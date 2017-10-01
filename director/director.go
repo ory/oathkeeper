@@ -1,274 +1,173 @@
 package director
 
 import (
-	"net/http"
-	"github.com/ory-am/common/compiler"
-	"regexp"
-	"github.com/ory-am/hydra/firewall"
-	"context"
-	"github.com/pkg/errors"
-	"fmt"
-	"strings"
 	"net/url"
-	"bytes"
-	"io/ioutil"
-	"github.com/ory-am/fosite"
-	log "github.com/Sirupsen/logrus"
-	"github.com/ory-am/hydra/oauth2"
-	"github.com/pborman/uuid"
+	"github.com/ory/oathkeeper/rule"
+	"github.com/ory/hydra/sdk/go/hydra"
+	"net/http"
+	"github.com/pkg/errors"
+	"context"
+	"github.com/sirupsen/logrus"
+	"github.com/ory/hydra/sdk/go/hydra/swagger"
+	"github.com/tomasen/realip"
+	"github.com/ory/oathkeeper/helper"
 )
 
-var rules = []Rule{
-	// developer-ui
-	Rule{
-		Description: "Reading a subject's images from the vault",
-		PathMatch: MustCompileMatch("<GET|POST|OPTIONS>:/developer-ui<.*>"),
-		Public: true,
-	},
-	Rule{
-		Description: "Reading a subject's images from the vault",
-		PathMatch: MustCompileMatch("<GET|POST|OPTIONS>:/developer-ui-gateway/<graph|auth|auth/callback>"),
-		Public: true,
-	},
-
-	// plugin-gateway
-	Rule{
-		Description: "Reading a subject's images from the vault",
-		PathMatch: MustCompileMatch("<GET|POST|OPTIONS>:/plugin-gateway/<.*>"),
-	},
-
-	// redux-logger
-	Rule{
-		Description: "Reading a subject's images from the vault",
-		PathMatch: MustCompileMatch("<GET|POST|OPTIONS>:/redux-logger/events/<.*>"),
-		Public: true,
-	},
-
-
-	// Vault
-	Rule{
-		Description: "Reading a subject's images from the vault",
-		PathMatch: MustCompileMatch("GET:/vault/images/<[^/]+>"),
-		Scopes:      []string{"ory.vault.images.read"},
-	},
-	Rule{
-		Description: "Uploading an image to a subject's vault",
-		PathMatch: MustCompileMatch("POST:/vault/images/<[^/]+>"),
-		Scopes:      []string{"ory.vault.images.write"},
-	},
-
-	// Quota
-	Rule{
-		Description: "Reading the service quota of a subject",
-		PathMatch: MustCompileMatch("GET:/quota/quotas/<[^/]+>/<[^/]+>"),
-		Scopes:      []string{"ory.quota.quotas.read"},
-	},
-	Rule{
-		Description: "Reading the service quota of a subject",
-		PathMatch: MustCompileMatch("POST:/quota/quotas/<[^/]+>/<[^/]+>"),
-		Scopes:      []string{"ory.quota.quotas.write"},
-	},
-	Rule{
-		Description: "Reading the service quota of a subject",
-		PathMatch: MustCompileMatch("GET:/quota/history/<[^/]+>"),
-		Scopes:      []string{"ory.quota.quotas.read"},
-	},
-	Rule{
-		Description: "Reading the service quota of a subject",
-		PathMatch: MustCompileMatch("GET:/quota/quotas/<[^/]+>"),
-		Scopes:      []string{"ory.quota.quotas.read"},
-	},
-	Rule{
-		Description: "Reading the service quota of a subject",
-		PathMatch: MustCompileMatch("POST:/subscriptions/<[^/]+>"),
-		Scopes:      []string{"ory.quota.subscriptions.update"},
-	},
-
-	// API KEYS
-	Rule{
-		Description: "Reading a subject's api key",
-		PathMatch: MustCompileMatch("GET:/api-keys/keys/<[^/]+>"),
-		Scopes:      []string{"ory.api-keys.keys.read"},
-	},
-	Rule{
-		Description: "Reading all api keys of a subject",
-		PathMatch: MustCompileMatch("GET:/api-keys/authorize"),
-		Public: true,
-	},
-	Rule{
-		Description: "Reading all api keys of a subject",
-		PathMatch: MustCompileMatch("GET:/api-keys/authorize/callback"),
-		Public: true,
-	},
-	Rule{
-		Description: "Reading all api keys of a subject",
-		PathMatch: MustCompileMatch("GET:/api-keys/keys"),
-		Scopes:      []string{"ory.api-keys.keys.read"},
-	},
-	Rule{
-		Description: "Updating an existing api key",
-		PathMatch: MustCompileMatch("PUT:/api-keys/keys/<[^/]+>"),
-		Scopes:      []string{"ory.api-keys.write"},
-	},
-	Rule{
-		Description: "Updating an existing api key",
-		PathMatch: MustCompileMatch("POST:/api-keys/keys/<[^/]+>"),
-		Scopes:      []string{"ory.api-keys.write"},
-	},
-	Rule{
-		Description: "Delete an existing api key",
-		PathMatch: MustCompileMatch("DELETE:/api-keys/keys/<[^/]+>"),
-		Scopes:      []string{"ory.api-keys.delete"},
-	},
-	Rule{
-		Description: "Creating a new api key",
-		PathMatch: MustCompileMatch("POST:/api-keys/keys"),
-		Scopes:      []string{"ory.api-keys.write"},
-	},
-}
-
-// Rule is a single rule that will get checked on every HTTP request.
-type Rule struct {
-	// PathMatch is used to match if this rule is responsible for a HTTP request. Rules have the following format:
-	//
-	// [protocol]:[path]
-	//
-	// For example:
-	//
-	// POST:/api/monet/images/<[^/]+>
-	//
-	// where < and > encapsulate regular expressions. The rule above would therefore match /api/monet/images/foo, /api/monet/images/bar, but not /api/monet/images.
-	PathMatch   *regexp.Regexp
-
-	// Scopes: If the path matches, check if the following scopes have been granted.
-	Scopes      []string
-
-	// Request can be used to check if the token's subject is allowed to perform an action, using ladon policies.
-	Request     *firewall.TokenAccessRequest
-
-	// RequestFunc has the same effect like Request but allows you to orchestrate the request during runtime. This let's you extract additional data from the request, or perform some other magic.
-	RequestFunc RequestFunc
-
-	// Public sets if the endpoint is public, thus not needing any authorization at all.
-	Public      bool
-
-	Description string
-}
-
-func NewDirector(target *url.URL, fw firewall.Firewall, it oauth2.Introspector) *Director {
+func NewDirector(target *url.URL, sdk *hydra.SDK, matcher rule.Matcher, logger logrus.FieldLogger) *Director {
+	if logger == nil {
+		logger = logrus.New()
+	}
 	return &Director{
-		Rules: rules,
 		TargetURL: target,
-		Firewall: fw,
-		Introspector: it,
+		SDK:       sdk,
+		Matcher:   matcher,
+		Logger:    logger,
 	}
-}
-
-type RequestFunc func(r *http.Request) *firewall.TokenAccessRequest
-
-func MustCompileMatch(path string) *regexp.Regexp {
-	reg, err := compiler.CompileRegex(path, '<', '>')
-	if err != nil {
-		// FIXME panic as long as this is being set up statically #14
-		panic(err)
-	}
-	return reg
 }
 
 type Director struct {
-	Rules     []Rule
-	Firewall  firewall.Firewall
-	Introspector oauth2.Introspector
+	Matcher   rule.Matcher
+	SDK       *hydra.SDK
 	TargetURL *url.URL
+	Logger    logrus.FieldLogger
 }
 
 type key int
 
-const wasDenied key = 0
+const requestAllowed key = 0
+const requestDenied key = 1
 
 func (d *Director) RoundTrip(r *http.Request) (*http.Response, error) {
-	if err, ok := r.Context().Value(wasDenied).(error); ok && err != nil {
-		he := fosite.ErrorToRFC6749Error(err)
-		if he.Name == fosite.UnknownErrorName {
-			log.WithError(err).WithField("reason", he.Debug).Print("An unrecognized error occured during access control decision")
-		}
+	if err, ok := r.Context().Value(requestDenied).(error); ok && err != nil {
 		return &http.Response{
-			StatusCode: he.StatusCode,
-			Body: ioutil.NopCloser(bytes.NewBufferString(he.Description)),
+			StatusCode: http.StatusForbidden,
+			//Body:       ioutil.NopCloser(bytes.NewBufferString(he.Description)),
 		}, nil
-	}
+	} else if token, ok := r.Context().Value(requestAllowed).(string); ok {
+		r.Header.Set("Authorization", "bearer "+token)
+		res, err := http.DefaultTransport.RoundTrip(r)
+		if err != nil {
+			d.Logger.WithField("url", r.URL.String()).WithError(err).Print("Round trip failed.")
+		}
 
-	res, err := http.DefaultTransport.RoundTrip(r)
-	if err != nil {
-		log.WithError(err).Print("RoundTrip failed")
 		return res, err
 	}
 
-	return res, err
+	return &http.Response{
+		StatusCode: http.StatusInternalServerError,
+		//Body:       ioutil.NopCloser(bytes.NewBufferString(he.Description)),
+	}, nil
 }
 
-func (d *Director) Allowed(r *http.Request) {
-	targetQuery := d.TargetURL.RawQuery
-	r.URL.Scheme = d.TargetURL.Scheme
-	r.URL.Host = d.TargetURL.Host
-	r.URL.Path = r.URL.Path
+func (d *Director) Director(r *http.Request) {
 
-	if targetQuery == "" || r.URL.RawQuery == "" {
-		r.URL.RawQuery = targetQuery + r.URL.RawQuery
-	} else {
-		r.URL.RawQuery = targetQuery + "&" + r.URL.RawQuery
-	}
-	if _, ok := r.Header["User-Agent"]; !ok {
-		// explicitly disable User-Agent so it's not set to default value
-		r.Header.Set("User-Agent", "")
-	}
-	if _, ok := r.Header["X-Request-Id"]; !ok {
-		// explicitly disable User-Agent so it's not set to default value
-		r.Header.Set("X-Request-Id", uuid.New())
-	}
-
-	for _, rule := range d.Rules {
-		if !rule.PathMatch.MatchString(fmt.Sprintf("%s:%s", r.Method, r.URL.Path)) {
-			continue;
-		}
-
-		if rule.Public {
-			r.Header.Add("X-Firewall-Method", "anonymous")
-			r.Header.Add("X-Firewall-Subject", "anonymous")
-			r.Header.Add("X-Firewall-Scopes", strings.Join(rule.Scopes, " "))
+	access, err := d.GenerateWardenRequests(r)
+	if errors.Cause(err) == helper.ErrPublicRule {
+		token := helper.BearerTokenFromRequest(r)
+		if token == "" {
+			// public rule without authorization means access is allowed (anonymously)
+			d.allowAnonymousRequest(r)
 			return
 		}
 
-		lr := rule.Request
-		if rule.RequestFunc != nil {
-			lr = rule.RequestFunc(r)
-		}
-
-		if lr == nil {
-			c, err := d.Introspector.IntrospectToken(context.Background(), d.Firewall.TokenFromRequest(r), rule.Scopes...)
-			if err != nil {
-				*r = *r.WithContext(context.WithValue(r.Context(), wasDenied, err))
-				return
-			}
-
-			r.Header.Add("X-Firewall-Method", "valid")
-			r.Header.Add("X-Firewall-Subject", c.Subject)
-			r.Header.Add("X-Firewall-Scopes", c.Scope)
-			return
-		}
-
-		c, err := d.Firewall.TokenAllowed(context.Background(), d.Firewall.TokenFromRequest(r), lr, rule.Scopes...)
+		result, resp, err := d.SDK.IntrospectOAuth2Token(token, "")
 		if err != nil {
-			*r = *r.WithContext(context.WithValue(r.Context(), wasDenied, err))
+			// public rule with failing introspection is still valid
+			d.Logger.WithField("url", r.URL.String()).WithError(err).Info("An error occurred during token introspection.")
+			d.allowAnonymousRequest(r)
+			return
+		} else if resp.StatusCode != http.StatusOK {
+			// public rule with failing introspection is still valid
+			d.Logger.
+				WithField("url", r.URL.String()).
+				WithField("status_code", resp.StatusCode).
+				Info("Token introspection did not result in HTTP status code 200.")
+			d.allowAnonymousRequest(r)
+			return
+		} else if !result.Active {
+			d.Logger.
+				WithField("url", r.URL.String()).
+				WithField("status_code", resp.StatusCode).
+				Info("Token introspection says authorization bearer token inactive.")
+			d.allowAnonymousRequest(r)
 			return
 		}
 
-		r.Header.Add("X-Firewall-Method", "allowed")
-		r.Header.Add("X-Firewall-Subject", c.Subject)
-		r.Header.Add("X-Firewall-Scopes", strings.Join(c.GrantedScopes, " "))
+		d.allowIntrospectedRequest(r, result)
+		return
+	} else if err != nil {
+		d.denyAnonymousRequest(r, err)
 		return
 	}
 
-	*r = *r.WithContext(context.WithValue(r.Context(), wasDenied, errors.Errorf("The endpoint is not protected by the firewall thus access is denied: %s", fmt.Sprintf("%s:%s", r.Method, r.URL.Path))))
-	return
+	result, resp, err := d.SDK.DoesWardenAllowTokenAccessRequest(access)
+	if err != nil {
+		d.denyAnonymousRequest(r, err)
+	} else if resp.StatusCode != http.StatusOK {
+		d.denyAnonymousRequest(r, err)
+		return
+	} else if !result.Allowed {
+		d.denyAuthorizedRequest(r, result)
+		return
+	}
+	d.allowAuthorizedRequest(r, result)
+}
+
+func (d *Director) GenerateAccessRequests(r *http.Request) ([]AccessRequest, error) {
+	rules, err := d.Matcher.MatchRules(r.Method, r.URL)
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+
+	requests := make([]AccessRequest, len(rules))
+	for k, matched := range rules {
+		access := AccessRequest{
+			WardenTokenAccessRequest: swagger.WardenTokenAccessRequest{
+				Scopes:   matched.RequiredScopes,
+				Action:   matched.MatchesPath.ReplaceAllString(r.URL.Path, matched.RequiredAction),
+				Resource: matched.MatchesPath.ReplaceAllString(r.URL.Path, matched.RequiredResource),
+			},
+			Public: matched.Public,
+		}
+
+		token := helper.BearerTokenFromRequest(r)
+		if token == "" {
+			return nil, errors.WithStack(helper.ErrMissingBearerToken)
+		}
+
+		access.Token = token
+		access.Context = map[string]interface{}{
+			"remoteIpAddress": realip.RealIP(r),
+		}
+		requests[k] = access
+	}
+
+	return requests, nil
+}
+
+func (d *Director) allowAnonymousRequest(r *http.Request) {
+	d.Logger.WithFields(map[string]interface{}{"user": "anonymous", "url": r.URL.String()}).Info("Request granted.")
+	r.URL.Scheme = d.TargetURL.Scheme
+	r.URL.Host = d.TargetURL.Host
+	*r = *r.WithContext(context.WithValue(r.Context(), requestAllowed, ""))
+}
+
+func (d *Director) allowIntrospectedRequest(r *http.Request, introspection *swagger.OAuth2TokenIntrospection) {
+	d.Logger.WithFields(map[string]interface{}{"user": "anonymous", "url": r.URL.String()}).Info("Request granted.")
+	r.URL.Scheme = d.TargetURL.Scheme
+	r.URL.Host = d.TargetURL.Host
+	*r = *r.WithContext(context.WithValue(r.Context(), requestAllowed, ""))
+}
+
+func (d *Director) denyAnonymousRequest(r *http.Request, err error) {
+	d.Logger.WithError(err).WithFields(map[string]interface{}{"user": "anonymous", "url": r.URL.String()}).Info("Request denied.")
+	*r = *r.WithContext(context.WithValue(r.Context(), requestDenied, err))
+}
+
+func (d *Director) denyAuthorizedRequest(r *http.Request, resp *swagger.WardenTokenAccessRequestResponsePayload) {
+	*r = *r.WithContext(context.WithValue(r.Context(), requestDenied, ""))
+}
+
+func (d *Director) allowAuthorizedRequest(r *http.Request, resp *swagger.WardenTokenAccessRequestResponsePayload) {
+	*r = *r.WithContext(context.WithValue(r.Context(), requestDenied, ""))
 }
