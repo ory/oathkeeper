@@ -1,26 +1,45 @@
-package: github.com/ory-am/editor-platform/services/exposed/proxies/firewall-reverse-proxy
+package: github.com/ory/oathkeeper
 import:
-- package: github.com/Sirupsen/logrus
-  version: ~0.11.0
+- package: github.com/dgrijalva/jwt-go
+  version: ^3.0.0
 - package: github.com/golang/mock
+  version: ~1.0.0
   subpackages:
   - gomock
-- package: github.com/ory-am/fosite
-  version: ~0.6.6
-- package: github.com/ory-am/hydra
-  version: ~0.6.9
+- package: github.com/jmoiron/sqlx
+- package: github.com/julienschmidt/httprouter
+  version: ~1.1.0
+- package: github.com/lib/pq
+- package: github.com/meatballhat/negroni-logrus
+- package: github.com/ory/graceful
+  version: ~0.1.0
+- package: github.com/ory/herodot
+  version: ~0.1.1
+- package: github.com/ory/hydra
+  version: ~0.9.13
   subpackages:
-  - firewall
-  - oauth2
-  - sdk
+  - sdk/go/hydra
+  - sdk/go/hydra/swagger
+- package: github.com/pborman/uuid
+  version: ~1.1.0
 - package: github.com/pkg/errors
   version: ~0.8.0
-- package: golang.org/x/net
-  subpackages:
-  - context
+- package: github.com/rubenv/sql-migrate
+- package: github.com/sirupsen/logrus
+  version: ~1.0.3
+- package: github.com/spf13/cobra
+- package: github.com/spf13/viper
+  version: ~1.0.0
+- package: github.com/tomasen/realip
+- package: github.com/urfave/negroni
+  version: ~0.2.0
+- package: gopkg.in/go-resty/resty.v0
+  version: ~1.0.0
 testImport:
+- package: github.com/ory/dockertest
+  version: ~3.0.9
 - package: github.com/stretchr/testify
-  version: ~1.1.3
+  version: ~1.1.4
   subpackages:
   - assert
   - require

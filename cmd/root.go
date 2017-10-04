@@ -4,12 +4,20 @@ import (
 	"fmt"
 	"os"
 
+	"time"
+
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
 
 var cfgFile string
+
+var (
+	Version   = "dev-master"
+	BuildTime = time.Now().String()
+	GitHash   = "undefined"
+)
 
 // RootCmd represents the base command when called without any subcommands
 var RootCmd = &cobra.Command{
@@ -63,6 +71,9 @@ func initConfig() {
 	viper.BindEnv("LOG_LEVEL")
 	viper.SetDefault("LOG_LEVEL", "info")
 
+	viper.BindEnv("BACKEND_URL")
+	viper.SetDefault("BACKEND_URL", "")
+
 	viper.BindEnv("DATABASE_URL")
 	viper.SetDefault("DATABASE_URL", "")
 
@@ -74,6 +85,24 @@ func initConfig() {
 
 	viper.BindEnv("HYDRA_URL")
 	viper.SetDefault("HYDRA_URL", "")
+
+	viper.BindEnv("PROXY_PORT")
+	viper.SetDefault("PROXY_PORT", "4455")
+
+	viper.BindEnv("PROXY_HOST")
+	viper.SetDefault("PROXY_HOST", "")
+
+	viper.BindEnv("MANAGEMENT_PORT")
+	viper.SetDefault("PROXY_PORT", "4456")
+
+	viper.BindEnv("MANAGEMENT_HOST")
+	viper.SetDefault("PROXY_HOST", "")
+
+	viper.BindEnv("JWT_SHARED_SECRET")
+	viper.SetDefault("JWT_SHARED_SECRET", "")
+
+	viper.BindEnv("REFRESH_DELAY")
+	viper.SetDefault("REFRESH_DELAY", "")
 
 	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err == nil {

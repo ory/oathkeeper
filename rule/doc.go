@@ -45,13 +45,13 @@ type swaggerCreateRuleParameters struct {
 // swagger:model rule
 type jsonRule struct {
 	// ID the a unique id of a rule.
-	ID string `json:"id"`
+	ID string `json:"id" db:"id"`
 
 	// MatchesMethods is a list of HTTP methods that this rule matches.
 	MatchesMethods []string `json:"matchesMethods"`
 
 	// MatchesPath is a regular expression of paths this rule matches.
-	MatchesPath string
+	MatchesPath string `json:"matchesPath"`
 
 	// RequiredScopes is a list of scopes that are required by this rule.
 	RequiredScopes []string `json:"requiredScopes"`

@@ -4,12 +4,13 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"net/http"
+
 	"github.com/julienschmidt/httprouter"
 	"github.com/ory/herodot"
 	"github.com/ory/oathkeeper/sdk/swagger"
-	"github.com/stretchr/testify/require"
-	"net/http"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestHandler(t *testing.T) {
@@ -54,6 +55,7 @@ func TestHandler(t *testing.T) {
 		results, response, err := client.ListRules()
 		require.NoError(t, err)
 		assert.Len(t, results, 2)
+		assert.True(t, results[0].Id != results[1].Id)
 
 		r1.RequiredScopes = []string{"users"}
 		r1.Id = "newfoo"

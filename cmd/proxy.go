@@ -2,8 +2,6 @@ package cmd
 
 import (
 	"fmt"
-
-	"log"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
@@ -14,6 +12,8 @@ import (
 	"github.com/ory/oathkeeper/evaluator"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"github.com/ory/oathkeeper/rule"
+	"time"
 )
 
 // proxyCmd represents the proxy command
@@ -34,11 +34,23 @@ var proxyCmd = &cobra.Command{
 		backend, err := url.Parse(viper.GetString("BACKEND_URL"))
 		if err != nil {
 			logger.WithError(err).Fatalln("Unable to parse backend URL.")
-
 		}
 
-		eval := evaluator.NewWardenEvaluator(logger, nil, sdk)
-		d := director.NewDirector(backend, eval, logger, viper.GetString("JWT_SECRET"))
+		rm, err := newRuleManager(viper.GetString("DATABASE_URL"))
+		if err != nil {
+			logger.WithError(err).Fatalln("Unable to connect to rule backend.")
+		}
+
+		matcher := &rule.CachedMatcher{Manager: rm, Rules: []rule.Rule{}}
+
+		if err := matcher.Refresh(); err != nil {
+			logger.WithError(err).Fatalln("Unable to refresh rules.")
+		}
+
+		go refresh(matcher, 0)
+
+		eval := evaluator.NewWardenEvaluator(logger, matcher, sdk)
+		d := director.NewDirector(backend, eval, logger, viper.GetString("JWT_SHARED_SECRET"))
 		proxy := &httputil.ReverseProxy{
 			Director:  d.Director,
 			Transport: d,
@@ -50,11 +62,32 @@ var proxyCmd = &cobra.Command{
 		})
 
 		if err := graceful.Graceful(server.ListenAndServe, server.Shutdown); err != nil {
-			log.Fatalf("Unable to gracefully shutdown HTTP server becase %s.\n", err)
+			logger.Fatalf("Unable to gracefully shutdown HTTP server becase %s.\n", err)
 			return
 		}
-		log.Println("HTTP server was shutdown gracefully")
+		logger.Println("HTTP server was shutdown gracefully")
 	},
+}
+
+func refresh(m *rule.CachedMatcher, fails int) {
+	duration, _ := time.ParseDuration(viper.GetString("REFRESH_DELAY"))
+	if duration == 0 {
+		duration = time.Second * 30
+	}
+
+	time.Sleep(duration)
+
+	if err := m.Refresh(); err != nil {
+		logger.WithError(err).WithField("retry", fails).Errorln("Unable to refresh rules.")
+		if fails > 15 {
+			logger.WithError(err).WithField("retry", fails).Fatalf("Terminating after retry %d.\n", fails)
+		}
+
+		refresh(m, fails+1)
+		return
+	}
+
+	refresh(m, 0)
 }
 
 func init() {

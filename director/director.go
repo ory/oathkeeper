@@ -21,6 +21,7 @@ func NewDirector(target *url.URL, eval evaluator.Evaluator, logger logrus.FieldL
 	}
 	if secret == "" {
 		secret = uuid.New()
+		logger.WithField("secret", secret).Infoln("No JWT secret was found, generated a random one.")
 	}
 	return &Director{
 		TargetURL: target,
