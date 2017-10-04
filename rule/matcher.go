@@ -5,5 +5,5 @@ import (
 )
 
 type Matcher interface {
-	MatchRules(method string, u *url.URL) ([]Rule, error)
+	MatchRule(method string, u *url.URL) (*Rule, error)
 }

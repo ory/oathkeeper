@@ -13,4 +13,3 @@ func BearerTokenFromRequest(r *http.Request) string {
 	}
 	return split[1]
 }
-

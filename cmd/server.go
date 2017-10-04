@@ -3,13 +3,12 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/spf13/cobra"
-	"net/http/httputil"
-	"github.com/ory/graceful"
-	"net/http"
-	"os"
 	"log"
+	"net/http"
+
 	"github.com/julienschmidt/httprouter"
+	"github.com/ory/graceful"
+	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
 
@@ -21,7 +20,7 @@ var serverCmd = &cobra.Command{
 		router := httprouter.New()
 
 		server := graceful.WithDefaults(&http.Server{
-			Addr: fmt.Sprintf("%s:%s", viper.GetString("SERVER_HOST"), viper.GetString("SERVER_PORT")),
+			Addr:    fmt.Sprintf("%s:%s", viper.GetString("SERVER_HOST"), viper.GetString("SERVER_PORT")),
 			Handler: router,
 		})
 

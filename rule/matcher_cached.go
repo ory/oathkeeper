@@ -1,8 +1,10 @@
 package rule
 
 import (
-	"github.com/pkg/errors"
 	"net/url"
+
+	"github.com/ory/oathkeeper/helper"
+	"github.com/pkg/errors"
 )
 
 type CachedMatcher struct {
@@ -10,7 +12,8 @@ type CachedMatcher struct {
 	Manager Manager
 }
 
-func (m *CachedMatcher) MatchRules(method string, u *url.URL) (rules []Rule, err error) {
+func (m *CachedMatcher) MatchRule(method string, u *url.URL) (*Rule, error) {
+	var rules []Rule
 	for _, rule := range m.Rules {
 		if err := rule.MatchesURL(method, u); err == nil {
 			rules = append(rules, rule)
@@ -18,10 +21,12 @@ func (m *CachedMatcher) MatchRules(method string, u *url.URL) (rules []Rule, err
 	}
 
 	if len(rules) == 0 {
-		return nil, errors.Errorf("Unable to finde rule matching %s:%s", method, u.String())
+		return nil, errors.WithStack(helper.ErrMatchesNoRule)
+	} else if len(rules) != 1 {
+		return nil, errors.WithStack(helper.ErrMatchesMoreThanOneRule)
 	}
 
-	return rules, nil
+	return &rules[0], nil
 }
 
 func (m *CachedMatcher) Refresh() error {

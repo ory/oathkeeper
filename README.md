@@ -12,7 +12,7 @@ Check out [director/director.go](director/director.go) for some exemplary rules 
 This service has a couple of environment variables:
 
 * `BACKEND_URL` is the URL where requests should be forwarded to. If a path (and query) is used, they will be prepended to the request. (default: `http://localhost:7000`)
-* `HYDRA_CLLIENT` the client id used to access Hydra.
+* `HYDRA_CLIENT` the client id used to access Hydra.
 * `HYDRA_SECRET` the client secret used to access Hydra.
 * `HYDRA_HOST` the URL of the Hydra instance.
 * `PORT` the port to listen on. (default: `3000`)
@@ -23,6 +23,5 @@ You can run this sever using `go run main.go` or `go install . && firewall-rever
 ## Generate the mock
 
 ```
-mockgen -package director -destination director/firewall_mock.go github.com/ory-am/hydra/firewall Firewall
-mockgen -package director -destination director/introspect_mock.go github.com/ory-am/hydra/oauth2 Introspector
+mockgen -package evaluator -destination evaluator/hydra_sdk_mock.go github.com/ory/hydra/sdk/go/hydra SDK
 ```

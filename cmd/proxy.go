@@ -3,16 +3,17 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/spf13/cobra"
-	"net/http/httputil"
-	"github.com/ory/graceful"
-	"net/http"
 	"log"
-	"github.com/ory/oathkeeper/director"
-	"github.com/spf13/viper"
-	"github.com/ory/hydra/sdk/go/hydra"
-	"github.com/ory/oathkeeper/rule"
+	"net/http"
+	"net/http/httputil"
 	"net/url"
+
+	"github.com/ory/graceful"
+	"github.com/ory/hydra/sdk/go/hydra"
+	"github.com/ory/oathkeeper/director"
+	"github.com/ory/oathkeeper/evaluator"
+	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 // proxyCmd represents the proxy command
@@ -23,25 +24,21 @@ var proxyCmd = &cobra.Command{
 		sdk, err := hydra.NewSDK(&hydra.Configuration{
 			ClientID:     viper.GetString("HYDRA_CLIENT_ID"),
 			ClientSecret: viper.GetString("HYDRA_CLIENT_SECRET"),
-			EndpointURL:  viper.GetString("HYDRA_CLIENT_SECRET"),
+			EndpointURL:  viper.GetString("HYDRA_ENDPOINT_URL"),
 			Scopes:       []string{"hydra.warden", "hydra.warden.*"},
 		})
 		if err != nil {
 			logger.WithError(err).Fatalln("Unable to connect to Hydra SDK.")
 			return
 		}
-
-		builder := &rule.WardenRequestBuilder{
-
-		}
-
 		backend, err := url.Parse(viper.GetString("BACKEND_URL"))
 		if err != nil {
 			logger.WithError(err).Fatalln("Unable to parse backend URL.")
 
 		}
 
-		d := director.NewDirector(backend, sdk, builder, logger, )
+		eval := evaluator.NewWardenEvaluator(logger, nil, sdk)
+		d := director.NewDirector(backend, eval, logger, viper.GetString("JWT_SECRET"))
 		proxy := &httputil.ReverseProxy{
 			Director:  d.Director,
 			Transport: d,

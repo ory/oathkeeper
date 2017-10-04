@@ -1,11 +1,11 @@
 package rule
 
 import (
+	"fmt"
 	"net/url"
 	"regexp"
 	"strconv"
 	"testing"
-	"fmt"
 )
 
 var methods = []string{"POST", "PUT", "GET", "DELETE", "PATCH", "OPTIONS", "HEAD"}
@@ -18,7 +18,7 @@ func generateDummyRules(amount int) []Rule {
 	actions := []string{"get", "get:$1"}
 
 	for i := 0; i < amount; i++ {
-		exp, _ := regexp.Compile(expressions[(i % (len(expressions)))] + "([0-" + strconv.Itoa(i) + "]+)")
+		exp, _ := regexp.Compile(expressions[(i%(len(expressions)))] + "([0-" + strconv.Itoa(i) + "]+)")
 		rules[i] = Rule{
 			ID:               strconv.Itoa(i),
 			MatchesMethods:   methods[:i%(len(methods))],
@@ -44,7 +44,6 @@ func cachedRuleMatcherBenchmark(rules int) func(b *testing.B) {
 	return func(b *testing.B) {
 		b.StopTimer()
 		matcher := &CachedMatcher{Rules: generateDummyRules(rules)}
-		var rules []Rule
 		urls := generateUrls(10)
 		methodLength := len(methods)
 		urlsLength := len(urls)
@@ -52,11 +51,13 @@ func cachedRuleMatcherBenchmark(rules int) func(b *testing.B) {
 
 		b.StartTimer()
 		for n := 0; n < b.N; n++ {
-			rules, _ = matcher.MatchRules(
+			_, err := matcher.MatchRule(
 				methods[n%methodLength],
 				urls[n%urlsLength],
 			)
-			matchedRules += len(rules)
+			if err != nil {
+				matchedRules += 1
+			}
 		}
 		b.StopTimer()
 		b.Logf("Received %d rules", matchedRules)

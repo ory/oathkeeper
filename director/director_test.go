@@ -1,86 +1,141 @@
 package director
 
 import (
-	"testing"
+	"fmt"
+	"io/ioutil"
 	"net/http"
+	"net/http/httptest"
+	"net/http/httputil"
+	"net/url"
+	"regexp"
+	"testing"
+
+	"github.com/golang/mock/gomock"
+	"github.com/ory/hydra/sdk/go/hydra"
 	"github.com/ory/hydra/sdk/go/hydra/swagger"
+	"github.com/ory/oathkeeper/evaluator"
+	"github.com/ory/oathkeeper/helper"
+	"github.com/ory/oathkeeper/rule"
+	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"strconv"
-	"regexp"
-	"net/url"
 )
 
-func newTestRequest(method, u, token, ip string, forwardedIP []string) *http.Request {
-	us, _ := url.Parse(u)
-	return &http.Request{
-		Method: method,
-		URL:    us,
-		Header: http.Header{
-			"Authorization":   []string{"bearer " + token},
-			"X-Forwarded-For": forwardedIP,
-		},
-		RemoteAddr: ip,
-	}
+func mustCompileRegex(t *testing.T, pattern string) *regexp.Regexp {
+	exp, err := regexp.Compile(pattern)
+	require.NoError(t, err)
+	return exp
 }
 
-func newMatcher(u string, methods ...string) *URLMatcher {
-	c, _ := regexp.Compile(u)
-	return &URLMatcher{
-		Methods:  methods,
-		URLMatch: c,
-	}
-}
+func TestProxy(t *testing.T) {
+	backend := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		assert.NotEmpty(t, helper.BearerTokenFromRequest(r))
+		fmt.Fprint(w, "Hello, client")
+	}))
+	defer backend.Close()
 
-func TestAccessRequestBuilder(t *testing.T) {
+	u, _ := url.Parse(backend.URL)
+	d := NewDirector(u, nil, nil, "some-secret")
+
+	proxy := httptest.NewServer(&httputil.ReverseProxy{Director: d.Director, Transport: d})
+	defer proxy.Close()
+
+	publicRule := rule.Rule{MatchesMethods: []string{"GET"}, MatchesPath: mustCompileRegex(t, "/users/[0-9]+"), AllowAnonymous: true}
+	privateRule := rule.Rule{
+		MatchesMethods:   []string{"GET"},
+		MatchesPath:      mustCompileRegex(t, "/users/([0-9]+)"),
+		RequiredResource: "users:$1",
+		RequiredAction:   "get:$1",
+		RequiredScopes:   []string{"users.create"},
+	}
+
 	for k, tc := range []struct {
-		r           *http.Request
-		rules       []Rule
-		assert      func(t *testing.T, request *swagger.WardenTokenAccessRequest, err error)
-		description string
+		url       string
+		code      int
+		message   string
+		rules     []rule.Rule
+		mock      func(c *gomock.Controller) hydra.SDK
+		transform func(r *http.Request)
+		d         string
 	}{
 		{
-			description: "passes because rule matches",
-			r:           newTestRequest("POST", "https://mydomain.com/users/1234", "some-token", "127.0.0.1", nil),
-			rules: []Rule{
-				{
-					Action:  "get:$1", Resource: "mydomain:users:$1",
-					Scopes:  []string{"users.get"},
-					Matcher: newMatcher("mydomain.com/users/([0-9]+)", "PoSt"),
-				},
-			},
-			assert: func(t *testing.T, request *swagger.WardenTokenAccessRequest, err error) {
-				require.NoError(t, err)
-				assert.Equal(t, "some-token", request.Token)
-				assert.EqualValues(t, []string{"users.get"}, request.Scopes)
-				assert.EqualValues(t, "mydomain:users:1234", request.Resource)
-				assert.EqualValues(t, "get:1234", request.Action)
-				assert.Equal(t, "127.0.0.1", request.Context["remoteIpAddress"])
+			d:     "should fail because url does not exist in rule set",
+			url:   proxy.URL + "/invalid",
+			rules: []rule.Rule{},
+			code:  http.StatusNotFound,
+			mock: func(c *gomock.Controller) hydra.SDK {
+				return nil
 			},
 		},
 		{
-			description: "failse because rule is public",
-			r:           newTestRequest("POST", "https://mydomain.com/users/1234", "some-token", "", nil),
-			rules:       []Rule{{Matcher: newMatcher("mydomain.com/users/([0-9]+)", "PoSt"), Public: true}},
-			assert: func(t *testing.T, request *swagger.WardenTokenAccessRequest, err error) {
-				assert.EqualError(t, err, ErrPublicRule.Error())
-				assert.Nil(t, request)
+			d:     "should fail because url does exist but is matched by two rules",
+			url:   proxy.URL + "/users/1234",
+			rules: []rule.Rule{publicRule, publicRule},
+			code:  http.StatusInternalServerError,
+			mock: func(c *gomock.Controller) hydra.SDK {
+				return nil
 			},
 		},
 		{
-			description: "fails because no bearer token is set",
-			r:           newTestRequest("POST", "https://mydomain.com/users/1234", "", "", nil),
-			rules:       []Rule{{Matcher: newMatcher("mydomain.com/users/([0-9]+)", "PoSt")}},
-			assert: func(t *testing.T, request *swagger.WardenTokenAccessRequest, err error) {
-				assert.EqualError(t, err, ErrMissingBearerToken.Error())
-				assert.Nil(t, request)
+			d:     "should pass with an anonymous user because introspection fails but it doesn't matter because the endpoint is publicly available",
+			url:   proxy.URL + "/users/1234",
+			rules: []rule.Rule{publicRule},
+			code:  http.StatusOK,
+			transform: func(r *http.Request) {
+				r.Header.Add("Authorization", "bearer token")
+			},
+			mock: func(c *gomock.Controller) hydra.SDK {
+				s := evaluator.NewMockSDK(c)
+				s.EXPECT().IntrospectOAuth2Token(gomock.Eq("token"), gomock.Eq("")).Return(nil, nil, errors.New("error"))
+				return s
+			},
+		},
+		{
+			d:     "should pass with an authorized user and a private rule",
+			url:   proxy.URL + "/users/1234",
+			rules: []rule.Rule{privateRule},
+			code:  http.StatusOK,
+			transform: func(r *http.Request) {
+				r.Header.Add("Authorization", "bearer token")
+			},
+			mock: func(c *gomock.Controller) hydra.SDK {
+				s := evaluator.NewMockSDK(c)
+				s.EXPECT().DoesWardenAllowTokenAccessRequest(gomock.Eq(swagger.WardenTokenAccessRequest{
+					Token:    "token",
+					Resource: "users:1234",
+					Action:   "get:1234",
+					Scopes:   []string{"users.create"},
+					Context:  map[string]interface{}{"remoteIpAddress": "127.0.0.1"},
+				})).Return(&swagger.WardenTokenAccessRequestResponse{Allowed: true}, &swagger.APIResponse{Response: &http.Response{StatusCode: http.StatusOK}}, nil)
+				return s
 			},
 		},
 	} {
-		t.Run("case="+strconv.Itoa(k)+"/description="+tc.description, func(t *testing.T) {
-			builder := &WardenRequestBuilder{CachedMatcher{Rules: tc.rules}}
-			request, err := builder.BuildWardenRequest(tc.r)
-			tc.assert(t, request, err)
+		t.Run(fmt.Sprintf("case=%d", k), func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+
+			matcher := &rule.CachedMatcher{Rules: tc.rules}
+			sdk := tc.mock(ctrl)
+			d.Evaluator = evaluator.NewWardenEvaluator(nil, matcher, sdk)
+
+			req, err := http.NewRequest("GET", tc.url, nil)
+			require.NoError(t, err)
+			if tc.transform != nil {
+				tc.transform(req)
+			}
+
+			res, err := http.DefaultClient.Do(req)
+			require.NoError(t, err)
+
+			greeting, err := ioutil.ReadAll(res.Body)
+			res.Body.Close()
+			require.NoError(t, err)
+
+			assert.Equal(t, tc.code, res.StatusCode)
+			if tc.message != "" {
+				assert.Equal(t, tc.message, fmt.Sprintf("%s", greeting))
+			}
 		})
 	}
 }

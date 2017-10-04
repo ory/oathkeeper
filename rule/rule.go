@@ -1,11 +1,11 @@
 package rule
 
 import (
-	"github.com/ory/hydra/sdk/go/hydra/swagger"
-	"github.com/pkg/errors"
 	"net/url"
 	"regexp"
 	"strings"
+
+	"github.com/pkg/errors"
 )
 
 // Rule is a single rule that will get checked on every HTTP request.
@@ -28,9 +28,10 @@ type Rule struct {
 	// RequiredScopes is the resource this rule requires.
 	RequiredResource string
 
-	// Public sets if the endpoint is public, thus not needing any authorization at all.
-	Public bool
+	// AllowAnonymous if set true allows anonymous access to the specified paths and methods.
+	AllowAnonymous bool
 
+	// Description describes the rule.
 	Description string
 }
 

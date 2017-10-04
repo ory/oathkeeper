@@ -1,35 +1,40 @@
 package director
 
 import (
-	"net/url"
-	"github.com/ory/oathkeeper/rule"
-	"github.com/ory/hydra/sdk/go/hydra"
-	"net/http"
-	"github.com/pkg/errors"
+	"bytes"
 	"context"
-	"github.com/sirupsen/logrus"
-	"github.com/ory/hydra/sdk/go/hydra/swagger"
-	"github.com/tomasen/realip"
+	"io/ioutil"
+	"net/http"
+	"net/url"
+
+	"github.com/dgrijalva/jwt-go"
+	"github.com/ory/oathkeeper/evaluator"
 	"github.com/ory/oathkeeper/helper"
+	"github.com/pborman/uuid"
+	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
 )
 
-func NewDirector(target *url.URL, sdk *hydra.SDK, matcher rule.Matcher, logger logrus.FieldLogger) *Director {
+func NewDirector(target *url.URL, eval evaluator.Evaluator, logger logrus.FieldLogger, secret string) *Director {
 	if logger == nil {
 		logger = logrus.New()
 	}
+	if secret == "" {
+		secret = uuid.New()
+	}
 	return &Director{
 		TargetURL: target,
-		SDK:       sdk,
-		Matcher:   matcher,
 		Logger:    logger,
+		Evaluator: eval,
+		Secret:    secret,
 	}
 }
 
 type Director struct {
-	Matcher   rule.Matcher
-	SDK       *hydra.SDK
 	TargetURL *url.URL
 	Logger    logrus.FieldLogger
+	Evaluator evaluator.Evaluator
+	Secret    string
 }
 
 type key int
@@ -37,11 +42,16 @@ type key int
 const requestAllowed key = 0
 const requestDenied key = 1
 
+type directorError struct {
+	err        error
+	statusCode int
+}
+
 func (d *Director) RoundTrip(r *http.Request) (*http.Response, error) {
-	if err, ok := r.Context().Value(requestDenied).(error); ok && err != nil {
+	if err, ok := r.Context().Value(requestDenied).(*directorError); ok && err != nil {
 		return &http.Response{
-			StatusCode: http.StatusForbidden,
-			//Body:       ioutil.NopCloser(bytes.NewBufferString(he.Description)),
+			StatusCode: err.statusCode,
+			Body:       ioutil.NopCloser(bytes.NewBufferString(err.err.Error())),
 		}, nil
 	} else if token, ok := r.Context().Value(requestAllowed).(string); ok {
 		r.Header.Set("Authorization", "bearer "+token)
@@ -53,121 +63,57 @@ func (d *Director) RoundTrip(r *http.Request) (*http.Response, error) {
 		return res, err
 	}
 
+	d.Logger.WithFields(map[string]interface{}{"user": "anonymous", "request_url": r.URL.String()}).Info("Unable to type assert context.")
 	return &http.Response{
 		StatusCode: http.StatusInternalServerError,
-		//Body:       ioutil.NopCloser(bytes.NewBufferString(he.Description)),
+		Body:       ioutil.NopCloser(bytes.NewBufferString(http.StatusText(http.StatusInternalServerError))),
 	}, nil
 }
 
 func (d *Director) Director(r *http.Request) {
-
-	access, err := d.GenerateWardenRequests(r)
-	if errors.Cause(err) == helper.ErrPublicRule {
-		token := helper.BearerTokenFromRequest(r)
-		if token == "" {
-			// public rule without authorization means access is allowed (anonymously)
-			d.allowAnonymousRequest(r)
-			return
-		}
-
-		result, resp, err := d.SDK.IntrospectOAuth2Token(token, "")
-		if err != nil {
-			// public rule with failing introspection is still valid
-			d.Logger.WithField("url", r.URL.String()).WithError(err).Info("An error occurred during token introspection.")
-			d.allowAnonymousRequest(r)
-			return
-		} else if resp.StatusCode != http.StatusOK {
-			// public rule with failing introspection is still valid
-			d.Logger.
-				WithField("url", r.URL.String()).
-				WithField("status_code", resp.StatusCode).
-				Info("Token introspection did not result in HTTP status code 200.")
-			d.allowAnonymousRequest(r)
-			return
-		} else if !result.Active {
-			d.Logger.
-				WithField("url", r.URL.String()).
-				WithField("status_code", resp.StatusCode).
-				Info("Token introspection says authorization bearer token inactive.")
-			d.allowAnonymousRequest(r)
-			return
-		}
-
-		d.allowIntrospectedRequest(r, result)
-		return
-	} else if err != nil {
-		d.denyAnonymousRequest(r, err)
-		return
-	}
-
-	result, resp, err := d.SDK.DoesWardenAllowTokenAccessRequest(access)
+	access, err := d.Evaluator.EvaluateAccessRequest(r)
 	if err != nil {
-		d.denyAnonymousRequest(r, err)
-	} else if resp.StatusCode != http.StatusOK {
-		d.denyAnonymousRequest(r, err)
-		return
-	} else if !result.Allowed {
-		d.denyAuthorizedRequest(r, result)
+		d.Logger.
+			WithError(err).
+			WithField("user", "anonymous").
+			WithField("request_url", r.URL.String()).
+			Info("Request denied.")
+
+		switch errors.Cause(err) {
+		case helper.ErrForbidden:
+			*r = *r.WithContext(context.WithValue(r.Context(), requestDenied, &directorError{err: err, statusCode: http.StatusForbidden}))
+		case helper.ErrMissingBearerToken:
+			*r = *r.WithContext(context.WithValue(r.Context(), requestDenied, &directorError{err: err, statusCode: http.StatusUnauthorized}))
+		case helper.ErrMatchesNoRule:
+			*r = *r.WithContext(context.WithValue(r.Context(), requestDenied, &directorError{err: err, statusCode: http.StatusNotFound}))
+		case helper.ErrMatchesMoreThanOneRule:
+			*r = *r.WithContext(context.WithValue(r.Context(), requestDenied, &directorError{err: err, statusCode: http.StatusInternalServerError}))
+		default:
+			*r = *r.WithContext(context.WithValue(r.Context(), requestDenied, &directorError{err: err, statusCode: http.StatusInternalServerError}))
+		}
+
 		return
 	}
-	d.allowAuthorizedRequest(r, result)
-}
 
-func (d *Director) GenerateAccessRequests(r *http.Request) ([]AccessRequest, error) {
-	rules, err := d.Matcher.MatchRules(r.Method, r.URL)
+	if access.Anonymous {
+		d.Logger.WithFields(map[string]interface{}{"user": "anonymous", "request_url": r.URL.String()}).Info("Request allowed to anonymous user.")
+	} else {
+		d.Logger.
+			WithFields(map[string]interface{}{"user": access.User, "client_id": access.ClientID, "request_url": r.URL.String()}).
+			Info("Request allowed.")
+	}
+
+	token, err := jwt.NewWithClaims(jwt.SigningMethodHS256, access.ToClaims()).SignedString([]byte(d.Secret))
 	if err != nil {
-		return nil, errors.WithStack(err)
+		d.Logger.
+			WithError(errors.WithStack(err)).
+			WithFields(map[string]interface{}{"user": access.User, "client_id": access.ClientID, "request_url": r.URL.String()}).
+			Errorf("Unable to sign JSON Web Token.")
+		*r = *r.WithContext(context.WithValue(r.Context(), requestDenied, &directorError{err: errors.WithStack(err), statusCode: http.StatusInternalServerError}))
+		return
 	}
 
-	requests := make([]AccessRequest, len(rules))
-	for k, matched := range rules {
-		access := AccessRequest{
-			WardenTokenAccessRequest: swagger.WardenTokenAccessRequest{
-				Scopes:   matched.RequiredScopes,
-				Action:   matched.MatchesPath.ReplaceAllString(r.URL.Path, matched.RequiredAction),
-				Resource: matched.MatchesPath.ReplaceAllString(r.URL.Path, matched.RequiredResource),
-			},
-			Public: matched.Public,
-		}
-
-		token := helper.BearerTokenFromRequest(r)
-		if token == "" {
-			return nil, errors.WithStack(helper.ErrMissingBearerToken)
-		}
-
-		access.Token = token
-		access.Context = map[string]interface{}{
-			"remoteIpAddress": realip.RealIP(r),
-		}
-		requests[k] = access
-	}
-
-	return requests, nil
-}
-
-func (d *Director) allowAnonymousRequest(r *http.Request) {
-	d.Logger.WithFields(map[string]interface{}{"user": "anonymous", "url": r.URL.String()}).Info("Request granted.")
 	r.URL.Scheme = d.TargetURL.Scheme
 	r.URL.Host = d.TargetURL.Host
-	*r = *r.WithContext(context.WithValue(r.Context(), requestAllowed, ""))
-}
-
-func (d *Director) allowIntrospectedRequest(r *http.Request, introspection *swagger.OAuth2TokenIntrospection) {
-	d.Logger.WithFields(map[string]interface{}{"user": "anonymous", "url": r.URL.String()}).Info("Request granted.")
-	r.URL.Scheme = d.TargetURL.Scheme
-	r.URL.Host = d.TargetURL.Host
-	*r = *r.WithContext(context.WithValue(r.Context(), requestAllowed, ""))
-}
-
-func (d *Director) denyAnonymousRequest(r *http.Request, err error) {
-	d.Logger.WithError(err).WithFields(map[string]interface{}{"user": "anonymous", "url": r.URL.String()}).Info("Request denied.")
-	*r = *r.WithContext(context.WithValue(r.Context(), requestDenied, err))
-}
-
-func (d *Director) denyAuthorizedRequest(r *http.Request, resp *swagger.WardenTokenAccessRequestResponsePayload) {
-	*r = *r.WithContext(context.WithValue(r.Context(), requestDenied, ""))
-}
-
-func (d *Director) allowAuthorizedRequest(r *http.Request, resp *swagger.WardenTokenAccessRequestResponsePayload) {
-	*r = *r.WithContext(context.WithValue(r.Context(), requestDenied, ""))
+	*r = *r.WithContext(context.WithValue(r.Context(), requestAllowed, token))
 }
