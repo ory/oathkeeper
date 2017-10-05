@@ -1,5 +1,7 @@
 # ORY Oathkeeper
 
+[![Build Status](https://travis-ci.com/ory/oathkeeper.svg?token=gtodfPz6nLDS6xphYxdJ&branch=master)](https://travis-ci.com/ory/oathkeeper)
+
 This is a simple reverse proxy that checks the HTTP Authorization for validity against a set of rules. This service
 uses Hydra to validate access tokens and policies.
 

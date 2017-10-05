@@ -16,7 +16,7 @@ import:
 - package: github.com/ory/herodot
   version: ~0.1.1
 - package: github.com/ory/hydra
-  version: ~0.9.13
+  version: a870e6abae37b77d56bc17a50e2ebdb350a02fca
   subpackages:
   - sdk/go/hydra
   - sdk/go/hydra/swagger
