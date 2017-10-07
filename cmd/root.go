@@ -93,10 +93,10 @@ func initConfig() {
 	viper.SetDefault("PROXY_HOST", "")
 
 	viper.BindEnv("MANAGEMENT_PORT")
-	viper.SetDefault("PROXY_PORT", "4456")
+	viper.SetDefault("MANAGEMENT_PORT", "4456")
 
 	viper.BindEnv("MANAGEMENT_HOST")
-	viper.SetDefault("PROXY_HOST", "")
+	viper.SetDefault("MANAGEMENT_HOST", "")
 
 	viper.BindEnv("JWT_SHARED_SECRET")
 	viper.SetDefault("JWT_SHARED_SECRET", "")

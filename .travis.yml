@@ -1,5 +1,11 @@
 sudo: required
 
+services:
+  - docker
+
+env:
+  - DOCKER_BIND_LOCALHOST=true DATABASE_URL=memory
+
 go_import_path: github.com/ory/oathkeeper
 
 cache:
@@ -26,6 +32,10 @@ script:
   - go-acc -o coverage.txt $(glide novendor)
   - go test -race -short $(glide novendor | grep -v cmd)
   - ./scripts/run-genswag.sh
+  - docker build -t oathkeeper-proxy-travis-ci -f Dockerfile-proxy .
+  - docker build -t oathkeeper-management-travis-ci -f Dockerfile-management .
+  - docker run -d oathkeeper-proxy-travis-ci
+  - docker run -d oathkeeper-management-travis-ci
 
 after_success:
   - |-
@@ -39,4 +49,3 @@ deploy:
   skip_cleanup: true
   on:
     tags: true
-    go: 1.9
