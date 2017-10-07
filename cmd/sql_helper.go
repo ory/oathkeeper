@@ -37,7 +37,7 @@ func maxParallelism() int {
 
 func newRuleManager(db string) (rule.Manager, error) {
 	if db == "memory" {
-		return &rule.MemoryManager{Rules: map[string]Rule{}}, nil
+		return &rule.MemoryManager{Rules: map[string]rule.Rule{}}, nil
 	} else if db == "" {
 		return nil, errors.New("No database URL provided")
 	}

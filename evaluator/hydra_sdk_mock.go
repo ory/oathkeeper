@@ -6,8 +6,8 @@ package evaluator
 import (
 	gomock "github.com/golang/mock/gomock"
 	swagger "github.com/ory/hydra/sdk/go/hydra/swagger"
-	oauth2 "github.com/ory/hydra/vendor/golang.org/x/oauth2"
-	clientcredentials "github.com/ory/hydra/vendor/golang.org/x/oauth2/clientcredentials"
+	oauth2 "golang.org/x/oauth2"
+	clientcredentials "golang.org/x/oauth2/clientcredentials"
 )
 
 // Mock of SDK interface
