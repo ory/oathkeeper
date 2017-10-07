@@ -17,20 +17,21 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
-	"github.com/ory/oathkeeper/rule"
-	"github.com/ory/herodot"
+	"net/http"
+
 	"github.com/julienschmidt/httprouter"
-	"github.com/urfave/negroni"
 	"github.com/meatballhat/negroni-logrus"
 	"github.com/ory/graceful"
-	"net/http"
+	"github.com/ory/herodot"
+	"github.com/ory/oathkeeper/rule"
+	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
+	"github.com/urfave/negroni"
 )
 
 // managementCmd represents the management command
 var managementCmd = &cobra.Command{
-	Use:   "management",
+	Use: "management",
 	Run: func(cmd *cobra.Command, args []string) {
 		rm, err := newRuleManager(viper.GetString("DATABASE_URL"))
 		if err != nil {
