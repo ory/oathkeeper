@@ -4,10 +4,11 @@ import (
 	"runtime"
 	"time"
 
-	"github.com/jmoiron/sqlx"
-	"github.com/pkg/errors"
 	"net/url"
+
+	"github.com/jmoiron/sqlx"
 	"github.com/ory/oathkeeper/rule"
+	"github.com/pkg/errors"
 )
 
 func connectToSql(url string) (*sqlx.DB, error) {

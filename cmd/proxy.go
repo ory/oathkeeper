@@ -6,14 +6,15 @@ import (
 	"net/http/httputil"
 	"net/url"
 
+	"time"
+
 	"github.com/ory/graceful"
 	"github.com/ory/hydra/sdk/go/hydra"
 	"github.com/ory/oathkeeper/director"
 	"github.com/ory/oathkeeper/evaluator"
+	"github.com/ory/oathkeeper/rule"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"github.com/ory/oathkeeper/rule"
-	"time"
 )
 
 // proxyCmd represents the proxy command

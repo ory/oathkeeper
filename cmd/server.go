@@ -7,12 +7,12 @@ import (
 	"net/http"
 
 	"github.com/julienschmidt/httprouter"
+	"github.com/meatballhat/negroni-logrus"
 	"github.com/ory/graceful"
+	"github.com/ory/herodot"
+	"github.com/ory/oathkeeper/rule"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"github.com/ory/oathkeeper/rule"
-	"github.com/ory/herodot"
-	"github.com/meatballhat/negroni-logrus"
 	"github.com/urfave/negroni"
 )
 

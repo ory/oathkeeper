@@ -17,9 +17,10 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/spf13/cobra"
 	"os"
+
 	"github.com/ory/oathkeeper/rule"
+	"github.com/spf13/cobra"
 )
 
 // migrateCmd represents the migrate command

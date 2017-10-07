@@ -1,5 +1,5 @@
-hash: fe7e00620b93fcebd36700b3985dcde7d99c9557720fe4a3396ac91acdcbb763
-updated: 2017-10-05T10:50:41.106363776+02:00
+hash: e7f352ba1f5173ea4cab8d2d008b38dcee064acfd7ffcb5bd1460bc543b555b6
+updated: 2017-10-07T14:17:23.1770022+02:00
 imports:
 - name: github.com/dgrijalva/jwt-go
   version: d2709f9f1f31ebcda9651b03077758c1f3a0018c
@@ -49,7 +49,7 @@ imports:
 - name: github.com/ory/herodot
   version: 5bb399b8a5aa583343a2108e723b990432b4a1b4
 - name: github.com/ory/hydra
-  version: a870e6abae37b77d56bc17a50e2ebdb350a02fca
+  version: 0eff6b8de435880b9e8eae85ba065490982bbe04
   subpackages:
   - sdk/go/hydra
   - sdk/go/hydra/swagger

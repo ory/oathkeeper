@@ -91,8 +91,8 @@ func (d *WardenEvaluator) EvaluateAccessRequest(r *http.Request) (*Session, erro
 	}
 
 	return &Session{
-		User:      introspection.Sub,
-		ClientID:  introspection.Cid,
+		User:      introspection.Subject,
+		ClientID:  introspection.ClientId,
 		Anonymous: false,
 	}, nil
 }

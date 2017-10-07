@@ -6,6 +6,8 @@ package evaluator
 import (
 	gomock "github.com/golang/mock/gomock"
 	swagger "github.com/ory/hydra/sdk/go/hydra/swagger"
+	oauth2 "github.com/ory/hydra/vendor/golang.org/x/oauth2"
+	clientcredentials "github.com/ory/hydra/vendor/golang.org/x/oauth2/clientcredentials"
 )
 
 // Mock of SDK interface
@@ -238,9 +240,29 @@ func (_mr *_MockSDKRecorder) GetOAuth2Client(arg0 interface{}) *gomock.Call {
 	return _mr.mock.ctrl.RecordCall(_mr.mock, "GetOAuth2Client", arg0)
 }
 
-func (_m *MockSDK) GetOAuth2ConsentRequest(_param0 string) (*swagger.OAuth2consentRequest, *swagger.APIResponse, error) {
+func (_m *MockSDK) GetOAuth2ClientConfig() *clientcredentials.Config {
+	ret := _m.ctrl.Call(_m, "GetOAuth2ClientConfig")
+	ret0, _ := ret[0].(*clientcredentials.Config)
+	return ret0
+}
+
+func (_mr *_MockSDKRecorder) GetOAuth2ClientConfig() *gomock.Call {
+	return _mr.mock.ctrl.RecordCall(_mr.mock, "GetOAuth2ClientConfig")
+}
+
+func (_m *MockSDK) GetOAuth2Config() *oauth2.Config {
+	ret := _m.ctrl.Call(_m, "GetOAuth2Config")
+	ret0, _ := ret[0].(*oauth2.Config)
+	return ret0
+}
+
+func (_mr *_MockSDKRecorder) GetOAuth2Config() *gomock.Call {
+	return _mr.mock.ctrl.RecordCall(_mr.mock, "GetOAuth2Config")
+}
+
+func (_m *MockSDK) GetOAuth2ConsentRequest(_param0 string) (*swagger.OAuth2ConsentRequest, *swagger.APIResponse, error) {
 	ret := _m.ctrl.Call(_m, "GetOAuth2ConsentRequest", _param0)
-	ret0, _ := ret[0].(*swagger.OAuth2consentRequest)
+	ret0, _ := ret[0].(*swagger.OAuth2ConsentRequest)
 	ret1, _ := ret[1].(*swagger.APIResponse)
 	ret2, _ := ret[2].(error)
 	return ret0, ret1, ret2
