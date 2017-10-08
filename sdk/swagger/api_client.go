@@ -112,7 +112,6 @@ func (c *APIClient) ParameterToString(obj interface{}, collectionFormat string) 
 func (c *APIClient) prepareClient() *resty.Client {
 
 	rClient := resty.New()
-	rClient.SetRedirectPolicy(resty.FlexibleRedirectPolicy(2))
 
 	rClient.SetDebug(c.config.Debug)
 	if c.config.Transport != nil {

@@ -239,14 +239,15 @@
       "description": "A rule",
       "type": "object",
       "properties": {
-        "MatchesPath": {
-          "description": "MatchesPath is a regular expression of paths this rule matches.",
-          "type": "string"
-        },
         "allowAnonymous": {
           "description": "AllowAnonymous sets if the endpoint is public, thus not needing any authorization at all.",
           "type": "boolean",
           "x-go-name": "AllowAnonymous"
+        },
+        "bypassAuthorization": {
+          "description": "BypassAuthorization if set true disables firewall capabilities.",
+          "type": "boolean",
+          "x-go-name": "BypassAuthorization"
         },
         "description": {
           "description": "Description describes the rule.",
@@ -265,6 +266,11 @@
             "type": "string"
           },
           "x-go-name": "MatchesMethods"
+        },
+        "matchesPath": {
+          "description": "MatchesPath is a regular expression of paths this rule matches.",
+          "type": "string",
+          "x-go-name": "MatchesPath"
         },
         "requiredAction": {
           "description": "RequiredScopes is the action this rule requires.",

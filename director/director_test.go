@@ -30,7 +30,7 @@ func mustCompileRegex(t *testing.T, pattern string) *regexp.Regexp {
 func TestProxy(t *testing.T) {
 	backend := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		assert.NotEmpty(t, helper.BearerTokenFromRequest(r))
-		fmt.Fprint(w, "Hello, client")
+		fmt.Fprint(w, r.Header.Get("Authorization"))
 	}))
 	defer backend.Close()
 
@@ -41,6 +41,7 @@ func TestProxy(t *testing.T) {
 	defer proxy.Close()
 
 	publicRule := rule.Rule{MatchesMethods: []string{"GET"}, MatchesPath: mustCompileRegex(t, "/users/[0-9]+"), AllowAnonymous: true}
+	disabledRule := rule.Rule{MatchesMethods: []string{"GET"}, MatchesPath: mustCompileRegex(t, "/users/[0-9]+"), BypassAuthorization: true}
 	privateRule := rule.Rule{
 		MatchesMethods:   []string{"GET"},
 		MatchesPath:      mustCompileRegex(t, "/users/([0-9]+)"),
@@ -107,6 +108,20 @@ func TestProxy(t *testing.T) {
 					Scopes:   []string{"users.create"},
 					Context:  map[string]interface{}{"remoteIpAddress": "127.0.0.1"},
 				})).Return(&swagger.WardenTokenAccessRequestResponse{Allowed: true}, &swagger.APIResponse{Response: &http.Response{StatusCode: http.StatusOK}}, nil)
+				return s
+			},
+		},
+		{
+			d:     "should pass with a rule that bypasses authorization",
+			url:   proxy.URL + "/users/1234",
+			rules: []rule.Rule{disabledRule},
+			code:  http.StatusOK,
+			message: "bearer token",
+			transform: func(r *http.Request) {
+				r.Header.Add("Authorization", "bearer token")
+			},
+			mock: func(c *gomock.Controller) hydra.SDK {
+				s := evaluator.NewMockSDK(c)
 				return s
 			},
 		},

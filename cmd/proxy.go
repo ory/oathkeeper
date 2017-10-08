@@ -15,6 +15,8 @@ import (
 	"github.com/ory/oathkeeper/rule"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"github.com/urfave/negroni"
+	"github.com/meatballhat/negroni-logrus"
 )
 
 // proxyCmd represents the proxy command
@@ -25,7 +27,7 @@ var proxyCmd = &cobra.Command{
 		sdk, err := hydra.NewSDK(&hydra.Configuration{
 			ClientID:     viper.GetString("HYDRA_CLIENT_ID"),
 			ClientSecret: viper.GetString("HYDRA_CLIENT_SECRET"),
-			EndpointURL:  viper.GetString("HYDRA_ENDPOINT_URL"),
+			EndpointURL:  viper.GetString("HYDRA_URL"),
 			Scopes:       []string{"hydra.warden", "hydra.warden.*"},
 		})
 		if err != nil {
@@ -57,11 +59,17 @@ var proxyCmd = &cobra.Command{
 			Transport: d,
 		}
 
+		n := negroni.New()
+		n.Use(negronilogrus.NewMiddlewareFromLogger(logger, "oahtkeeper-proxy"))
+		n.UseHandler(proxy)
+
+		addr := fmt.Sprintf("%s:%s", viper.GetString("PROXY_HOST"), viper.GetString("PROXY_PORT"))
 		server := graceful.WithDefaults(&http.Server{
-			Addr:    fmt.Sprintf("%s:%s", viper.GetString("PROXY_HOST"), viper.GetString("PROXY_PORT")),
-			Handler: proxy,
+			Addr:    addr,
+			Handler: n,
 		})
 
+		logger.Printf("Listening on %s.\n", addr)
 		if err := graceful.Graceful(server.ListenAndServe, server.Shutdown); err != nil {
 			logger.Fatalf("Unable to gracefully shutdown HTTP server becase %s.\n", err)
 			return

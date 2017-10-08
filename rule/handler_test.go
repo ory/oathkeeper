@@ -34,10 +34,11 @@ func TestHandler(t *testing.T) {
 		RequiredScopes:   []string{"users.create"},
 	}
 	r2 := swagger.Rule{
-		Description:    "Get users rule",
-		MatchesPath:    "/users/([0-9]+)",
-		MatchesMethods: []string{"GET"},
-		AllowAnonymous: true,
+		Description:         "Get users rule",
+		MatchesPath:         "/users/([0-9]+)",
+		MatchesMethods:      []string{"GET"},
+		AllowAnonymous:      true,
+		BypassAuthorization: true,
 	}
 
 	t.Run("case=create a new rule", func(t *testing.T) {

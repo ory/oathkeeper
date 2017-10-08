@@ -43,16 +43,18 @@ var managementCmd = &cobra.Command{
 		handler.SetRoutes(router)
 
 		n := negroni.New()
-		n.Use(negronilogrus.NewMiddlewareFromLogger(logger, "oahtkeeper"))
+		n.Use(negronilogrus.NewMiddlewareFromLogger(logger, "oahtkeeper-management"))
 		n.UseHandler(router)
 
+		addr := fmt.Sprintf("%s:%s", viper.GetString("MANAGEMENT_HOST"), viper.GetString("MANAGEMENT_PORT"))
 		server := graceful.WithDefaults(&http.Server{
-			Addr:    fmt.Sprintf("%s:%s", viper.GetString("MANAGEMENT_HOST"), viper.GetString("MANAGEMENT_PORT")),
+			Addr:    addr,
 			Handler: router,
 		})
 
+		logger.Printf("Listening on %s.\n", addr)
 		if err := graceful.Graceful(server.ListenAndServe, server.Shutdown); err != nil {
-			logger.Fatalf("Unable to gracefully shutdown HTTP server becase %s.\n", err)
+			logger.Fatalf("Unable to gracefully shutdown HTTP server because %s.\n", err)
 			return
 		}
 		logger.Println("HTTP server was shutdown gracefully")

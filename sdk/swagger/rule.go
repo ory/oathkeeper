@@ -13,11 +13,11 @@ package swagger
 // A rule
 type Rule struct {
 
-	// MatchesPath is a regular expression of paths this rule matches.
-	MatchesPath string `json:"MatchesPath,omitempty"`
-
 	// AllowAnonymous sets if the endpoint is public, thus not needing any authorization at all.
 	AllowAnonymous bool `json:"allowAnonymous,omitempty"`
+
+	// BypassAuthorization if set true disables firewall capabilities.
+	BypassAuthorization bool `json:"bypassAuthorization,omitempty"`
 
 	// Description describes the rule.
 	Description string `json:"description,omitempty"`
@@ -27,6 +27,9 @@ type Rule struct {
 
 	// MatchesMethods is a list of HTTP methods that this rule matches.
 	MatchesMethods []string `json:"matchesMethods,omitempty"`
+
+	// MatchesPath is a regular expression of paths this rule matches.
+	MatchesPath string `json:"matchesPath,omitempty"`
 
 	// RequiredScopes is the action this rule requires.
 	RequiredAction string `json:"requiredAction,omitempty"`

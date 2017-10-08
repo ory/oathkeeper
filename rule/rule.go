@@ -31,6 +31,9 @@ type Rule struct {
 	// AllowAnonymous if set true allows anonymous access to the specified paths and methods.
 	AllowAnonymous bool
 
+	// BypassAuthorization if set true disables firewall capabilities.
+	BypassAuthorization bool
+
 	// Description describes the rule.
 	Description string
 }

@@ -38,6 +38,10 @@ func (d *WardenEvaluator) EvaluateAccessRequest(r *http.Request) (*Session, erro
 		return nil, err
 	}
 
+	if rl.BypassAuthorization {
+		return &Session{User: "", Anonymous: true, ClientID: "", Disabled: true}, nil
+	}
+
 	if rl.AllowAnonymous {
 		if token == "" {
 			return &Session{User: "", Anonymous: true, ClientID: ""}, nil

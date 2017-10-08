@@ -33,7 +33,7 @@ var migrateCmd = &cobra.Command{
 			return
 		}
 
-		db, err := connectToSql(args[1])
+		db, err := connectToSql(args[0])
 		if err != nil {
 			fmt.Printf("Could not connect to database because %s.\n", err)
 			os.Exit(1)
@@ -48,7 +48,7 @@ var migrateCmd = &cobra.Command{
 			return
 		}
 
-		fmt.Printf("Successfully applied %d migrations", num)
+		fmt.Printf("Successfully applied %d migrations.\n", num)
 	},
 }
 

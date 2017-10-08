@@ -9,6 +9,7 @@ import (
 type Session struct {
 	User      string `json:"user"`
 	Anonymous bool   `json:"anonymous"`
+	Disabled  bool   `json:"disabled"`
 	ClientID  string `json:"clientId"`
 }
 

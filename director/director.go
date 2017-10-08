@@ -42,6 +42,7 @@ type key int
 
 const requestAllowed key = 0
 const requestDenied key = 1
+const requestBypassedAuthorization key = 2
 
 type directorError struct {
 	err        error
@@ -56,6 +57,13 @@ func (d *Director) RoundTrip(r *http.Request) (*http.Response, error) {
 		}, nil
 	} else if token, ok := r.Context().Value(requestAllowed).(string); ok {
 		r.Header.Set("Authorization", "bearer "+token)
+		res, err := http.DefaultTransport.RoundTrip(r)
+		if err != nil {
+			d.Logger.WithField("url", r.URL.String()).WithError(err).Print("Round trip failed.")
+		}
+
+		return res, err
+	} else if _, ok := r.Context().Value(requestBypassedAuthorization).(string); ok {
 		res, err := http.DefaultTransport.RoundTrip(r)
 		if err != nil {
 			d.Logger.WithField("url", r.URL.String()).WithError(err).Print("Round trip failed.")
@@ -93,6 +101,18 @@ func (d *Director) Director(r *http.Request) {
 			*r = *r.WithContext(context.WithValue(r.Context(), requestDenied, &directorError{err: err, statusCode: http.StatusInternalServerError}))
 		}
 
+		return
+	}
+
+	if access.Disabled {
+		d.Logger.
+			WithField("user", "anonymous").
+			WithField("request_url", r.URL.String()).
+			Info("Request allowed to bypass firewall.")
+
+		r.URL.Scheme = d.TargetURL.Scheme
+		r.URL.Host = d.TargetURL.Host
+		*r = *r.WithContext(context.WithValue(r.Context(), requestBypassedAuthorization, ""))
 		return
 	}
 

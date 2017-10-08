@@ -67,4 +67,7 @@ type jsonRule struct {
 
 	// Description describes the rule.
 	Description string `json:"description"`
+
+	// BypassAuthorization if set true disables firewall capabilities.
+	BypassAuthorization bool `json:"bypassAuthorization"`
 }
