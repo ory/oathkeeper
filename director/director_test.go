@@ -112,10 +112,10 @@ func TestProxy(t *testing.T) {
 			},
 		},
 		{
-			d:     "should pass with a rule that bypasses authorization",
-			url:   proxy.URL + "/users/1234",
-			rules: []rule.Rule{disabledRule},
-			code:  http.StatusOK,
+			d:       "should pass with a rule that bypasses authorization",
+			url:     proxy.URL + "/users/1234",
+			rules:   []rule.Rule{disabledRule},
+			code:    http.StatusOK,
 			message: "bearer token",
 			transform: func(r *http.Request) {
 				r.Header.Add("Authorization", "bearer token")

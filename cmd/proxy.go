@@ -8,6 +8,7 @@ import (
 
 	"time"
 
+	"github.com/meatballhat/negroni-logrus"
 	"github.com/ory/graceful"
 	"github.com/ory/hydra/sdk/go/hydra"
 	"github.com/ory/oathkeeper/director"
@@ -16,7 +17,6 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/urfave/negroni"
-	"github.com/meatballhat/negroni-logrus"
 )
 
 // proxyCmd represents the proxy command
