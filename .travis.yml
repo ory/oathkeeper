@@ -36,6 +36,7 @@ script:
   - docker build -t oathkeeper-management-travis-ci -f Dockerfile-management .
   - docker run -d oathkeeper-proxy-travis-ci
   - docker run -d oathkeeper-management-travis-ci
+  - goveralls -service=travis-ci -coverprofile=coverage.txt
 
 after_success:
   - |-
