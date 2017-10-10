@@ -1,0 +1,16 @@
+FROM golang:1.9-alpine
+
+RUN apk add --no-cache git mercurial
+RUN go get github.com/Masterminds/glide
+WORKDIR /go/src/github.com/ory/oathkeeper
+
+ADD ./glide.lock ./glide.lock
+ADD ./glide.yaml ./glide.yaml
+RUN glide install
+
+ADD . .
+RUN go install .
+
+ENTRYPOINT /go/bin/oathkeeper management
+
+EXPOSE 4456

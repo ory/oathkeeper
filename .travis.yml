@@ -1,0 +1,51 @@
+sudo: required
+
+services:
+  - docker
+
+env:
+  - DOCKER_BIND_LOCALHOST=true DATABASE_URL=memory
+
+go_import_path: github.com/ory/oathkeeper
+
+cache:
+  directories:
+    - ./vendor/
+
+env:
+  - DATABASE_URL=memory
+
+language: go
+
+go:
+  - 1.9
+
+install:
+  - go get -u github.com/go-swagger/go-swagger/cmd/swagger github.com/bradfitz/goimports github.com/mattn/goveralls golang.org/x/tools/cmd/cover github.com/Masterminds/glide github.com/ory/go-acc
+  - glide install
+  - go install github.com/ory/oathkeeper
+  - glide update
+  - go install github.com/ory/oathkeeper
+
+script:
+  - ./scripts/test-format.sh
+  - go-acc -o coverage.txt $(glide novendor)
+  - go test -race -short $(glide novendor | grep -v cmd)
+  - ./scripts/run-genswag.sh
+  - docker build -t oathkeeper-proxy-travis-ci -f Dockerfile-proxy .
+  - docker build -t oathkeeper-management-travis-ci -f Dockerfile-management .
+  - docker run -d oathkeeper-proxy-travis-ci
+  - docker run -d oathkeeper-management-travis-ci
+
+after_success:
+  - |-
+    [ "${TRAVIS_TAG}" != "" ] && gox -ldflags "-X github.com/ory/oathkeeper/cmd.Version=`git describe --tags` -X github.com/ory/oathkeeper/cmd.BuildTime=`TZ=UTC date -u '+%Y-%m-%dT%H:%M:%SZ'` -X github.com/ory/oathkeeper/cmd.GitHash=`git rev-parse HEAD`" -output "dist/{{.Dir}}-{{.OS}}-{{.Arch}}"
+
+deploy:
+  provider: releases
+  file_glob: true
+  api_key: "$GITHUB_TOKEN"
+  file: "dist/*"
+  skip_cleanup: true
+  on:
+    tags: true

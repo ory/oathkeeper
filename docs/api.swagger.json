@@ -1,0 +1,423 @@
+{
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "schemes": [
+    "http",
+    "https"
+  ],
+  "swagger": "2.0",
+  "info": {
+    "description": "Oathkeeper",
+    "title": "Oathkeeper",
+    "contact": {
+      "name": "ORY",
+      "url": "https://www.ory.am",
+      "email": "hi@ory.am"
+    },
+    "version": "Latest"
+  },
+  "basePath": "/",
+  "paths": {
+    "/rules": {
+      "get": {
+        "description": "List all rules",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "http",
+          "https"
+        ],
+        "tags": [
+          "rule"
+        ],
+        "operationId": "listRules",
+        "responses": {
+          "200": {
+            "$ref": "#/responses/rules"
+          },
+          "401": {
+            "$ref": "#/responses/genericError"
+          },
+          "403": {
+            "$ref": "#/responses/genericError"
+          },
+          "500": {
+            "$ref": "#/responses/genericError"
+          }
+        }
+      },
+      "post": {
+        "description": "Create a rule",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "http",
+          "https"
+        ],
+        "tags": [
+          "rule"
+        ],
+        "operationId": "createRule",
+        "parameters": [
+          {
+            "name": "Body",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/rule"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "$ref": "#/responses/rule"
+          },
+          "401": {
+            "$ref": "#/responses/genericError"
+          },
+          "403": {
+            "$ref": "#/responses/genericError"
+          },
+          "500": {
+            "$ref": "#/responses/genericError"
+          }
+        }
+      }
+    },
+    "/rules/{id}": {
+      "get": {
+        "description": "Get a rule",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "http",
+          "https"
+        ],
+        "tags": [
+          "rule"
+        ],
+        "operationId": "getRule",
+        "parameters": [
+          {
+            "type": "string",
+            "x-go-name": "ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/rule"
+          },
+          "401": {
+            "$ref": "#/responses/genericError"
+          },
+          "403": {
+            "$ref": "#/responses/genericError"
+          },
+          "404": {
+            "$ref": "#/responses/genericError"
+          },
+          "500": {
+            "$ref": "#/responses/genericError"
+          }
+        }
+      },
+      "put": {
+        "description": "Update a rule",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "http",
+          "https"
+        ],
+        "tags": [
+          "rule"
+        ],
+        "operationId": "updateRule",
+        "parameters": [
+          {
+            "type": "string",
+            "x-go-name": "ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "Body",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/rule"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/rule"
+          },
+          "401": {
+            "$ref": "#/responses/genericError"
+          },
+          "403": {
+            "$ref": "#/responses/genericError"
+          },
+          "404": {
+            "$ref": "#/responses/genericError"
+          },
+          "500": {
+            "$ref": "#/responses/genericError"
+          }
+        }
+      },
+      "delete": {
+        "description": "Delete a rule",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "http",
+          "https"
+        ],
+        "tags": [
+          "rule"
+        ],
+        "operationId": "deleteRule",
+        "parameters": [
+          {
+            "type": "string",
+            "x-go-name": "ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "204": {
+            "$ref": "#/responses/emptyResponse"
+          },
+          "401": {
+            "$ref": "#/responses/genericError"
+          },
+          "403": {
+            "$ref": "#/responses/genericError"
+          },
+          "404": {
+            "$ref": "#/responses/genericError"
+          },
+          "500": {
+            "$ref": "#/responses/genericError"
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "rule": {
+      "description": "A rule",
+      "type": "object",
+      "properties": {
+        "allowAnonymous": {
+          "description": "AllowAnonymous sets if the endpoint is public, thus not needing any authorization at all.",
+          "type": "boolean",
+          "x-go-name": "AllowAnonymous"
+        },
+        "bypassAuthorization": {
+          "description": "BypassAuthorization if set true disables firewall capabilities.",
+          "type": "boolean",
+          "x-go-name": "BypassAuthorization"
+        },
+        "description": {
+          "description": "Description describes the rule.",
+          "type": "string",
+          "x-go-name": "Description"
+        },
+        "id": {
+          "description": "ID the a unique id of a rule.",
+          "type": "string",
+          "x-go-name": "ID"
+        },
+        "matchesMethods": {
+          "description": "MatchesMethods is a list of HTTP methods that this rule matches.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-go-name": "MatchesMethods"
+        },
+        "matchesPath": {
+          "description": "MatchesPath is a regular expression of paths this rule matches.",
+          "type": "string",
+          "x-go-name": "MatchesPath"
+        },
+        "requiredAction": {
+          "description": "RequiredScopes is the action this rule requires.",
+          "type": "string",
+          "x-go-name": "RequiredAction"
+        },
+        "requiredResource": {
+          "description": "RequiredScopes is the resource this rule requires.",
+          "type": "string",
+          "x-go-name": "RequiredResource"
+        },
+        "requiredScopes": {
+          "description": "RequiredScopes is a list of scopes that are required by this rule.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-go-name": "RequiredScopes"
+        }
+      },
+      "x-go-name": "jsonRule",
+      "x-go-package": "github.com/ory/oathkeeper/rule"
+    },
+    "swaggerCreateRuleParameters": {
+      "type": "object",
+      "properties": {
+        "Body": {
+          "$ref": "#/definitions/rule"
+        }
+      },
+      "x-go-package": "github.com/ory/oathkeeper/rule"
+    },
+    "swaggerGetRuleParameters": {
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "properties": {
+        "id": {
+          "description": "in: path",
+          "type": "string",
+          "x-go-name": "ID"
+        }
+      },
+      "x-go-package": "github.com/ory/oathkeeper/rule"
+    },
+    "swaggerRuleResponse": {
+      "description": "A rule",
+      "type": "object",
+      "properties": {
+        "Body": {
+          "$ref": "#/definitions/rule"
+        }
+      },
+      "x-go-package": "github.com/ory/oathkeeper/rule"
+    },
+    "swaggerRulesResponse": {
+      "description": "A list of rules",
+      "type": "object",
+      "properties": {
+        "Body": {
+          "description": "in: body\ntype: array",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/rule"
+          }
+        }
+      },
+      "x-go-package": "github.com/ory/oathkeeper/rule"
+    },
+    "swaggerUpdateRuleParameters": {
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "properties": {
+        "Body": {
+          "$ref": "#/definitions/rule"
+        },
+        "id": {
+          "description": "in: path",
+          "type": "string",
+          "x-go-name": "ID"
+        }
+      },
+      "x-go-package": "github.com/ory/oathkeeper/rule"
+    }
+  },
+  "responses": {
+    "emptyResponse": {
+      "description": "An empty response"
+    },
+    "genericError": {
+      "description": "The standard error format",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "format": "int64",
+            "x-go-name": "Code"
+          },
+          "details": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "object"
+              }
+            },
+            "x-go-name": "Details"
+          },
+          "message": {
+            "type": "string",
+            "x-go-name": "Message"
+          },
+          "reason": {
+            "type": "string",
+            "x-go-name": "Reason"
+          },
+          "request": {
+            "type": "string",
+            "x-go-name": "Request"
+          },
+          "status": {
+            "type": "string",
+            "x-go-name": "Status"
+          }
+        }
+      }
+    },
+    "rule": {
+      "description": "A rule",
+      "schema": {
+        "$ref": "#/definitions/rule"
+      }
+    },
+    "rules": {
+      "description": "A list of rules",
+      "schema": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/rule"
+        }
+      }
+    }
+  },
+  "x-forwarded-proto": "string",
+  "x-request-id": "string"
+}
