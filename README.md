@@ -1,13 +1,18 @@
 # ORY Oathkeeper
 
-[![Build Status](https://travis-ci.com/ory/oathkeeper.svg?token=gtodfPz6nLDS6xphYxdJ&branch=master)](https://travis-ci.com/ory/oathkeeper)
+<h4 align="center">
+    <a href="https://gitter.im/ory-am/hydra">Chat</a> |
+    <a href="https://community.ory.am/">Forums</a> |
+    <a href="http://eepurl.com/bKT3N9">Newsletter</a><br/><br/>
+    <a href="http://docs.oathkeeper.apiary.io/">API Docs</a> |
+    <a href="https://patreon.com/user?u=4298803">Support us on patreon!</a>
+</h4>
 
-This is a simple reverse proxy that checks the HTTP Authorization for validity against a set of rules. This service
-uses Hydra to validate access tokens and policies.
+This is a reverse proxy that checks the HTTP Authorization for validity against a set of rules. This service
+uses Hydra to validate access tokens and policies. This service is under **active development** with **regular breaking changes**.
 
-## Writing Rules
-
-Check out [director/director.go](director/director.go) for some exemplary rules and rule documentation.
+[![Build Status](https://travis-ci.org/ory/oathkeeper.svg?branch=master)](https://travis-ci.org/ory/oathkeeper)
+[![Coverage Status](https://coveralls.io/repos/github/ory/oathkeeper/badge.svg?branch=master)](https://coveralls.io/github/ory/oathkeeper?branch=master)
 
 ## Running
 
