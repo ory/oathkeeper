@@ -70,4 +70,7 @@ type jsonRule struct {
 
 	// BypassAuthorization if set true disables firewall capabilities.
 	BypassAuthorization bool `json:"bypassAuthorization"`
+
+	// BypassAccessControlPolicies if set true disables checking access control policies.
+	BypassAccessControlPolicies bool `json:"bypassAccessControlPolicies"`
 }

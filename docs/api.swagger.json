@@ -244,6 +244,11 @@
           "type": "boolean",
           "x-go-name": "AllowAnonymous"
         },
+        "bypassAccessControlPolicies": {
+          "description": "BypassAccessControlPolicies if set true disables checking access control policies.",
+          "type": "boolean",
+          "x-go-name": "BypassAccessControlPolicies"
+        },
         "bypassAuthorization": {
           "description": "BypassAuthorization if set true disables firewall capabilities.",
           "type": "boolean",

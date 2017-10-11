@@ -31,6 +31,7 @@ func mustGenerateURL(t *testing.T, u string) *url.URL {
 func TestEvaluator(t *testing.T) {
 	we := NewWardenEvaluator(nil, nil, nil)
 	publicRule := rule.Rule{MatchesMethods: []string{"GET"}, MatchesPath: mustCompileRegex(t, "/users/[0-9]+"), AllowAnonymous: true}
+	bypassACPRule := rule.Rule{MatchesMethods: []string{"GET"}, MatchesPath: mustCompileRegex(t, "/users/[0-9]+"), BypassAccessControlPolicies: true}
 	privateRule := rule.Rule{
 		MatchesMethods:   []string{"POST"},
 		MatchesPath:      mustCompileRegex(t, "/users/([0-9]+)"),
@@ -144,6 +145,61 @@ func TestEvaluator(t *testing.T) {
 		{
 			d:     "request is allowed because it matches a public rule, and token introspection succeeds",
 			rules: []rule.Rule{publicRule},
+			r:     &http.Request{Method: "GET", Header: http.Header{"Authorization": []string{"bEaReR token"}}, URL: mustGenerateURL(t, "https://localhost/users/1234")},
+			e: func(t *testing.T, s *Session, err error) {
+				require.NoError(t, err)
+				assert.Equal(t, "client", s.ClientID)
+				assert.Equal(t, "user", s.User)
+				assert.False(t, s.Anonymous)
+			},
+			mock: func(c *gomock.Controller) hydra.SDK {
+				s := NewMockSDK(c)
+				s.EXPECT().IntrospectOAuth2Token(gomock.Eq("token"), gomock.Eq("")).Return(&swagger.OAuth2TokenIntrospection{Active: true, Sub: "user", ClientId: "client"}, &swagger.APIResponse{Response: &http.Response{StatusCode: http.StatusOK}}, nil)
+				return s
+			},
+		},
+		{
+			d:     "request is not allowed because it matches a rule without access control policies, but token introspection fails",
+			rules: []rule.Rule{bypassACPRule},
+			r:     &http.Request{Method: "GET", Header: http.Header{"Authorization": []string{"bEaReR token"}}, URL: mustGenerateURL(t, "https://localhost/users/1234")},
+			e: func(t *testing.T, s *Session, err error) {
+				require.Error(t, err)
+			},
+			mock: func(c *gomock.Controller) hydra.SDK {
+				s := NewMockSDK(c)
+				s.EXPECT().IntrospectOAuth2Token(gomock.Eq("token"), gomock.Eq("")).Return(&swagger.OAuth2TokenIntrospection{Active: false}, &swagger.APIResponse{Response: &http.Response{StatusCode: http.StatusOK}}, nil)
+				return s
+			},
+		},
+		{
+			d:     "request is not allowed because it matches a rule without access control policies, but token introspection fails with network error",
+			rules: []rule.Rule{bypassACPRule},
+			r:     &http.Request{Method: "GET", Header: http.Header{"Authorization": []string{"bEaReR token"}}, URL: mustGenerateURL(t, "https://localhost/users/1234")},
+			e: func(t *testing.T, s *Session, err error) {
+				require.Error(t, err)
+			},
+			mock: func(c *gomock.Controller) hydra.SDK {
+				s := NewMockSDK(c)
+				s.EXPECT().IntrospectOAuth2Token(gomock.Eq("token"), gomock.Eq("")).Return(nil, nil, errors.New("Some error"))
+				return s
+			},
+		},
+		{
+			d:     "request is not allowed because it matches a rule without access control policies, but token introspection fails with wrong status code",
+			rules: []rule.Rule{bypassACPRule},
+			r:     &http.Request{Method: "GET", Header: http.Header{"Authorization": []string{"bEaReR token"}}, URL: mustGenerateURL(t, "https://localhost/users/1234")},
+			e: func(t *testing.T, s *Session, err error) {
+				require.Error(t, err)
+			},
+			mock: func(c *gomock.Controller) hydra.SDK {
+				s := NewMockSDK(c)
+				s.EXPECT().IntrospectOAuth2Token(gomock.Eq("token"), gomock.Eq("")).Return(nil, &swagger.APIResponse{Response: &http.Response{StatusCode: http.StatusUnauthorized}}, nil)
+				return s
+			},
+		},
+		{
+			d:     "request is allowed because it matches a rule without access control policies, and token introspection succeeds",
+			rules: []rule.Rule{bypassACPRule},
 			r:     &http.Request{Method: "GET", Header: http.Header{"Authorization": []string{"bEaReR token"}}, URL: mustGenerateURL(t, "https://localhost/users/1234")},
 			e: func(t *testing.T, s *Session, err error) {
 				require.NoError(t, err)

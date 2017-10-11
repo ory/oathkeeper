@@ -201,28 +201,30 @@ func toRule(rule *jsonRule) (*Rule, error) {
 	}
 
 	return &Rule{
-		ID:                  rule.ID,
-		MatchesPath:         exp,
-		MatchesMethods:      rule.MatchesMethods,
-		RequiredScopes:      rule.RequiredScopes,
-		RequiredAction:      rule.RequiredAction,
-		RequiredResource:    rule.RequiredResource,
-		AllowAnonymous:      rule.AllowAnonymous,
-		BypassAuthorization: rule.BypassAuthorization,
-		Description:         rule.Description,
+		ID:                          rule.ID,
+		MatchesPath:                 exp,
+		MatchesMethods:              rule.MatchesMethods,
+		RequiredScopes:              rule.RequiredScopes,
+		RequiredAction:              rule.RequiredAction,
+		RequiredResource:            rule.RequiredResource,
+		AllowAnonymous:              rule.AllowAnonymous,
+		BypassAuthorization:         rule.BypassAuthorization,
+		BypassAccessControlPolicies: rule.BypassAccessControlPolicies,
+		Description:                 rule.Description,
 	}, nil
 }
 
 func encodeRule(r *Rule) *jsonRule {
 	return &jsonRule{
-		ID:                  r.ID,
-		MatchesPath:         r.MatchesPath.String(),
-		MatchesMethods:      r.MatchesMethods,
-		RequiredScopes:      r.RequiredScopes,
-		RequiredAction:      r.RequiredAction,
-		RequiredResource:    r.RequiredResource,
-		BypassAuthorization: r.BypassAuthorization,
-		AllowAnonymous:      r.AllowAnonymous,
-		Description:         r.Description,
+		ID:                          r.ID,
+		MatchesPath:                 r.MatchesPath.String(),
+		MatchesMethods:              r.MatchesMethods,
+		RequiredScopes:              r.RequiredScopes,
+		RequiredAction:              r.RequiredAction,
+		RequiredResource:            r.RequiredResource,
+		BypassAuthorization:         r.BypassAuthorization,
+		BypassAccessControlPolicies: r.BypassAccessControlPolicies,
+		AllowAnonymous:              r.AllowAnonymous,
+		Description:                 r.Description,
 	}
 }

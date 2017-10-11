@@ -16,6 +16,9 @@ type Rule struct {
 	// AllowAnonymous sets if the endpoint is public, thus not needing any authorization at all.
 	AllowAnonymous bool `json:"allowAnonymous,omitempty"`
 
+	// BypassAccessControlPolicies if set true disables checking access control policies.
+	BypassAccessControlPolicies bool `json:"bypassAccessControlPolicies,omitempty"`
+
 	// BypassAuthorization if set true disables firewall capabilities.
 	BypassAuthorization bool `json:"bypassAuthorization,omitempty"`
 
