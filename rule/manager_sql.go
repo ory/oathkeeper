@@ -14,15 +14,16 @@ import (
 )
 
 type sqlRule struct {
-	ID                  string `db:"id"`
-	MatchesMethods      string `db:"matches_methods"`
-	MatchesPath         string `db:"matches_path"`
-	RequiredScopes      string `db:"required_scopes"`
-	RequiredAction      string `db:"required_action"`
-	RequiredResource    string `db:"required_resource"`
-	AllowAnonymous      bool   `db:"allow_anonymous"`
-	BypassAuthorization bool   `db:"disable_firewall"`
-	Description         string `db:"description"`
+	ID                          string `db:"id"`
+	MatchesMethods              string `db:"matches_methods"`
+	MatchesPath                 string `db:"matches_path"`
+	RequiredScopes              string `db:"required_scopes"`
+	RequiredAction              string `db:"required_action"`
+	RequiredResource            string `db:"required_resource"`
+	AllowAnonymous              bool   `db:"allow_anonymous"`
+	BypassAuthorization         bool   `db:"disable_firewall"`
+	BypassAccessControlPolicies bool   `db:"disable_acp"`
+	Description                 string `db:"description"`
 }
 
 func (r *sqlRule) toRule() (*Rule, error) {
@@ -41,29 +42,31 @@ func (r *sqlRule) toRule() (*Rule, error) {
 	}
 
 	return &Rule{
-		ID:                  r.ID,
-		MatchesMethods:      methods,
-		MatchesPath:         exp,
-		RequiredScopes:      scopes,
-		RequiredAction:      r.RequiredAction,
-		RequiredResource:    r.RequiredResource,
-		AllowAnonymous:      r.AllowAnonymous,
-		BypassAuthorization: r.BypassAuthorization,
-		Description:         r.Description,
+		ID:                          r.ID,
+		MatchesMethods:              methods,
+		MatchesPath:                 exp,
+		RequiredScopes:              scopes,
+		RequiredAction:              r.RequiredAction,
+		RequiredResource:            r.RequiredResource,
+		AllowAnonymous:              r.AllowAnonymous,
+		BypassAuthorization:         r.BypassAuthorization,
+		BypassAccessControlPolicies: r.BypassAccessControlPolicies,
+		Description:                 r.Description,
 	}, nil
 }
 
 func toSqlRule(r *Rule) *sqlRule {
 	return &sqlRule{
-		ID:                  r.ID,
-		MatchesMethods:      strings.Join(r.MatchesMethods, " "),
-		MatchesPath:         r.MatchesPath.String(),
-		RequiredScopes:      strings.Join(r.RequiredScopes, " "),
-		RequiredAction:      r.RequiredAction,
-		RequiredResource:    r.RequiredResource,
-		AllowAnonymous:      r.AllowAnonymous,
-		BypassAuthorization: r.BypassAuthorization,
-		Description:         r.Description,
+		ID:                          r.ID,
+		MatchesMethods:              strings.Join(r.MatchesMethods, " "),
+		MatchesPath:                 r.MatchesPath.String(),
+		RequiredScopes:              strings.Join(r.RequiredScopes, " "),
+		RequiredAction:              r.RequiredAction,
+		RequiredResource:            r.RequiredResource,
+		AllowAnonymous:              r.AllowAnonymous,
+		BypassAuthorization:         r.BypassAuthorization,
+		BypassAccessControlPolicies: r.BypassAccessControlPolicies,
+		Description:                 r.Description,
 	}
 }
 
@@ -80,7 +83,8 @@ var migrations = &migrate.MemoryMigrationSource{
 	required_resource	text NOT NULL,
 	allow_anonymous		bool NOT NULL,
 	description			text NOT NULL,
-	disable_firewall	text NOT NULL
+	disable_firewall	bool NOT NULL,
+	disable_acp			bool NOT NULL
 )`},
 			Down: []string{
 				"DROP TABLE hydra_client",
@@ -99,6 +103,7 @@ var sqlParams = []string{
 	"allow_anonymous",
 	"description",
 	"disable_firewall",
+	"disable_acp",
 }
 
 func NewSQLManager(db *sqlx.DB) *SQLManager {

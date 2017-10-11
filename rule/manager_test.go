@@ -58,13 +58,14 @@ func TestManagers(t *testing.T) {
 			RequiredScopes:   []string{"users.create"},
 		}
 		r2 := Rule{
-			ID:                  "foo2",
-			Description:         "Get users rule",
-			MatchesPath:         mustCompileRegex(t, "/users/([0-9]+)"),
-			MatchesMethods:      []string{"GET"},
-			AllowAnonymous:      true,
-			RequiredScopes:      []string{},
-			BypassAuthorization: true,
+			ID:                          "foo2",
+			Description:                 "Get users rule",
+			MatchesPath:                 mustCompileRegex(t, "/users/([0-9]+)"),
+			MatchesMethods:              []string{"GET"},
+			AllowAnonymous:              true,
+			RequiredScopes:              []string{},
+			BypassAuthorization:         true,
+			BypassAccessControlPolicies: true,
 		}
 
 		t.Run("case="+k, func(t *testing.T) {

@@ -10,6 +10,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"github.com/tomasen/realip"
+	"strings"
 )
 
 type WardenEvaluator struct {
@@ -74,6 +75,32 @@ func (d *WardenEvaluator) EvaluateAccessRequest(r *http.Request) (*Session, erro
 
 	if token == "" {
 		return nil, errors.WithStack(helper.ErrMissingBearerToken)
+	}
+
+	if rl.BypassAccessControlPolicies {
+		introspection, response, err := d.Hydra.IntrospectOAuth2Token(token, strings.Join(rl.RequiredScopes, " "))
+		if err != nil {
+			d.Logger.WithError(err).
+				WithField("access_url", r.URL.String()).
+				WithField("token", token[:5]).
+				Errorf("Unable to connect to warden endpoint.")
+			return nil, errors.WithStack(err)
+		} else if response.StatusCode != http.StatusOK {
+			d.Logger.
+				WithField("status_code", response.StatusCode).
+				WithField("token", token[:5]).
+				WithField("access_url", r.URL.String()).
+				Errorf("Expected warden response to return status code 200.")
+			return nil, errors.Errorf("Token introspection expects status code %d but got %d", http.StatusOK, response.StatusCode)
+		} else if !introspection.Active {
+			return nil, errors.WithStack(helper.ErrForbidden)
+		}
+
+		return &Session{
+			User:      introspection.Sub,
+			ClientID:  introspection.ClientId,
+			Anonymous: false,
+		}, nil
 	}
 
 	introspection, response, err := d.Hydra.DoesWardenAllowTokenAccessRequest(d.prepareAccessRequests(r, token, rl))

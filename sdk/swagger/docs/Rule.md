@@ -4,6 +4,7 @@
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **AllowAnonymous** | **bool** | AllowAnonymous sets if the endpoint is public, thus not needing any authorization at all. | [optional] [default to null]
+**BypassAccessControlPolicies** | **bool** | BypassAccessControlPolicies if set true disables checking access control policies. | [optional] [default to null]
 **BypassAuthorization** | **bool** | BypassAuthorization if set true disables firewall capabilities. | [optional] [default to null]
 **Description** | **string** | Description describes the rule. | [optional] [default to null]
 **Id** | **string** | ID the a unique id of a rule. | [optional] [default to null]

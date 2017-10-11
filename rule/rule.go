@@ -34,6 +34,9 @@ type Rule struct {
 	// BypassAuthorization if set true disables firewall capabilities.
 	BypassAuthorization bool
 
+	// BypassAccessControlPolicies if set true disables checking access control policies.
+	BypassAccessControlPolicies bool
+
 	// Description describes the rule.
 	Description string
 }
