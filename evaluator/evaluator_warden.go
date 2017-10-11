@@ -3,6 +3,8 @@ package evaluator
 import (
 	"net/http"
 
+	"strings"
+
 	"github.com/ory/hydra/sdk/go/hydra"
 	"github.com/ory/hydra/sdk/go/hydra/swagger"
 	"github.com/ory/oathkeeper/helper"
@@ -10,7 +12,6 @@ import (
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"github.com/tomasen/realip"
-	"strings"
 )
 
 type WardenEvaluator struct {

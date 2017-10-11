@@ -28,7 +28,7 @@ var proxyCmd = &cobra.Command{
 			ClientID:     viper.GetString("HYDRA_CLIENT_ID"),
 			ClientSecret: viper.GetString("HYDRA_CLIENT_SECRET"),
 			EndpointURL:  viper.GetString("HYDRA_URL"),
-			Scopes:       []string{"hydra.warden", "hydra.warden.*"},
+			Scopes:       []string{"hydra.warden"},
 		})
 		if err != nil {
 			logger.WithError(err).Fatalln("Unable to connect to Hydra SDK.")
