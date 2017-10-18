@@ -93,6 +93,8 @@ func (d *Director) Director(r *http.Request) {
 			*r = *r.WithContext(context.WithValue(r.Context(), requestDenied, &directorError{err: err, statusCode: http.StatusForbidden}))
 		case helper.ErrMissingBearerToken:
 			*r = *r.WithContext(context.WithValue(r.Context(), requestDenied, &directorError{err: err, statusCode: http.StatusUnauthorized}))
+		case helper.ErrUnauthorized:
+			*r = *r.WithContext(context.WithValue(r.Context(), requestDenied, &directorError{err: err, statusCode: http.StatusUnauthorized}))
 		case helper.ErrMatchesNoRule:
 			*r = *r.WithContext(context.WithValue(r.Context(), requestDenied, &directorError{err: err, statusCode: http.StatusNotFound}))
 		case helper.ErrMatchesMoreThanOneRule:
