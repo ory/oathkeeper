@@ -94,7 +94,7 @@ func (d *WardenEvaluator) EvaluateAccessRequest(r *http.Request) (*Session, erro
 				Errorf("Expected warden response to return status code 200.")
 			return nil, errors.Errorf("Token introspection expects status code %d but got %d", http.StatusOK, response.StatusCode)
 		} else if !introspection.Active {
-			return nil, errors.WithStack(helper.ErrForbidden)
+			return nil, errors.WithStack(helper.ErrUnauthorized)
 		}
 
 		return &Session{
