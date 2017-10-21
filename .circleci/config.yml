@@ -1,0 +1,48 @@
+# Golang CircleCI 2.0 configuration file
+#
+# Check https://circleci.com/docs/2.0/language-go/ for more details
+version: 2
+jobs:
+  build:
+    docker:
+      # specify the version
+      - image: circleci/golang:1.9
+
+      # Specify service dependencies here if necessary
+      # CircleCI maintains a library of pre-built images
+      # documented at https://circleci.com/docs/2.0/circleci-images/
+      # - image: circleci/postgres:9.4
+
+    #### TEMPLATE_NOTE: go expects specific checkout path representing url
+    #### expecting it in the form of
+    ####   /go/src/github.com/circleci/go-tool
+    ####   /go/src/bitbucket.org/circleci/go-tool
+    working_directory: /go/src/github.com/ory/oathkeeper
+    steps:
+      - checkout
+      - run: go get -u github.com/go-swagger/go-swagger/cmd/swagger github.com/bradfitz/goimports github.com/mattn/goveralls golang.org/x/tools/cmd/cover github.com/Masterminds/glide github.com/ory/go-acc
+
+      # Installation
+      - run: glide install
+      - run: go install github.com/ory/oathkeeper
+      - run: glide update
+      - run: go install github.com/ory/oathkeeper
+
+      # Format
+      - run: ./scripts/test-format.sh
+
+      # Tests
+      - run: go-acc -o coverage.txt $(glide novendor)
+      - run: go test -race -short $(glide novendor | grep -v cmd)
+
+      # See if swagger works
+      - run: ./scripts/run-genswag.sh
+
+      # Build and test dockerfiles
+      - run: docker build -t oathkeeper-proxy-travis-ci -f Dockerfile-proxy .
+      - run: docker build -t oathkeeper-management-travis-ci -f Dockerfile-management .
+      - run: docker run -d oathkeeper-proxy-travis-ci
+      - run: docker run -d oathkeeper-management-travis-ci
+
+      # Submit coverage details
+      - run: goveralls -service=travis-ci -coverprofile=coverage.txt
