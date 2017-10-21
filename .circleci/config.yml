@@ -20,6 +20,7 @@ jobs:
     working_directory: /go/src/github.com/ory/oathkeeper
     steps:
       - checkout
+      - setup_remote_docker
       - run: go get -u github.com/go-swagger/go-swagger/cmd/swagger github.com/bradfitz/goimports github.com/mattn/goveralls golang.org/x/tools/cmd/cover github.com/Masterminds/glide github.com/ory/go-acc
 
       # Installation
