@@ -14,7 +14,7 @@ import (
 )
 
 var resources []*dockertest.Resource
-var pool *dockertest.Pool
+var pool = new(dockertest.Pool)
 
 func kjillAll() {
 	for _, resource := range resources {
