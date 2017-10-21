@@ -121,28 +121,37 @@ func connectToPostgres(t *testing.T, managers map[string]Manager) {
 func connectToPostgresDB(t *testing.T) *sqlx.DB {
 	var db *sqlx.DB
 	var err error
-	pool, err = dockertest.NewPool("")
-	if err != nil {
-		t.Fatalf("Could not connect to docker: %s", err)
-	}
+	var resource *dockertest.Resource
 
-	resource, err := pool.Run("postgres", "9.6", []string{"POSTGRES_PASSWORD=secret", "POSTGRES_DB=oathkeeper"})
-	if err != nil {
-		t.Fatalf("Could not start resource: %s", err)
+	url := os.Getenv("PG_URL")
+	if url == "" {
+		pool, err = dockertest.NewPool("")
+		if err != nil {
+			t.Fatalf("Could not connect to docker: %s", err)
+		}
+
+		resource, err = pool.Run("postgres", "9.6", []string{"POSTGRES_PASSWORD=secret", "POSTGRES_DB=oathkeeper"})
+		if err != nil {
+			t.Fatalf("Could not start resource: %s", err)
+		}
+
+		url = fmt.Sprintf("postgres://postgres:secret@localhost:%s/oathkeeper?sslmode=disable", resource.GetPort("5432/tcp"))
+		resources = append(resources, resource)
 	}
 
 	if err = pool.Retry(func() error {
 		var err error
-		db, err = sqlx.Open("postgres", fmt.Sprintf("postgres://postgres:secret@localhost:%s/oathkeeper?sslmode=disable", resource.GetPort("5432/tcp")))
+		db, err = sqlx.Open("postgres", url)
 		if err != nil {
 			return err
 		}
 		return db.Ping()
 	}); err != nil {
-		pool.Purge(resource)
+		if resource != nil {
+			pool.Purge(resource)
+		}
 		t.Fatalf("Could not connect to docker: %s", err)
 	}
 
-	resources = append(resources, resource)
 	return db
 }
