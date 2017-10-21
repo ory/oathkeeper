@@ -186,7 +186,10 @@ func (h *Handler) Delete(w http.ResponseWriter, r *http.Request, ps httprouter.P
 }
 
 func decodeRule(w http.ResponseWriter, r *http.Request) (*Rule, error) {
-	var rule jsonRule
+	rule := jsonRule{
+		MatchesMethods: []string{},
+		RequiredScopes: []string{},
+	}
 	if err := json.NewDecoder(r.Body).Decode(&rule); err != nil {
 		return nil, err
 	}
