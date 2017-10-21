@@ -1,10 +1,9 @@
 package rule
 
 import (
+	"net/http"
 	"net/http/httptest"
 	"testing"
-
-	"net/http"
 
 	"github.com/julienschmidt/httprouter"
 	"github.com/ory/herodot"
@@ -37,6 +36,7 @@ func TestHandler(t *testing.T) {
 		Description:                 "Get users rule",
 		MatchesPath:                 "/users/([0-9]+)",
 		MatchesMethods:              []string{"GET"},
+		RequiredScopes:              []string{},
 		AllowAnonymous:              true,
 		BypassAuthorization:         true,
 		BypassAccessControlPolicies: true,
