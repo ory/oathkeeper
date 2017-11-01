@@ -23,6 +23,7 @@ jobs:
 
       # Installation
       - run: curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -
+      - run: dep ensure -vendor-only
       - run: go install github.com/ory/oathkeeper
 
       # Format
