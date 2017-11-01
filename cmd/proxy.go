@@ -5,7 +5,9 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"net/url"
-
+	"os"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/meatballhat/negroni-logrus"
@@ -14,6 +16,7 @@ import (
 	"github.com/ory/oathkeeper/director"
 	"github.com/ory/oathkeeper/evaluator"
 	"github.com/ory/oathkeeper/rule"
+	"github.com/rs/cors"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/urfave/negroni"
@@ -63,10 +66,23 @@ var proxyCmd = &cobra.Command{
 		n.Use(negronilogrus.NewMiddlewareFromLogger(logger, "oahtkeeper-proxy"))
 		n.UseHandler(proxy)
 
+		allowCredentials, _ := strconv.ParseBool(os.Getenv("CORS_ALLOWED_CREDENTIALS"))
+		debug, _ := strconv.ParseBool(os.Getenv("CORS_DEBUG"))
+		maxAge, _ := strconv.Atoi(os.Getenv("CORS_MAX_AGE"))
+		ch := cors.New(cors.Options{
+			AllowedOrigins:   strings.Split(os.Getenv("CORS_ALLOWED_ORIGINS"), ","),
+			AllowedMethods:   strings.Split(os.Getenv("CORS_ALLOWED_METHODS"), ","),
+			AllowedHeaders:   strings.Split(os.Getenv("CORS_ALLOWED_HEADERS"), ","),
+			ExposedHeaders:   strings.Split(os.Getenv("CORS_EXPOSED_HEADERS"), ","),
+			AllowCredentials: allowCredentials,
+			MaxAge:           maxAge,
+			Debug:            debug,
+		}).Handler(n)
+
 		addr := fmt.Sprintf("%s:%s", viper.GetString("PROXY_HOST"), viper.GetString("PROXY_PORT"))
 		server := graceful.WithDefaults(&http.Server{
 			Addr:    addr,
-			Handler: n,
+			Handler: ch,
 		})
 
 		logger.Printf("Listening on %s.\n", addr)

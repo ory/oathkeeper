@@ -104,3 +104,7 @@
 [[constraint]]
   name = "gopkg.in/go-resty/resty.v0"
   version = "0.13.0"
+
+[[constraint]]
+  name = "github.com/rs/cors"
+  version = "1.2.0"
