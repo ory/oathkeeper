@@ -18,12 +18,11 @@ jobs:
     steps:
       - checkout
       - setup_remote_docker
-      - run: go get -u github.com/go-swagger/go-swagger/cmd/swagger github.com/bradfitz/goimports github.com/mattn/goveralls golang.org/x/tools/cmd/cover github.com/Masterminds/glide github.com/ory/go-acc
+      - run: go get -u github.com/go-swagger/go-swagger/cmd/swagger github.com/bradfitz/goimports github.com/mattn/goveralls golang.org/x/tools/cmd/cover github.com/ory/go-acc
+      - run: curl -L -s https://github.com/golang/dep/releases/download/v0.3.2/dep-linux-amd64 -o /go/bin/dep && chmod +x /go/bin/dep
 
       # Installation
-      - run: glide install
-      - run: go install github.com/ory/oathkeeper
-      - run: glide update
+      - run: curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -
       - run: go install github.com/ory/oathkeeper
 
       # Format
