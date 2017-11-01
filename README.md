@@ -11,7 +11,7 @@
 This is a reverse proxy that checks the HTTP Authorization for validity against a set of rules. This service
 uses Hydra to validate access tokens and policies. This service is under **active development** with **regular breaking changes**.
 
-[![Build Status](https://travis-ci.org/ory/oathkeeper.svg?branch=master)](https://travis-ci.org/ory/oathkeeper)
+[![CircleCI](https://circleci.com/gh/ory/oathkeeper/tree/master.svg?style=svg)](https://circleci.com/gh/ory/oathkeeper/tree/master)
 [![Coverage Status](https://coveralls.io/repos/github/ory/oathkeeper/badge.svg?branch=master)](https://coveralls.io/github/ory/oathkeeper?branch=master)
 
 ## Running
