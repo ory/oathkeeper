@@ -5,10 +5,6 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"net/url"
-	"os"
-	"strconv"
-	"strings"
-	"time"
 
 	"github.com/meatballhat/negroni-logrus"
 	"github.com/ory/graceful"
@@ -22,99 +18,89 @@ import (
 	"github.com/urfave/negroni"
 )
 
+type proxyConfig struct {
+	hydra             *hydra.Configuration
+	backendURL        string
+	databaseURL       string
+	cors              cors.Options
+	address           string
+	refreshDelay      string
+	rules             rule.Manager
+	bearerTokenSecret string
+}
+
 // proxyCmd represents the proxy command
 var proxyCmd = &cobra.Command{
 	Use:   "proxy",
 	Short: "Runs the reverse proxy",
 	Run: func(cmd *cobra.Command, args []string) {
-		sdk, err := hydra.NewSDK(&hydra.Configuration{
-			ClientID:     viper.GetString("HYDRA_CLIENT_ID"),
-			ClientSecret: viper.GetString("HYDRA_CLIENT_SECRET"),
-			EndpointURL:  viper.GetString("HYDRA_URL"),
-			Scopes:       []string{"hydra.warden"},
-		})
-		if err != nil {
-			logger.WithError(err).Fatalln("Unable to connect to Hydra SDK.")
-			return
-		}
-		backend, err := url.Parse(viper.GetString("BACKEND_URL"))
-		if err != nil {
-			logger.WithError(err).Fatalln("Unable to parse backend URL.")
-		}
-
-		rm, err := newRuleManager(viper.GetString("DATABASE_URL"))
+		rules, err := newRuleManager(viper.GetString("DATABASE_URL"))
 		if err != nil {
 			logger.WithError(err).Fatalln("Unable to connect to rule backend.")
 		}
 
-		matcher := &rule.CachedMatcher{Manager: rm, Rules: []rule.Rule{}}
-
-		if err := matcher.Refresh(); err != nil {
-			logger.WithError(err).Fatalln("Unable to refresh rules.")
+		config := &proxyConfig{
+			hydra: &hydra.Configuration{
+				ClientID:     viper.GetString("HYDRA_CLIENT_ID"),
+				ClientSecret: viper.GetString("HYDRA_CLIENT_SECRET"),
+				EndpointURL:  viper.GetString("HYDRA_URL"),
+				Scopes:       []string{"hydra.warden"},
+			},
+			rules: rules, backendURL: viper.GetString("BACKEND_URL"),
+			bearerTokenSecret: viper.GetString("JWT_SHARED_SECRET"),
+			cors:              parseCorsOptions(""),
+			address:           fmt.Sprintf("%s:%s", viper.GetString("PROXY_HOST"), viper.GetString("PROXY_PORT")),
 		}
 
-		go refresh(matcher, 0)
-
-		eval := evaluator.NewWardenEvaluator(logger, matcher, sdk)
-		d := director.NewDirector(backend, eval, logger, viper.GetString("JWT_SHARED_SECRET"))
-		proxy := &httputil.ReverseProxy{
-			Director:  d.Director,
-			Transport: d,
-		}
-
-		n := negroni.New()
-		n.Use(negronilogrus.NewMiddlewareFromLogger(logger, "oahtkeeper-proxy"))
-		n.UseHandler(proxy)
-
-		allowCredentials, _ := strconv.ParseBool(os.Getenv("CORS_ALLOWED_CREDENTIALS"))
-		debug, _ := strconv.ParseBool(os.Getenv("CORS_DEBUG"))
-		maxAge, _ := strconv.Atoi(os.Getenv("CORS_MAX_AGE"))
-		ch := cors.New(cors.Options{
-			AllowedOrigins:   strings.Split(os.Getenv("CORS_ALLOWED_ORIGINS"), ","),
-			AllowedMethods:   strings.Split(os.Getenv("CORS_ALLOWED_METHODS"), ","),
-			AllowedHeaders:   strings.Split(os.Getenv("CORS_ALLOWED_HEADERS"), ","),
-			ExposedHeaders:   strings.Split(os.Getenv("CORS_EXPOSED_HEADERS"), ","),
-			AllowCredentials: allowCredentials,
-			MaxAge:           maxAge,
-			Debug:            debug,
-		}).Handler(n)
-
-		addr := fmt.Sprintf("%s:%s", viper.GetString("PROXY_HOST"), viper.GetString("PROXY_PORT"))
-		server := graceful.WithDefaults(&http.Server{
-			Addr:    addr,
-			Handler: ch,
-		})
-
-		logger.Printf("Listening on %s.\n", addr)
-		if err := graceful.Graceful(server.ListenAndServe, server.Shutdown); err != nil {
-			logger.Fatalf("Unable to gracefully shutdown HTTP server becase %s.\n", err)
-			return
-		}
-		logger.Println("HTTP server was shutdown gracefully")
+		runProxy(config)
 	},
 }
 
-func refresh(m *rule.CachedMatcher, fails int) {
-	duration, _ := time.ParseDuration(viper.GetString("REFRESH_DELAY"))
-	if duration == 0 {
-		duration = time.Second * 30
-	}
-
-	time.Sleep(duration)
-
-	if err := m.Refresh(); err != nil {
-		logger.WithError(err).WithField("retry", fails).Errorln("Unable to refresh rules.")
-		if fails > 15 {
-			logger.WithError(err).WithField("retry", fails).Fatalf("Terminating after retry %d.\n", fails)
-		}
-
-		refresh(m, fails+1)
+func runProxy(c *proxyConfig) {
+	sdk, err := hydra.NewSDK(c.hydra)
+	if err != nil {
+		logger.WithError(err).Fatalln("Unable to connect to Hydra SDK.")
 		return
 	}
+	backend, err := url.Parse(c.backendURL)
+	if err != nil {
+		logger.WithError(err).Fatalln("Unable to parse backend URL.")
+	}
 
-	refresh(m, 0)
+	matcher := &rule.CachedMatcher{Manager: c.rules, Rules: []rule.Rule{}}
+
+	if err := matcher.Refresh(); err != nil {
+		logger.WithError(err).Fatalln("Unable to refresh rules.")
+	}
+
+	go refresh(c, matcher, 0)
+
+	eval := evaluator.NewWardenEvaluator(logger, matcher, sdk)
+	d := director.NewDirector(backend, eval, logger, c.bearerTokenSecret)
+	proxy := &httputil.ReverseProxy{
+		Director:  d.Director,
+		Transport: d,
+	}
+
+	n := negroni.New()
+	n.Use(negronilogrus.NewMiddlewareFromLogger(logger, "oahtkeeper-proxy"))
+	n.UseHandler(proxy)
+
+	ch := cors.New(c.cors).Handler(n)
+
+	server := graceful.WithDefaults(&http.Server{
+		Addr:    c.address,
+		Handler: ch,
+	})
+
+	logger.Printf("Listening on %s.\n", c.address)
+	if err := graceful.Graceful(server.ListenAndServe, server.Shutdown); err != nil {
+		logger.Fatalf("Unable to gracefully shutdown HTTP server because %s.\n", err)
+		return
+	}
+	logger.Println("HTTP server was shutdown gracefully")
 }
 
 func init() {
-	RootCmd.AddCommand(proxyCmd)
+	serveCmd.AddCommand(proxyCmd)
 }

@@ -29,38 +29,52 @@ import (
 	"github.com/urfave/negroni"
 )
 
+type managementConfig struct {
+	rules   rule.Manager
+	address string
+}
+
+func runManagement(c *managementConfig) {
+	handler := rule.Handler{H: herodot.NewJSONWriter(logger), M: c.rules}
+	router := httprouter.New()
+	handler.SetRoutes(router)
+
+	n := negroni.New()
+	n.Use(negronilogrus.NewMiddlewareFromLogger(logger, "oahtkeeper-management"))
+	n.UseHandler(router)
+
+	addr := c.address
+	server := graceful.WithDefaults(&http.Server{
+		Addr:    addr,
+		Handler: router,
+	})
+
+	logger.Printf("Listening on %s.\n", addr)
+	if err := graceful.Graceful(server.ListenAndServe, server.Shutdown); err != nil {
+		logger.Fatalf("Unable to gracefully shutdown HTTP server because %s.\n", err)
+		return
+	}
+	logger.Println("HTTP server was shutdown gracefully")
+}
+
 // managementCmd represents the management command
 var managementCmd = &cobra.Command{
 	Use: "management",
 	Run: func(cmd *cobra.Command, args []string) {
-		rm, err := newRuleManager(viper.GetString("DATABASE_URL"))
+		rules, err := newRuleManager(viper.GetString("DATABASE_URL"))
 		if err != nil {
 			logger.WithError(err).Fatalln("Unable to connect to rule backend.")
 		}
 
-		handler := rule.Handler{H: herodot.NewJSONWriter(logger), M: rm}
-		router := httprouter.New()
-		handler.SetRoutes(router)
-
-		n := negroni.New()
-		n.Use(negronilogrus.NewMiddlewareFromLogger(logger, "oahtkeeper-management"))
-		n.UseHandler(router)
-
-		addr := fmt.Sprintf("%s:%s", viper.GetString("MANAGEMENT_HOST"), viper.GetString("MANAGEMENT_PORT"))
-		server := graceful.WithDefaults(&http.Server{
-			Addr:    addr,
-			Handler: router,
-		})
-
-		logger.Printf("Listening on %s.\n", addr)
-		if err := graceful.Graceful(server.ListenAndServe, server.Shutdown); err != nil {
-			logger.Fatalf("Unable to gracefully shutdown HTTP server because %s.\n", err)
-			return
+		config := &managementConfig{
+			rules:   rules,
+			address: fmt.Sprintf("%s:%s", viper.GetString("MANAGEMENT_HOST"), viper.GetString("MANAGEMENT_PORT")),
 		}
-		logger.Println("HTTP server was shutdown gracefully")
+
+		runManagement(config)
 	},
 }
 
 func init() {
-	RootCmd.AddCommand(managementCmd)
+	serveCmd.AddCommand(managementCmd)
 }

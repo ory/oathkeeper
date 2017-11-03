@@ -13,6 +13,6 @@ RUN dep ensure -vendor-only
 ADD . .
 RUN go install .
 
-ENTRYPOINT /go/bin/oathkeeper proxy
+ENTRYPOINT /go/bin/oathkeeper serve proxy
 
 EXPOSE 4455
