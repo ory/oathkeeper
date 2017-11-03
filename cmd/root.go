@@ -68,41 +68,9 @@ func initConfig() {
 	viper.AddConfigPath("$HOME")       // adding home directory as first search path
 	viper.AutomaticEnv()               // read in environment variables that match
 
-	viper.BindEnv("LOG_LEVEL")
 	viper.SetDefault("LOG_LEVEL", "info")
-
-	viper.BindEnv("BACKEND_URL")
-	viper.SetDefault("BACKEND_URL", "")
-
-	viper.BindEnv("DATABASE_URL")
-	viper.SetDefault("DATABASE_URL", "")
-
-	viper.BindEnv("HYDRA_CLIENT_ID")
-	viper.SetDefault("HYDRA_CLIENT_ID", "")
-
-	viper.BindEnv("HYDRA_CLIENT_SECRET")
-	viper.SetDefault("HYDRA_CLIENT_SECRET", "")
-
-	viper.BindEnv("HYDRA_URL")
-	viper.SetDefault("HYDRA_URL", "")
-
-	viper.BindEnv("PROXY_PORT")
 	viper.SetDefault("PROXY_PORT", "4455")
-
-	viper.BindEnv("PROXY_HOST")
-	viper.SetDefault("PROXY_HOST", "")
-
-	viper.BindEnv("MANAGEMENT_PORT")
 	viper.SetDefault("MANAGEMENT_PORT", "4456")
-
-	viper.BindEnv("MANAGEMENT_HOST")
-	viper.SetDefault("MANAGEMENT_HOST", "")
-
-	viper.BindEnv("JWT_SHARED_SECRET")
-	viper.SetDefault("JWT_SHARED_SECRET", "")
-
-	viper.BindEnv("REFRESH_DELAY")
-	viper.SetDefault("REFRESH_DELAY", "")
 
 	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err == nil {

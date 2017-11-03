@@ -13,6 +13,6 @@ RUN dep ensure -vendor-only
 ADD . .
 RUN go install .
 
-ENTRYPOINT /go/bin/oathkeeper management
+ENTRYPOINT /go/bin/oathkeeper serve management
 
 EXPOSE 4456
