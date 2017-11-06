@@ -20,6 +20,6 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags "-s -X github.com/or
 FROM scratch
 
 COPY --from=0 /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
-COPY --from=0 /go/src/github.com/ory/oathkeeper/oathkeeper /oathkeeper
+COPY --from=0 /go/src/github.com/ory/oathkeeper/oathkeeper /usr/bin/oathkeeper
 
-ENTRYPOINT ["/oathkeeper"]
+ENTRYPOINT ["oathkeeper"]
