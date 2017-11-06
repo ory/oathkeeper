@@ -53,14 +53,15 @@ jobs:
       # Submit coverage details
       # - run: goveralls -service=circle-ci -coverprofile=coverage.txt -repotoken=$COVERALLS_REPO_TOKEN
 
-  build-docker:
+  test-docker:
     docker:
       - image: library/docker:17.10
     steps:
       - checkout
       - setup_remote_docker:
           version: 17.10.0-ce
-      - run: docker build -f Dockerfile .
+      - run: docker build -f Dockerfile -t oathkeeper-test .
+      - run: docker run oathkeeper-test oathkeeper version
 
   release:
     docker:
@@ -90,7 +91,7 @@ workflows:
           filters:
             tags:
               only: /.*/
-      - build-docker:
+      - test-docker:
           requires:
             - test
             - swagger
@@ -100,7 +101,7 @@ workflows:
               only: /.*/
       - release:
           requires:
-            - build-docker
+            - test-docker
           filters:
             tags:
               only: /.*/
