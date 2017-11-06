@@ -3,7 +3,29 @@
 # Check https://circleci.com/docs/2.0/language-go/ for more details
 version: 2
 jobs:
-  build:
+  format:
+    docker:
+      - image: circleci/golang:1.9
+    working_directory: /go/src/github.com/ory/oathkeeper
+    steps:
+      - checkout
+      - run: curl -L -s https://github.com/golang/dep/releases/download/v0.3.2/dep-linux-amd64 -o /go/bin/dep && chmod +x /go/bin/dep
+      - run: go get -u golang.org/x/tools/cmd/goimports
+      - run: dep ensure -vendor-only
+      - run: ./scripts/test-format.sh
+
+  swagger:
+    docker:
+      - image: circleci/golang:1.9
+    working_directory: /go/src/github.com/ory/oathkeeper
+    steps:
+      - checkout
+      - run: curl -L -s https://github.com/golang/dep/releases/download/v0.3.2/dep-linux-amd64 -o /go/bin/dep && chmod +x /go/bin/dep
+      - run: go get -u github.com/go-swagger/go-swagger/cmd/swagger golang.org/x/tools/cmd/goimports
+      - run: dep ensure -vendor-only
+      - run: ./scripts/run-genswag.sh
+
+  test:
     docker:
       - image: circleci/golang:1.9
         environment:
@@ -13,11 +35,9 @@ jobs:
         - POSTGRES_USER=test
         - POSTGRES_PASSWORD=test
         - POSTGRES_DB=oathkeeper
-
     working_directory: /go/src/github.com/ory/oathkeeper
     steps:
       - checkout
-      - setup_remote_docker
       - run: go get -u github.com/go-swagger/go-swagger/cmd/swagger github.com/bradfitz/goimports github.com/mattn/goveralls golang.org/x/tools/cmd/cover github.com/ory/go-acc
       - run: curl -L -s https://github.com/golang/dep/releases/download/v0.3.2/dep-linux-amd64 -o /go/bin/dep && chmod +x /go/bin/dep
 
@@ -26,21 +46,65 @@ jobs:
       - run: dep ensure -vendor-only
       - run: go install github.com/ory/oathkeeper
 
-      # Format
-      - run: ./scripts/test-format.sh
-
       # Tests
       - run: go-acc -o coverage.txt $(glide novendor)
       - run: go test -race -short $(glide novendor | grep -v cmd)
 
-      # See if swagger works
-      - run: ./scripts/run-genswag.sh
-
-      # Build and test dockerfiles
-      - run: docker build -t oathkeeper-proxy-travis-ci -f Dockerfile-proxy .
-      - run: docker build -t oathkeeper-management-travis-ci -f Dockerfile-management .
-      - run: docker run -d oathkeeper-proxy-travis-ci
-      - run: docker run -d oathkeeper-management-travis-ci
-
       # Submit coverage details
       # - run: goveralls -service=circle-ci -coverprofile=coverage.txt -repotoken=$COVERALLS_REPO_TOKEN
+
+  build-docker:
+    docker:
+      - image: library/docker:17.10
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run: docker build -f Dockerfile-test .
+
+  release:
+    docker:
+      - image: circleci/golang:1.9
+    working_directory: /go/src/github.com/ory/oathkeeper
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run: curl -L -s https://github.com/golang/dep/releases/download/v0.3.2/dep-linux-amd64 -o /go/bin/dep && chmod +x /go/bin/dep
+      - run: go get -u golang.org/x/tools/cmd/goimports
+      - run: dep ensure -vendor-only
+      - run: GOOS=linux GOARCH=amd64 go build -ldflags "-X github.com/ory/oathkeeper/cmd.Version=`git describe --tags` -X github.com/ory/oathkeeper/cmd.BuildTime=`TZ=UTC date -u '+%Y-%m-%dT%H:%M:%SZ'` -X github.com/ory/oathkeeper/cmd.GitHash=`git rev-parse HEAD`" -o oathkeeper-docker-bin
+      - run: docker build -f Dockerfile -t oryd/oathkeeper:$CIRCLE_TAG .
+      - run: docker login --username "$DOCKER_USERNAME" --password "$DOCKER_PASSWORD"
+      - run: docker push oryd/oathkeeper:$CIRCLE_TAG
+
+workflows:
+  version: 2
+  "test, build, and relase":
+    jobs:
+      - format:
+          filters:
+            tags:
+              only: /.*/
+      - test:
+          filters:
+            tags:
+              only: /.*/
+      - swagger:
+          filters:
+            tags:
+              only: /.*/
+      - build-docker:
+          requires:
+            - test
+            - swagger
+            - format
+          filters:
+            tags:
+              only: /.*/
+      - release:
+          requires:
+            - build-docker
+          filters:
+            tags:
+              only: /.*/
+            branches:
+              ignore: /.*/
