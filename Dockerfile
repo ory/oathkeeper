@@ -1,8 +1,24 @@
-FROM alpine:3.6
+FROM golang:1.9-alpine
 
-RUN apk add --update ca-certificates # Certificates for SSL
+ARG git_tag
+ARG git_commit
 
-ADD oathkeeper-docker-bin /go/bin/oathkeeper
-RUN chmod a=+x /go/bin/oathkeeper
+RUN apk add --no-cache git build-base curl
+RUN curl -L -s https://github.com/golang/dep/releases/download/v0.3.2/dep-linux-amd64 -o $GOPATH/bin/dep
+RUN chmod +x $GOPATH/bin/dep
 
-ENTRYPOINT ["/go/bin/oathkeeper"]
+WORKDIR /go/src/github.com/ory/oathkeeper
+
+ADD ./Gopkg.lock ./Gopkg.lock
+ADD ./Gopkg.toml ./Gopkg.toml
+RUN dep ensure -vendor-only
+
+ADD . .
+
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags "-s -X github.com/ory/oathkeeper/cmd.Version=$git_tag -X github.com/ory/oathkeeper/cmd.BuildTime=`TZ=UTC date -u '+%Y-%m-%dT%H:%M:%SZ'` -X github.com/ory/oathkeeper/cmd.GitHash=$git_commit" -a -installsuffix cgo -o oathkeeper
+
+FROM scratch
+
+COPY --from=0 /go/src/github.com/ory/oathkeeper/oathkeeper /oathkeeper
+
+ENTRYPOINT ["/oathkeeper"]
