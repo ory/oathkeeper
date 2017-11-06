@@ -61,7 +61,7 @@ jobs:
       - setup_remote_docker:
           version: 17.10.0-ce
       - run: docker build -f Dockerfile -t oathkeeper-test .
-      - run: docker run oathkeeper-test oathkeeper version
+      - run: docker run oathkeeper-test version
 
   release:
     docker:
