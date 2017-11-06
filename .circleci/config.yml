@@ -58,8 +58,9 @@ jobs:
       - image: library/docker:17.10
     steps:
       - checkout
-      - setup_remote_docker
-      - run: docker build -f Dockerfile-test .
+      - setup_remote_docker:
+          version: 17.10.0-ce
+      - run: docker build -f Dockerfile .
 
   release:
     docker:
@@ -67,7 +68,8 @@ jobs:
     working_directory: /go/src/github.com/ory/oathkeeper
     steps:
       - checkout
-      - setup_remote_docker
+      - setup_remote_docker:
+          version: 17.10.0-ce
       - run: docker build --build-arg git_tag=$(git describe --tags) --build-arg git_commit=$(git rev-parse HEAD) -f Dockerfile -t oryd/oathkeeper:$CIRCLE_TAG .
       - run: docker login --username "$DOCKER_USERNAME" --password "$DOCKER_PASSWORD"
       - run: docker push oryd/oathkeeper:$CIRCLE_TAG
