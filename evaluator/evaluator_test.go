@@ -31,28 +31,28 @@ func mustGenerateURL(t *testing.T, u string) *url.URL {
 
 func TestEvaluator(t *testing.T) {
 	we := NewWardenEvaluator(nil, nil, nil)
-	publicRule := rule.Rule{MatchesMethods: []string{"GET"}, MatchesPath: mustCompileRegex(t, "/users/<[0-9]+>"), AllowAnonymous: true}
-	bypassACPRule := rule.Rule{MatchesMethods: []string{"GET"}, MatchesPath: mustCompileRegex(t, "/users/<[0-9]+>"), BypassAccessControlPolicies: true}
+	publicRule := rule.Rule{MatchesMethods: []string{"GET"}, MatchesPathCompiled: mustCompileRegex(t, "/users/<[0-9]+>"), AllowAnonymous: true}
+	bypassACPRule := rule.Rule{MatchesMethods: []string{"GET"}, MatchesPathCompiled: mustCompileRegex(t, "/users/<[0-9]+>"), BypassAccessControlPolicies: true}
 	privateRuleWithSubstitution := rule.Rule{
-		MatchesMethods:   []string{"POST"},
-		MatchesPath:      mustCompileRegex(t, "/users/<[0-9]+>"),
-		RequiredResource: "users:$1",
-		RequiredAction:   "get:$1",
-		RequiredScopes:   []string{"users.create"},
+		MatchesMethods:      []string{"POST"},
+		MatchesPathCompiled: mustCompileRegex(t, "/users/<[0-9]+>"),
+		RequiredResource:    "users:$1",
+		RequiredAction:      "get:$1",
+		RequiredScopes:      []string{"users.create"},
 	}
 	privateRuleWithoutSubstitution := rule.Rule{
-		MatchesMethods:   []string{"POST"},
-		MatchesPath:      mustCompileRegex(t, "/users<$|/([0-9]+)>"),
-		RequiredResource: "users",
-		RequiredAction:   "get",
-		RequiredScopes:   []string{"users.create"},
+		MatchesMethods:      []string{"POST"},
+		MatchesPathCompiled: mustCompileRegex(t, "/users<$|/([0-9]+)>"),
+		RequiredResource:    "users",
+		RequiredAction:      "get",
+		RequiredScopes:      []string{"users.create"},
 	}
 	privateRuleWithPartialSubstitution := rule.Rule{
-		MatchesMethods:   []string{"POST"},
-		MatchesPath:      mustCompileRegex(t, "/users<$|/([0-9]+)>"),
-		RequiredResource: "users:$2",
-		RequiredAction:   "get",
-		RequiredScopes:   []string{"users.create"},
+		MatchesMethods:      []string{"POST"},
+		MatchesPathCompiled: mustCompileRegex(t, "/users<$|/([0-9]+)>"),
+		RequiredResource:    "users:$2",
+		RequiredAction:      "get",
+		RequiredScopes:      []string{"users.create"},
 	}
 
 	for k, tc := range []struct {

@@ -16,8 +16,11 @@ type Rule struct {
 	// MatchesMethods is a list of HTTP methods that this rule matches.
 	MatchesMethods []string
 
+	// MatchesPathCompiled is a regular expression of paths this rule matches.
+	MatchesPathCompiled *regexp.Regexp
+
 	// MatchesPath is a regular expression of paths this rule matches.
-	MatchesPath *regexp.Regexp
+	MatchesPath string
 
 	// RequiredScopes is a list of scopes that are required by this rule.
 	RequiredScopes []string
@@ -46,8 +49,8 @@ func (r *Rule) MatchesURL(method string, u *url.URL) error {
 		return errors.Errorf("Method %s does not match any of %v", method, r.MatchesMethods)
 	}
 
-	if !r.MatchesPath.MatchString(u.Path) {
-		return errors.Errorf("Path %s does not match %s", u.Path, r.MatchesPath.String())
+	if !r.MatchesPathCompiled.MatchString(u.Path) {
+		return errors.Errorf("Path %s does not match %s", u.Path, r.MatchesPath)
 	}
 
 	return nil
