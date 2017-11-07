@@ -273,7 +273,7 @@
           "x-go-name": "MatchesMethods"
         },
         "matchesPath": {
-          "description": "MatchesPath is a regular expression of paths this rule matches.",
+          "description": "MatchesPathCompiled is a regular expression of paths this rule matches.",
           "type": "string",
           "x-go-name": "MatchesPath"
         },

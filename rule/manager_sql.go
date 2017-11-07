@@ -44,7 +44,8 @@ func (r *sqlRule) toRule() (*Rule, error) {
 	return &Rule{
 		ID:                          r.ID,
 		MatchesMethods:              methods,
-		MatchesPath:                 exp,
+		MatchesPathCompiled:         exp,
+		MatchesPath:                 r.MatchesPath,
 		RequiredScopes:              scopes,
 		RequiredAction:              r.RequiredAction,
 		RequiredResource:            r.RequiredResource,
@@ -59,7 +60,7 @@ func toSqlRule(r *Rule) *sqlRule {
 	return &sqlRule{
 		ID:                          r.ID,
 		MatchesMethods:              strings.Join(r.MatchesMethods, " "),
-		MatchesPath:                 r.MatchesPath.String(),
+		MatchesPath:                 r.MatchesPath,
 		RequiredScopes:              strings.Join(r.RequiredScopes, " "),
 		RequiredAction:              r.RequiredAction,
 		RequiredResource:            r.RequiredResource,

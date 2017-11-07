@@ -205,7 +205,8 @@ func toRule(rule *jsonRule) (*Rule, error) {
 
 	return &Rule{
 		ID:                          rule.ID,
-		MatchesPath:                 exp,
+		MatchesPathCompiled:         exp,
+		MatchesPath:                 rule.MatchesPath,
 		MatchesMethods:              rule.MatchesMethods,
 		RequiredScopes:              rule.RequiredScopes,
 		RequiredAction:              rule.RequiredAction,
@@ -220,7 +221,7 @@ func toRule(rule *jsonRule) (*Rule, error) {
 func encodeRule(r *Rule) *jsonRule {
 	return &jsonRule{
 		ID:                          r.ID,
-		MatchesPath:                 r.MatchesPath.String(),
+		MatchesPath:                 r.MatchesPath,
 		MatchesMethods:              r.MatchesMethods,
 		RequiredScopes:              r.RequiredScopes,
 		RequiredAction:              r.RequiredAction,
