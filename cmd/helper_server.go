@@ -16,8 +16,6 @@ func refresh(c *proxyConfig, m *rule.CachedMatcher, fails int) {
 		duration = time.Second * 30
 	}
 
-	time.Sleep(duration)
-
 	if err := m.Refresh(); err != nil {
 		logger.WithError(err).WithField("retry", fails).Errorln("Unable to refresh rules.")
 		if fails > 15 {
@@ -27,6 +25,8 @@ func refresh(c *proxyConfig, m *rule.CachedMatcher, fails int) {
 		refresh(c, m, fails+1)
 		return
 	}
+
+	time.Sleep(duration)
 
 	refresh(c, m, 0)
 }

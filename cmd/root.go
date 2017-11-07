@@ -71,6 +71,7 @@ func initConfig() {
 	viper.SetDefault("LOG_LEVEL", "info")
 	viper.SetDefault("PROXY_PORT", "4455")
 	viper.SetDefault("MANAGEMENT_PORT", "4456")
+	viper.SetDefault("REFRESH_DELAY", "5s")
 
 	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err == nil {
