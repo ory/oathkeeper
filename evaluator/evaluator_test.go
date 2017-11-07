@@ -10,6 +10,7 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/ory/hydra/sdk/go/hydra"
 	"github.com/ory/hydra/sdk/go/hydra/swagger"
+	"github.com/ory/ladon/compiler"
 	"github.com/ory/oathkeeper/rule"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
@@ -17,7 +18,7 @@ import (
 )
 
 func mustCompileRegex(t *testing.T, pattern string) *regexp.Regexp {
-	exp, err := regexp.Compile(pattern)
+	exp, err := compiler.CompileRegex(pattern, '<', '>')
 	require.NoError(t, err)
 	return exp
 }
@@ -30,13 +31,27 @@ func mustGenerateURL(t *testing.T, u string) *url.URL {
 
 func TestEvaluator(t *testing.T) {
 	we := NewWardenEvaluator(nil, nil, nil)
-	publicRule := rule.Rule{MatchesMethods: []string{"GET"}, MatchesPath: mustCompileRegex(t, "/users/[0-9]+"), AllowAnonymous: true}
-	bypassACPRule := rule.Rule{MatchesMethods: []string{"GET"}, MatchesPath: mustCompileRegex(t, "/users/[0-9]+"), BypassAccessControlPolicies: true}
-	privateRule := rule.Rule{
+	publicRule := rule.Rule{MatchesMethods: []string{"GET"}, MatchesPath: mustCompileRegex(t, "/users/<[0-9]+>"), AllowAnonymous: true}
+	bypassACPRule := rule.Rule{MatchesMethods: []string{"GET"}, MatchesPath: mustCompileRegex(t, "/users/<[0-9]+>"), BypassAccessControlPolicies: true}
+	privateRuleWithSubstitution := rule.Rule{
 		MatchesMethods:   []string{"POST"},
-		MatchesPath:      mustCompileRegex(t, "/users/([0-9]+)"),
+		MatchesPath:      mustCompileRegex(t, "/users/<[0-9]+>"),
 		RequiredResource: "users:$1",
 		RequiredAction:   "get:$1",
+		RequiredScopes:   []string{"users.create"},
+	}
+	privateRuleWithoutSubstitution := rule.Rule{
+		MatchesMethods:   []string{"POST"},
+		MatchesPath:      mustCompileRegex(t, "/users<$|/([0-9]+)>"),
+		RequiredResource: "users",
+		RequiredAction:   "get",
+		RequiredScopes:   []string{"users.create"},
+	}
+	privateRuleWithPartialSubstitution := rule.Rule{
+		MatchesMethods:   []string{"POST"},
+		MatchesPath:      mustCompileRegex(t, "/users<$|/([0-9]+)>"),
+		RequiredResource: "users:$2",
+		RequiredAction:   "get",
 		RequiredScopes:   []string{"users.create"},
 	}
 
@@ -215,7 +230,7 @@ func TestEvaluator(t *testing.T) {
 		},
 		{
 			d:     "request is denied because token is missing and endpoint is not public",
-			rules: []rule.Rule{privateRule},
+			rules: []rule.Rule{privateRuleWithSubstitution},
 			r:     &http.Request{Method: "POST", Header: http.Header{"Authorization": []string{"bEaReR"}}, URL: mustGenerateURL(t, "https://localhost/users/1234")},
 			e: func(t *testing.T, s *Session, err error) {
 				require.Error(t, err)
@@ -226,7 +241,7 @@ func TestEvaluator(t *testing.T) {
 		},
 		{
 			d:     "request is denied because warden request fails with a network error and endpoint is not public",
-			rules: []rule.Rule{privateRule},
+			rules: []rule.Rule{privateRuleWithSubstitution},
 			r:     &http.Request{Method: "POST", Header: http.Header{"Authorization": []string{"bEaReR token"}}, URL: mustGenerateURL(t, "https://localhost/users/1234")},
 			e: func(t *testing.T, s *Session, err error) {
 				require.Error(t, err)
@@ -239,7 +254,7 @@ func TestEvaluator(t *testing.T) {
 		},
 		{
 			d:     "request is denied because warden request fails with a 400 status code and endpoint is not public",
-			rules: []rule.Rule{privateRule},
+			rules: []rule.Rule{privateRuleWithSubstitution},
 			r:     &http.Request{Method: "POST", Header: http.Header{"Authorization": []string{"bEaReR token"}}, URL: mustGenerateURL(t, "https://localhost/users/1234")},
 			e: func(t *testing.T, s *Session, err error) {
 				require.Error(t, err)
@@ -252,7 +267,7 @@ func TestEvaluator(t *testing.T) {
 		},
 		{
 			d:     "request is denied because warden request fails with allowed=false",
-			rules: []rule.Rule{privateRule},
+			rules: []rule.Rule{privateRuleWithSubstitution},
 			r:     &http.Request{Method: "POST", Header: http.Header{"Authorization": []string{"bEaReR token"}}, URL: mustGenerateURL(t, "https://localhost/users/1234")},
 			e: func(t *testing.T, s *Session, err error) {
 				require.Error(t, err)
@@ -264,8 +279,8 @@ func TestEvaluator(t *testing.T) {
 			},
 		},
 		{
-			d:     "request is allowed because token is valid and allowed",
-			rules: []rule.Rule{privateRule},
+			d:     "request is allowed because token is valid and allowed (rule with substitution)",
+			rules: []rule.Rule{privateRuleWithSubstitution},
 			r:     &http.Request{RemoteAddr: "127.0.0.1:1234", Method: "POST", Header: http.Header{"Authorization": []string{"bEaReR token"}}, URL: mustGenerateURL(t, "https://localhost/users/1234")},
 			e: func(t *testing.T, s *Session, err error) {
 				require.NoError(t, err)
@@ -276,6 +291,63 @@ func TestEvaluator(t *testing.T) {
 					Token:    "token",
 					Resource: "users:1234",
 					Action:   "get:1234",
+					Scopes:   []string{"users.create"},
+					Context:  map[string]interface{}{"remoteIpAddress": "127.0.0.1"},
+				})).Return(&swagger.WardenTokenAccessRequestResponse{Allowed: true}, &swagger.APIResponse{Response: &http.Response{StatusCode: http.StatusOK}}, nil)
+				return s
+			},
+		},
+		{
+			d:     "request is allowed because token is valid and allowed (rule with partial substitution)",
+			rules: []rule.Rule{privateRuleWithPartialSubstitution},
+			r:     &http.Request{RemoteAddr: "127.0.0.1:1234", Method: "POST", Header: http.Header{"Authorization": []string{"bEaReR token"}}, URL: mustGenerateURL(t, "https://localhost/users/1234")},
+			e: func(t *testing.T, s *Session, err error) {
+				require.NoError(t, err)
+			},
+			mock: func(c *gomock.Controller) hydra.SDK {
+				s := NewMockSDK(c)
+				s.EXPECT().DoesWardenAllowTokenAccessRequest(gomock.Eq(swagger.WardenTokenAccessRequest{
+					Token:    "token",
+					Resource: "users:1234",
+					Action:   "get",
+					Scopes:   []string{"users.create"},
+					Context:  map[string]interface{}{"remoteIpAddress": "127.0.0.1"},
+				})).Return(&swagger.WardenTokenAccessRequestResponse{Allowed: true}, &swagger.APIResponse{Response: &http.Response{StatusCode: http.StatusOK}}, nil)
+				return s
+			},
+		},
+		{
+			d:     "request is allowed because token is valid and allowed (rule with partial substitution and path parameter)",
+			rules: []rule.Rule{privateRuleWithoutSubstitution},
+			r:     &http.Request{RemoteAddr: "127.0.0.1:1234", Method: "POST", Header: http.Header{"Authorization": []string{"bEaReR token"}}, URL: mustGenerateURL(t, "https://localhost/users/1234")},
+			e: func(t *testing.T, s *Session, err error) {
+				require.NoError(t, err)
+			},
+			mock: func(c *gomock.Controller) hydra.SDK {
+				s := NewMockSDK(c)
+				s.EXPECT().DoesWardenAllowTokenAccessRequest(gomock.Eq(swagger.WardenTokenAccessRequest{
+					Token:    "token",
+					Resource: "users",
+					Action:   "get",
+					Scopes:   []string{"users.create"},
+					Context:  map[string]interface{}{"remoteIpAddress": "127.0.0.1"},
+				})).Return(&swagger.WardenTokenAccessRequestResponse{Allowed: true}, &swagger.APIResponse{Response: &http.Response{StatusCode: http.StatusOK}}, nil)
+				return s
+			},
+		},
+		{
+			d:     "request is allowed because token is valid and allowed (rule without substitution and path parameter)",
+			rules: []rule.Rule{privateRuleWithoutSubstitution},
+			r:     &http.Request{RemoteAddr: "127.0.0.1:1234", Method: "POST", Header: http.Header{"Authorization": []string{"bEaReR token"}}, URL: mustGenerateURL(t, "https://localhost/users")},
+			e: func(t *testing.T, s *Session, err error) {
+				require.NoError(t, err)
+			},
+			mock: func(c *gomock.Controller) hydra.SDK {
+				s := NewMockSDK(c)
+				s.EXPECT().DoesWardenAllowTokenAccessRequest(gomock.Eq(swagger.WardenTokenAccessRequest{
+					Token:    "token",
+					Resource: "users",
+					Action:   "get",
 					Scopes:   []string{"users.create"},
 					Context:  map[string]interface{}{"remoteIpAddress": "127.0.0.1"},
 				})).Return(&swagger.WardenTokenAccessRequestResponse{Allowed: true}, &swagger.APIResponse{Response: &http.Response{StatusCode: http.StatusOK}}, nil)
@@ -294,4 +366,15 @@ func TestEvaluator(t *testing.T) {
 			tc.e(t, s, err)
 		})
 	}
+}
+
+func TestSubstitution(t *testing.T) {
+	reg, err := compiler.CompileRegex("/rules<$|/([^/]+)>", '<', '>')
+	fmt.Println(reg.String())
+	fmt.Printf("Found: %s\n", reg.FindAllString("/rules", -1))
+	fmt.Printf("Found: %s\n", reg.FindAllString("/rules/", -1))
+	fmt.Printf("Found: %s\n", reg.FindAllString("/rules/2423", -1))
+	fmt.Printf("Found: %s\n", reg.ReplaceAllString("/rules/2423", "read:$2"))
+	require.NoError(t, err)
+
 }

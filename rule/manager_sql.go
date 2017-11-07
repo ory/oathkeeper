@@ -3,11 +3,11 @@ package rule
 import (
 	"database/sql"
 	"fmt"
-	"regexp"
 	"strings"
 
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
+	"github.com/ory/ladon/compiler"
 	"github.com/ory/oathkeeper/helper"
 	"github.com/pkg/errors"
 	"github.com/rubenv/sql-migrate"
@@ -27,7 +27,7 @@ type sqlRule struct {
 }
 
 func (r *sqlRule) toRule() (*Rule, error) {
-	exp, err := regexp.Compile(r.MatchesPath)
+	exp, err := compiler.CompileRegex(r.MatchesPath, '<', '>')
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}

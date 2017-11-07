@@ -3,10 +3,10 @@ package rule
 import (
 	"encoding/json"
 	"net/http"
-	"regexp"
 
 	"github.com/julienschmidt/httprouter"
 	"github.com/ory/herodot"
+	"github.com/ory/ladon/compiler"
 	"github.com/ory/oathkeeper/helper"
 	"github.com/pborman/uuid"
 	"github.com/pkg/errors"
@@ -198,7 +198,7 @@ func decodeRule(w http.ResponseWriter, r *http.Request) (*Rule, error) {
 }
 
 func toRule(rule *jsonRule) (*Rule, error) {
-	exp, err := regexp.Compile(rule.MatchesPath)
+	exp, err := compiler.CompileRegex(rule.MatchesPath, '<', '>')
 	if err != nil {
 		return nil, err
 	}
