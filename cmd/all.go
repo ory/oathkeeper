@@ -29,6 +29,7 @@ var allCmd = &cobra.Command{
 			bearerTokenSecret: viper.GetString("JWT_SHARED_SECRET"),
 			cors:              parseCorsOptions(""),
 			address:           fmt.Sprintf("%s:%s", viper.GetString("PROXY_HOST"), viper.GetString("PROXY_PORT")),
+			refreshDelay:      viper.GetString("REFRESH_DELAY"),
 		}
 
 		mc := &managementConfig{
