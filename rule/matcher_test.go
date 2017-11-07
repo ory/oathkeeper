@@ -3,9 +3,10 @@ package rule
 import (
 	"fmt"
 	"net/url"
-	"regexp"
 	"strconv"
 	"testing"
+
+	"github.com/ory/ladon/compiler"
 )
 
 var methods = []string{"POST", "PUT", "GET", "DELETE", "PATCH", "OPTIONS", "HEAD"}
@@ -13,12 +14,12 @@ var methods = []string{"POST", "PUT", "GET", "DELETE", "PATCH", "OPTIONS", "HEAD
 func generateDummyRules(amount int) []Rule {
 	rules := make([]Rule, amount)
 	scopes := []string{"foo", "bar", "baz", "faz"}
-	expressions := []string{"/users/", "/users", "/blogs/", "/use(r)s/"}
+	expressions := []string{"/users/", "/users", "/blogs/", "/use<(r)>s/"}
 	resources := []string{"users", "users:$1"}
 	actions := []string{"get", "get:$1"}
 
 	for i := 0; i < amount; i++ {
-		exp, _ := regexp.Compile(expressions[(i%(len(expressions)))] + "([0-" + strconv.Itoa(i) + "]+)")
+		exp, _ := compiler.CompileRegex(expressions[(i%(len(expressions)))]+"([0-"+strconv.Itoa(i)+"]+)", '<', '>')
 		rules[i] = Rule{
 			ID:               strconv.Itoa(i),
 			MatchesMethods:   methods[:i%(len(methods))],

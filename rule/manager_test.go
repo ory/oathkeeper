@@ -9,6 +9,7 @@ import (
 
 	"github.com/jmoiron/sqlx"
 	"github.com/ory/dockertest"
+	"github.com/ory/ladon/compiler"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -26,7 +27,7 @@ func kjillAll() {
 }
 
 func mustCompileRegex(t *testing.T, pattern string) *regexp.Regexp {
-	exp, err := regexp.Compile(pattern)
+	exp, err := compiler.CompileRegex(pattern, '<', '>')
 	require.NoError(t, err)
 	return exp
 }

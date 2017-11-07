@@ -187,6 +187,12 @@
   version = "v0.9.14"
 
 [[projects]]
+  name = "github.com/ory/ladon"
+  packages = ["compiler"]
+  revision = "4223d97b7a16808bc1213cc641d529e764e67eea"
+  version = "v0.8.3"
+
+[[projects]]
   name = "github.com/pborman/uuid"
   packages = ["."]
   revision = "e790cca94e6cc75c7064b1332e63811d4aae1a53"
@@ -339,6 +345,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "c857c9359eea153d02809743535bf58228f15d216ead4ed5babd07a77ed7297d"
+  inputs-digest = "11498cdf99d7b585598cf1667dc5c24db3c7e0d26a315cba59902a4876f2b5e5"
   solver-name = "gps-cdcl"
   solver-version = 1
