@@ -40,7 +40,7 @@ func runManagement(c *managementConfig) {
 	handler.SetRoutes(router)
 
 	n := negroni.New()
-	n.Use(negronilogrus.NewMiddlewareFromLogger(logger, "oahtkeeper-management"))
+	n.Use(negronilogrus.NewMiddlewareFromLogger(logger, "oathkeeper-management"))
 	n.UseHandler(router)
 
 	addr := c.address
@@ -59,7 +59,26 @@ func runManagement(c *managementConfig) {
 
 // managementCmd represents the management command
 var managementCmd = &cobra.Command{
-	Use: "management",
+	Use:   "management",
+	Short: "Starts the ORY Oathkeeper management REST API",
+	Long: `This starts a HTTP/2 REST API for managing ORY Oathkeeper.
+
+CORE CONTROLS
+=============
+
+` + databaseUrl + `
+
+
+HTTP CONTROLS
+==============
+
+- MANAGEMENT_HOST: The host to listen on.
+	Default: PROXY_HOST="" (all interfaces)
+- MANAGEMENT_PORT: The port to listen on.
+	Default: PROXY_PORT="4456"
+
+
+` + corsMessage,
 	Run: func(cmd *cobra.Command, args []string) {
 		rules, err := newRuleManager(viper.GetString("DATABASE_URL"))
 		if err != nil {
