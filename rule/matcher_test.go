@@ -21,12 +21,12 @@ func generateDummyRules(amount int) []Rule {
 	for i := 0; i < amount; i++ {
 		exp, _ := compiler.CompileRegex(expressions[(i%(len(expressions)))]+"([0-"+strconv.Itoa(i)+"]+)", '<', '>')
 		rules[i] = Rule{
-			ID:                  strconv.Itoa(i),
-			MatchesMethods:      methods[:i%(len(methods))],
-			RequiredScopes:      scopes[:i%(len(scopes))],
-			RequiredAction:      actions[i%(len(actions))],
-			RequiredResource:    resources[i%(len(resources))],
-			MatchesPathCompiled: exp,
+			ID:                 strconv.Itoa(i),
+			MatchesMethods:     methods[:i%(len(methods))],
+			RequiredScopes:     scopes[:i%(len(scopes))],
+			RequiredAction:     actions[i%(len(actions))],
+			RequiredResource:   resources[i%(len(resources))],
+			MatchesURLCompiled: exp,
 		}
 	}
 	return rules

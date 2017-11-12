@@ -198,15 +198,15 @@ func decodeRule(w http.ResponseWriter, r *http.Request) (*Rule, error) {
 }
 
 func toRule(rule *jsonRule) (*Rule, error) {
-	exp, err := compiler.CompileRegex(rule.MatchesPath, '<', '>')
+	exp, err := compiler.CompileRegex(rule.MatchesURL, '<', '>')
 	if err != nil {
 		return nil, err
 	}
 
 	return &Rule{
 		ID:                          rule.ID,
-		MatchesPathCompiled:         exp,
-		MatchesPath:                 rule.MatchesPath,
+		MatchesURLCompiled:          exp,
+		MatchesURL:                  rule.MatchesURL,
 		MatchesMethods:              rule.MatchesMethods,
 		RequiredScopes:              rule.RequiredScopes,
 		RequiredAction:              rule.RequiredAction,
@@ -221,7 +221,7 @@ func toRule(rule *jsonRule) (*Rule, error) {
 func encodeRule(r *Rule) *jsonRule {
 	return &jsonRule{
 		ID:                          r.ID,
-		MatchesPath:                 r.MatchesPath,
+		MatchesURL:                  r.MatchesURL,
 		MatchesMethods:              r.MatchesMethods,
 		RequiredScopes:              r.RequiredScopes,
 		RequiredAction:              r.RequiredAction,

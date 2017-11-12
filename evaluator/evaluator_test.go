@@ -31,28 +31,28 @@ func mustGenerateURL(t *testing.T, u string) *url.URL {
 
 func TestEvaluator(t *testing.T) {
 	we := NewWardenEvaluator(nil, nil, nil)
-	publicRule := rule.Rule{MatchesMethods: []string{"GET"}, MatchesPathCompiled: mustCompileRegex(t, "/users/<[0-9]+>"), AllowAnonymous: true}
-	bypassACPRule := rule.Rule{MatchesMethods: []string{"GET"}, MatchesPathCompiled: mustCompileRegex(t, "/users/<[0-9]+>"), BypassAccessControlPolicies: true}
+	publicRule := rule.Rule{MatchesMethods: []string{"GET"}, MatchesURLCompiled: mustCompileRegex(t, "https://localhost/users/<[0-9]+>"), AllowAnonymous: true}
+	bypassACPRule := rule.Rule{MatchesMethods: []string{"GET"}, MatchesURLCompiled: mustCompileRegex(t, "https://localhost/users/<[0-9]+>"), BypassAccessControlPolicies: true}
 	privateRuleWithSubstitution := rule.Rule{
-		MatchesMethods:      []string{"POST"},
-		MatchesPathCompiled: mustCompileRegex(t, "/users/<[0-9]+>"),
-		RequiredResource:    "users:$1",
-		RequiredAction:      "get:$1",
-		RequiredScopes:      []string{"users.create"},
+		MatchesMethods:     []string{"POST"},
+		MatchesURLCompiled: mustCompileRegex(t, "https://localhost/users/<[0-9]+>"),
+		RequiredResource:   "users:$1",
+		RequiredAction:     "get:$1",
+		RequiredScopes:     []string{"users.create"},
 	}
 	privateRuleWithoutSubstitution := rule.Rule{
-		MatchesMethods:      []string{"POST"},
-		MatchesPathCompiled: mustCompileRegex(t, "/users<$|/([0-9]+)>"),
-		RequiredResource:    "users",
-		RequiredAction:      "get",
-		RequiredScopes:      []string{"users.create"},
+		MatchesMethods:     []string{"POST"},
+		MatchesURLCompiled: mustCompileRegex(t, "https://localhost/users<$|/([0-9]+)>"),
+		RequiredResource:   "users",
+		RequiredAction:     "get",
+		RequiredScopes:     []string{"users.create"},
 	}
 	privateRuleWithPartialSubstitution := rule.Rule{
-		MatchesMethods:      []string{"POST"},
-		MatchesPathCompiled: mustCompileRegex(t, "/users<$|/([0-9]+)>"),
-		RequiredResource:    "users:$2",
-		RequiredAction:      "get",
-		RequiredScopes:      []string{"users.create"},
+		MatchesMethods:     []string{"POST"},
+		MatchesURLCompiled: mustCompileRegex(t, "https://localhost/users<$|/([0-9]+)>"),
+		RequiredResource:   "users:$2",
+		RequiredAction:     "get",
+		RequiredScopes:     []string{"users.create"},
 	}
 
 	for k, tc := range []struct {
@@ -366,15 +366,4 @@ func TestEvaluator(t *testing.T) {
 			tc.e(t, s, err)
 		})
 	}
-}
-
-func TestSubstitution(t *testing.T) {
-	reg, err := compiler.CompileRegex("/rules<$|/([^/]+)>", '<', '>')
-	fmt.Println(reg.String())
-	fmt.Printf("Found: %s\n", reg.FindAllString("/rules", -1))
-	fmt.Printf("Found: %s\n", reg.FindAllString("/rules/", -1))
-	fmt.Printf("Found: %s\n", reg.FindAllString("/rules/2423", -1))
-	fmt.Printf("Found: %s\n", reg.ReplaceAllString("/rules/2423", "read:$2"))
-	require.NoError(t, err)
-
 }

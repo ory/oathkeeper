@@ -26,7 +26,7 @@ func TestHandler(t *testing.T) {
 	r1 := swagger.Rule{
 		Id:               "foo1",
 		Description:      "Create users rule",
-		MatchesPath:      "/users/([0-9]+)",
+		MatchesUrl:       server.URL + "/users/([0-9]+)",
 		MatchesMethods:   []string{"POST"},
 		RequiredResource: "users:$1",
 		RequiredAction:   "create:$1",
@@ -34,7 +34,7 @@ func TestHandler(t *testing.T) {
 	}
 	r2 := swagger.Rule{
 		Description:                 "Get users rule",
-		MatchesPath:                 "/users/([0-9]+)",
+		MatchesUrl:                  server.URL + "/users/([0-9]+)",
 		MatchesMethods:              []string{"GET"},
 		RequiredScopes:              []string{},
 		AllowAnonymous:              true,

@@ -9,7 +9,7 @@ Name | Type | Description | Notes
 **Description** | **string** | Description describes the rule. | [optional] [default to null]
 **Id** | **string** | ID the a unique id of a rule. | [optional] [default to null]
 **MatchesMethods** | **[]string** | MatchesMethods is a list of HTTP methods that this rule matches. | [optional] [default to null]
-**MatchesPath** | **string** | MatchesPathCompiled is a regular expression of paths this rule matches. | [optional] [default to null]
+**MatchesUrl** | **string** | MatchesURL is a regular expression of paths this rule matches. | [optional] [default to null]
 **RequiredAction** | **string** | RequiredScopes is the action this rule requires. | [optional] [default to null]
 **RequiredResource** | **string** | RequiredScopes is the resource this rule requires. | [optional] [default to null]
 **RequiredScopes** | **[]string** | RequiredScopes is a list of scopes that are required by this rule. | [optional] [default to null]

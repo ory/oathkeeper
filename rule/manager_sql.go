@@ -16,7 +16,7 @@ import (
 type sqlRule struct {
 	ID                          string `db:"id"`
 	MatchesMethods              string `db:"matches_methods"`
-	MatchesPath                 string `db:"matches_path"`
+	MatchesURL                  string `db:"matches_url"`
 	RequiredScopes              string `db:"required_scopes"`
 	RequiredAction              string `db:"required_action"`
 	RequiredResource            string `db:"required_resource"`
@@ -27,7 +27,7 @@ type sqlRule struct {
 }
 
 func (r *sqlRule) toRule() (*Rule, error) {
-	exp, err := compiler.CompileRegex(r.MatchesPath, '<', '>')
+	exp, err := compiler.CompileRegex(r.MatchesURL, '<', '>')
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
@@ -44,8 +44,8 @@ func (r *sqlRule) toRule() (*Rule, error) {
 	return &Rule{
 		ID:                          r.ID,
 		MatchesMethods:              methods,
-		MatchesPathCompiled:         exp,
-		MatchesPath:                 r.MatchesPath,
+		MatchesURLCompiled:          exp,
+		MatchesURL:                  r.MatchesURL,
 		RequiredScopes:              scopes,
 		RequiredAction:              r.RequiredAction,
 		RequiredResource:            r.RequiredResource,
@@ -60,7 +60,7 @@ func toSqlRule(r *Rule) *sqlRule {
 	return &sqlRule{
 		ID:                          r.ID,
 		MatchesMethods:              strings.Join(r.MatchesMethods, " "),
-		MatchesPath:                 r.MatchesPath,
+		MatchesURL:                  r.MatchesURL,
 		RequiredScopes:              strings.Join(r.RequiredScopes, " "),
 		RequiredAction:              r.RequiredAction,
 		RequiredResource:            r.RequiredResource,
@@ -78,7 +78,7 @@ var migrations = &migrate.MemoryMigrationSource{
 			Up: []string{`CREATE TABLE IF NOT EXISTS oathkeeper_rule (
 	id      			varchar(64) NOT NULL PRIMARY KEY,
 	matches_methods		varchar(64) NOT NULL,
-	matches_path		text NOT NULL,
+	matches_url		text NOT NULL,
 	required_scopes		text NOT NULL,
 	required_action		text NOT NULL,
 	required_resource	text NOT NULL,
@@ -97,7 +97,7 @@ var migrations = &migrate.MemoryMigrationSource{
 var sqlParams = []string{
 	"id",
 	"matches_methods",
-	"matches_path",
+	"matches_url",
 	"required_scopes",
 	"required_action",
 	"required_resource",

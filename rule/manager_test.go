@@ -50,20 +50,20 @@ func TestManagers(t *testing.T) {
 	for k, manager := range managers {
 
 		r1 := Rule{
-			ID:                  "foo1",
-			Description:         "Create users rule",
-			MatchesPathCompiled: mustCompileRegex(t, "/users/([0-9]+)"),
-			MatchesPath:         "/users/([0-9]+)",
-			MatchesMethods:      []string{"POST"},
-			RequiredResource:    "users:$1",
-			RequiredAction:      "create:$1",
-			RequiredScopes:      []string{"users.create"},
+			ID:                 "foo1",
+			Description:        "Create users rule",
+			MatchesURLCompiled: mustCompileRegex(t, "/users/([0-9]+)"),
+			MatchesURL:         "/users/([0-9]+)",
+			MatchesMethods:     []string{"POST"},
+			RequiredResource:   "users:$1",
+			RequiredAction:     "create:$1",
+			RequiredScopes:     []string{"users.create"},
 		}
 		r2 := Rule{
 			ID:                          "foo2",
 			Description:                 "Get users rule",
-			MatchesPathCompiled:         mustCompileRegex(t, "/users/([0-9]+)"),
-			MatchesPath:                 "/users/([0-9]+)",
+			MatchesURLCompiled:          mustCompileRegex(t, "/users/([0-9]+)"),
+			MatchesURL:                  "/users/([0-9]+)",
 			MatchesMethods:              []string{"GET"},
 			AllowAnonymous:              true,
 			RequiredScopes:              []string{},

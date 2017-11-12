@@ -132,8 +132,8 @@ func (d *WardenEvaluator) EvaluateAccessRequest(r *http.Request) (*Session, erro
 func (d *WardenEvaluator) prepareAccessRequests(r *http.Request, token string, rl *rule.Rule) swagger.WardenTokenAccessRequest {
 	return swagger.WardenTokenAccessRequest{
 		Scopes:   rl.RequiredScopes,
-		Action:   rl.MatchesPathCompiled.ReplaceAllString(r.URL.Path, rl.RequiredAction),
-		Resource: rl.MatchesPathCompiled.ReplaceAllString(r.URL.Path, rl.RequiredResource),
+		Action:   rl.MatchesURLCompiled.ReplaceAllString(r.URL.String(), rl.RequiredAction),
+		Resource: rl.MatchesURLCompiled.ReplaceAllString(r.URL.String(), rl.RequiredResource),
 		Token:    token,
 		Context: map[string]interface{}{
 			"remoteIpAddress": realip.RealIP(r),

@@ -31,8 +31,8 @@ type Rule struct {
 	// MatchesMethods is a list of HTTP methods that this rule matches.
 	MatchesMethods []string `json:"matchesMethods,omitempty"`
 
-	// MatchesPathCompiled is a regular expression of paths this rule matches.
-	MatchesPath string `json:"matchesPath,omitempty"`
+	// MatchesURL is a regular expression of paths this rule matches.
+	MatchesUrl string `json:"matchesUrl,omitempty"`
 
 	// RequiredScopes is the action this rule requires.
 	RequiredAction string `json:"requiredAction,omitempty"`
