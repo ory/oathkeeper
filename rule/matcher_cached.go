@@ -15,7 +15,7 @@ type CachedMatcher struct {
 func (m *CachedMatcher) MatchRule(method string, u *url.URL) (*Rule, error) {
 	var rules []Rule
 	for _, rule := range m.Rules {
-		if err := rule.MatchesURL(method, u); err == nil {
+		if err := rule.IsMatching(method, u); err == nil {
 			rules = append(rules, rule)
 		}
 	}

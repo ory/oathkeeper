@@ -50,8 +50,8 @@ type jsonRule struct {
 	// MatchesMethods is a list of HTTP methods that this rule matches.
 	MatchesMethods []string `json:"matchesMethods"`
 
-	// MatchesPathCompiled is a regular expression of paths this rule matches.
-	MatchesPath string `json:"matchesPath"`
+	// MatchesURL is a regular expression of paths this rule matches.
+	MatchesURL string `json:"matchesUrl"`
 
 	// RequiredScopes is a list of scopes that are required by this rule.
 	RequiredScopes []string `json:"requiredScopes"`

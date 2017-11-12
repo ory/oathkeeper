@@ -272,10 +272,10 @@
           },
           "x-go-name": "MatchesMethods"
         },
-        "matchesPath": {
-          "description": "MatchesPathCompiled is a regular expression of paths this rule matches.",
+        "matchesUrl": {
+          "description": "MatchesURL is a regular expression of paths this rule matches.",
           "type": "string",
-          "x-go-name": "MatchesPath"
+          "x-go-name": "MatchesURL"
         },
         "requiredAction": {
           "description": "RequiredScopes is the action this rule requires.",
