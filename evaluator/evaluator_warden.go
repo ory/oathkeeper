@@ -34,6 +34,10 @@ func NewWardenEvaluator(l logrus.FieldLogger, m rule.Matcher, s hydra.SDK) *Ward
 
 func (d *WardenEvaluator) EvaluateAccessRequest(r *http.Request) (*Session, error) {
 	token := helper.BearerTokenFromRequest(r)
+	var tokenID = token
+	if len(token) >= 5 {
+		tokenID = token[:5]
+	}
 
 	rl, err := d.Matcher.MatchRule(r.Method, r.URL)
 	if err != nil {
@@ -53,13 +57,13 @@ func (d *WardenEvaluator) EvaluateAccessRequest(r *http.Request) (*Session, erro
 		if err != nil {
 			d.Logger.WithError(err).
 				WithField("access_url", r.URL.String()).
-				WithField("token", token[:5]).
+				WithField("token", tokenID).
 				Errorf("Unable to connect to introspect endpoint.")
 			return &Session{User: "", Anonymous: true, ClientID: ""}, nil
 		} else if response.StatusCode != http.StatusOK {
 			d.Logger.
 				WithField("status_code", response.StatusCode).
-				WithField("token", token[:5]).
+				WithField("token", tokenID).
 				WithField("access_url", r.URL.String()).
 				Errorf("Expected introspection response to return status code 200.")
 			return &Session{User: "", Anonymous: true, ClientID: ""}, nil
@@ -83,13 +87,13 @@ func (d *WardenEvaluator) EvaluateAccessRequest(r *http.Request) (*Session, erro
 		if err != nil {
 			d.Logger.WithError(err).
 				WithField("access_url", r.URL.String()).
-				WithField("token", token[:5]).
+				WithField("token", tokenID).
 				Errorf("Unable to connect to warden endpoint.")
 			return nil, errors.WithStack(err)
 		} else if response.StatusCode != http.StatusOK {
 			d.Logger.
 				WithField("status_code", response.StatusCode).
-				WithField("token", token[:5]).
+				WithField("token", tokenID).
 				WithField("access_url", r.URL.String()).
 				Errorf("Expected warden response to return status code 200.")
 			return nil, errors.Errorf("Token introspection expects status code %d but got %d", http.StatusOK, response.StatusCode)
@@ -108,13 +112,13 @@ func (d *WardenEvaluator) EvaluateAccessRequest(r *http.Request) (*Session, erro
 	if err != nil {
 		d.Logger.WithError(err).
 			WithField("access_url", r.URL.String()).
-			WithField("token", token[:5]).
+			WithField("token", tokenID).
 			Errorf("Unable to connect to warden endpoint.")
 		return nil, errors.WithStack(err)
 	} else if response.StatusCode != http.StatusOK {
 		d.Logger.
 			WithField("status_code", response.StatusCode).
-			WithField("token", token[:5]).
+			WithField("token", tokenID).
 			WithField("access_url", r.URL.String()).
 			Errorf("Expected warden response to return status code 200.")
 		return nil, errors.Errorf("Token introspection expects status code %d but got %d", http.StatusOK, response.StatusCode)
