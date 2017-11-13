@@ -82,12 +82,6 @@ func (d *Director) RoundTrip(r *http.Request) (*http.Response, error) {
 func (d *Director) Director(r *http.Request) {
 	access, err := d.Evaluator.EvaluateAccessRequest(r)
 	if err != nil {
-		d.Logger.
-			WithError(err).
-			WithField("user", "anonymous").
-			WithField("request_url", r.URL.String()).
-			Info("Request denied.")
-
 		switch errors.Cause(err) {
 		case helper.ErrForbidden:
 			*r = *r.WithContext(context.WithValue(r.Context(), requestDenied, &directorError{err: err, statusCode: http.StatusForbidden}))
@@ -107,23 +101,10 @@ func (d *Director) Director(r *http.Request) {
 	}
 
 	if access.Disabled {
-		d.Logger.
-			WithField("user", "anonymous").
-			WithField("request_url", r.URL.String()).
-			Info("Request allowed to bypass firewall.")
-
 		r.URL.Scheme = d.TargetURL.Scheme
 		r.URL.Host = d.TargetURL.Host
 		*r = *r.WithContext(context.WithValue(r.Context(), requestBypassedAuthorization, ""))
 		return
-	}
-
-	if access.Anonymous {
-		d.Logger.WithFields(map[string]interface{}{"user": "anonymous", "request_url": r.URL.String()}).Info("Request allowed to anonymous user.")
-	} else {
-		d.Logger.
-			WithFields(map[string]interface{}{"user": access.User, "client_id": access.ClientID, "request_url": r.URL.String()}).
-			Info("Request allowed.")
 	}
 
 	token, err := jwt.NewWithClaims(jwt.SigningMethodHS256, access.ToClaims()).SignedString([]byte(d.Secret))

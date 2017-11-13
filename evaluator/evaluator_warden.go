@@ -52,18 +52,25 @@ var reasons = map[string]string{
 }
 
 func (d *WardenEvaluator) EvaluateAccessRequest(r *http.Request) (*Session, error) {
+	var u = *r.URL
+	u.Host = r.Host
+	u.Scheme = "http"
+	if r.TLS != nil {
+		u.Scheme = "https"
+	}
+
 	token := helper.BearerTokenFromRequest(r)
 	var tokenID = token
 	if len(token) >= 5 {
 		tokenID = token[:5]
 	}
 
-	rl, err := d.Matcher.MatchRule(r.Method, r.URL)
+	rl, err := d.Matcher.MatchRule(r.Method, &u)
 	if err != nil {
 		d.Logger.WithError(err).
 			WithField("granted", false).
 			WithField("user", "").
-			WithField("access_url", r.URL.String()).
+			WithField("access_url", u.String()).
 			WithField("token", tokenID).
 			WithField("reason", reasons["no_rule_match"]).
 			WithField("reason_id", "no_rule_match").
@@ -75,7 +82,7 @@ func (d *WardenEvaluator) EvaluateAccessRequest(r *http.Request) (*Session, erro
 		d.Logger.
 			WithField("granted", true).
 			WithField("user", "").
-			WithField("access_url", r.URL.String()).
+			WithField("access_url", u.String()).
 			WithField("token", tokenID).
 			WithField("rule", rl.ID).
 			WithField("reason", reasons["passthrough"]).
@@ -89,7 +96,7 @@ func (d *WardenEvaluator) EvaluateAccessRequest(r *http.Request) (*Session, erro
 			d.Logger.
 				WithField("granted", true).
 				WithField("user", "").
-				WithField("access_url", r.URL.String()).
+				WithField("access_url", u.String()).
 				WithField("token", tokenID).
 				WithField("rule", rl.ID).
 				WithField("reason", reasons["anonymous_without_credentials"]).
@@ -103,7 +110,7 @@ func (d *WardenEvaluator) EvaluateAccessRequest(r *http.Request) (*Session, erro
 			d.Logger.WithError(err).
 				WithField("granted", true).
 				WithField("user", "").
-				WithField("access_url", r.URL.String()).
+				WithField("access_url", u.String()).
 				WithField("token", tokenID).
 				WithField("reason", reasons["anonymous_without_credentials_failed_introspection"]).
 				WithField("reason_id", "anonymous_without_credentials_failed_introspection").
@@ -115,7 +122,7 @@ func (d *WardenEvaluator) EvaluateAccessRequest(r *http.Request) (*Session, erro
 				WithField("user", "").
 				WithField("status_code", response.StatusCode).
 				WithField("token", tokenID).
-				WithField("access_url", r.URL.String()).
+				WithField("access_url", u.String()).
 				WithField("reason", reasons["anonymous_introspection_http_error"]).
 				WithField("reason_id", "anonymous_introspection_http_error").
 				Infoln("Access request granted")
@@ -124,7 +131,7 @@ func (d *WardenEvaluator) EvaluateAccessRequest(r *http.Request) (*Session, erro
 			d.Logger.
 				WithField("granted", true).
 				WithField("user", "").
-				WithField("access_url", r.URL.String()).
+				WithField("access_url", u.String()).
 				WithField("token", tokenID).
 				WithField("rule", rl.ID).
 				WithField("reason", reasons["anonymous_introspection_invalid_credentials"]).
@@ -136,7 +143,7 @@ func (d *WardenEvaluator) EvaluateAccessRequest(r *http.Request) (*Session, erro
 		d.Logger.
 			WithField("granted", true).
 			WithField("user", introspection.Sub).
-			WithField("access_url", r.URL.String()).
+			WithField("access_url", u.String()).
 			WithField("token", tokenID).
 			WithField("rule", rl.ID).
 			WithField("reason", reasons["anonymous_with_valid_credentials"]).
@@ -153,7 +160,7 @@ func (d *WardenEvaluator) EvaluateAccessRequest(r *http.Request) (*Session, erro
 		d.Logger.WithError(err).
 			WithField("granted", false).
 			WithField("user", "").
-			WithField("access_url", r.URL.String()).
+			WithField("access_url", u.String()).
 			WithField("token", tokenID).
 			WithField("reason", reasons["missing_credentials"]).
 			WithField("reason_id", "missing_credentials").
@@ -167,7 +174,7 @@ func (d *WardenEvaluator) EvaluateAccessRequest(r *http.Request) (*Session, erro
 			d.Logger.WithError(err).
 				WithField("granted", false).
 				WithField("user", "").
-				WithField("access_url", r.URL.String()).
+				WithField("access_url", u.String()).
 				WithField("token", tokenID).
 				WithField("reason", reasons["introspection_network_error"]).
 				WithField("reason_id", "introspection_network_error").
@@ -177,7 +184,7 @@ func (d *WardenEvaluator) EvaluateAccessRequest(r *http.Request) (*Session, erro
 			d.Logger.WithError(err).
 				WithField("granted", false).
 				WithField("user", "").
-				WithField("access_url", r.URL.String()).
+				WithField("access_url", u.String()).
 				WithField("status_code", response.StatusCode).
 				WithField("token", tokenID).
 				WithField("reason", reasons["introspection_http_error"]).
@@ -188,7 +195,7 @@ func (d *WardenEvaluator) EvaluateAccessRequest(r *http.Request) (*Session, erro
 			d.Logger.WithError(err).
 				WithField("granted", false).
 				WithField("user", "").
-				WithField("access_url", r.URL.String()).
+				WithField("access_url", u.String()).
 				WithField("status_code", response.StatusCode).
 				WithField("token", tokenID).
 				WithField("reason", reasons["introspection_invalid_credentials"]).
@@ -200,7 +207,7 @@ func (d *WardenEvaluator) EvaluateAccessRequest(r *http.Request) (*Session, erro
 		d.Logger.
 			WithField("granted", true).
 			WithField("user", introspection.Sub).
-			WithField("access_url", r.URL.String()).
+			WithField("access_url", u.String()).
 			WithField("token", tokenID).
 			WithField("rule", rl.ID).
 			WithField("reason", reasons["introspection_valid"]).
@@ -213,12 +220,12 @@ func (d *WardenEvaluator) EvaluateAccessRequest(r *http.Request) (*Session, erro
 		}, nil
 	}
 
-	introspection, response, err := d.Hydra.DoesWardenAllowTokenAccessRequest(d.prepareAccessRequests(r, token, rl))
+	introspection, response, err := d.Hydra.DoesWardenAllowTokenAccessRequest(d.prepareAccessRequests(r, u.String(), token, rl))
 	if err != nil {
 		d.Logger.WithError(err).
 			WithField("granted", false).
 			WithField("user", "").
-			WithField("access_url", r.URL.String()).
+			WithField("access_url", u.String()).
 			WithField("token", tokenID).
 			WithField("reason", reasons["policy_decision_point_network_error"]).
 			WithField("reason_id", "policy_decision_point_network_error").
@@ -228,7 +235,7 @@ func (d *WardenEvaluator) EvaluateAccessRequest(r *http.Request) (*Session, erro
 		d.Logger.WithError(err).
 			WithField("granted", false).
 			WithField("user", "").
-			WithField("access_url", r.URL.String()).
+			WithField("access_url", u.String()).
 			WithField("status_code", response.StatusCode).
 			WithField("token", tokenID).
 			WithField("reason", reasons["policy_decision_point_http_error"]).
@@ -239,7 +246,7 @@ func (d *WardenEvaluator) EvaluateAccessRequest(r *http.Request) (*Session, erro
 		d.Logger.WithError(err).
 			WithField("granted", false).
 			WithField("user", "").
-			WithField("access_url", r.URL.String()).
+			WithField("access_url", u.String()).
 			WithField("status_code", response.StatusCode).
 			WithField("token", tokenID).
 			WithField("reason", reasons["policy_decision_point_access_forbidden"]).
@@ -251,7 +258,7 @@ func (d *WardenEvaluator) EvaluateAccessRequest(r *http.Request) (*Session, erro
 	d.Logger.
 		WithField("granted", true).
 		WithField("user", introspection.Subject).
-		WithField("access_url", r.URL.String()).
+		WithField("access_url", u.String()).
 		WithField("token", tokenID).
 		WithField("rule", rl.ID).
 		WithField("reason", reasons["policy_decision_point_access_granted"]).
@@ -264,11 +271,11 @@ func (d *WardenEvaluator) EvaluateAccessRequest(r *http.Request) (*Session, erro
 	}, nil
 }
 
-func (d *WardenEvaluator) prepareAccessRequests(r *http.Request, token string, rl *rule.Rule) swagger.WardenTokenAccessRequest {
+func (d *WardenEvaluator) prepareAccessRequests(r *http.Request, u string, token string, rl *rule.Rule) swagger.WardenTokenAccessRequest {
 	return swagger.WardenTokenAccessRequest{
 		Scopes:   rl.RequiredScopes,
-		Action:   rl.MatchesURLCompiled.ReplaceAllString(r.URL.String(), rl.RequiredAction),
-		Resource: rl.MatchesURLCompiled.ReplaceAllString(r.URL.String(), rl.RequiredResource),
+		Action:   rl.MatchesURLCompiled.ReplaceAllString(u, rl.RequiredAction),
+		Resource: rl.MatchesURLCompiled.ReplaceAllString(u, rl.RequiredResource),
 		Token:    token,
 		Context: map[string]interface{}{
 			"remoteIpAddress": realip.RealIP(r),
