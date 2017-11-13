@@ -40,11 +40,11 @@ func TestProxy(t *testing.T) {
 	proxy := httptest.NewServer(&httputil.ReverseProxy{Director: d.Director, Transport: d})
 	defer proxy.Close()
 
-	publicRule := rule.Rule{MatchesMethods: []string{"GET"}, MatchesURLCompiled: mustCompileRegex(t, "/users/[0-9]+"), AllowAnonymous: true}
-	disabledRule := rule.Rule{MatchesMethods: []string{"GET"}, MatchesURLCompiled: mustCompileRegex(t, "/users/[0-9]+"), BypassAuthorization: true}
+	publicRule := rule.Rule{MatchesMethods: []string{"GET"}, MatchesURLCompiled: mustCompileRegex(t, proxy.URL+"/users/[0-9]+"), AllowAnonymous: true}
+	disabledRule := rule.Rule{MatchesMethods: []string{"GET"}, MatchesURLCompiled: mustCompileRegex(t, proxy.URL+"/users/[0-9]+"), BypassAuthorization: true}
 	privateRule := rule.Rule{
 		MatchesMethods:     []string{"GET"},
-		MatchesURLCompiled: mustCompileRegex(t, "/users/([0-9]+)"),
+		MatchesURLCompiled: mustCompileRegex(t, proxy.URL+"/users/([0-9]+)"),
 		RequiredResource:   "users:$1",
 		RequiredAction:     "get:$1",
 		RequiredScopes:     []string{"users.create"},
