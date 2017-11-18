@@ -15,7 +15,7 @@ var allCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		rules, err := newRuleManager(viper.GetString("DATABASE_URL"))
 		if err != nil {
-			logger.WithError(err).Fatalln("Unable to connect to rule backend.")
+			logger.WithError(err).Fatalln("Unable to connect to rule backend")
 		}
 
 		pc := &proxyConfig{
@@ -26,13 +26,18 @@ var allCmd = &cobra.Command{
 				Scopes:       []string{"hydra.warden"},
 			},
 			rules: rules, backendURL: viper.GetString("BACKEND_URL"),
-			bearerTokenSecret: viper.GetString("JWT_SHARED_SECRET"),
-			cors:              parseCorsOptions(""),
-			address:           fmt.Sprintf("%s:%s", viper.GetString("PROXY_HOST"), viper.GetString("PROXY_PORT")),
-			refreshDelay:      viper.GetString("REFRESH_DELAY"),
+			cors:         parseCorsOptions(""),
+			address:      fmt.Sprintf("%s:%s", viper.GetString("PROXY_HOST"), viper.GetString("PROXY_PORT")),
+			refreshDelay: viper.GetString("RULES_REFRESH_INTERVAL"),
 		}
 
 		mc := &managementConfig{
+			hydra: &hydra.Configuration{
+				ClientID:     viper.GetString("HYDRA_CLIENT_ID"),
+				ClientSecret: viper.GetString("HYDRA_CLIENT_SECRET"),
+				EndpointURL:  viper.GetString("HYDRA_URL"),
+				Scopes:       []string{"hydra.warden"},
+			},
 			rules:   rules,
 			address: fmt.Sprintf("%s:%s", viper.GetString("MANAGEMENT_HOST"), viper.GetString("MANAGEMENT_PORT")),
 		}

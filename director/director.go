@@ -10,32 +10,28 @@ import (
 	"github.com/dgrijalva/jwt-go"
 	"github.com/ory/oathkeeper/evaluator"
 	"github.com/ory/oathkeeper/helper"
-	"github.com/pborman/uuid"
+	"github.com/ory/oathkeeper/rsakey"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 )
 
-func NewDirector(target *url.URL, eval evaluator.Evaluator, logger logrus.FieldLogger, secret string) *Director {
+func NewDirector(target *url.URL, eval evaluator.Evaluator, logger logrus.FieldLogger, keyManager rsakey.Manager) *Director {
 	if logger == nil {
 		logger = logrus.New()
 	}
-	if secret == "" {
-		secret = uuid.New()
-		logger.WithField("secret", secret).Infoln("No JWT secret was found, generated a random one.")
-	}
 	return &Director{
-		TargetURL: target,
-		Logger:    logger,
-		Evaluator: eval,
-		Secret:    secret,
+		TargetURL:  target,
+		Logger:     logger,
+		Evaluator:  eval,
+		KeyManager: keyManager,
 	}
 }
 
 type Director struct {
-	TargetURL *url.URL
-	Logger    logrus.FieldLogger
-	Evaluator evaluator.Evaluator
-	Secret    string
+	TargetURL  *url.URL
+	Logger     logrus.FieldLogger
+	Evaluator  evaluator.Evaluator
+	KeyManager rsakey.Manager
 }
 
 type key int
@@ -59,20 +55,20 @@ func (d *Director) RoundTrip(r *http.Request) (*http.Response, error) {
 		r.Header.Set("Authorization", "bearer "+token)
 		res, err := http.DefaultTransport.RoundTrip(r)
 		if err != nil {
-			d.Logger.WithField("url", r.URL.String()).WithError(err).Print("Round trip failed.")
+			d.Logger.WithField("url", r.URL.String()).WithError(err).Print("Round trip failed")
 		}
 
 		return res, err
 	} else if _, ok := r.Context().Value(requestBypassedAuthorization).(string); ok {
 		res, err := http.DefaultTransport.RoundTrip(r)
 		if err != nil {
-			d.Logger.WithField("url", r.URL.String()).WithError(err).Print("Round trip failed.")
+			d.Logger.WithField("url", r.URL.String()).WithError(err).Print("Round trip failed")
 		}
 
 		return res, err
 	}
 
-	d.Logger.WithFields(map[string]interface{}{"user": "anonymous", "request_url": r.URL.String()}).Info("Unable to type assert context.")
+	d.Logger.WithFields(map[string]interface{}{"user": "anonymous", "request_url": r.URL.String()}).Info("Unable to type assert context")
 	return &http.Response{
 		StatusCode: http.StatusInternalServerError,
 		Body:       ioutil.NopCloser(bytes.NewBufferString(http.StatusText(http.StatusInternalServerError))),
@@ -107,12 +103,21 @@ func (d *Director) Director(r *http.Request) {
 		return
 	}
 
-	token, err := jwt.NewWithClaims(jwt.SigningMethodHS256, access.ToClaims()).SignedString([]byte(d.Secret))
+	privateKey, err := d.KeyManager.PrivateKey()
 	if err != nil {
 		d.Logger.
 			WithError(errors.WithStack(err)).
 			WithFields(map[string]interface{}{"user": access.User, "client_id": access.ClientID, "request_url": r.URL.String()}).
-			Errorf("Unable to sign JSON Web Token.")
+			Errorf("Unable to fetch private key for signing JSON Web Token")
+		*r = *r.WithContext(context.WithValue(r.Context(), requestDenied, &directorError{err: errors.WithStack(err), statusCode: http.StatusInternalServerError}))
+	}
+
+	token, err := jwt.NewWithClaims(jwt.SigningMethodRS256, access.ToClaims()).SignedString(privateKey)
+	if err != nil {
+		d.Logger.
+			WithError(errors.WithStack(err)).
+			WithFields(map[string]interface{}{"user": access.User, "client_id": access.ClientID, "request_url": r.URL.String()}).
+			Errorf("Unable to sign JSON Web Token")
 		*r = *r.WithContext(context.WithValue(r.Context(), requestDenied, &directorError{err: errors.WithStack(err), statusCode: http.StatusInternalServerError}))
 		return
 	}

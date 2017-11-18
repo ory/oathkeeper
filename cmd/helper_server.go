@@ -5,30 +5,51 @@ import (
 	"strings"
 	"time"
 
+	"github.com/ory/oathkeeper/rsakey"
 	"github.com/ory/oathkeeper/rule"
 	"github.com/rs/cors"
 	"github.com/spf13/viper"
 )
 
-func refresh(c *proxyConfig, m *rule.CachedMatcher, fails int) {
+func refreshRules(c *proxyConfig, m *rule.CachedMatcher, fails int) {
 	duration, _ := time.ParseDuration(c.refreshDelay)
 	if duration == 0 {
 		duration = time.Second * 30
 	}
 
 	if err := m.Refresh(); err != nil {
-		logger.WithError(err).WithField("retry", fails).Errorln("Unable to refresh rules.")
+		logger.WithError(err).WithField("retry", fails).Errorln("Unable to refresh rules")
 		if fails > 15 {
-			logger.WithError(err).WithField("retry", fails).Fatalf("Terminating after retry %d.\n", fails)
+			logger.WithError(err).WithField("retry", fails).Fatalf("Terminating after retry %d\n", fails)
 		}
 
-		refresh(c, m, fails+1)
+		time.Sleep(time.Second * time.Duration(fails+1))
+		refreshRules(c, m, fails+1)
 		return
 	}
 
 	time.Sleep(duration)
 
-	refresh(c, m, 0)
+	refreshRules(c, m, 0)
+}
+
+func refreshKeys(k rsakey.Manager, fails int) {
+	duration := time.Minute * 5
+
+	if err := k.Refresh(); err != nil {
+		logger.WithError(err).WithField("retry", fails).Errorln("Unable to refresh RSA keys for JWK signing")
+		if fails > 15 {
+			logger.WithError(err).WithField("retry", fails).Fatalf("Terminating after retry %d\n", fails)
+		}
+
+		time.Sleep(time.Second * time.Duration(fails+1))
+		refreshKeys(k, fails+1)
+		return
+	}
+
+	time.Sleep(duration)
+
+	refreshKeys(k, 0)
 }
 
 func parseCorsOptions(prefix string) cors.Options {

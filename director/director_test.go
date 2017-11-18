@@ -15,6 +15,7 @@ import (
 	"github.com/ory/hydra/sdk/go/hydra/swagger"
 	"github.com/ory/oathkeeper/evaluator"
 	"github.com/ory/oathkeeper/helper"
+	"github.com/ory/oathkeeper/rsakey"
 	"github.com/ory/oathkeeper/rule"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
@@ -35,7 +36,7 @@ func TestProxy(t *testing.T) {
 	defer backend.Close()
 
 	u, _ := url.Parse(backend.URL)
-	d := NewDirector(u, nil, nil, "some-secret")
+	d := NewDirector(u, nil, nil, &rsakey.LocalManager{KeyStrength: 512})
 
 	proxy := httptest.NewServer(&httputil.ReverseProxy{Director: d.Director, Transport: d})
 	defer proxy.Close()
