@@ -10,10 +10,13 @@ import (
 
 // Rule is a single rule that will get checked on every HTTP request.
 type Rule struct {
-	// ID the a unique id of a rule.
+	// ID is the unique id of the rule. It can be at most 190 characters long, but the layout of the ID is up to you.
+	// You will need this ID later on to update or delete the rule.
 	ID string
 
-	// MatchesMethods is a list of HTTP methods that this rule matches.
+	// MatchesMethods as an array of HTTP methods (e.g. GET, POST, PUT, DELETE, ...). When ORY Oathkeeper searches for rules
+	// to decide what to do with an incoming request to the proxy server, it compares the HTTP method of the incoming
+	// request with the HTTP methods of each rules. If a match is found, the rule is considered a partial match.
 	MatchesMethods []string
 
 	// MatchesURLCompiled is a regular expression of paths this rule matches.

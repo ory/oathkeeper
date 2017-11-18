@@ -5,10 +5,10 @@ All URIs are relative to *http://localhost*
 Method | HTTP request | Description
 ------------- | ------------- | -------------
 [**CreateRule**](RuleApi.md#CreateRule) | **Post** /rules | 
-[**DeleteRule**](RuleApi.md#DeleteRule) | **Delete** /rules/{id} | 
-[**GetRule**](RuleApi.md#GetRule) | **Get** /rules/{id} | 
-[**ListRules**](RuleApi.md#ListRules) | **Get** /rules | 
-[**UpdateRule**](RuleApi.md#UpdateRule) | **Put** /rules/{id} | 
+[**DeleteRule**](RuleApi.md#DeleteRule) | **Delete** /rules/{id} | Delete a rule
+[**GetRule**](RuleApi.md#GetRule) | **Get** /rules/{id} | Retrieve a rule
+[**ListRules**](RuleApi.md#ListRules) | **Get** /rules | List all rules
+[**UpdateRule**](RuleApi.md#UpdateRule) | **Put** /rules/{id} | Update a rule
 
 
 # **CreateRule**
@@ -43,9 +43,9 @@ No authorization required
 # **DeleteRule**
 > DeleteRule($id)
 
-
-
 Delete a rule
+
+Use this endpoint to delete a rule.
 
 
 ### Parameters
@@ -72,9 +72,9 @@ No authorization required
 # **GetRule**
 > Rule GetRule($id)
 
+Retrieve a rule
 
-
-Get a rule
+Use this method to retrieve a rule from the storage. If it does not exist you will receive a 404 error.
 
 
 ### Parameters
@@ -101,9 +101,9 @@ No authorization required
 # **ListRules**
 > []Rule ListRules()
 
-
-
 List all rules
+
+This method returns an array of all rules that are stored in the backend. This is useful if you want to get a full view of what rules you have currently in place.
 
 
 ### Parameters
@@ -127,9 +127,9 @@ No authorization required
 # **UpdateRule**
 > Rule UpdateRule($id, $body)
 
-
-
 Update a rule
+
+Use this method to update a rule. Keep in mind that you need to send the full rule payload as this endpoint does not support patching.
 
 
 ### Parameters

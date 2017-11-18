@@ -1,7 +1,7 @@
 /*
- * Oathkeeper
+ * ORY Oathkeeper
  *
- * Oathkeeper
+ * ORY Oathkeeper is a reverse proxy that checks the HTTP Authorization for validity against a set of rules. This service uses Hydra to validate access tokens and policies.  Oathkeeper
  *
  * OpenAPI spec version: Latest
  * Contact: hi@ory.am
@@ -100,8 +100,8 @@ func (a RuleApi) CreateRule(body Rule) (*Rule, *APIResponse, error) {
 }
 
 /**
- *
  * Delete a rule
+ * Use this endpoint to delete a rule.
  *
  * @param id
  * @return void
@@ -159,8 +159,8 @@ func (a RuleApi) DeleteRule(id string) (*APIResponse, error) {
 }
 
 /**
- *
- * Get a rule
+ * Retrieve a rule
+ * Use this method to retrieve a rule from the storage. If it does not exist you will receive a 404 error.
  *
  * @param id
  * @return *Rule
@@ -220,8 +220,8 @@ func (a RuleApi) GetRule(id string) (*Rule, *APIResponse, error) {
 }
 
 /**
- *
  * List all rules
+ * This method returns an array of all rules that are stored in the backend. This is useful if you want to get a full view of what rules you have currently in place.
  *
  * @return []Rule
  */
@@ -279,8 +279,8 @@ func (a RuleApi) ListRules() ([]Rule, *APIResponse, error) {
 }
 
 /**
- *
  * Update a rule
+ * Use this method to update a rule. Keep in mind that you need to send the full rule payload as this endpoint does not support patching.
  *
  * @param id
  * @param body
