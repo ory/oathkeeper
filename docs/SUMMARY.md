@@ -2,7 +2,7 @@
   - [Terminology](concepts.md#terminology)
   - [Rules](concepts.md#rules)
     - [Rules REST API](concepts.md#rules-rest-api)
-    - [Rules CLI API](#rules-cli-api)
+    - [Rules CLI API](concepts.md#rules-cli-api)
 - [Deployment](deployment.md#deployment)
   - [Gateway](deployment.md#gateway)
   - [Sidecar](deployment.md#sidecar)
