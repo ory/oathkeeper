@@ -1,5 +1,10 @@
 package cmd
 
+import (
+	"fmt"
+	"os"
+)
+
 var corsMessage = `CORS CONTROLS
 ==============
 - CORS_ALLOWED_ORIGINS: A list of origins (comma separated values) a cross-domain request can be executed from.
@@ -37,3 +42,8 @@ var databaseUrl = `- DATABASE_URL: A URL to a persistent backend. Hydra supports
 	Example: DATABASE_URL=mysql://user:password@tcp(host:123)/database?parseTime=true
 
 	Be aware that the ?parseTime=true parameter is mandatory, or timestamps will not work.`
+
+func fatalf(msg string, args ...interface{}) {
+	fmt.Printf(msg+"\n", args...)
+	os.Exit(1)
+}

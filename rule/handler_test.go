@@ -7,7 +7,7 @@ import (
 
 	"github.com/julienschmidt/httprouter"
 	"github.com/ory/herodot"
-	"github.com/ory/oathkeeper/sdk/swagger"
+	"github.com/ory/oathkeeper/sdk/go/oathkeepersdk/swagger"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -33,13 +33,13 @@ func TestHandler(t *testing.T) {
 		RequiredScopes:   []string{"users.create"},
 	}
 	r2 := swagger.Rule{
-		Description:                 "Get users rule",
-		MatchesUrl:                  server.URL + "/users/([0-9]+)",
-		MatchesMethods:              []string{"GET"},
-		RequiredScopes:              []string{},
-		AllowAnonymous:              true,
-		BypassAuthorization:         true,
-		BypassAccessControlPolicies: true,
+		Description:                   "Get users rule",
+		MatchesUrl:                    server.URL + "/users/([0-9]+)",
+		MatchesMethods:                []string{"GET"},
+		RequiredScopes:                []string{},
+		AllowAnonymousModeEnabled:     true,
+		PassThroughModeEnabled:        true,
+		BasicAuthorizationModeEnabled: true,
 	}
 
 	t.Run("case=create a new rule", func(t *testing.T) {

@@ -62,15 +62,15 @@ type jsonRule struct {
 	// RequiredScopes is the resource this rule requires.
 	RequiredResource string `json:"requiredResource"`
 
-	// AllowAnonymous sets if the endpoint is public, thus not needing any authorization at all.
-	AllowAnonymous bool `json:"allowAnonymous"`
+	// AllowAnonymousModeEnabled sets if the endpoint is public, thus not needing any authorization at all.
+	AllowAnonymousModeEnabled bool `json:"allowAnonymousModeEnabled"`
 
 	// Description describes the rule.
 	Description string `json:"description"`
 
-	// BypassAuthorization if set true disables firewall capabilities.
-	BypassAuthorization bool `json:"bypassAuthorization"`
+	// PassThroughModeEnabled if set true disables firewall capabilities.
+	PassThroughModeEnabled bool `json:"passThroughModeEnabled"`
 
-	// BypassAccessControlPolicies if set true disables checking access control policies.
-	BypassAccessControlPolicies bool `json:"bypassAccessControlPolicies"`
+	// BasicAuthorizationModeEnabled if set true disables checking access control policies.
+	BasicAuthorizationModeEnabled bool `json:"basicAuthorizationModeEnabled"`
 }

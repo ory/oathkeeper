@@ -13,14 +13,11 @@ package swagger
 // A rule
 type Rule struct {
 
-	// AllowAnonymous sets if the endpoint is public, thus not needing any authorization at all.
-	AllowAnonymous bool `json:"allowAnonymous,omitempty"`
+	// AllowAnonymousModeEnabled sets if the endpoint is public, thus not needing any authorization at all.
+	AllowAnonymousModeEnabled bool `json:"allowAnonymousModeEnabled,omitempty"`
 
-	// BypassAccessControlPolicies if set true disables checking access control policies.
-	BypassAccessControlPolicies bool `json:"bypassAccessControlPolicies,omitempty"`
-
-	// BypassAuthorization if set true disables firewall capabilities.
-	BypassAuthorization bool `json:"bypassAuthorization,omitempty"`
+	// BasicAuthorizationModeEnabled if set true disables checking access control policies.
+	BasicAuthorizationModeEnabled bool `json:"basicAuthorizationModeEnabled,omitempty"`
 
 	// Description describes the rule.
 	Description string `json:"description,omitempty"`
@@ -33,6 +30,9 @@ type Rule struct {
 
 	// MatchesURL is a regular expression of paths this rule matches.
 	MatchesUrl string `json:"matchesUrl,omitempty"`
+
+	// PassThroughModeEnabled if set true disables firewall capabilities.
+	PassThroughModeEnabled bool `json:"passThroughModeEnabled,omitempty"`
 
 	// RequiredScopes is the action this rule requires.
 	RequiredAction string `json:"requiredAction,omitempty"`
