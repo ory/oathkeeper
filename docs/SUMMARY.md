@@ -1,3 +1,6 @@
+- [Quickstart](quickstart.md)
+  - [Installing ORY Oathkeeper](quickstart.md#installing-ory-oathkeeper)
+  - [Running ORY Oathkeeper](quickstart.md#running-ory-oathkeeper)
 - [Concepts](concepts.md#concepts)
   - [Terminology](concepts.md#terminology)
   - [Rules](concepts.md#rules)
