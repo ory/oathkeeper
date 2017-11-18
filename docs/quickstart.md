@@ -1,6 +1,30 @@
 # Quickstart
 
-This section covers how to get started using ORY Oathkeeper. ORY Oathkeeper has two servers that run on separate ports:
+This section covers how to get started using ORY Oathkeeper.
+
+## Installing ORY Oathkeeper
+
+The only way to install ORY Oathkeeper currently is through [Docker Hub]. ORY Oathkeeper is a private docker repository
+and to gain access to it you have create an ORY Gatekeeper instance at the [ORY Admin Console](https://admin.ory.am).
+
+Once your account is authorized to access the repository, log in to docker using `docker login`. Then you should
+be able to fetch the ory/oathkeeper image and also be able to see it on [Docker Hub](https://hub.docker.com/r/oryd/oathkeeper/).
+
+To run any oathkeeper command, do:
+
+```
+$ docker run oryd/oathkeeper:v<version> <command>
+```
+
+for example (this guide is written for ORY Oathkeeper 0.0.20:
+
+```
+$ docker run oryd/oathkeeper:v0.0.20 help
+```
+
+## Running ORY Oathkeeper
+
+ORY Oathkeeper has two servers that run on separate ports:
 
 * The management server: This server is responsible for exposing the management REST API.
 * The proxy server: This server is responsible for evaluating access requests and forwarding them to the backend.
@@ -52,7 +76,7 @@ $ hydra policies create -f policy.json
 ```
 
 Now we are all set to boot up ORY Oathkeeper. Because we are using the in-memory database backend, we have to use
-`oathkeeper serve all`, otherwise the proxy and management process would not be able to talk to each other:
+`docker run oryd/oathkeeper:v0.0.20 serve all`, otherwise the proxy and management process would not be able to talk to each other:
 
 ```
 # We assume that ORY Hydra is running on localhost:4444
@@ -68,7 +92,7 @@ $ export BACKEND_URL=http://my-api-endpoint-servers.com/
 # This should be a proper database URL in production, see `hydra help serve proxy`
 $ export DATABASE_URL=memory
 
-$ oathkeeper serve all
+$ docker run oryd/oathkeeper:v0.0.20 serve all
 ```
 
 Now, we have a proxy listening on port 4455 and the management REST API at port 4456.
