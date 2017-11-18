@@ -31,25 +31,25 @@ func mustGenerateURL(t *testing.T, u string) *url.URL {
 
 func TestEvaluator(t *testing.T) {
 	we := NewWardenEvaluator(nil, nil, nil)
-	publicRule := rule.Rule{MatchesMethods: []string{"GET"}, MatchesURLCompiled: mustCompileRegex(t, "https://localhost/users/<[0-9]+>"), AllowAnonymous: true}
-	bypassACPRule := rule.Rule{MatchesMethods: []string{"GET"}, MatchesURLCompiled: mustCompileRegex(t, "https://localhost/users/<[0-9]+>"), BypassAccessControlPolicies: true}
+	publicRule := rule.Rule{MatchesMethods: []string{"GET"}, MatchesURLCompiled: mustCompileRegex(t, "http://localhost/users/<[0-9]+>"), AllowAnonymousModeEnabled: true}
+	bypassACPRule := rule.Rule{MatchesMethods: []string{"GET"}, MatchesURLCompiled: mustCompileRegex(t, "http://localhost/users/<[0-9]+>"), BasicAuthorizationModeEnabled: true}
 	privateRuleWithSubstitution := rule.Rule{
 		MatchesMethods:     []string{"POST"},
-		MatchesURLCompiled: mustCompileRegex(t, "https://localhost/users/<[0-9]+>"),
+		MatchesURLCompiled: mustCompileRegex(t, "http://localhost/users/<[0-9]+>"),
 		RequiredResource:   "users:$1",
 		RequiredAction:     "get:$1",
 		RequiredScopes:     []string{"users.create"},
 	}
 	privateRuleWithoutSubstitution := rule.Rule{
 		MatchesMethods:     []string{"POST"},
-		MatchesURLCompiled: mustCompileRegex(t, "https://localhost/users<$|/([0-9]+)>"),
+		MatchesURLCompiled: mustCompileRegex(t, "http://localhost/users<$|/([0-9]+)>"),
 		RequiredResource:   "users",
 		RequiredAction:     "get",
 		RequiredScopes:     []string{"users.create"},
 	}
 	privateRuleWithPartialSubstitution := rule.Rule{
 		MatchesMethods:     []string{"POST"},
-		MatchesURLCompiled: mustCompileRegex(t, "https://localhost/users<$|/([0-9]+)>"),
+		MatchesURLCompiled: mustCompileRegex(t, "http://localhost/users<$|/([0-9]+)>"),
 		RequiredResource:   "users:$2",
 		RequiredAction:     "get",
 		RequiredScopes:     []string{"users.create"},
@@ -65,7 +65,7 @@ func TestEvaluator(t *testing.T) {
 		{
 			d:     "request is allowed anonymously because it matches a public rule and does not contain a bearer token",
 			rules: []rule.Rule{publicRule},
-			r:     &http.Request{Method: "GET", URL: mustGenerateURL(t, "https://localhost/users/1234")},
+			r:     &http.Request{Method: "GET", Host: "localhost", URL: mustGenerateURL(t, "http://localhost/users/1234")},
 			e: func(t *testing.T, s *Session, err error) {
 				require.NoError(t, err)
 				assert.Empty(t, s.ClientID)
@@ -79,7 +79,7 @@ func TestEvaluator(t *testing.T) {
 		{
 			d:     "request is denied because no rule exists",
 			rules: []rule.Rule{},
-			r:     &http.Request{Method: "GET", URL: mustGenerateURL(t, "https://localhost/users/1234")},
+			r:     &http.Request{Method: "GET", Host: "localhost", URL: mustGenerateURL(t, "http://localhost/users/1234")},
 			e: func(t *testing.T, s *Session, err error) {
 				require.Error(t, err)
 			},
@@ -90,7 +90,7 @@ func TestEvaluator(t *testing.T) {
 		{
 			d:     "request is denied because no rule matches",
 			rules: []rule.Rule{},
-			r:     &http.Request{Method: "POST", URL: mustGenerateURL(t, "https://localhost/users/1234")},
+			r:     &http.Request{Method: "POST", Host: "localhost", URL: mustGenerateURL(t, "http://localhost/users/1234")},
 			e: func(t *testing.T, s *Session, err error) {
 				require.Error(t, err)
 			},
@@ -101,7 +101,7 @@ func TestEvaluator(t *testing.T) {
 		{
 			d:     "request is denied because multiple rules match",
 			rules: []rule.Rule{publicRule, publicRule},
-			r:     &http.Request{Method: "GET", URL: mustGenerateURL(t, "https://localhost/users/1234")},
+			r:     &http.Request{Method: "GET", Host: "localhost", URL: mustGenerateURL(t, "http://localhost/users/1234")},
 			e: func(t *testing.T, s *Session, err error) {
 				require.Error(t, err)
 			},
@@ -112,7 +112,7 @@ func TestEvaluator(t *testing.T) {
 		{
 			d:     "request is allowed anonymously because it matches a public rule, but token introspection fails with a network connection issue",
 			rules: []rule.Rule{publicRule},
-			r:     &http.Request{Method: "GET", Header: http.Header{"Authorization": []string{"bEaReR token"}}, URL: mustGenerateURL(t, "https://localhost/users/1234")},
+			r:     &http.Request{Method: "GET", Host: "localhost", Header: http.Header{"Authorization": []string{"bEaReR token"}}, URL: mustGenerateURL(t, "http://localhost/users/1234")},
 			e: func(t *testing.T, s *Session, err error) {
 				require.NoError(t, err)
 				assert.Empty(t, s.ClientID)
@@ -128,7 +128,7 @@ func TestEvaluator(t *testing.T) {
 		{
 			d:     "request is allowed anonymously because it matches a public rule, but token introspection fails with status code 400",
 			rules: []rule.Rule{publicRule},
-			r:     &http.Request{Method: "GET", Header: http.Header{"Authorization": []string{"bEaReR token"}}, URL: mustGenerateURL(t, "https://localhost/users/1234")},
+			r:     &http.Request{Method: "GET", Host: "localhost", Header: http.Header{"Authorization": []string{"bEaReR token"}}, URL: mustGenerateURL(t, "http://localhost/users/1234")},
 			e: func(t *testing.T, s *Session, err error) {
 				require.NoError(t, err)
 				assert.Empty(t, s.ClientID)
@@ -144,7 +144,7 @@ func TestEvaluator(t *testing.T) {
 		{
 			d:     "request is allowed anonymously because it matches a public rule, but token introspection says the token is no longer active",
 			rules: []rule.Rule{publicRule},
-			r:     &http.Request{Method: "GET", Header: http.Header{"Authorization": []string{"bEaReR token"}}, URL: mustGenerateURL(t, "https://localhost/users/1234")},
+			r:     &http.Request{Method: "GET", Host: "localhost", Header: http.Header{"Authorization": []string{"bEaReR token"}}, URL: mustGenerateURL(t, "http://localhost/users/1234")},
 			e: func(t *testing.T, s *Session, err error) {
 				require.NoError(t, err)
 				assert.Empty(t, s.ClientID)
@@ -160,7 +160,7 @@ func TestEvaluator(t *testing.T) {
 		{
 			d:     "request is allowed because it matches a public rule, and token introspection succeeds",
 			rules: []rule.Rule{publicRule},
-			r:     &http.Request{Method: "GET", Header: http.Header{"Authorization": []string{"bEaReR token"}}, URL: mustGenerateURL(t, "https://localhost/users/1234")},
+			r:     &http.Request{Method: "GET", Host: "localhost", Header: http.Header{"Authorization": []string{"bEaReR token"}}, URL: mustGenerateURL(t, "http://localhost/users/1234")},
 			e: func(t *testing.T, s *Session, err error) {
 				require.NoError(t, err)
 				assert.Equal(t, "client", s.ClientID)
@@ -176,7 +176,7 @@ func TestEvaluator(t *testing.T) {
 		{
 			d:     "request is not allowed because it matches a rule without access control policies, but token introspection fails",
 			rules: []rule.Rule{bypassACPRule},
-			r:     &http.Request{Method: "GET", Header: http.Header{"Authorization": []string{"bEaReR token"}}, URL: mustGenerateURL(t, "https://localhost/users/1234")},
+			r:     &http.Request{Method: "GET", Host: "localhost", Header: http.Header{"Authorization": []string{"bEaReR token"}}, URL: mustGenerateURL(t, "http://localhost/users/1234")},
 			e: func(t *testing.T, s *Session, err error) {
 				require.Error(t, err)
 			},
@@ -189,7 +189,7 @@ func TestEvaluator(t *testing.T) {
 		{
 			d:     "request is not allowed because it matches a rule without access control policies, but token introspection fails with network error",
 			rules: []rule.Rule{bypassACPRule},
-			r:     &http.Request{Method: "GET", Header: http.Header{"Authorization": []string{"bEaReR token"}}, URL: mustGenerateURL(t, "https://localhost/users/1234")},
+			r:     &http.Request{Method: "GET", Host: "localhost", Header: http.Header{"Authorization": []string{"bEaReR token"}}, URL: mustGenerateURL(t, "http://localhost/users/1234")},
 			e: func(t *testing.T, s *Session, err error) {
 				require.Error(t, err)
 			},
@@ -202,7 +202,7 @@ func TestEvaluator(t *testing.T) {
 		{
 			d:     "request is not allowed because it matches a rule without access control policies, but token introspection fails with wrong status code",
 			rules: []rule.Rule{bypassACPRule},
-			r:     &http.Request{Method: "GET", Header: http.Header{"Authorization": []string{"bEaReR token"}}, URL: mustGenerateURL(t, "https://localhost/users/1234")},
+			r:     &http.Request{Method: "GET", Host: "localhost", Header: http.Header{"Authorization": []string{"bEaReR token"}}, URL: mustGenerateURL(t, "http://localhost/users/1234")},
 			e: func(t *testing.T, s *Session, err error) {
 				require.Error(t, err)
 			},
@@ -215,7 +215,7 @@ func TestEvaluator(t *testing.T) {
 		{
 			d:     "request is allowed because it matches a rule without access control policies, and token introspection succeeds",
 			rules: []rule.Rule{bypassACPRule},
-			r:     &http.Request{Method: "GET", Header: http.Header{"Authorization": []string{"bEaReR token"}}, URL: mustGenerateURL(t, "https://localhost/users/1234")},
+			r:     &http.Request{Method: "GET", Host: "localhost", Header: http.Header{"Authorization": []string{"bEaReR token"}}, URL: mustGenerateURL(t, "http://localhost/users/1234")},
 			e: func(t *testing.T, s *Session, err error) {
 				require.NoError(t, err)
 				assert.Equal(t, "client", s.ClientID)
@@ -231,7 +231,7 @@ func TestEvaluator(t *testing.T) {
 		{
 			d:     "request is denied because token is missing and endpoint is not public",
 			rules: []rule.Rule{privateRuleWithSubstitution},
-			r:     &http.Request{Method: "POST", Header: http.Header{"Authorization": []string{"bEaReR"}}, URL: mustGenerateURL(t, "https://localhost/users/1234")},
+			r:     &http.Request{Method: "POST", Host: "localhost", Header: http.Header{"Authorization": []string{"bEaReR"}}, URL: mustGenerateURL(t, "http://localhost/users/1234")},
 			e: func(t *testing.T, s *Session, err error) {
 				require.Error(t, err)
 			},
@@ -242,7 +242,7 @@ func TestEvaluator(t *testing.T) {
 		{
 			d:     "request is denied because warden request fails with a network error and endpoint is not public",
 			rules: []rule.Rule{privateRuleWithSubstitution},
-			r:     &http.Request{Method: "POST", Header: http.Header{"Authorization": []string{"bEaReR token"}}, URL: mustGenerateURL(t, "https://localhost/users/1234")},
+			r:     &http.Request{Method: "POST", Host: "localhost", Header: http.Header{"Authorization": []string{"bEaReR token"}}, URL: mustGenerateURL(t, "http://localhost/users/1234")},
 			e: func(t *testing.T, s *Session, err error) {
 				require.Error(t, err)
 			},
@@ -255,7 +255,7 @@ func TestEvaluator(t *testing.T) {
 		{
 			d:     "request is denied because warden request fails with a 400 status code and endpoint is not public",
 			rules: []rule.Rule{privateRuleWithSubstitution},
-			r:     &http.Request{Method: "POST", Header: http.Header{"Authorization": []string{"bEaReR token"}}, URL: mustGenerateURL(t, "https://localhost/users/1234")},
+			r:     &http.Request{Method: "POST", Host: "localhost", Header: http.Header{"Authorization": []string{"bEaReR token"}}, URL: mustGenerateURL(t, "http://localhost/users/1234")},
 			e: func(t *testing.T, s *Session, err error) {
 				require.Error(t, err)
 			},
@@ -268,7 +268,7 @@ func TestEvaluator(t *testing.T) {
 		{
 			d:     "request is denied because warden request fails with allowed=false",
 			rules: []rule.Rule{privateRuleWithSubstitution},
-			r:     &http.Request{Method: "POST", Header: http.Header{"Authorization": []string{"bEaReR token"}}, URL: mustGenerateURL(t, "https://localhost/users/1234")},
+			r:     &http.Request{Method: "POST", Host: "localhost", Header: http.Header{"Authorization": []string{"bEaReR token"}}, URL: mustGenerateURL(t, "http://localhost/users/1234")},
 			e: func(t *testing.T, s *Session, err error) {
 				require.Error(t, err)
 			},
@@ -281,7 +281,7 @@ func TestEvaluator(t *testing.T) {
 		{
 			d:     "request is allowed because token is valid and allowed (rule with substitution)",
 			rules: []rule.Rule{privateRuleWithSubstitution},
-			r:     &http.Request{RemoteAddr: "127.0.0.1:1234", Method: "POST", Header: http.Header{"Authorization": []string{"bEaReR token"}}, URL: mustGenerateURL(t, "https://localhost/users/1234")},
+			r:     &http.Request{RemoteAddr: "127.0.0.1:1234", Method: "POST", Host: "localhost", Header: http.Header{"Authorization": []string{"bEaReR token"}}, URL: mustGenerateURL(t, "http://localhost/users/1234")},
 			e: func(t *testing.T, s *Session, err error) {
 				require.NoError(t, err)
 			},
@@ -300,7 +300,7 @@ func TestEvaluator(t *testing.T) {
 		{
 			d:     "request is allowed because token is valid and allowed (rule with partial substitution)",
 			rules: []rule.Rule{privateRuleWithPartialSubstitution},
-			r:     &http.Request{RemoteAddr: "127.0.0.1:1234", Method: "POST", Header: http.Header{"Authorization": []string{"bEaReR token"}}, URL: mustGenerateURL(t, "https://localhost/users/1234")},
+			r:     &http.Request{RemoteAddr: "127.0.0.1:1234", Method: "POST", Host: "localhost", Header: http.Header{"Authorization": []string{"bEaReR token"}}, URL: mustGenerateURL(t, "http://localhost/users/1234")},
 			e: func(t *testing.T, s *Session, err error) {
 				require.NoError(t, err)
 			},
@@ -319,7 +319,7 @@ func TestEvaluator(t *testing.T) {
 		{
 			d:     "request is allowed because token is valid and allowed (rule with partial substitution and path parameter)",
 			rules: []rule.Rule{privateRuleWithoutSubstitution},
-			r:     &http.Request{RemoteAddr: "127.0.0.1:1234", Method: "POST", Header: http.Header{"Authorization": []string{"bEaReR token"}}, URL: mustGenerateURL(t, "https://localhost/users/1234")},
+			r:     &http.Request{RemoteAddr: "127.0.0.1:1234", Method: "POST", Host: "localhost", Header: http.Header{"Authorization": []string{"bEaReR token"}}, URL: mustGenerateURL(t, "http://localhost/users/1234")},
 			e: func(t *testing.T, s *Session, err error) {
 				require.NoError(t, err)
 			},
@@ -338,7 +338,7 @@ func TestEvaluator(t *testing.T) {
 		{
 			d:     "request is allowed because token is valid and allowed (rule without substitution and path parameter)",
 			rules: []rule.Rule{privateRuleWithoutSubstitution},
-			r:     &http.Request{RemoteAddr: "127.0.0.1:1234", Method: "POST", Header: http.Header{"Authorization": []string{"bEaReR token"}}, URL: mustGenerateURL(t, "https://localhost/users")},
+			r:     &http.Request{RemoteAddr: "127.0.0.1:1234", Method: "POST", Host: "localhost", Header: http.Header{"Authorization": []string{"bEaReR token"}}, URL: mustGenerateURL(t, "http://localhost/users")},
 			e: func(t *testing.T, s *Session, err error) {
 				require.NoError(t, err)
 			},

@@ -31,14 +31,14 @@ type Rule struct {
 	// RequiredScopes is the resource this rule requires.
 	RequiredResource string
 
-	// AllowAnonymous if set true allows anonymous access to the specified paths and methods.
-	AllowAnonymous bool
+	// AllowAnonymousModeEnabled if set true allows anonymous access to the specified paths and methods.
+	AllowAnonymousModeEnabled bool
 
-	// BypassAuthorization if set true disables firewall capabilities.
-	BypassAuthorization bool
+	// PassThroughModeEnabled if set true disables firewall capabilities.
+	PassThroughModeEnabled bool
 
-	// BypassAccessControlPolicies if set true disables checking access control policies.
-	BypassAccessControlPolicies bool
+	// BasicAuthorizationModeEnabled if set true disables checking access control policies.
+	BasicAuthorizationModeEnabled bool
 
 	// Description describes the rule.
 	Description string

@@ -1,0 +1,11 @@
+[{
+  "id": "test-rule-1",
+  "matchesMethods": ["POST", "GET"],
+  "matchesUrl": "http://localhost/",
+  "passThroughModeEnabled": true
+}, {
+  "id": "test-rule-2",
+  "matchesMethods": ["POST", "GET"],
+  "matchesUrl": "http://localhost/",
+  "passThroughModeEnabled": true
+}]

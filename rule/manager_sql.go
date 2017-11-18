@@ -14,17 +14,17 @@ import (
 )
 
 type sqlRule struct {
-	ID                          string `db:"surrogate_id"`
-	InternalID                  int64  `db:"id"`
-	MatchesMethods              string `db:"matches_methods"`
-	MatchesURL                  string `db:"matches_url"`
-	RequiredScopes              string `db:"required_scopes"`
-	RequiredAction              string `db:"required_action"`
-	RequiredResource            string `db:"required_resource"`
-	AllowAnonymous              bool   `db:"allow_anonymous"`
-	BypassAuthorization         bool   `db:"disable_firewall"`
-	BypassAccessControlPolicies bool   `db:"disable_acp"`
-	Description                 string `db:"description"`
+	ID                            string `db:"surrogate_id"`
+	InternalID                    int64  `db:"id"`
+	MatchesMethods                string `db:"matches_methods"`
+	MatchesURL                    string `db:"matches_url"`
+	RequiredScopes                string `db:"required_scopes"`
+	RequiredAction                string `db:"required_action"`
+	RequiredResource              string `db:"required_resource"`
+	AllowAnonymousModeEnabled     bool   `db:"allow_anonymous"`
+	PassThroughModeEnabled        bool   `db:"disable_firewall"`
+	BasicAuthorizationModeEnabled bool   `db:"disable_acp"`
+	Description                   string `db:"description"`
 }
 
 func (r *sqlRule) toRule() (*Rule, error) {
@@ -43,32 +43,32 @@ func (r *sqlRule) toRule() (*Rule, error) {
 	}
 
 	return &Rule{
-		ID:                          r.ID,
-		MatchesMethods:              methods,
-		MatchesURLCompiled:          exp,
-		MatchesURL:                  r.MatchesURL,
-		RequiredScopes:              scopes,
-		RequiredAction:              r.RequiredAction,
-		RequiredResource:            r.RequiredResource,
-		AllowAnonymous:              r.AllowAnonymous,
-		BypassAuthorization:         r.BypassAuthorization,
-		BypassAccessControlPolicies: r.BypassAccessControlPolicies,
-		Description:                 r.Description,
+		ID:                            r.ID,
+		MatchesMethods:                methods,
+		MatchesURLCompiled:            exp,
+		MatchesURL:                    r.MatchesURL,
+		RequiredScopes:                scopes,
+		RequiredAction:                r.RequiredAction,
+		RequiredResource:              r.RequiredResource,
+		AllowAnonymousModeEnabled:     r.AllowAnonymousModeEnabled,
+		PassThroughModeEnabled:        r.PassThroughModeEnabled,
+		BasicAuthorizationModeEnabled: r.BasicAuthorizationModeEnabled,
+		Description:                   r.Description,
 	}, nil
 }
 
 func toSqlRule(r *Rule) *sqlRule {
 	return &sqlRule{
-		ID:                          r.ID,
-		MatchesMethods:              strings.Join(r.MatchesMethods, " "),
-		MatchesURL:                  r.MatchesURL,
-		RequiredScopes:              strings.Join(r.RequiredScopes, " "),
-		RequiredAction:              r.RequiredAction,
-		RequiredResource:            r.RequiredResource,
-		AllowAnonymous:              r.AllowAnonymous,
-		BypassAuthorization:         r.BypassAuthorization,
-		BypassAccessControlPolicies: r.BypassAccessControlPolicies,
-		Description:                 r.Description,
+		ID:                            r.ID,
+		MatchesMethods:                strings.Join(r.MatchesMethods, " "),
+		MatchesURL:                    r.MatchesURL,
+		RequiredScopes:                strings.Join(r.RequiredScopes, " "),
+		RequiredAction:                r.RequiredAction,
+		RequiredResource:              r.RequiredResource,
+		AllowAnonymousModeEnabled:     r.AllowAnonymousModeEnabled,
+		PassThroughModeEnabled:        r.PassThroughModeEnabled,
+		BasicAuthorizationModeEnabled: r.BasicAuthorizationModeEnabled,
+		Description:                   r.Description,
 	}
 }
 

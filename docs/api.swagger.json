@@ -239,20 +239,15 @@
       "description": "A rule",
       "type": "object",
       "properties": {
-        "allowAnonymous": {
-          "description": "AllowAnonymous sets if the endpoint is public, thus not needing any authorization at all.",
+        "allowAnonymousModeEnabled": {
+          "description": "AllowAnonymousModeEnabled sets if the endpoint is public, thus not needing any authorization at all.",
           "type": "boolean",
-          "x-go-name": "AllowAnonymous"
+          "x-go-name": "AllowAnonymousModeEnabled"
         },
-        "bypassAccessControlPolicies": {
-          "description": "BypassAccessControlPolicies if set true disables checking access control policies.",
+        "basicAuthorizationModeEnabled": {
+          "description": "BasicAuthorizationModeEnabled if set true disables checking access control policies.",
           "type": "boolean",
-          "x-go-name": "BypassAccessControlPolicies"
-        },
-        "bypassAuthorization": {
-          "description": "BypassAuthorization if set true disables firewall capabilities.",
-          "type": "boolean",
-          "x-go-name": "BypassAuthorization"
+          "x-go-name": "BasicAuthorizationModeEnabled"
         },
         "description": {
           "description": "Description describes the rule.",
@@ -276,6 +271,11 @@
           "description": "MatchesURL is a regular expression of paths this rule matches.",
           "type": "string",
           "x-go-name": "MatchesURL"
+        },
+        "passThroughModeEnabled": {
+          "description": "PassThroughModeEnabled if set true disables firewall capabilities.",
+          "type": "boolean",
+          "x-go-name": "PassThroughModeEnabled"
         },
         "requiredAction": {
           "description": "RequiredScopes is the action this rule requires.",

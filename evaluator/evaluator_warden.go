@@ -78,7 +78,7 @@ func (d *WardenEvaluator) EvaluateAccessRequest(r *http.Request) (*Session, erro
 		return nil, err
 	}
 
-	if rl.BypassAuthorization {
+	if rl.PassThroughModeEnabled {
 		d.Logger.
 			WithField("granted", true).
 			WithField("user", "").
@@ -91,7 +91,7 @@ func (d *WardenEvaluator) EvaluateAccessRequest(r *http.Request) (*Session, erro
 		return &Session{User: "", Anonymous: true, ClientID: "", Disabled: true}, nil
 	}
 
-	if rl.AllowAnonymous {
+	if rl.AllowAnonymousModeEnabled {
 		if token == "" {
 			d.Logger.
 				WithField("granted", true).
@@ -168,7 +168,7 @@ func (d *WardenEvaluator) EvaluateAccessRequest(r *http.Request) (*Session, erro
 		return nil, errors.WithStack(helper.ErrMissingBearerToken)
 	}
 
-	if rl.BypassAccessControlPolicies {
+	if rl.BasicAuthorizationModeEnabled {
 		introspection, response, err := d.Hydra.IntrospectOAuth2Token(token, strings.Join(rl.RequiredScopes, " "))
 		if err != nil {
 			d.Logger.WithError(err).
