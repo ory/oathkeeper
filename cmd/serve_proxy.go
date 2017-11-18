@@ -15,6 +15,7 @@ import (
 	"github.com/ory/hydra/sdk/go/hydra"
 	"github.com/ory/oathkeeper/director"
 	"github.com/ory/oathkeeper/evaluator"
+	"github.com/ory/oathkeeper/rsakey"
 	"github.com/ory/oathkeeper/rule"
 	"github.com/rs/cors"
 	"github.com/spf13/cobra"
@@ -23,16 +24,15 @@ import (
 )
 
 type proxyConfig struct {
-	hydra             *hydra.Configuration
-	backendURL        string
-	databaseURL       string
-	cors              cors.Options
-	address           string
-	refreshDelay      string
-	rules             rule.Manager
-	bearerTokenSecret string
-	tlsCert           string
-	tlsKey            string
+	hydra        *hydra.Configuration
+	backendURL   string
+	databaseURL  string
+	cors         cors.Options
+	address      string
+	refreshDelay string
+	rules        rule.Manager
+	tlsCert      string
+	tlsKey       string
 }
 
 // proxyCmd represents the proxy command
@@ -85,15 +85,15 @@ HTTP(S) CONTROLS
 
 OTHER CONTROLS
 ==============
-- REFRESH_DELAY: ORY Oathkeeper stores rules in memory for faster access. This value sets the database polling interval.
+- RULES_REFRESH_INTERVAL: ORY Oathkeeper stores rules in memory for faster access. This value sets the database polling interval.
 	Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
-	Default: REFRESH_DELY=5s
+	Default: RULES_REFRESH_INTERVAL=5s
 
 ` + corsMessage,
 	Run: func(cmd *cobra.Command, args []string) {
 		rules, err := newRuleManager(viper.GetString("DATABASE_URL"))
 		if err != nil {
-			logger.WithError(err).Fatalln("Unable to connect to rule backend.")
+			logger.WithError(err).Fatalln("Unable to connect to rule backend")
 		}
 
 		config := &proxyConfig{
@@ -104,12 +104,11 @@ OTHER CONTROLS
 				Scopes:       []string{"hydra.warden"},
 			},
 			rules: rules, backendURL: viper.GetString("BACKEND_URL"),
-			bearerTokenSecret: viper.GetString("JWT_SHARED_SECRET"),
-			cors:              parseCorsOptions(""),
-			address:           fmt.Sprintf("%s:%s", viper.GetString("PROXY_HOST"), viper.GetString("PROXY_PORT")),
-			refreshDelay:      viper.GetString("REFRESH_DELAY"),
-			tlsKey:            viper.GetString("HTTP_TLS_KEY"),
-			tlsCert:           viper.GetString("HTTP_TLS_CERT"),
+			cors:         parseCorsOptions(""),
+			address:      fmt.Sprintf("%s:%s", viper.GetString("PROXY_HOST"), viper.GetString("PROXY_PORT")),
+			refreshDelay: viper.GetString("RULES_REFRESH_INTERVAL"),
+			tlsKey:       viper.GetString("HTTP_TLS_KEY"),
+			tlsCert:      viper.GetString("HTTP_TLS_CERT"),
 		}
 
 		runProxy(config)
@@ -119,24 +118,30 @@ OTHER CONTROLS
 func runProxy(c *proxyConfig) {
 	sdk, err := hydra.NewSDK(c.hydra)
 	if err != nil {
-		logger.WithError(err).Fatalln("Unable to connect to Hydra SDK.")
+		logger.WithError(err).Fatalln("Unable to connect to Hydra SDK")
 		return
 	}
 	backend, err := url.Parse(c.backendURL)
 	if err != nil {
-		logger.WithError(err).Fatalln("Unable to parse backend URL.")
+		logger.WithError(err).Fatalln("Unable to parse backend URL")
 	}
 
 	matcher := &rule.CachedMatcher{Manager: c.rules, Rules: []rule.Rule{}}
 
 	if err := matcher.Refresh(); err != nil {
-		logger.WithError(err).Fatalln("Unable to refresh rules.")
+		logger.WithError(err).Fatalln("Unable to refresh rules")
 	}
 
-	go refresh(c, matcher, 0)
+	keyManager := &rsakey.HydraManager{
+		SDK: sdk,
+		Set: viper.GetString("HYDRA_JWK_SET_ID"),
+	}
+
+	go refreshRules(c, matcher, 0)
+	go refreshKeys(keyManager, 0)
 
 	eval := evaluator.NewWardenEvaluator(logger, matcher, sdk)
-	d := director.NewDirector(backend, eval, logger, c.bearerTokenSecret)
+	d := director.NewDirector(backend, eval, logger, keyManager)
 	proxy := &httputil.ReverseProxy{
 		Director:  d.Director,
 		Transport: d,
@@ -151,11 +156,11 @@ func runProxy(c *proxyConfig) {
 	var cert tls.Certificate
 	if c.tlsCert != "" && c.tlsKey != "" {
 		if tlsCert, err := base64.StdEncoding.DecodeString(c.tlsCert); err != nil {
-			logger.WithError(err).Fatalln("Unable to base64 decode the TLS Certificate.")
+			logger.WithError(err).Fatalln("Unable to base64 decode the TLS Certificate")
 		} else if tlsKey, err := base64.StdEncoding.DecodeString(c.tlsKey); err != nil {
-			logger.WithError(err).Fatalln("Unable to base64 decode the TLS Private Key.")
+			logger.WithError(err).Fatalln("Unable to base64 decode the TLS Private Key")
 		} else if cert, err = tls.X509KeyPair(tlsCert, tlsKey); err != nil {
-			logger.WithError(err).Fatalln("Unable to load X509 key pair.")
+			logger.WithError(err).Fatalln("Unable to load X509 key pair")
 		}
 	}
 

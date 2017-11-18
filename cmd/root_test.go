@@ -52,7 +52,7 @@ func TestCommandLineInterface(t *testing.T) {
 			if c.wait != nil {
 				var count = 0
 				for c.wait() {
-					t.Logf("Port is not yet open, retrying attempt #%d...", count)
+					t.Logf("Port is not yet open, retrying attempt #%d..", count)
 					count++
 					if count > 5 {
 						t.FailNow()

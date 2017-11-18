@@ -88,7 +88,7 @@ func (d *WardenEvaluator) EvaluateAccessRequest(r *http.Request) (*Session, erro
 			WithField("reason", reasons["passthrough"]).
 			WithField("reason_id", "passthrough").
 			Infoln("Access request granted")
-		return &Session{User: "", Anonymous: true, ClientID: "", Disabled: true}, nil
+		return &Session{Issuer: "", User: "", Anonymous: true, ClientID: "", Disabled: true}, nil
 	}
 
 	if rl.AllowAnonymousModeEnabled {
@@ -102,7 +102,7 @@ func (d *WardenEvaluator) EvaluateAccessRequest(r *http.Request) (*Session, erro
 				WithField("reason", reasons["anonymous_without_credentials"]).
 				WithField("reason_id", "anonymous_without_credentials").
 				Infoln("Access request granted")
-			return &Session{User: "", Anonymous: true, ClientID: ""}, nil
+			return &Session{Issuer: "", User: "", Anonymous: true, ClientID: ""}, nil
 		}
 
 		introspection, response, err := d.Hydra.IntrospectOAuth2Token(token, "")
@@ -115,7 +115,7 @@ func (d *WardenEvaluator) EvaluateAccessRequest(r *http.Request) (*Session, erro
 				WithField("reason", reasons["anonymous_without_credentials_failed_introspection"]).
 				WithField("reason_id", "anonymous_without_credentials_failed_introspection").
 				Infoln("Access request granted")
-			return &Session{User: "", Anonymous: true, ClientID: ""}, nil
+			return &Session{Issuer: "", User: "", Anonymous: true, ClientID: ""}, nil
 		} else if response.StatusCode != http.StatusOK {
 			d.Logger.
 				WithField("granted", true).
@@ -126,7 +126,7 @@ func (d *WardenEvaluator) EvaluateAccessRequest(r *http.Request) (*Session, erro
 				WithField("reason", reasons["anonymous_introspection_http_error"]).
 				WithField("reason_id", "anonymous_introspection_http_error").
 				Infoln("Access request granted")
-			return &Session{User: "", Anonymous: true, ClientID: ""}, nil
+			return &Session{Issuer: "", User: "", Anonymous: true, ClientID: ""}, nil
 		} else if !introspection.Active {
 			d.Logger.
 				WithField("granted", true).
@@ -137,7 +137,7 @@ func (d *WardenEvaluator) EvaluateAccessRequest(r *http.Request) (*Session, erro
 				WithField("reason", reasons["anonymous_introspection_invalid_credentials"]).
 				WithField("reason_id", "anonymous_introspection_invalid_credentials").
 				Infoln("Access request granted")
-			return &Session{User: "", Anonymous: true, ClientID: ""}, nil
+			return &Session{Issuer: "", User: "", Anonymous: true, ClientID: ""}, nil
 		}
 
 		d.Logger.
@@ -150,6 +150,7 @@ func (d *WardenEvaluator) EvaluateAccessRequest(r *http.Request) (*Session, erro
 			WithField("reason_id", "anonymous_with_valid_credentials").
 			Infoln("Access request granted")
 		return &Session{
+			Issuer:    introspection.Iss,
 			User:      introspection.Sub,
 			ClientID:  introspection.ClientId,
 			Anonymous: false,
@@ -214,6 +215,7 @@ func (d *WardenEvaluator) EvaluateAccessRequest(r *http.Request) (*Session, erro
 			WithField("reason_id", "introspection_valid").
 			Infoln("Access request granted")
 		return &Session{
+			Issuer:    introspection.Iss,
 			User:      introspection.Sub,
 			ClientID:  introspection.ClientId,
 			Anonymous: false,
@@ -265,6 +267,7 @@ func (d *WardenEvaluator) EvaluateAccessRequest(r *http.Request) (*Session, erro
 		WithField("reason_id", "policy_decision_point_access_granted").
 		Infoln("Access request granted")
 	return &Session{
+		Issuer:    introspection.Issuer,
 		User:      introspection.Subject,
 		ClientID:  introspection.ClientId,
 		Anonymous: false,
