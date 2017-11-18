@@ -9,11 +9,10 @@
     <a href="https://patreon.com/user?u=4298803">Support us on patreon!</a>
 </h4>
 
-This is a reverse proxy that checks the HTTP Authorization for validity against a set of rules. This service
+ORY Oathkeeper is a reverse proxy that checks the HTTP Authorization for validity against a set of rules. This service
 uses Hydra to validate access tokens and policies. This service is under **active development** with **regular breaking changes**.
 
-[![CircleCI](https://circleci.com/gh/ory/oathkeeper/tree/master.svg?style=svg)](https://circleci.com/gh/ory/oathkeeper/tree/master)
-[![Coverage Status](https://coveralls.io/repos/github/ory/oathkeeper/badge.svg?branch=master)](https://coveralls.io/github/ory/oathkeeper?branch=master)
+[![CircleCI](https://circleci.com/gh/ory/oathkeeper.svg?style=svg&circle-token=eb458bf636326d41674141b6bbfa475a39c9db1e)](https://circleci.com/gh/ory/oathkeeper)
 
 ## Running
 

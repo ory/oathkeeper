@@ -65,6 +65,9 @@ func (h *Handler) Create(w http.ResponseWriter, r *http.Request, _ httprouter.Pa
 //
 // List all rules
 //
+// This method returns an array of all rules that are stored in the backend. This is useful if you want to get a full
+// view of what rules you have currently in place.
+//
 //     Consumes:
 //     - application/json
 //
@@ -95,7 +98,9 @@ func (h *Handler) List(w http.ResponseWriter, r *http.Request, _ httprouter.Para
 
 // swagger:route GET /rules/{id} rule getRule
 //
-// Get a rule
+// Retrieve a rule
+//
+// Use this method to retrieve a rule from the storage. If it does not exist you will receive a 404 error.
 //
 //     Consumes:
 //     - application/json
@@ -127,6 +132,9 @@ func (h *Handler) Get(w http.ResponseWriter, r *http.Request, ps httprouter.Para
 // swagger:route PUT /rules/{id} rule updateRule
 //
 // Update a rule
+//
+// Use this method to update a rule. Keep in mind that you need to send the full rule payload as this endpoint does
+// not support patching.
 //
 //     Consumes:
 //     - application/json
@@ -161,6 +169,8 @@ func (h *Handler) Update(w http.ResponseWriter, r *http.Request, ps httprouter.P
 // swagger:route DELETE /rules/{id} rule deleteRule
 //
 // Delete a rule
+//
+// Use this endpoint to delete a rule.
 //
 //     Consumes:
 //     - application/json
