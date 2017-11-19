@@ -94,7 +94,7 @@ HTTP CONTROLS
 				ClientID:     viper.GetString("HYDRA_CLIENT_ID"),
 				ClientSecret: viper.GetString("HYDRA_CLIENT_SECRET"),
 				EndpointURL:  viper.GetString("HYDRA_URL"),
-				Scopes:       []string{"hydra.warden"},
+				Scopes:       []string{"hydra.warden", "hydra.keys.*"},
 			},
 			rules:   rules,
 			address: fmt.Sprintf("%s:%s", viper.GetString("MANAGEMENT_HOST"), viper.GetString("MANAGEMENT_PORT")),
