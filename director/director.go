@@ -110,6 +110,7 @@ func (d *Director) Director(r *http.Request) {
 			WithFields(map[string]interface{}{"user": access.User, "client_id": access.ClientID, "request_url": r.URL.String()}).
 			Errorf("Unable to fetch private key for signing JSON Web Token")
 		*r = *r.WithContext(context.WithValue(r.Context(), requestDenied, &directorError{err: errors.WithStack(err), statusCode: http.StatusInternalServerError}))
+		return
 	}
 
 	token, err := jwt.NewWithClaims(jwt.SigningMethodRS256, access.ToClaims()).SignedString(privateKey)

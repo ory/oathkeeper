@@ -101,7 +101,7 @@ OTHER CONTROLS
 				ClientID:     viper.GetString("HYDRA_CLIENT_ID"),
 				ClientSecret: viper.GetString("HYDRA_CLIENT_SECRET"),
 				EndpointURL:  viper.GetString("HYDRA_URL"),
-				Scopes:       []string{"hydra.warden"},
+				Scopes:       []string{"hydra.warden", "hydra.keys.*"},
 			},
 			rules: rules, backendURL: viper.GetString("BACKEND_URL"),
 			cors:         parseCorsOptions(""),
