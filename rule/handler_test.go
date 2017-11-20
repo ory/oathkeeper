@@ -31,15 +31,14 @@ func TestHandler(t *testing.T) {
 		RequiredResource: "users:$1",
 		RequiredAction:   "create:$1",
 		RequiredScopes:   []string{"users.create"},
+		Mode:             PolicyMode,
 	}
 	r2 := swagger.Rule{
-		Description:                   "Get users rule",
-		MatchesUrl:                    server.URL + "/users/([0-9]+)",
-		MatchesMethods:                []string{"GET"},
-		RequiredScopes:                []string{},
-		AllowAnonymousModeEnabled:     true,
-		PassThroughModeEnabled:        true,
-		BasicAuthorizationModeEnabled: true,
+		Description:    "Get users rule",
+		MatchesUrl:     server.URL + "/users/([0-9]+)",
+		MatchesMethods: []string{"GET"},
+		RequiredScopes: []string{},
+		Mode:           AnonymousMode,
 	}
 
 	t.Run("case=create a new rule", func(t *testing.T) {

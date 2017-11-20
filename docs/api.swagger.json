@@ -243,16 +243,6 @@
       "description": "A rule",
       "type": "object",
       "properties": {
-        "allowAnonymousModeEnabled": {
-          "description": "If set to true, the protected endpoint is available to anonymous users. That means that the endpoint is accessible\nwithout having a valid access token. This setting overrides `basicAuthorizationModeEnabled`.",
-          "type": "boolean",
-          "x-go-name": "AllowAnonymousModeEnabled"
-        },
-        "basicAuthorizationModeEnabled": {
-          "description": "If set to true, disables checks against ORY Hydra's Warden API and uses basic authorization. This means that\nthe access token is validated (e.g. checking if it is expired, check if it claimed the necessary scopes)\nbut does not use the `requiredAction` and `requiredResource` fields for advanced access control.",
-          "type": "boolean",
-          "x-go-name": "BasicAuthorizationModeEnabled"
-        },
         "description": {
           "description": "A human readable description of this rule.",
           "type": "string",
@@ -276,10 +266,10 @@
           "type": "string",
           "x-go-name": "MatchesURL"
         },
-        "passThroughModeEnabled": {
-          "description": "If set to true, any authorization logic is completely disabled and the Authorization header is not changed at all.\nThis is useful if you have an endpoint that has it's own authorization logic, for example using basic authorization.\nIf set to true, this setting overrides `basicAuthorizationModeEnabled` and `allowAnonymousModeEnabled`.",
-          "type": "boolean",
-          "x-go-name": "PassThroughModeEnabled"
+        "mode": {
+          "description": "Defines which mode this rule should use. There are four valid modes:\n\nbypass: If set, any authorization logic is completely disabled and the Authorization header is not changed at all.\nThis is useful if you have an endpoint that has it's own authorization logic, for example using basic authorization.\nIf set to true, this setting overrides `basicAuthorizationModeEnabled` and `allowAnonymousModeEnabled`.\nanonymous: If set, the protected endpoint is available to anonymous users. That means that the endpoint is accessible\nwithout having a valid access token. This setting overrides `basicAuthorizationModeEnabled`.\ntoken: If set, disables checks against ORY Hydra's Warden API and uses basic authorization. This means that\nthe access token is validated (e.g. checking if it is expired, check if it claimed the necessary scopes)\nbut does not use the `requiredAction` and `requiredResource` fields for advanced access control.\npolicy: If set, uses ORY Hydra's Warden API for access control using access control policies.",
+          "type": "string",
+          "x-go-name": "Mode"
         },
         "requiredAction": {
           "description": "This field will be used to decide advanced authorization requests where access control policies are used. A\naction is typically something a user wants to do (e.g. write, read, delete).\nThis field supports expansion as described in the developer guide: https://ory.gitbooks.io/oathkeeper/content/concepts.html#rules",

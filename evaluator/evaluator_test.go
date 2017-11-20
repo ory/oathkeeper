@@ -31,14 +31,15 @@ func mustGenerateURL(t *testing.T, u string) *url.URL {
 
 func TestEvaluator(t *testing.T) {
 	we := NewWardenEvaluator(nil, nil, nil)
-	publicRule := rule.Rule{MatchesMethods: []string{"GET"}, MatchesURLCompiled: mustCompileRegex(t, "http://localhost/users/<[0-9]+>"), AllowAnonymousModeEnabled: true}
-	bypassACPRule := rule.Rule{MatchesMethods: []string{"GET"}, MatchesURLCompiled: mustCompileRegex(t, "http://localhost/users/<[0-9]+>"), BasicAuthorizationModeEnabled: true}
+	publicRule := rule.Rule{MatchesMethods: []string{"GET"}, MatchesURLCompiled: mustCompileRegex(t, "http://localhost/users/<[0-9]+>"), Mode: rule.AnonymousMode}
+	bypassACPRule := rule.Rule{MatchesMethods: []string{"GET"}, MatchesURLCompiled: mustCompileRegex(t, "http://localhost/users/<[0-9]+>"), Mode: rule.AuthenticatedMode}
 	privateRuleWithSubstitution := rule.Rule{
 		MatchesMethods:     []string{"POST"},
 		MatchesURLCompiled: mustCompileRegex(t, "http://localhost/users/<[0-9]+>"),
 		RequiredResource:   "users:$1",
 		RequiredAction:     "get:$1",
 		RequiredScopes:     []string{"users.create"},
+		Mode:               rule.PolicyMode,
 	}
 	privateRuleWithoutSubstitution := rule.Rule{
 		MatchesMethods:     []string{"POST"},
@@ -46,6 +47,7 @@ func TestEvaluator(t *testing.T) {
 		RequiredResource:   "users",
 		RequiredAction:     "get",
 		RequiredScopes:     []string{"users.create"},
+		Mode:               rule.PolicyMode,
 	}
 	privateRuleWithPartialSubstitution := rule.Rule{
 		MatchesMethods:     []string{"POST"},
@@ -53,6 +55,7 @@ func TestEvaluator(t *testing.T) {
 		RequiredResource:   "users:$2",
 		RequiredAction:     "get",
 		RequiredScopes:     []string{"users.create"},
+		Mode:               rule.PolicyMode,
 	}
 
 	for k, tc := range []struct {

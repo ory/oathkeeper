@@ -8,6 +8,18 @@ import (
 	"github.com/pkg/errors"
 )
 
+const BypassMode = "bypass"
+const AnonymousMode = "anonymous"
+const AuthenticatedMode = "authenticated"
+const PolicyMode = "policy"
+
+var ruleModes = []string{
+	BypassMode,
+	AnonymousMode,
+	AuthenticatedMode,
+	PolicyMode,
+}
+
 // Rule is a single rule that will get checked on every HTTP request.
 type Rule struct {
 	// ID is the unique id of the rule. It can be at most 190 characters long, but the layout of the ID is up to you.
@@ -34,14 +46,8 @@ type Rule struct {
 	// RequiredScopes is the resource this rule requires.
 	RequiredResource string
 
-	// AllowAnonymousModeEnabled if set true allows anonymous access to the specified paths and methods.
-	AllowAnonymousModeEnabled bool
-
-	// PassThroughModeEnabled if set true disables firewall capabilities.
-	PassThroughModeEnabled bool
-
-	// BasicAuthorizationModeEnabled if set true disables checking access control policies.
-	BasicAuthorizationModeEnabled bool
+	// Mode is the mode this rule enforces.
+	Mode string
 
 	// Description describes the rule.
 	Description string

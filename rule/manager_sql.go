@@ -14,17 +14,15 @@ import (
 )
 
 type sqlRule struct {
-	ID                            string `db:"surrogate_id"`
-	InternalID                    int64  `db:"id"`
-	MatchesMethods                string `db:"matches_methods"`
-	MatchesURL                    string `db:"matches_url"`
-	RequiredScopes                string `db:"required_scopes"`
-	RequiredAction                string `db:"required_action"`
-	RequiredResource              string `db:"required_resource"`
-	AllowAnonymousModeEnabled     bool   `db:"allow_anonymous"`
-	PassThroughModeEnabled        bool   `db:"disable_firewall"`
-	BasicAuthorizationModeEnabled bool   `db:"disable_acp"`
-	Description                   string `db:"description"`
+	ID               string `db:"surrogate_id"`
+	InternalID       int64  `db:"id"`
+	MatchesMethods   string `db:"matches_methods"`
+	MatchesURL       string `db:"matches_url"`
+	RequiredScopes   string `db:"required_scopes"`
+	RequiredAction   string `db:"required_action"`
+	RequiredResource string `db:"required_resource"`
+	Description      string `db:"description"`
+	Mode             string `db:"mode"`
 }
 
 func (r *sqlRule) toRule() (*Rule, error) {
@@ -43,32 +41,28 @@ func (r *sqlRule) toRule() (*Rule, error) {
 	}
 
 	return &Rule{
-		ID:                            r.ID,
-		MatchesMethods:                methods,
-		MatchesURLCompiled:            exp,
-		MatchesURL:                    r.MatchesURL,
-		RequiredScopes:                scopes,
-		RequiredAction:                r.RequiredAction,
-		RequiredResource:              r.RequiredResource,
-		AllowAnonymousModeEnabled:     r.AllowAnonymousModeEnabled,
-		PassThroughModeEnabled:        r.PassThroughModeEnabled,
-		BasicAuthorizationModeEnabled: r.BasicAuthorizationModeEnabled,
-		Description:                   r.Description,
+		ID:                 r.ID,
+		MatchesMethods:     methods,
+		MatchesURLCompiled: exp,
+		MatchesURL:         r.MatchesURL,
+		RequiredScopes:     scopes,
+		RequiredAction:     r.RequiredAction,
+		RequiredResource:   r.RequiredResource,
+		Mode:               r.Mode,
+		Description:        r.Description,
 	}, nil
 }
 
 func toSqlRule(r *Rule) *sqlRule {
 	return &sqlRule{
-		ID:                            r.ID,
-		MatchesMethods:                strings.Join(r.MatchesMethods, " "),
-		MatchesURL:                    r.MatchesURL,
-		RequiredScopes:                strings.Join(r.RequiredScopes, " "),
-		RequiredAction:                r.RequiredAction,
-		RequiredResource:              r.RequiredResource,
-		AllowAnonymousModeEnabled:     r.AllowAnonymousModeEnabled,
-		PassThroughModeEnabled:        r.PassThroughModeEnabled,
-		BasicAuthorizationModeEnabled: r.BasicAuthorizationModeEnabled,
-		Description:                   r.Description,
+		ID:               r.ID,
+		MatchesMethods:   strings.Join(r.MatchesMethods, " "),
+		MatchesURL:       r.MatchesURL,
+		RequiredScopes:   strings.Join(r.RequiredScopes, " "),
+		RequiredAction:   r.RequiredAction,
+		RequiredResource: r.RequiredResource,
+		Description:      r.Description,
+		Mode:             r.Mode,
 	}
 }
 
@@ -84,10 +78,8 @@ var migrations = &migrate.MemoryMigrationSource{
 	required_scopes		text NOT NULL,
 	required_action		text NOT NULL,
 	required_resource	text NOT NULL,
-	allow_anonymous		bool NOT NULL,
 	description			text NOT NULL,
-	disable_firewall	bool NOT NULL,
-	disable_acp			bool NOT NULL
+	mode				text NOT NULL
 )`},
 			Down: []string{
 				"DROP TABLE hydra_client",
@@ -103,10 +95,8 @@ var sqlParams = []string{
 	"required_scopes",
 	"required_action",
 	"required_resource",
-	"allow_anonymous",
 	"description",
-	"disable_firewall",
-	"disable_acp",
+	"mode",
 }
 
 func NewSQLManager(db *sqlx.DB) *SQLManager {
