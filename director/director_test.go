@@ -41,14 +41,15 @@ func TestProxy(t *testing.T) {
 	proxy := httptest.NewServer(&httputil.ReverseProxy{Director: d.Director, Transport: d})
 	defer proxy.Close()
 
-	publicRule := rule.Rule{MatchesMethods: []string{"GET"}, MatchesURLCompiled: mustCompileRegex(t, proxy.URL+"/users/[0-9]+"), AllowAnonymousModeEnabled: true}
-	disabledRule := rule.Rule{MatchesMethods: []string{"GET"}, MatchesURLCompiled: mustCompileRegex(t, proxy.URL+"/users/[0-9]+"), PassThroughModeEnabled: true}
+	publicRule := rule.Rule{MatchesMethods: []string{"GET"}, MatchesURLCompiled: mustCompileRegex(t, proxy.URL+"/users/[0-9]+"), Mode: rule.AnonymousMode}
+	disabledRule := rule.Rule{MatchesMethods: []string{"GET"}, MatchesURLCompiled: mustCompileRegex(t, proxy.URL+"/users/[0-9]+"), Mode: rule.BypassMode}
 	privateRule := rule.Rule{
 		MatchesMethods:     []string{"GET"},
 		MatchesURLCompiled: mustCompileRegex(t, proxy.URL+"/users/([0-9]+)"),
 		RequiredResource:   "users:$1",
 		RequiredAction:     "get:$1",
 		RequiredScopes:     []string{"users.create"},
+		Mode:               rule.PolicyMode,
 	}
 
 	for k, tc := range []struct {

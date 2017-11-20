@@ -49,6 +49,7 @@ var reasons = map[string]string{
 	"policy_decision_point_http_error":            "Rule requires policy-based access control decision, which failed due to a http error",
 	"policy_decision_point_access_forbidden":      "Rule requires policy-based access control decision, which was denied",
 	"policy_decision_point_access_granted":        "Rule requires policy-based access control decision, which was granted",
+	"unknown_mode":                                "Rule defines a unknown mod ",
 }
 
 func (d *WardenEvaluator) EvaluateAccessRequest(r *http.Request) (*Session, error) {
@@ -78,20 +79,20 @@ func (d *WardenEvaluator) EvaluateAccessRequest(r *http.Request) (*Session, erro
 		return nil, err
 	}
 
-	if rl.PassThroughModeEnabled {
+	switch rl.Mode {
+	case rule.BypassMode:
 		d.Logger.
 			WithField("granted", true).
 			WithField("user", "").
 			WithField("access_url", u.String()).
 			WithField("token", tokenID).
 			WithField("rule", rl.ID).
+			WithField("mode", rl.Mode).
 			WithField("reason", reasons["passthrough"]).
 			WithField("reason_id", "passthrough").
 			Infoln("Access request granted")
 		return &Session{Issuer: "", User: "", Anonymous: true, ClientID: "", Disabled: true}, nil
-	}
-
-	if rl.AllowAnonymousModeEnabled {
+	case rule.AnonymousMode:
 		if token == "" {
 			d.Logger.
 				WithField("granted", true).
@@ -112,6 +113,7 @@ func (d *WardenEvaluator) EvaluateAccessRequest(r *http.Request) (*Session, erro
 				WithField("user", "").
 				WithField("access_url", u.String()).
 				WithField("token", tokenID).
+				WithField("mode", rl.Mode).
 				WithField("reason", reasons["anonymous_without_credentials_failed_introspection"]).
 				WithField("reason_id", "anonymous_without_credentials_failed_introspection").
 				Infoln("Access request granted")
@@ -123,6 +125,7 @@ func (d *WardenEvaluator) EvaluateAccessRequest(r *http.Request) (*Session, erro
 				WithField("status_code", response.StatusCode).
 				WithField("token", tokenID).
 				WithField("access_url", u.String()).
+				WithField("mode", rl.Mode).
 				WithField("reason", reasons["anonymous_introspection_http_error"]).
 				WithField("reason_id", "anonymous_introspection_http_error").
 				Infoln("Access request granted")
@@ -134,6 +137,7 @@ func (d *WardenEvaluator) EvaluateAccessRequest(r *http.Request) (*Session, erro
 				WithField("access_url", u.String()).
 				WithField("token", tokenID).
 				WithField("rule", rl.ID).
+				WithField("mode", rl.Mode).
 				WithField("reason", reasons["anonymous_introspection_invalid_credentials"]).
 				WithField("reason_id", "anonymous_introspection_invalid_credentials").
 				Infoln("Access request granted")
@@ -146,6 +150,7 @@ func (d *WardenEvaluator) EvaluateAccessRequest(r *http.Request) (*Session, erro
 			WithField("access_url", u.String()).
 			WithField("token", tokenID).
 			WithField("rule", rl.ID).
+			WithField("mode", rl.Mode).
 			WithField("reason", reasons["anonymous_with_valid_credentials"]).
 			WithField("reason_id", "anonymous_with_valid_credentials").
 			Infoln("Access request granted")
@@ -155,21 +160,20 @@ func (d *WardenEvaluator) EvaluateAccessRequest(r *http.Request) (*Session, erro
 			ClientID:  introspection.ClientId,
 			Anonymous: false,
 		}, nil
-	}
+	case rule.AuthenticatedMode:
+		if token == "" {
+			d.Logger.WithError(err).
+				WithField("granted", false).
+				WithField("user", "").
+				WithField("access_url", u.String()).
+				WithField("token", tokenID).
+				WithField("mode", rl.Mode).
+				WithField("reason", reasons["missing_credentials"]).
+				WithField("reason_id", "missing_credentials").
+				Warn("Access request denied")
+			return nil, errors.WithStack(helper.ErrMissingBearerToken)
+		}
 
-	if token == "" {
-		d.Logger.WithError(err).
-			WithField("granted", false).
-			WithField("user", "").
-			WithField("access_url", u.String()).
-			WithField("token", tokenID).
-			WithField("reason", reasons["missing_credentials"]).
-			WithField("reason_id", "missing_credentials").
-			Warn("Access request denied")
-		return nil, errors.WithStack(helper.ErrMissingBearerToken)
-	}
-
-	if rl.BasicAuthorizationModeEnabled {
 		introspection, response, err := d.Hydra.IntrospectOAuth2Token(token, strings.Join(rl.RequiredScopes, " "))
 		if err != nil {
 			d.Logger.WithError(err).
@@ -177,6 +181,7 @@ func (d *WardenEvaluator) EvaluateAccessRequest(r *http.Request) (*Session, erro
 				WithField("user", "").
 				WithField("access_url", u.String()).
 				WithField("token", tokenID).
+				WithField("mode", rl.Mode).
 				WithField("reason", reasons["introspection_network_error"]).
 				WithField("reason_id", "introspection_network_error").
 				Warn("Access request denied")
@@ -188,6 +193,7 @@ func (d *WardenEvaluator) EvaluateAccessRequest(r *http.Request) (*Session, erro
 				WithField("access_url", u.String()).
 				WithField("status_code", response.StatusCode).
 				WithField("token", tokenID).
+				WithField("mode", rl.Mode).
 				WithField("reason", reasons["introspection_http_error"]).
 				WithField("reason_id", "introspection_http_error").
 				Warn("Access request denied")
@@ -199,6 +205,7 @@ func (d *WardenEvaluator) EvaluateAccessRequest(r *http.Request) (*Session, erro
 				WithField("access_url", u.String()).
 				WithField("status_code", response.StatusCode).
 				WithField("token", tokenID).
+				WithField("mode", rl.Mode).
 				WithField("reason", reasons["introspection_invalid_credentials"]).
 				WithField("reason_id", "introspection_invalid_credentials").
 				Warn("Access request denied")
@@ -211,6 +218,7 @@ func (d *WardenEvaluator) EvaluateAccessRequest(r *http.Request) (*Session, erro
 			WithField("access_url", u.String()).
 			WithField("token", tokenID).
 			WithField("rule", rl.ID).
+			WithField("mode", rl.Mode).
 			WithField("reason", reasons["introspection_valid"]).
 			WithField("reason_id", "introspection_valid").
 			Infoln("Access request granted")
@@ -220,58 +228,86 @@ func (d *WardenEvaluator) EvaluateAccessRequest(r *http.Request) (*Session, erro
 			ClientID:  introspection.ClientId,
 			Anonymous: false,
 		}, nil
-	}
+	case rule.PolicyMode:
+		if token == "" {
+			d.Logger.WithError(err).
+				WithField("granted", false).
+				WithField("user", "").
+				WithField("access_url", u.String()).
+				WithField("token", tokenID).
+				WithField("mode", rl.Mode).
+				WithField("reason", reasons["missing_credentials"]).
+				WithField("reason_id", "missing_credentials").
+				Warn("Access request denied")
+			return nil, errors.WithStack(helper.ErrMissingBearerToken)
+		}
 
-	introspection, response, err := d.Hydra.DoesWardenAllowTokenAccessRequest(d.prepareAccessRequests(r, u.String(), token, rl))
-	if err != nil {
-		d.Logger.WithError(err).
-			WithField("granted", false).
-			WithField("user", "").
-			WithField("access_url", u.String()).
-			WithField("token", tokenID).
-			WithField("reason", reasons["policy_decision_point_network_error"]).
-			WithField("reason_id", "policy_decision_point_network_error").
-			Warn("Access request denied")
-		return nil, errors.WithStack(err)
-	} else if response.StatusCode != http.StatusOK {
-		d.Logger.WithError(err).
-			WithField("granted", false).
-			WithField("user", "").
-			WithField("access_url", u.String()).
-			WithField("status_code", response.StatusCode).
-			WithField("token", tokenID).
-			WithField("reason", reasons["policy_decision_point_http_error"]).
-			WithField("reason_id", "policy_decision_point_http_error").
-			Warn("Access request denied")
-		return nil, errors.Errorf("Token introspection expects status code %d but got %d", http.StatusOK, response.StatusCode)
-	} else if !introspection.Allowed {
-		d.Logger.WithError(err).
-			WithField("granted", false).
-			WithField("user", "").
-			WithField("access_url", u.String()).
-			WithField("status_code", response.StatusCode).
-			WithField("token", tokenID).
-			WithField("reason", reasons["policy_decision_point_access_forbidden"]).
-			WithField("reason_id", "policy_decision_point_access_forbidden").
-			Warn("Access request denied")
-		return nil, errors.WithStack(helper.ErrForbidden)
-	}
+		introspection, response, err := d.Hydra.DoesWardenAllowTokenAccessRequest(d.prepareAccessRequests(r, u.String(), token, rl))
+		if err != nil {
+			d.Logger.WithError(err).
+				WithField("granted", false).
+				WithField("user", "").
+				WithField("access_url", u.String()).
+				WithField("token", tokenID).
+				WithField("mode", rl.Mode).
+				WithField("reason", reasons["policy_decision_point_network_error"]).
+				WithField("reason_id", "policy_decision_point_network_error").
+				Warn("Access request denied")
+			return nil, errors.WithStack(err)
+		} else if response.StatusCode != http.StatusOK {
+			d.Logger.WithError(err).
+				WithField("granted", false).
+				WithField("user", "").
+				WithField("access_url", u.String()).
+				WithField("status_code", response.StatusCode).
+				WithField("token", tokenID).
+				WithField("mode", rl.Mode).
+				WithField("reason", reasons["policy_decision_point_http_error"]).
+				WithField("reason_id", "policy_decision_point_http_error").
+				Warn("Access request denied")
+			return nil, errors.Errorf("Token introspection expects status code %d but got %d", http.StatusOK, response.StatusCode)
+		} else if !introspection.Allowed {
+			d.Logger.WithError(err).
+				WithField("granted", false).
+				WithField("user", "").
+				WithField("access_url", u.String()).
+				WithField("status_code", response.StatusCode).
+				WithField("token", tokenID).
+				WithField("mode", rl.Mode).
+				WithField("reason", reasons["policy_decision_point_access_forbidden"]).
+				WithField("reason_id", "policy_decision_point_access_forbidden").
+				Warn("Access request denied")
+			return nil, errors.WithStack(helper.ErrForbidden)
+		}
 
-	d.Logger.
-		WithField("granted", true).
-		WithField("user", introspection.Subject).
-		WithField("access_url", u.String()).
-		WithField("token", tokenID).
-		WithField("rule", rl.ID).
-		WithField("reason", reasons["policy_decision_point_access_granted"]).
-		WithField("reason_id", "policy_decision_point_access_granted").
-		Infoln("Access request granted")
-	return &Session{
-		Issuer:    introspection.Issuer,
-		User:      introspection.Subject,
-		ClientID:  introspection.ClientId,
-		Anonymous: false,
-	}, nil
+		d.Logger.
+			WithField("granted", true).
+			WithField("user", introspection.Subject).
+			WithField("access_url", u.String()).
+			WithField("token", tokenID).
+			WithField("rule", rl.ID).
+			WithField("mode", rl.Mode).
+			WithField("reason", reasons["policy_decision_point_access_granted"]).
+			WithField("reason_id", "policy_decision_point_access_granted").
+			Infoln("Access request granted")
+		return &Session{
+			Issuer:    introspection.Issuer,
+			User:      introspection.Subject,
+			ClientID:  introspection.ClientId,
+			Anonymous: false,
+		}, nil
+	default:
+		d.Logger.WithError(err).
+			WithField("granted", false).
+			WithField("user", "").
+			WithField("access_url", u.String()).
+			WithField("token", tokenID).
+			WithField("mode", rl.Mode).
+			WithField("reason", reasons["unknown_mode"]).
+			WithField("reason_id", "unknown_mode").
+			Warn("Access request denied")
+		return nil, errors.Errorf("Unknown rule mode \"%s\"", rl.Mode)
+	}
 }
 
 func (d *WardenEvaluator) prepareAccessRequests(r *http.Request, u string, token string, rl *rule.Rule) swagger.WardenTokenAccessRequest {

@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"strings"
+
 	"github.com/julienschmidt/httprouter"
 	"github.com/ory/herodot"
 	"github.com/ory/ladon/compiler"
@@ -213,32 +215,32 @@ func toRule(rule *jsonRule) (*Rule, error) {
 		return nil, err
 	}
 
+	if !stringInSlice(rule.Mode, ruleModes) {
+		return nil, errors.Errorf("Rule mode %s not supported, use one of: %s", rule.Mode, strings.Join(ruleModes, ","))
+	}
+
 	return &Rule{
-		ID:                            rule.ID,
-		MatchesURLCompiled:            exp,
-		MatchesURL:                    rule.MatchesURL,
-		MatchesMethods:                rule.MatchesMethods,
-		RequiredScopes:                rule.RequiredScopes,
-		RequiredAction:                rule.RequiredAction,
-		RequiredResource:              rule.RequiredResource,
-		AllowAnonymousModeEnabled:     rule.AllowAnonymousModeEnabled,
-		PassThroughModeEnabled:        rule.PassThroughModeEnabled,
-		BasicAuthorizationModeEnabled: rule.BasicAuthorizationModeEnabled,
-		Description:                   rule.Description,
+		ID:                 rule.ID,
+		MatchesURLCompiled: exp,
+		MatchesURL:         rule.MatchesURL,
+		MatchesMethods:     rule.MatchesMethods,
+		RequiredScopes:     rule.RequiredScopes,
+		RequiredAction:     rule.RequiredAction,
+		RequiredResource:   rule.RequiredResource,
+		Mode:               rule.Mode,
+		Description:        rule.Description,
 	}, nil
 }
 
 func encodeRule(r *Rule) *jsonRule {
 	return &jsonRule{
-		ID:                            r.ID,
-		MatchesURL:                    r.MatchesURL,
-		MatchesMethods:                r.MatchesMethods,
-		RequiredScopes:                r.RequiredScopes,
-		RequiredAction:                r.RequiredAction,
-		RequiredResource:              r.RequiredResource,
-		PassThroughModeEnabled:        r.PassThroughModeEnabled,
-		BasicAuthorizationModeEnabled: r.BasicAuthorizationModeEnabled,
-		AllowAnonymousModeEnabled:     r.AllowAnonymousModeEnabled,
-		Description:                   r.Description,
+		ID:               r.ID,
+		MatchesURL:       r.MatchesURL,
+		MatchesMethods:   r.MatchesMethods,
+		RequiredScopes:   r.RequiredScopes,
+		RequiredAction:   r.RequiredAction,
+		RequiredResource: r.RequiredResource,
+		Mode:             r.Mode,
+		Description:      r.Description,
 	}
 }
