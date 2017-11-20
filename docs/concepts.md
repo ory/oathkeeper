@@ -1,10 +1,18 @@
+
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
-**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
+**Table of Contents**
 
 - [Concepts](#concepts)
   - [Terminology](#terminology)
   - [Rules](#rules)
+    - [Regular Expressions](#regular-expressions)
+      - [Substitution](#substitution)
+    - [Examples](#examples)
+      - [Bypass](#bypass)
+      - [Anonymous](#anonymous)
+      - [Authenticated](#authenticated)
+      - [Policy Based Access Control](#policy-based-access-control)
     - [Rules REST API](#rules-rest-api)
     - [Rules CLI API](#rules-cli-api)
 

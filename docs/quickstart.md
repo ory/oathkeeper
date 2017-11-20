@@ -1,3 +1,13 @@
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents**
+
+- [Quickstart](#quickstart)
+  - [Installing ORY Oathkeeper](#installing-ory-oathkeeper)
+  - [Running ORY Oathkeeper](#running-ory-oathkeeper)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 # Quickstart
 
 This section covers how to get started using ORY Oathkeeper.
