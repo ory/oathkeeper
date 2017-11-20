@@ -22,7 +22,7 @@ All URIs are relative to *http://localhost*
 
 Class | Method | HTTP request | Description
 ------------ | ------------- | ------------- | -------------
-*RuleApi* | [**CreateRule**](docs/RuleApi.md#createrule) | **Post** /rules | 
+*RuleApi* | [**CreateRule**](docs/RuleApi.md#createrule) | **Post** /rules | Create a rule
 *RuleApi* | [**DeleteRule**](docs/RuleApi.md#deleterule) | **Delete** /rules/{id} | Delete a rule
 *RuleApi* | [**GetRule**](docs/RuleApi.md#getrule) | **Get** /rules/{id} | Retrieve a rule
 *RuleApi* | [**ListRules**](docs/RuleApi.md#listrules) | **Get** /rules | List all rules

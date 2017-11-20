@@ -1,3 +1,4 @@
+
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 **Table of Contents**
@@ -38,7 +39,11 @@ Authorization: bearer <jwt-signed-id-token>
 ```
 
 Now, the protected resource is capable of decoding and validating the JSON Web Token using the public key supplied
-by ORY Oathkeeper's API.
+by ORY Oathkeeper's API. The public key for decoding the ID token is available at Oathkeeper's management endpoint:
+
+```
+http://oathkeeper:4456/keys/id-token.public
+```
 
 ![ID Token Transformation](images/id_token.svg)
 
