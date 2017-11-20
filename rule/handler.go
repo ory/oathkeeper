@@ -31,6 +31,8 @@ func (h *Handler) SetRoutes(r *httprouter.Router) {
 //
 // Create a rule
 //
+// This method allows creation of rules. If a rule id exists, you will receive an error.
+//
 //     Consumes:
 //     - application/json
 //

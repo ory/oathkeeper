@@ -18,6 +18,7 @@ import (
 	"github.com/ory/oathkeeper/rsakey"
 	"github.com/ory/oathkeeper/rule"
 	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -155,4 +156,50 @@ func TestProxy(t *testing.T) {
 			}
 		})
 	}
+}
+
+func panicCompileRegex(pattern string) *regexp.Regexp {
+	exp, err := regexp.Compile(pattern)
+	if err != nil {
+		panic(err.Error())
+	}
+	return exp
+}
+
+func BenchmarkDirector(b *testing.B) {
+	backend := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprint(w, r.Header.Get("Authorization"))
+	}))
+	defer backend.Close()
+
+	logger := logrus.New()
+	logger.Level = logrus.WarnLevel
+	u, _ := url.Parse(backend.URL)
+	d := NewDirector(u, nil, logger, &rsakey.LocalManager{KeyStrength: 512})
+
+	proxy := httptest.NewServer(&httputil.ReverseProxy{Director: d.Director, Transport: d})
+	defer proxy.Close()
+
+	matcher := &rule.CachedMatcher{Rules: []rule.Rule{
+		{MatchesMethods: []string{"GET"}, MatchesURLCompiled: panicCompileRegex(proxy.URL + "/users"), Mode: rule.AnonymousMode},
+		{MatchesMethods: []string{"GET"}, MatchesURLCompiled: panicCompileRegex(proxy.URL + "/users/<[0-9]+>"), Mode: rule.AnonymousMode},
+		{MatchesMethods: []string{"GET"}, MatchesURLCompiled: panicCompileRegex(proxy.URL + "/<[0-9]+>"), Mode: rule.AnonymousMode},
+		{MatchesMethods: []string{"GET"}, MatchesURLCompiled: panicCompileRegex(proxy.URL + "/other/<.+>"), Mode: rule.AnonymousMode},
+	}}
+	d.Evaluator = evaluator.NewWardenEvaluator(logger, matcher, nil)
+
+	req, _ := http.NewRequest("GET", proxy.URL+"/users", nil)
+
+	b.Run("case=fetch_user_endpoint", func(b *testing.B) {
+		for n := 0; n < b.N; n++ {
+			res, err := http.DefaultClient.Do(req)
+			if err != nil {
+				b.FailNow()
+			}
+
+			if res.StatusCode != http.StatusOK {
+				b.FailNow()
+			}
+		}
+	})
 }

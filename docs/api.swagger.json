@@ -56,7 +56,7 @@
         }
       },
       "post": {
-        "description": "Create a rule",
+        "description": "This method allows creation of rules. If a rule id exists, you will receive an error.",
         "consumes": [
           "application/json"
         ],
@@ -70,6 +70,7 @@
         "tags": [
           "rule"
         ],
+        "summary": "Create a rule",
         "operationId": "createRule",
         "parameters": [
           {

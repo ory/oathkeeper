@@ -38,8 +38,8 @@ func NewRuleApiWithBasePath(basePath string) *RuleApi {
 }
 
 /**
- *
  * Create a rule
+ * This method allows creation of rules. If a rule id exists, you will receive an error.
  *
  * @param body
  * @return *Rule

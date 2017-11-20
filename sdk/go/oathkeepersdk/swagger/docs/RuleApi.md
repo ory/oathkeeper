@@ -4,7 +4,7 @@ All URIs are relative to *http://localhost*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
-[**CreateRule**](RuleApi.md#CreateRule) | **Post** /rules | 
+[**CreateRule**](RuleApi.md#CreateRule) | **Post** /rules | Create a rule
 [**DeleteRule**](RuleApi.md#DeleteRule) | **Delete** /rules/{id} | Delete a rule
 [**GetRule**](RuleApi.md#GetRule) | **Get** /rules/{id} | Retrieve a rule
 [**ListRules**](RuleApi.md#ListRules) | **Get** /rules | List all rules
@@ -14,9 +14,9 @@ Method | HTTP request | Description
 # **CreateRule**
 > Rule CreateRule($body)
 
-
-
 Create a rule
+
+This method allows creation of rules. If a rule id exists, you will receive an error.
 
 
 ### Parameters
