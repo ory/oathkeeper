@@ -70,10 +70,12 @@ create two files:
   "effect": "allow",
   "resources": [
     "rn:hydra:warden:allowed",
-    "rn:hydra:warden:token:allowed"
+    "rn:hydra:warden:token:allowed",
+    "rn:hydra:keys:oathkeeper:id-token<.*>",
   ],
   "actions": [
-    "decide"
+    "decide",
+    "get"
   ]
 }
 ```
@@ -91,6 +93,9 @@ Now we are all set to boot up ORY Oathkeeper. Because we are using the in-memory
 ```
 # We assume that ORY Hydra is running on localhost:4444
 $ export HYDRA_URL=http://localhost:4444/
+
+# ORY Oathkeeper stores the public/private key in ORY Hydra using this set id
+export HYDRA_JWK_SET_ID=oathkeeper:id-token
 
 # These are the values from the client.json file
 $ export HYDRA_CLIENT_ID=oathkeeper-client
