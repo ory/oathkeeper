@@ -4,7 +4,7 @@
     <a href="https://gitter.im/ory-am/hydra">Chat</a> |
     <a href="https://community.ory.am/">Forums</a> |
     <a href="http://eepurl.com/bKT3N9">Newsletter</a><br/><br/>
-    <a href="http://docs.oathkeeper.apiary.io/">Developer Guide</a> |
+    <a href="https://ory.gitbooks.io/oathkeeper/content/">Developer Guide</a> |
     <a href="http://docs.oathkeeper.apiary.io/">API Docs</a> |
     <a href="https://patreon.com/user?u=4298803">Support us on patreon!</a>
 </h4>
