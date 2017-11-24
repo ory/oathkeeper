@@ -3,6 +3,8 @@ package cmd
 import (
 	"net/http"
 
+	"fmt"
+
 	"github.com/ory/oathkeeper/sdk/go/oathkeepersdk"
 	"github.com/spf13/cobra"
 )
@@ -24,9 +26,9 @@ var getCmd = &cobra.Command{
 		}
 
 		client := oathkeepersdk.NewSDK(endpoint)
-		rules, response, err := client.GetRule(args[0])
+		rule, response, err := client.GetRule(args[0])
 		checkResponse(response, err, http.StatusOK)
-		formatResponse(rules)
+		fmt.Println(formatResponse(rule))
 	},
 }
 
