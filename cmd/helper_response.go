@@ -9,7 +9,7 @@ import (
 )
 
 func checkResponse(response *swagger.APIResponse, err error, expectedStatusCode int) {
-	must(err, "Could not validate token: %s", err)
+	must(err, "A network error occurred: %s", err)
 
 	if response.StatusCode != expectedStatusCode {
 		fmt.Printf("Command failed because status code %d was expeceted but code %d was received", expectedStatusCode, response.StatusCode)
