@@ -9,7 +9,6 @@ import (
 	"github.com/meatballhat/negroni-logrus"
 	"github.com/ory/graceful"
 	"github.com/ory/herodot"
-	"github.com/ory/hydra/sdk/go/hydra"
 	"github.com/ory/oathkeeper/rsakey"
 	"github.com/ory/oathkeeper/rule"
 	"github.com/spf13/cobra"
@@ -18,17 +17,11 @@ import (
 )
 
 type managementConfig struct {
-	hydra   *hydra.Configuration
-	rules   rule.Manager
-	address string
+	rules rule.Manager
 }
 
 func runManagement(c *managementConfig) {
-	sdk, err := hydra.NewSDK(c.hydra)
-	if err != nil {
-		logger.WithError(err).Fatalln("Unable to connect to Hydra SDK")
-		return
-	}
+	sdk := getHydraSDK()
 
 	keyManager := &rsakey.HydraManager{
 		SDK: sdk,
@@ -47,7 +40,7 @@ func runManagement(c *managementConfig) {
 
 	go refreshKeys(keyManager, 0)
 
-	addr := c.address
+	addr := fmt.Sprintf("%s:%s", viper.GetString("MANAGEMENT_HOST"), viper.GetString("MANAGEMENT_PORT"))
 	server := graceful.WithDefaults(&http.Server{
 		Addr:    addr,
 		Handler: router,
@@ -89,17 +82,7 @@ HTTP CONTROLS
 			logger.WithError(err).Fatalln("Unable to connect to rule backend")
 		}
 
-		config := &managementConfig{
-			hydra: &hydra.Configuration{
-				ClientID:     viper.GetString("HYDRA_CLIENT_ID"),
-				ClientSecret: viper.GetString("HYDRA_CLIENT_SECRET"),
-				EndpointURL:  viper.GetString("HYDRA_URL"),
-				Scopes:       []string{"hydra.warden", "hydra.keys.*"},
-			},
-			rules:   rules,
-			address: fmt.Sprintf("%s:%s", viper.GetString("MANAGEMENT_HOST"), viper.GetString("MANAGEMENT_PORT")),
-		}
-
+		config := &managementConfig{rules: rules}
 		runManagement(config)
 	},
 }

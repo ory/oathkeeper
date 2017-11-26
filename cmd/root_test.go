@@ -13,6 +13,7 @@ import (
 func TestCommandLineInterface(t *testing.T) {
 	var osArgs = make([]string, len(os.Args))
 	os.Setenv("DATABASE_URL", "memory")
+	os.Setenv("ISSUER_URL", "memory")
 	os.Setenv("HYDRA_URL", "http://does-not-exist.com/")
 	os.Setenv("HYDRA_CLIENT_ID", "does-not-exist")
 	os.Setenv("HYDRA_CLIENT_SECRET", "does-not-exist")

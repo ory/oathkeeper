@@ -135,7 +135,7 @@ func TestProxy(t *testing.T) {
 
 			matcher := &rule.CachedMatcher{Rules: tc.rules}
 			sdk := tc.mock(ctrl)
-			d.Evaluator = evaluator.NewWardenEvaluator(nil, matcher, sdk)
+			d.Evaluator = evaluator.NewWardenEvaluator(nil, matcher, sdk, "")
 
 			req, err := http.NewRequest("GET", tc.url, nil)
 			require.NoError(t, err)
@@ -186,7 +186,7 @@ func BenchmarkDirector(b *testing.B) {
 		{MatchesMethods: []string{"GET"}, MatchesURLCompiled: panicCompileRegex(proxy.URL + "/<[0-9]+>"), Mode: rule.AnonymousMode},
 		{MatchesMethods: []string{"GET"}, MatchesURLCompiled: panicCompileRegex(proxy.URL + "/other/<.+>"), Mode: rule.AnonymousMode},
 	}}
-	d.Evaluator = evaluator.NewWardenEvaluator(logger, matcher, nil)
+	d.Evaluator = evaluator.NewWardenEvaluator(logger, matcher, nil, "")
 
 	req, _ := http.NewRequest("GET", proxy.URL+"/users", nil)
 
