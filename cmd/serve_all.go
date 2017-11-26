@@ -1,9 +1,6 @@
 package cmd
 
 import (
-	"fmt"
-
-	"github.com/ory/hydra/sdk/go/hydra"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -11,36 +8,19 @@ import (
 // allCmd represents the all command
 var allCmd = &cobra.Command{
 	Use:   "all",
-	Short: "A brief description of your command",
+	Short: "Runs both the proxy and management command",
+	Long: `For documentation on the available configuration options please run:
+
+* hydra help serve management
+* hydra help serve proxy`,
 	Run: func(cmd *cobra.Command, args []string) {
 		rules, err := newRuleManager(viper.GetString("DATABASE_URL"))
 		if err != nil {
 			logger.WithError(err).Fatalln("Unable to connect to rule backend")
 		}
 
-		pc := &proxyConfig{
-			hydra: &hydra.Configuration{
-				ClientID:     viper.GetString("HYDRA_CLIENT_ID"),
-				ClientSecret: viper.GetString("HYDRA_CLIENT_SECRET"),
-				EndpointURL:  viper.GetString("HYDRA_URL"),
-				Scopes:       []string{"hydra.warden", "hydra.keys.*"},
-			},
-			rules: rules, backendURL: viper.GetString("BACKEND_URL"),
-			cors:         parseCorsOptions(""),
-			address:      fmt.Sprintf("%s:%s", viper.GetString("PROXY_HOST"), viper.GetString("PROXY_PORT")),
-			refreshDelay: viper.GetString("RULES_REFRESH_INTERVAL"),
-		}
-
-		mc := &managementConfig{
-			hydra: &hydra.Configuration{
-				ClientID:     viper.GetString("HYDRA_CLIENT_ID"),
-				ClientSecret: viper.GetString("HYDRA_CLIENT_SECRET"),
-				EndpointURL:  viper.GetString("HYDRA_URL"),
-				Scopes:       []string{"hydra.warden", "hydra.keys.*"},
-			},
-			rules:   rules,
-			address: fmt.Sprintf("%s:%s", viper.GetString("MANAGEMENT_HOST"), viper.GetString("MANAGEMENT_PORT")),
-		}
+		pc := &proxyConfig{rules: rules}
+		mc := &managementConfig{rules: rules}
 
 		go runManagement(mc)
 		runProxy(pc)
