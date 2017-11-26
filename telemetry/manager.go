@@ -4,7 +4,9 @@ import (
 	"runtime"
 	"time"
 
-	"github.com/ory/hydra/pkg"
+	"strings"
+
+	"github.com/ory/oathkeeper/pkg"
 	"github.com/segmentio/analytics-go"
 	"github.com/sirupsen/logrus"
 )
@@ -21,6 +23,10 @@ type Manager struct {
 }
 
 func (m *Manager) Identify() {
+	if strings.Contains(m.ID, "localhost") {
+		return
+	}
+
 	if err := pkg.Retry(m.Logger, time.Minute*2, time.Minute*15, func() error {
 		return m.Segment.Identify(&analytics.Identify{
 			UserId: m.ID,
@@ -41,6 +47,10 @@ func (m *Manager) Identify() {
 }
 
 func (m *Manager) Submit() {
+	if strings.Contains(m.ID, "localhost") {
+		return
+	}
+
 	for {
 		if err := m.Segment.Track(&analytics.Track{
 			Event:  "telemetry",
