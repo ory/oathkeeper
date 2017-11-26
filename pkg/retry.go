@@ -36,8 +36,7 @@ func Retry(logger logrus.FieldLogger, maxWait time.Duration, failAfter time.Dura
 			retryStart = time.Now()
 		}
 
-		LogError(err, logger)
-		logger.Infof("Retrying in %f seconds...", loopWait.Seconds())
+		logger.WithError(err).Infof("Retrying in %f seconds...", loopWait.Seconds())
 		time.Sleep(loopWait)
 		loopWait = loopWait * time.Duration(int64(2))
 		if loopWait > maxWait {
