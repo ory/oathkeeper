@@ -30,7 +30,7 @@ func mustGenerateURL(t *testing.T, u string) *url.URL {
 }
 
 func TestEvaluator(t *testing.T) {
-	we := NewWardenEvaluator(nil, nil, nil)
+	we := NewWardenEvaluator(nil, nil, nil, "")
 	publicRule := rule.Rule{MatchesMethods: []string{"GET"}, MatchesURLCompiled: mustCompileRegex(t, "http://localhost/users/<[0-9]+>"), Mode: rule.AnonymousMode}
 	bypassACPRule := rule.Rule{MatchesMethods: []string{"GET"}, MatchesURLCompiled: mustCompileRegex(t, "http://localhost/users/<[0-9]+>"), Mode: rule.AuthenticatedMode}
 	privateRuleWithSubstitution := rule.Rule{
