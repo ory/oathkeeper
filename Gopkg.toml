@@ -47,7 +47,7 @@
 
 [[constraint]]
   name = "github.com/ory/dockertest"
-  version = "3.0.9"
+  version = "3.1.0"
 
 [[constraint]]
   name = "github.com/ory/graceful"
@@ -62,6 +62,10 @@
   version = "0.9.14"
 
 [[constraint]]
+  name = "github.com/ory/ladon"
+  version = "0.8.6"
+
+[[constraint]]
   name = "github.com/pborman/uuid"
   version = "1.1.0"
 
@@ -70,8 +74,16 @@
   version = "0.8.0"
 
 [[constraint]]
+  name = "github.com/rs/cors"
+  version = "1.2.0"
+
+[[constraint]]
   branch = "master"
   name = "github.com/rubenv/sql-migrate"
+
+[[constraint]]
+  name = "github.com/segmentio/analytics-go"
+  version = "2.1.1"
 
 [[constraint]]
   name = "github.com/sirupsen/logrus"
@@ -95,7 +107,7 @@
 
 [[constraint]]
   name = "github.com/urfave/negroni"
-  version = "0.2.0"
+  version = "0.3.0"
 
 [[constraint]]
   branch = "master"
@@ -106,5 +118,5 @@
   version = "0.13.0"
 
 [[constraint]]
-  name = "github.com/rs/cors"
-  version = "1.2.0"
+  name = "gopkg.in/square/go-jose.v2"
+  version = "2.1.3"
