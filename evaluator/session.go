@@ -8,11 +8,12 @@ import (
 )
 
 type Session struct {
-	User      string `json:"user"`
-	Anonymous bool   `json:"anonymous"`
-	Disabled  bool   `json:"disabled"`
-	ClientID  string `json:"clientId"`
-	Issuer    string `json:"issuer"`
+	User      string      `json:"user"`
+	Anonymous bool        `json:"anonymous"`
+	Disabled  bool        `json:"disabled"`
+	ClientID  string      `json:"clientId"`
+	Issuer    string      `json:"issuer"`
+	Extra     interface{} `json:"extra"`
 }
 
 func (s *Session) ToClaims() jwt.MapClaims {
@@ -25,5 +26,6 @@ func (s *Session) ToClaims() jwt.MapClaims {
 		"anon": s.Anonymous,
 		"aud":  s.ClientID,
 		"jti":  uuid.New(),
+		"ext":  s.Extra,
 	}
 }

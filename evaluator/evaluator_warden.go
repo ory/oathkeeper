@@ -161,6 +161,7 @@ func (d *WardenEvaluator) EvaluateAccessRequest(r *http.Request) (*Session, erro
 			User:      introspection.Sub,
 			ClientID:  introspection.ClientId,
 			Anonymous: false,
+			Extra:     introspection.Ext,
 		}, nil
 	case rule.AuthenticatedMode:
 		if token == "" {
@@ -229,6 +230,7 @@ func (d *WardenEvaluator) EvaluateAccessRequest(r *http.Request) (*Session, erro
 			User:      introspection.Sub,
 			ClientID:  introspection.ClientId,
 			Anonymous: false,
+			Extra:     introspection.Ext,
 		}, nil
 	case rule.PolicyMode:
 		if token == "" {
@@ -297,6 +299,7 @@ func (d *WardenEvaluator) EvaluateAccessRequest(r *http.Request) (*Session, erro
 			User:      introspection.Subject,
 			ClientID:  introspection.ClientId,
 			Anonymous: false,
+			Extra:     introspection.AccessTokenExtra,
 		}, nil
 	default:
 		d.Logger.WithError(err).
