@@ -42,7 +42,7 @@ reverse proxy chain.
 In the sidecar deployment scenario, ORY Oathkeeper is deployed alongside each API endpoint service, probably even
 within the same logical unit (e.g. Docker Container or VM) as the service itself.
 
-![Gateway Oathkeeper Deployment Layout](images/sidecar_layout.svg)
+![Gateway Oathkeeper Deployment Layout](images/sidecar_deployment.svg)
 
 The advantage of this deployment layout is that requests to the API endpoints are possible without passing through
 the API router. The disadvantage is that multiple instances of ORY Oathkeeper have to be maintained.
