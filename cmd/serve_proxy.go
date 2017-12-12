@@ -26,7 +26,8 @@ import (
 )
 
 type proxyConfig struct {
-	rules rule.Manager
+	rules      rule.Manager
+	corsPrefix string
 }
 
 // proxyCmd represents the proxy command
@@ -160,7 +161,7 @@ func runProxy(c *proxyConfig) {
 	n.Use(segmentMiddleware)
 	n.UseHandler(proxy)
 
-	ch := cors.New(parseCorsOptions("")).Handler(n)
+	ch := cors.New(parseCorsOptions(c.corsPrefix)).Handler(n)
 
 	var cert tls.Certificate
 	tlsCert := viper.GetString("HTTP_TLS_CERT")

@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"fmt"
-
 	"net/http"
 
 	"github.com/julienschmidt/httprouter"
@@ -11,13 +10,15 @@ import (
 	"github.com/ory/herodot"
 	"github.com/ory/oathkeeper/rsakey"
 	"github.com/ory/oathkeeper/rule"
+	"github.com/rs/cors"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/urfave/negroni"
 )
 
 type managementConfig struct {
-	rules rule.Manager
+	rules      rule.Manager
+	corsPrefix string
 }
 
 func runManagement(c *managementConfig) {
@@ -38,12 +39,14 @@ func runManagement(c *managementConfig) {
 	n.Use(negronilogrus.NewMiddlewareFromLogger(logger, "oathkeeper-management"))
 	n.UseHandler(router)
 
+	ch := cors.New(parseCorsOptions(c.corsPrefix)).Handler(n)
+
 	go refreshKeys(keyManager, 0)
 
 	addr := fmt.Sprintf("%s:%s", viper.GetString("MANAGEMENT_HOST"), viper.GetString("MANAGEMENT_PORT"))
 	server := graceful.WithDefaults(&http.Server{
 		Addr:    addr,
-		Handler: router,
+		Handler: ch,
 	})
 
 	logger.Printf("Listening on %s.\n", addr)
