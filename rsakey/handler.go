@@ -14,21 +14,21 @@ type Handler struct {
 }
 
 func (h *Handler) SetRoutes(r *httprouter.Router) {
-	r.GET("/keys/id-token.public", h.GetPublicKey)
+	r.GET("/.well-known/jwks.json", h.WellKnown)
 }
 
-func (h *Handler) GetPublicKey(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+func (h *Handler) WellKnown(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	key, err := h.M.PublicKey()
 	if err != nil {
 		h.H.WriteError(w, r, err)
 		return
 	}
 
-	jwk := &jose.JSONWebKey{
-		Key:       key,
-		KeyID:     "id-token.public",
-		Algorithm: h.M.Algorithm(),
-	}
-
-	h.H.Write(w, r, jwk)
+	h.H.Write(w, r, &jose.JSONWebKeySet{
+		Keys: []jose.JSONWebKey{{
+			Key:       key,
+			KeyID:     h.M.PublicKeyID(),
+			Algorithm: h.M.Algorithm(),
+		}},
+	})
 }

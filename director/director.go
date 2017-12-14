@@ -113,7 +113,10 @@ func (d *Director) Director(r *http.Request) {
 		return
 	}
 
-	token, err := jwt.NewWithClaims(jwt.SigningMethodRS256, access.ToClaims()).SignedString(privateKey)
+	token := jwt.NewWithClaims(jwt.SigningMethodRS256, access.ToClaims())
+	token.Header["kid"] = d.KeyManager.PublicKeyID()
+
+	signed, err := token.SignedString(privateKey)
 	if err != nil {
 		d.Logger.
 			WithError(errors.WithStack(err)).
@@ -125,5 +128,5 @@ func (d *Director) Director(r *http.Request) {
 
 	r.URL.Scheme = d.TargetURL.Scheme
 	r.URL.Host = d.TargetURL.Host
-	*r = *r.WithContext(context.WithValue(r.Context(), requestAllowed, token))
+	*r = *r.WithContext(context.WithValue(r.Context(), requestAllowed, signed))
 }
