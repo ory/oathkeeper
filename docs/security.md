@@ -39,11 +39,16 @@ Authorization: bearer <jwt-signed-id-token>
 ```
 
 Now, the protected resource is capable of decoding and validating the JSON Web Token using the public key supplied
-by ORY Oathkeeper's API. The public key for decoding the ID token is available at Oathkeeper's management endpoint:
+by ORY Oathkeeper's API. The public key for decoding the ID token is available at Oathkeeper's `/.well-known/jwks.json` endpoint:
 
 ```
-http://oathkeeper:4456/keys/id-token.public
+http://oathkeeper:4456/.well-known/jwks.json
 ```
+
+The endpoint returns an array of valid public keys. Every ID token is equipped with a `kid` (key id) in its header. Use
+the `kid` to find the appropriate key. For now, only one public key will be returned and you can simply take the first
+element of the array for key validation. We recommend using a library such as [node-jwks-rsa](https://github.com/auth0/node-jwks-rsa)
+for handling this appropriately.
 
 ![ID Token Transformation](images/id_token.svg)
 
