@@ -22,6 +22,34 @@
   },
   "basePath": "/",
   "paths": {
+    "/.well-known/jwks.json": {
+      "get": {
+        "description": "This endpoint returns public keys for validating the ID tokens issued by ORY Oathkeeper.",
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "http",
+          "https"
+        ],
+        "summary": "Returns well known keys",
+        "operationId": "getWellKnown",
+        "responses": {
+          "200": {
+            "description": "jsonWebKeySet",
+            "schema": {
+              "$ref": "#/definitions/jsonWebKeySet"
+            }
+          },
+          "401": {
+            "$ref": "#/responses/genericError"
+          },
+          "403": {
+            "$ref": "#/responses/genericError"
+          }
+        }
+      }
+    },
     "/rules": {
       "get": {
         "description": "This method returns an array of all rules that are stored in the backend. This is useful if you want to get a full\nview of what rules you have currently in place.",

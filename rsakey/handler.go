@@ -17,30 +17,17 @@ func (h *Handler) SetRoutes(r *httprouter.Router) {
 	r.GET("/.well-known/jwks.json", h.WellKnown)
 }
 
-// swagger:route GET /.well-known/jwks.json
+// swagger:route GET /.well-known/jwks.json getWellKnown
 //
-// Get list of well known JSON Web Keys
+// Returns well known keys
 //
-// The subject making the request needs to be assigned to a policy containing:
+// This endpoint returns public keys for validating the ID tokens issued by ORY Oathkeeper.
 //
-//  ```
-//  {
-//    "resources": ["rn:hydra:keys:hydra.openid.id-token:public"],
-//    "actions": ["GET"],
-//    "effect": "allow"
-//  }
-//  ```
-//
-//     Consumes:
-//     - application/json
 //
 //     Produces:
 //     - application/json
 //
 //     Schemes: http, https
-//
-//     Security:
-//       oauth2: hydra.keys.get
 //
 //     Responses:
 //       200: jsonWebKeySet
