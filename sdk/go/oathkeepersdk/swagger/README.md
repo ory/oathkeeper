@@ -32,6 +32,8 @@ Class | Method | HTTP request | Description
 ## Documentation For Models
 
  - [InlineResponse401](docs/InlineResponse401.md)
+ - [JsonWebKey](docs/JsonWebKey.md)
+ - [JsonWebKeySet](docs/JsonWebKeySet.md)
  - [Rule](docs/Rule.md)
  - [SwaggerCreateRuleParameters](docs/SwaggerCreateRuleParameters.md)
  - [SwaggerGetRuleParameters](docs/SwaggerGetRuleParameters.md)

@@ -76,6 +76,10 @@ func (m *HydraManager) PrivateKey() (*rsa.PrivateKey, error) {
 	return m.key, nil
 }
 
+func (m *HydraManager) PublicKeyID() string {
+	return m.Set + ":public"
+}
+
 func (m *HydraManager) Algorithm() string {
 	return "RS256"
 }

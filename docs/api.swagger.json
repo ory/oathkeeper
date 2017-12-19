@@ -22,6 +22,34 @@
   },
   "basePath": "/",
   "paths": {
+    "/.well-known/jwks.json": {
+      "get": {
+        "description": "This endpoint returns public keys for validating the ID tokens issued by ORY Oathkeeper.",
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "http",
+          "https"
+        ],
+        "summary": "Returns well known keys",
+        "operationId": "getWellKnown",
+        "responses": {
+          "200": {
+            "description": "jsonWebKeySet",
+            "schema": {
+              "$ref": "#/definitions/jsonWebKeySet"
+            }
+          },
+          "401": {
+            "$ref": "#/responses/genericError"
+          },
+          "403": {
+            "$ref": "#/responses/genericError"
+          }
+        }
+      }
+    },
     "/rules": {
       "get": {
         "description": "This method returns an array of all rules that are stored in the backend. This is useful if you want to get a full\nview of what rules you have currently in place.",
@@ -240,6 +268,104 @@
     }
   },
   "definitions": {
+    "jsonWebKey": {
+      "type": "object",
+      "properties": {
+        "alg": {
+          "description": "The \"alg\" (algorithm) parameter identifies the algorithm intended for\nuse with the key.  The values used should either be registered in the\nIANA \"JSON Web Signature and Encryption Algorithms\" registry\nestablished by [JWA] or be a value that contains a Collision-\nResistant Name.",
+          "type": "string",
+          "x-go-name": "Alg"
+        },
+        "crv": {
+          "type": "string",
+          "x-go-name": "Crv"
+        },
+        "d": {
+          "type": "string",
+          "x-go-name": "D"
+        },
+        "dp": {
+          "type": "string",
+          "x-go-name": "Dp"
+        },
+        "dq": {
+          "type": "string",
+          "x-go-name": "Dq"
+        },
+        "e": {
+          "type": "string",
+          "x-go-name": "E"
+        },
+        "k": {
+          "type": "string",
+          "x-go-name": "K"
+        },
+        "kid": {
+          "description": "The \"kid\" (key ID) parameter is used to match a specific key.  This\nis used, for instance, to choose among a set of keys within a JWK Set\nduring key rollover.  The structure of the \"kid\" value is\nunspecified.  When \"kid\" values are used within a JWK Set, different\nkeys within the JWK Set SHOULD use distinct \"kid\" values.  (One\nexample in which different keys might use the same \"kid\" value is if\nthey have different \"kty\" (key type) values but are considered to be\nequivalent alternatives by the application using them.)  The \"kid\"\nvalue is a case-sensitive string.",
+          "type": "string",
+          "x-go-name": "Kid"
+        },
+        "kty": {
+          "description": "The \"kty\" (key type) parameter identifies the cryptographic algorithm\nfamily used with the key, such as \"RSA\" or \"EC\". \"kty\" values should\neither be registered in the IANA \"JSON Web Key Types\" registry\nestablished by [JWA] or be a value that contains a Collision-\nResistant Name.  The \"kty\" value is a case-sensitive string.",
+          "type": "string",
+          "x-go-name": "Kty"
+        },
+        "n": {
+          "type": "string",
+          "x-go-name": "N"
+        },
+        "p": {
+          "type": "string",
+          "x-go-name": "P"
+        },
+        "q": {
+          "type": "string",
+          "x-go-name": "Q"
+        },
+        "qi": {
+          "type": "string",
+          "x-go-name": "Qi"
+        },
+        "use": {
+          "description": "The \"use\" (public key use) parameter identifies the intended use of\nthe public key. The \"use\" parameter is employed to indicate whether\na public key is used for encrypting data or verifying the signature\non data. Values are commonly \"sig\" (signature) or \"enc\" (encryption).",
+          "type": "string",
+          "x-go-name": "Use"
+        },
+        "x": {
+          "type": "string",
+          "x-go-name": "X"
+        },
+        "x5c": {
+          "description": "The \"x5c\" (X.509 certificate chain) parameter contains a chain of one\nor more PKIX certificates [RFC5280].  The certificate chain is\nrepresented as a JSON array of certificate value strings.  Each\nstring in the array is a base64-encoded (Section 4 of [RFC4648] --\nnot base64url-encoded) DER [ITU.X690.1994] PKIX certificate value.\nThe PKIX certificate containing the key value MUST be the first\ncertificate.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-go-name": "X5c"
+        },
+        "y": {
+          "type": "string",
+          "x-go-name": "Y"
+        }
+      },
+      "x-go-name": "swaggerJSONWebKey",
+      "x-go-package": "github.com/ory/oathkeeper/rsakey"
+    },
+    "jsonWebKeySet": {
+      "type": "object",
+      "properties": {
+        "keys": {
+          "description": "The value of the \"keys\" parameter is an array of JWK values.  By\ndefault, the order of the JWK values within the array does not imply\nan order of preference among them, although applications of JWK Sets\ncan choose to assign a meaning to the order for their purposes, if\ndesired.",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/jsonWebKey"
+          },
+          "x-go-name": "Keys"
+        }
+      },
+      "x-go-name": "swaggerJSONWebKeySet",
+      "x-go-package": "github.com/ory/oathkeeper/rsakey"
+    },
     "rule": {
       "description": "A rule",
       "type": "object",

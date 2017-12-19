@@ -44,6 +44,10 @@ func (m *LocalManager) PrivateKey() (*rsa.PrivateKey, error) {
 	return m.key, nil
 }
 
+func (m *LocalManager) PublicKeyID() string {
+	return "id-token:public"
+}
+
 func (m *LocalManager) Algorithm() string {
 	return "RS256"
 }
