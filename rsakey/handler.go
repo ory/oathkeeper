@@ -43,6 +43,7 @@ func (h *Handler) WellKnown(w http.ResponseWriter, r *http.Request, _ httprouter
 	h.H.Write(w, r, &jose.JSONWebKeySet{
 		Keys: []jose.JSONWebKey{{
 			Key:       key,
+			Use:       "sig",
 			KeyID:     h.M.PublicKeyID(),
 			Algorithm: h.M.Algorithm(),
 		}},
