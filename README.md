@@ -9,26 +9,17 @@
     <a href="https://patreon.com/user?u=4298803">Support us on patreon!</a>
 </h4>
 
-ORY Oathkeeper is a reverse proxy that checks the HTTP Authorization for validity against a set of rules. This service
-uses Hydra to validate access tokens and policies. This service is under **active development** with **regular breaking changes**.
+ORY Oathkeeper is an Identity & Access Proxy (IAP) that authorizes HTTP requests based on sets of rules. This proxy integrates with ORY Hydra.
 
-[![CircleCI](https://circleci.com/gh/ory/oathkeeper.svg?style=svg&circle-token=eb458bf636326d41674141b6bbfa475a39c9db1e)](https://circleci.com/gh/ory/oathkeeper)
+This service is in **early access**.
 
-## Running
+[![CircleCI](https://circleci.com/gh/ory/oathkeeper.svg?style=shield&circle-token=eb458bf636326d41674141b6bbfa475a39c9db1e)](https://circleci.com/gh/ory/oathkeeper)
+![Go Report Card](https://goreportcard.com/badge/github.com/ory/oathkeeper)
 
-This service has a couple of environment variables:
+## Installation
 
-* `BACKEND_URL` is the URL where requests should be forwarded to. If a path (and query) is used, they will be prepended to the request. (default: `http://localhost:7000`)
-* `HYDRA_CLIENT` the client id used to access Hydra.
-* `HYDRA_SECRET` the client secret used to access Hydra.
-* `HYDRA_HOST` the URL of the Hydra instance.
-* `PORT` the port to listen on. (default: `3000`)
-* `HOST` the host to listen on.
-
-You can run this sever using `go run main.go` or `go install . && firewall-reverse-proxy` or `docker build . && docker run <image>`
-
-## Generate the mock
+The easiest way to install ORY Oathkeeper is using Docker:
 
 ```
-mockgen -package evaluator -destination evaluator/hydra_sdk_mock.go github.com/ory/hydra/sdk/go/hydra SDK
+docker run oryd/oathkeeper:v0.0.29 help
 ```
