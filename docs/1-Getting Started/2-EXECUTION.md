@@ -1,38 +1,6 @@
-<!-- START doctoc generated TOC please keep comment here to allow auto update -->
-<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
-**Table of Contents**
+# Running ORY Oathkeeper
 
-- [Quickstart](#quickstart)
-  - [Installing ORY Oathkeeper](#installing-ory-oathkeeper)
-  - [Running ORY Oathkeeper](#running-ory-oathkeeper)
-
-<!-- END doctoc generated TOC please keep comment here to allow auto update -->
-
-# Quickstart
-
-This section covers how to get started using ORY Oathkeeper.
-
-## Installing ORY Oathkeeper
-
-The only way to install ORY Oathkeeper currently is through [Docker Hub]. ORY Oathkeeper is a private docker repository
-and to gain access to it you have create an ORY Gatekeeper instance at the [ORY Admin Console](https://admin.ory.am).
-
-Once your account is authorized to access the repository, log in to docker using `docker login`. Then you should
-be able to fetch the ory/oathkeeper image and also be able to see it on [Docker Hub](https://hub.docker.com/r/oryd/oathkeeper/).
-
-To run any oathkeeper command, do:
-
-```
-$ docker run oryd/oathkeeper:v<version> <command>
-```
-
-for example (this guide is written for ORY Oathkeeper 0.0.20:
-
-```
-$ docker run oryd/oathkeeper:v0.0.20 help
-```
-
-## Running ORY Oathkeeper
+<!-- toc -->
 
 ORY Oathkeeper has two servers that run on separate ports:
 
