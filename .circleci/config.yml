@@ -111,7 +111,10 @@ workflows:
           filters:
             tags:
               only: /.*/
-      - publish-docs
+      - publish-docs:
+          filters:
+            branches:
+              only: master
       - test-docker:
           requires:
             - test
