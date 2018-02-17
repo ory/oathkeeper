@@ -14,7 +14,7 @@
     },
     "domain-redirect": {
       "from": "ory.gitbooks.io/oathkeeper/content/",
-      "to": "www.ory.sh/docs/oathkeeper"
+      "to": "www.ory.sh/docs/2-oathkeeper"
     },
     "etoc": {
       "h2lb": 2,
