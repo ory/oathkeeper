@@ -3,7 +3,6 @@
   "author": "Aeneas Rekkas",
   "gitbook": ">=3.2.3",
   "plugins": [
-    "summary",
     "edit-link",
     "etoc",
     "domain-redirect"
