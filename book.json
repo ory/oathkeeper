@@ -4,9 +4,14 @@
   "gitbook": ">=3.2.3",
   "plugins": [
     "summary",
+    "edit-link",
     "etoc"
   ],
   "pluginsConfig": {
+    "edit-link": {
+      "base": "https://github.com/ory/oathkeeper/tree/master/docs",
+      "label": "Edit this page on GitHub"
+    },
     "etoc": {
       "h2lb": 2,
       "mindepth": 2,
