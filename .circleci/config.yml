@@ -89,9 +89,9 @@ jobs:
     working_directory: /go/src/github.com/ory/oathkeeper
     steps:
       - checkout
-      - run: git clone https://github.com/ory/ory-am.git ../ory-am
-      - run: cp -R ./docs/* ../ory-am/docs/oathkeeper/
-      - run: cd ../ory-am; git add -A; git commit -a -m "docs: Updates ORY Oathkeeper docs"; git push origin
+      - run: "git clone https://github.com/ory/ory-am.git ../ory-am"
+      - run: "cp -R ./docs/* ../ory-am/docs/oathkeeper/"
+      - run: "cd ../ory-am; git add -A; git commit -a -m \"docs: Updates ORY Oathkeeper docs\"; git push origin"
 
 workflows:
   version: 2
