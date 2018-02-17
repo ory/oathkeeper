@@ -1,37 +1,6 @@
+# Rules
 
-<!-- START doctoc generated TOC please keep comment here to allow auto update -->
-<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
-**Table of Contents**
-
-- [Concepts](#concepts)
-  - [Terminology](#terminology)
-  - [Rules](#rules)
-    - [Regular Expressions](#regular-expressions)
-      - [Substitution](#substitution)
-    - [Examples](#examples)
-      - [Bypass](#bypass)
-      - [Anonymous](#anonymous)
-      - [Authenticated](#authenticated)
-      - [Policy Based Access Control](#policy-based-access-control)
-    - [Rules REST API](#rules-rest-api)
-    - [Rules CLI API](#rules-cli-api)
-
-<!-- END doctoc generated TOC please keep comment here to allow auto update -->
-
-# Concepts
-
-This section covers core concepts of ORY Oathekeeper.
-
-## Terminology
-
-* Access credentials: The credentials used to access an endpoint. This is typically an OAuth 2.0 access token supplied
-    by ORY Hydra.
-* Backend URL: The URL (backend) where requests will be forwarded to, if access is granted. Typically an API Gateway
-    such as Mashape Kong.
-* Scopes: An OAuth 2.0 Scope.
-* Access Control Policies: These are JSON documents similar to AWS and Google Cloud Policies. Read more about them [here](https://ory.gitbooks.io/hydra/content/security.html#how-does-access-control-work-with-hydra).
-
-## Rules
+<!-- toc -->
 
 ORY Oathkeeper has a configurable set of rules. Rules are applied to all incoming requests and based on the rule definition,
 an action is taken. There are four types of rules:
@@ -81,7 +50,7 @@ In general, a rule has the following fields:
 	resource is typically something a user wants to access (e.g. printer, article, virtual machine).
 	This field supports expansion as described in the developer guide: https://ory.gitbooks.io/oathkeeper/content/concepts.html#rules
 
-### Regular Expressions
+## Regular Expressions
 
 Rules are matched using the `matchesUrl` parameter. That string is checked for case-sensitive equality:
 
@@ -107,7 +76,7 @@ Regular expressions must be encapsulated in brackets `<` `>`, for example:
   * Matches: `http://localhost/`
   * Does not match: `http://domain.com/users`
 
-#### Substitution
+### Substitution
 
 Sometimes it is required to use a part from the URL in the resource or action identifier. Let's assume that user
 `subjects:mydomain.com:alexa` needs access to all articles beginning with the letter `0`, as defined by the following
@@ -156,12 +125,12 @@ Now when a user hits, for example `http://localhost/articles/01234`, ORY Oathkee
 }
 ```
 
-### Examples
+## Examples
 
 The following examples should give you an idea of how rules work. You can save them as files and import them to oathkeeper
 using `oathkeeper import --endpoint http://localhost:4456/ <path/to/file.json>`
 
-#### Bypass
+### Bypass
 
 ```json
 {
@@ -172,7 +141,7 @@ using `oathkeeper import --endpoint http://localhost:4456/ <path/to/file.json>`
 }
 ```
 
-#### Anonymous
+### Anonymous
 
 ```json
 {
@@ -183,7 +152,7 @@ using `oathkeeper import --endpoint http://localhost:4456/ <path/to/file.json>`
 }
 ```
 
-#### Authenticated
+### Authenticated
 
 Note that `requiredScopes` is an optional field. If you just wish to require user agents to provide a valid access token,
 without any scopes, you can leave out the `requiredScopes` field.
@@ -198,7 +167,7 @@ without any scopes, you can leave out the `requiredScopes` field.
 }
 ```
 
-#### Policy Based Access Control
+### Policy Based Access Control
 
 ```json
 {
@@ -231,12 +200,12 @@ a policy like the following one:
 }
 ```
 
-### Rules REST API
+## Rules REST API
 
 For more information on available fields and exemplary payloads of rules, as well as rule management using HTTP
 please refer to the [REST API docs](https://oathkeeper.docs.apiary.io/#)
 
-### Rules CLI API
+## Rules CLI API
 
 Management of rules is not only possible through the REST API, but additionally using the ORY Oathkeeper CLI.
 For help on how to manage the CLI, type `oathkeeper help rules`.

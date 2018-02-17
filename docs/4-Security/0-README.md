@@ -1,15 +1,6 @@
-
-<!-- START doctoc generated TOC please keep comment here to allow auto update -->
-<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
-**Table of Contents**
-
-- [Security](#security)
-  - [Stateless Authorization](#stateless-authorization)
-  - [The ID Token](#the-id-token)
-
-<!-- END doctoc generated TOC please keep comment here to allow auto update -->
-
 # Security
+
+<!-- toc -->
 
 ORY Oathkeeper, as all ORY products, takes security extremely serious. To reduce risk, ORY Hydra issues opaque access
 tokens which are impossible to decode by third parties. Internal services however often rely on stateless authorization
@@ -50,7 +41,7 @@ the `kid` to find the appropriate key. For now, only one public key will be retu
 element of the array for key validation. We recommend using a library such as [node-jwks-rsa](https://github.com/auth0/node-jwks-rsa)
 for handling this appropriately.
 
-![ID Token Transformation](images/id_token.svg)
+![ID Token Transformation](../images/id_token.svg)
 
 ## The ID Token
 

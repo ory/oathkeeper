@@ -1,7 +1,5 @@
 # ORY Oathkeeper
 
-## Introduction
-
 Welcome to the ORY Oathkeeper documentation!
 
 ORY Oathkeeper is a reverse proxy which evaluates incoming HTTP requests based on a set of rules. This capability

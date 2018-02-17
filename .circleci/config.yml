@@ -83,6 +83,18 @@ jobs:
       - run: docker login --username "$DOCKER_USERNAME" --password "$DOCKER_PASSWORD"
       - run: docker push oryd/oathkeeper:$CIRCLE_TAG
 
+  publish-docs:
+    docker:
+      - image: circleci/golang:1.9
+    working_directory: /go/src/github.com/ory/oathkeeper
+    steps:
+      - checkout
+      - run: git config --global user.email "hi@ory.am"
+      - run: git config --global user.name "ORY Continuous Integration"
+      - run: "git clone https://arekkas:$DOCS_TOKEN_PUSH@github.com/ory/ory-am.git ../ory-am"
+      - run: "cp -R ./docs/* ../ory-am/docs/2-oathkeeper/"
+      - run: "cd ../ory-am; git add -A; git commit -a -m \"docs: Updates ORY Oathkeeper docs\"; git push origin"
+
 workflows:
   version: 2
   "test, build, and relase":
@@ -99,6 +111,10 @@ workflows:
           filters:
             tags:
               only: /.*/
+      - publish-docs:
+          filters:
+            branches:
+              only: master
       - test-docker:
           requires:
             - test
