@@ -109,7 +109,7 @@ workflows:
           filters:
             tags:
               only: /.*/
-      - publish-docs:
+      - publish-docs
       - test-docker:
           requires:
             - test
