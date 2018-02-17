@@ -5,12 +5,17 @@
   "plugins": [
     "summary",
     "edit-link",
-    "etoc"
+    "etoc",
+    "domain-redirect"
   ],
   "pluginsConfig": {
     "edit-link": {
       "base": "https://github.com/ory/oathkeeper/tree/master/docs",
       "label": "Edit this page on GitHub"
+    },
+    "domain-redirect": {
+      "from": "ory.gitbooks.io/oathkeeper/content/",
+      "to": "www.ory.sh/docs/oathkeeper"
     },
     "etoc": {
       "h2lb": 2,
