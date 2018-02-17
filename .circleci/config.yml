@@ -90,7 +90,7 @@ jobs:
     steps:
       - checkout
       - run: "git clone https://arekkas:$DOCS_TOKEN_PUSH@github.com/ory/ory-am.git ../ory-am"
-      - run: "cp -R ./docs/* ../ory-am/docs/oathkeeper/"
+      - run: "cp -R ./docs/* ../ory-am/docs/2-oathkeeper/"
       - run: "cd ../ory-am; git add -A; git commit -a -m \"docs: Updates ORY Oathkeeper docs\"; git push origin"
 
 workflows:
