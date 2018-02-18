@@ -11,7 +11,7 @@
   ],
   "swagger": "2.0",
   "info": {
-    "description": "ORY Oathkeeper is a reverse proxy that checks the HTTP Authorization for validity against a set of rules. This service\nuses Hydra to validate access tokens and policies.\n\nOathkeeper",
+    "description": "ORY Oathkeeper is a reverse proxy that checks the HTTP Authorization for validity against a set of rules. This service uses Hydra to validate access tokens and policies.",
     "title": "ORY Oathkeeper",
     "contact": {
       "name": "ORY",
