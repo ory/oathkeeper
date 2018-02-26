@@ -170,7 +170,7 @@ func runProxy(c *proxyConfig) {
 	}
 
 	n := negroni.New()
-	n.Use(negronilogrus.NewMiddlewareFromLogger(logger, "oahtkeeper-proxy"))
+	n.Use(negronilogrus.NewMiddlewareFromLogger(logger, "oathkeeper-proxy"))
 	n.Use(segmentMiddleware)
 	n.UseHandler(proxy)
 
