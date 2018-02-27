@@ -1,7 +1,7 @@
 # ORY Oathkeeper
 
 <h4 align="center">
-    <a href="https://gitter.im/ory-am/hydra">Chat</a> |
+    <a href="https://discord.gg/PAMQWkr">Chat</a> |
     <a href="https://community.ory.am/">Forums</a> |
     <a href="http://eepurl.com/bKT3N9">Newsletter</a><br/><br/>
     <a href="https://ory.gitbooks.io/oathkeeper/content/">Developer Guide</a> |
