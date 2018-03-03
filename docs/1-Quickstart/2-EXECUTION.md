@@ -76,7 +76,8 @@ $ export BACKEND_URL=http://my-api-endpoint-servers.com/
 # This should be a proper database URL in production, see `hydra help serve proxy`
 $ export DATABASE_URL=memory
 
-$ docker run oryd/oathkeeper:v0.0.20 serve all
+# Each of environment variables needs to be injected into docker container properly '-e key=value'
+$ docker run -e DATABASE_URL=$DATABASE_URL -e HYDRA_URL=$HYDRA_URL -e HYDRA_JWK_SET_ID=$HYDRA_JWK_SET_ID -e HYDRA_CLIENT_ID=$HYDRA_CLIENT_ID -e HYDRA_CLIENT_SECRET=$HYDRA_CLIENT_SECRET -e BACKEND_URL=$BACKEND_URL  oryd/oathkeeper:v0.0.20 serve all
 ```
 
 Now, we have a proxy listening on port 4455 and the management REST API at port 4456.
