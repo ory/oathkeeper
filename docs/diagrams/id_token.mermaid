@@ -1,8 +1,0 @@
-sequenceDiagram
-    participant UA as User Agent
-    participant FW as ORY Oathkeeper
-    participant API as API Endpoint
-
-    UA->>FW: Authorization: bearer Opaque.Token
-    FW->>API: Authorization: bearer JWT.ID.Token
-    API->>API: Decodes & validates JWT.ID.Token using Oathkeeper's public key
