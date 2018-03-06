@@ -1,8 +1,0 @@
-- [Quickstart](1-Quickstart/0-README.md)
-    - [Installing ORY Oathkeeper](1-Quickstart/1-INSTALLATION.md)
-    - [Running ORY Oathkeeper](1-Quickstart/2-EXECUTION.md)
-- [Concepts](2-Concepts/0-README.md)
-    - [Terminology](2-Concepts/1-TERMINOLOGY.md)
-    - [Rules](2-Concepts/2-RULES.md)
-- [Deployment](3-Deyploment/0-README.md)
-- [Security](4-Security/0-README.md)
