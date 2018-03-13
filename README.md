@@ -9,9 +9,21 @@
     <a href="https://patreon.com/user?u=4298803">Support us on patreon!</a>
 </h4>
 
-ORY Oathkeeper is an Identity & Access Proxy (IAP) that authorizes HTTP requests based on sets of rules. This proxy integrates with ORY Hydra.
+ORY Oathkeeper is an Identity & Access Proxy (IAP) that authorizes HTTP requests based on sets of rules. The BeyondCorp
+Model is designed by [Google](https://cloud.google.com/beyondcorp/) and secures applications in Zero-Trust networks.
+An Identity & Access Proxy is typically deployed in front of (think API Gateway) web-facing applications and is capable
+of authenticating and optionally authorizing access requests.
 
-This service is being developed actively.
+ORY Oathkeeper is a reverse proxy which evaluates incoming HTTP requests based on a set of rules that are defined
+by administartive users. ORY Oathkeeper is thus capable of:
+
+* Identifying the user and providing the user session in form of a JSON Web Token.
+* Restricting access to certain resources based on a set of rules (Authorization).
+
+We plan to generalize this software and make it compatible with Authentication and Authorization providers. For now,
+this proxy integrates best ORY Hydra. Please file an issue if you would like to see your favorite Auth* provider integrated.
+
+This service is under active development and may introduce breaking changes in future releases.
 
 [![CircleCI](https://circleci.com/gh/ory/oathkeeper.svg?style=shield&circle-token=eb458bf636326d41674141b6bbfa475a39c9db1e)](https://circleci.com/gh/ory/oathkeeper)
 [![Coverage Status](https://coveralls.io/repos/github/ory/oathkeeper/badge.svg?branch=master)](https://coveralls.io/github/ory/oathkeeper?branch=master)
@@ -67,6 +79,8 @@ If you think you found a security vulnerability, please refrain from posting it 
 and send us an email to [hi@ory.am](mailto:hi@ory.am) instead.
 
 ## Telemetry
+
+ORY Oathkeeper collects summarized, anonymized telemetry which can optionally be turned off. Click [here](https://www.ory.sh/docs/1-hydra/0-tutorial/0-readme) to learn more.
 
 ## Documentation
 
