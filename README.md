@@ -1,3 +1,32 @@
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
+
+- [ORY Oathkeeper](#ory-oathkeeper)
+      - [
+    Chat |
+    Forums |
+    Newsletter
+    Guide |
+    API Docs |
+    Support us on patreon!
+](#chat-%0A----forums-%0A----newsletter%0A----guide-%0A----api-docs-%0A----support-us-on-patreon)
+  - [Installation](#installation)
+  - [Ecosystem](#ecosystem)
+    - [ORY Security Console: Administrative User Interface](#ory-security-console-administrative-user-interface)
+    - [ORY Hydra](#ory-hydra)
+  - [Security](#security)
+    - [Disclosing vulnerabilities](#disclosing-vulnerabilities)
+  - [Telemetry](#telemetry)
+  - [Documentation](#documentation)
+    - [Guide](#guide)
+    - [HTTP API documentation](#http-api-documentation)
+    - [Upgrading and Changelog](#upgrading-and-changelog)
+    - [Command line documentation](#command-line-documentation)
+    - [Develop](#develop)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 # ORY Oathkeeper
 
 <h4 align="center">
