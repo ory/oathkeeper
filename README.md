@@ -1,4 +1,4 @@
-# ORY Oathkeeper
+<h1 align="center"><img src="./docs/images/banner_oathkeeper.png" alt="ORY Oathkeeper - Cloud Native Identity & Access Proxy"></h1>
 
 <h4 align="center">
     <a href="https://discord.gg/PAMQWkr">Chat</a> |
