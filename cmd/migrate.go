@@ -22,6 +22,7 @@ package cmd
 
 import (
 	"fmt"
+	"net/url"
 
 	"os"
 
@@ -39,7 +40,14 @@ var migrateCmd = &cobra.Command{
 			return
 		}
 
-		db, err := connectToSql(args[0])
+		url, err := url.Parse(args[0])
+		if err != nil {
+			fmt.Printf("Could not parse database url because %s.\n", err)
+			os.Exit(1)
+			return
+		}
+
+		db, err := connectToSql(url)
 		if err != nil {
 			fmt.Printf("Could not connect to database because %s.\n", err)
 			os.Exit(1)
