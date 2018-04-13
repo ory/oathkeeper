@@ -18,7 +18,7 @@
  * @license  	   Apache-2.0
  */
 
-package director
+package proxy
 
 import (
 	"fmt"
@@ -33,7 +33,7 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/ory/hydra/sdk/go/hydra"
 	"github.com/ory/hydra/sdk/go/hydra/swagger"
-	"github.com/ory/oathkeeper/evaluator"
+	"github.com/ory/oathkeeper/decision"
 	"github.com/ory/oathkeeper/helper"
 	"github.com/ory/oathkeeper/rsakey"
 	"github.com/ory/oathkeeper/rule"
@@ -57,7 +57,7 @@ func TestProxy(t *testing.T) {
 	defer backend.Close()
 
 	u, _ := url.Parse(backend.URL)
-	d := NewDirector(u, nil, nil, &rsakey.LocalManager{KeyStrength: 512})
+	d := NewProxy(u, nil, nil, &rsakey.LocalManager{KeyStrength: 512})
 
 	proxy := httptest.NewServer(&httputil.ReverseProxy{Director: d.Director, Transport: d})
 	defer proxy.Close()
@@ -109,7 +109,7 @@ func TestProxy(t *testing.T) {
 				r.Header.Add("Authorization", "bearer token")
 			},
 			mock: func(c *gomock.Controller) hydra.SDK {
-				s := evaluator.NewMockSDK(c)
+				s := decision.NewMockSDK(c)
 				s.EXPECT().IntrospectOAuth2Token(gomock.Eq("token"), gomock.Eq("")).Return(nil, nil, errors.New("error"))
 				return s
 			},
@@ -123,7 +123,7 @@ func TestProxy(t *testing.T) {
 				r.Header.Add("Authorization", "bearer token")
 			},
 			mock: func(c *gomock.Controller) hydra.SDK {
-				s := evaluator.NewMockSDK(c)
+				s := decision.NewMockSDK(c)
 				s.EXPECT().DoesWardenAllowTokenAccessRequest(gomock.Eq(swagger.WardenTokenAccessRequest{
 					Token:    "token",
 					Resource: "users:1234",
@@ -144,7 +144,7 @@ func TestProxy(t *testing.T) {
 				r.Header.Add("Authorization", "bearer token")
 			},
 			mock: func(c *gomock.Controller) hydra.SDK {
-				s := evaluator.NewMockSDK(c)
+				s := decision.NewMockSDK(c)
 				return s
 			},
 		},
@@ -155,7 +155,7 @@ func TestProxy(t *testing.T) {
 
 			matcher := &rule.CachedMatcher{Rules: tc.rules}
 			sdk := tc.mock(ctrl)
-			d.Evaluator = evaluator.NewWardenEvaluator(nil, matcher, sdk, "")
+			d.Evaluator = decision.NewWardenEvaluator(nil, matcher, sdk, "")
 
 			req, err := http.NewRequest("GET", tc.url, nil)
 			require.NoError(t, err)
@@ -195,7 +195,7 @@ func BenchmarkDirector(b *testing.B) {
 	logger := logrus.New()
 	logger.Level = logrus.WarnLevel
 	u, _ := url.Parse(backend.URL)
-	d := NewDirector(u, nil, logger, &rsakey.LocalManager{KeyStrength: 512})
+	d := NewProxy(u, nil, logger, &rsakey.LocalManager{KeyStrength: 512})
 
 	proxy := httptest.NewServer(&httputil.ReverseProxy{Director: d.Director, Transport: d})
 	defer proxy.Close()
@@ -206,7 +206,7 @@ func BenchmarkDirector(b *testing.B) {
 		{MatchesMethods: []string{"GET"}, MatchesURLCompiled: panicCompileRegex(proxy.URL + "/<[0-9]+>"), Mode: rule.AnonymousMode},
 		{MatchesMethods: []string{"GET"}, MatchesURLCompiled: panicCompileRegex(proxy.URL + "/other/<.+>"), Mode: rule.AnonymousMode},
 	}}
-	d.Evaluator = evaluator.NewWardenEvaluator(logger, matcher, nil, "")
+	d.Evaluator = decision.NewWardenEvaluator(logger, matcher, nil, "")
 
 	req, _ := http.NewRequest("GET", proxy.URL+"/users", nil)
 

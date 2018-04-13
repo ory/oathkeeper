@@ -32,17 +32,17 @@ import (
 
 	"github.com/meatballhat/negroni-logrus"
 	"github.com/ory/graceful"
-	"github.com/ory/oathkeeper/director"
-	"github.com/ory/oathkeeper/evaluator"
+	"github.com/ory/oathkeeper/proxy"
+	"github.com/ory/oathkeeper/decision"
 	"github.com/ory/oathkeeper/rsakey"
 	"github.com/ory/oathkeeper/rule"
-	"github.com/ory/oathkeeper/telemetry"
 	"github.com/pborman/uuid"
 	"github.com/rs/cors"
 	"github.com/segmentio/analytics-go"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/urfave/negroni"
+	"github.com/ory/metrics-middleware"
 )
 
 type proxyConfig struct {
@@ -152,34 +152,30 @@ func runProxy(c *proxyConfig) {
 		Set: viper.GetString("HYDRA_JWK_SET_ID"),
 	}
 
-	segmentMiddleware := new(telemetry.Middleware)
-	segment := telemetry.Manager{
-		Segment:      analytics.New("MSx9A6YQ1qodnkzEFOv22cxOmOCJXMFa"),
-		Middleware:   segmentMiddleware,
-		ID:           issuer,
-		BuildVersion: Version,
-		BuildTime:    BuildTime,
-		BuildHash:    GitHash,
-		Logger:       logger,
-		InstanceID:   uuid.New(),
-	}
-
-	go segment.Identify()
-	go segment.Submit()
 	go refreshRules(c, matcher, 0)
 	go refreshKeys(keyManager, 0)
 
-	eval := evaluator.NewWardenEvaluator(logger, matcher, sdk, issuer)
-	d := director.NewDirector(backend, eval, logger, keyManager)
-	proxy := &httputil.ReverseProxy{
+	eval := decision.NewWardenEvaluator(logger, matcher, sdk, issuer)
+	d := proxy.NewProxy(backend, eval, logger, keyManager)
+	handler := &httputil.ReverseProxy{
 		Director:  d.Director,
 		Transport: d,
 	}
 
+	segmentMiddleware := metrics.NewMetricsManager(
+		metrics.Hash("DATABASE_URL"),
+		viper.GetString("DATABASE_URL") != "memory",
+		"jk32cFATnj9GKbQdFL7fBB9qtKZdX9j7",
+		[]string{"/"},
+		logger,
+	)
+	go segmentMiddleware.RegisterSegment(Version, GitHash, BuildTime)
+	go segmentMiddleware.CommitMemoryStatistics()
+
 	n := negroni.New()
-	n.Use(negronilogrus.NewMiddlewareFromLogger(logger, "oathkeeper-proxy"))
+	n.Use(negronilogrus.NewMiddlewareFromLogger(logger, "oathkeeper-handler"))
 	n.Use(segmentMiddleware)
-	n.UseHandler(proxy)
+	n.UseHandler(handler)
 
 	ch := cors.New(parseCorsOptions(c.corsPrefix)).Handler(n)
 

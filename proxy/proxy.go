@@ -18,7 +18,7 @@
  * @license  	   Apache-2.0
  */
 
-package director
+package proxy
 
 import (
 	"bytes"
@@ -28,18 +28,18 @@ import (
 	"net/url"
 
 	"github.com/dgrijalva/jwt-go"
-	"github.com/ory/oathkeeper/evaluator"
+	"github.com/ory/oathkeeper/decision"
 	"github.com/ory/oathkeeper/helper"
 	"github.com/ory/oathkeeper/rsakey"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 )
 
-func NewDirector(target *url.URL, eval evaluator.Evaluator, logger logrus.FieldLogger, keyManager rsakey.Manager) *Director {
+func NewProxy(target *url.URL, eval *decision.Evaluator, logger logrus.FieldLogger, keyManager rsakey.Manager) *Proxy {
 	if logger == nil {
 		logger = logrus.New()
 	}
-	return &Director{
+	return &Proxy{
 		TargetURL:  target,
 		Logger:     logger,
 		Evaluator:  eval,
@@ -47,10 +47,10 @@ func NewDirector(target *url.URL, eval evaluator.Evaluator, logger logrus.FieldL
 	}
 }
 
-type Director struct {
+type Proxy struct {
 	TargetURL  *url.URL
 	Logger     logrus.FieldLogger
-	Evaluator  evaluator.Evaluator
+	Evaluator  *decision.Evaluator
 	KeyManager rsakey.Manager
 }
 
@@ -65,7 +65,7 @@ type directorError struct {
 	statusCode int
 }
 
-func (d *Director) RoundTrip(r *http.Request) (*http.Response, error) {
+func (d *Proxy) RoundTrip(r *http.Request) (*http.Response, error) {
 	if err, ok := r.Context().Value(requestDenied).(*directorError); ok && err != nil {
 		return &http.Response{
 			StatusCode: err.statusCode,
@@ -95,7 +95,7 @@ func (d *Director) RoundTrip(r *http.Request) (*http.Response, error) {
 	}, nil
 }
 
-func (d *Director) Director(r *http.Request) {
+func (d *Proxy) Director(r *http.Request) {
 	access, err := d.Evaluator.EvaluateAccessRequest(r)
 	if err != nil {
 		switch errors.Cause(err) {

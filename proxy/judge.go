@@ -18,15 +18,15 @@
  * @license  	   Apache-2.0
  */
 
-package evaluator
+package decision
 
 import (
 	"net/http"
 
 	"strings"
 
-	"github.com/ory/hydra/sdk/go/hydra"
-	"github.com/ory/hydra/sdk/go/hydra/swagger"
+	"github.com/ory/keto/sdk/go/keto"
+	"github.com/ory/keto/sdk/go/keto/swagger"
 	"github.com/ory/oathkeeper/helper"
 	"github.com/ory/oathkeeper/rule"
 	"github.com/pkg/errors"
@@ -34,21 +34,19 @@ import (
 	"github.com/tomasen/realip"
 )
 
-type WardenEvaluator struct {
+type Judge struct {
 	Logger  logrus.FieldLogger
 	Matcher rule.Matcher
-	Hydra   hydra.SDK
 	Issuer  string
 }
 
-func NewWardenEvaluator(l logrus.FieldLogger, m rule.Matcher, s hydra.SDK, i string) *WardenEvaluator {
+func NewWardenEvaluator(l logrus.FieldLogger, m rule.Matcher, i string) *Judge {
 	if l == nil {
 		l = logrus.New()
 	}
 
-	return &WardenEvaluator{
+	return &Judge{
 		Matcher: m,
-		Hydra:   s,
 		Logger:  l,
 		Issuer:  i,
 	}
@@ -74,7 +72,7 @@ var reasons = map[string]string{
 	"unknown_mode":                                "Rule defines a unknown mod ",
 }
 
-func (d *WardenEvaluator) EvaluateAccessRequest(r *http.Request) (*Session, error) {
+func (d *Judge) EvaluateAccessRequest(r *http.Request) (*Session, error) {
 	var u = *r.URL
 	u.Host = r.Host
 	u.Scheme = "http"
@@ -335,7 +333,7 @@ func (d *WardenEvaluator) EvaluateAccessRequest(r *http.Request) (*Session, erro
 	}
 }
 
-func (d *WardenEvaluator) prepareAccessRequests(r *http.Request, u string, token string, rl *rule.Rule) swagger.WardenTokenAccessRequest {
+func (d *Judge) prepareAccessRequests(r *http.Request, u string, token string, rl *rule.Rule) swagger.WardenTokenAccessRequest {
 	return swagger.WardenTokenAccessRequest{
 		Scopes:   rl.RequiredScopes,
 		Action:   rl.MatchesURLCompiled.ReplaceAllString(u, rl.RequiredAction),

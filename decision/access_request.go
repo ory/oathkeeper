@@ -18,12 +18,11 @@
  * @license  	   Apache-2.0
  */
 
-package evaluator
+package decision
 
-import (
-	"net/http"
-)
+import "github.com/ory/hydra/sdk/go/hydra/swagger"
 
-type Evaluator interface {
-	EvaluateAccessRequest(r *http.Request) (*Session, error)
+type AccessRequest struct {
+	swagger.WardenTokenAccessRequest
+	Public bool
 }
