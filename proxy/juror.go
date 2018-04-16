@@ -21,31 +21,25 @@
 package proxy
 
 import (
-	"time"
-
-	"github.com/dgrijalva/jwt-go"
-	"github.com/pborman/uuid"
+	"net/http"
+	"github.com/ory/oathkeeper/rule"
+	"net/url"
+	"github.com/sirupsen/logrus"
 )
 
-type Session struct {
-	User      string      `json:"user"`
-	Anonymous bool        `json:"anonymous"`
-	Disabled  bool        `json:"disabled"`
-	ClientID  string      `json:"clientId"`
-	Issuer    string      `json:"issuer"`
-	Extra     interface{} `json:"extra"`
+type Juror interface {
+	GetID() string
+	Try(*http.Request, *rule.Rule, *url.URL) (*Session, error)
 }
 
-func (s *Session) ToClaims() jwt.MapClaims {
-	return jwt.MapClaims{
-		"nbf":  time.Now().Unix(),
-		"iat":  time.Now().Unix(),
-		"exp":  time.Now().Add(time.Hour).Unix(),
-		"sub":  s.User,
-		"iss":  s.Issuer,
-		"anon": s.Anonymous,
-		"aud":  s.ClientID,
-		"jti":  uuid.New(),
-		"ext":  s.Extra,
+func toLogFields(r *http.Request, u *url.URL, granted bool, rl *rule.Rule, user string) logrus.Fields {
+	_, tokenID := getBearerToken(r)
+	return map[string]interface{}{
+		"access_url": u.String(),
+		"granted":    granted,
+		"rule":       rl.ID,
+		"mode":       rl.Mode,
+		"user":       user,
+		"token":      tokenID,
 	}
 }

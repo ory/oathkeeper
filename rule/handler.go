@@ -35,8 +35,21 @@ import (
 )
 
 type Handler struct {
-	H herodot.Writer
-	M Manager
+	H                herodot.Writer
+	M                Manager
+	AllowedRuleModes []string
+}
+
+func NewHandler(
+	h herodot.Writer,
+	m Manager,
+	allowedRuleModes []string,
+) *Handler {
+	return &Handler{
+		H:                h,
+		M:                m,
+		AllowedRuleModes: allowedRuleModes,
+	}
 }
 
 func (h *Handler) SetRoutes(r *httprouter.Router) {
@@ -67,7 +80,7 @@ func (h *Handler) SetRoutes(r *httprouter.Router) {
 //       403: genericError
 //       500: genericError
 func (h *Handler) Create(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-	rule, err := decodeRule(w, r)
+	rule, err := h.decodeRule(w, r)
 	if err != nil {
 		h.H.WriteError(w, r, errors.WithStack(err))
 		return
@@ -112,7 +125,7 @@ func (h *Handler) List(w http.ResponseWriter, r *http.Request, _ httprouter.Para
 		return
 	}
 
-	var encodedRules []jsonRule = make([]jsonRule, len(rules))
+	encodedRules := make([]jsonRule, len(rules))
 	for k, rule := range rules {
 		encodedRules[k] = *encodeRule(&rule)
 	}
@@ -175,7 +188,7 @@ func (h *Handler) Get(w http.ResponseWriter, r *http.Request, ps httprouter.Para
 //       404: genericError
 //       500: genericError
 func (h *Handler) Update(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	rule, err := decodeRule(w, r)
+	rule, err := h.decodeRule(w, r)
 	if err != nil {
 		h.H.WriteError(w, r, errors.WithStack(err))
 		return
@@ -219,7 +232,7 @@ func (h *Handler) Delete(w http.ResponseWriter, r *http.Request, ps httprouter.P
 	w.WriteHeader(http.StatusNoContent)
 }
 
-func decodeRule(w http.ResponseWriter, r *http.Request) (*Rule, error) {
+func (h *Handler) decodeRule(w http.ResponseWriter, r *http.Request) (*Rule, error) {
 	rule := jsonRule{
 		MatchesMethods: []string{},
 		RequiredScopes: []string{},
@@ -228,17 +241,17 @@ func decodeRule(w http.ResponseWriter, r *http.Request) (*Rule, error) {
 		return nil, err
 	}
 
-	return toRule(&rule)
+	return h.toRule(&rule)
 }
 
-func toRule(rule *jsonRule) (*Rule, error) {
+func (h *Handler) toRule(rule *jsonRule) (*Rule, error) {
 	exp, err := compiler.CompileRegex(rule.MatchesURL, '<', '>')
 	if err != nil {
 		return nil, err
 	}
 
-	if !stringInSlice(rule.Mode, ruleModes) {
-		return nil, errors.Errorf("Rule mode %s not supported, use one of: %s", rule.Mode, strings.Join(ruleModes, ","))
+	if !stringInSlice(rule.Mode, h.AllowedRuleModes) {
+		return nil, errors.Errorf("Rule mode %s not supported, use one of: %s", rule.Mode, strings.Join(h.AllowedRuleModes, ","))
 	}
 
 	return &Rule{

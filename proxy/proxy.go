@@ -28,14 +28,13 @@ import (
 	"net/url"
 
 	"github.com/dgrijalva/jwt-go"
-	"github.com/ory/oathkeeper/decision"
 	"github.com/ory/oathkeeper/helper"
 	"github.com/ory/oathkeeper/rsakey"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 )
 
-func NewProxy(target *url.URL, eval *decision.Evaluator, logger logrus.FieldLogger, keyManager rsakey.Manager) *Proxy {
+func NewProxy(target *url.URL, eval *Judge, logger logrus.FieldLogger, keyManager rsakey.Manager) *Proxy {
 	if logger == nil {
 		logger = logrus.New()
 	}
@@ -50,7 +49,7 @@ func NewProxy(target *url.URL, eval *decision.Evaluator, logger logrus.FieldLogg
 type Proxy struct {
 	TargetURL  *url.URL
 	Logger     logrus.FieldLogger
-	Evaluator  *decision.Evaluator
+	Evaluator  *Judge
 	KeyManager rsakey.Manager
 }
 

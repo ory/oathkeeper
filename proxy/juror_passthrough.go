@@ -21,31 +21,36 @@
 package proxy
 
 import (
-	"time"
-
-	"github.com/dgrijalva/jwt-go"
-	"github.com/pborman/uuid"
+	"github.com/sirupsen/logrus"
+	"net/http"
+	"github.com/ory/oathkeeper/rule"
+	"net/url"
 )
 
-type Session struct {
-	User      string      `json:"user"`
-	Anonymous bool        `json:"anonymous"`
-	Disabled  bool        `json:"disabled"`
-	ClientID  string      `json:"clientId"`
-	Issuer    string      `json:"issuer"`
-	Extra     interface{} `json:"extra"`
+type JurorPassThrough struct {
+	L logrus.FieldLogger
 }
 
-func (s *Session) ToClaims() jwt.MapClaims {
-	return jwt.MapClaims{
-		"nbf":  time.Now().Unix(),
-		"iat":  time.Now().Unix(),
-		"exp":  time.Now().Add(time.Hour).Unix(),
-		"sub":  s.User,
-		"iss":  s.Issuer,
-		"anon": s.Anonymous,
-		"aud":  s.ClientID,
-		"jti":  uuid.New(),
-		"ext":  s.Extra,
-	}
+func (j *JurorPassThrough) GetID() string {
+	//const BypassMode = "bypass"
+	return "pass_through"
+}
+
+func (j JurorPassThrough) Try(r *http.Request, rl *rule.Rule, u *url.URL) (*Session, error) {
+	j.L.
+		WithField("granted", true).
+		WithField("user", "").
+		WithField("access_url", u.String()).
+		WithField("rule", rl.ID).
+		WithField("mode", rl.Mode).
+		WithField("reason", "Access is granted because rule is set to pass through").
+		WithField("reason_id", "pass_through").
+		Infoln("Access request granted")
+
+	return &Session{
+		User: "",
+		Anonymous: true,
+		ClientID: "",
+		Disabled: true,
+	}, nil
 }

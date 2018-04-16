@@ -18,11 +18,33 @@
  * @license  	   Apache-2.0
  */
 
-package decision
+package proxy
 
-import "github.com/ory/hydra/sdk/go/hydra/swagger"
+import (
+	"testing"
+	"github.com/ory/oathkeeper/rule"
+	"github.com/sirupsen/logrus"
+	"net/url"
+	"github.com/stretchr/testify/require"
+	"github.com/stretchr/testify/assert"
+)
 
-type AccessRequest struct {
-	swagger.WardenTokenAccessRequest
-	Public bool
+func TestJurorPassThrough(t *testing.T) {
+	t.Run("case=getID", func(t *testing.T) {
+		assert.Equal(t, "pass_through", new(JurorPassThrough).GetID())
+	})
+
+	t.Run("case=try", func(t *testing.T) {
+		j := &JurorPassThrough{
+			L: logrus.New(),
+		}
+		session, err := j.Try(nil, new(rule.Rule), new(url.URL))
+		require.NoError(t, err)
+		assert.EqualValues(t, &Session{
+			User: "",
+			Anonymous: true,
+			ClientID: "",
+			Disabled: true,
+		}, session)
+	})
 }

@@ -4,4 +4,5 @@ set -euo pipefail
 
 cd "$( dirname "${BASH_SOURCE[0]}" )/.."
 
-mockgen -package evaluator -destination evaluator/hydra_sdk_mock.go -source ./vendor/github.com/ory/hydra/sdk/go/hydra/sdk_api.go SDK
+mockgen -package proxy -destination proxy/hydra_sdk_mock.go -source ./vendor/github.com/ory/hydra/sdk/go/hydra/sdk_api.go OAuth2API
+mockgen -package proxy -destination proxy/keto_sdk_mock.go -source ./vendor/github.com/ory/keto/sdk/go/keto/sdk_warden.go WardenSDK
