@@ -21,12 +21,13 @@
 package proxy
 
 import (
+	"net/url"
 	"testing"
+
 	"github.com/ory/oathkeeper/rule"
 	"github.com/sirupsen/logrus"
-	"net/url"
-	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestJurorPassThrough(t *testing.T) {
@@ -41,10 +42,10 @@ func TestJurorPassThrough(t *testing.T) {
 		session, err := j.Try(nil, new(rule.Rule), new(url.URL))
 		require.NoError(t, err)
 		assert.EqualValues(t, &Session{
-			User: "",
+			Subject:   "",
 			Anonymous: true,
-			ClientID: "",
-			Disabled: true,
+			ClientID:  "",
+			Disabled:  true,
 		}, session)
 	})
 }

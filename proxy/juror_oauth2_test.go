@@ -21,51 +21,158 @@
 package proxy
 
 import (
-	"testing"
-	"github.com/stretchr/testify/assert"
-	"github.com/sirupsen/logrus"
-	"github.com/ory/oathkeeper/rule"
-	"net/url"
-	"net/http"
+	"errors"
 	"fmt"
+	"net/http"
+	"net/url"
+	"testing"
+
+	"github.com/golang/mock/gomock"
+	"github.com/ory/hydra/sdk/go/hydra/swagger"
+	"github.com/ory/oathkeeper/rule"
+	"github.com/sirupsen/logrus"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func TestOAuth2Juror(t *testing.T) {
+	type testCase struct {
+		prepare       func(sdk *MockSDK)
+		token         string
+		expectErr     bool
+		expectSession *Session
+	}
+
+	var runTest = func(tc testCase, j *JurorOAuth2Introspection, rl *rule.Rule) func(t *testing.T) {
+		return func(t *testing.T) {
+			c := gomock.NewController(t)
+			sdk := NewMockSDK(c)
+			j.H = sdk
+			if tc.prepare != nil {
+				tc.prepare(sdk)
+			}
+
+			r := &http.Request{Header: http.Header{"Authorization": {"Bearer " + tc.token}}}
+			s, err := j.Try(r, rl, new(url.URL))
+
+			if tc.expectErr {
+				require.Error(t, err)
+			} else {
+				require.NoError(t, err)
+
+				if tc.expectSession != nil {
+					assert.EqualValues(t, tc.expectSession, s)
+				}
+			}
+		}
+	}
+
 	t.Run("suite=regular", func(t *testing.T) {
 		j := &JurorOAuth2Introspection{L: logrus.New()}
 		assert.Equal(t, "oauth2_introspection", j.GetID())
 
 		rl := &rule.Rule{ID: "1234", Mode: "foo"}
-		for k, tc := range []struct {
-			token         string
-			expectErr     bool
-			expectSession *Session
-		}{
+		for k, tc := range []testCase{
 			{
-				token: "foo",
-
+				token:     "",
+				expectErr: true,
+			},
+			{
+				token: "foo-token",
+				prepare: func(sdk *MockSDK) {
+					sdk.EXPECT().IntrospectOAuth2Token(gomock.Eq("foo-token"), gomock.Eq("")).Return(nil, nil, errors.New("network error"))
+				},
+				expectErr: true,
+			},
+			{
+				token: "foo-token",
+				prepare: func(sdk *MockSDK) {
+					sdk.EXPECT().IntrospectOAuth2Token(gomock.Eq("foo-token"), gomock.Eq("")).Return(nil, &swagger.APIResponse{
+						Response: &http.Response{StatusCode: http.StatusInternalServerError},
+					}, nil)
+				},
+				expectErr: true,
+			},
+			{
+				token: "foo-token",
+				prepare: func(sdk *MockSDK) {
+					sdk.EXPECT().IntrospectOAuth2Token(gomock.Eq("foo-token"), gomock.Eq("")).Return(&swagger.OAuth2TokenIntrospection{
+						Active: false,
+					}, &swagger.APIResponse{
+						Response: &http.Response{StatusCode: http.StatusOK},
+					}, nil)
+				},
+				expectErr: true,
+			},
+			{
+				token: "foo-token",
+				prepare: func(sdk *MockSDK) {
+					sdk.EXPECT().IntrospectOAuth2Token(gomock.Eq("foo-token"), gomock.Eq("")).Return(&swagger.OAuth2TokenIntrospection{
+						Active: true,
+					}, &swagger.APIResponse{
+						Response: &http.Response{StatusCode: http.StatusOK},
+					}, nil)
+				},
+				expectErr: false,
 			},
 		} {
-			t.Run(fmt.Sprintf("case=%d", k), func(t *testing.T) {
-				r := &http.Request{Header: http.Header{"Authorization": {"Bearer " + tc.token}}}
-				s, err := j.Try(r, rl, new(url.URL))
-
-				if tc.expectErr {
-					require.Error(t, err)
-				} else {
-					require.NoError(t, err)
-					assert.EqualValues(t, tc.expectSession, s)
-				}
-			})
+			t.Run(fmt.Sprintf("case=%d", k), runTest(tc, j, rl))
 		}
 	})
 
 	t.Run("suite=anonymous", func(t *testing.T) {
-		ja := &JurorOAuth2Introspection{
+		j := &JurorOAuth2Introspection{
 			AllowAnonymous: true,
 			L:              logrus.New(),
 		}
-		assert.Equal(t, "oauth2_introspection_anonymous", ja.GetID())
+		assert.Equal(t, "oauth2_introspection_anonymous", j.GetID())
+
+		rl := &rule.Rule{ID: "1234", Mode: "foo"}
+		for k, tc := range []testCase{
+			{
+				token:     "",
+				expectErr: false,
+			},
+			{
+				token: "foo-token",
+				prepare: func(sdk *MockSDK) {
+					sdk.EXPECT().IntrospectOAuth2Token(gomock.Eq("foo-token"), gomock.Eq("")).Return(nil, nil, errors.New("network error"))
+				},
+				expectErr: false,
+			},
+			{
+				token: "foo-token",
+				prepare: func(sdk *MockSDK) {
+					sdk.EXPECT().IntrospectOAuth2Token(gomock.Eq("foo-token"), gomock.Eq("")).Return(nil, &swagger.APIResponse{
+						Response: &http.Response{StatusCode: http.StatusInternalServerError},
+					}, nil)
+				},
+				expectErr: false,
+			},
+			{
+				token: "foo-token",
+				prepare: func(sdk *MockSDK) {
+					sdk.EXPECT().IntrospectOAuth2Token(gomock.Eq("foo-token"), gomock.Eq("")).Return(&swagger.OAuth2TokenIntrospection{
+						Active: false,
+					}, &swagger.APIResponse{
+						Response: &http.Response{StatusCode: http.StatusOK},
+					}, nil)
+				},
+				expectErr: false,
+			},
+			{
+				token: "foo-token",
+				prepare: func(sdk *MockSDK) {
+					sdk.EXPECT().IntrospectOAuth2Token(gomock.Eq("foo-token"), gomock.Eq("")).Return(&swagger.OAuth2TokenIntrospection{
+						Active: true,
+					}, &swagger.APIResponse{
+						Response: &http.Response{StatusCode: http.StatusOK},
+					}, nil)
+				},
+				expectErr: false,
+			},
+		} {
+			t.Run(fmt.Sprintf("case=%d", k), runTest(tc, j, rl))
+		}
 	})
 }

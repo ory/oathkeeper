@@ -21,10 +21,11 @@
 package proxy
 
 import (
-	"github.com/sirupsen/logrus"
 	"net/http"
-	"github.com/ory/oathkeeper/rule"
 	"net/url"
+
+	"github.com/ory/oathkeeper/rule"
+	"github.com/sirupsen/logrus"
 )
 
 type JurorPassThrough struct {
@@ -48,9 +49,9 @@ func (j JurorPassThrough) Try(r *http.Request, rl *rule.Rule, u *url.URL) (*Sess
 		Infoln("Access request granted")
 
 	return &Session{
-		User: "",
+		Subject:   "",
 		Anonymous: true,
-		ClientID: "",
-		Disabled: true,
+		ClientID:  "",
+		Disabled:  true,
 	}, nil
 }

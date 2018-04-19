@@ -32,17 +32,15 @@ import (
 
 	"github.com/meatballhat/negroni-logrus"
 	"github.com/ory/graceful"
-	"github.com/ory/oathkeeper/proxy"
+	"github.com/ory/metrics-middleware"
 	"github.com/ory/oathkeeper/decision"
+	"github.com/ory/oathkeeper/proxy"
 	"github.com/ory/oathkeeper/rsakey"
 	"github.com/ory/oathkeeper/rule"
-	"github.com/pborman/uuid"
 	"github.com/rs/cors"
-	"github.com/segmentio/analytics-go"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/urfave/negroni"
-	"github.com/ory/metrics-middleware"
 )
 
 type proxyConfig struct {

@@ -158,7 +158,7 @@ func (c *APIClient) prepareRequest(
 	request.SetBody(postBody)
 
 	if c.config.UserAgent != "" {
-		request.SetHeader("User-Agent", c.config.UserAgent)
+		request.SetHeader("Subject-Agent", c.config.UserAgent)
 	}
 
 	// add header parameter, if any

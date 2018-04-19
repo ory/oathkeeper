@@ -111,14 +111,14 @@ var migrations = &migrate.MemoryMigrationSource{
 				`UPDATE oathkeeper_rule SET mode='pass_through' WHERE mode='bypass'`,
 				`UPDATE oathkeeper_rule SET mode='oauth2_introspection_anonymous' WHERE mode='anonymous'`,
 				`UPDATE oathkeeper_rule SET mode='oauth2_introspection' WHERE mode='authenticated'`,
-				`UPDATE oathkeeper_rule SET mode='keto_oauth2' WHERE mode='policy'`,
-},
+				`UPDATE oathkeeper_rule SET mode='warden_oauth2' WHERE mode='policy'`,
+			},
 			Down: []string{
 				`UPDATE oathkeeper_rule SET mode='bypass' WHERE mode='pass_through'`,
 				`UPDATE oathkeeper_rule SET mode='anonymous' WHERE mode='oauth2_introspection_anonymous'`,
 				`UPDATE oathkeeper_rule SET mode='authenticated' WHERE mode='oauth2_introspection'`,
-				`UPDATE oathkeeper_rule SET mode='policy' WHERE mode='keto_oauth2'`,
-},
+				`UPDATE oathkeeper_rule SET mode='policy' WHERE mode='warden_oauth2'`,
+			},
 		},
 	},
 }

@@ -126,7 +126,7 @@ func (d *Proxy) Director(r *http.Request) {
 	if err != nil {
 		d.Logger.
 			WithError(errors.WithStack(err)).
-			WithFields(map[string]interface{}{"user": access.User, "client_id": access.ClientID, "request_url": r.URL.String()}).
+			WithFields(map[string]interface{}{"user": access.Subject, "client_id": access.ClientID, "request_url": r.URL.String()}).
 			Errorf("Unable to fetch private key for signing JSON Web Token")
 		*r = *r.WithContext(context.WithValue(r.Context(), requestDenied, &directorError{err: errors.WithStack(err), statusCode: http.StatusInternalServerError}))
 		return
@@ -139,7 +139,7 @@ func (d *Proxy) Director(r *http.Request) {
 	if err != nil {
 		d.Logger.
 			WithError(errors.WithStack(err)).
-			WithFields(map[string]interface{}{"user": access.User, "client_id": access.ClientID, "request_url": r.URL.String()}).
+			WithFields(map[string]interface{}{"user": access.Subject, "client_id": access.ClientID, "request_url": r.URL.String()}).
 			Errorf("Unable to sign JSON Web Token")
 		*r = *r.WithContext(context.WithValue(r.Context(), requestDenied, &directorError{err: errors.WithStack(err), statusCode: http.StatusInternalServerError}))
 		return

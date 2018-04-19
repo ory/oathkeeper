@@ -21,8 +21,9 @@
 package proxy
 
 import (
-	"github.com/ory/oathkeeper/helper"
 	"net/http"
+
+	"github.com/ory/oathkeeper/helper"
 )
 
 func getBearerToken(r *http.Request) (string, string) {

@@ -21,13 +21,15 @@
 package proxy
 
 import (
-	"github.com/sirupsen/logrus"
 	"net/http"
-	"github.com/ory/oathkeeper/rule"
 	"net/url"
+	"strings"
+
 	"github.com/ory/hydra/sdk/go/hydra"
-	"github.com/pkg/errors"
 	"github.com/ory/oathkeeper/helper"
+	"github.com/ory/oathkeeper/rule"
+	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
 )
 
 type JurorOAuth2Introspection struct {
@@ -64,13 +66,13 @@ func (j *JurorOAuth2Introspection) Try(r *http.Request, rl *rule.Rule, u *url.UR
 			Infoln("Access request granted")
 
 		return &Session{
-			User:      "",
+			Subject:   "",
 			Anonymous: true,
 			ClientID:  "",
 		}, nil
 	}
 
-	introspection, response, err := j.H.IntrospectOAuth2Token(token, "")
+	introspection, response, err := j.H.IntrospectOAuth2Token(token, strings.Join(rl.RequiredScopes, " "))
 	if err != nil && !j.AllowAnonymous {
 		j.L.WithError(err).
 			WithFields(toLogFields(r, u, false, rl, "")).
@@ -87,7 +89,7 @@ func (j *JurorOAuth2Introspection) Try(r *http.Request, rl *rule.Rule, u *url.UR
 			Infoln("Access request granted")
 
 		return &Session{
-			User:      "",
+			Subject:   "",
 			Anonymous: true,
 			ClientID:  "",
 		}, nil
@@ -111,7 +113,7 @@ func (j *JurorOAuth2Introspection) Try(r *http.Request, rl *rule.Rule, u *url.UR
 			Infoln("Access request granted")
 
 		return &Session{
-			User:      "",
+			Subject:   "",
 			Anonymous: true,
 			ClientID:  "",
 		}, nil
@@ -134,7 +136,7 @@ func (j *JurorOAuth2Introspection) Try(r *http.Request, rl *rule.Rule, u *url.UR
 			Infoln("Access request granted")
 
 		return &Session{
-			User:      "",
+			Subject:   "",
 			Anonymous: true,
 			ClientID:  "",
 		}, nil
@@ -147,7 +149,7 @@ func (j *JurorOAuth2Introspection) Try(r *http.Request, rl *rule.Rule, u *url.UR
 		Infoln("Access request granted")
 
 	return &Session{
-		User:      introspection.Sub,
+		Subject:   introspection.Sub,
 		ClientID:  introspection.ClientId,
 		Anonymous: false,
 		Extra:     introspection.Ext,

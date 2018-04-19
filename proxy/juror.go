@@ -22,8 +22,9 @@ package proxy
 
 import (
 	"net/http"
-	"github.com/ory/oathkeeper/rule"
 	"net/url"
+
+	"github.com/ory/oathkeeper/rule"
 	"github.com/sirupsen/logrus"
 )
 
