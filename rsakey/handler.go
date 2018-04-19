@@ -33,6 +33,16 @@ type Handler struct {
 	M Manager
 }
 
+func NewHandler(
+	h herodot.Writer,
+	m Manager,
+) *Handler {
+	return &Handler{
+		H: h,
+		M: m,
+	}
+}
+
 func (h *Handler) SetRoutes(r *httprouter.Router) {
 	r.GET("/.well-known/jwks.json", h.WellKnown)
 }

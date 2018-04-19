@@ -21,50 +21,48 @@
 package rule
 
 import (
-	"net/url"
+	"net/http"
 
-	"github.com/ory/oathkeeper/helper"
 	"github.com/ory/oathkeeper/pkg"
+	"github.com/ory/oathkeeper/sdk/go/oathkeeper"
 	"github.com/pkg/errors"
 )
 
-type CachedMatcher struct {
-	Rules   map[string]Rule
-	Manager Manager
+type HTTPMatcher struct {
+	O oathkeeper.SDK
+	*CachedMatcher
 }
 
-func NewCachedMatcher(m Manager) *CachedMatcher {
-	return &CachedMatcher{
-		Manager: m,
-		Rules:   map[string]Rule{},
+func NewHTTPMatcher(o oathkeeper.SDK) *HTTPMatcher {
+	return &HTTPMatcher{
+		O: o,
+		CachedMatcher: &CachedMatcher{
+			Rules: map[string]Rule{},
+		},
 	}
 }
 
-func (m *CachedMatcher) MatchRule(method string, u *url.URL) (*Rule, error) {
-	var rules []Rule
-	for _, rule := range m.Rules {
-		if err := rule.IsMatching(method, u); err == nil {
-			rules = append(rules, rule)
-		}
-	}
-
-	if len(rules) == 0 {
-		return nil, errors.WithStack(helper.ErrMatchesNoRule)
-	} else if len(rules) != 1 {
-		return nil, errors.WithStack(helper.ErrMatchesMoreThanOneRule)
-	}
-
-	return &rules[0], nil
-}
-
-func (m *CachedMatcher) Refresh() error {
-	rules, err := m.Manager.ListRules(pkg.RulesUpperLimit, 0)
+func (m *HTTPMatcher) Refresh() error {
+	rules, response, err := m.O.ListRules(pkg.RulesUpperLimit, 0)
 	if err != nil {
 		return errors.WithStack(err)
 	}
-
-	for _, rule := range rules {
-		m.Rules[rule.ID] = rule
+	if response.StatusCode != http.StatusOK {
+		return errors.Errorf("Unable to fetch rules from backend, got status code %d but expected %s", response.StatusCode, http.StatusOK)
 	}
+
+	for _, r := range rules {
+		m.Rules[r.Id] = Rule{
+			ID:               r.Id,
+			Description:      r.Description,
+			MatchesMethods:   r.MatchesMethods,
+			Mode:             r.Mode,
+			MatchesURL:       r.MatchesUrl,
+			RequiredAction:   r.RequiredAction,
+			RequiredResource: r.RequiredResource,
+			RequiredScopes:   r.RequiredScopes,
+		}
+	}
+
 	return nil
 }

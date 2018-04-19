@@ -21,9 +21,13 @@
 package rule
 
 type Manager interface {
-	ListRules() ([]Rule, error)
+	ListRules(limit, offset int) ([]Rule, error)
 	CreateRule(*Rule) error
 	GetRule(id string) (*Rule, error)
 	DeleteRule(id string) error
 	UpdateRule(*Rule) error
+}
+
+type Refresher interface {
+	Refresh() error
 }

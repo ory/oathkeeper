@@ -51,6 +51,17 @@ type swaggerGetRuleParameters struct {
 	ID string `json:"id"`
 }
 
+// swagger:parameters listRules
+type swaggerListRulesParameters struct {
+	// The maximum amount of rules returned.
+	// in: query
+	Limit int `json:"limit"`
+
+	// The offset from where to start looking.
+	// in: query
+	Offset int `json:"offset"`
+}
+
 // swagger:parameters updateRule
 type swaggerUpdateRuleParameters struct {
 	// in: path

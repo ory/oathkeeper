@@ -99,7 +99,7 @@ No authorization required
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **ListRules**
-> []Rule ListRules()
+> []Rule ListRules($limit, $offset)
 
 List all rules
 
@@ -107,7 +107,11 @@ This method returns an array of all rules that are stored in the backend. This i
 
 
 ### Parameters
-This endpoint does not need any parameter.
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **limit** | **int64**| The maximum amount of rules returned. | [optional] 
+ **offset** | **int64**| The offset from where to start looking. | [optional] 
 
 ### Return type
 

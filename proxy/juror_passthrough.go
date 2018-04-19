@@ -32,6 +32,10 @@ type JurorPassThrough struct {
 	L logrus.FieldLogger
 }
 
+func NewJurorPassThrough(l logrus.FieldLogger) *JurorPassThrough {
+	return &JurorPassThrough{L: l}
+}
+
 func (j *JurorPassThrough) GetID() string {
 	//const BypassMode = "bypass"
 	return "pass_through"

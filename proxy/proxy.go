@@ -41,7 +41,7 @@ func NewProxy(target *url.URL, eval *Judge, logger logrus.FieldLogger, keyManage
 	return &Proxy{
 		TargetURL:  target,
 		Logger:     logger,
-		Evaluator:  eval,
+		Judge:      eval,
 		KeyManager: keyManager,
 	}
 }
@@ -49,7 +49,7 @@ func NewProxy(target *url.URL, eval *Judge, logger logrus.FieldLogger, keyManage
 type Proxy struct {
 	TargetURL  *url.URL
 	Logger     logrus.FieldLogger
-	Evaluator  *Judge
+	Judge      *Judge
 	KeyManager rsakey.Manager
 }
 
@@ -87,7 +87,7 @@ func (d *Proxy) RoundTrip(r *http.Request) (*http.Response, error) {
 		return res, err
 	}
 
-	d.Logger.WithFields(map[string]interface{}{"user": "anonymous", "request_url": r.URL.String()}).Info("Unable to type assert context")
+	d.Logger.WithFields(map[string]interface{}{"subject": "anonymous", "request_url": r.URL.String()}).Info("Unable to type assert context")
 	return &http.Response{
 		StatusCode: http.StatusInternalServerError,
 		Body:       ioutil.NopCloser(bytes.NewBufferString(http.StatusText(http.StatusInternalServerError))),
@@ -95,7 +95,7 @@ func (d *Proxy) RoundTrip(r *http.Request) (*http.Response, error) {
 }
 
 func (d *Proxy) Director(r *http.Request) {
-	access, err := d.Evaluator.EvaluateAccessRequest(r)
+	access, err := d.Judge.EvaluateAccessRequest(r)
 	if err != nil {
 		switch errors.Cause(err) {
 		case helper.ErrForbidden:
@@ -126,7 +126,7 @@ func (d *Proxy) Director(r *http.Request) {
 	if err != nil {
 		d.Logger.
 			WithError(errors.WithStack(err)).
-			WithFields(map[string]interface{}{"user": access.Subject, "client_id": access.ClientID, "request_url": r.URL.String()}).
+			WithFields(map[string]interface{}{"subject": access.Subject, "client_id": access.ClientID, "request_url": r.URL.String()}).
 			Errorf("Unable to fetch private key for signing JSON Web Token")
 		*r = *r.WithContext(context.WithValue(r.Context(), requestDenied, &directorError{err: errors.WithStack(err), statusCode: http.StatusInternalServerError}))
 		return
@@ -139,7 +139,7 @@ func (d *Proxy) Director(r *http.Request) {
 	if err != nil {
 		d.Logger.
 			WithError(errors.WithStack(err)).
-			WithFields(map[string]interface{}{"user": access.Subject, "client_id": access.ClientID, "request_url": r.URL.String()}).
+			WithFields(map[string]interface{}{"subject": access.Subject, "client_id": access.ClientID, "request_url": r.URL.String()}).
 			Errorf("Unable to sign JSON Web Token")
 		*r = *r.WithContext(context.WithValue(r.Context(), requestDenied, &directorError{err: errors.WithStack(err), statusCode: http.StatusInternalServerError}))
 		return

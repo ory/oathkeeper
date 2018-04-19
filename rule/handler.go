@@ -23,13 +23,14 @@ package rule
 import (
 	"encoding/json"
 	"net/http"
-
 	"strings"
 
 	"github.com/julienschmidt/httprouter"
 	"github.com/ory/herodot"
 	"github.com/ory/ladon/compiler"
 	"github.com/ory/oathkeeper/helper"
+	"github.com/ory/oathkeeper/pkg"
+	"github.com/ory/pagination"
 	"github.com/pborman/uuid"
 	"github.com/pkg/errors"
 )
@@ -119,7 +120,8 @@ func (h *Handler) Create(w http.ResponseWriter, r *http.Request, _ httprouter.Pa
 //       403: genericError
 //       500: genericError
 func (h *Handler) List(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-	rules, err := h.M.ListRules()
+	limit, offset := pagination.Parse(r, 100, 0, pkg.RulesUpperLimit)
+	rules, err := h.M.ListRules(limit, offset)
 	if err != nil {
 		h.H.WriteError(w, r, err)
 		return

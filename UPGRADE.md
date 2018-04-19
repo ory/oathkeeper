@@ -10,3 +10,26 @@ before finalizing the upgrade process.
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
+# 0.1.0
+
+* Refactored judge, jury, juror
+  * Can add custom jurors
+  * Also works with regular token introspection
+    * But needs scope
+    * TODO: Refresh token identification
+* Compatibility with Keto
+* How to make compatible with hydra 0.11.0
+* needs sql migration
+
+* rename the commands
+  * management -> api
+  * deprecated all (?)
+    * MANAGEMENET_ and PROX_ deprecated due to all
+    * Does not need database_url any more but ANONYMOUS_SUBJECT_ID
+
+* Added ANONYMOUS_SUBJECT_ID
+
+* Warden policies now possible with anonymous users
+
+* Scopes are now being enforced in introspect

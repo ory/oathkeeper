@@ -1,27 +1,7 @@
 /*
- * Copyright © 2017-2018 Aeneas Rekkas <aeneas+oss@aeneas.io>
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *
- * @author       Aeneas Rekkas <aeneas+oss@aeneas.io>
- * @copyright  2017-2018 Aeneas Rekkas <aeneas+oss@aeneas.io>
- * @license  	   Apache-2.0
- */
-
-/*
  * ORY Oathkeeper
  *
- * ORY Oathkeeper is a reverse proxy that checks the HTTP Authorization for validity against a set of rules. This service uses Hydra to validate access tokens and policies.  Oathkeeper
+ * ORY Oathkeeper is a reverse proxy that checks the HTTP Authorization for validity against a set of rules. This service uses Hydra to validate access tokens and policies.
  *
  * OpenAPI spec version: Latest
  * Contact: hi@ory.am
@@ -243,9 +223,11 @@ func (a RuleApi) GetRule(id string) (*Rule, *APIResponse, error) {
  * List all rules
  * This method returns an array of all rules that are stored in the backend. This is useful if you want to get a full view of what rules you have currently in place.
  *
+ * @param limit The maximum amount of rules returned.
+ * @param offset The offset from where to start looking.
  * @return []Rule
  */
-func (a RuleApi) ListRules() ([]Rule, *APIResponse, error) {
+func (a RuleApi) ListRules(limit int64, offset int64) ([]Rule, *APIResponse, error) {
 
 	var localVarHttpMethod = strings.ToUpper("Get")
 	// create path and map variables
@@ -261,6 +243,8 @@ func (a RuleApi) ListRules() ([]Rule, *APIResponse, error) {
 	for key := range a.Configuration.DefaultHeader {
 		localVarHeaderParams[key] = a.Configuration.DefaultHeader[key]
 	}
+	localVarQueryParams.Add("limit", a.Configuration.APIClient.ParameterToString(limit, ""))
+	localVarQueryParams.Add("offset", a.Configuration.APIClient.ParameterToString(offset, ""))
 
 	// to determine the Content-Type header
 	localVarHttpContentTypes := []string{"application/json"}

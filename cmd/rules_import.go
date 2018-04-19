@@ -26,8 +26,8 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	"github.com/ory/oathkeeper/sdk/go/oathkeepersdk"
-	"github.com/ory/oathkeeper/sdk/go/oathkeepersdk/swagger"
+	"github.com/ory/oathkeeper/sdk/go/oathkeeper"
+	"github.com/ory/oathkeeper/sdk/go/oathkeeper/swagger"
 	"github.com/spf13/cobra"
 )
 
@@ -63,7 +63,7 @@ Usage example:
 
 		for _, r := range rules {
 			fmt.Printf("Importing rule %s...\n", r.Id)
-			client := oathkeepersdk.NewSDK(endpoint)
+			client := oathkeeper.NewSDK(endpoint)
 			out, response, err := client.CreateRule(r)
 			checkResponse(response, err, http.StatusCreated)
 			fmt.Printf("Successfully imported rule %s...\n", out.Id)

@@ -36,51 +36,10 @@ import (
 	"github.com/urfave/negroni"
 )
 
-type managementConfig struct {
-	rules      rule.Manager
-	corsPrefix string
-}
-
-func runManagement(c *managementConfig) {
-	sdk := getHydraSDK()
-
-	keyManager := &rsakey.HydraManager{
-		SDK: sdk,
-		Set: viper.GetString("HYDRA_JWK_SET_ID"),
-	}
-
-	rules := rule.Handler{H: herodot.NewJSONWriter(logger), M: c.rules}
-	keys := rsakey.Handler{H: herodot.NewJSONWriter(logger), M: keyManager}
-	router := httprouter.New()
-	rules.SetRoutes(router)
-	keys.SetRoutes(router)
-
-	n := negroni.New()
-	n.Use(negronilogrus.NewMiddlewareFromLogger(logger, "oathkeeper-management"))
-	n.UseHandler(router)
-
-	ch := cors.New(parseCorsOptions(c.corsPrefix)).Handler(n)
-
-	go refreshKeys(keyManager, 0)
-
-	addr := fmt.Sprintf("%s:%s", viper.GetString("MANAGEMENT_HOST"), viper.GetString("MANAGEMENT_PORT"))
-	server := graceful.WithDefaults(&http.Server{
-		Addr:    addr,
-		Handler: ch,
-	})
-
-	logger.Printf("Listening on %s.\n", addr)
-	if err := graceful.Graceful(server.ListenAndServe, server.Shutdown); err != nil {
-		logger.Fatalf("Unable to gracefully shutdown HTTP server because %s.\n", err)
-		return
-	}
-	logger.Println("HTTP server was shutdown gracefully")
-}
-
 // managementCmd represents the management command
 var managementCmd = &cobra.Command{
-	Use:   "management",
-	Short: "Starts the ORY Oathkeeper management REST API",
+	Use:   "api",
+	Short: "Starts the ORY Oathkeeper HTTP API",
 	Long: `This starts a HTTP/2 REST API for managing ORY Oathkeeper.
 
 CORE CONTROLS
@@ -92,11 +51,10 @@ CORE CONTROLS
 HTTP CONTROLS
 ==============
 
-- MANAGEMENT_HOST: The host to listen on.
-	Default: PROXY_HOST="" (all interfaces)
-- MANAGEMENT_PORT: The port to listen on.
-	Default: PROXY_PORT="4456"
-
+- HOST: The host to listen on.
+	Default: HOST="" (all interfaces)
+- PORT: The port to listen on.
+	Default: PORT="4456"
 
 ` + corsMessage,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -105,8 +63,40 @@ HTTP CONTROLS
 			logger.WithError(err).Fatalln("Unable to connect to rule backend")
 		}
 
-		config := &managementConfig{rules: rules}
-		runManagement(config)
+		sdk := getHydraSDK()
+
+		keyManager := &rsakey.HydraManager{
+			SDK: sdk,
+			Set: viper.GetString("HYDRA_JWK_SET_ID"),
+		}
+
+		writer := herodot.NewJSONWriter(logger)
+		ruleHandler := rule.NewHandler(writer, rules, newJury(logger).GetIDs())
+		keyHandler := rsakey.NewHandler(writer, keyManager)
+		router := httprouter.New()
+		ruleHandler.SetRoutes(router)
+		keyHandler.SetRoutes(router)
+
+		n := negroni.New()
+		n.Use(negronilogrus.NewMiddlewareFromLogger(logger, "oathkeeper-api"))
+		n.UseHandler(router)
+
+		ch := cors.New(parseCorsOptions("")).Handler(n)
+
+		go refreshKeys(keyManager, 0)
+
+		addr := fmt.Sprintf("%s:%s", viper.GetString("HOST"), viper.GetString("PORT"))
+		server := graceful.WithDefaults(&http.Server{
+			Addr:    addr,
+			Handler: ch,
+		})
+
+		logger.Printf("Listening on %s.\n", addr)
+		if err := graceful.Graceful(server.ListenAndServe, server.Shutdown); err != nil {
+			logger.Fatalf("Unable to gracefully shutdown HTTP server because %s.\n", err)
+			return
+		}
+		logger.Println("HTTP server was shutdown gracefully")
 	},
 }
 

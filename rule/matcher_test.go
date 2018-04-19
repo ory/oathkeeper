@@ -31,8 +31,8 @@ import (
 
 var methods = []string{"POST", "PUT", "GET", "DELETE", "PATCH", "OPTIONS", "HEAD"}
 
-func generateDummyRules(amount int) []Rule {
-	rules := make([]Rule, amount)
+func generateDummyRules(amount int) map[string]Rule {
+	rules := make(map[string]Rule, amount)
 	scopes := []string{"foo", "bar", "baz", "faz"}
 	expressions := []string{"/users/", "/users", "/blogs/", "/use<(r)>s/"}
 	resources := []string{"users", "users:$1"}
@@ -40,7 +40,7 @@ func generateDummyRules(amount int) []Rule {
 
 	for i := 0; i < amount; i++ {
 		exp, _ := compiler.CompileRegex(expressions[(i%(len(expressions)))]+"([0-"+strconv.Itoa(i)+"]+)", '<', '>')
-		rules[i] = Rule{
+		rules[strconv.Itoa(i)] = Rule{
 			ID:                 strconv.Itoa(i),
 			MatchesMethods:     methods[:i%(len(methods))],
 			RequiredScopes:     scopes[:i%(len(scopes))],

@@ -21,32 +21,26 @@
 package cmd
 
 import (
+	"crypto/tls"
+	"encoding/base64"
 	"fmt"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
 
-	"crypto/tls"
-
-	"encoding/base64"
-
 	"github.com/meatballhat/negroni-logrus"
 	"github.com/ory/graceful"
 	"github.com/ory/metrics-middleware"
-	"github.com/ory/oathkeeper/decision"
 	"github.com/ory/oathkeeper/proxy"
 	"github.com/ory/oathkeeper/rsakey"
 	"github.com/ory/oathkeeper/rule"
+	"github.com/ory/oathkeeper/sdk/go/oathkeeper"
 	"github.com/rs/cors"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/urfave/negroni"
 )
-
-type proxyConfig struct {
-	rules      rule.Manager
-	corsPrefix string
-}
 
 // proxyCmd represents the proxy command
 var proxyCmd = &cobra.Command{
@@ -63,8 +57,6 @@ All possible controls are listed below.
 REQUIRED CONTROLS
 =============
 
-` + databaseUrl + `
-
 - HYDRA_CLIENT_ID: The OAuth 2.0 Client ID to be used to connect to ORY Hydra. The client must allowed to request the
 	hydra.warden OAuth 2.0 Scope and allowed to access the warden resources.
 
@@ -75,6 +67,9 @@ REQUIRED CONTROLS
 
 - BACKEND_URL: The URL where requests will be forwarded to, if access is granted.
 	Example: BACKEND_URL=https://my-backend.com/
+
+- OATHKEEPER_API_URL: The URL of the Oathkeeper REST API
+	Example: OATHKEEPER_API_URL=https://api.oathkeeper.mydomain.com/
 
 - JWT_SHARED_SECRET: The shared secret to be used to encrypt the Authorization Bearer JSON Web Token. Use this
 	secret to validate that the Bearer Token was indeed issued by this ORY Oathkeeper instance.
@@ -92,11 +87,11 @@ HTTP(S) CONTROLS
 - HTTP_TLS_CERT: Base64 encoded (without padding) string of the TLS certificate (PEM encoded) to be used for HTTP over TLS (HTTPS).
 	If not set, HTTPS will be disabled and instead HTTP will be served.
 
-- PROXY_HOST: The host to listen on.
-	Default: PROXY_HOST="" (all interfaces)
+- HOST: The host to listen on.
+	Default: HOST="" (all interfaces)
 
-- PROXY_PORT: The port to listen on.
-	Default: PROXY_PORT="4455"
+- PORT: The port to listen on.
+	Default: PORT="4455"
 
 
 OTHER CONTROLS
@@ -113,105 +108,102 @@ OTHER CONTROLS
 	Default: HYDRA_JWK_SET_ID=oathkeeper:id-token
 ` + corsMessage,
 	Run: func(cmd *cobra.Command, args []string) {
-		rules, err := newRuleManager(viper.GetString("DATABASE_URL"))
+		os := oathkeeper.NewSDK(viper.GetString("OATHKEEPER_API_URL"))
+		sdk := getHydraSDK()
+
+		backend, err := url.Parse(viper.GetString("BACKEND_URL"))
 		if err != nil {
-			logger.WithError(err).Fatalln("Unable to connect to rule backend")
+			logger.WithError(err).Fatalln("Unable to parse backend URL")
 		}
 
-		config := &proxyConfig{
-			rules: rules,
+		issuer := viper.GetString("ISSUER_URL")
+		if issuer == "" {
+			logger.Fatalln("Please set the issuer URL using the environment variable ISSUER_URL")
 		}
 
-		runProxy(config)
-	},
-}
-
-func runProxy(c *proxyConfig) {
-	sdk := getHydraSDK()
-
-	backend, err := url.Parse(viper.GetString("BACKEND_URL"))
-	if err != nil {
-		logger.WithError(err).Fatalln("Unable to parse backend URL")
-	}
-
-	issuer := viper.GetString("ISSUER_URL")
-	if issuer == "" {
-		logger.Fatalln("Please set the issuer URL using the environment variable ISSUER_URL")
-	}
-
-	matcher := &rule.CachedMatcher{Manager: c.rules, Rules: []rule.Rule{}}
-
-	if err := matcher.Refresh(); err != nil {
-		logger.WithError(err).Fatalln("Unable to refresh rules")
-	}
-
-	keyManager := &rsakey.HydraManager{
-		SDK: sdk,
-		Set: viper.GetString("HYDRA_JWK_SET_ID"),
-	}
-
-	go refreshRules(c, matcher, 0)
-	go refreshKeys(keyManager, 0)
-
-	eval := decision.NewWardenEvaluator(logger, matcher, sdk, issuer)
-	d := proxy.NewProxy(backend, eval, logger, keyManager)
-	handler := &httputil.ReverseProxy{
-		Director:  d.Director,
-		Transport: d,
-	}
-
-	segmentMiddleware := metrics.NewMetricsManager(
-		metrics.Hash("DATABASE_URL"),
-		viper.GetString("DATABASE_URL") != "memory",
-		"jk32cFATnj9GKbQdFL7fBB9qtKZdX9j7",
-		[]string{"/"},
-		logger,
-	)
-	go segmentMiddleware.RegisterSegment(Version, GitHash, BuildTime)
-	go segmentMiddleware.CommitMemoryStatistics()
-
-	n := negroni.New()
-	n.Use(negronilogrus.NewMiddlewareFromLogger(logger, "oathkeeper-handler"))
-	n.Use(segmentMiddleware)
-	n.UseHandler(handler)
-
-	ch := cors.New(parseCorsOptions(c.corsPrefix)).Handler(n)
-
-	var cert tls.Certificate
-	tlsCert := viper.GetString("HTTP_TLS_CERT")
-	tlsKey := viper.GetString("HTTP_TLS_KEY")
-	if tlsCert != "" && tlsKey != "" {
-		if tlsCert, err := base64.StdEncoding.DecodeString(tlsCert); err != nil {
-			logger.WithError(err).Fatalln("Unable to base64 decode the TLS Certificate")
-		} else if tlsKey, err := base64.StdEncoding.DecodeString(tlsKey); err != nil {
-			logger.WithError(err).Fatalln("Unable to base64 decode the TLS Private Key")
-		} else if cert, err = tls.X509KeyPair(tlsCert, tlsKey); err != nil {
-			logger.WithError(err).Fatalln("Unable to load X509 key pair")
+		matcher := rule.NewHTTPMatcher(os)
+		if err := matcher.Refresh(); err != nil {
+			logger.WithError(err).Fatalln("Unable to refresh rules")
 		}
-	}
 
-	addr := fmt.Sprintf("%s:%s", viper.GetString("PROXY_HOST"), viper.GetString("PROXY_PORT"))
-	server := graceful.WithDefaults(&http.Server{
-		Addr:    addr,
-		Handler: ch,
-		TLSConfig: &tls.Config{
-			Certificates: []tls.Certificate{cert},
-		},
-	})
+		keyManager := &rsakey.HydraManager{
+			SDK: sdk,
+			Set: viper.GetString("HYDRA_JWK_SET_ID"),
+		}
 
-	logger.Printf("Listening on %s.\n", addr)
-	if err := graceful.Graceful(func() error {
+		go refreshRules(matcher, 0)
+		go refreshKeys(keyManager, 0)
+
+		eval := proxy.NewJudge(logger, matcher, issuer, newJury(logger))
+		d := proxy.NewProxy(backend, eval, logger, keyManager)
+		handler := &httputil.ReverseProxy{
+			Director:  d.Director,
+			Transport: d,
+		}
+
+		segmentMiddleware := metrics.NewMetricsManager(
+			metrics.Hash(viper.GetString("DATABASE_URL")),
+			viper.GetString("DATABASE_URL") != "memory",
+			"MSx9A6YQ1qodnkzEFOv22cxOmOCJXMFa",
+			[]string{"/"},
+			logger,
+		)
+		go segmentMiddleware.RegisterSegment(Version, GitHash, BuildTime)
+		go segmentMiddleware.CommitMemoryStatistics()
+
+		n := negroni.New()
+		n.Use(negronilogrus.NewMiddlewareFromLogger(logger, "oathkeeper-proxy"))
+		n.Use(segmentMiddleware)
+		n.UseHandler(handler)
+
+		ch := cors.New(parseCorsOptions("")).Handler(n)
+
+		var cert tls.Certificate
+		tlsCert := viper.GetString("HTTP_TLS_CERT")
+		tlsKey := viper.GetString("HTTP_TLS_KEY")
 		if tlsCert != "" && tlsKey != "" {
-			return server.ListenAndServeTLS("", "")
+			if tlsCert, err := base64.StdEncoding.DecodeString(tlsCert); err != nil {
+				logger.WithError(err).Fatalln("Unable to base64 decode the TLS Certificate")
+			} else if tlsKey, err := base64.StdEncoding.DecodeString(tlsKey); err != nil {
+				logger.WithError(err).Fatalln("Unable to base64 decode the TLS Private Key")
+			} else if cert, err = tls.X509KeyPair(tlsCert, tlsKey); err != nil {
+				logger.WithError(err).Fatalln("Unable to load X509 key pair")
+			}
 		}
-		return server.ListenAndServe()
-	}, server.Shutdown); err != nil {
-		logger.Fatalf("Unable to gracefully shutdown HTTP(s) server because %s.\n", err)
-		return
-	}
-	logger.Println("HTTP(s) server was shutdown gracefully")
+
+		addr := fmt.Sprintf("%s:%s", viper.GetString("HOST"), viper.GetString("PORT"))
+		server := graceful.WithDefaults(&http.Server{
+			Addr:    addr,
+			Handler: ch,
+			TLSConfig: &tls.Config{
+				Certificates: []tls.Certificate{cert},
+			},
+		})
+
+		logger.Printf("Listening on %s.\n", addr)
+		if err := graceful.Graceful(func() error {
+			if tlsCert != "" && tlsKey != "" {
+				return server.ListenAndServeTLS("", "")
+			}
+			return server.ListenAndServe()
+		}, server.Shutdown); err != nil {
+			logger.Fatalf("Unable to gracefully shutdown HTTP(s) server because %s.\n", err)
+			return
+		}
+		logger.Println("HTTP(s) server was shutdown gracefully")
+	},
 }
 
 func init() {
 	serveCmd.AddCommand(proxyCmd)
+}
+
+func newJury(logger logrus.FieldLogger) proxy.Jury {
+	return []proxy.Juror{
+		proxy.NewJurorPassThrough(logger),
+		proxy.NewJurorWardenOAuth2(logger, nil, false, ""),
+		proxy.NewJurorWardenOAuth2(logger, nil, true, viper.GetString("ANONYMOUS_SUBJECT_ID")),
+		proxy.NewJurorOAuth2(logger, nil, false, ""),
+		proxy.NewJurorOAuth2(logger, nil, true, viper.GetString("ANONYMOUS_SUBJECT_ID")),
+	}
 }

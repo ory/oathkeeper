@@ -47,7 +47,7 @@ func getHydraSDK() hydra.SDK {
 	return sdk
 }
 
-func refreshRules(c *proxyConfig, m *rule.CachedMatcher, fails int) {
+func refreshRules(m rule.Refresher, fails int) {
 	duration, _ := time.ParseDuration(viper.GetString("RULES_REFRESH_INTERVAL"))
 	if duration == 0 {
 		duration = time.Second * 30
@@ -60,13 +60,13 @@ func refreshRules(c *proxyConfig, m *rule.CachedMatcher, fails int) {
 		}
 
 		time.Sleep(time.Second * time.Duration(fails+1))
-		refreshRules(c, m, fails+1)
+		refreshRules(m, fails+1)
 		return
 	}
 
 	time.Sleep(duration)
 
-	refreshRules(c, m, 0)
+	refreshRules(m, 0)
 }
 
 func refreshKeys(k rsakey.Manager, fails int) {

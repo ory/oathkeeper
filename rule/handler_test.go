@@ -27,15 +27,17 @@ import (
 
 	"github.com/julienschmidt/httprouter"
 	"github.com/ory/herodot"
-	"github.com/ory/oathkeeper/sdk/go/oathkeepersdk/swagger"
+	"github.com/ory/oathkeeper/pkg"
+	"github.com/ory/oathkeeper/sdk/go/oathkeeper/swagger"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func TestHandler(t *testing.T) {
 	handler := &Handler{
-		H: herodot.NewJSONWriter(nil),
-		M: NewMemoryManager(),
+		H:                herodot.NewJSONWriter(nil),
+		M:                NewMemoryManager(),
+		AllowedRuleModes: []string{"foo", "bar"},
 	}
 	router := httprouter.New()
 	handler.SetRoutes(router)
@@ -51,14 +53,14 @@ func TestHandler(t *testing.T) {
 		RequiredResource: "users:$1",
 		RequiredAction:   "create:$1",
 		RequiredScopes:   []string{"users.create"},
-		Mode:             PolicyMode,
+		Mode:             "foo",
 	}
 	r2 := swagger.Rule{
 		Description:    "Get users rule",
 		MatchesUrl:     server.URL + "/users/([0-9]+)",
 		MatchesMethods: []string{"GET"},
 		RequiredScopes: []string{},
-		Mode:           AnonymousMode,
+		Mode:           "bar",
 	}
 
 	t.Run("case=create a new rule", func(t *testing.T) {
@@ -73,9 +75,9 @@ func TestHandler(t *testing.T) {
 		assert.NotEmpty(t, result.Id)
 		r2.Id = result.Id
 
-		results, response, err := client.ListRules()
+		results, response, err := client.ListRules(pkg.RulesUpperLimit, 0)
 		require.NoError(t, err)
-		assert.Len(t, results, 2)
+		require.Len(t, results, 2)
 		assert.True(t, results[0].Id != results[1].Id)
 
 		r1.RequiredScopes = []string{"users"}
@@ -99,7 +101,7 @@ func TestHandler(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, http.StatusNotFound, response.StatusCode)
 
-		results, response, err = client.ListRules()
+		results, response, err = client.ListRules(pkg.RulesUpperLimit, 0)
 		require.NoError(t, err)
 		assert.Len(t, results, 1)
 	})

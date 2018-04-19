@@ -23,7 +23,6 @@ package proxy
 import (
 	"net/http"
 
-	"github.com/ory/oathkeeper/helper"
 	"github.com/ory/oathkeeper/rule"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
@@ -36,16 +35,17 @@ type Judge struct {
 	Issuer  string
 }
 
-func NewWardenEvaluator(l logrus.FieldLogger, m rule.Matcher, i string) *Judge {
+func NewJudge(l logrus.FieldLogger, m rule.Matcher, i string, jury Jury) *Judge {
 	if l == nil {
 		l = logrus.New()
 	}
 
-	return &Judge{
-		Matcher: m,
-		Logger:  l,
-		Issuer:  i,
+	j := &Judge{Matcher: m, Logger: l, Issuer: i, Jury: map[string]Juror{}}
+	for _, juror := range jury {
+		j.Jury[juror.GetID()] = juror
 	}
+
+	return j
 }
 
 func (d *Judge) EvaluateAccessRequest(r *http.Request) (*Session, error) {
@@ -54,12 +54,6 @@ func (d *Judge) EvaluateAccessRequest(r *http.Request) (*Session, error) {
 	u.Scheme = "http"
 	if r.TLS != nil {
 		u.Scheme = "https"
-	}
-
-	token := helper.BearerTokenFromRequest(r)
-	var tokenID = token
-	if len(token) >= 5 {
-		tokenID = token[:5]
 	}
 
 	rl, err := d.Matcher.MatchRule(r.Method, &u)
@@ -87,7 +81,6 @@ func (d *Judge) EvaluateAccessRequest(r *http.Request) (*Session, error) {
 		WithField("granted", false).
 		WithField("user", "").
 		WithField("access_url", u.String()).
-		WithField("token", tokenID).
 		WithField("mode", rl.Mode).
 		WithField("reason", "Rule defines a unknown mode").
 		WithField("reason_id", "unknown_mode").

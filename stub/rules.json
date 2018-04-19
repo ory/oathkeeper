@@ -2,10 +2,10 @@
   "id": "test-rule-1",
   "matchesMethods": ["POST", "GET"],
   "matchesUrl": "http://localhost/",
-  "mode": "bypass"
+  "mode": "pass_through"
 }, {
   "id": "test-rule-2",
   "matchesMethods": ["POST", "GET"],
   "matchesUrl": "http://localhost/",
-  "mode": "bypass"
+  "mode": "oauth2_introspection"
 }]

@@ -22,6 +22,7 @@ package rule
 
 import (
 	"github.com/ory/oathkeeper/helper"
+	"github.com/ory/pagination"
 	"github.com/pkg/errors"
 )
 
@@ -33,14 +34,15 @@ func NewMemoryManager() *MemoryManager {
 	return &MemoryManager{Rules: map[string]Rule{}}
 }
 
-func (m *MemoryManager) ListRules() ([]Rule, error) {
+func (m *MemoryManager) ListRules(limit, offset int) ([]Rule, error) {
 	rules := make([]Rule, len(m.Rules))
 	i := 0
 	for _, rule := range m.Rules {
 		rules[i] = rule
 		i++
 	}
-	return rules, nil
+	start, end := pagination.Index(limit, offset, len(rules))
+	return rules[start:end], nil
 }
 
 func (m *MemoryManager) GetRule(id string) (*Rule, error) {

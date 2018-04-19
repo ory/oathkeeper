@@ -151,9 +151,9 @@ func (s *SQLManager) CreateSchemas() (int, error) {
 	return n, nil
 }
 
-func (s *SQLManager) ListRules() ([]Rule, error) {
+func (s *SQLManager) ListRules(limit, offset int) ([]Rule, error) {
 	var d []sqlRule
-	if err := s.db.Select(&d, "SELECT * FROM oathkeeper_rule"); err == sql.ErrNoRows {
+	if err := s.db.Select(&d, s.db.Rebind("SELECT * FROM oathkeeper_rule ORDER BY id LIMIT ? OFFSET ?"), limit, offset); err == sql.ErrNoRows {
 		return []Rule{}, nil
 	} else if err != nil {
 		return nil, errors.WithStack(err)

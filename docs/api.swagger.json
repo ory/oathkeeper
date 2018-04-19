@@ -68,6 +68,24 @@
         ],
         "summary": "List all rules",
         "operationId": "listRules",
+        "parameters": [
+          {
+            "type": "integer",
+            "format": "int64",
+            "x-go-name": "Limit",
+            "description": "The maximum amount of rules returned.",
+            "name": "limit",
+            "in": "query"
+          },
+          {
+            "type": "integer",
+            "format": "int64",
+            "x-go-name": "Offset",
+            "description": "The offset from where to start looking.",
+            "name": "offset",
+            "in": "query"
+          }
+        ],
         "responses": {
           "200": {
             "$ref": "#/responses/rules"
@@ -439,6 +457,24 @@
           "description": "in: path",
           "type": "string",
           "x-go-name": "ID"
+        }
+      },
+      "x-go-package": "github.com/ory/oathkeeper/rule"
+    },
+    "swaggerListRulesParameters": {
+      "type": "object",
+      "properties": {
+        "limit": {
+          "description": "The maximum amount of rules returned.\nin: query",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "Limit"
+        },
+        "offset": {
+          "description": "The offset from where to start looking.\nin: query",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "Offset"
         }
       },
       "x-go-package": "github.com/ory/oathkeeper/rule"

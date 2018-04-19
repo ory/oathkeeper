@@ -36,6 +36,21 @@ type JurorOAuth2Introspection struct {
 	L              logrus.FieldLogger
 	H              hydra.OAuth2API
 	AllowAnonymous bool
+	AnonymousName  string
+}
+
+func NewJurorOAuth2(
+	l logrus.FieldLogger,
+	h hydra.OAuth2API,
+	allowAnonymous bool,
+	anonymousName string,
+) *JurorOAuth2Introspection {
+	return &JurorOAuth2Introspection{
+		L:              l,
+		H:              h,
+		AllowAnonymous: allowAnonymous,
+		AnonymousName:  anonymousName,
+	}
 }
 
 func (j *JurorOAuth2Introspection) GetID() string {
@@ -66,9 +81,8 @@ func (j *JurorOAuth2Introspection) Try(r *http.Request, rl *rule.Rule, u *url.UR
 			Infoln("Access request granted")
 
 		return &Session{
-			Subject:   "",
+			Subject:   j.AnonymousName,
 			Anonymous: true,
-			ClientID:  "",
 		}, nil
 	}
 
@@ -89,9 +103,8 @@ func (j *JurorOAuth2Introspection) Try(r *http.Request, rl *rule.Rule, u *url.UR
 			Infoln("Access request granted")
 
 		return &Session{
-			Subject:   "",
+			Subject:   j.AnonymousName,
 			Anonymous: true,
-			ClientID:  "",
 		}, nil
 	}
 
@@ -113,9 +126,8 @@ func (j *JurorOAuth2Introspection) Try(r *http.Request, rl *rule.Rule, u *url.UR
 			Infoln("Access request granted")
 
 		return &Session{
-			Subject:   "",
+			Subject:   j.AnonymousName,
 			Anonymous: true,
-			ClientID:  "",
 		}, nil
 	}
 
@@ -136,9 +148,8 @@ func (j *JurorOAuth2Introspection) Try(r *http.Request, rl *rule.Rule, u *url.UR
 			Infoln("Access request granted")
 
 		return &Session{
-			Subject:   "",
+			Subject:   j.AnonymousName,
 			Anonymous: true,
-			ClientID:  "",
 		}, nil
 	}
 

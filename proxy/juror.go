@@ -28,6 +28,15 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+type Jury []Juror
+
+func (j Jury) GetIDs() (ids []string) {
+	for _, l := range j {
+		ids = append(ids, l.GetID())
+	}
+	return ids
+}
+
 type Juror interface {
 	GetID() string
 	Try(*http.Request, *rule.Rule, *url.URL) (*Session, error)

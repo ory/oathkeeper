@@ -25,7 +25,8 @@ import (
 
 	"fmt"
 
-	"github.com/ory/oathkeeper/sdk/go/oathkeepersdk"
+	"github.com/ory/oathkeeper/pkg"
+	"github.com/ory/oathkeeper/sdk/go/oathkeeper"
 	"github.com/spf13/cobra"
 )
 
@@ -43,8 +44,8 @@ var listCmd = &cobra.Command{
 			fatalf("Please specify the endpoint url using the --endpoint flag, for more information use `oathkeeper help rules`")
 		}
 
-		client := oathkeepersdk.NewSDK(endpoint)
-		rules, response, err := client.ListRules()
+		client := oathkeeper.NewSDK(endpoint)
+		rules, response, err := client.ListRules(pkg.RulesUpperLimit, 0)
 		checkResponse(response, err, http.StatusOK)
 		fmt.Println(formatResponse(rules))
 	},

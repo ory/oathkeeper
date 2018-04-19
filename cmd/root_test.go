@@ -32,6 +32,7 @@ import (
 
 func TestCommandLineInterface(t *testing.T) {
 	var osArgs = make([]string, len(os.Args))
+	os.Setenv("PORT", "4456")
 	os.Setenv("DATABASE_URL", "memory")
 	os.Setenv("ISSUER_URL", "memory")
 	os.Setenv("HYDRA_URL", "http://does-not-exist.com/")
@@ -45,13 +46,14 @@ func TestCommandLineInterface(t *testing.T) {
 		expectErr bool
 	}{
 		{
-			args: []string{"serve", "all"},
+			args: []string{"serve", "api"},
 			wait: func() bool {
-				res, err := http.Get("http://localhost:4455")
+				res, err := http.Get("http://localhost:4456")
 				if err != nil {
 					t.Logf("Network error while polling for server: %s", err)
+				} else {
+					defer res.Body.Close()
 				}
-				defer res.Body.Close()
 				return err != nil
 			},
 		},

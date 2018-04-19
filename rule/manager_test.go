@@ -30,6 +30,7 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/ory/dockertest"
 	"github.com/ory/ladon/compiler"
+	"github.com/ory/oathkeeper/pkg"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -104,7 +105,7 @@ func TestManagers(t *testing.T) {
 			require.NoError(t, err)
 			assert.EqualValues(t, &r2, result)
 
-			results, err := manager.ListRules()
+			results, err := manager.ListRules(pkg.RulesUpperLimit, 0)
 			require.NoError(t, err)
 			assert.Len(t, results, 2)
 			assert.True(t, results[0].ID != results[1].ID)
@@ -120,7 +121,7 @@ func TestManagers(t *testing.T) {
 
 			require.NoError(t, manager.DeleteRule(r1.ID))
 
-			results, err = manager.ListRules()
+			results, err = manager.ListRules(pkg.RulesUpperLimit, 0)
 			require.NoError(t, err)
 			assert.Len(t, results, 1)
 			assert.True(t, results[0].ID != r1.ID)

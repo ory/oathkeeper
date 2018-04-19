@@ -18,16 +18,24 @@
  * @license  	   Apache-2.0
  */
 
-package oathkeepersdk
+package oathkeeper
 
-import "github.com/ory/oathkeeper/sdk/go/oathkeepersdk/swagger"
+import "github.com/ory/oathkeeper/sdk/go/oathkeeper/swagger"
 
-type SDK struct {
+type SDK interface {
+	CreateRule(body swagger.Rule) (*swagger.Rule, *swagger.APIResponse, error)
+	DeleteRule(id string) (*swagger.APIResponse, error)
+	GetRule(id string) (*swagger.Rule, *swagger.APIResponse, error)
+	ListRules(limit, offset int64) ([]swagger.Rule, *swagger.APIResponse, error)
+	UpdateRule(id string, body swagger.Rule) (*swagger.Rule, *swagger.APIResponse, error)
+}
+
+type DefaultSDK struct {
 	*swagger.RuleApi
 }
 
-func NewSDK(endpoint string) *SDK {
-	return &SDK{
+func NewSDK(endpoint string) *DefaultSDK {
+	return &DefaultSDK{
 		RuleApi: swagger.NewRuleApiWithBasePath(removeTrailingSlash(endpoint)),
 	}
 }
