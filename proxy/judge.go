@@ -74,6 +74,7 @@ func (d *Judge) EvaluateAccessRequest(r *http.Request) (*Session, error) {
 			return nil, err
 		}
 		session.Issuer = d.Issuer
+		session.Rule = rl
 		return session, nil
 	}
 

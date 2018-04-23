@@ -286,6 +286,71 @@
     }
   },
   "definitions": {
+    "Upstream": {
+      "type": "object",
+      "properties": {
+        "preserveHost": {
+          "type": "boolean",
+          "x-go-name": "PreserveHost"
+        },
+        "stripPath": {
+          "type": "string",
+          "x-go-name": "StripPath"
+        },
+        "url": {
+          "type": "string",
+          "x-go-name": "URL"
+        }
+      },
+      "x-go-package": "github.com/ory/oathkeeper/rule"
+    },
+    "jsonRule": {
+      "type": "object",
+      "properties": {
+        "description": {
+          "type": "string",
+          "x-go-name": "Description"
+        },
+        "id": {
+          "type": "string",
+          "x-go-name": "ID"
+        },
+        "matchesMethods": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-go-name": "MatchesMethods"
+        },
+        "matchesUrl": {
+          "type": "string",
+          "x-go-name": "MatchesURL"
+        },
+        "mode": {
+          "type": "string",
+          "x-go-name": "Mode"
+        },
+        "requiredAction": {
+          "type": "string",
+          "x-go-name": "RequiredAction"
+        },
+        "requiredResource": {
+          "type": "string",
+          "x-go-name": "RequiredResource"
+        },
+        "requiredScopes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-go-name": "RequiredScopes"
+        },
+        "upstream": {
+          "$ref": "#/definitions/Upstream"
+        }
+      },
+      "x-go-package": "github.com/ory/oathkeeper/rule"
+    },
     "jsonWebKey": {
       "type": "object",
       "properties": {
@@ -385,8 +450,8 @@
       "x-go-package": "github.com/ory/oathkeeper/rsakey"
     },
     "rule": {
-      "description": "A rule",
       "type": "object",
+      "title": "Rule is a single rule that will get checked on every HTTP request.",
       "properties": {
         "description": {
           "description": "A human readable description of this rule.",
@@ -433,91 +498,12 @@
             "type": "string"
           },
           "x-go-name": "RequiredScopes"
-        }
-      },
-      "x-go-name": "jsonRule",
-      "x-go-package": "github.com/ory/oathkeeper/rule"
-    },
-    "swaggerCreateRuleParameters": {
-      "type": "object",
-      "properties": {
-        "Body": {
-          "$ref": "#/definitions/rule"
-        }
-      },
-      "x-go-package": "github.com/ory/oathkeeper/rule"
-    },
-    "swaggerGetRuleParameters": {
-      "type": "object",
-      "required": [
-        "id"
-      ],
-      "properties": {
-        "id": {
-          "description": "in: path",
-          "type": "string",
-          "x-go-name": "ID"
-        }
-      },
-      "x-go-package": "github.com/ory/oathkeeper/rule"
-    },
-    "swaggerListRulesParameters": {
-      "type": "object",
-      "properties": {
-        "limit": {
-          "description": "The maximum amount of rules returned.\nin: query",
-          "type": "integer",
-          "format": "int64",
-          "x-go-name": "Limit"
         },
-        "offset": {
-          "description": "The offset from where to start looking.\nin: query",
-          "type": "integer",
-          "format": "int64",
-          "x-go-name": "Offset"
+        "upstream": {
+          "$ref": "#/definitions/Upstream"
         }
       },
-      "x-go-package": "github.com/ory/oathkeeper/rule"
-    },
-    "swaggerRuleResponse": {
-      "description": "A rule",
-      "type": "object",
-      "properties": {
-        "Body": {
-          "$ref": "#/definitions/rule"
-        }
-      },
-      "x-go-package": "github.com/ory/oathkeeper/rule"
-    },
-    "swaggerRulesResponse": {
-      "description": "A list of rules",
-      "type": "object",
-      "properties": {
-        "Body": {
-          "description": "in: body\ntype: array",
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/rule"
-          }
-        }
-      },
-      "x-go-package": "github.com/ory/oathkeeper/rule"
-    },
-    "swaggerUpdateRuleParameters": {
-      "type": "object",
-      "required": [
-        "id"
-      ],
-      "properties": {
-        "Body": {
-          "$ref": "#/definitions/rule"
-        },
-        "id": {
-          "description": "in: path",
-          "type": "string",
-          "x-go-name": "ID"
-        }
-      },
+      "x-go-name": "Rule",
       "x-go-package": "github.com/ory/oathkeeper/rule"
     }
   },

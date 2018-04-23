@@ -24,6 +24,7 @@ import (
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
+	"github.com/ory/oathkeeper/rule"
 	"github.com/pborman/uuid"
 )
 
@@ -34,6 +35,7 @@ type Session struct {
 	ClientID  string
 	Issuer    string
 	Extra     interface{}
+	Rule      *rule.Rule
 }
 
 func (s *Session) ToClaims() jwt.MapClaims {

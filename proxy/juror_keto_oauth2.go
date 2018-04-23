@@ -72,7 +72,7 @@ func contextFromRequest(r *http.Request) map[string]interface{} {
 }
 
 func (j *JurorWardenOAuth2) Try(r *http.Request, rl *rule.Rule, u *url.URL) (*Session, error) {
-	var oauthSession *swagger.WardenOAuth2AuthorizationResponse
+	var oauthSession *swagger.WardenOAuth2AccessTokenAuthorizationResponse
 	var defaultSession *swagger.WardenSubjectAuthorizationResponse
 	var isAuthorized bool
 	var response *swagger.APIResponse
@@ -101,7 +101,7 @@ func (j *JurorWardenOAuth2) Try(r *http.Request, rl *rule.Rule, u *url.URL) (*Se
 			return nil, errors.WithStack(helper.ErrMissingBearerToken)
 		}
 	} else {
-		oauthSession, response, err = j.K.IsOAuth2AccessTokenAuthorized(swagger.WardenOAuth2AuthorizationRequest{
+		oauthSession, response, err = j.K.IsOAuth2AccessTokenAuthorized(swagger.WardenOAuth2AccessTokenAuthorizationRequest{
 			Scopes:   rl.RequiredScopes,
 			Action:   rl.MatchesURLCompiled.ReplaceAllString(u.String(), rl.RequiredAction),
 			Resource: rl.MatchesURLCompiled.ReplaceAllString(u.String(), rl.RequiredResource),
@@ -128,7 +128,7 @@ func (j *JurorWardenOAuth2) Try(r *http.Request, rl *rule.Rule, u *url.URL) (*Se
 			WithField("reason", "Rule requires policy-based access control decision, which failed due to a http error").
 			WithField("reason_id", "policy_decision_point_http_error").
 			Warn("Access request denied")
-		return nil, errors.Errorf("Token introspection expects status code %d but got %d", http.StatusOK, response.StatusCode)
+		return nil, errors.Errorf("Warden request expects status code %d but got %d", http.StatusOK, response.StatusCode)
 	} else if !isAuthorized {
 		j.L.WithError(err).
 			WithFields(toLogFields(r, u, false, rl, subject)).

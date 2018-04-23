@@ -33,15 +33,11 @@ Class | Method | HTTP request | Description
 ## Documentation For Models
 
  - [InlineResponse401](docs/InlineResponse401.md)
+ - [JsonRule](docs/JsonRule.md)
  - [JsonWebKey](docs/JsonWebKey.md)
  - [JsonWebKeySet](docs/JsonWebKeySet.md)
  - [Rule](docs/Rule.md)
- - [SwaggerCreateRuleParameters](docs/SwaggerCreateRuleParameters.md)
- - [SwaggerGetRuleParameters](docs/SwaggerGetRuleParameters.md)
- - [SwaggerListRulesParameters](docs/SwaggerListRulesParameters.md)
- - [SwaggerRuleResponse](docs/SwaggerRuleResponse.md)
- - [SwaggerRulesResponse](docs/SwaggerRulesResponse.md)
- - [SwaggerUpdateRuleParameters](docs/SwaggerUpdateRuleParameters.md)
+ - [Upstream](docs/Upstream.md)
 
 
 ## Documentation For Authorization

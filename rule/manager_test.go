@@ -21,31 +21,19 @@
 package rule
 
 import (
-	"fmt"
-	"log"
-	"os"
 	"regexp"
 	"testing"
 
-	"github.com/jmoiron/sqlx"
-	"github.com/ory/dockertest"
+	"net/url"
+
+	_ "github.com/go-sql-driver/mysql"
+	_ "github.com/lib/pq"
 	"github.com/ory/ladon/compiler"
 	"github.com/ory/oathkeeper/pkg"
+	"github.com/ory/sqlcon/dockertest"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
-
-var resources []*dockertest.Resource
-var pool = new(dockertest.Pool)
-
-func kjillAll() {
-	for _, resource := range resources {
-		if err := pool.Purge(resource); err != nil {
-			log.Printf("Got an error while trying to purge resource: %s", err)
-		}
-	}
-	resources = []*dockertest.Resource{}
-}
 
 func mustCompileRegex(t *testing.T, pattern string) *regexp.Regexp {
 	exp, err := compiler.CompileRegex(pattern, '<', '>')
@@ -53,10 +41,16 @@ func mustCompileRegex(t *testing.T, pattern string) *regexp.Regexp {
 	return exp
 }
 
+func mustParseURL(t *testing.T, u string) *url.URL {
+	exp, err := url.Parse(u)
+	require.NoError(t, err)
+	return exp
+}
+
 func TestMain(m *testing.M) {
+	ex := dockertest.Register()
 	code := m.Run()
-	kjillAll()
-	os.Exit(code)
+	ex.Exit(code)
 }
 
 func TestManagers(t *testing.T) {
@@ -66,10 +60,10 @@ func TestManagers(t *testing.T) {
 
 	if !testing.Short() {
 		connectToPostgres(t, managers)
+		connectToMySQL(t, managers)
 	}
 
 	for k, manager := range managers {
-
 		r1 := Rule{
 			ID:                 "foo1",
 			Description:        "Create users rule",
@@ -79,6 +73,12 @@ func TestManagers(t *testing.T) {
 			RequiredResource:   "users:$1",
 			RequiredAction:     "create:$1",
 			RequiredScopes:     []string{"users.create"},
+			Upstream: &Upstream{
+				URLParsed:    mustParseURL(t, "http://localhost:1235/"),
+				URL:          "http://localhost:1235/",
+				StripPath:    "/bar",
+				PreserveHost: true,
+			},
 		}
 		r2 := Rule{
 			ID:                 "foo2",
@@ -86,8 +86,14 @@ func TestManagers(t *testing.T) {
 			MatchesURLCompiled: mustCompileRegex(t, "/users/([0-9]+)"),
 			MatchesURL:         "/users/([0-9]+)",
 			MatchesMethods:     []string{"GET"},
-			Mode:               AnonymousMode,
+			Mode:               "abc",
 			RequiredScopes:     []string{},
+			Upstream: &Upstream{
+				URLParsed:    mustParseURL(t, "http://localhost:333/"),
+				URL:          "http://localhost:333/",
+				StripPath:    "/foo",
+				PreserveHost: false,
+			},
 		}
 
 		t.Run("case="+k, func(t *testing.T) {
@@ -130,7 +136,14 @@ func TestManagers(t *testing.T) {
 }
 
 func connectToPostgres(t *testing.T, managers map[string]Manager) {
-	s := NewSQLManager(connectToPostgresDB(t))
+	db, err := dockertest.ConnectToTestPostgreSQL()
+	if err != nil {
+		t.Logf("Could not connect to database: %v", err)
+		t.FailNow()
+		return
+	}
+
+	s := NewSQLManager(db)
 	if _, err := s.CreateSchemas(); err != nil {
 		t.Logf("Could not create postgres schema: %v", err)
 		t.FailNow()
@@ -140,40 +153,20 @@ func connectToPostgres(t *testing.T, managers map[string]Manager) {
 	managers["postgres"] = s
 }
 
-func connectToPostgresDB(t *testing.T) *sqlx.DB {
-	var db *sqlx.DB
-	var err error
-	var resource *dockertest.Resource
-
-	url := os.Getenv("PG_URL")
-	if url == "" {
-		pool, err = dockertest.NewPool("")
-		if err != nil {
-			t.Fatalf("Could not connect to docker: %s", err)
-		}
-
-		resource, err = pool.Run("postgres", "9.6", []string{"POSTGRES_PASSWORD=secret", "POSTGRES_DB=oathkeeper"})
-		if err != nil {
-			t.Fatalf("Could not start resource: %s", err)
-		}
-
-		url = fmt.Sprintf("postgres://postgres:secret@localhost:%s/oathkeeper?sslmode=disable", resource.GetPort("5432/tcp"))
-		resources = append(resources, resource)
+func connectToMySQL(t *testing.T, managers map[string]Manager) {
+	db, err := dockertest.ConnectToTestMySQL()
+	if err != nil {
+		t.Logf("Could not connect to database: %v", err)
+		t.FailNow()
+		return
 	}
 
-	if err = pool.Retry(func() error {
-		var err error
-		db, err = sqlx.Open("postgres", url)
-		if err != nil {
-			return err
-		}
-		return db.Ping()
-	}); err != nil {
-		if resource != nil {
-			pool.Purge(resource)
-		}
-		t.Fatalf("Could not connect to docker: %s", err)
+	s := NewSQLManager(db)
+	if _, err := s.CreateSchemas(); err != nil {
+		t.Logf("Could not create postgres schema: %v", err)
+		t.FailNow()
+		return
 	}
 
-	return db
+	managers["mysql"] = s
 }

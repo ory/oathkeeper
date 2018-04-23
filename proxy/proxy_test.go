@@ -30,6 +30,8 @@ import (
 	"regexp"
 	"testing"
 
+	"strings"
+
 	"github.com/ory/oathkeeper/helper"
 	"github.com/ory/oathkeeper/rsakey"
 	"github.com/ory/oathkeeper/rule"
@@ -67,23 +69,29 @@ func (j jurorAcceptAll) Try(r *http.Request, rl *rule.Rule, u *url.URL) (*Sessio
 func TestProxy(t *testing.T) {
 	backend := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		assert.NotEmpty(t, helper.BearerTokenFromRequest(r))
-		fmt.Fprint(w, r.Header.Get("Authorization"))
+		fmt.Fprint(w, "authorization="+r.Header.Get("Authorization"))
+		fmt.Fprint(w, "host="+r.Host)
+		fmt.Fprint(w, "url="+r.URL.String())
+		fmt.Fprint(w, "path="+r.URL.Path)
 	}))
 	defer backend.Close()
 
 	u, _ := url.Parse(backend.URL)
-	d := NewProxy(u, nil, nil, &rsakey.LocalManager{KeyStrength: 512})
+	d := NewProxy(nil, nil, &rsakey.LocalManager{KeyStrength: 512})
 
 	proxy := httptest.NewServer(&httputil.ReverseProxy{Director: d.Director, Transport: d})
 	defer proxy.Close()
 
-	acceptRule := rule.Rule{MatchesMethods: []string{"GET"}, MatchesURLCompiled: mustCompileRegex(t, proxy.URL+"/users/<[0-9]+>"), Mode: "pass_through_accept"}
-	denyRule := rule.Rule{MatchesMethods: []string{"GET"}, MatchesURLCompiled: mustCompileRegex(t, proxy.URL+"/users/<[0-9]+>"), Mode: "pass_through_deny"}
+	acceptRule := rule.Rule{MatchesMethods: []string{"GET"}, MatchesURLCompiled: mustCompileRegex(t, proxy.URL+"/users/<[0-9]+>"), Mode: "pass_through_accept", Upstream: &rule.Upstream{URLParsed: u}}
+	acceptRuleStripHost := rule.Rule{MatchesMethods: []string{"GET"}, MatchesURLCompiled: mustCompileRegex(t, proxy.URL+"/users/<[0-9]+>"), Mode: "pass_through_accept", Upstream: &rule.Upstream{URLParsed: u, StripPath: "/users/", PreserveHost: true}}
+	acceptRuleStripHostWithoutTrailing := rule.Rule{MatchesMethods: []string{"GET"}, MatchesURLCompiled: mustCompileRegex(t, proxy.URL+"/users/<[0-9]+>"), Mode: "pass_through_accept", Upstream: &rule.Upstream{URLParsed: u, StripPath: "/users", PreserveHost: true}}
+	acceptRuleStripHostWithoutTrailing2 := rule.Rule{MatchesMethods: []string{"GET"}, MatchesURLCompiled: mustCompileRegex(t, proxy.URL+"/users/<[0-9]+>"), Mode: "pass_through_accept", Upstream: &rule.Upstream{URLParsed: u, StripPath: "users", PreserveHost: true}}
+	denyRule := rule.Rule{MatchesMethods: []string{"GET"}, MatchesURLCompiled: mustCompileRegex(t, proxy.URL+"/users/<[0-9]+>"), Mode: "pass_through_deny", Upstream: &rule.Upstream{URLParsed: u}}
 
 	for k, tc := range []struct {
 		url       string
 		code      int
-		message   string
+		messages  []string
 		rules     map[string]rule.Rule
 		transform func(r *http.Request)
 		d         string
@@ -108,7 +116,53 @@ func TestProxy(t *testing.T) {
 			transform: func(r *http.Request) {
 				r.Header.Add("Authorization", "bearer token")
 			},
-			message: "bearer token",
+			messages: []string{
+				"authorization=bearer token",
+				"url=/users/1234",
+				"host=" + mustGenerateURL(t, proxy.URL).Host,
+			},
+		},
+		{
+			d:     "should pass",
+			url:   proxy.URL + "/users/1234",
+			rules: map[string]rule.Rule{"1": acceptRuleStripHost},
+			code:  http.StatusOK,
+			transform: func(r *http.Request) {
+				r.Header.Add("Authorization", "bearer token")
+			},
+			messages: []string{
+				"authorization=bearer token",
+				"path=/1234",
+				"host=" + mustGenerateURL(t, backend.URL).Host,
+			},
+		},
+		{
+			d:     "should pass",
+			url:   proxy.URL + "/users/1234",
+			rules: map[string]rule.Rule{"1": acceptRuleStripHostWithoutTrailing},
+			code:  http.StatusOK,
+			transform: func(r *http.Request) {
+				r.Header.Add("Authorization", "bearer token")
+			},
+			messages: []string{
+				"authorization=bearer token",
+				"path=/1234",
+				"host=" + mustGenerateURL(t, backend.URL).Host,
+			},
+		},
+		{
+			d:     "should pass",
+			url:   proxy.URL + "/users/1234",
+			rules: map[string]rule.Rule{"1": acceptRuleStripHostWithoutTrailing2},
+			code:  http.StatusOK,
+			transform: func(r *http.Request) {
+				r.Header.Add("Authorization", "bearer token")
+			},
+			messages: []string{
+				"authorization=bearer token",
+				"path=/1234",
+				"host=" + mustGenerateURL(t, backend.URL).Host,
+			},
 		},
 		{
 			d:     "should fail because invalid credentials",
@@ -135,8 +189,8 @@ func TestProxy(t *testing.T) {
 			require.NoError(t, err)
 
 			assert.Equal(t, tc.code, res.StatusCode)
-			if tc.message != "" {
-				assert.Equal(t, tc.message, fmt.Sprintf("%s", greeting))
+			for _, m := range tc.messages {
+				assert.True(t, strings.Contains(string(greeting), m), "%s not in %s", m, greeting)
 			}
 		})
 	}
@@ -152,24 +206,27 @@ func panicCompileRegex(pattern string) *regexp.Regexp {
 
 func BenchmarkDirector(b *testing.B) {
 	backend := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprint(w, r.Header.Get("Authorization"))
+		fmt.Fprint(w, "authorization="+r.Header.Get("Authorization"))
+		fmt.Fprint(w, "host="+r.Header.Get("Host"))
+		fmt.Fprint(w, "url="+r.URL.String())
+		fmt.Fprint(w, "path="+r.URL.Path)
 	}))
 	defer backend.Close()
 
 	logger := logrus.New()
 	logger.Level = logrus.WarnLevel
 	u, _ := url.Parse(backend.URL)
-	d := NewProxy(u, nil, logger, &rsakey.LocalManager{KeyStrength: 512})
+	d := NewProxy(nil, logger, &rsakey.LocalManager{KeyStrength: 512})
 
 	p := httptest.NewServer(&httputil.ReverseProxy{Director: d.Director, Transport: d})
 	defer p.Close()
 
 	jt := &JurorPassThrough{L: logrus.New()}
 	matcher := &rule.CachedMatcher{Rules: map[string]rule.Rule{
-		"A": {MatchesMethods: []string{"GET"}, MatchesURLCompiled: panicCompileRegex(p.URL + "/users"), Mode: jt.GetID()},
-		"B": {MatchesMethods: []string{"GET"}, MatchesURLCompiled: panicCompileRegex(p.URL + "/users/<[0-9]+>"), Mode: jt.GetID()},
-		"C": {MatchesMethods: []string{"GET"}, MatchesURLCompiled: panicCompileRegex(p.URL + "/<[0-9]+>"), Mode: jt.GetID()},
-		"D": {MatchesMethods: []string{"GET"}, MatchesURLCompiled: panicCompileRegex(p.URL + "/other/<.+>"), Mode: jt.GetID()},
+		"A": {MatchesMethods: []string{"GET"}, MatchesURLCompiled: panicCompileRegex(p.URL + "/users"), Mode: jt.GetID(), Upstream: &rule.Upstream{URLParsed: u}},
+		"B": {MatchesMethods: []string{"GET"}, MatchesURLCompiled: panicCompileRegex(p.URL + "/users/<[0-9]+>"), Mode: jt.GetID(), Upstream: &rule.Upstream{URLParsed: u}},
+		"C": {MatchesMethods: []string{"GET"}, MatchesURLCompiled: panicCompileRegex(p.URL + "/<[0-9]+>"), Mode: jt.GetID(), Upstream: &rule.Upstream{URLParsed: u}},
+		"D": {MatchesMethods: []string{"GET"}, MatchesURLCompiled: panicCompileRegex(p.URL + "/other/<.+>"), Mode: jt.GetID(), Upstream: &rule.Upstream{URLParsed: u}},
 	}}
 	d.Judge = NewJudge(logger, matcher, "", []Juror{jt})
 

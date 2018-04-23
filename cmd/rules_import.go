@@ -34,8 +34,10 @@ import (
 // importCmd represents the import command
 var importCmd = &cobra.Command{
 	Use:   "import <file>",
-	Short: "Import rules from a JSON file",
-	Long: `The JSON file must be formatted as an array containing one or more rules:
+	Short: "Imports rules from a JSON file",
+	Long: `Imported rules are either created or updated if they already exist.
+
+The JSON file must be formatted as an array containing one or more rules:
 
 [
 	{ id: "rule-1", ... },
@@ -64,9 +66,20 @@ Usage example:
 		for _, r := range rules {
 			fmt.Printf("Importing rule %s...\n", r.Id)
 			client := oathkeeper.NewSDK(endpoint)
-			out, response, err := client.CreateRule(r)
-			checkResponse(response, err, http.StatusCreated)
-			fmt.Printf("Successfully imported rule %s...\n", out.Id)
+			out, response, err := client.GetRule(r.Id)
+			if err == nil {
+				response.Body.Close()
+			}
+
+			if out != nil {
+				out, response, err := client.UpdateRule(r.Id, r)
+				checkResponse(response, err, http.StatusOK)
+				fmt.Printf("Successfully imported rule %s...\n", out.Id)
+			} else {
+				out, response, err := client.CreateRule(r)
+				checkResponse(response, err, http.StatusCreated)
+				fmt.Printf("Successfully imported rule %s...\n", out.Id)
+			}
 		}
 		fmt.Printf("Successfully imported all rules from %s", args[0])
 	},

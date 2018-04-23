@@ -41,9 +41,9 @@ func (_mr *_MockWardenSDKRecorder) IsSubjectAuthorized(arg0 interface{}) *gomock
 	return _mr.mock.ctrl.RecordCall(_mr.mock, "IsSubjectAuthorized", arg0)
 }
 
-func (_m *MockWardenSDK) IsOAuth2AccessTokenAuthorized(body swagger.WardenOAuth2AuthorizationRequest) (*swagger.WardenOAuth2AuthorizationResponse, *swagger.APIResponse, error) {
+func (_m *MockWardenSDK) IsOAuth2AccessTokenAuthorized(body swagger.WardenOAuth2AccessTokenAuthorizationRequest) (*swagger.WardenOAuth2AccessTokenAuthorizationResponse, *swagger.APIResponse, error) {
 	ret := _m.ctrl.Call(_m, "IsOAuth2AccessTokenAuthorized", body)
-	ret0, _ := ret[0].(*swagger.WardenOAuth2AuthorizationResponse)
+	ret0, _ := ret[0].(*swagger.WardenOAuth2AccessTokenAuthorizationResponse)
 	ret1, _ := ret[1].(*swagger.APIResponse)
 	ret2, _ := ret[2].(error)
 	return ret0, ret1, ret2
@@ -51,4 +51,16 @@ func (_m *MockWardenSDK) IsOAuth2AccessTokenAuthorized(body swagger.WardenOAuth2
 
 func (_mr *_MockWardenSDKRecorder) IsOAuth2AccessTokenAuthorized(arg0 interface{}) *gomock.Call {
 	return _mr.mock.ctrl.RecordCall(_mr.mock, "IsOAuth2AccessTokenAuthorized", arg0)
+}
+
+func (_m *MockWardenSDK) IsOAuth2ClientAuthorized(body swagger.WardenOAuth2ClientAuthorizationRequest) (*swagger.WardenOAuth2ClientAuthorizationResponse, *swagger.APIResponse, error) {
+	ret := _m.ctrl.Call(_m, "IsOAuth2ClientAuthorized", body)
+	ret0, _ := ret[0].(*swagger.WardenOAuth2ClientAuthorizationResponse)
+	ret1, _ := ret[1].(*swagger.APIResponse)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
+}
+
+func (_mr *_MockWardenSDKRecorder) IsOAuth2ClientAuthorized(arg0 interface{}) *gomock.Call {
+	return _mr.mock.ctrl.RecordCall(_mr.mock, "IsOAuth2ClientAuthorized", arg0)
 }

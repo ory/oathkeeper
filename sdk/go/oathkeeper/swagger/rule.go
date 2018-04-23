@@ -10,7 +10,6 @@
 
 package swagger
 
-// A rule
 type Rule struct {
 
 	// A human readable description of this rule.
@@ -36,4 +35,6 @@ type Rule struct {
 
 	// An array of OAuth 2.0 scopes that are required when accessing an endpoint protected by this rule. If the token used in the Authorization header did not request that specific scope, the request is denied.
 	RequiredScopes []string `json:"requiredScopes,omitempty"`
+
+	Upstream Upstream `json:"upstream,omitempty"`
 }

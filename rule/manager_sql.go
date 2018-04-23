@@ -25,6 +25,8 @@ import (
 	"fmt"
 	"strings"
 
+	"net/url"
+
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 	"github.com/ory/ladon/compiler"
@@ -34,15 +36,18 @@ import (
 )
 
 type sqlRule struct {
-	ID               string `db:"surrogate_id"`
-	InternalID       int64  `db:"id"`
-	MatchesMethods   string `db:"matches_methods"`
-	MatchesURL       string `db:"matches_url"`
-	RequiredScopes   string `db:"required_scopes"`
-	RequiredAction   string `db:"required_action"`
-	RequiredResource string `db:"required_resource"`
-	Description      string `db:"description"`
-	Mode             string `db:"mode"`
+	ID                   string `db:"surrogate_id"`
+	InternalID           int64  `db:"id"`
+	MatchesMethods       string `db:"matches_methods"`
+	MatchesURL           string `db:"matches_url"`
+	RequiredScopes       string `db:"required_scopes"`
+	RequiredAction       string `db:"required_action"`
+	RequiredResource     string `db:"required_resource"`
+	Description          string `db:"description"`
+	Mode                 string `db:"mode"`
+	UpstreamURL          string `db:"upstream_url"`
+	UpstreamPreserveHost bool   `db:"upstream_preserve_host"`
+	UpstreamStripPath    string `db:"upstream_strip_path"`
 }
 
 func (r *sqlRule) toRule() (*Rule, error) {
@@ -60,6 +65,11 @@ func (r *sqlRule) toRule() (*Rule, error) {
 		scopes = strings.Split(r.RequiredScopes, " ")
 	}
 
+	upstream, err := url.Parse(r.UpstreamURL)
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+
 	return &Rule{
 		ID:                 r.ID,
 		MatchesMethods:     methods,
@@ -70,19 +80,28 @@ func (r *sqlRule) toRule() (*Rule, error) {
 		RequiredResource:   r.RequiredResource,
 		Mode:               r.Mode,
 		Description:        r.Description,
+		Upstream: &Upstream{
+			URL:          r.UpstreamURL,
+			URLParsed:    upstream,
+			PreserveHost: r.UpstreamPreserveHost,
+			StripPath:    r.UpstreamStripPath,
+		},
 	}, nil
 }
 
 func toSqlRule(r *Rule) *sqlRule {
 	return &sqlRule{
-		ID:               r.ID,
-		MatchesMethods:   strings.Join(r.MatchesMethods, " "),
-		MatchesURL:       r.MatchesURL,
-		RequiredScopes:   strings.Join(r.RequiredScopes, " "),
-		RequiredAction:   r.RequiredAction,
-		RequiredResource: r.RequiredResource,
-		Description:      r.Description,
-		Mode:             r.Mode,
+		ID:                   r.ID,
+		MatchesMethods:       strings.Join(r.MatchesMethods, " "),
+		MatchesURL:           r.MatchesURL,
+		RequiredScopes:       strings.Join(r.RequiredScopes, " "),
+		RequiredAction:       r.RequiredAction,
+		RequiredResource:     r.RequiredResource,
+		Description:          r.Description,
+		Mode:                 r.Mode,
+		UpstreamURL:          r.Upstream.URL,
+		UpstreamPreserveHost: r.Upstream.PreserveHost,
+		UpstreamStripPath:    r.Upstream.StripPath,
 	}
 }
 
@@ -120,6 +139,19 @@ var migrations = &migrate.MemoryMigrationSource{
 				`UPDATE oathkeeper_rule SET mode='policy' WHERE mode='warden_oauth2'`,
 			},
 		},
+		{
+			Id: "3",
+			Up: []string{
+				`ALTER TABLE oathkeeper_rule ADD upstream_url text`,
+				`ALTER TABLE oathkeeper_rule ADD upstream_preserve_host bool`,
+				`ALTER TABLE oathkeeper_rule ADD upstream_strip_path text`,
+			},
+			Down: []string{
+				`ALTER TABLE oathkeeper_rule DROP COLUMN upstream_url`,
+				`ALTER TABLE oathkeeper_rule DROP COLUMN upstream_preserve_host`,
+				`ALTER TABLE oathkeeper_rule DROP COLUMN upstream_strip_path`,
+			},
+		},
 	},
 }
 
@@ -132,6 +164,9 @@ var sqlParams = []string{
 	"required_resource",
 	"description",
 	"mode",
+	"upstream_url",
+	"upstream_preserve_host",
+	"upstream_strip_path",
 }
 
 func NewSQLManager(db *sqlx.DB) *SQLManager {

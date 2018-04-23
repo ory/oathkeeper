@@ -33,3 +33,9 @@ before finalizing the upgrade process.
 * Warden policies now possible with anonymous users
 
 * Scopes are now being enforced in introspect
+
+* BACKEND_URL deprecated, now in rules
+    * upstream field with
+        * url -> the target url (does not support load balancing)
+        * preserve_host -> preserve the target host
+        * strip_path -> a string that will be removed from the path e.g. `proxy.com/users/1234` with strip_path `users/` becomes `user-service.com/1234`

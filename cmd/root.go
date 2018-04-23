@@ -83,6 +83,7 @@ func initConfig() {
 	viper.SetDefault("PORT", "4455")
 	viper.SetDefault("RULES_REFRESH_INTERVAL", "5s")
 	viper.SetDefault("HYDRA_JWK_SET_ID", "oathkeeper:id-token")
+	viper.SetDefault("ANONYMOUS_SUBJECT_ID", "anonymous")
 
 	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err == nil {

@@ -11,6 +11,7 @@ Name | Type | Description | Notes
 **RequiredAction** | **string** | This field will be used to decide advanced authorization requests where access control policies are used. A action is typically something a user wants to do (e.g. write, read, delete). This field supports expansion as described in the developer guide: https://ory.gitbooks.io/oathkeeper/content/concepts.html#rules | [optional] [default to null]
 **RequiredResource** | **string** | This field will be used to decide advanced authorization requests where access control policies are used. A resource is typically something a user wants to access (e.g. printer, article, virtual machine). This field supports expansion as described in the developer guide: https://ory.gitbooks.io/oathkeeper/content/concepts.html#rules | [optional] [default to null]
 **RequiredScopes** | **[]string** | An array of OAuth 2.0 scopes that are required when accessing an endpoint protected by this rule. If the token used in the Authorization header did not request that specific scope, the request is denied. | [optional] [default to null]
+**Upstream** | [**Upstream**](Upstream.md) |  | [optional] [default to null]
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

@@ -25,7 +25,7 @@ import (
 	"context"
 	"io/ioutil"
 	"net/http"
-	"net/url"
+	"strings"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/ory/oathkeeper/helper"
@@ -34,12 +34,11 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func NewProxy(target *url.URL, eval *Judge, logger logrus.FieldLogger, keyManager rsakey.Manager) *Proxy {
+func NewProxy(eval *Judge, logger logrus.FieldLogger, keyManager rsakey.Manager) *Proxy {
 	if logger == nil {
 		logger = logrus.New()
 	}
 	return &Proxy{
-		TargetURL:  target,
 		Logger:     logger,
 		Judge:      eval,
 		KeyManager: keyManager,
@@ -47,7 +46,6 @@ func NewProxy(target *url.URL, eval *Judge, logger logrus.FieldLogger, keyManage
 }
 
 type Proxy struct {
-	TargetURL  *url.URL
 	Logger     logrus.FieldLogger
 	Judge      *Judge
 	KeyManager rsakey.Manager
@@ -116,8 +114,7 @@ func (d *Proxy) Director(r *http.Request) {
 	}
 
 	if access.Disabled {
-		r.URL.Scheme = d.TargetURL.Scheme
-		r.URL.Host = d.TargetURL.Host
+		r = configureBackendURL(r, access)
 		*r = *r.WithContext(context.WithValue(r.Context(), requestBypassedAuthorization, ""))
 		return
 	}
@@ -145,7 +142,19 @@ func (d *Proxy) Director(r *http.Request) {
 		return
 	}
 
-	r.URL.Scheme = d.TargetURL.Scheme
-	r.URL.Host = d.TargetURL.Host
+	r = configureBackendURL(r, access)
 	*r = *r.WithContext(context.WithValue(r.Context(), requestAllowed, signed))
+}
+
+func configureBackendURL(r *http.Request, access *Session) *http.Request {
+	r.URL.Scheme = access.Rule.Upstream.URLParsed.Scheme
+	r.URL.Host = access.Rule.Upstream.URLParsed.Host
+	if access.Rule.Upstream.StripPath != "" {
+		r.URL.Path = strings.Replace(r.URL.Path, "/"+strings.Trim(access.Rule.Upstream.StripPath, "/"), "", 1)
+	}
+	if access.Rule.Upstream.PreserveHost {
+		r.Host = r.URL.Host
+	}
+
+	return r
 }

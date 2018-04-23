@@ -26,10 +26,10 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httputil"
-	"net/url"
 
 	"github.com/meatballhat/negroni-logrus"
 	"github.com/ory/graceful"
+	"github.com/ory/keto/sdk/go/keto"
 	"github.com/ory/metrics-middleware"
 	"github.com/ory/oathkeeper/proxy"
 	"github.com/ory/oathkeeper/rsakey"
@@ -64,9 +64,6 @@ REQUIRED CONTROLS
 
 - HYDRA_URL: The URL of ORY Hydra.
 	Example: HYDRA_URL=https://hydra.com/
-
-- BACKEND_URL: The URL where requests will be forwarded to, if access is granted.
-	Example: BACKEND_URL=https://my-backend.com/
 
 - OATHKEEPER_API_URL: The URL of the Oathkeeper REST API
 	Example: OATHKEEPER_API_URL=https://api.oathkeeper.mydomain.com/
@@ -111,11 +108,6 @@ OTHER CONTROLS
 		os := oathkeeper.NewSDK(viper.GetString("OATHKEEPER_API_URL"))
 		sdk := getHydraSDK()
 
-		backend, err := url.Parse(viper.GetString("BACKEND_URL"))
-		if err != nil {
-			logger.WithError(err).Fatalln("Unable to parse backend URL")
-		}
-
 		issuer := viper.GetString("ISSUER_URL")
 		if issuer == "" {
 			logger.Fatalln("Please set the issuer URL using the environment variable ISSUER_URL")
@@ -135,7 +127,7 @@ OTHER CONTROLS
 		go refreshKeys(keyManager, 0)
 
 		eval := proxy.NewJudge(logger, matcher, issuer, newJury(logger))
-		d := proxy.NewProxy(backend, eval, logger, keyManager)
+		d := proxy.NewProxy(eval, logger, keyManager)
 		handler := &httputil.ReverseProxy{
 			Director:  d.Director,
 			Transport: d,
@@ -199,11 +191,20 @@ func init() {
 }
 
 func newJury(logger logrus.FieldLogger) proxy.Jury {
+	k, err := keto.NewCodeGenSDK(&keto.Configuration{
+		EndpointURL: viper.GetString("KETO_URL"),
+	})
+	if err != nil {
+		logger.WithError(err).Fatalf("Unable to initialize Keto SDK")
+		return nil
+	}
+
+	h := getHydraSDK()
 	return []proxy.Juror{
 		proxy.NewJurorPassThrough(logger),
-		proxy.NewJurorWardenOAuth2(logger, nil, false, ""),
-		proxy.NewJurorWardenOAuth2(logger, nil, true, viper.GetString("ANONYMOUS_SUBJECT_ID")),
-		proxy.NewJurorOAuth2(logger, nil, false, ""),
-		proxy.NewJurorOAuth2(logger, nil, true, viper.GetString("ANONYMOUS_SUBJECT_ID")),
+		proxy.NewJurorWardenOAuth2(logger, k, false, viper.GetString("ANONYMOUS_SUBJECT_ID")),
+		proxy.NewJurorWardenOAuth2(logger, k, true, viper.GetString("ANONYMOUS_SUBJECT_ID")),
+		proxy.NewJurorOAuth2(logger, h, false, viper.GetString("ANONYMOUS_SUBJECT_ID")),
+		proxy.NewJurorOAuth2(logger, h, true, viper.GetString("ANONYMOUS_SUBJECT_ID")),
 	}
 }

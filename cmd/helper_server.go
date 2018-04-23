@@ -37,7 +37,7 @@ func getHydraSDK() hydra.SDK {
 		ClientID:     viper.GetString("HYDRA_CLIENT_ID"),
 		ClientSecret: viper.GetString("HYDRA_CLIENT_SECRET"),
 		EndpointURL:  viper.GetString("HYDRA_URL"),
-		Scopes:       []string{"hydra.introspect", "hydra.warden", "hydra.keys.*"},
+		Scopes:       strings.Split(viper.GetString("HYDRA_CLIENT_SCOPES"), ","),
 	})
 
 	if err != nil {

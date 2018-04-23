@@ -94,7 +94,7 @@ func TestKetoJuror(t *testing.T) {
 				prepare: func(sdk *MockWardenSDK) {
 					sdk.EXPECT().
 						IsOAuth2AccessTokenAuthorized(gomock.Any()).
-						Return(&swagger.WardenOAuth2AuthorizationResponse{}, &swagger.APIResponse{Response: &http.Response{StatusCode: http.StatusInternalServerError}}, nil)
+						Return(&swagger.WardenOAuth2AccessTokenAuthorizationResponse{}, &swagger.APIResponse{Response: &http.Response{StatusCode: http.StatusInternalServerError}}, nil)
 				},
 				expectErr: true,
 			},
@@ -103,7 +103,7 @@ func TestKetoJuror(t *testing.T) {
 				prepare: func(sdk *MockWardenSDK) {
 					sdk.EXPECT().
 						IsOAuth2AccessTokenAuthorized(gomock.Any()).
-						Return(&swagger.WardenOAuth2AuthorizationResponse{Allowed: false}, &swagger.APIResponse{Response: &http.Response{StatusCode: http.StatusOK}}, nil)
+						Return(&swagger.WardenOAuth2AccessTokenAuthorizationResponse{Allowed: false}, &swagger.APIResponse{Response: &http.Response{StatusCode: http.StatusOK}}, nil)
 				},
 				expectErr: true,
 			},
@@ -112,7 +112,7 @@ func TestKetoJuror(t *testing.T) {
 				prepare: func(sdk *MockWardenSDK) {
 					sdk.EXPECT().
 						IsOAuth2AccessTokenAuthorized(gomock.Any()).
-						Return(&swagger.WardenOAuth2AuthorizationResponse{Allowed: true}, &swagger.APIResponse{Response: &http.Response{StatusCode: http.StatusOK}}, nil)
+						Return(&swagger.WardenOAuth2AccessTokenAuthorizationResponse{Allowed: true}, &swagger.APIResponse{Response: &http.Response{StatusCode: http.StatusOK}}, nil)
 				},
 			},
 		} {
@@ -149,7 +149,7 @@ func TestKetoJuror(t *testing.T) {
 				prepare: func(sdk *MockWardenSDK) {
 					sdk.EXPECT().
 						IsOAuth2AccessTokenAuthorized(gomock.Any()).
-						Return(&swagger.WardenOAuth2AuthorizationResponse{}, &swagger.APIResponse{Response: &http.Response{StatusCode: http.StatusInternalServerError}}, nil)
+						Return(&swagger.WardenOAuth2AccessTokenAuthorizationResponse{}, &swagger.APIResponse{Response: &http.Response{StatusCode: http.StatusInternalServerError}}, nil)
 				},
 				expectErr: true,
 			},
@@ -166,7 +166,7 @@ func TestKetoJuror(t *testing.T) {
 				prepare: func(sdk *MockWardenSDK) {
 					sdk.EXPECT().
 						IsOAuth2AccessTokenAuthorized(gomock.Any()).
-						Return(&swagger.WardenOAuth2AuthorizationResponse{Allowed: false}, &swagger.APIResponse{Response: &http.Response{StatusCode: http.StatusOK}}, nil)
+						Return(&swagger.WardenOAuth2AccessTokenAuthorizationResponse{Allowed: false}, &swagger.APIResponse{Response: &http.Response{StatusCode: http.StatusOK}}, nil)
 				},
 				expectErr: true,
 			},
@@ -183,7 +183,7 @@ func TestKetoJuror(t *testing.T) {
 				prepare: func(sdk *MockWardenSDK) {
 					sdk.EXPECT().
 						IsOAuth2AccessTokenAuthorized(gomock.Any()).
-						Return(&swagger.WardenOAuth2AuthorizationResponse{Allowed: true}, &swagger.APIResponse{Response: &http.Response{StatusCode: http.StatusOK}}, nil)
+						Return(&swagger.WardenOAuth2AccessTokenAuthorizationResponse{Allowed: true}, &swagger.APIResponse{Response: &http.Response{StatusCode: http.StatusOK}}, nil)
 				},
 			},
 			{
