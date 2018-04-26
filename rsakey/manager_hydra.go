@@ -36,10 +36,11 @@ type HydraManager struct {
 	key *rsa.PrivateKey
 	SDK hydra.SDK
 	Set string
+	KID string
 }
 
 func (m *HydraManager) Refresh() error {
-	_, response, err := m.SDK.GetJsonWebKey("private", m.Set)
+	_, response, err := m.SDK.GetJsonWebKey("private:"+m.KID, m.Set)
 	if err != nil {
 		return errors.WithStack(err)
 	} else if response.StatusCode == http.StatusNotFound {
@@ -47,6 +48,7 @@ func (m *HydraManager) Refresh() error {
 
 		_, response, err = m.SDK.CreateJsonWebKeySet(m.Set, swagger.JsonWebKeySetGeneratorRequest{
 			Alg: "RS256",
+			Kid: m.KID,
 		})
 		if err != nil {
 			return errors.WithStack(err)
@@ -64,11 +66,11 @@ func (m *HydraManager) Refresh() error {
 		return errors.WithStack(err)
 	}
 
-	if len(set.Key("private")) < 1 {
+	if len(set.Key("private:"+m.KID)) < 1 {
 		return errors.New("Expected at least one private key but got none")
 	}
 
-	privateKey, ok := set.Key("private")[0].Key.(*rsa.PrivateKey)
+	privateKey, ok := set.Key("private:" + m.KID)[0].Key.(*rsa.PrivateKey)
 	if !ok {
 		return errors.Errorf("Type assertion to *rsa.PrivateKey failed, make sure you are actually sending a RSA private key")
 	}
@@ -97,7 +99,7 @@ func (m *HydraManager) PrivateKey() (*rsa.PrivateKey, error) {
 }
 
 func (m *HydraManager) PublicKeyID() string {
-	return m.Set + ":public"
+	return m.Set + ":public:" + m.KID
 }
 
 func (m *HydraManager) Algorithm() string {

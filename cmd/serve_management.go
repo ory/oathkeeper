@@ -47,6 +47,7 @@ func runManagement(c *managementConfig) {
 	keyManager := &rsakey.HydraManager{
 		SDK: sdk,
 		Set: viper.GetString("HYDRA_JWK_SET_ID"),
+		KID: viper.GetString("HYDRA_JWK_KEY_ID"),
 	}
 
 	rules := rule.Handler{H: herodot.NewJSONWriter(logger), M: c.rules}
