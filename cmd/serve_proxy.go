@@ -150,6 +150,7 @@ func runProxy(c *proxyConfig) {
 	keyManager := &rsakey.HydraManager{
 		SDK: sdk,
 		Set: viper.GetString("HYDRA_JWK_SET_ID"),
+		KID: viper.GetString("HYDRA_JWK_KEY_ID"),
 	}
 
 	segmentMiddleware := new(telemetry.Middleware)
