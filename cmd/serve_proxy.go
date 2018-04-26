@@ -126,7 +126,7 @@ OTHER CONTROLS
 		go refreshRules(matcher, 0)
 		go refreshKeys(keyManager, 0)
 
-		eval := proxy.NewJudge(logger, matcher, issuer, newJury(logger))
+		eval := proxy.NewRequestHandler(logger, matcher, issuer, newJury(logger))
 		d := proxy.NewProxy(eval, logger, keyManager)
 		handler := &httputil.ReverseProxy{
 			Director:  d.Director,

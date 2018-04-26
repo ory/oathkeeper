@@ -64,10 +64,10 @@ func TestJudge(t *testing.T) {
 			Mode:               "c",
 		},
 	}
-	j := &Judge{
-		Logger:  logrus.New(),
-		Jury:    map[string]Juror{"a": &JurorPassThrough{L: logrus.New()}},
-		Matcher: &rule.CachedMatcher{Rules: rules},
+	j := &RequestHandler{
+		Logger:      logrus.New(),
+		Authorizers: map[string]Juror{"a": &JurorPassThrough{L: logrus.New()}},
+		Matcher:     &rule.CachedMatcher{Rules: rules},
 	}
 
 	for k, tc := range []struct {

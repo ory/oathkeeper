@@ -28,6 +28,10 @@ import (
 	"github.com/pborman/uuid"
 )
 
+type SessionHandler interface {
+
+}
+
 type Session struct {
 	Subject   string
 	Anonymous bool

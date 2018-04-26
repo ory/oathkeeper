@@ -34,7 +34,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func NewProxy(eval *Judge, logger logrus.FieldLogger, keyManager rsakey.Manager) *Proxy {
+func NewProxy(eval *RequestHandler, logger logrus.FieldLogger, keyManager rsakey.Manager) *Proxy {
 	if logger == nil {
 		logger = logrus.New()
 	}
@@ -47,7 +47,7 @@ func NewProxy(eval *Judge, logger logrus.FieldLogger, keyManager rsakey.Manager)
 
 type Proxy struct {
 	Logger     logrus.FieldLogger
-	Judge      *Judge
+	Judge      *RequestHandler
 	KeyManager rsakey.Manager
 }
 
@@ -150,7 +150,7 @@ func configureBackendURL(r *http.Request, access *Session) *http.Request {
 	r.URL.Scheme = access.Rule.Upstream.URLParsed.Scheme
 	r.URL.Host = access.Rule.Upstream.URLParsed.Host
 	if access.Rule.Upstream.StripPath != "" {
-		r.URL.Path = strings.Replace(r.URL.Path, "/"+strings.Trim(access.Rule.Upstream.StripPath, "/"), "", 1)
+		r.URL.Path = strings.Replace(strings.ToLower(r.URL.Path), "/"+strings.Trim(strings.ToLower(access.Rule.Upstream.StripPath), "/"), "", 1)
 	}
 	if access.Rule.Upstream.PreserveHost {
 		r.Host = r.URL.Host

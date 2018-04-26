@@ -173,7 +173,7 @@ func TestProxy(t *testing.T) {
 	} {
 		t.Run(fmt.Sprintf("case=%d", k), func(t *testing.T) {
 			matcher := &rule.CachedMatcher{Rules: tc.rules}
-			d.Judge = NewJudge(logrus.New(), matcher, "", []Juror{new(jurorAcceptAll), new(jurorDenyAll)})
+			d.Judge = NewRequestHandler(logrus.New(), matcher, "", []Juror{new(jurorAcceptAll), new(jurorDenyAll)})
 
 			req, err := http.NewRequest("GET", tc.url, nil)
 			require.NoError(t, err)
@@ -228,7 +228,7 @@ func BenchmarkDirector(b *testing.B) {
 		"C": {MatchesMethods: []string{"GET"}, MatchesURLCompiled: panicCompileRegex(p.URL + "/<[0-9]+>"), Mode: jt.GetID(), Upstream: &rule.Upstream{URLParsed: u}},
 		"D": {MatchesMethods: []string{"GET"}, MatchesURLCompiled: panicCompileRegex(p.URL + "/other/<.+>"), Mode: jt.GetID(), Upstream: &rule.Upstream{URLParsed: u}},
 	}}
-	d.Judge = NewJudge(logger, matcher, "", []Juror{jt})
+	d.Judge = NewRequestHandler(logger, matcher, "", []Juror{jt})
 
 	req, _ := http.NewRequest("GET", p.URL+"/users", nil)
 
