@@ -26,112 +26,146 @@ import (
 	"github.com/ory/oathkeeper/rule"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
-	"golang.org/x/tools/go/gcimporter15/testdata"
+	"github.com/ory/oathkeeper/helper"
 )
 
 type RequestHandler struct {
 	Logger                 logrus.FieldLogger
-	Matcher                rule.Matcher
 	AuthorizationHandlers  map[string]Authorizer
 	AuthenticationHandlers map[string]Authenticator
-	SessionHandlers        map[string]SessionHandler
+	CredentialIssuers      map[string]CredentialsIssuer
 	Issuer                 string
 }
 
-func NewRequestHandler(l logrus.FieldLogger, m rule.Matcher, i string, jury Jury) *RequestHandler {
+func NewRequestHandler(
+	l logrus.FieldLogger,
+	authenticationHandlers []Authenticator,
+	authorizationHandlers []Authorizer,
+	credentialIssuers []CredentialsIssuer,
+) *RequestHandler {
 	if l == nil {
 		l = logrus.New()
 	}
 
-	j := &RequestHandler{Matcher: m, Logger: l, Issuer: i, Authorizers: map[string]Juror{}}
-	for _, juror := range jury {
-		j.Authorizers[juror.GetID()] = juror
+	j := &RequestHandler{
+		Logger:                 l,
+		AuthorizationHandlers:  map[string]Authorizer{},
+		AuthenticationHandlers: map[string]Authenticator{},
+		CredentialIssuers:      map[string]CredentialsIssuer{},
+	}
+
+	for _, h := range authorizationHandlers {
+		j.AuthorizationHandlers[h.GetID()] = h
+	}
+
+	for _, h := range authenticationHandlers {
+		j.AuthenticationHandlers[h.GetID()] = h
+	}
+
+	for _, h := range credentialIssuers {
+		j.CredentialIssuers[h.GetID()] = h
 	}
 
 	return j
 }
 
-func (d *RequestHandler) HandleRequest(r *http.Request) (error) {
-	var u = *r.URL
-	u.Host = r.Host
-	u.Scheme = "http"
-	if r.TLS != nil {
-		u.Scheme = "https"
-	}
+func (d *RequestHandler) HandleRequest(r *http.Request, rl *rule.Rule) (error) {
+	var err error
+	var session *AuthenticationSession
+	var found bool
 
-	rl, err := d.Matcher.MatchRule(r.Method, &u)
-	if err != nil {
+	if len(rl.Authenticators) == 0 {
+		err = errors.New("No authentication handler was set in the rule")
 		d.Logger.WithError(err).
 			WithField("granted", false).
-			WithField("user", "").
-			WithField("access_url", u.String()).
-			WithField("reason", "Unable to match a rule").
-			WithField("reason_id", "no_rule_match").
-			Warn("Access request denied")
+			WithField("access_url", r.URL.String()).
+			WithField("reason_id", "authentication_handler_missing").
+			Warn("No authentication handler was set in the rule")
 		return err
 	}
 
-	var session *AuthenticationSession
 	for _, a := range rl.Authenticators {
 		anh, ok := d.AuthenticationHandlers[a.Handler]
 		if !ok {
 			d.Logger.
 				WithField("granted", false).
-				WithField("access_url", u.String()).
+				WithField("access_url", r.URL.String()).
 				WithField("authentication_handler", a.Handler).
 				WithField("reason_id", "unknown_authentication_handler").
 				Warn("Unknown authentication handler requested")
 			return errors.New("Unknown authentication handler requested")
 		}
 
-		if session, err = anh.Authenticate(r); errors.Cause(ErrAuthenticatorNotResponsible).Error() == ErrAuthenticatorNotResponsible.Error() {
-			// The authentication handler is not responsible for handling this request, skip to the next handler
-		} else if errors.Cause(ErrAuthenticatorBypassed).Error() == ErrAuthenticatorBypassed.Error() {
-			// The authentication handler says that no further authentication/authorization is required, and the request should
-			// be forwarded to its final destination.
-			return nil
-		} else if err != nil {
-			d.Logger.WithError(err).
-				WithField("granted", false).
-				WithField("access_url", u.String()).
-				WithField("authentication_handler", a.Handler).
-				WithField("reason_id", "authentication_handler_error").
-				Warn("The authentication handler encountered an error")
-			return err
-		} else {
-			// The first authenticator that matches must return the session
-			break
+		session, err = anh.Authenticate(r, a.Config)
+		if err != nil {
+			switch errors.Cause(err).Error() {
+			case ErrAuthenticatorNotResponsible.Error():
+				// The authentication handler is not responsible for handling this request, skip to the next handler
+				break
+			case ErrAuthenticatorBypassed.Error():
+				// The authentication handler says that no further authentication/authorization is required, and the request should
+				// be forwarded to its final destination.
+				return nil
+			default:
+				d.Logger.WithError(err).
+					WithField("granted", false).
+					WithField("access_url", r.URL.String()).
+					WithField("authentication_handler", a.Handler).
+					WithField("reason_id", "authentication_handler_error").
+					Warn("The authentication handler encountered an error")
+				return err
+			}
 		}
+
+		// The first authenticator that matches must return the session
+		found = true
+		break
+	}
+
+	if !found {
+		err := errors.WithStack(helper.ErrUnauthorized)
+		d.Logger.WithError(err).
+			WithField("granted", false).
+			WithField("access_url", r.URL.String()).
+			WithField("reason_id", "authentication_handler_no_match").
+			Warn("No authentication handler was responsible for handling the authentication request")
+		return err
 	}
 
 	azh, ok := d.AuthorizationHandlers[rl.Authorizer.Handler]
 	if !ok {
 		d.Logger.
 			WithField("granted", false).
-			WithField("access_url", u.String()).
+			WithField("access_url", r.URL.String()).
 			WithField("authorization_handler", rl.Authorizer.Handler).
 			WithField("reason_id", "unknown_authorization_handler").
 			Warn("Unknown authentication handler requested")
 		return errors.New("Unknown authorization handler requested")
 	}
 
-	if err := azh.Authorize(r, session); err != nil {
+	if err := azh.Authorize(r, session, rl.Authorizer.Config); err != nil {
+		d.Logger.
+			WithError(err).
+			WithField("granted", false).
+			WithField("access_url", r.URL.String()).
+			WithField("authorization_handler", rl.Authorizer.Handler).
+			WithField("reason_id", "authorization_handler_error").
+			Warn("The authorization handler encountered an error")
 		return err
-
 	}
 
-	sh, ok := d.SessionHandlers[rl.Session.Handler]
+	sh, ok := d.CredentialIssuers[rl.CredentialsIssuer.Handler]
 	if !ok {
 		d.Logger.
 			WithField("granted", false).
-			WithField("access_url", u.String()).
-			WithField("session_handler", rl.Session.Handler).
-			WithField("reason_id", "unknown_session_handler").
-			Warn("Unknown session handler requested")
-		return errors.New("Unknown session handler requested")
+			WithField("access_url", r.URL.String()).
+			WithField("session_handler", rl.CredentialsIssuer.Handler).
+			WithField("reason_id", "unknown_credential_issuer").
+			Warn("Unknown credential issuer requested")
+		return errors.New("Unknown credential issuer requested")
 	}
 
-	if err := sh.CreateSession(r,session); err != nil {
+	if err := sh.Issue(r, session, rl.CredentialsIssuer.Config); err != nil {
 		return err
 	}
 

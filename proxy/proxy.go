@@ -21,140 +21,152 @@
 package proxy
 
 import (
-	"bytes"
 	"context"
 	"io/ioutil"
 	"net/http"
 	"strings"
 
-	"github.com/dgrijalva/jwt-go"
-	"github.com/ory/oathkeeper/helper"
 	"github.com/ory/oathkeeper/rsakey"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
+	"github.com/ory/oathkeeper/rule"
+	"net/url"
+	"github.com/ory/herodot"
 )
 
-func NewProxy(eval *RequestHandler, logger logrus.FieldLogger, keyManager rsakey.Manager) *Proxy {
+func NewProxy(handler *RequestHandler, logger logrus.FieldLogger, matcher rule.Matcher) *Proxy {
 	if logger == nil {
 		logger = logrus.New()
 	}
 	return &Proxy{
-		Logger:     logger,
-		Judge:      eval,
-		KeyManager: keyManager,
+		Logger:         logger,
+		Matcher:        matcher,
+		RequestHandler: handler,
+		H:              herodot.NewNegotiationHandler(logger),
 	}
 }
 
 type Proxy struct {
-	Logger     logrus.FieldLogger
-	Judge      *RequestHandler
-	KeyManager rsakey.Manager
+	Logger         logrus.FieldLogger
+	RequestHandler *RequestHandler
+	KeyManager     rsakey.Manager
+	Matcher        rule.Matcher
+	H              herodot.Writer
 }
 
 type key int
 
-const requestAllowed key = 0
-const requestDenied key = 1
-const requestBypassedAuthorization key = 2
-
-type directorError struct {
-	err        error
-	statusCode int
-}
+const director key = 0
 
 func (d *Proxy) RoundTrip(r *http.Request) (*http.Response, error) {
-	if err, ok := r.Context().Value(requestDenied).(*directorError); ok && err != nil {
-		return &http.Response{
-			StatusCode: err.statusCode,
-			Body:       ioutil.NopCloser(bytes.NewBufferString(err.err.Error())),
-		}, nil
-	} else if token, ok := r.Context().Value(requestAllowed).(string); ok {
-		r.Header.Set("Authorization", "bearer "+token)
-		res, err := http.DefaultTransport.RoundTrip(r)
-		if err != nil {
-			d.Logger.WithField("url", r.URL.String()).WithError(err).Print("Round trip failed")
-		}
+	rw := NewSimpleResponseWriter()
 
-		return res, err
-	} else if _, ok := r.Context().Value(requestBypassedAuthorization).(string); ok {
+	if err, ok := r.Context().Value(director).(error); ok && err != nil {
+		d.Logger.WithError(err).
+			WithField("granted", false).
+			WithField("access_url", r.URL.String()).
+			Warn("Access request denied")
+
+		d.H.WriteError(rw, r, err)
+
+		return &http.Response{
+			StatusCode: rw.code,
+			Body:       ioutil.NopCloser(rw.buffer),
+			Header:     rw.header,
+		}, nil
+	} else if err == nil {
 		res, err := http.DefaultTransport.RoundTrip(r)
 		if err != nil {
-			d.Logger.WithField("url", r.URL.String()).WithError(err).Print("Round trip failed")
+			d.Logger.
+				WithError(errors.WithStack(err)).
+				WithField("granted", false).
+				WithField("access_url", r.URL.String()).
+				Warn("Access request denied because roundtrip failed")
+			// don't need to return because covered in next line
+		} else {
+			d.Logger.
+				WithField("granted", true).
+				WithField("access_url", r.URL.String()).
+				Warn("Access request granted")
 		}
 
 		return res, err
 	}
 
-	d.Logger.WithFields(map[string]interface{}{"subject": "anonymous", "request_url": r.URL.String()}).Info("Unable to type assert context")
+	err := errors.New("Unable to type assert context")
+	d.Logger.
+		WithError(err).
+		WithField("granted", false).
+		WithField("access_url", r.URL.String()).
+		Warn("Unable to type assert context")
+
+	d.H.Write(rw, r, err)
+
 	return &http.Response{
-		StatusCode: http.StatusInternalServerError,
-		Body:       ioutil.NopCloser(bytes.NewBufferString(http.StatusText(http.StatusInternalServerError))),
+		StatusCode: rw.code,
+		Body:       ioutil.NopCloser(rw.buffer),
+		Header:     rw.header,
 	}, nil
 }
 
 func (d *Proxy) Director(r *http.Request) {
-	access, err := d.Judge.EvaluateAccessRequest(r)
+	enrichRequestedURL(r)
+	rl, err := d.Matcher.MatchRule(r.Method, r.URL)
 	if err != nil {
-		switch errors.Cause(err) {
-		case helper.ErrForbidden:
-			*r = *r.WithContext(context.WithValue(r.Context(), requestDenied, &directorError{err: err, statusCode: http.StatusForbidden}))
-		case helper.ErrMissingBearerToken:
-			*r = *r.WithContext(context.WithValue(r.Context(), requestDenied, &directorError{err: err, statusCode: http.StatusUnauthorized}))
-		case helper.ErrUnauthorized:
-			*r = *r.WithContext(context.WithValue(r.Context(), requestDenied, &directorError{err: err, statusCode: http.StatusUnauthorized}))
-		case helper.ErrMatchesNoRule:
-			*r = *r.WithContext(context.WithValue(r.Context(), requestDenied, &directorError{err: err, statusCode: http.StatusNotFound}))
-		case helper.ErrMatchesMoreThanOneRule:
-			*r = *r.WithContext(context.WithValue(r.Context(), requestDenied, &directorError{err: err, statusCode: http.StatusInternalServerError}))
-		default:
-			*r = *r.WithContext(context.WithValue(r.Context(), requestDenied, &directorError{err: err, statusCode: http.StatusInternalServerError}))
-		}
-
+		*r = *r.WithContext(context.WithValue(r.Context(), director, err))
 		return
 	}
 
-	if access.Disabled {
-		r = configureBackendURL(r, access)
-		*r = *r.WithContext(context.WithValue(r.Context(), requestBypassedAuthorization, ""))
+	if err := d.RequestHandler.HandleRequest(r, rl); err != nil {
+		*r = *r.WithContext(context.WithValue(r.Context(), director, err))
 		return
 	}
 
-	privateKey, err := d.KeyManager.PrivateKey()
-	if err != nil {
-		d.Logger.
-			WithError(errors.WithStack(err)).
-			WithFields(map[string]interface{}{"subject": access.Subject, "client_id": access.ClientID, "request_url": r.URL.String()}).
-			Errorf("Unable to fetch private key for signing JSON Web Token")
-		*r = *r.WithContext(context.WithValue(r.Context(), requestDenied, &directorError{err: errors.WithStack(err), statusCode: http.StatusInternalServerError}))
+	if err := configureBackendURL(r, rl); err != nil {
+		*r = *r.WithContext(context.WithValue(r.Context(), director, err))
 		return
 	}
 
-	token := jwt.NewWithClaims(jwt.SigningMethodRS256, access.ToClaims())
-	token.Header["kid"] = d.KeyManager.PublicKeyID()
-
-	signed, err := token.SignedString(privateKey)
-	if err != nil {
-		d.Logger.
-			WithError(errors.WithStack(err)).
-			WithFields(map[string]interface{}{"subject": access.Subject, "client_id": access.ClientID, "request_url": r.URL.String()}).
-			Errorf("Unable to sign JSON Web Token")
-		*r = *r.WithContext(context.WithValue(r.Context(), requestDenied, &directorError{err: errors.WithStack(err), statusCode: http.StatusInternalServerError}))
-		return
-	}
-
-	r = configureBackendURL(r, access)
-	*r = *r.WithContext(context.WithValue(r.Context(), requestAllowed, signed))
+	var en error // need to set it to error but with nil value
+	*r = *r.WithContext(context.WithValue(r.Context(), director, en))
 }
 
-func configureBackendURL(r *http.Request, access *Session) *http.Request {
-	r.URL.Scheme = access.Rule.Upstream.URLParsed.Scheme
-	r.URL.Host = access.Rule.Upstream.URLParsed.Host
-	if access.Rule.Upstream.StripPath != "" {
-		r.URL.Path = strings.Replace(strings.ToLower(r.URL.Path), "/"+strings.Trim(strings.ToLower(access.Rule.Upstream.StripPath), "/"), "", 1)
+// enrichRequestedURL sets Scheme and Host values in a URL passed down by a http server. Per default, the URL
+// does not contain host nor scheme values.
+func enrichRequestedURL(r *http.Request)  {
+	r.URL.Scheme = "http"
+	r.URL.Host = r.Host
+	if r.TLS != nil {
+		r.URL.Scheme = "https"
 	}
-	if access.Rule.Upstream.PreserveHost {
-		r.Host = r.URL.Host
+}
+
+func configureBackendURL(r *http.Request, rl *rule.Rule) (error) {
+	p, err := url.Parse(rl.Upstream.URL)
+	if err != nil {
+		return errors.WithStack(err)
 	}
 
-	return r
+	proxyHost := r.Host
+	proxyPath := r.URL.Path
+
+	backendHost := p.Host
+	backendPath := p.Path
+	backendScheme := p.Scheme
+
+	forwardURL := r.URL
+	forwardURL.Scheme = backendScheme
+	forwardURL.Host = backendHost
+	forwardURL.Path = "/" + strings.TrimLeft("/" + strings.Trim(backendPath, "/") + "/" + strings.TrimLeft(proxyPath, "/"), "/")
+
+	if rl.Upstream.StripPath != "" {
+		forwardURL.Path = strings.Replace(forwardURL.Path, "/"+strings.Trim(rl.Upstream.StripPath, "/"), "", 1)
+	}
+
+	r.Host = backendHost
+	if rl.Upstream.PreserveHost {
+		r.Host = proxyHost
+	}
+
+	return nil
 }

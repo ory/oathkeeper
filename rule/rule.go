@@ -21,21 +21,17 @@
 package rule
 
 import (
-	"net/url"
 	"strings"
 
 	"encoding/json"
-	"regexp"
-
-	"github.com/ory/ladon/compiler"
 	"github.com/pkg/errors"
+	"github.com/ory/ladon/compiler"
+	"net/url"
+	"regexp"
+	"hash/crc32"
 )
 
 type RuleMatch struct {
-	PreserveHost bool     `json:"preserveHost"`
-	StripPath    string   `json:"stripPath"`
-
-
 	// An array of HTTP methods (e.g. GET, POST, PUT, DELETE, ...). When ORY Oathkeeper searches for rules
 	// to decide what to do with an incoming request to the proxy server, it compares the HTTP method of the incoming
 	// request with the HTTP methods of each rules. If a match is found, the rule is considered a partial match.
@@ -54,115 +50,95 @@ type RuleMatch struct {
 	// For more information refer to: https://ory.gitbooks.io/oathkeeper/content/concepts.html#rules
 	URL string `json:"url"`
 
-	Upstream *Upstream `json:"upstream"`
+	compiledURL         *regexp.Regexp
+	compiledURLChecksum uint32
 }
 
 type RuleHandler struct {
+	// Handler identifies the implementation which will be used to handle this specific request. Please read the user
+	// guide for a complete list of available handlers.
 	Handler string `json:"handler"`
+
+	// Config contains the configuration for the handler. Please read the user
+	// guide for a complete list of each handler's available settings.
 	Config json.RawMessage `json:"config"`
 }
 
 // Rule is a single rule that will get checked on every HTTP request.
 // swagger:model rule
 type Rule struct {
-	// The ID is the unique id of the rule. It can be at most 190 characters long, but the layout of the ID is up to you.
+	// ID is the unique id of the rule. It can be at most 190 characters long, but the layout of the ID is up to you.
 	// You will need this ID later on to update or delete the rule.
 	ID string `json:"id"`
 
-	// A human readable description of this rule.
+	// Description is a human readable description of this rule.
 	Description string `json:"description"`
 
-	Matches []RuleMatch
+	// Matches is an array of URL matchers that this rule should match.
+	Matches []RuleMatch `json:"matches"`
 
-	Authenticators map[string]RuleHandler
-	Authorizer RuleHandler
-	Session RuleHandler
+	// Authenticators is a list of authentication handlers that will try and authenticate the provided credentials.
+	// Authenticators are checked iteratively from index 0 to n and if the first authenticator to return a positive
+	// result will be the one used.
+	//
+	// If you want the rule to first check a specific authenticator  before "falling back" to others, have that authenticator
+	// as the first item in the array.
+	Authenticators []RuleHandler `json:"authenticators"`
 
-	// This field will be used to decide advanced authorization requests where access control policies are used. A
-	// action is typically something a user wants to do (e.g. write, read, delete).
-	// This field supports expansion as described in the developer guide: https://ory.gitbooks.io/oathkeeper/content/concepts.html#rules
-	RequiredAction string `json:"requiredAction"`
+	// Authorizer is the authorization handler which will try to authorize the subject (authenticated using an Authenticator)
+	// making the request.
+	Authorizer RuleHandler `json:"authorizer"`
 
-	// This field will be used to decide advanced authorization requests where access control policies are used. A
-	// resource is typically something a user wants to access (e.g. printer, article, virtual machine).
-	// This field supports expansion as described in the developer guide: https://ory.gitbooks.io/oathkeeper/content/concepts.html#rules
-	RequiredResource string `json:"requiredResource"`
+	// CredentialsIssuer is the handler which will issue the credentials which will be used when ORY Oathkeeper
+	// forwards a granted request to the upstream server.
+	CredentialsIssuer RuleHandler `json:"credentials_issuer"`
+
+	// Upstream is the location of the server where requests matching this rule should be forwarded to.
+	Upstream *Upstream `json:"upstream"`
 }
 
-type jsonRule struct {
-	ID               string    `json:"id"`
-	Description      string    `json:"description"`
-	MatchesMethods   []string  `json:"matchesMethods"`
-	MatchesURL       string    `json:"matchesUrl"`
-	RequiredScopes   []string  `json:"requiredScopes"`
-	Mode             string    `json:"mode"`
-	RequiredAction   string    `json:"requiredAction"`
-	RequiredResource string    `json:"requiredResource"`
-	Upstream         *Upstream `json:"upstream"`
+func NewRule() *Rule {
+	return &Rule{
+		Matches:        []RuleMatch{},
+		Authenticators: []RuleHandler{},
+	}
 }
 
 type Upstream struct {
-	URL          string   `json:"url"`
-	URLParsed    *url.URL `json:"-"`
-	PreserveHost bool     `json:"preserveHost"`
-	StripPath    string   `json:"stripPath"`
+	// PreserveHost, if false (the default), tells ORY Oathkeeper to set the upstream request's Host header to the
+	// hostname of the API's upstream's URL. Setting this flag to true instructs ORY Oathkeeper not to do so.
+	PreserveHost bool `json:"preserve_host"`
+
+	// StripPath if set, replaces the provided path prefix when forwarding the requested URL to the upstream URL.
+	StripPath string `json:"strip_path"`
+
+	// URL is the URL the request will be proxied to.
+	URL string `json:"url"`
 }
 
-func (r *Rule) UnmarshalJSON(data []byte) (err error) {
-	f := &jsonRule{
-		Upstream: new(Upstream),
-	}
-	if err = json.Unmarshal(data, f); err != nil {
-		return errors.WithStack(err)
-	}
+// IsMatching returns an error if the provided method and URL do not match the rule.
+func (r *Rule) IsMatching(method string, u *url.URL) (error) {
+	for _, m := range r.Matches {
+		if !stringInSlice(method, m.Methods) {
+			continue
+		}
 
-	if f.Upstream == nil {
-		f.Upstream = new(Upstream)
-	}
+		c := crc32.ChecksumIEEE([]byte(m.URL))
+		if m.compiledURL == nil || c != m.compiledURLChecksum {
+			r, err := compiler.CompileRegex(m.URL, '<', '>')
+			if err != nil {
+				return errors.Wrap(err, "Unable to compile URL matcher")
+			}
+			m.compiledURL = r
+			m.compiledURLChecksum = c
+		}
 
-	r.ID = f.ID
-	r.Description = f.Description
-	r.MatchesMethods = f.MatchesMethods
-	r.MatchesURL = f.MatchesURL
-	r.RequiredScopes = f.RequiredScopes
-	r.Mode = f.Mode
-	r.RequiredAction = f.RequiredAction
-	r.RequiredResource = f.RequiredResource
-	r.Upstream = &Upstream{
-		URL:          f.Upstream.URL,
-		PreserveHost: f.Upstream.PreserveHost,
-		StripPath:    f.Upstream.StripPath,
+		if m.compiledURL.MatchString(u.String()) {
+			return nil
+		}
 	}
 
-	if r.RequiredScopes == nil {
-		r.RequiredScopes = []string{}
-	}
-
-	if r.MatchesMethods == nil {
-		r.MatchesMethods = []string{}
-	}
-
-	if r.MatchesURLCompiled, err = compiler.CompileRegex(r.MatchesURL, '<', '>'); err != nil {
-		return errors.WithStack(err)
-	}
-
-	if r.Upstream.URLParsed, err = url.Parse(r.Upstream.URL); err != nil {
-		return errors.WithStack(err)
-	}
-
-	return nil
-}
-
-func (r *Rule) IsMatching(method string, u *url.URL) error {
-	if !stringInSlice(method, r.MatchesMethods) {
-		return errors.Errorf("Method %s does not match any of %v", method, r.MatchesMethods)
-	}
-
-	if !r.MatchesURLCompiled.MatchString(u.String()) {
-		return errors.Errorf("Path %s does not match %s", u.String(), r.MatchesURL)
-	}
-
-	return nil
+	return errors.Errorf("Rule %s does not match URL %s", u)
 }
 
 func stringInSlice(a string, list []string) bool {

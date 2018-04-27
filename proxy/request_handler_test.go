@@ -29,8 +29,6 @@ import (
 
 	"github.com/ory/ladon/compiler"
 	"github.com/ory/oathkeeper/rule"
-	"github.com/sirupsen/logrus"
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -46,59 +44,89 @@ func mustGenerateURL(t *testing.T, u string) *url.URL {
 	return up
 }
 
-func TestJudge(t *testing.T) {
-	rules := map[string]rule.Rule{
-		"1": {
-			MatchesMethods:     []string{"GET"},
-			MatchesURLCompiled: mustCompileRegex(t, "http://localhost/users/<[0-9]+>"),
-			RequiredResource:   "users:$1",
-			RequiredAction:     "get:$1",
-			RequiredScopes:     []string{"users.get"},
-			Mode:               "a",
-		}, "2": {
-			MatchesMethods:     []string{"GET"},
-			MatchesURLCompiled: mustCompileRegex(t, "http://localhost/articles/<[0-9]+>"),
-			RequiredResource:   "users:$1",
-			RequiredAction:     "get:$1",
-			RequiredScopes:     []string{"users.get"},
-			Mode:               "c",
-		},
-	}
-	j := &RequestHandler{
-		Logger:      logrus.New(),
-		Authorizers: map[string]Juror{"a": &JurorPassThrough{L: logrus.New()}},
-		Matcher:     &rule.CachedMatcher{Rules: rules},
-	}
+func newTestRequest(t *testing.T, u string) *http.Request {
+	p, err := url.Parse(u)
+	require.NoError(t, err)
 
+	return &http.Request{
+		URL: p,
+	}
+}
+
+func TestRequestHandler(t *testing.T) {
 	for k, tc := range []struct {
-		r *http.Request
-		e func(*testing.T, *Session, error)
+		rule      rule.Rule
+		r         *http.Request
+		expectErr bool
+		j         *RequestHandler
 	}{
 		{
-			r: &http.Request{Method: "GET", Host: "localhost", URL: mustGenerateURL(t, "http://localhost/users/1234")},
-			e: func(t *testing.T, s *Session, err error) {
-				require.NoError(t, err)
-				assert.Empty(t, s.ClientID)
-				assert.Empty(t, s.Subject)
-				assert.True(t, s.Anonymous)
+			expectErr: true,
+			r:         newTestRequest(t, "http://localhost"),
+			j:         NewRequestHandler(nil, []Authenticator{}, []Authorizer{}, []CredentialsIssuer{}),
+			rule: rule.Rule{
+				Authenticators:    []rule.RuleHandler{},
+				Authorizer:        rule.RuleHandler{},
+				CredentialsIssuer: rule.RuleHandler{},
 			},
 		},
 		{
-			r: &http.Request{Method: "GET", Host: "localhost", URL: mustGenerateURL(t, "http://localhost/articles/1234")},
-			e: func(t *testing.T, s *Session, err error) {
-				require.Error(t, err)
+			expectErr: true,
+			r:         newTestRequest(t, "http://localhost"),
+			j:         NewRequestHandler(nil, []Authenticator{NewAuthenticatorNoOp()}, []Authorizer{}, []CredentialsIssuer{}),
+			rule: rule.Rule{
+				Authenticators:    []rule.RuleHandler{},
+				Authorizer:        rule.RuleHandler{},
+				CredentialsIssuer: rule.RuleHandler{},
 			},
 		},
 		{
-			r: &http.Request{Method: "GET", Host: "localhost", URL: mustGenerateURL(t, "http://localhost/foo/1234")},
-			e: func(t *testing.T, s *Session, err error) {
-				require.Error(t, err)
+			expectErr: false,
+			r:         newTestRequest(t, "http://localhost"),
+			j:         NewRequestHandler(nil, []Authenticator{NewAuthenticatorNoOp()}, []Authorizer{}, []CredentialsIssuer{}),
+			rule: rule.Rule{
+				Authenticators:    []rule.RuleHandler{{Handler: NewAuthenticatorNoOp().GetID()}},
+				Authorizer:        rule.RuleHandler{},
+				CredentialsIssuer: rule.RuleHandler{},
+			},
+		},
+		{
+			expectErr: true,
+			r:         newTestRequest(t, "http://localhost"),
+			j:         NewRequestHandler(nil, []Authenticator{NewAuthenticatorAnonymous("anonymous")}, []Authorizer{}, []CredentialsIssuer{}),
+			rule: rule.Rule{
+				Authenticators:    []rule.RuleHandler{{Handler: NewAuthenticatorAnonymous("").GetID()}},
+				Authorizer:        rule.RuleHandler{},
+				CredentialsIssuer: rule.RuleHandler{},
+			},
+		},
+		{
+			expectErr: true,
+			r:         newTestRequest(t, "http://localhost"),
+			j:         NewRequestHandler(nil, []Authenticator{NewAuthenticatorAnonymous("anonymous")}, []Authorizer{NewAuthorizerAllow()}, []CredentialsIssuer{}),
+			rule: rule.Rule{
+				Authenticators:    []rule.RuleHandler{{Handler: NewAuthenticatorAnonymous("").GetID()}},
+				Authorizer:        rule.RuleHandler{Handler: "allow"},
+				CredentialsIssuer: rule.RuleHandler{},
+			},
+		},
+		{
+			expectErr: false,
+			r:         newTestRequest(t, "http://localhost"),
+			j:         NewRequestHandler(nil, []Authenticator{NewAuthenticatorAnonymous("anonymous")}, []Authorizer{NewAuthorizerAllow()}, []CredentialsIssuer{NewCredentialsIssuerNoOp()}),
+			rule: rule.Rule{
+				Authenticators:    []rule.RuleHandler{{Handler: NewAuthenticatorAnonymous("").GetID()}},
+				Authorizer:        rule.RuleHandler{Handler: "allow"},
+				CredentialsIssuer: rule.RuleHandler{Handler: "noop"},
 			},
 		},
 	} {
 		t.Run(fmt.Sprintf("case=%d", k), func(t *testing.T) {
-			s, err := j.EvaluateAccessRequest(tc.r)
-			tc.e(t, s, err)
+			if tc.expectErr {
+				require.Error(t, tc.j.HandleRequest(tc.r, &tc.rule))
+			} else {
+				require.NoError(t, tc.j.HandleRequest(tc.r, &tc.rule))
+			}
 		})
 	}
 }

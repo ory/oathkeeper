@@ -21,37 +21,20 @@
 package proxy
 
 import (
-	"time"
-
-	"github.com/dgrijalva/jwt-go"
-	"github.com/ory/oathkeeper/rule"
-	"github.com/pborman/uuid"
+	"net/http"
+	"encoding/json"
 )
 
-type SessionHandler interface {
+type AuthorizerAllow struct{}
 
+func NewAuthorizerAllow() *AuthorizerAllow {
+	return new(AuthorizerAllow)
 }
 
-type Session struct {
-	Subject   string
-	Anonymous bool
-	Disabled  bool
-	ClientID  string
-	Issuer    string
-	Extra     interface{}
-	Rule      *rule.Rule
+func (a *AuthorizerAllow) GetID() string {
+	return "allow"
 }
 
-func (s *Session) ToClaims() jwt.MapClaims {
-	return jwt.MapClaims{
-		"nbf":  time.Now().Unix(),
-		"iat":  time.Now().Unix(),
-		"exp":  time.Now().Add(time.Hour).Unix(),
-		"sub":  s.Subject,
-		"iss":  s.Issuer,
-		"anon": s.Anonymous,
-		"aud":  s.ClientID,
-		"jti":  uuid.New(),
-		"ext":  s.Extra,
-	}
+func (a *AuthorizerAllow) Authorize(r *http.Request, session *AuthenticationSession, config json.RawMessage) error {
+	return nil
 }

@@ -46,7 +46,6 @@ func generateDummyRules(amount int) map[string]Rule {
 			RequiredScopes:     scopes[:i%(len(scopes))],
 			RequiredAction:     actions[i%(len(actions))],
 			RequiredResource:   resources[i%(len(resources))],
-			MatchesURLCompiled: exp,
 		}
 	}
 	return rules

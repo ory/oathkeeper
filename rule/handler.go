@@ -23,8 +23,6 @@ package rule
 import (
 	"encoding/json"
 	"net/http"
-	"strings"
-
 	"github.com/julienschmidt/httprouter"
 	"github.com/ory/herodot"
 	"github.com/ory/oathkeeper/helper"
@@ -37,18 +35,15 @@ import (
 type Handler struct {
 	H                herodot.Writer
 	M                Manager
-	AllowedRuleModes []string
 }
 
 func NewHandler(
 	h herodot.Writer,
 	m Manager,
-	allowedRuleModes []string,
 ) *Handler {
 	return &Handler{
 		H:                h,
 		M:                m,
-		AllowedRuleModes: allowedRuleModes,
 	}
 }
 
@@ -229,20 +224,13 @@ func (h *Handler) Delete(w http.ResponseWriter, r *http.Request, ps httprouter.P
 }
 
 func (h *Handler) decodeRule(w http.ResponseWriter, r *http.Request) (*Rule, error) {
-	rule := Rule{
-		MatchesMethods: []string{},
-		RequiredScopes: []string{},
-	}
+	rule := NewRule()
 
 	d := json.NewDecoder(r.Body)
 	d.DisallowUnknownFields()
-	if err := d.Decode(&rule); err != nil {
+	if err := d.Decode(rule); err != nil {
 		return nil, err
 	}
 
-	if !stringInSlice(rule.Mode, h.AllowedRuleModes) {
-		return nil, errors.Errorf("Rule mode %s not supported, use one of: %s", rule.Mode, strings.Join(h.AllowedRuleModes, ","))
-	}
-
-	return &rule, nil
+	return rule, nil
 }

@@ -21,35 +21,20 @@
 package proxy
 
 import (
+	"testing"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"net/http"
-	"net/url"
-
-	"github.com/ory/oathkeeper/rule"
-	"github.com/sirupsen/logrus"
 )
 
-type Jury []Juror
+func TestAuthenticatorAnonymous(t *testing.T) {
+	assert.NotEmpty(t, NewAuthenticatorAnonymous(""))
+	assert.NotEmpty(t, NewAuthenticatorAnonymous("").GetID())
 
-func (j Jury) GetIDs() (ids []string) {
-	for _, l := range j {
-		ids = append(ids, l.GetID())
-	}
-	return ids
-}
+	session, err := NewAuthenticatorAnonymous("anon").Authenticate(&http.Request{Header: http.Header{}}, nil)
+	require.NoError(t, err)
+	assert.Equal(t, "anon", session.Subject)
 
-type Juror interface {
-	GetID() string
-	Try(*http.Request, *rule.Rule, *url.URL) (*Session, error)
-}
-
-func toLogFields(r *http.Request, u *url.URL, granted bool, rl *rule.Rule, user string) logrus.Fields {
-	_, tokenID := getBearerToken(r)
-	return map[string]interface{}{
-		"access_url": u.String(),
-		"granted":    granted,
-		"rule":       rl.ID,
-		"mode":       rl.Mode,
-		"user":       user,
-		"token":      tokenID,
-	}
+	_, err = NewAuthenticatorAnonymous("anon").Authenticate(&http.Request{Header: http.Header{"Authorization": {"foo"}}}, nil)
+	require.Error(t, err)
 }
