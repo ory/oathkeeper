@@ -28,11 +28,12 @@ import (
 // allCmd represents the all command
 var allCmd = &cobra.Command{
 	Use:   "all",
-	Short: "Runs both the proxy and management command",
+	Short: "Runs the proxy, warden and management command",
 	Long: `For documentation on the available configuration options please run:
 
 * hydra help serve management
-* hydra help serve proxy`,
+* hydra help serve proxy,
+* hydra help serve extauth`,
 	Run: func(cmd *cobra.Command, args []string) {
 		rules, err := newRuleManager(viper.GetString("DATABASE_URL"))
 		if err != nil {
@@ -43,6 +44,7 @@ var allCmd = &cobra.Command{
 		mc := &managementConfig{rules: rules}
 
 		go runManagement(mc)
+		go runExtauth(pc)
 		runProxy(pc)
 	},
 }

@@ -82,6 +82,7 @@ func initConfig() {
 	viper.SetDefault("LOG_LEVEL", "info")
 	viper.SetDefault("PROXY_PORT", "4455")
 	viper.SetDefault("MANAGEMENT_PORT", "4456")
+	viper.SetDefault("EXTAUTH_PORT", "4457")
 	viper.SetDefault("RULES_REFRESH_INTERVAL", "5s")
 	viper.SetDefault("HYDRA_JWK_SET_ID", "oathkeeper:id-token")
 
