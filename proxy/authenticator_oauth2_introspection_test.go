@@ -24,13 +24,14 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"net/http"
+	"testing"
+
 	"github.com/golang/mock/gomock"
 	"github.com/ory/fosite"
 	"github.com/ory/keto/authentication"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"net/http"
-	"testing"
 )
 
 func TestAuthenticatorOAuth2Introspection(t *testing.T) {

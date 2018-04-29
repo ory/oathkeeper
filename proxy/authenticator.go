@@ -2,9 +2,10 @@ package proxy
 
 import (
 	"encoding/json"
+	"net/http"
+
 	"github.com/go-errors/errors"
 	"github.com/ory/oathkeeper/rule"
-	"net/http"
 )
 
 var ErrAuthenticatorNotResponsible = errors.New("Authenticator not responsible")

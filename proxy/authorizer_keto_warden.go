@@ -23,6 +23,9 @@ package proxy
 import (
 	"bytes"
 	"encoding/json"
+	"net/http"
+	"time"
+
 	"github.com/asaskevich/govalidator"
 	"github.com/ory/keto/sdk/go/keto"
 	"github.com/ory/keto/sdk/go/keto/swagger"
@@ -30,8 +33,6 @@ import (
 	"github.com/ory/oathkeeper/rule"
 	"github.com/pkg/errors"
 	"github.com/tomasen/realip"
-	"net/http"
-	"time"
 )
 
 type AuthorizerKetoWardenConfiguration struct {

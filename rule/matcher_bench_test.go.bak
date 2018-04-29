@@ -42,6 +42,10 @@ func generateDummyRules(amount int) map[string]Rule {
 		exp, _ := compiler.CompileRegex(expressions[(i%(len(expressions)))]+"([0-"+strconv.Itoa(i)+"]+)", '<', '>')
 		rules[strconv.Itoa(i)] = Rule{
 			ID:                 strconv.Itoa(i),
+			Match:RuleMatch{
+				Methods: methods[:i%(len(methods))],
+				URL: "https://localhost:1234/123",
+			},
 			MatchesMethods:     methods[:i%(len(methods))],
 			RequiredScopes:     scopes[:i%(len(scopes))],
 			RequiredAction:     actions[i%(len(actions))],

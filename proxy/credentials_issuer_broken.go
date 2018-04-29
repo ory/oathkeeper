@@ -23,8 +23,9 @@ package proxy
 import (
 	"encoding/json"
 	"errors"
-	"github.com/ory/oathkeeper/rule"
 	"net/http"
+
+	"github.com/ory/oathkeeper/rule"
 )
 
 type CredentialsIssuerBroken struct{}

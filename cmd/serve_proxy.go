@@ -29,14 +29,12 @@ import (
 
 	"github.com/meatballhat/negroni-logrus"
 	"github.com/ory/graceful"
-	"github.com/ory/keto/sdk/go/keto"
 	"github.com/ory/metrics-middleware"
 	"github.com/ory/oathkeeper/proxy"
 	"github.com/ory/oathkeeper/rsakey"
 	"github.com/ory/oathkeeper/rule"
 	"github.com/ory/oathkeeper/sdk/go/oathkeeper"
 	"github.com/rs/cors"
-	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/urfave/negroni"
@@ -126,8 +124,19 @@ OTHER CONTROLS
 		go refreshRules(matcher, 0)
 		go refreshKeys(keyManager, 0)
 
-		eval := proxy.NewRequestHandler(logger, matcher, issuer, newJury(logger))
-		d := proxy.NewProxy(eval, logger, keyManager)
+		eval := proxy.NewRequestHandler(
+			logger,
+			[]proxy.Authenticator{
+				proxy.NewAuthenticatorAnonymous(viper.GetString("AUTHENTICATOR_ANONYMOUS_USERNAME")),
+				proxy.NewAuthenticatorNoOp(),
+			},
+			[]proxy.Authorizer{
+				proxy.NewAuthorizerAllow(),
+				proxy.NewAuthorizerDeny(),
+			},
+			[]proxy.CredentialsIssuer{},
+		)
+		d := proxy.NewProxy(eval, logger, matcher)
 		handler := &httputil.ReverseProxy{
 			Director:  d.Director,
 			Transport: d,
@@ -188,23 +197,4 @@ OTHER CONTROLS
 
 func init() {
 	serveCmd.AddCommand(proxyCmd)
-}
-
-func newJury(logger logrus.FieldLogger) proxy.Jury {
-	k, err := keto.NewCodeGenSDK(&keto.Configuration{
-		EndpointURL: viper.GetString("KETO_URL"),
-	})
-	if err != nil {
-		logger.WithError(err).Fatalf("Unable to initialize Keto SDK")
-		return nil
-	}
-
-	h := getHydraSDK()
-	return []proxy.Juror{
-		proxy.NewJurorPassThrough(logger),
-		proxy.NewJurorWardenOAuth2(logger, k, false, viper.GetString("ANONYMOUS_SUBJECT_ID")),
-		proxy.NewJurorWardenOAuth2(logger, k, true, viper.GetString("ANONYMOUS_SUBJECT_ID")),
-		proxy.NewJurorOAuth2(logger, h, false, viper.GetString("ANONYMOUS_SUBJECT_ID")),
-		proxy.NewJurorOAuth2(logger, h, true, viper.GetString("ANONYMOUS_SUBJECT_ID")),
-	}
 }

@@ -4,11 +4,12 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"net/http"
+
 	"github.com/ory/oathkeeper/helper"
 	"github.com/ory/oathkeeper/rule"
 	"github.com/pkg/errors"
 	"golang.org/x/oauth2/clientcredentials"
-	"net/http"
 )
 
 type AuthenticatorOAuth2Configuration struct {

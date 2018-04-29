@@ -23,14 +23,15 @@ package proxy
 import (
 	"bytes"
 	"encoding/json"
+	"net/http"
+	"time"
+
 	"github.com/dgrijalva/jwt-go"
 	"github.com/ory/oathkeeper/rsakey"
 	"github.com/ory/oathkeeper/rule"
 	"github.com/pborman/uuid"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
-	"net/http"
-	"time"
 )
 
 type CredentialsIDTokenConfig struct {

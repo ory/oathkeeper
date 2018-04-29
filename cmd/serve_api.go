@@ -71,7 +71,7 @@ HTTP CONTROLS
 		}
 
 		writer := herodot.NewJSONWriter(logger)
-		ruleHandler := rule.NewHandler(writer, rules, newJury(logger).GetIDs())
+		ruleHandler := rule.NewHandler(writer, rules)
 		keyHandler := rsakey.NewHandler(writer, keyManager)
 		router := httprouter.New()
 		ruleHandler.SetRoutes(router)

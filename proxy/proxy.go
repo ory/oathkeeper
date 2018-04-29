@@ -26,12 +26,13 @@ import (
 	"net/http"
 	"strings"
 
+	"net/url"
+
 	"github.com/ory/herodot"
 	"github.com/ory/oathkeeper/rsakey"
 	"github.com/ory/oathkeeper/rule"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
-	"net/url"
 )
 
 func NewProxy(handler *RequestHandler, logger logrus.FieldLogger, matcher rule.Matcher) *Proxy {

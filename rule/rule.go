@@ -24,11 +24,12 @@ import (
 	"strings"
 
 	"encoding/json"
-	"github.com/ory/ladon/compiler"
-	"github.com/pkg/errors"
 	"hash/crc32"
 	"net/url"
 	"regexp"
+
+	"github.com/ory/ladon/compiler"
+	"github.com/pkg/errors"
 )
 
 type RuleMatch struct {
@@ -65,7 +66,6 @@ type RuleHandler struct {
 }
 
 // Rule is a single rule that will get checked on every HTTP request.
-// swagger:model rule
 type Rule struct {
 	// ID is the unique id of the rule. It can be at most 190 characters long, but the layout of the ID is up to you.
 	// You will need this ID later on to update or delete the rule.

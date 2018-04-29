@@ -21,8 +21,9 @@
 package helper
 
 import (
-	"github.com/ory/herodot"
 	"net/http"
+
+	"github.com/ory/herodot"
 )
 
 var (

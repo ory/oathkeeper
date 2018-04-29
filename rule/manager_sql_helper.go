@@ -22,9 +22,10 @@ package rule
 
 import (
 	"fmt"
+	"strings"
+
 	"github.com/pkg/errors"
 	"github.com/rubenv/sql-migrate"
-	"strings"
 )
 
 type sqlRule struct {

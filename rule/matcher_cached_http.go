@@ -23,12 +23,9 @@ package rule
 import (
 	"net/http"
 
-	"github.com/ory/ladon/compiler"
 	"github.com/ory/oathkeeper/pkg"
 	"github.com/ory/oathkeeper/sdk/go/oathkeeper"
 	"github.com/pkg/errors"
-	//"net/url"
-	"net/url"
 )
 
 type HTTPMatcher struct {
@@ -55,37 +52,33 @@ func (m *HTTPMatcher) Refresh() error {
 	}
 
 	for _, r := range rules {
-		if r.RequiredScopes == nil {
-			r.RequiredScopes = []string{}
+		if len(r.Match.Methods) == 0 {
+			r.Match.Methods = []string{}
 		}
 
-		if r.MatchesMethods == nil {
-			r.MatchesMethods = []string{}
-		}
-
-		matches, err := compiler.CompileRegex(r.MatchesUrl, '<', '>')
-		if err != nil {
-			return errors.WithStack(err)
-		}
-
-		parsed, err := url.Parse(r.Upstream.Url)
-		if err != nil {
-			return errors.WithStack(err)
+		rh := make([]RuleHandler, len(r.Authenticators))
+		for k, authn := range r.Authenticators {
+			rh[k] = RuleHandler{
+				Handler: authn.Handler,
+				Config:  []byte(authn.Config),
+			}
 		}
 
 		m.Rules[r.Id] = Rule{
-			ID:                 r.Id,
-			Description:        r.Description,
-			MatchesMethods:     r.MatchesMethods,
-			Mode:               r.Mode,
-			MatchesURL:         r.MatchesUrl,
-			MatchesURLCompiled: matches,
-			RequiredAction:     r.RequiredAction,
-			RequiredResource:   r.RequiredResource,
-			RequiredScopes:     r.RequiredScopes,
+			ID:          r.Id,
+			Description: r.Description,
+			Match:       RuleMatch{Methods: r.Match.Methods, URL: r.Match.Url},
+			Authorizer: RuleHandler{
+				Handler: r.Authorizer.Handler,
+				Config:  []byte(r.Authorizer.Config),
+			},
+			Authenticators: rh,
+			CredentialsIssuer: RuleHandler{
+				Handler: r.Authorizer.Handler,
+				Config:  []byte(r.Authorizer.Config),
+			},
 			Upstream: &Upstream{
 				URL:          r.Upstream.Url,
-				URLParsed:    parsed,
 				PreserveHost: r.Upstream.PreserveHost,
 				StripPath:    r.Upstream.StripPath,
 			},

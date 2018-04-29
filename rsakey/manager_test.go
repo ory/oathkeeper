@@ -31,6 +31,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"time"
 )
 
 var resources []*dockertest.Resource
@@ -111,6 +112,7 @@ func connectToHydra(t *testing.T) *hydra.CodeGenSDK {
 	if err != nil {
 		log.Fatalf("Could not start resource: %s", err)
 	}
+	pool.MaxWait=time.Minute*2
 
 	if err = pool.Retry(func() error {
 		var err error

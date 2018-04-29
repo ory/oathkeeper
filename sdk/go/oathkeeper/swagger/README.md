@@ -32,11 +32,28 @@ Class | Method | HTTP request | Description
 
 ## Documentation For Models
 
+ - [AuthenticationDefaultSession](docs/AuthenticationDefaultSession.md)
+ - [AuthenticationOAuth2ClientCredentialsRequest](docs/AuthenticationOAuth2ClientCredentialsRequest.md)
+ - [AuthenticationOAuth2ClientCredentialsSession](docs/AuthenticationOAuth2ClientCredentialsSession.md)
+ - [AuthenticationOAuth2IntrospectionRequest](docs/AuthenticationOAuth2IntrospectionRequest.md)
+ - [AuthenticationOAuth2Session](docs/AuthenticationOAuth2Session.md)
+ - [Authenticator](docs/Authenticator.md)
  - [InlineResponse401](docs/InlineResponse401.md)
- - [JsonRule](docs/JsonRule.md)
+ - [IntrospectionResponse](docs/IntrospectionResponse.md)
  - [JsonWebKey](docs/JsonWebKey.md)
  - [JsonWebKeySet](docs/JsonWebKeySet.md)
+ - [OAuth2ClientCredentialsAuthentication](docs/OAuth2ClientCredentialsAuthentication.md)
+ - [OAuth2IntrospectionAuthentication](docs/OAuth2IntrospectionAuthentication.md)
  - [Rule](docs/Rule.md)
+ - [RuleHandler](docs/RuleHandler.md)
+ - [RuleMatch](docs/RuleMatch.md)
+ - [Session](docs/Session.md)
+ - [SwaggerCreateRuleParameters](docs/SwaggerCreateRuleParameters.md)
+ - [SwaggerGetRuleParameters](docs/SwaggerGetRuleParameters.md)
+ - [SwaggerListRulesParameters](docs/SwaggerListRulesParameters.md)
+ - [SwaggerRuleResponse](docs/SwaggerRuleResponse.md)
+ - [SwaggerRulesResponse](docs/SwaggerRulesResponse.md)
+ - [SwaggerUpdateRuleParameters](docs/SwaggerUpdateRuleParameters.md)
  - [Upstream](docs/Upstream.md)
 
 

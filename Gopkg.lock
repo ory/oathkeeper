@@ -23,6 +23,12 @@
   revision = "cd527374f1e5bff4938207604a14f2e38a9cf512"
 
 [[projects]]
+  name = "github.com/asaskevich/govalidator"
+  packages = ["."]
+  revision = "73945b6115bfbbcc57d89b7316e28109364124e1"
+  version = "v7"
+
+[[projects]]
   name = "github.com/cenkalti/backoff"
   packages = ["."]
   revision = "2ea60e5f094469f9e65adb9cd103795b73ae743e"
@@ -65,6 +71,12 @@
   version = "v1.4.2"
 
 [[projects]]
+  name = "github.com/go-errors/errors"
+  packages = ["."]
+  revision = "a6af135bd4e28680facf08a3d206b454abc877a4"
+  version = "v1.0.1"
+
+[[projects]]
   name = "github.com/go-resty/resty"
   packages = ["."]
   revision = "f8815663de1e64d57cdd4ee9e2b2fa96977a030e"
@@ -75,6 +87,15 @@
   packages = ["."]
   revision = "a0583e0143b1624142adab07e0e97fe106d99561"
   version = "v1.3"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/golang/gddo"
+  packages = [
+    "httputil",
+    "httputil/header"
+  ]
+  revision = "416d5fc8c9c85e9ec9252a70d01e069f4b287ff0"
 
 [[projects]]
   name = "github.com/golang/mock"
@@ -153,6 +174,12 @@
   revision = "06020f85339e21b2478f756a78e295255ffa4d6a"
 
 [[projects]]
+  branch = "master"
+  name = "github.com/mohae/deepcopy"
+  packages = ["."]
+  revision = "c48cc78d482608239f6c4c92a4abd87eb8761c90"
+
+[[projects]]
   name = "github.com/opencontainers/go-digest"
   packages = ["."]
   revision = "279bed98673dd5bef374d3b6e4b09e2af76183bf"
@@ -209,6 +236,12 @@
   version = "v3.3.0"
 
 [[projects]]
+  name = "github.com/ory/fosite"
+  packages = ["."]
+  revision = "99029e0e1bc4b1d6dfa1ca8b85a46d79cffad6e8"
+  version = "v0.17.2"
+
+[[projects]]
   name = "github.com/ory/graceful"
   packages = ["."]
   revision = "3d30c83329259f53a904d428b38d8cb8fba7bd77"
@@ -217,8 +250,8 @@
 [[projects]]
   name = "github.com/ory/herodot"
   packages = ["."]
-  revision = "5bb399b8a5aa583343a2108e723b990432b4a1b4"
-  version = "v0.1.1"
+  revision = "971c3587ee1af2b9e86f3cf38b0cd320a889120a"
+  version = "v0.2.1"
 
 [[projects]]
   branch = "move-policy-merged"
@@ -233,10 +266,11 @@
   branch = "fix-sdk"
   name = "github.com/ory/keto"
   packages = [
+    "authentication",
     "sdk/go/keto",
     "sdk/go/keto/swagger"
   ]
-  revision = "1c1bb0c5b734826a853fb56cae94359d87d881d9"
+  revision = "9ecd2893b1aac7ca376990601fc85a40ef0380f4"
 
 [[projects]]
   name = "github.com/ory/ladon"
@@ -389,6 +423,8 @@
   branch = "master"
   name = "golang.org/x/crypto"
   packages = [
+    "bcrypt",
+    "blowfish",
     "ed25519",
     "ed25519/internal/edwards25519",
     "ssh/terminal"
@@ -491,6 +527,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "056a7f605a177fa73222f9f8fa9328be22507ecd921b9c38ff7bde7221d0b145"
+  inputs-digest = "8880ab41c243e65bbb5513580a29b04e126fc282f8e4c1be70b372bf38f5281e"
   solver-name = "gps-cdcl"
   solver-version = 1

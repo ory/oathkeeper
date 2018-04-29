@@ -59,7 +59,7 @@
 
 [[constraint]]
   name = "github.com/ory/herodot"
-  version = "0.1.1"
+  version = "0.2.1"
 
 [[constraint]]
   name = "github.com/ory/hydra"

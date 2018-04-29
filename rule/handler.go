@@ -22,6 +22,8 @@ package rule
 
 import (
 	"encoding/json"
+	"net/http"
+
 	"github.com/julienschmidt/httprouter"
 	"github.com/ory/herodot"
 	"github.com/ory/oathkeeper/helper"
@@ -29,7 +31,6 @@ import (
 	"github.com/ory/pagination"
 	"github.com/pborman/uuid"
 	"github.com/pkg/errors"
-	"net/http"
 )
 
 type Handler struct {
@@ -77,7 +78,7 @@ func (h *Handler) SetRoutes(r *httprouter.Router) {
 func (h *Handler) Create(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	rule, err := h.decodeRule(w, r)
 	if err != nil {
-		h.H.WriteError(w, r, errors.WithStack(err))
+		h.H.WriteError(w, r, err)
 		return
 	}
 
@@ -181,7 +182,7 @@ func (h *Handler) Get(w http.ResponseWriter, r *http.Request, ps httprouter.Para
 func (h *Handler) Update(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	rule, err := h.decodeRule(w, r)
 	if err != nil {
-		h.H.WriteError(w, r, errors.WithStack(err))
+		h.H.WriteError(w, r, err)
 		return
 	}
 
@@ -229,7 +230,7 @@ func (h *Handler) decodeRule(w http.ResponseWriter, r *http.Request) (*Rule, err
 	d := json.NewDecoder(r.Body)
 	d.DisallowUnknownFields()
 	if err := d.Decode(rule); err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 
 	return rule, nil

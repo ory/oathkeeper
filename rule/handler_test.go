@@ -35,8 +35,8 @@ import (
 
 func TestHandler(t *testing.T) {
 	handler := &Handler{
-		H:                herodot.NewJSONWriter(nil),
-		M:                NewMemoryManager(),
+		H: herodot.NewJSONWriter(nil),
+		M: NewMemoryManager(),
 	}
 	router := httprouter.New()
 	handler.SetRoutes(router)
@@ -45,21 +45,36 @@ func TestHandler(t *testing.T) {
 	client := swagger.NewRuleApiWithBasePath(server.URL)
 
 	r1 := swagger.Rule{
-		Id:               "foo1",
-		Description:      "Create users rule",
-		MatchesUrl:       server.URL + "/users/([0-9]+)",
-		MatchesMethods:   []string{"POST"},
-		RequiredResource: "users:$1",
-		RequiredAction:   "create:$1",
-		RequiredScopes:   []string{"users.create"},
-		Mode:             "foo",
+		Id: "foo1",
+		Match: swagger.RuleMatch{
+			Url:     "https://localhost:1234/<foo|bar>",
+			Methods: []string{"POST"},
+		},
+		Description:       "Create users rule",
+		Authorizer:        swagger.RuleHandler{Handler: "allow", Config: `{ "type": "any" }`},
+		Authenticators:    []swagger.RuleHandler{{Handler: "anonymous", Config: `{ "name": "anonymous1" }`}},
+		CredentialsIssuer: swagger.RuleHandler{Handler: "id_token", Config: `{ "issuer": "anything" }`},
+		Upstream: swagger.Upstream{
+			Url:          "http://localhost:1235/",
+			StripPath:    "/bar",
+			PreserveHost: true,
+		},
 	}
 	r2 := swagger.Rule{
-		Description:    "Get users rule",
-		MatchesUrl:     server.URL + "/users/([0-9]+)",
-		MatchesMethods: []string{"GET"},
-		RequiredScopes: []string{},
-		Mode:           "bar",
+		Id: "foo2",
+		Match: swagger.RuleMatch{
+			Url:     "https://localhost:34/<baz|bar>",
+			Methods: []string{"GET"},
+		},
+		Description:       "Get users rule",
+		Authorizer:        swagger.RuleHandler{Handler: "deny", Config: `{ "type": "any" }`},
+		Authenticators:    [] swagger.RuleHandler{{Handler: "oauth2_introspection", Config: `{ "name": "anonymous1" }`}},
+		CredentialsIssuer: swagger.RuleHandler{Handler: "id_token", Config: `{ "issuer": "anything" }`},
+		Upstream: swagger.Upstream{
+			Url:          "http://localhost:333/",
+			StripPath:    "/foo",
+			PreserveHost: false,
+		},
 	}
 
 	t.Run("case=create a new rule", func(t *testing.T) {
@@ -79,13 +94,11 @@ func TestHandler(t *testing.T) {
 		require.Len(t, results, 2)
 		assert.True(t, results[0].Id != results[1].Id)
 
-		r1.RequiredScopes = []string{"users"}
 		r1.Id = "newfoo"
 		result, response, err = client.UpdateRule("foo1", r1)
 		require.NoError(t, err)
 		assert.Equal(t, http.StatusOK, response.StatusCode)
 		assert.Equal(t, "foo1", result.Id)
-		assert.EqualValues(t, r1.RequiredScopes, result.RequiredScopes)
 		r1.Id = "foo1"
 
 		result, response, err = client.GetRule(r2.Id)

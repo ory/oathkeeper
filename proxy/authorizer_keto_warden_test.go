@@ -23,15 +23,16 @@ package proxy
 import (
 	"encoding/json"
 	"fmt"
+	"net/http"
+	"net/url"
+	"testing"
+
 	"github.com/golang/mock/gomock"
 	"github.com/ory/keto/sdk/go/keto/swagger"
 	"github.com/ory/oathkeeper/rule"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"net/http"
-	"net/url"
-	"testing"
 )
 
 func mustParseURL(t *testing.T, u string) *url.URL {

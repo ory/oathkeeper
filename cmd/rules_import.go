@@ -27,8 +27,10 @@ import (
 	"net/http"
 
 	"github.com/ory/oathkeeper/sdk/go/oathkeeper"
-	"github.com/ory/oathkeeper/sdk/go/oathkeeper/swagger"
 	"github.com/spf13/cobra"
+	"bytes"
+	"github.com/ory/oathkeeper/rule"
+	"github.com/ory/oathkeeper/sdk/go/oathkeeper/swagger"
 )
 
 // importCmd represents the import command
@@ -59,24 +61,54 @@ Usage example:
 		file, err := ioutil.ReadFile(args[0])
 		must(err, "Reading file %s resulted in error %s", args[0], err)
 
-		var rules []swagger.Rule
-		err = json.Unmarshal(file, &rules)
+		var rules []rule.Rule
+		d := json.NewDecoder(bytes.NewBuffer(file))
+		d.DisallowUnknownFields()
+		err = d.Decode(&rules)
 		must(err, "Decoding file contents from JSON resulted in error %s", err)
 
 		for _, r := range rules {
-			fmt.Printf("Importing rule %s...\n", r.Id)
+			fmt.Printf("Importing rule %s...\n", r.ID)
 			client := oathkeeper.NewSDK(endpoint)
-			out, response, err := client.GetRule(r.Id)
+			out, response, err := client.GetRule(r.ID)
 			if err == nil {
 				response.Body.Close()
 			}
 
+			rh := make([]swagger.RuleHandler, len(r.Authenticators))
+			for k, authn := range r.Authenticators {
+				rh[k] = swagger.RuleHandler{
+					Handler: authn.Handler,
+					Config:  string(authn.Config),
+				}
+			}
+
+			sr := swagger.Rule{
+				Id:          r.ID,
+				Description: r.Description,
+				Match:       swagger.RuleMatch{Methods: r.Match.Methods, Url: r.Match.URL},
+				Authorizer: swagger.RuleHandler{
+					Handler: r.Authorizer.Handler,
+					Config:  string(r.Authorizer.Config),
+				},
+				Authenticators: rh,
+				CredentialsIssuer: swagger.RuleHandler{
+					Handler: r.Authorizer.Handler,
+					Config:  string(r.Authorizer.Config),
+				},
+				Upstream: swagger.Upstream{
+					Url:          r.Upstream.URL,
+					PreserveHost: r.Upstream.PreserveHost,
+					StripPath:    r.Upstream.StripPath,
+				},
+			}
+
 			if out != nil {
-				out, response, err := client.UpdateRule(r.Id, r)
+				out, response, err := client.UpdateRule(r.ID, sr)
 				checkResponse(response, err, http.StatusOK)
 				fmt.Printf("Successfully imported rule %s...\n", out.Id)
 			} else {
-				out, response, err := client.CreateRule(r)
+				out, response, err := client.CreateRule(sr)
 				checkResponse(response, err, http.StatusCreated)
 				fmt.Printf("Successfully imported rule %s...\n", out.Id)
 			}

@@ -1,11 +1,110 @@
-[{
-  "id": "test-rule-1",
-  "matchesMethods": ["POST", "GET"],
-  "matchesUrl": "http://localhost/",
-  "mode": "pass_through"
-}, {
-  "id": "test-rule-2",
-  "matchesMethods": ["POST", "GET"],
-  "matchesUrl": "http://localhost/",
-  "mode": "oauth2_introspection"
-}]
+[
+  {
+    "id": "test-rule-1",
+    "upstream": {
+      "preserve_host": true,
+      "strip_path": "/api",
+      "url": "mybackend.com/api"
+    },
+    "match": {
+      "url": "myproxy.com/api",
+      "methods": [
+        "GET",
+        "POST"
+      ]
+    },
+    "authenticators": [
+      {
+        "handler": "noop"
+      },
+      {
+        "handler": "anonymous"
+      },
+      {
+        "handler": "oauth2_introspection",
+        "config": {
+          "required_scope": [
+            "foo",
+            "bar"
+          ]
+        }
+      },
+      {
+        "handler": "oauth2_introspection",
+        "config": {
+          "required_scope": [
+            "foo",
+            "baz"
+          ]
+        }
+      },
+      {
+        "handler": "oauth2_client_credentials"
+      }
+    ],
+    "authorizer": {
+      "handler": "keto_warden",
+      "config": {
+        "required_resource": "foo:bar",
+        "required_action": "foo:bar"
+      }
+    },
+    "credentials_issuer": {
+      "handler": "noop|idToken"
+    }
+  },
+  {
+    "id": "test-rule-2",
+    "upstream": {
+      "preserve_host": true,
+      "strip_path": "/api",
+      "url": "mybackend.com/api"
+    },
+    "match": {
+      "url": "myproxy.com/api",
+      "methods": [
+        "GET",
+        "POST"
+      ]
+    },
+    "authenticators": [
+      {
+        "handler": "noop"
+      },
+      {
+        "handler": "anonymous"
+      },
+      {
+        "handler": "oauth2_introspection",
+        "config": {
+          "required_scope": [
+            "foo",
+            "bar"
+          ]
+        }
+      },
+      {
+        "handler": "oauth2_introspection",
+        "config": {
+          "required_scope": [
+            "foo",
+            "baz"
+          ]
+        }
+      },
+      {
+        "handler": "oauth2_client_credentials"
+      }
+    ],
+    "authorizer": {
+      "handler": "keto_warden",
+      "config": {
+        "required_resource": "foo:bar",
+        "required_action": "foo:bar"
+      }
+    },
+    "credentials_issuer": {
+      "handler": "noop|idToken"
+    }
+  }
+]

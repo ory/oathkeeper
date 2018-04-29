@@ -2,8 +2,9 @@ package proxy
 
 import (
 	"encoding/json"
-	"github.com/ory/oathkeeper/rule"
 	"net/http"
+
+	"github.com/ory/oathkeeper/rule"
 )
 
 type Authorizer interface {

@@ -22,16 +22,17 @@ package proxy
 
 import (
 	"encoding/json"
+	"net/http"
+	"strings"
+	"testing"
+	"time"
+
 	"github.com/dgrijalva/jwt-go"
 	"github.com/go-errors/errors"
 	"github.com/ory/oathkeeper/rsakey"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"net/http"
-	"strings"
-	"testing"
-	"time"
 )
 
 func TestCredentialsIssuerIDToken(t *testing.T) {

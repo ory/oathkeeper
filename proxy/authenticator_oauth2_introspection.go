@@ -4,12 +4,13 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"net/http"
+
 	"github.com/ory/fosite"
 	"github.com/ory/keto/authentication"
 	"github.com/ory/oathkeeper/helper"
 	"github.com/ory/oathkeeper/rule"
 	"github.com/pkg/errors"
-	"net/http"
 )
 
 type AuthenticatorOAuth2IntrospectionConfiguration struct {
