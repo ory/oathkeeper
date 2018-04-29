@@ -70,12 +70,6 @@ REQUIRED CONTROLS
 - OATHKEEPER_API_URL: The URL of the Oathkeeper REST API
 	Example: OATHKEEPER_API_URL=https://api.oathkeeper.mydomain.com/
 
-- JWT_SHARED_SECRET: The shared secret to be used to encrypt the Authorization Bearer JSON Web Token. Use this
-	secret to validate that the Bearer Token was indeed issued by this ORY Oathkeeper instance.
-
-- ISSUER_URL: The public URL where this proxy is listening on.
-	Example: ISSUER_URL=https://my-api.com
-
 
 HTTP(S) CONTROLS
 ==============

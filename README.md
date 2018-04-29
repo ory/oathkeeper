@@ -65,7 +65,8 @@ docker run oryd/oathkeeper:<version> help
 
 ### ORY Security Console: Administrative User Interface
 
-The [ORY Security Console](https://console.ory.am/auth/login). connects with your existing ORY Hydra and ORY Oathkeeper isntallation and lets you manage and monitor them through an intuitive UI.
+The [ORY Security Console](https://console.ory.am/auth/login) is a visual admin interface for managing ORY Hydra,
+ORY Oathkeeper, and ORY Keto.
 
 ### ORY Hydra: OAuth2 & OpenID Connect Server
 
@@ -88,7 +89,8 @@ and send us an email to [hi@ory.am](mailto:hi@ory.am) instead.
 
 ## Telemetry
 
-ORY Oathkeeper collects summarized, anonymized telemetry which can optionally be turned off. Click [here](https://www.ory.sh/docs/1-hydra/0-tutorial/0-readme) to learn more.
+Our services collect summarized, anonymized data which can optionally be turned off. Click
+[here](https://www.ory.sh/docs/1-hydra/9-telemetry) to learn more.
 
 ## Documentation
 
