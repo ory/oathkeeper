@@ -24,6 +24,7 @@ import (
 	"net/http"
 
 	"fmt"
+
 	"github.com/ory/oathkeeper/pkg"
 	"github.com/ory/oathkeeper/sdk/go/oathkeeper"
 	"github.com/pkg/errors"

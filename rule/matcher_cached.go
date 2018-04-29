@@ -23,10 +23,11 @@ package rule
 import (
 	"net/url"
 
+	"sync"
+
 	"github.com/ory/oathkeeper/helper"
 	"github.com/ory/oathkeeper/pkg"
 	"github.com/pkg/errors"
-	"sync"
 )
 
 type CachedMatcher struct {

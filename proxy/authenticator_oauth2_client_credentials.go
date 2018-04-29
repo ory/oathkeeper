@@ -6,12 +6,13 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"net/url"
+
 	"github.com/ory/oathkeeper/helper"
 	"github.com/ory/oathkeeper/rule"
 	"github.com/pkg/errors"
-	"golang.org/x/oauth2/clientcredentials"
 	"github.com/sirupsen/logrus"
-	"net/url"
+	"golang.org/x/oauth2/clientcredentials"
 )
 
 type AuthenticatorOAuth2Configuration struct {

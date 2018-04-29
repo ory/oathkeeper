@@ -5,7 +5,7 @@ version: 2
 jobs:
   format:
     docker:
-      - image: circleci/golang:1.9
+      - image: circleci/golang:1.10
     working_directory: /go/src/github.com/ory/oathkeeper
     steps:
       - checkout
@@ -16,7 +16,7 @@ jobs:
 
   swagger:
     docker:
-      - image: circleci/golang:1.9
+      - image: circleci/golang:1.10
     working_directory: /go/src/github.com/ory/oathkeeper
     steps:
       - checkout
@@ -27,7 +27,7 @@ jobs:
 
   test:
     docker:
-      - image: circleci/golang:1.9
+      - image: circleci/golang:1.10
         environment:
         - PG_URL=postgres://test:test@localhost:5432/oathkeeper?sslmode=disable
         - TEST_HYDRA_URL=http://localhost:4444
@@ -73,7 +73,7 @@ jobs:
 
   release:
     docker:
-      - image: circleci/golang:1.9
+      - image: circleci/golang:1.10
     working_directory: /go/src/github.com/ory/oathkeeper
     steps:
       - checkout

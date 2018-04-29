@@ -27,6 +27,8 @@ import (
 	"net/http"
 	"net/http/httputil"
 
+	"strings"
+
 	"github.com/meatballhat/negroni-logrus"
 	"github.com/ory/fosite"
 	"github.com/ory/graceful"
@@ -40,7 +42,6 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/urfave/negroni"
-	"strings"
 )
 
 // proxyCmd represents the proxy command

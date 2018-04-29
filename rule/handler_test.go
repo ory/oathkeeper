@@ -68,7 +68,7 @@ func TestHandler(t *testing.T) {
 		},
 		Description:       "Get users rule",
 		Authorizer:        swagger.RuleHandler{Handler: "deny", Config: []byte(`{"type":"any"}`)},
-		Authenticators:    [] swagger.RuleHandler{{Handler: "oauth2_introspection", Config: []byte(`{"name":"anonymous1"}`)}},
+		Authenticators:    []swagger.RuleHandler{{Handler: "oauth2_introspection", Config: []byte(`{"name":"anonymous1"}`)}},
 		CredentialsIssuer: swagger.RuleHandler{Handler: "id_token", Config: []byte(`{"issuer":"anything"}`)},
 		Upstream: swagger.Upstream{
 			Url:          "http://localhost:333/",

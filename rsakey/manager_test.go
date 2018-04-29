@@ -26,12 +26,13 @@ import (
 	"os"
 	"testing"
 
+	"time"
+
 	"github.com/ory/dockertest"
 	"github.com/ory/hydra/sdk/go/hydra"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"time"
 )
 
 var resources []*dockertest.Resource
