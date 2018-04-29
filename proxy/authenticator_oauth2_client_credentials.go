@@ -10,6 +10,8 @@ import (
 	"github.com/ory/oathkeeper/rule"
 	"github.com/pkg/errors"
 	"golang.org/x/oauth2/clientcredentials"
+	"github.com/sirupsen/logrus"
+	"net/url"
 )
 
 type AuthenticatorOAuth2Configuration struct {
@@ -49,6 +51,18 @@ func (a *AuthenticatorOAuth2ClientCredentials) Authenticate(r *http.Request, con
 		return nil, errors.WithStack(ErrAuthenticatorNotResponsible)
 	}
 
+	var err error
+	user, err = url.QueryUnescape(user)
+	if !ok {
+		return nil, errors.Wrapf(helper.ErrUnauthorized, err.Error())
+	}
+
+	password, err = url.QueryUnescape(password)
+	if !ok {
+		return nil, errors.Wrapf(helper.ErrUnauthorized, err.Error())
+	}
+
+	logrus.New().Printf("Got wow user pw, %s, %s", user, password)
 	c := &clientcredentials.Config{
 		ClientID:     user,
 		ClientSecret: password,
