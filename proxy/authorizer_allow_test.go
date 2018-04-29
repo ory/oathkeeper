@@ -21,14 +21,14 @@
 package proxy
 
 import (
-	"testing"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"testing"
 )
 
 func TestAuthorizerAllow(t *testing.T) {
 	a := NewAuthorizerAllow()
 
 	assert.NotEmpty(t, a.GetID())
-	require.NoError(t, a.Authorize(nil, nil, nil))
+	require.NoError(t, a.Authorize(nil, nil, nil, nil))
 }

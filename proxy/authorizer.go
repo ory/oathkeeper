@@ -1,12 +1,13 @@
 package proxy
 
 import (
-	"net/http"
 	"encoding/json"
+	"github.com/ory/oathkeeper/rule"
+	"net/http"
 )
 
 type Authorizer interface {
-	Authorize(r *http.Request, session *AuthenticationSession, config json.RawMessage) error
+	Authorize(r *http.Request, session *AuthenticationSession, config json.RawMessage, rl *rule.Rule) error
 	GetID() string
 }
 

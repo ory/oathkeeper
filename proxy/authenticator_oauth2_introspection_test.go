@@ -21,16 +21,16 @@
 package proxy
 
 import (
-	"testing"
-	"github.com/ory/fosite"
-	"github.com/golang/mock/gomock"
-	"fmt"
-	"github.com/stretchr/testify/assert"
-	"net/http"
 	"encoding/json"
-	"github.com/stretchr/testify/require"
 	"errors"
+	"fmt"
+	"github.com/golang/mock/gomock"
+	"github.com/ory/fosite"
 	"github.com/ory/keto/authentication"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	"net/http"
+	"testing"
 )
 
 func TestAuthenticatorOAuth2Introspection(t *testing.T) {
@@ -124,7 +124,7 @@ func TestAuthenticatorOAuth2Introspection(t *testing.T) {
 
 			a.helper = m
 
-			sess, err := a.Authenticate(tc.r, tc.config)
+			sess, err := a.Authenticate(tc.r, tc.config, nil)
 			if tc.expectErr {
 				require.Error(t, err)
 			} else {

@@ -1,14 +1,15 @@
 package proxy
 
 import (
-	"net/http"
-	"github.com/pkg/errors"
+	"bytes"
 	"encoding/json"
+	"fmt"
+	"github.com/ory/fosite"
 	"github.com/ory/keto/authentication"
 	"github.com/ory/oathkeeper/helper"
-	"github.com/ory/fosite"
-	"bytes"
-	"fmt"
+	"github.com/ory/oathkeeper/rule"
+	"github.com/pkg/errors"
+	"net/http"
 )
 
 type AuthenticatorOAuth2IntrospectionConfiguration struct {
@@ -45,7 +46,7 @@ func (a *AuthenticatorOAuth2Introspection) GetID() string {
 	return "oauth2_introspection"
 }
 
-func (a *AuthenticatorOAuth2Introspection) Authenticate(r *http.Request, config json.RawMessage) (*AuthenticationSession, error) {
+func (a *AuthenticatorOAuth2Introspection) Authenticate(r *http.Request, config json.RawMessage, rl *rule.Rule) (*AuthenticationSession, error) {
 	var cf AuthenticatorOAuth2IntrospectionConfiguration
 
 	if len(config) == 0 {

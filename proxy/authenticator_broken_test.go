@@ -21,16 +21,16 @@
 package proxy
 
 import (
-	"testing"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"net/http"
+	"testing"
 )
 
 func TestAuthenticatorBroken(t *testing.T) {
 	assert.NotEmpty(t, NewAuthenticatorBroken())
 	assert.NotEmpty(t, NewAuthenticatorBroken().GetID())
 
-	_, err := NewAuthenticatorBroken().Authenticate(&http.Request{Header: http.Header{}}, nil)
+	_, err := NewAuthenticatorBroken().Authenticate(&http.Request{Header: http.Header{}}, nil, nil)
 	require.Error(t, err)
 }

@@ -21,17 +21,17 @@
 package proxy
 
 import (
-	"testing"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
-	"github.com/ory/oathkeeper/rsakey"
-	"github.com/sirupsen/logrus"
-	"net/http"
 	"encoding/json"
-	"time"
-	"strings"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/go-errors/errors"
+	"github.com/ory/oathkeeper/rsakey"
+	"github.com/sirupsen/logrus"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	"net/http"
+	"strings"
+	"testing"
+	"time"
 )
 
 func TestCredentialsIssuerIDToken(t *testing.T) {
@@ -43,7 +43,7 @@ func TestCredentialsIssuerIDToken(t *testing.T) {
 
 	r := &http.Request{Header: http.Header{}}
 	s := &AuthenticationSession{Subject: "foo"}
-	require.NoError(t, b.Issue(r, s, json.RawMessage([]byte(`{ "aud": ["foo", "bar"] }`))))
+	require.NoError(t, b.Issue(r, s, json.RawMessage([]byte(`{ "aud": ["foo", "bar"] }`)), nil))
 
 	generated := strings.Replace(r.Header.Get("Authorization"), "Bearer ", "", 1)
 	token, err := jwt.ParseWithClaims(generated, new(Claims), func(token *jwt.Token) (interface{}, error) {

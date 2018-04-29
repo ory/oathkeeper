@@ -21,20 +21,20 @@
 package proxy
 
 import (
-	"testing"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"net/http"
+	"testing"
 )
 
 func TestAuthenticatorAnonymous(t *testing.T) {
 	assert.NotEmpty(t, NewAuthenticatorAnonymous(""))
 	assert.NotEmpty(t, NewAuthenticatorAnonymous("").GetID())
 
-	session, err := NewAuthenticatorAnonymous("anon").Authenticate(&http.Request{Header: http.Header{}}, nil)
+	session, err := NewAuthenticatorAnonymous("anon").Authenticate(&http.Request{Header: http.Header{}}, nil, nil)
 	require.NoError(t, err)
 	assert.Equal(t, "anon", session.Subject)
 
-	_, err = NewAuthenticatorAnonymous("anon").Authenticate(&http.Request{Header: http.Header{"Authorization": {"foo"}}}, nil)
+	_, err = NewAuthenticatorAnonymous("anon").Authenticate(&http.Request{Header: http.Header{"Authorization": {"foo"}}}, nil, nil)
 	require.Error(t, err)
 }

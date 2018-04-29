@@ -23,10 +23,10 @@ package proxy
 import (
 	"net/http"
 
+	"github.com/ory/oathkeeper/helper"
 	"github.com/ory/oathkeeper/rule"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
-	"github.com/ory/oathkeeper/helper"
 )
 
 type RequestHandler struct {
@@ -69,7 +69,7 @@ func NewRequestHandler(
 	return j
 }
 
-func (d *RequestHandler) HandleRequest(r *http.Request, rl *rule.Rule) (error) {
+func (d *RequestHandler) HandleRequest(r *http.Request, rl *rule.Rule) error {
 	var err error
 	var session *AuthenticationSession
 	var found bool
@@ -96,7 +96,7 @@ func (d *RequestHandler) HandleRequest(r *http.Request, rl *rule.Rule) (error) {
 			return errors.New("Unknown authentication handler requested")
 		}
 
-		session, err = anh.Authenticate(r, a.Config)
+		session, err = anh.Authenticate(r, a.Config, rl)
 		if err != nil {
 			switch errors.Cause(err).Error() {
 			case ErrAuthenticatorNotResponsible.Error():
@@ -143,7 +143,7 @@ func (d *RequestHandler) HandleRequest(r *http.Request, rl *rule.Rule) (error) {
 		return errors.New("Unknown authorization handler requested")
 	}
 
-	if err := azh.Authorize(r, session, rl.Authorizer.Config); err != nil {
+	if err := azh.Authorize(r, session, rl.Authorizer.Config, rl); err != nil {
 		d.Logger.
 			WithError(err).
 			WithField("granted", false).
@@ -165,7 +165,7 @@ func (d *RequestHandler) HandleRequest(r *http.Request, rl *rule.Rule) (error) {
 		return errors.New("Unknown credential issuer requested")
 	}
 
-	if err := sh.Issue(r, session, rl.CredentialsIssuer.Config); err != nil {
+	if err := sh.Issue(r, session, rl.CredentialsIssuer.Config, rl); err != nil {
 		return err
 	}
 

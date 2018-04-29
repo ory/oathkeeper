@@ -21,14 +21,14 @@
 package proxy
 
 import (
-	"testing"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"testing"
 )
 
 func TestCredentialsIssuerNoOp(t *testing.T) {
 	assert.NotEmpty(t, NewCredentialsIssuerNoOp())
 	assert.NotEmpty(t, NewCredentialsIssuerNoOp().GetID())
 
-	require.NoError(t,  NewCredentialsIssuerNoOp().Issue(nil, nil,nil))
+	require.NoError(t, NewCredentialsIssuerNoOp().Issue(nil, nil, nil, nil))
 }

@@ -1,13 +1,14 @@
 package proxy
 
 import (
-	"net/http"
-	"github.com/pkg/errors"
-	"encoding/json"
-	"golang.org/x/oauth2/clientcredentials"
-	"context"
-	"github.com/ory/oathkeeper/helper"
 	"bytes"
+	"context"
+	"encoding/json"
+	"github.com/ory/oathkeeper/helper"
+	"github.com/ory/oathkeeper/rule"
+	"github.com/pkg/errors"
+	"golang.org/x/oauth2/clientcredentials"
+	"net/http"
 )
 
 type AuthenticatorOAuth2Configuration struct {
@@ -30,7 +31,7 @@ func (a *AuthenticatorOAuth2ClientCredentials) GetID() string {
 	return "oauth2_client_credentials"
 }
 
-func (a *AuthenticatorOAuth2ClientCredentials) Authenticate(r *http.Request, config json.RawMessage) (*AuthenticationSession, error) {
+func (a *AuthenticatorOAuth2ClientCredentials) Authenticate(r *http.Request, config json.RawMessage, rl *rule.Rule) (*AuthenticationSession, error) {
 	var cf AuthenticatorOAuth2Configuration
 	if len(config) == 0 {
 		config = []byte("{}")

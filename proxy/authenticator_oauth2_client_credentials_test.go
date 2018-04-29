@@ -21,18 +21,18 @@
 package proxy
 
 import (
-	"testing"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
-	"github.com/julienschmidt/httprouter"
-	"net/http"
-	"github.com/ory/herodot"
-	"net/http/httptest"
-	"github.com/sirupsen/logrus"
 	"encoding/json"
+	"fmt"
+	"github.com/julienschmidt/httprouter"
+	"github.com/ory/herodot"
 	"github.com/ory/oathkeeper/helper"
 	"github.com/pkg/errors"
-	"fmt"
+	"github.com/sirupsen/logrus"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	"net/http"
+	"net/http/httptest"
+	"testing"
 )
 
 func TestAuthenticatorOAuth2ClientCredentials(t *testing.T) {
@@ -82,7 +82,7 @@ func TestAuthenticatorOAuth2ClientCredentials(t *testing.T) {
 		},
 	} {
 		t.Run(fmt.Sprintf("case=%d", k), func(t *testing.T) {
-			session, err := a.Authenticate(tc.r, tc.config)
+			session, err := a.Authenticate(tc.r, tc.config, nil)
 
 			if tc.expectErr != nil {
 				require.EqualError(t, errors.Cause(err), tc.expectErr.Error())

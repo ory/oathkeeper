@@ -21,8 +21,9 @@
 package proxy
 
 import (
-	"net/http"
 	"encoding/json"
+	"github.com/ory/oathkeeper/rule"
+	"net/http"
 )
 
 type CredentialsIssuerNoOp struct{}
@@ -35,6 +36,6 @@ func (a *CredentialsIssuerNoOp) GetID() string {
 	return "noop"
 }
 
-func (a *CredentialsIssuerNoOp) Issue(r *http.Request, session *AuthenticationSession, config json.RawMessage) error {
+func (a *CredentialsIssuerNoOp) Issue(r *http.Request, session *AuthenticationSession, config json.RawMessage, rl *rule.Rule) error {
 	return nil
 }

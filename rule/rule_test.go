@@ -21,10 +21,10 @@
 package rule
 
 import (
-	"testing"
 	"github.com/stretchr/testify/assert"
-	"net/url"
 	"github.com/stretchr/testify/require"
+	"net/url"
+	"testing"
 )
 
 func mustParse(t *testing.T, u string) *url.URL {
@@ -35,21 +35,11 @@ func mustParse(t *testing.T, u string) *url.URL {
 
 func TestRule(t *testing.T) {
 	r := &Rule{
-		Matches: []RuleMatch{
-			{
-				Methods: []string{"POST", "GET"},
-				URL:     "https://localhost/users",
-			},
-			{
-				Methods: []string{"DELETE"},
-				URL:     "https://localhost/users/<[0-9]+>",
-			},
+		Match: RuleMatch{
+			Methods: []string{"DELETE"},
+			URL:     "https://localhost/users/<[0-9]+>",
 		},
 	}
-
-	assert.NoError(t, r.IsMatching("GET", mustParse(t, "https://localhost/users")))
-	assert.NoError(t, r.IsMatching("POST",mustParse(t,  "https://localhost/users")))
-	assert.Error(t, r.IsMatching("DELETE", mustParse(t, "https://localhost/users")))
 
 	assert.NoError(t, r.IsMatching("DELETE", mustParse(t, "https://localhost/users/1234")))
 	assert.Error(t, r.IsMatching("DELETE", mustParse(t, "https://localhost/users/abcd")))

@@ -21,15 +21,15 @@
 package proxy
 
 import (
-	"testing"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"testing"
 )
 
 func TestAuthenticatorNoop(t *testing.T) {
 	assert.NotEmpty(t, NewAuthenticatorNoOp())
 	assert.NotEmpty(t, NewAuthenticatorNoOp().GetID())
 
-	_, err := NewAuthenticatorNoOp().Authenticate(nil, nil)
+	_, err := NewAuthenticatorNoOp().Authenticate(nil, nil, nil)
 	require.Error(t, err)
 }

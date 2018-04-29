@@ -21,9 +21,9 @@
 package proxy
 
 import (
-	"testing"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"testing"
 )
 
 func TestCredentialsIssuerBroken(t *testing.T) {
@@ -31,5 +31,5 @@ func TestCredentialsIssuerBroken(t *testing.T) {
 	assert.NotEmpty(t, b)
 	assert.NotEmpty(t, b.GetID())
 
-	require.Error(t,  b.Issue(nil, nil,nil))
+	require.Error(t, b.Issue(nil, nil, nil, nil))
 }

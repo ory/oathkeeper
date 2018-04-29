@@ -21,11 +21,12 @@
 package proxy
 
 import (
-	"net/http"
 	"encoding/json"
+	"github.com/ory/oathkeeper/rule"
+	"net/http"
 )
 
 type CredentialsIssuer interface {
-	Issue(r *http.Request, session *AuthenticationSession, config json.RawMessage) error
+	Issue(r *http.Request, session *AuthenticationSession, config json.RawMessage, rl *rule.Rule) error
 	GetID() string
 }

@@ -21,8 +21,9 @@
 package proxy
 
 import (
-	"net/http"
 	"encoding/json"
+	"github.com/ory/oathkeeper/rule"
+	"net/http"
 )
 
 type AuthorizerAllow struct{}
@@ -35,6 +36,6 @@ func (a *AuthorizerAllow) GetID() string {
 	return "allow"
 }
 
-func (a *AuthorizerAllow) Authorize(r *http.Request, session *AuthenticationSession, config json.RawMessage) error {
+func (a *AuthorizerAllow) Authorize(r *http.Request, session *AuthenticationSession, config json.RawMessage, rl *rule.Rule) error {
 	return nil
 }

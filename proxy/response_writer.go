@@ -21,8 +21,8 @@
 package proxy
 
 import (
-	"net/http"
 	"bytes"
+	"net/http"
 )
 
 type simpleResponseWriter struct {

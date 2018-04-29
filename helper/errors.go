@@ -26,12 +26,12 @@ import (
 )
 
 var (
-	ErrForbidden              = &herodot.DefaultError{
+	ErrForbidden = &herodot.DefaultError{
 		ErrorField:  "Access credentials are not sufficient to access this resource",
 		CodeField:   http.StatusForbidden,
 		StatusField: http.StatusText(http.StatusForbidden),
 	}
-	ErrUnauthorized           = &herodot.DefaultError{
+	ErrUnauthorized = &herodot.DefaultError{
 		ErrorField:  "Access credentials are either expired or missing a scope",
 		CodeField:   http.StatusUnauthorized,
 		StatusField: http.StatusText(http.StatusUnauthorized),

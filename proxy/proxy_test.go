@@ -33,8 +33,8 @@ import (
 	"github.com/ory/oathkeeper/rule"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"strconv"
 	"net/url"
+	"strconv"
 )
 
 //type jurorDenyAll struct{}
@@ -78,7 +78,7 @@ func TestProxy(t *testing.T) {
 		nil,
 		[]Authenticator{NewAuthenticatorNoOp(), NewAuthenticatorAnonymous("anonymous"), NewAuthenticatorBroken()},
 		[]Authorizer{NewAuthorizerAllow(), NewAuthorizerDeny()},
-		[]CredentialsIssuer{NewCredentialsIssuerNoOp(),NewCredentialsIssuerBroken()},
+		[]CredentialsIssuer{NewCredentialsIssuerNoOp(), NewCredentialsIssuerBroken()},
 	)
 
 	d := NewProxy(rh, nil, matcher)
@@ -86,12 +86,12 @@ func TestProxy(t *testing.T) {
 	defer proxy.Close()
 
 	ruleNoOpAuthenticator := rule.Rule{
-		Matches:        []rule.RuleMatch{{Methods: []string{"GET"}, URL: proxy.URL + "/authn-noop/<[0-9]+>"}},
+		Match:          rule.RuleMatch{Methods: []string{"GET"}, URL: proxy.URL + "/authn-noop/<[0-9]+>"},
 		Authenticators: []rule.RuleHandler{{Handler: "noop"}},
 		Upstream:       &rule.Upstream{URL: backend.URL},
 	}
 	ruleNoOpAuthenticatorModifyUpstream := rule.Rule{
-		Matches:        []rule.RuleMatch{{Methods: []string{"GET"}, URL: proxy.URL + "/strip-path/authn-noop/<[0-9]+>"}},
+		Match:          rule.RuleMatch{Methods: []string{"GET"}, URL: proxy.URL + "/strip-path/authn-noop/<[0-9]+>"},
 		Authenticators: []rule.RuleHandler{{Handler: "noop"}},
 		Upstream:       &rule.Upstream{URL: backend.URL, StripPath: "/strip-path/", PreserveHost: true},
 	}
@@ -153,7 +153,7 @@ func TestProxy(t *testing.T) {
 			d:   "should fail because no authorizer was configured",
 			url: proxy.URL + "/authn-anon/authz-none/cred-none/1234",
 			rules: []rule.Rule{{
-				Matches:        []rule.RuleMatch{{Methods: []string{"GET"}, URL: proxy.URL + "/authn-anon/authz-none/cred-none/<[0-9]+>"}},
+				Match:          rule.RuleMatch{Methods: []string{"GET"}, URL: proxy.URL + "/authn-anon/authz-none/cred-none/<[0-9]+>"},
 				Authenticators: []rule.RuleHandler{{Handler: "anonymous"}},
 				Upstream:       &rule.Upstream{URL: backend.URL},
 			}},
@@ -166,7 +166,7 @@ func TestProxy(t *testing.T) {
 			d:   "should fail because no credentials issuer was configured",
 			url: proxy.URL + "/authn-anon/authz-allow/cred-none/1234",
 			rules: []rule.Rule{{
-				Matches:        []rule.RuleMatch{{Methods: []string{"GET"}, URL: proxy.URL + "/authn-anon/authz-allow/cred-none/<[0-9]+>"}},
+				Match:          rule.RuleMatch{Methods: []string{"GET"}, URL: proxy.URL + "/authn-anon/authz-allow/cred-none/<[0-9]+>"},
 				Authenticators: []rule.RuleHandler{{Handler: "anonymous"}},
 				Authorizer:     rule.RuleHandler{Handler: "allow"},
 				Upstream:       &rule.Upstream{URL: backend.URL},
@@ -177,7 +177,7 @@ func TestProxy(t *testing.T) {
 			d:   "should pass with anonymous and everything else set to noop",
 			url: proxy.URL + "/authn-anon/authz-allow/cred-noop/1234",
 			rules: []rule.Rule{{
-				Matches:           []rule.RuleMatch{{Methods: []string{"GET"}, URL: proxy.URL + "/authn-anon/authz-allow/cred-noop/<[0-9]+>"}},
+				Match:             rule.RuleMatch{Methods: []string{"GET"}, URL: proxy.URL + "/authn-anon/authz-allow/cred-noop/<[0-9]+>"},
 				Authenticators:    []rule.RuleHandler{{Handler: "anonymous"}},
 				Authorizer:        rule.RuleHandler{Handler: "allow"},
 				CredentialsIssuer: rule.RuleHandler{Handler: "noop"},
@@ -194,7 +194,7 @@ func TestProxy(t *testing.T) {
 			d:   "should fail when authorizer fails",
 			url: proxy.URL + "/authn-anon/authz-deny/cred-noop/1234",
 			rules: []rule.Rule{{
-				Matches:           []rule.RuleMatch{{Methods: []string{"GET"}, URL: proxy.URL + "/authn-anon/authz-deny/cred-noop/<[0-9]+>"}},
+				Match:             rule.RuleMatch{Methods: []string{"GET"}, URL: proxy.URL + "/authn-anon/authz-deny/cred-noop/<[0-9]+>"},
 				Authenticators:    []rule.RuleHandler{{Handler: "anonymous"}},
 				Authorizer:        rule.RuleHandler{Handler: "deny"},
 				CredentialsIssuer: rule.RuleHandler{Handler: "noop"},
@@ -206,9 +206,9 @@ func TestProxy(t *testing.T) {
 			d:   "should fail when authenticator fails",
 			url: proxy.URL + "/authn-broken/authz-none/cred-none/1234",
 			rules: []rule.Rule{{
-				Matches:           []rule.RuleMatch{{Methods: []string{"GET"}, URL: proxy.URL + "/authn-broken/authz-none/cred-none/<[0-9]+>"}},
-				Authenticators:    []rule.RuleHandler{{Handler: "broken"}},
-				Upstream:          &rule.Upstream{URL: backend.URL},
+				Match:          rule.RuleMatch{Methods: []string{"GET"}, URL: proxy.URL + "/authn-broken/authz-none/cred-none/<[0-9]+>"},
+				Authenticators: []rule.RuleHandler{{Handler: "broken"}},
+				Upstream:       &rule.Upstream{URL: backend.URL},
 			}},
 			code: http.StatusUnauthorized,
 		},
@@ -216,7 +216,7 @@ func TestProxy(t *testing.T) {
 			d:   "should fail when credentials issuer fails",
 			url: proxy.URL + "/authn-anonymous/authz-allow/cred-broken/1234",
 			rules: []rule.Rule{{
-				Matches:           []rule.RuleMatch{{Methods: []string{"GET"}, URL: proxy.URL + "/authn-anonymous/authz-allow/cred-broken/<[0-9]+>"}},
+				Match:             rule.RuleMatch{Methods: []string{"GET"}, URL: proxy.URL + "/authn-anonymous/authz-allow/cred-broken/<[0-9]+>"},
 				Authenticators:    []rule.RuleHandler{{Handler: "anonymous"}},
 				Authorizer:        rule.RuleHandler{Handler: "allow"},
 				CredentialsIssuer: rule.RuleHandler{Handler: "broken"},

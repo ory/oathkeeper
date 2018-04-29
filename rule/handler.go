@@ -22,7 +22,6 @@ package rule
 
 import (
 	"encoding/json"
-	"net/http"
 	"github.com/julienschmidt/httprouter"
 	"github.com/ory/herodot"
 	"github.com/ory/oathkeeper/helper"
@@ -30,11 +29,12 @@ import (
 	"github.com/ory/pagination"
 	"github.com/pborman/uuid"
 	"github.com/pkg/errors"
+	"net/http"
 )
 
 type Handler struct {
-	H                herodot.Writer
-	M                Manager
+	H herodot.Writer
+	M Manager
 }
 
 func NewHandler(
@@ -42,8 +42,8 @@ func NewHandler(
 	m Manager,
 ) *Handler {
 	return &Handler{
-		H:                h,
-		M:                m,
+		H: h,
+		M: m,
 	}
 }
 

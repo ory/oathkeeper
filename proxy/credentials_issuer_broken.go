@@ -21,9 +21,10 @@
 package proxy
 
 import (
-	"net/http"
 	"encoding/json"
 	"errors"
+	"github.com/ory/oathkeeper/rule"
+	"net/http"
 )
 
 type CredentialsIssuerBroken struct{}
@@ -36,6 +37,6 @@ func (a *CredentialsIssuerBroken) GetID() string {
 	return "broken"
 }
 
-func (a *CredentialsIssuerBroken) Issue(r *http.Request, session *AuthenticationSession, config json.RawMessage) error {
+func (a *CredentialsIssuerBroken) Issue(r *http.Request, session *AuthenticationSession, config json.RawMessage, rl *rule.Rule) error {
 	return errors.New("forced denial of credentials")
 }

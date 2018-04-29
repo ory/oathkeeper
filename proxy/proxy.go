@@ -26,12 +26,12 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/ory/herodot"
 	"github.com/ory/oathkeeper/rsakey"
+	"github.com/ory/oathkeeper/rule"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
-	"github.com/ory/oathkeeper/rule"
 	"net/url"
-	"github.com/ory/herodot"
 )
 
 func NewProxy(handler *RequestHandler, logger logrus.FieldLogger, matcher rule.Matcher) *Proxy {
@@ -133,7 +133,7 @@ func (d *Proxy) Director(r *http.Request) {
 
 // enrichRequestedURL sets Scheme and Host values in a URL passed down by a http server. Per default, the URL
 // does not contain host nor scheme values.
-func enrichRequestedURL(r *http.Request)  {
+func enrichRequestedURL(r *http.Request) {
 	r.URL.Scheme = "http"
 	r.URL.Host = r.Host
 	if r.TLS != nil {
@@ -141,7 +141,7 @@ func enrichRequestedURL(r *http.Request)  {
 	}
 }
 
-func configureBackendURL(r *http.Request, rl *rule.Rule) (error) {
+func configureBackendURL(r *http.Request, rl *rule.Rule) error {
 	p, err := url.Parse(rl.Upstream.URL)
 	if err != nil {
 		return errors.WithStack(err)
@@ -157,7 +157,7 @@ func configureBackendURL(r *http.Request, rl *rule.Rule) (error) {
 	forwardURL := r.URL
 	forwardURL.Scheme = backendScheme
 	forwardURL.Host = backendHost
-	forwardURL.Path = "/" + strings.TrimLeft("/" + strings.Trim(backendPath, "/") + "/" + strings.TrimLeft(proxyPath, "/"), "/")
+	forwardURL.Path = "/" + strings.TrimLeft("/"+strings.Trim(backendPath, "/")+"/"+strings.TrimLeft(proxyPath, "/"), "/")
 
 	if rl.Upstream.StripPath != "" {
 		forwardURL.Path = strings.Replace(forwardURL.Path, "/"+strings.Trim(rl.Upstream.StripPath, "/"), "", 1)

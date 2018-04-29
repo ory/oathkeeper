@@ -1,22 +1,23 @@
 package proxy
 
 import (
-	"net/http"
-	"github.com/go-errors/errors"
 	"encoding/json"
+	"github.com/go-errors/errors"
+	"github.com/ory/oathkeeper/rule"
+	"net/http"
 )
 
 var ErrAuthenticatorNotResponsible = errors.New("Authenticator not responsible")
 var ErrAuthenticatorBypassed = errors.New("Authenticator is disabled")
 
 type Authenticator interface {
-	Authenticate(r *http.Request, config json.RawMessage) (*AuthenticationSession, error)
+	Authenticate(r *http.Request, config json.RawMessage, rl *rule.Rule) (*AuthenticationSession, error)
 	GetID() string
 }
 
 type AuthenticationSession struct {
-	Subject   string
-	Extra     map[string]interface{}
+	Subject string
+	Extra   map[string]interface{}
 }
 
 //

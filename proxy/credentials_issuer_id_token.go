@@ -21,15 +21,16 @@
 package proxy
 
 import (
-	"net/http"
-	"encoding/json"
-	"github.com/ory/oathkeeper/rsakey"
-	"github.com/pkg/errors"
-	"github.com/dgrijalva/jwt-go"
-	"github.com/sirupsen/logrus"
-	"time"
-	"github.com/pborman/uuid"
 	"bytes"
+	"encoding/json"
+	"github.com/dgrijalva/jwt-go"
+	"github.com/ory/oathkeeper/rsakey"
+	"github.com/ory/oathkeeper/rule"
+	"github.com/pborman/uuid"
+	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
+	"net/http"
+	"time"
 )
 
 type CredentialsIDTokenConfig struct {
@@ -75,7 +76,7 @@ func (c *Claims) Valid() error {
 	return nil
 }
 
-func (a *CredentialsIDToken) Issue(r *http.Request, session *AuthenticationSession, config json.RawMessage) error {
+func (a *CredentialsIDToken) Issue(r *http.Request, session *AuthenticationSession, config json.RawMessage, rl *rule.Rule) error {
 	privateKey, err := a.km.PrivateKey()
 	if err != nil {
 		return errors.WithStack(err)

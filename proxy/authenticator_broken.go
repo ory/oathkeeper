@@ -21,10 +21,11 @@
 package proxy
 
 import (
-	"net/http"
-	"github.com/pkg/errors"
 	"encoding/json"
 	"github.com/ory/oathkeeper/helper"
+	"github.com/ory/oathkeeper/rule"
+	"github.com/pkg/errors"
+	"net/http"
 )
 
 type AuthenticatorBroken struct{}
@@ -37,6 +38,6 @@ func (a *AuthenticatorBroken) GetID() string {
 	return "broken"
 }
 
-func (a *AuthenticatorBroken) Authenticate(r *http.Request, config json.RawMessage) (*AuthenticationSession, error) {
+func (a *AuthenticatorBroken) Authenticate(r *http.Request, config json.RawMessage, rl *rule.Rule) (*AuthenticationSession, error) {
 	return nil, errors.WithStack(helper.ErrUnauthorized)
 }

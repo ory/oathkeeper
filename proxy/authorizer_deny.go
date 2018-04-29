@@ -21,10 +21,11 @@
 package proxy
 
 import (
-	"net/http"
 	"encoding/json"
 	"github.com/ory/oathkeeper/helper"
+	"github.com/ory/oathkeeper/rule"
 	"github.com/pkg/errors"
+	"net/http"
 )
 
 type AuthorizerDeny struct{}
@@ -37,6 +38,6 @@ func (a *AuthorizerDeny) GetID() string {
 	return "deny"
 }
 
-func (a *AuthorizerDeny) Authorize(r *http.Request, session *AuthenticationSession, config json.RawMessage) error {
+func (a *AuthorizerDeny) Authorize(r *http.Request, session *AuthenticationSession, config json.RawMessage, rl *rule.Rule) error {
 	return errors.WithStack(helper.ErrForbidden)
 }

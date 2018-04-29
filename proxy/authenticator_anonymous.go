@@ -1,9 +1,10 @@
 package proxy
 
 import (
-	"net/http"
-	"github.com/pkg/errors"
 	"encoding/json"
+	"github.com/ory/oathkeeper/rule"
+	"github.com/pkg/errors"
+	"net/http"
 )
 
 type AuthenticatorAnonymous struct {
@@ -20,7 +21,7 @@ func (a *AuthenticatorAnonymous) GetID() string {
 	return "anonymous"
 }
 
-func (a *AuthenticatorAnonymous) Authenticate(r *http.Request, config json.RawMessage) (*AuthenticationSession, error) {
+func (a *AuthenticatorAnonymous) Authenticate(r *http.Request, config json.RawMessage, rl *rule.Rule) (*AuthenticationSession, error) {
 	if len(r.Header.Get("Authorization")) != 0 {
 		return nil, errors.WithStack(ErrAuthenticatorNotResponsible)
 	}
