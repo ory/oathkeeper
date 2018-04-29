@@ -89,18 +89,18 @@ func TestProxy(t *testing.T) {
 	ruleNoOpAuthenticator := rule.Rule{
 		Match:          rule.RuleMatch{Methods: []string{"GET"}, URL: proxy.URL + "/authn-noop/<[0-9]+>"},
 		Authenticators: []rule.RuleHandler{{Handler: "noop"}},
-		Upstream:       &rule.Upstream{URL: backend.URL},
+		Upstream:       rule.Upstream{URL: backend.URL},
 	}
 	ruleNoOpAuthenticatorModifyUpstream := rule.Rule{
 		Match:          rule.RuleMatch{Methods: []string{"GET"}, URL: proxy.URL + "/strip-path/authn-noop/<[0-9]+>"},
 		Authenticators: []rule.RuleHandler{{Handler: "noop"}},
-		Upstream:       &rule.Upstream{URL: backend.URL, StripPath: "/strip-path/", PreserveHost: true},
+		Upstream:       rule.Upstream{URL: backend.URL, StripPath: "/strip-path/", PreserveHost: true},
 	}
 
-	//acceptRuleStripHost := rule.Rule{MatchesMethods: []string{"GET"}, MatchesURLCompiled: mustCompileRegex(t, proxy.URL+"/users/<[0-9]+>"), Mode: "pass_through_accept", Upstream: &rule.Upstream{URLParsed: u, StripPath: "/users/", PreserveHost: true}}
-	//acceptRuleStripHostWithoutTrailing := rule.Rule{MatchesMethods: []string{"GET"}, MatchesURLCompiled: mustCompileRegex(t, proxy.URL+"/users/<[0-9]+>"), Mode: "pass_through_accept", Upstream: &rule.Upstream{URLParsed: u, StripPath: "/users", PreserveHost: true}}
-	//acceptRuleStripHostWithoutTrailing2 := rule.Rule{MatchesMethods: []string{"GET"}, MatchesURLCompiled: mustCompileRegex(t, proxy.URL+"/users/<[0-9]+>"), Mode: "pass_through_accept", Upstream: &rule.Upstream{URLParsed: u, StripPath: "users", PreserveHost: true}}
-	//denyRule := rule.Rule{MatchesMethods: []string{"GET"}, MatchesURLCompiled: mustCompileRegex(t, proxy.URL+"/users/<[0-9]+>"), Mode: "pass_through_deny", Upstream: &rule.Upstream{URLParsed: u}}
+	//acceptRuleStripHost := rule.Rule{MatchesMethods: []string{"GET"}, MatchesURLCompiled: mustCompileRegex(t, proxy.URL+"/users/<[0-9]+>"), Mode: "pass_through_accept", Upstream: rule.Upstream{URLParsed: u, StripPath: "/users/", PreserveHost: true}}
+	//acceptRuleStripHostWithoutTrailing := rule.Rule{MatchesMethods: []string{"GET"}, MatchesURLCompiled: mustCompileRegex(t, proxy.URL+"/users/<[0-9]+>"), Mode: "pass_through_accept", Upstream: rule.Upstream{URLParsed: u, StripPath: "/users", PreserveHost: true}}
+	//acceptRuleStripHostWithoutTrailing2 := rule.Rule{MatchesMethods: []string{"GET"}, MatchesURLCompiled: mustCompileRegex(t, proxy.URL+"/users/<[0-9]+>"), Mode: "pass_through_accept", Upstream: rule.Upstream{URLParsed: u, StripPath: "users", PreserveHost: true}}
+	//denyRule := rule.Rule{MatchesMethods: []string{"GET"}, MatchesURLCompiled: mustCompileRegex(t, proxy.URL+"/users/<[0-9]+>"), Mode: "pass_through_deny", Upstream: rule.Upstream{URLParsed: u}}
 
 	for k, tc := range []struct {
 		url       string
@@ -156,7 +156,7 @@ func TestProxy(t *testing.T) {
 			rules: []rule.Rule{{
 				Match:          rule.RuleMatch{Methods: []string{"GET"}, URL: proxy.URL + "/authn-anon/authz-none/cred-none/<[0-9]+>"},
 				Authenticators: []rule.RuleHandler{{Handler: "anonymous"}},
-				Upstream:       &rule.Upstream{URL: backend.URL},
+				Upstream:       rule.Upstream{URL: backend.URL},
 			}},
 			transform: func(r *http.Request) {
 				r.Header.Add("Authorization", "bearer token")
@@ -170,7 +170,7 @@ func TestProxy(t *testing.T) {
 				Match:          rule.RuleMatch{Methods: []string{"GET"}, URL: proxy.URL + "/authn-anon/authz-allow/cred-none/<[0-9]+>"},
 				Authenticators: []rule.RuleHandler{{Handler: "anonymous"}},
 				Authorizer:     rule.RuleHandler{Handler: "allow"},
-				Upstream:       &rule.Upstream{URL: backend.URL},
+				Upstream:       rule.Upstream{URL: backend.URL},
 			}},
 			code: http.StatusInternalServerError,
 		},
@@ -182,7 +182,7 @@ func TestProxy(t *testing.T) {
 				Authenticators:    []rule.RuleHandler{{Handler: "anonymous"}},
 				Authorizer:        rule.RuleHandler{Handler: "allow"},
 				CredentialsIssuer: rule.RuleHandler{Handler: "noop"},
-				Upstream:          &rule.Upstream{URL: backend.URL},
+				Upstream:          rule.Upstream{URL: backend.URL},
 			}},
 			code: http.StatusOK,
 			messages: []string{
@@ -199,7 +199,7 @@ func TestProxy(t *testing.T) {
 				Authenticators:    []rule.RuleHandler{{Handler: "anonymous"}},
 				Authorizer:        rule.RuleHandler{Handler: "deny"},
 				CredentialsIssuer: rule.RuleHandler{Handler: "noop"},
-				Upstream:          &rule.Upstream{URL: backend.URL},
+				Upstream:          rule.Upstream{URL: backend.URL},
 			}},
 			code: http.StatusForbidden,
 		},
@@ -209,7 +209,7 @@ func TestProxy(t *testing.T) {
 			rules: []rule.Rule{{
 				Match:          rule.RuleMatch{Methods: []string{"GET"}, URL: proxy.URL + "/authn-broken/authz-none/cred-none/<[0-9]+>"},
 				Authenticators: []rule.RuleHandler{{Handler: "broken"}},
-				Upstream:       &rule.Upstream{URL: backend.URL},
+				Upstream:       rule.Upstream{URL: backend.URL},
 			}},
 			code: http.StatusUnauthorized,
 		},
@@ -221,7 +221,7 @@ func TestProxy(t *testing.T) {
 				Authenticators:    []rule.RuleHandler{{Handler: "anonymous"}},
 				Authorizer:        rule.RuleHandler{Handler: "allow"},
 				CredentialsIssuer: rule.RuleHandler{Handler: "broken"},
-				Upstream:          &rule.Upstream{URL: backend.URL},
+				Upstream:          rule.Upstream{URL: backend.URL},
 			}},
 			code: http.StatusInternalServerError,
 		},
@@ -266,49 +266,49 @@ func TestConfigureBackendURL(t *testing.T) {
 	}{
 		{
 			r:     &http.Request{Host: "localhost", URL: &url.URL{Path: "/api/users/1234", Scheme: "http"}},
-			rl:    &rule.Rule{Upstream: &rule.Upstream{URL: "http://localhost/"}},
+			rl:    &rule.Rule{Upstream: rule.Upstream{URL: "http://localhost/"}},
 			eURL:  "http://localhost/api/users/1234",
 			eHost: "localhost",
 		},
 		{
 			r:     &http.Request{Host: "localhost:3000", URL: &url.URL{Path: "/api/users/1234", Scheme: "http"}},
-			rl:    &rule.Rule{Upstream: &rule.Upstream{URL: "http://localhost:4000/", PreserveHost: true}},
+			rl:    &rule.Rule{Upstream: rule.Upstream{URL: "http://localhost:4000/", PreserveHost: true}},
 			eURL:  "http://localhost:4000/api/users/1234",
 			eHost: "localhost:3000",
 		},
 		{
 			r:     &http.Request{Host: "localhost:3000", URL: &url.URL{Path: "/api/users/1234", Scheme: "http"}},
-			rl:    &rule.Rule{Upstream: &rule.Upstream{URL: "http://localhost:4000/", PreserveHost: true, StripPath: "/api/"}},
+			rl:    &rule.Rule{Upstream: rule.Upstream{URL: "http://localhost:4000/", PreserveHost: true, StripPath: "/api/"}},
 			eURL:  "http://localhost:4000/users/1234",
 			eHost: "localhost:3000",
 		},
 		{
 			r:     &http.Request{Host: "localhost:3000", URL: &url.URL{Path: "/api/users/1234", Scheme: "http"}},
-			rl:    &rule.Rule{Upstream: &rule.Upstream{URL: "http://localhost:4000/", PreserveHost: true, StripPath: "api/"}},
+			rl:    &rule.Rule{Upstream: rule.Upstream{URL: "http://localhost:4000/", PreserveHost: true, StripPath: "api/"}},
 			eURL:  "http://localhost:4000/users/1234",
 			eHost: "localhost:3000",
 		},
 		{
 			r:     &http.Request{Host: "localhost:3000", URL: &url.URL{Path: "/api/users/1234", Scheme: "http"}},
-			rl:    &rule.Rule{Upstream: &rule.Upstream{URL: "http://localhost:4000/", PreserveHost: true, StripPath: "/api"}},
+			rl:    &rule.Rule{Upstream: rule.Upstream{URL: "http://localhost:4000/", PreserveHost: true, StripPath: "/api"}},
 			eURL:  "http://localhost:4000/users/1234",
 			eHost: "localhost:3000",
 		},
 		{
 			r:     &http.Request{Host: "localhost:3000", URL: &url.URL{Path: "/api/users/1234", Scheme: "http"}},
-			rl:    &rule.Rule{Upstream: &rule.Upstream{URL: "http://localhost:4000/", PreserveHost: true, StripPath: "api"}},
+			rl:    &rule.Rule{Upstream: rule.Upstream{URL: "http://localhost:4000/", PreserveHost: true, StripPath: "api"}},
 			eURL:  "http://localhost:4000/users/1234",
 			eHost: "localhost:3000",
 		},
 		{
 			r:     &http.Request{Host: "localhost:3000", URL: &url.URL{Path: "/api/users/1234", Scheme: "http"}},
-			rl:    &rule.Rule{Upstream: &rule.Upstream{URL: "http://localhost:4000/foo/", PreserveHost: true, StripPath: "api"}},
+			rl:    &rule.Rule{Upstream: rule.Upstream{URL: "http://localhost:4000/foo/", PreserveHost: true, StripPath: "api"}},
 			eURL:  "http://localhost:4000/foo/users/1234",
 			eHost: "localhost:3000",
 		},
 		{
 			r:     &http.Request{Host: "localhost:3000", URL: &url.URL{Path: "/api/users/1234", Scheme: "http"}},
-			rl:    &rule.Rule{Upstream: &rule.Upstream{URL: "http://localhost:4000/foo/", PreserveHost: true, StripPath: "api"}},
+			rl:    &rule.Rule{Upstream: rule.Upstream{URL: "http://localhost:4000/foo/", PreserveHost: true, StripPath: "api"}},
 			eURL:  "http://localhost:4000/foo/users/1234",
 			eHost: "localhost:3000",
 		},
@@ -349,10 +349,10 @@ func TestConfigureBackendURL(t *testing.T) {
 //
 //	jt := &JurorPassThrough{L: logrus.New()}
 //	matcher := &rule.CachedMatcher{Rules: map[string]rule.Rule{
-//		"A": {MatchesMethods: []string{"GET"}, MatchesURLCompiled: panicCompileRegex(p.URL + "/users"), Mode: jt.GetID(), Upstream: &rule.Upstream{URLParsed: u}},
-//		"B": {MatchesMethods: []string{"GET"}, MatchesURLCompiled: panicCompileRegex(p.URL + "/users/<[0-9]+>"), Mode: jt.GetID(), Upstream: &rule.Upstream{URLParsed: u}},
-//		"C": {MatchesMethods: []string{"GET"}, MatchesURLCompiled: panicCompileRegex(p.URL + "/<[0-9]+>"), Mode: jt.GetID(), Upstream: &rule.Upstream{URLParsed: u}},
-//		"D": {MatchesMethods: []string{"GET"}, MatchesURLCompiled: panicCompileRegex(p.URL + "/other/<.+>"), Mode: jt.GetID(), Upstream: &rule.Upstream{URLParsed: u}},
+//		"A": {MatchesMethods: []string{"GET"}, MatchesURLCompiled: panicCompileRegex(p.URL + "/users"), Mode: jt.GetID(), Upstream: rule.Upstream{URLParsed: u}},
+//		"B": {MatchesMethods: []string{"GET"}, MatchesURLCompiled: panicCompileRegex(p.URL + "/users/<[0-9]+>"), Mode: jt.GetID(), Upstream: rule.Upstream{URLParsed: u}},
+//		"C": {MatchesMethods: []string{"GET"}, MatchesURLCompiled: panicCompileRegex(p.URL + "/<[0-9]+>"), Mode: jt.GetID(), Upstream: rule.Upstream{URLParsed: u}},
+//		"D": {MatchesMethods: []string{"GET"}, MatchesURLCompiled: panicCompileRegex(p.URL + "/other/<.+>"), Mode: jt.GetID(), Upstream: rule.Upstream{URLParsed: u}},
 //	}}
 //	d.Judge = NewRequestHandler(logger, matcher, "", []Juror{jt})
 //

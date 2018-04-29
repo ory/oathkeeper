@@ -48,38 +48,8 @@ func TestManagers(t *testing.T) {
 	}
 
 	for k, manager := range managers {
-		r1 := Rule{
-			ID: "foo1",
-			Match: RuleMatch{
-				URL:     "https://localhost:1234/<foo|bar>",
-				Methods: []string{"POST"},
-			},
-			Description:       "Create users rule",
-			Authorizer:        RuleHandler{Handler: "allow", Config: []byte(`{ "type": "any" }`)},
-			Authenticators:    []RuleHandler{{Handler: "anonymous", Config: []byte(`{ "name": "anonymous1" }`)}},
-			CredentialsIssuer: RuleHandler{Handler: "id_token", Config: []byte(`{ "issuer": "anything" }`)},
-			Upstream: &Upstream{
-				URL:          "http://localhost:1235/",
-				StripPath:    "/bar",
-				PreserveHost: true,
-			},
-		}
-		r2 := Rule{
-			ID: "foo2",
-			Match: RuleMatch{
-				URL:     "https://localhost:34/<baz|bar>",
-				Methods: []string{"GET"},
-			},
-			Description:       "Get users rule",
-			Authorizer:        RuleHandler{Handler: "deny", Config: []byte(`{ "type": "any" }`)},
-			Authenticators:    []RuleHandler{{Handler: "oauth2_introspection", Config: []byte(`{ "name": "anonymous1" }`)}},
-			CredentialsIssuer: RuleHandler{Handler: "id_token", Config: []byte(`{ "issuer": "anything" }`)},
-			Upstream: &Upstream{
-				URL:          "http://localhost:333/",
-				StripPath:    "/foo",
-				PreserveHost: false,
-			},
-		}
+		r1 := testRules[0]
+		r2 := testRules[1]
 
 		t.Run("case="+k, func(t *testing.T) {
 			_, err := manager.GetRule("1")

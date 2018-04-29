@@ -94,7 +94,7 @@ type Rule struct {
 	CredentialsIssuer RuleHandler `json:"credentials_issuer" db:"credentials_issuer"`
 
 	// Upstream is the location of the server where requests matching this rule should be forwarded to.
-	Upstream *Upstream `json:"upstream" db:"upstream"`
+	Upstream Upstream `json:"upstream" db:"upstream"`
 }
 
 func NewRule() *Rule {

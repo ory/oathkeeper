@@ -67,7 +67,7 @@ HTTP CONTROLS
 
 		keyManager := &rsakey.HydraManager{
 			SDK: sdk,
-			Set: viper.GetString("HYDRA_JWK_SET_ID"),
+			Set: viper.GetString("CREDENTIALS_ISSUER_ID_TOKEN_HYDRA_JWK_SET_ID"),
 		}
 
 		writer := herodot.NewJSONWriter(logger)

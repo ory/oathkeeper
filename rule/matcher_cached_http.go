@@ -23,6 +23,7 @@ package rule
 import (
 	"net/http"
 
+	"fmt"
 	"github.com/ory/oathkeeper/pkg"
 	"github.com/ory/oathkeeper/sdk/go/oathkeeper"
 	"github.com/pkg/errors"
@@ -44,6 +45,7 @@ func NewHTTPMatcher(o oathkeeper.SDK) *HTTPMatcher {
 
 func (m *HTTPMatcher) Refresh() error {
 	rules, response, err := m.O.ListRules(pkg.RulesUpperLimit, 0)
+	fmt.Printf("got %s", response.Payload)
 	if err != nil {
 		return errors.WithStack(err)
 	}
@@ -74,10 +76,10 @@ func (m *HTTPMatcher) Refresh() error {
 			},
 			Authenticators: rh,
 			CredentialsIssuer: RuleHandler{
-				Handler: r.Authorizer.Handler,
-				Config:  []byte(r.Authorizer.Config),
+				Handler: r.CredentialsIssuer.Handler,
+				Config:  []byte(r.CredentialsIssuer.Config),
 			},
-			Upstream: &Upstream{
+			Upstream: Upstream{
 				URL:          r.Upstream.Url,
 				PreserveHost: r.Upstream.PreserveHost,
 				StripPath:    r.Upstream.StripPath,

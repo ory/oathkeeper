@@ -92,7 +92,7 @@ func (r *sqlRule) toRule() (*Rule, error) {
 		Authorizer:        r.Authorizers.toRuleHandler()[0],
 		CredentialsIssuer: r.CredentialsIssuers.toRuleHandler()[0],
 		Description:       r.Description,
-		Upstream: &Upstream{
+		Upstream: Upstream{
 			URL:          r.UpstreamURL,
 			PreserveHost: r.UpstreamPreserveHost,
 			StripPath:    r.UpstreamStripPath,

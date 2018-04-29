@@ -112,7 +112,7 @@ func connectToHydra(t *testing.T) *hydra.CodeGenSDK {
 	if err != nil {
 		log.Fatalf("Could not start resource: %s", err)
 	}
-	pool.MaxWait=time.Minute*2
+	pool.MaxWait = time.Minute * 2
 
 	if err = pool.Retry(func() error {
 		var err error

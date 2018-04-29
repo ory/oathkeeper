@@ -45,7 +45,7 @@ type CredentialsIDToken struct {
 	issuer   string
 }
 
-func NewCredentialsIDToken(
+func NewCredentialsIssuerIDToken(
 	k rsakey.Manager,
 	l logrus.FieldLogger,
 	lifetime time.Duration,

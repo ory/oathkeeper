@@ -28,7 +28,9 @@ import (
 	"net/http/httputil"
 
 	"github.com/meatballhat/negroni-logrus"
+	"github.com/ory/fosite"
 	"github.com/ory/graceful"
+	"github.com/ory/keto/sdk/go/keto"
 	"github.com/ory/metrics-middleware"
 	"github.com/ory/oathkeeper/proxy"
 	"github.com/ory/oathkeeper/rsakey"
@@ -38,6 +40,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/urfave/negroni"
+	"strings"
 )
 
 // proxyCmd represents the proxy command
@@ -95,30 +98,31 @@ OTHER CONTROLS
 	Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
 	Default: RULES_REFRESH_INTERVAL=5s
 
-- JWK_REFRESH_INTERVAL: ORY Oathkeeper stores JSON Web Keys for ID Token signing in memory. This value sets the refresh interval.
+- CREDENTIALS_ISSUER_ID_TOKEN_JWK_REFRESH_INTERVAL: ORY Oathkeeper stores JSON Web Keys for ID Token signing in memory. This value sets the refresh interval.
 	Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
-	Default: JWK_REFRESH_INTERVAL=5m
+	Default: CREDENTIALS_ISSUER_ID_TOKEN_JWK_REFRESH_INTERVAL=5m
 
-- HYDRA_JWK_SET_ID: The JSON Web Key set identifier that will be used to create, store, and retrieve the JSON Web Key from ORY Hydra.
-	Default: HYDRA_JWK_SET_ID=oathkeeper:id-token
+- CREDENTIALS_ISSUER_ID_TOKEN_HYDRA_JWK_SET_ID: The JSON Web Key set identifier that will be used to create, store, and retrieve the JSON Web Key from ORY Hydra.
+	Default: CREDENTIALS_ISSUER_ID_TOKEN_HYDRA_JWK_SET_ID=oathkeeper:id-token
 ` + corsMessage,
 	Run: func(cmd *cobra.Command, args []string) {
-		os := oathkeeper.NewSDK(viper.GetString("OATHKEEPER_API_URL"))
-		sdk := getHydraSDK()
-
-		issuer := viper.GetString("ISSUER_URL")
-		if issuer == "" {
-			logger.Fatalln("Please set the issuer URL using the environment variable ISSUER_URL")
+		oathkeeperSdk := oathkeeper.NewSDK(viper.GetString("OATHKEEPER_API_URL"))
+		hydraSdk := getHydraSDK()
+		ketoSdk, err := keto.NewCodeGenSDK(&keto.Configuration{
+			EndpointURL: viper.GetString("AUTHORIZER_KETO_WARDEN_KETO_URL"),
+		})
+		if err != nil {
+			logger.WithError(err).Fatal("Unable to initialize the ORY Keto SDK")
 		}
 
-		matcher := rule.NewHTTPMatcher(os)
+		matcher := rule.NewHTTPMatcher(oathkeeperSdk)
 		if err := matcher.Refresh(); err != nil {
 			logger.WithError(err).Fatalln("Unable to refresh rules")
 		}
 
 		keyManager := &rsakey.HydraManager{
-			SDK: sdk,
-			Set: viper.GetString("HYDRA_JWK_SET_ID"),
+			SDK: hydraSdk,
+			Set: viper.GetString("CREDENTIALS_ISSUER_ID_TOKEN_HYDRA_JWK_SET_ID"),
 		}
 
 		go refreshRules(matcher, 0)
@@ -127,14 +131,34 @@ OTHER CONTROLS
 		eval := proxy.NewRequestHandler(
 			logger,
 			[]proxy.Authenticator{
-				proxy.NewAuthenticatorAnonymous(viper.GetString("AUTHENTICATOR_ANONYMOUS_USERNAME")),
 				proxy.NewAuthenticatorNoOp(),
+				proxy.NewAuthenticatorAnonymous(viper.GetString("AUTHENTICATOR_ANONYMOUS_USERNAME")),
+				proxy.NewAuthenticatorOAuth2Introspection(
+					viper.GetString("AUTHENTICATOR_OAUTH2_INTROSPECTION_CLIENT_ID"),
+					viper.GetString("AUTHENTICATOR_OAUTH2_INTROSPECTION_CLIENT_SECRET"),
+					viper.GetString("AUTHENTICATOR_OAUTH2_INTROSPECTION_TOKEN_URL"),
+					viper.GetString("AUTHENTICATOR_OAUTH2_INTROSPECTION_INTROSPECT_URL"),
+					strings.Split(viper.GetString("AUTHENTICATOR_OAUTH2_INTROSPECTION_SCOPES"), ","),
+					fosite.WildcardScopeStrategy,
+				),
+				proxy.NewAuthenticatorOAuth2ClientCredentials(
+					viper.GetString("AUTHENTICATOR_OAUTH2_CLIENT_CREDENTIALS_TOKEN_URL"),
+				),
 			},
 			[]proxy.Authorizer{
 				proxy.NewAuthorizerAllow(),
 				proxy.NewAuthorizerDeny(),
+				proxy.NewAuthorizerKetoWarden(ketoSdk),
 			},
-			[]proxy.CredentialsIssuer{},
+			[]proxy.CredentialsIssuer{
+				proxy.NewCredentialsIssuerNoOp(),
+				proxy.NewCredentialsIssuerIDToken(
+					keyManager,
+					logger,
+					viper.GetDuration("CREDENTIALS_ISSUER_ID_TOKEN_LIFESPAN"),
+					viper.GetString("CREDENTIALS_ISSUER_ID_TOKEN_ISSUER"),
+				),
+			},
 		)
 		d := proxy.NewProxy(eval, logger, matcher)
 		handler := &httputil.ReverseProxy{

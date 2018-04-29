@@ -26,11 +26,11 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	"github.com/ory/oathkeeper/sdk/go/oathkeeper"
-	"github.com/spf13/cobra"
 	"bytes"
 	"github.com/ory/oathkeeper/rule"
+	"github.com/ory/oathkeeper/sdk/go/oathkeeper"
 	"github.com/ory/oathkeeper/sdk/go/oathkeeper/swagger"
+	"github.com/spf13/cobra"
 )
 
 // importCmd represents the import command
@@ -79,7 +79,7 @@ Usage example:
 			for k, authn := range r.Authenticators {
 				rh[k] = swagger.RuleHandler{
 					Handler: authn.Handler,
-					Config:  string(authn.Config),
+					Config:  []byte(authn.Config),
 				}
 			}
 
@@ -89,12 +89,12 @@ Usage example:
 				Match:       swagger.RuleMatch{Methods: r.Match.Methods, Url: r.Match.URL},
 				Authorizer: swagger.RuleHandler{
 					Handler: r.Authorizer.Handler,
-					Config:  string(r.Authorizer.Config),
+					Config:  []byte(r.Authorizer.Config),
 				},
 				Authenticators: rh,
 				CredentialsIssuer: swagger.RuleHandler{
-					Handler: r.Authorizer.Handler,
-					Config:  string(r.Authorizer.Config),
+					Handler: r.CredentialsIssuer.Handler,
+					Config:  []byte(r.CredentialsIssuer.Config),
 				},
 				Upstream: swagger.Upstream{
 					Url:          r.Upstream.URL,

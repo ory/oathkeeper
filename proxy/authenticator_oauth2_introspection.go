@@ -82,6 +82,10 @@ func (a *AuthenticatorOAuth2Introspection) Authenticate(r *http.Request, config 
 		}
 	}
 
+	if len(ir.Extra) == 0 {
+		ir.Extra = map[string]interface{}{}
+	}
+
 	ir.Extra["username"] = ir.Username
 	ir.Extra["client_id"] = ir.ClientID
 	ir.Extra["scope"] = ir.Scope

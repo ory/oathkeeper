@@ -34,10 +34,10 @@ import (
 
 func getHydraSDK() hydra.SDK {
 	sdk, err := hydra.NewSDK(&hydra.Configuration{
-		ClientID:     viper.GetString("HYDRA_CLIENT_ID"),
-		ClientSecret: viper.GetString("HYDRA_CLIENT_SECRET"),
-		EndpointURL:  viper.GetString("HYDRA_URL"),
-		Scopes:       strings.Split(viper.GetString("HYDRA_CLIENT_SCOPES"), ","),
+		ClientID:     viper.GetString("CREDENTIALS_ISSUER_ID_TOKEN_HYDRA_CLIENT_ID"),
+		ClientSecret: viper.GetString("CREDENTIALS_ISSUER_ID_TOKEN_HYDRA_CLIENT_SECRET"),
+		EndpointURL:  viper.GetString("CREDENTIALS_ISSUER_ID_TOKEN_HYDRA_URL"),
+		Scopes:       strings.Split(viper.GetString("CREDENTIALS_ISSUER_ID_TOKEN_HYDRA_CLIENT_SCOPES"), ","),
 	})
 
 	if err != nil {
@@ -70,7 +70,7 @@ func refreshRules(m rule.Refresher, fails int) {
 }
 
 func refreshKeys(k rsakey.Manager, fails int) {
-	duration, _ := time.ParseDuration(viper.GetString("JWK_REFRESH_INTERVAL"))
+	duration, _ := time.ParseDuration(viper.GetString("CREDENTIALS_ISSUER_ID_TOKEN_JWK_REFRESH_INTERVAL"))
 	if duration == 0 {
 		duration = time.Minute * 5
 	}
