@@ -22,6 +22,7 @@ package cmd
 
 import (
 	"runtime"
+	"strings"
 	"time"
 
 	"net/url"
@@ -31,8 +32,28 @@ import (
 	"github.com/pkg/errors"
 )
 
-func connectToSql(url string) (*sqlx.DB, error) {
-	db, err := sqlx.Open("postgres", url)
+func cleanURLQuery(c *url.URL) *url.URL {
+	cleanurl := new(url.URL)
+	*cleanurl = *c
+
+	q := cleanurl.Query()
+	q.Del("max_conns")
+	q.Del("max_idle_conns")
+	q.Del("max_conn_lifetime")
+
+	cleanurl.RawQuery = q.Encode()
+	return cleanurl
+}
+
+func connectToSql(url *url.URL) (*sqlx.DB, error) {
+	clean := cleanURLQuery(url)
+	u := clean.String()
+
+	if clean.Scheme == "mysql" {
+		u = strings.Replace(u, "mysql://", "", -1)
+	}
+
+	db, err := sqlx.Open(clean.Scheme, u)
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
@@ -69,7 +90,8 @@ func newRuleManager(db string) (rule.Manager, error) {
 
 	switch u.Scheme {
 	case "postgres":
-		db, err := connectToSql(db)
+	case "mysql":
+		db, err := connectToSql(u)
 		if err != nil {
 			return nil, errors.WithStack(err)
 		}
