@@ -54,6 +54,10 @@ environment variable.
 Most notably, the `BACKEND_URL` environment variable was deprecated. Instead, rules define their upstream server themselves,
 allowing for simple routing using this software.
 
+#### `migrate`
+
+Command `migrate` is now called `migrate sql`.
+
 ### Not compatible with ORY Hydra < 1.0.0
 
 This release is not compatible with ORY Hydra versions < 1.0.0. Instead, it relies on a combination of ORY Hydra
