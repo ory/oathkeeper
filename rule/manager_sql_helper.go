@@ -62,9 +62,6 @@ func (s sqlRuleHandlers) toRuleHandler() []RuleHandler {
 }
 
 func (r *sqlRule) toRule() (*Rule, error) {
-
-	fmt.Printf("%+v", r)
-
 	methods := []string{}
 	if len(r.MatchesMethods) > 0 {
 		methods = strings.Split(r.MatchesMethods, " ")
