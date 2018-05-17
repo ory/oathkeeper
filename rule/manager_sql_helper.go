@@ -54,7 +54,7 @@ func (s sqlRuleHandlers) toRuleHandler() []RuleHandler {
 	rh := make([]RuleHandler, len(s))
 	for k, v := range s {
 		config := v.Config
-		if config == "" {
+		if len(config) == 0 {
 			config = "{}"
 		}
 		rh[k] = RuleHandler{
@@ -105,7 +105,7 @@ func toSqlRuleHandler(rs []RuleHandler, rule string) sqlRuleHandlers {
 	srh := make([]sqlRuleHandler, len(rs))
 	for k, v := range rs {
 		config := string(v.Config)
-		if config == "" {
+		if len(config) == 0 {
 			config = "{}"
 		}
 

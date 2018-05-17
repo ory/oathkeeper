@@ -50,6 +50,7 @@ func TestManagers(t *testing.T) {
 	for k, manager := range managers {
 		r1 := testRules[0]
 		r2 := testRules[1]
+		r3 := testRules[2]
 
 		t.Run("case="+k, func(t *testing.T) {
 			_, err := manager.GetRule("1")
@@ -57,6 +58,7 @@ func TestManagers(t *testing.T) {
 
 			require.NoError(t, manager.CreateRule(&r1))
 			require.NoError(t, manager.CreateRule(&r2))
+			require.NoError(t, manager.CreateRule(&r3))
 
 			result, err := manager.GetRule(r1.ID)
 			require.NoError(t, err)
@@ -66,9 +68,20 @@ func TestManagers(t *testing.T) {
 			require.NoError(t, err)
 			assert.EqualValues(t, &r2, result)
 
+			result, err = manager.GetRule(r3.ID)
+			require.NoError(t, err)
+			// this makes sure that the conversion worked properly
+			if string(r3.Authorizer.Config) == "{}" {
+				r3.Authorizer.Config=nil
+			}
+			if string(r3.CredentialsIssuer.Config) == "{}" {
+				r3.CredentialsIssuer.Config=nil
+			}
+			assert.EqualValues(t, &r3, result)
+
 			results, err := manager.ListRules(pkg.RulesUpperLimit, 0)
 			require.NoError(t, err)
-			assert.Len(t, results, 2)
+			assert.Len(t, results, 3)
 			assert.True(t, results[0].ID != results[1].ID)
 
 			r1.Authorizer = RuleHandler{Handler: "allow", Config: []byte(`{ "type": "some" }`)}
@@ -86,7 +99,7 @@ func TestManagers(t *testing.T) {
 
 			results, err = manager.ListRules(pkg.RulesUpperLimit, 0)
 			require.NoError(t, err)
-			assert.Len(t, results, 1)
+			assert.Len(t, results, 2)
 			assert.True(t, results[0].ID != r1.ID)
 		})
 	}

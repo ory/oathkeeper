@@ -66,6 +66,22 @@ var testRules = []Rule{
 			PreserveHost: false,
 		},
 	},
+	{
+		ID: "foo3",
+		Match: RuleMatch{
+			URL:     "https://localhost:343/<baz|bar>",
+			Methods: []string{"GET"},
+		},
+		Description:       "Get users rule",
+		Authorizer:        RuleHandler{Handler: "deny"},
+		Authenticators:    []RuleHandler{{Handler: "oauth2_introspection"}},
+		CredentialsIssuer: RuleHandler{Handler: "id_token"},
+		Upstream: Upstream{
+			URL:          "http://localhost:3333/",
+			StripPath:    "/foo",
+			PreserveHost: false,
+		},
+	},
 }
 
 func mustParseURL(t *testing.T, u string) *url.URL {
