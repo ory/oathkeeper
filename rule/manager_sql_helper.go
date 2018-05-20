@@ -74,13 +74,13 @@ func (r *sqlRule) toRule() (*Rule, error) {
 	if len(r.Authorizers) > 1 {
 		return nil, errors.New("Expected at most one oathkeeper_rule_authorizer row, but found none")
 	} else if len(r.Authorizers) == 0 {
-		r.Authorizers = []sqlRuleHandler{{Config:"{}"}}
+		r.Authorizers = []sqlRuleHandler{{Config: "{}"}}
 	}
 
 	if len(r.CredentialsIssuers) > 1 {
 		return nil, errors.New("Expected at most one oathkeeper_rule_credentials_issuer row, but found none")
 	} else if len(r.CredentialsIssuers) == 0 {
-		r.CredentialsIssuers = []sqlRuleHandler{{Config:"{}"}}
+		r.CredentialsIssuers = []sqlRuleHandler{{Config: "{}"}}
 	}
 
 	return &Rule{

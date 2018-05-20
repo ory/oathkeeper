@@ -72,10 +72,10 @@ func TestManagers(t *testing.T) {
 			require.NoError(t, err)
 			// this makes sure that the conversion worked properly
 			if string(r3.Authorizer.Config) == "{}" {
-				r3.Authorizer.Config=nil
+				r3.Authorizer.Config = nil
 			}
 			if string(r3.CredentialsIssuer.Config) == "{}" {
-				r3.CredentialsIssuer.Config=nil
+				r3.CredentialsIssuer.Config = nil
 			}
 			assert.EqualValues(t, &r3, result)
 
