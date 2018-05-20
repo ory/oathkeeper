@@ -11,6 +11,7 @@ before finalizing the upgrade process.
 - [0.1.0](#010)
   - [Changes to the CLI](#changes-to-the-cli)
   - [Not compatible with ORY Hydra < 1.0.0](#not-compatible-with-ory-hydra--100)
+- [0.11.12](#01112)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -62,3 +63,8 @@ Command `migrate` is now called `migrate sql`.
 
 This release is not compatible with ORY Hydra versions < 1.0.0. Instead, it relies on a combination of ORY Hydra
 and ORY Keto to provide the same functionality as before.
+
+## 0.11.12
+
+This release adds no breaking changes but brings this version up to speed with the latest version of ORY Hydra
+that Oathkeeper works with.
