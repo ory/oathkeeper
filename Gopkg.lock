@@ -271,7 +271,7 @@
     "sdk/go/keto",
     "sdk/go/keto/swagger"
   ]
-  revision = "686a4419f7c6c48f12ff997128891db34f9898c2"
+  revision = "70b12adf5bcc0e890d6707e11e891e6cedfb3d87"
 
 [[projects]]
   name = "github.com/ory/ladon"
