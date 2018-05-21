@@ -34,10 +34,10 @@ import (
 
 func getHydraSDK() hydra.SDK {
 	sdk, err := hydra.NewSDK(&hydra.Configuration{
-		ClientID:     viper.GetString("HYDRA_CLIENT_ID"),
-		ClientSecret: viper.GetString("HYDRA_CLIENT_SECRET"),
-		EndpointURL:  viper.GetString("HYDRA_URL"),
-		Scopes:       []string{"hydra.introspect", "hydra.warden", "hydra.keys.*"},
+		ClientID:     viper.GetString("CREDENTIALS_ISSUER_ID_TOKEN_HYDRA_CLIENT_ID"),
+		ClientSecret: viper.GetString("CREDENTIALS_ISSUER_ID_TOKEN_HYDRA_CLIENT_SECRET"),
+		EndpointURL:  viper.GetString("CREDENTIALS_ISSUER_ID_TOKEN_HYDRA_URL"),
+		Scopes:       strings.Split(viper.GetString("CREDENTIALS_ISSUER_ID_TOKEN_HYDRA_CLIENT_SCOPES"), ","),
 	})
 
 	if err != nil {
@@ -47,7 +47,7 @@ func getHydraSDK() hydra.SDK {
 	return sdk
 }
 
-func refreshRules(c *proxyConfig, m *rule.CachedMatcher, fails int) {
+func refreshRules(m rule.Refresher, fails int) {
 	duration, _ := time.ParseDuration(viper.GetString("RULES_REFRESH_INTERVAL"))
 	if duration == 0 {
 		duration = time.Second * 30
@@ -60,17 +60,17 @@ func refreshRules(c *proxyConfig, m *rule.CachedMatcher, fails int) {
 		}
 
 		time.Sleep(time.Second * time.Duration(fails+1))
-		refreshRules(c, m, fails+1)
+		refreshRules(m, fails+1)
 		return
 	}
 
 	time.Sleep(duration)
 
-	refreshRules(c, m, 0)
+	refreshRules(m, 0)
 }
 
 func refreshKeys(k rsakey.Manager, fails int) {
-	duration, _ := time.ParseDuration(viper.GetString("JWK_REFRESH_INTERVAL"))
+	duration, _ := time.ParseDuration(viper.GetString("CREDENTIALS_ISSUER_ID_TOKEN_JWK_REFRESH_INTERVAL"))
 	if duration == 0 {
 		duration = time.Minute * 5
 	}

@@ -25,7 +25,7 @@ import (
 
 	"fmt"
 
-	"github.com/ory/oathkeeper/sdk/go/oathkeepersdk"
+	"github.com/ory/oathkeeper/sdk/go/oathkeeper"
 	"github.com/spf13/cobra"
 )
 
@@ -45,7 +45,7 @@ var getCmd = &cobra.Command{
 			fatalf("Please specify the rule id, for more information use `oathkeeper help rules get`")
 		}
 
-		client := oathkeepersdk.NewSDK(endpoint)
+		client := oathkeeper.NewSDK(endpoint)
 		rule, response, err := client.GetRule(args[0])
 		checkResponse(response, err, http.StatusOK)
 		fmt.Println(formatResponse(rule))

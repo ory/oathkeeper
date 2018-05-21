@@ -1,0 +1,62 @@
+/*
+ * Copyright © 2017-2018 Aeneas Rekkas <aeneas+oss@aeneas.io>
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * @author       Aeneas Rekkas <aeneas+oss@aeneas.io>
+ * @copyright  2017-2018 Aeneas Rekkas <aeneas+oss@aeneas.io>
+ * @license  	   Apache-2.0
+ */
+
+package proxy
+
+import (
+	"encoding/json"
+	"net/http"
+	"strings"
+	"testing"
+	"time"
+
+	"github.com/dgrijalva/jwt-go"
+	"github.com/go-errors/errors"
+	"github.com/ory/oathkeeper/rsakey"
+	"github.com/sirupsen/logrus"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+)
+
+func TestCredentialsIssuerIDToken(t *testing.T) {
+	k := &rsakey.LocalManager{KeyStrength: 512}
+	b := NewCredentialsIssuerIDToken(k, logrus.New(), time.Hour, "some-issuer")
+
+	assert.NotNil(t, b)
+	assert.NotEmpty(t, b.GetID())
+
+	r := &http.Request{Header: http.Header{}}
+	s := &AuthenticationSession{Subject: "foo"}
+	require.NoError(t, b.Issue(r, s, json.RawMessage([]byte(`{ "aud": ["foo", "bar"] }`)), nil))
+
+	generated := strings.Replace(r.Header.Get("Authorization"), "Bearer ", "", 1)
+	token, err := jwt.ParseWithClaims(generated, new(Claims), func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodRSA); !ok {
+			return nil, errors.Errorf("Unexpected signing method: %v", token.Header["alg"])
+		}
+
+		return k.PublicKey()
+	})
+	require.NoError(t, err)
+
+	claims := token.Claims.(*Claims)
+	assert.Equal(t, "foo", claims.Subject)
+	assert.Equal(t, []string{"foo", "bar"}, claims.Audience)
+}

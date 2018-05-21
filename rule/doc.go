@@ -33,7 +33,7 @@ package rule
 // swagger:response rule
 type swaggerRuleResponse struct {
 	// in: body
-	Body jsonRule
+	Body swaggerRule
 }
 
 // A list of rules
@@ -41,7 +41,7 @@ type swaggerRuleResponse struct {
 type swaggerRulesResponse struct {
 	// in: body
 	// type: array
-	Body []jsonRule
+	Body []swaggerRule
 }
 
 // swagger:parameters getRule deleteRule
@@ -51,6 +51,17 @@ type swaggerGetRuleParameters struct {
 	ID string `json:"id"`
 }
 
+// swagger:parameters listRules
+type swaggerListRulesParameters struct {
+	// The maximum amount of rules returned.
+	// in: query
+	Limit int `json:"limit"`
+
+	// The offset from where to start looking.
+	// in: query
+	Offset int `json:"offset"`
+}
+
 // swagger:parameters updateRule
 type swaggerUpdateRuleParameters struct {
 	// in: path
@@ -58,30 +69,22 @@ type swaggerUpdateRuleParameters struct {
 	ID string `json:"id"`
 
 	// in: body
-	Body jsonRule
+	Body swaggerRule
 }
 
 // swagger:parameters createRule
 type swaggerCreateRuleParameters struct {
 	// in: body
-	Body jsonRule
+	Body swaggerRule
 }
 
-// A rule
-// swagger:model rule
-type jsonRule struct {
-	// The ID is the unique id of the rule. It can be at most 190 characters long, but the layout of the ID is up to you.
-	// You will need this ID later on to update or delete the rule.
-	ID string `json:"id" db:"id"`
-
-	// A human readable description of this rule.
-	Description string `json:"description"`
-
+// swagger:model ruleMatch
+type swaggerRuleMatch struct {
 	// An array of HTTP methods (e.g. GET, POST, PUT, DELETE, ...). When ORY Oathkeeper searches for rules
 	// to decide what to do with an incoming request to the proxy server, it compares the HTTP method of the incoming
 	// request with the HTTP methods of each rules. If a match is found, the rule is considered a partial match.
 	// If the matchesUrl field is satisfied as well, the rule is considered a full match.
-	MatchesMethods []string `json:"matchesMethods"`
+	Methods []string `json:"methods"`
 
 	// This field represents the URL pattern this rule matches. When ORY Oathkeeper searches for rules
 	// to decide what to do with an incoming request to the proxy server, it compares the full request URL
@@ -93,32 +96,49 @@ type jsonRule struct {
 	// brackets < and >. The following example matches all paths of the domain `mydomain.com`: `https://mydomain.com/<.*>`.
 	//
 	// For more information refer to: https://ory.gitbooks.io/oathkeeper/content/concepts.html#rules
-	MatchesURL string `json:"matchesUrl"`
+	URL string `json:"url"`
+}
 
-	// An array of OAuth 2.0 scopes that are required when accessing an endpoint protected by this rule.
-	// If the token used in the Authorization header did not request that specific scope, the request is denied.
-	RequiredScopes []string `json:"requiredScopes"`
+// swagger:model ruleHandler
+type swaggerRuleHandler struct {
+	// Handler identifies the implementation which will be used to handle this specific request. Please read the user
+	// guide for a complete list of available handlers.
+	Handler string `json:"handler"`
 
-	// Defines which mode this rule should use. There are four valid modes:
+	// Config contains the configuration for the handler. Please read the user
+	// guide for a complete list of each handler's available settings.
+	Config string `json:"config"`
+}
+
+// swaggerRule is a single rule that will get checked on every HTTP request.
+// swagger:model rule
+type swaggerRule struct {
+	// ID is the unique id of the rule. It can be at most 190 characters long, but the layout of the ID is up to you.
+	// You will need this ID later on to update or delete the rule.
+	ID string `json:"id" db:"surrogate_id"`
+
+	// Description is a human readable description of this rule.
+	Description string `json:"description"`
+
+	// Match defines the URL that this rule should match.
+	Match swaggerRuleMatch `json:"match"`
+
+	// Authenticators is a list of authentication handlers that will try and authenticate the provided credentials.
+	// Authenticators are checked iteratively from index 0 to n and if the first authenticator to return a positive
+	// result will be the one used.
 	//
-	// - bypass: If set, any authorization logic is completely disabled and the Authorization header is not changed at all.
-	// 		This is useful if you have an endpoint that has it's own authorization logic, for example using basic authorization.
-	// 		If set to true, this setting overrides `basicAuthorizationModeEnabled` and `allowAnonymousModeEnabled`.
-	// - anonymous: If set, the protected endpoint is available to anonymous users. That means that the endpoint is accessible
-	// 		without having a valid access token. This setting overrides `basicAuthorizationModeEnabled`.
-	// - token: If set, disables checks against ORY Hydra's Warden API and uses basic authorization. This means that
-	// 		the access token is validated (e.g. checking if it is expired, check if it claimed the necessary scopes)
-	// 		but does not use the `requiredAction` and `requiredResource` fields for advanced access control.
-	// - policy: If set, uses ORY Hydra's Warden API for access control using access control policies.
-	Mode string `json:"mode"`
+	// If you want the rule to first check a specific authenticator  before "falling back" to others, have that authenticator
+	// as the first item in the array.
+	Authenticators []swaggerRuleHandler `json:"authenticators"`
 
-	// This field will be used to decide advanced authorization requests where access control policies are used. A
-	// action is typically something a user wants to do (e.g. write, read, delete).
-	// This field supports expansion as described in the developer guide: https://ory.gitbooks.io/oathkeeper/content/concepts.html#rules
-	RequiredAction string `json:"requiredAction"`
+	// Authorizer is the authorization handler which will try to authorize the subject (authenticated using an Authenticator)
+	// making the request.
+	Authorizer swaggerRuleHandler `json:"authorizer"`
 
-	// This field will be used to decide advanced authorization requests where access control policies are used. A
-	// resource is typically something a user wants to access (e.g. printer, article, virtual machine).
-	// This field supports expansion as described in the developer guide: https://ory.gitbooks.io/oathkeeper/content/concepts.html#rules
-	RequiredResource string `json:"requiredResource"`
+	// CredentialsIssuer is the handler which will issue the credentials which will be used when ORY Oathkeeper
+	// forwards a granted request to the upstream server.
+	CredentialsIssuer swaggerRuleHandler `json:"credentials_issuer"`
+
+	// Upstream is the location of the server where requests matching this rule should be forwarded to.
+	Upstream *Upstream `json:"upstream"`
 }

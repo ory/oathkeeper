@@ -25,7 +25,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/ory/oathkeeper/sdk/go/oathkeepersdk/swagger"
+	"github.com/ory/oathkeeper/sdk/go/oathkeeper/swagger"
 )
 
 func checkResponse(response *swagger.APIResponse, err error, expectedStatusCode int) {

@@ -21,72 +21,108 @@
 package rule
 
 import (
-	"fmt"
+	"net/http/httptest"
 	"net/url"
-	"strconv"
 	"testing"
 
-	"github.com/ory/ladon/compiler"
+	"github.com/julienschmidt/httprouter"
+	"github.com/ory/herodot"
+	"github.com/ory/oathkeeper/sdk/go/oathkeeper"
+	"github.com/sirupsen/logrus"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
-var methods = []string{"POST", "PUT", "GET", "DELETE", "PATCH", "OPTIONS", "HEAD"}
-
-func generateDummyRules(amount int) []Rule {
-	rules := make([]Rule, amount)
-	scopes := []string{"foo", "bar", "baz", "faz"}
-	expressions := []string{"/users/", "/users", "/blogs/", "/use<(r)>s/"}
-	resources := []string{"users", "users:$1"}
-	actions := []string{"get", "get:$1"}
-
-	for i := 0; i < amount; i++ {
-		exp, _ := compiler.CompileRegex(expressions[(i%(len(expressions)))]+"([0-"+strconv.Itoa(i)+"]+)", '<', '>')
-		rules[i] = Rule{
-			ID:                 strconv.Itoa(i),
-			MatchesMethods:     methods[:i%(len(methods))],
-			RequiredScopes:     scopes[:i%(len(scopes))],
-			RequiredAction:     actions[i%(len(actions))],
-			RequiredResource:   resources[i%(len(resources))],
-			MatchesURLCompiled: exp,
-		}
-	}
-	return rules
+var testRules = []Rule{
+	{
+		ID: "foo1",
+		Match: RuleMatch{
+			URL:     "https://localhost:1234/<foo|bar>",
+			Methods: []string{"POST"},
+		},
+		Description:       "Create users rule",
+		Authorizer:        RuleHandler{Handler: "allow", Config: []byte(`{"type":"any"}`)},
+		Authenticators:    []RuleHandler{{Handler: "anonymous", Config: []byte(`{"name":"anonymous1"}`)}},
+		CredentialsIssuer: RuleHandler{Handler: "id_token", Config: []byte(`{"issuer":"anything"}`)},
+		Upstream: Upstream{
+			URL:          "http://localhost:1235/",
+			StripPath:    "/bar",
+			PreserveHost: true,
+		},
+	},
+	{
+		ID: "foo2",
+		Match: RuleMatch{
+			URL:     "https://localhost:34/<baz|bar>",
+			Methods: []string{"GET"},
+		},
+		Description:       "Get users rule",
+		Authorizer:        RuleHandler{Handler: "deny", Config: []byte(`{"type":"any"}`)},
+		Authenticators:    []RuleHandler{{Handler: "oauth2_introspection", Config: []byte(`{"name":"anonymous1"}`)}},
+		CredentialsIssuer: RuleHandler{Handler: "id_token", Config: []byte(`{"issuer":"anything"}`)},
+		Upstream: Upstream{
+			URL:          "http://localhost:333/",
+			StripPath:    "/foo",
+			PreserveHost: false,
+		},
+	},
+	{
+		ID: "foo3",
+		Match: RuleMatch{
+			URL:     "https://localhost:343/<baz|bar>",
+			Methods: []string{"GET"},
+		},
+		Description:       "Get users rule",
+		Authorizer:        RuleHandler{Handler: "deny"},
+		Authenticators:    []RuleHandler{{Handler: "oauth2_introspection"}},
+		CredentialsIssuer: RuleHandler{Handler: "id_token"},
+		Upstream: Upstream{
+			URL:          "http://localhost:3333/",
+			StripPath:    "/foo",
+			PreserveHost: false,
+		},
+	},
 }
 
-func generateUrls(amount int) []*url.URL {
-	urls := make([]*url.URL, amount)
-	for i := 0; i < amount; i++ {
-		parsed, _ := url.Parse("/users/" + strconv.Itoa(i))
-		urls[i] = parsed
-	}
-	return urls
+func mustParseURL(t *testing.T, u string) *url.URL {
+	p, err := url.Parse(u)
+	require.NoError(t, err)
+	return p
 }
 
-func cachedRuleMatcherBenchmark(rules int) func(b *testing.B) {
-	return func(b *testing.B) {
-		b.StopTimer()
-		matcher := &CachedMatcher{Rules: generateDummyRules(rules)}
-		urls := generateUrls(10)
-		methodLength := len(methods)
-		urlsLength := len(urls)
-		var matchedRules int
-
-		b.StartTimer()
-		for n := 0; n < b.N; n++ {
-			_, err := matcher.MatchRule(
-				methods[n%methodLength],
-				urls[n%urlsLength],
-			)
-			if err != nil {
-				matchedRules += 1
-			}
-		}
-		b.StopTimer()
-		b.Logf("Received %d rules", matchedRules)
+func TestMatcher(t *testing.T) {
+	manager := NewMemoryManager()
+	handler := &Handler{
+		H: herodot.NewJSONWriter(logrus.New()),
+		M: manager,
 	}
-}
+	router := httprouter.New()
+	handler.SetRoutes(router)
+	server := httptest.NewServer(router)
 
-func BenchmarkCachedRuleMatcher(b *testing.B) {
-	for _, tc := range []int{1, 3, 5, 7, 10, 100, 1000, 10000, 100000, 200000, 300000, 400000} {
-		b.Run(fmt.Sprintf("rules=%d", tc), cachedRuleMatcherBenchmark(tc))
+	for _, tr := range testRules {
+		require.NoError(t, manager.CreateRule(&tr))
+	}
+
+	matchers := map[string]Matcher{
+		"memory": NewCachedMatcher(manager),
+		"http":   NewHTTPMatcher(oathkeeper.NewSDK(server.URL)),
+	}
+
+	for name, matcher := range matchers {
+		t.Run("matcher="+name, func(t *testing.T) {
+			require.NoError(t, matcher.Refresh())
+
+			r, err := matcher.MatchRule("GET", mustParseURL(t, "https://localhost:34/baz"))
+			require.NoError(t, err)
+			assert.EqualValues(t, testRules[1], *r)
+
+			r, err = matcher.MatchRule("POST", mustParseURL(t, "https://localhost:1234/foo"))
+			require.NoError(t, err)
+			assert.EqualValues(t, testRules[0], *r)
+
+			r, err = matcher.MatchRule("DELETE", mustParseURL(t, "https://localhost:1234/foo"))
+			require.Error(t, err)
+		})
 	}
 }

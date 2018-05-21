@@ -23,16 +23,29 @@ package rule
 import (
 	"net/url"
 
+	"sync"
+
 	"github.com/ory/oathkeeper/helper"
+	"github.com/ory/oathkeeper/pkg"
 	"github.com/pkg/errors"
 )
 
 type CachedMatcher struct {
-	Rules   []Rule
+	Rules   map[string]Rule
 	Manager Manager
+	sync.RWMutex
+}
+
+func NewCachedMatcher(m Manager) *CachedMatcher {
+	return &CachedMatcher{
+		Manager: m,
+		Rules:   map[string]Rule{},
+	}
 }
 
 func (m *CachedMatcher) MatchRule(method string, u *url.URL) (*Rule, error) {
+	m.RLock()
+	defer m.RUnlock()
 	var rules []Rule
 	for _, rule := range m.Rules {
 		if err := rule.IsMatching(method, u); err == nil {
@@ -50,11 +63,16 @@ func (m *CachedMatcher) MatchRule(method string, u *url.URL) (*Rule, error) {
 }
 
 func (m *CachedMatcher) Refresh() error {
-	rules, err := m.Manager.ListRules()
+	m.Lock()
+	defer m.Unlock()
+
+	rules, err := m.Manager.ListRules(pkg.RulesUpperLimit, 0)
 	if err != nil {
 		return errors.WithStack(err)
 	}
 
-	m.Rules = rules
+	for _, rule := range rules {
+		m.Rules[rule.ID] = rule
+	}
 	return nil
 }

@@ -21,41 +21,20 @@
 package rule
 
 import (
-	"fmt"
-	"log"
-	"os"
-	"regexp"
 	"testing"
 
-	"github.com/jmoiron/sqlx"
-	"github.com/ory/dockertest"
-	"github.com/ory/ladon/compiler"
+	_ "github.com/go-sql-driver/mysql"
+	_ "github.com/lib/pq"
+	"github.com/ory/oathkeeper/pkg"
+	"github.com/ory/sqlcon/dockertest"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
-var resources []*dockertest.Resource
-var pool = new(dockertest.Pool)
-
-func kjillAll() {
-	for _, resource := range resources {
-		if err := pool.Purge(resource); err != nil {
-			log.Printf("Got an error while trying to purge resource: %s", err)
-		}
-	}
-	resources = []*dockertest.Resource{}
-}
-
-func mustCompileRegex(t *testing.T, pattern string) *regexp.Regexp {
-	exp, err := compiler.CompileRegex(pattern, '<', '>')
-	require.NoError(t, err)
-	return exp
-}
-
 func TestMain(m *testing.M) {
+	ex := dockertest.Register()
 	code := m.Run()
-	kjillAll()
-	os.Exit(code)
+	ex.Exit(code)
 }
 
 func TestManagers(t *testing.T) {
@@ -65,29 +44,13 @@ func TestManagers(t *testing.T) {
 
 	if !testing.Short() {
 		connectToPostgres(t, managers)
+		connectToMySQL(t, managers)
 	}
 
 	for k, manager := range managers {
-
-		r1 := Rule{
-			ID:                 "foo1",
-			Description:        "Create users rule",
-			MatchesURLCompiled: mustCompileRegex(t, "/users/([0-9]+)"),
-			MatchesURL:         "/users/([0-9]+)",
-			MatchesMethods:     []string{"POST"},
-			RequiredResource:   "users:$1",
-			RequiredAction:     "create:$1",
-			RequiredScopes:     []string{"users.create"},
-		}
-		r2 := Rule{
-			ID:                 "foo2",
-			Description:        "Get users rule",
-			MatchesURLCompiled: mustCompileRegex(t, "/users/([0-9]+)"),
-			MatchesURL:         "/users/([0-9]+)",
-			MatchesMethods:     []string{"GET"},
-			Mode:               AnonymousMode,
-			RequiredScopes:     []string{},
-		}
+		r1 := testRules[0]
+		r2 := testRules[1]
+		r3 := testRules[2]
 
 		t.Run("case="+k, func(t *testing.T) {
 			_, err := manager.GetRule("1")
@@ -95,6 +58,7 @@ func TestManagers(t *testing.T) {
 
 			require.NoError(t, manager.CreateRule(&r1))
 			require.NoError(t, manager.CreateRule(&r2))
+			require.NoError(t, manager.CreateRule(&r3))
 
 			result, err := manager.GetRule(r1.ID)
 			require.NoError(t, err)
@@ -104,14 +68,32 @@ func TestManagers(t *testing.T) {
 			require.NoError(t, err)
 			assert.EqualValues(t, &r2, result)
 
-			results, err := manager.ListRules()
+			result, err = manager.GetRule(r3.ID)
 			require.NoError(t, err)
-			assert.Len(t, results, 2)
+			// this makes sure that the conversion worked properly
+			if string(r3.Authorizer.Config) == "{}" {
+				r3.Authorizer.Config = nil
+			}
+			if string(r3.CredentialsIssuer.Config) == "{}" {
+				r3.CredentialsIssuer.Config = nil
+			}
+			for k, an := range r3.Authenticators {
+				if string(an.Config) == "{}" {
+					r3.Authenticators[k].Config = nil
+				}
+			}
+			assert.EqualValues(t, &r3, result)
+
+			results, err := manager.ListRules(pkg.RulesUpperLimit, 0)
+			require.NoError(t, err)
+			assert.Len(t, results, 3)
 			assert.True(t, results[0].ID != results[1].ID)
 
-			r1.RequiredResource = r1.RequiredResource + "abc"
-			r1.RequiredAction = r1.RequiredAction + "abc"
+			r1.Authorizer = RuleHandler{Handler: "allow", Config: []byte(`{ "type": "some" }`)}
+			r1.Authenticators = []RuleHandler{{Handler: "auth_none", Config: []byte(`{ "name": "foo" }`)}}
+			r1.CredentialsIssuer = RuleHandler{Handler: "plain", Config: []byte(`{ "text": "anything" }`)}
 			r1.Description = r1.Description + "abc"
+			r1.Match.Methods = []string{"HEAD"}
 			require.NoError(t, manager.UpdateRule(&r1))
 
 			result, err = manager.GetRule(r1.ID)
@@ -120,16 +102,23 @@ func TestManagers(t *testing.T) {
 
 			require.NoError(t, manager.DeleteRule(r1.ID))
 
-			results, err = manager.ListRules()
+			results, err = manager.ListRules(pkg.RulesUpperLimit, 0)
 			require.NoError(t, err)
-			assert.Len(t, results, 1)
+			assert.Len(t, results, 2)
 			assert.True(t, results[0].ID != r1.ID)
 		})
 	}
 }
 
 func connectToPostgres(t *testing.T, managers map[string]Manager) {
-	s := NewSQLManager(connectToPostgresDB(t))
+	db, err := dockertest.ConnectToTestPostgreSQL()
+	if err != nil {
+		t.Logf("Could not connect to database: %v", err)
+		t.FailNow()
+		return
+	}
+
+	s := NewSQLManager(db)
 	if _, err := s.CreateSchemas(); err != nil {
 		t.Logf("Could not create postgres schema: %v", err)
 		t.FailNow()
@@ -139,40 +128,20 @@ func connectToPostgres(t *testing.T, managers map[string]Manager) {
 	managers["postgres"] = s
 }
 
-func connectToPostgresDB(t *testing.T) *sqlx.DB {
-	var db *sqlx.DB
-	var err error
-	var resource *dockertest.Resource
-
-	url := os.Getenv("PG_URL")
-	if url == "" {
-		pool, err = dockertest.NewPool("")
-		if err != nil {
-			t.Fatalf("Could not connect to docker: %s", err)
-		}
-
-		resource, err = pool.Run("postgres", "9.6", []string{"POSTGRES_PASSWORD=secret", "POSTGRES_DB=oathkeeper"})
-		if err != nil {
-			t.Fatalf("Could not start resource: %s", err)
-		}
-
-		url = fmt.Sprintf("postgres://postgres:secret@localhost:%s/oathkeeper?sslmode=disable", resource.GetPort("5432/tcp"))
-		resources = append(resources, resource)
+func connectToMySQL(t *testing.T, managers map[string]Manager) {
+	db, err := dockertest.ConnectToTestMySQL()
+	if err != nil {
+		t.Logf("Could not connect to database: %v", err)
+		t.FailNow()
+		return
 	}
 
-	if err = pool.Retry(func() error {
-		var err error
-		db, err = sqlx.Open("postgres", url)
-		if err != nil {
-			return err
-		}
-		return db.Ping()
-	}); err != nil {
-		if resource != nil {
-			pool.Purge(resource)
-		}
-		t.Fatalf("Could not connect to docker: %s", err)
+	s := NewSQLManager(db)
+	if _, err := s.CreateSchemas(); err != nil {
+		t.Logf("Could not create postgres schema: %v", err)
+		t.FailNow()
+		return
 	}
 
-	return db
+	managers["mysql"] = s
 }

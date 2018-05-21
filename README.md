@@ -17,11 +17,8 @@ of authenticating and optionally authorizing access requests.
 ORY Oathkeeper is a reverse proxy which evaluates incoming HTTP requests based on a set of rules that are defined
 by administartive users. ORY Oathkeeper is thus capable of:
 
-* Identifying the user and providing the user session in form of a JSON Web Token.
+* Identifying the user and providing the user session to API backends.
 * Restricting access to certain resources based on a set of rules (Authorization).
-
-We plan to generalize this software and make it compatible with Authentication and Authorization providers. For now,
-this proxy integrates best ORY Hydra. Please file an issue if you would like to see your favorite Auth* provider integrated.
 
 This service is under active development and may introduce breaking changes in future releases.
 
@@ -34,9 +31,12 @@ This service is under active development and may introduce breaking changes in f
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 - [Installation](#installation)
+
+- [Installation](#installation)
 - [Ecosystem](#ecosystem)
   - [ORY Security Console: Administrative User Interface](#ory-security-console-administrative-user-interface)
-  - [ORY Hydra](#ory-hydra)
+  - [ORY Hydra: OAuth2 & OpenID Connect Server](#ory-hydra-oauth2-&-openid-connect-server)
+  - [ORY Keto: Access Control Policies as a Server](#ory-keto-access-control-policies-as-a-server)
 - [Security](#security)
   - [Disclosing vulnerabilities](#disclosing-vulnerabilities)
 - [Telemetry](#telemetry)
@@ -65,11 +65,20 @@ docker run oryd/oathkeeper:<version> help
 
 ### ORY Security Console: Administrative User Interface
 
-The [ORY Security Console](https://console.ory.am/auth/login). connects with your existing ORY Hydra and ORY Oathkeeper isntallation and lets you manage and monitor them through an intuitive UI.
+The [ORY Security Console](https://console.ory.am/auth/login) is a visual admin interface for managing ORY Hydra,
+ORY Oathkeeper, and ORY Keto.
 
-### ORY Hydra
+### ORY Hydra: OAuth2 & OpenID Connect Server
 
-ORY Hydra is a hardened OAuth2 and OpenID Connect server optimized for low-latency, high throughput, and low resource consumption. ORY Hydra is not an identity provider (user sign up, user log in, password reset flow), but connects to your existing identity provider through a consent app.
+[ORY Hydra](https://github.com/ory/hydra) ORY Hydra is a hardened OAuth2 and OpenID Connect server optimized
+for low-latency, high throughput, and low resource consumption. ORY Hydra is not an identity provider
+(user sign up, user log in, password reset flow), but connects to your existing identity provider through a consent app.
+
+### ORY Keto: Access Control Policies as a Server
+
+[ORY Keto](https://github.com/ory/keto) is a policy decision point. It uses a set of access control policies, similar
+to AWS IAM Policies, in order to determine whether a subject (user, application, service, car, ...) is authorized to
+perform a certain action on a resource.
 
 ## Security
 
@@ -80,7 +89,8 @@ and send us an email to [hi@ory.am](mailto:hi@ory.am) instead.
 
 ## Telemetry
 
-ORY Oathkeeper collects summarized, anonymized telemetry which can optionally be turned off. Click [here](https://www.ory.sh/docs/1-hydra/0-tutorial/0-readme) to learn more.
+Our services collect summarized, anonymized data which can optionally be turned off. Click
+[here](https://www.ory.sh/docs/guides/latest/9-telemetry) to learn more.
 
 ## Documentation
 

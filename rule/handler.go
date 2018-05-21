@@ -24,12 +24,11 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"strings"
-
 	"github.com/julienschmidt/httprouter"
 	"github.com/ory/herodot"
-	"github.com/ory/ladon/compiler"
 	"github.com/ory/oathkeeper/helper"
+	"github.com/ory/oathkeeper/pkg"
+	"github.com/ory/pagination"
 	"github.com/pborman/uuid"
 	"github.com/pkg/errors"
 )
@@ -37,6 +36,16 @@ import (
 type Handler struct {
 	H herodot.Writer
 	M Manager
+}
+
+func NewHandler(
+	h herodot.Writer,
+	m Manager,
+) *Handler {
+	return &Handler{
+		H: h,
+		M: m,
+	}
 }
 
 func (h *Handler) SetRoutes(r *httprouter.Router) {
@@ -67,9 +76,9 @@ func (h *Handler) SetRoutes(r *httprouter.Router) {
 //       403: genericError
 //       500: genericError
 func (h *Handler) Create(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-	rule, err := decodeRule(w, r)
+	rule, err := h.decodeRule(w, r)
 	if err != nil {
-		h.H.WriteError(w, r, errors.WithStack(err))
+		h.H.WriteError(w, r, err)
 		return
 	}
 
@@ -82,7 +91,7 @@ func (h *Handler) Create(w http.ResponseWriter, r *http.Request, _ httprouter.Pa
 		return
 	}
 
-	h.H.WriteCreated(w, r, "/rules/"+rule.ID, encodeRule(rule))
+	h.H.WriteCreated(w, r, "/rules/"+rule.ID, rule)
 }
 
 // swagger:route GET /rules rule listRules
@@ -106,18 +115,14 @@ func (h *Handler) Create(w http.ResponseWriter, r *http.Request, _ httprouter.Pa
 //       403: genericError
 //       500: genericError
 func (h *Handler) List(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-	rules, err := h.M.ListRules()
+	limit, offset := pagination.Parse(r, 100, 0, pkg.RulesUpperLimit)
+	rules, err := h.M.ListRules(limit, offset)
 	if err != nil {
 		h.H.WriteError(w, r, err)
 		return
 	}
 
-	var encodedRules []jsonRule = make([]jsonRule, len(rules))
-	for k, rule := range rules {
-		encodedRules[k] = *encodeRule(&rule)
-	}
-
-	h.H.Write(w, r, encodedRules)
+	h.H.Write(w, r, rules)
 }
 
 // swagger:route GET /rules/{id} rule getRule
@@ -150,7 +155,7 @@ func (h *Handler) Get(w http.ResponseWriter, r *http.Request, ps httprouter.Para
 		return
 	}
 
-	h.H.Write(w, r, encodeRule(rule))
+	h.H.Write(w, r, rule)
 }
 
 // swagger:route PUT /rules/{id} rule updateRule
@@ -175,9 +180,9 @@ func (h *Handler) Get(w http.ResponseWriter, r *http.Request, ps httprouter.Para
 //       404: genericError
 //       500: genericError
 func (h *Handler) Update(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	rule, err := decodeRule(w, r)
+	rule, err := h.decodeRule(w, r)
 	if err != nil {
-		h.H.WriteError(w, r, errors.WithStack(err))
+		h.H.WriteError(w, r, err)
 		return
 	}
 
@@ -187,7 +192,7 @@ func (h *Handler) Update(w http.ResponseWriter, r *http.Request, ps httprouter.P
 		return
 	}
 
-	h.H.Write(w, r, encodeRule(rule))
+	h.H.Write(w, r, rule)
 }
 
 // swagger:route DELETE /rules/{id} rule deleteRule
@@ -219,50 +224,14 @@ func (h *Handler) Delete(w http.ResponseWriter, r *http.Request, ps httprouter.P
 	w.WriteHeader(http.StatusNoContent)
 }
 
-func decodeRule(w http.ResponseWriter, r *http.Request) (*Rule, error) {
-	rule := jsonRule{
-		MatchesMethods: []string{},
-		RequiredScopes: []string{},
-	}
-	if err := json.NewDecoder(r.Body).Decode(&rule); err != nil {
-		return nil, err
-	}
+func (h *Handler) decodeRule(w http.ResponseWriter, r *http.Request) (*Rule, error) {
+	rule := NewRule()
 
-	return toRule(&rule)
-}
-
-func toRule(rule *jsonRule) (*Rule, error) {
-	exp, err := compiler.CompileRegex(rule.MatchesURL, '<', '>')
-	if err != nil {
-		return nil, err
+	d := json.NewDecoder(r.Body)
+	d.DisallowUnknownFields()
+	if err := d.Decode(rule); err != nil {
+		return nil, errors.WithStack(err)
 	}
 
-	if !stringInSlice(rule.Mode, ruleModes) {
-		return nil, errors.Errorf("Rule mode %s not supported, use one of: %s", rule.Mode, strings.Join(ruleModes, ","))
-	}
-
-	return &Rule{
-		ID:                 rule.ID,
-		MatchesURLCompiled: exp,
-		MatchesURL:         rule.MatchesURL,
-		MatchesMethods:     rule.MatchesMethods,
-		RequiredScopes:     rule.RequiredScopes,
-		RequiredAction:     rule.RequiredAction,
-		RequiredResource:   rule.RequiredResource,
-		Mode:               rule.Mode,
-		Description:        rule.Description,
-	}, nil
-}
-
-func encodeRule(r *Rule) *jsonRule {
-	return &jsonRule{
-		ID:               r.ID,
-		MatchesURL:       r.MatchesURL,
-		MatchesMethods:   r.MatchesMethods,
-		RequiredScopes:   r.RequiredScopes,
-		RequiredAction:   r.RequiredAction,
-		RequiredResource: r.RequiredResource,
-		Mode:             r.Mode,
-		Description:      r.Description,
-	}
+	return rule, nil
 }

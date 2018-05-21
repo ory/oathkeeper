@@ -20,13 +20,36 @@
 
 package helper
 
-import "github.com/pkg/errors"
+import (
+	"net/http"
+
+	"github.com/ory/herodot"
+)
 
 var (
-	ErrMissingBearerToken     = errors.New("This action requires authorization but no bearer token was given")
-	ErrForbidden              = errors.New("Access credentials are not sufficient to access this resource")
-	ErrUnauthorized           = errors.New("Access credentials are either expired or missing a scope")
-	ErrMatchesMoreThanOneRule = errors.New("Expected exactly one rule but found multiple rules")
-	ErrMatchesNoRule          = errors.New("Requested url does not match any rules")
-	ErrResourceNotFound       = errors.New("The requested resource could not be found")
+	ErrForbidden = &herodot.DefaultError{
+		ErrorField:  "Access credentials are not sufficient to access this resource",
+		CodeField:   http.StatusForbidden,
+		StatusField: http.StatusText(http.StatusForbidden),
+	}
+	ErrUnauthorized = &herodot.DefaultError{
+		ErrorField:  "Access credentials are either expired or missing a scope",
+		CodeField:   http.StatusUnauthorized,
+		StatusField: http.StatusText(http.StatusUnauthorized),
+	}
+	ErrMatchesMoreThanOneRule = &herodot.DefaultError{
+		ErrorField:  "Expected exactly one rule but found multiple rules",
+		CodeField:   http.StatusInternalServerError,
+		StatusField: http.StatusText(http.StatusInternalServerError),
+	}
+	ErrMatchesNoRule = &herodot.DefaultError{
+		ErrorField:  "Requested url does not match any rules",
+		CodeField:   http.StatusNotFound,
+		StatusField: http.StatusText(http.StatusNotFound),
+	}
+	ErrResourceNotFound = &herodot.DefaultError{
+		ErrorField:  "The requested resource could not be found",
+		CodeField:   http.StatusNotFound,
+		StatusField: http.StatusText(http.StatusNotFound),
+	}
 )

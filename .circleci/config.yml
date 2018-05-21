@@ -5,39 +5,40 @@ version: 2
 jobs:
   format:
     docker:
-      - image: circleci/golang:1.9
+      - image: circleci/golang:1.10
     working_directory: /go/src/github.com/ory/oathkeeper
     steps:
       - checkout
-      - run: curl -L -s https://github.com/golang/dep/releases/download/v0.3.2/dep-linux-amd64 -o /go/bin/dep && chmod +x /go/bin/dep
+      - run: curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
       - run: go get -u golang.org/x/tools/cmd/goimports
       - run: dep ensure -vendor-only
       - run: ./scripts/test-format.sh
 
   swagger:
     docker:
-      - image: circleci/golang:1.9
+      - image: circleci/golang:1.10
     working_directory: /go/src/github.com/ory/oathkeeper
     steps:
       - checkout
-      - run: curl -L -s https://github.com/golang/dep/releases/download/v0.3.2/dep-linux-amd64 -o /go/bin/dep && chmod +x /go/bin/dep
+      - run: curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
       - run: go get -u github.com/go-swagger/go-swagger/cmd/swagger golang.org/x/tools/cmd/goimports
       - run: dep ensure -vendor-only
       - run: ./scripts/run-genswag.sh
 
   test:
     docker:
-      - image: circleci/golang:1.9
+      - image: circleci/golang:1.10
         environment:
-        - PG_URL=postgres://test:test@localhost:5432/oathkeeper?sslmode=disable
+        - TEST_DATABASE_POSTGRESQL=postgres://test:test@localhost:5432/oathkeeper?sslmode=disable
+        - TEST_DATABASE_MYSQL=root:test@(localhost:3306)/mysql?parseTime=true
         - TEST_HYDRA_URL=http://localhost:4444
-        - TEST_HYDRA_CLIENT_ID=root
-        - TEST_HYDRA_CLIENT_SECRET=secret
-        - FORCE_ROOT_CLIENT_CREDENTIALS=root:secret
-      - image: oryd/hydra:v0.10.0-alpha.18
+      - image: oryd/hydra:unstable
         environment:
         - DATABASE_URL=memory
-        command: "host --dangerous-force-http"
+        command: "serve --dangerous-force-http"
+      - image: mysql:5.7
+        environment:
+        - MYSQL_ROOT_PASSWORD=test
       - image: postgres:9.5
         environment:
         - POSTGRES_USER=test
@@ -47,7 +48,7 @@ jobs:
     steps:
       - checkout
       - run: go get -u github.com/go-swagger/go-swagger/cmd/swagger github.com/bradfitz/goimports github.com/mattn/goveralls golang.org/x/tools/cmd/cover github.com/ory/go-acc
-      - run: curl -L -s https://github.com/golang/dep/releases/download/v0.3.2/dep-linux-amd64 -o /go/bin/dep && chmod +x /go/bin/dep
+      - run: curl -L -s https://github.com/golang/dep/releases/download/v0.4.1/dep-linux-amd64 -o /go/bin/dep && chmod +x /go/bin/dep
 
       # Installation
       - run: curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -
@@ -55,11 +56,11 @@ jobs:
       - run: go install github.com/ory/oathkeeper
 
       # Tests
-      - run: go-acc -o coverage.txt $(glide novendor)
-      - run: go test -race -short $(glide novendor | grep -v cmd)
+      - run: go test -race -short $(go list ./... | grep -v cmd)
+      - run: go-acc -o coverage.txt ./...
 
       # Submit coverage details
-      # - run: goveralls -service=circle-ci -coverprofile=coverage.txt -repotoken=$COVERALLS_REPO_TOKEN
+      - run: goveralls -service=circle-ci -coverprofile=coverage.txt -repotoken=$COVERALLS_REPO_TOKEN
 
   test-docker:
     docker:
@@ -73,7 +74,7 @@ jobs:
 
   release:
     docker:
-      - image: circleci/golang:1.9
+      - image: circleci/golang:1.10
     working_directory: /go/src/github.com/ory/oathkeeper
     steps:
       - checkout
@@ -102,14 +103,15 @@ jobs:
       - checkout
       - run: gem install github_changelog_generator
       - run: sudo npm i -g doctoc
-      - run: github_changelog_generator -u ory -p hydra -o CHANGELOG.md --token $GITHUB_TOKEN
+      - run: github_changelog_generator -u ory -p oathkeeper -o CHANGELOG.md --token $GITHUB_TOKEN
       - run: doctoc CHANGELOG.md
       - run: doctoc README.md
       - run: git config --global user.email "circleci@ory.am"
       - run: git config --global user.name "ORY Continuous Integration"
       - run: git add CHANGELOG.md
+      - run: git add README.md
       - run: |
-          git commit -m "docs: Incorporates changes from version $(git describe --tags)" -- CHANGELOG.md
+          git commit -a -m "docs: Incorporates changes from version $(git describe --tags)"
       - run: git remote rm origin
       - run: git remote add origin https://arekkas:$GITHUB_TOKEN@github.com/ory/oathkeeper.git
       - run: git push origin HEAD:master

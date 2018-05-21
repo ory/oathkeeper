@@ -26,6 +26,8 @@ import (
 
 	"encoding/json"
 
+	"strings"
+
 	"github.com/ory/hydra/sdk/go/hydra"
 	"github.com/ory/hydra/sdk/go/hydra/swagger"
 	"github.com/pkg/errors"
@@ -39,7 +41,7 @@ type HydraManager struct {
 }
 
 func (m *HydraManager) Refresh() error {
-	_, response, err := m.SDK.GetJsonWebKey("private", m.Set)
+	_, response, err := m.SDK.GetJsonWebKeySet(m.Set)
 	if err != nil {
 		return errors.WithStack(err)
 	} else if response.StatusCode == http.StatusNotFound {
@@ -64,17 +66,22 @@ func (m *HydraManager) Refresh() error {
 		return errors.WithStack(err)
 	}
 
-	if len(set.Key("private")) < 1 {
+	var privateKey *rsa.PrivateKey
+	for _, key := range set.Keys {
+		if strings.Contains(key.KeyID, "private:") {
+			var ok bool
+			privateKey, ok = key.Key.(*rsa.PrivateKey)
+			if !ok {
+				return errors.Errorf("Type assertion to *rsa.PrivateKey failed, make sure you are actually sending a RSA private key")
+			}
+		}
+	}
+
+	if privateKey == nil {
 		return errors.New("Expected at least one private key but got none")
 	}
 
-	privateKey, ok := set.Key("private")[0].Key.(*rsa.PrivateKey)
-	if !ok {
-		return errors.Errorf("Type assertion to *rsa.PrivateKey failed, make sure you are actually sending a RSA private key")
-	}
-
 	m.key = privateKey
-
 	return nil
 }
 

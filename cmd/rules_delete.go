@@ -25,7 +25,7 @@ import (
 
 	"net/http"
 
-	"github.com/ory/oathkeeper/sdk/go/oathkeepersdk"
+	"github.com/ory/oathkeeper/sdk/go/oathkeeper"
 	"github.com/spf13/cobra"
 )
 
@@ -45,7 +45,7 @@ var deleteCmd = &cobra.Command{
 			fatalf("Please specify the rule id, for more information use `oathkeeper help rules delete`")
 		}
 
-		client := oathkeepersdk.NewSDK(endpoint)
+		client := oathkeeper.NewSDK(endpoint)
 		response, err := client.DeleteRule(args[0])
 		checkResponse(response, err, http.StatusNoContent)
 		fmt.Printf("Successfully deleted rule %s\n", args[0])
