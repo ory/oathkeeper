@@ -260,8 +260,8 @@
     "sdk/go/hydra",
     "sdk/go/hydra/swagger"
   ]
-  revision = "f6ddee8f9a2d65dfa6c02adc402c1a61fa03d4a0"
-  version = "v0.11.12"
+  revision = "98044aa796e64e3b9bcc27f08188c46a26f07532"
+  version = "master"
 
 [[projects]]
   branch = "master"

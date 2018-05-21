@@ -85,13 +85,9 @@ func TestManager(t *testing.T) {
 }
 
 func connectToHydra(t *testing.T) *hydra.CodeGenSDK {
-	scopes := []string{"hydra.keys.*"}
 	if url := os.Getenv("TEST_HYDRA_URL"); url != "" {
 		sdk, err := hydra.NewSDK(&hydra.Configuration{
-			EndpointURL:  url,
-			ClientID:     os.Getenv("TEST_HYDRA_CLIENT_ID"),
-			ClientSecret: os.Getenv("TEST_HYDRA_CLIENT_SECRET"),
-			Scopes:       scopes,
+			EndpointURL: url,
 		})
 		require.NoError(t, err)
 		return sdk
@@ -105,9 +101,9 @@ func connectToHydra(t *testing.T) *hydra.CodeGenSDK {
 
 	resource, err := pool.RunWithOptions(&dockertest.RunOptions{
 		Repository:   "oryd/hydra",
-		Tag:          "v0.11.6",
-		Cmd:          []string{"host", "--dangerous-force-http"},
-		Env:          []string{"DATABASE_URL=memory", "FORCE_ROOT_CLIENT_CREDENTIALS=root:secret"},
+		Tag:          "unstable",
+		Cmd:          []string{"serve", "--dangerous-force-http"},
+		Env:          []string{"DATABASE_URL=memory"},
 		ExposedPorts: []string{"4444/tcp"},
 	})
 	if err != nil {
@@ -136,10 +132,7 @@ func connectToHydra(t *testing.T) *hydra.CodeGenSDK {
 
 	resources = append(resources, resource)
 	sdk, err := hydra.NewSDK(&hydra.Configuration{
-		EndpointURL:  "http://localhost:" + resource.GetPort("4444/tcp") + "/",
-		ClientID:     "root",
-		ClientSecret: "secret",
-		Scopes:       scopes,
+		EndpointURL: "http://localhost:" + resource.GetPort("4444/tcp") + "/",
 	})
 	require.NoError(t, err)
 	return sdk

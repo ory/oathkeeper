@@ -39,7 +39,7 @@ func TestCredentialsIssuerIDToken(t *testing.T) {
 	k := &rsakey.LocalManager{KeyStrength: 512}
 	b := NewCredentialsIssuerIDToken(k, logrus.New(), time.Hour, "some-issuer")
 
-	assert.NotEmpty(t, b)
+	assert.NotNil(t, b)
 	assert.NotEmpty(t, b.GetID())
 
 	r := &http.Request{Header: http.Header{}}

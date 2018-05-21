@@ -28,7 +28,7 @@ import (
 )
 
 func TestAuthenticatorNoop(t *testing.T) {
-	assert.NotEmpty(t, NewAuthenticatorNoOp())
+	assert.NotNil(t, NewAuthenticatorNoOp())
 	assert.NotEmpty(t, NewAuthenticatorNoOp().GetID())
 
 	_, err := NewAuthenticatorNoOp().Authenticate(nil, nil, nil)

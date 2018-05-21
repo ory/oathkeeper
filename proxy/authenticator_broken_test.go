@@ -29,7 +29,7 @@ import (
 )
 
 func TestAuthenticatorBroken(t *testing.T) {
-	assert.NotEmpty(t, NewAuthenticatorBroken())
+	assert.NotNil(t, NewAuthenticatorBroken())
 	assert.NotEmpty(t, NewAuthenticatorBroken().GetID())
 
 	_, err := NewAuthenticatorBroken().Authenticate(&http.Request{Header: http.Header{}}, nil, nil)

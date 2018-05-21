@@ -53,13 +53,13 @@ type sqlRuleHandler struct {
 func (s sqlRuleHandlers) toRuleHandler() []RuleHandler {
 	rh := make([]RuleHandler, len(s))
 	for k, v := range s {
-		config := v.Config
+		config := []byte(v.Config)
 		if len(config) == 0 {
-			config = "{}"
+			config = nil
 		}
 		rh[k] = RuleHandler{
 			Handler: v.Handler,
-			Config:  []byte(config),
+			Config:  config,
 		}
 	}
 	return rh
@@ -74,13 +74,13 @@ func (r *sqlRule) toRule() (*Rule, error) {
 	if len(r.Authorizers) > 1 {
 		return nil, errors.New("Expected at most one oathkeeper_rule_authorizer row, but found none")
 	} else if len(r.Authorizers) == 0 {
-		r.Authorizers = []sqlRuleHandler{{Config: "{}"}}
+		r.Authorizers = []sqlRuleHandler{{}}
 	}
 
 	if len(r.CredentialsIssuers) > 1 {
 		return nil, errors.New("Expected at most one oathkeeper_rule_credentials_issuer row, but found none")
 	} else if len(r.CredentialsIssuers) == 0 {
-		r.CredentialsIssuers = []sqlRuleHandler{{Config: "{}"}}
+		r.CredentialsIssuers = []sqlRuleHandler{{}}
 	}
 
 	return &Rule{
@@ -104,15 +104,10 @@ func (r *sqlRule) toRule() (*Rule, error) {
 func toSqlRuleHandler(rs []RuleHandler, rule string) sqlRuleHandlers {
 	srh := make([]sqlRuleHandler, len(rs))
 	for k, v := range rs {
-		config := string(v.Config)
-		if len(config) == 0 {
-			config = "{}"
-		}
-
 		srh[k] = sqlRuleHandler{
 			Rule:    rule,
 			Handler: v.Handler,
-			Config:  config,
+			Config:  string(v.Config),
 		}
 	}
 	return srh

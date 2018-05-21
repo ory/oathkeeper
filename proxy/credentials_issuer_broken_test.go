@@ -29,7 +29,7 @@ import (
 
 func TestCredentialsIssuerBroken(t *testing.T) {
 	b := NewCredentialsIssuerBroken()
-	assert.NotEmpty(t, b)
+	assert.NotNil(t, b)
 	assert.NotEmpty(t, b.GetID())
 
 	require.Error(t, b.Issue(nil, nil, nil, nil))

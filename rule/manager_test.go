@@ -77,6 +77,11 @@ func TestManagers(t *testing.T) {
 			if string(r3.CredentialsIssuer.Config) == "{}" {
 				r3.CredentialsIssuer.Config = nil
 			}
+			for k, an := range r3.Authenticators {
+				if string(an.Config) == "{}" {
+					r3.Authenticators[k].Config = nil
+				}
+			}
 			assert.EqualValues(t, &r3, result)
 
 			results, err := manager.ListRules(pkg.RulesUpperLimit, 0)

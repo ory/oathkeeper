@@ -28,7 +28,7 @@ import (
 )
 
 func TestCredentialsIssuerNoOp(t *testing.T) {
-	assert.NotEmpty(t, NewCredentialsIssuerNoOp())
+	assert.NotNil(t, NewCredentialsIssuerNoOp())
 	assert.NotEmpty(t, NewCredentialsIssuerNoOp().GetID())
 
 	require.NoError(t, NewCredentialsIssuerNoOp().Issue(nil, nil, nil, nil))

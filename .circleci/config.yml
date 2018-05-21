@@ -31,13 +31,10 @@ jobs:
         environment:
         - PG_URL=postgres://test:test@localhost:5432/oathkeeper?sslmode=disable
         - TEST_HYDRA_URL=http://localhost:4444
-        - TEST_HYDRA_CLIENT_ID=root
-        - TEST_HYDRA_CLIENT_SECRET=secret
-        - FORCE_ROOT_CLIENT_CREDENTIALS=root:secret
-      - image: oryd/hydra:v0.10.0-alpha.18
+      - image: oryd/hydra:unstable
         environment:
         - DATABASE_URL=memory
-        command: "host --dangerous-force-http"
+        command: "serve --dangerous-force-http"
       - image: postgres:9.5
         environment:
         - POSTGRES_USER=test

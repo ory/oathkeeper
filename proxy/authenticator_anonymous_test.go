@@ -29,7 +29,7 @@ import (
 )
 
 func TestAuthenticatorAnonymous(t *testing.T) {
-	assert.NotEmpty(t, NewAuthenticatorAnonymous(""))
+	assert.NotNil(t, NewAuthenticatorAnonymous(""))
 	assert.NotEmpty(t, NewAuthenticatorAnonymous("").GetID())
 
 	session, err := NewAuthenticatorAnonymous("anon").Authenticate(&http.Request{Header: http.Header{}}, nil, nil)
