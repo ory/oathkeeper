@@ -39,10 +39,9 @@ that are added with this release:
   * ...
 * Supports basic routing logic per rule
 
-The following will list breaking changes so you can get an idea of what changed, but the list might be incomplete.
 We recommend re-reading the user guide.
 
-If you are upgrading a production deployment and have issues or questions, reach out to the [ORY Community](https://discord.gg/PAMQWkr).
+If you are upgrading a production deployment and have issues or questions, reach out to the [ORY Community](https://discord.gg/PAMQWkr) or to [mailto:hi@ory.sh](hi@ory.sh).
 
 ### Changes to the CLI
 
