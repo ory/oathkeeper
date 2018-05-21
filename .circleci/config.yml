@@ -29,7 +29,7 @@ jobs:
     docker:
       - image: circleci/golang:1.10
         environment:
-        - PG_URL=postgres://test:test@localhost:5432/oathkeeper?sslmode=disable
+        - TEST_DATABASE_POSTGRESQL=postgres://test:test@localhost:5432/oathkeeper?sslmode=disable
         - TEST_HYDRA_URL=http://localhost:4444
       - image: oryd/hydra:unstable
         environment:
@@ -52,12 +52,11 @@ jobs:
       - run: go install github.com/ory/oathkeeper
 
       # Tests
-      - run: go test -race -short -v $(go list ./... | grep -v cmd)
-      - run: go-acc -v -o coverage.txt ./...
+      - run: go test -race -short $(go list ./... | grep -v cmd)
+      - run: go-acc -o coverage.txt ./...
 
       # Submit coverage details
       - run: goveralls -service=circle-ci -coverprofile=coverage.txt -repotoken=$COVERALLS_REPO_TOKEN
-
 
   test-docker:
     docker:
