@@ -35,7 +35,7 @@ This service is under active development and may introduce breaking changes in f
 - [Installation](#installation)
 - [Ecosystem](#ecosystem)
   - [ORY Security Console: Administrative User Interface](#ory-security-console-administrative-user-interface)
-  - [ORY Hydra: OAuth2 & OpenID Connect Server](#ory-hydra-oauth2-&-openid-connect-server)
+  - [ORY Hydra: OAuth2 & OpenID Connect Server](#ory-hydra-oauth2--openid-connect-server)
   - [ORY Keto: Access Control Policies as a Server](#ory-keto-access-control-policies-as-a-server)
 - [Security](#security)
   - [Disclosing vulnerabilities](#disclosing-vulnerabilities)
