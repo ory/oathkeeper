@@ -87,7 +87,7 @@ func initConfig() {
 	viper.SetDefault("CREDENTIALS_ISSUER_ID_TOKEN_HYDRA_JWK_SET_ID", "oathkeeper:id-token")
 
 	viper.SetDefault("AUTHENTICATOR_ANONYMOUS_USERNAME", "anonymous")
-	viper.SetDefault("CREDENTIALS_ISSUER_ID_TOKEN_LIFESPAN", "anonymous")
+	viper.SetDefault("CREDENTIALS_ISSUER_ID_TOKEN_LIFESPAN", "10m")
 
 	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err == nil {

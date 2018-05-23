@@ -76,19 +76,24 @@ func refreshKeys(k rsakey.Manager, fails int) {
 	}
 
 	if err := k.Refresh(); err != nil {
-		logger.WithError(err).WithField("retry", fails).Errorln("Unable to refresh RSA keys for JWK signing")
-		if fails > 15 {
-			logger.WithError(err).WithField("retry", fails).Fatalf("Terminating after retry %d\n", fails)
-		}
+		logger.WithError(err).WithField("retry", fails).Errorln("Unable to refresh RSA keys for signing ID Token, 'id_token' credentials issuer will not work.")
+		//if fails > 15 {
+		//	logger.WithError(err).WithField("retry", fails).Fatalf("Terminating after retry %d\n", fails)
+		//}
 
-		time.Sleep(time.Second * time.Duration(fails+1))
+		wait := fails
+		if wait > 10 {
+			wait = 10
+		}
+		time.Sleep(time.Second * time.Duration(wait^2))
+
 		refreshKeys(k, fails+1)
 		return
 	}
 
 	time.Sleep(duration)
 
-	refreshKeys(k, 0)
+	refreshKeys(k, 1)
 }
 
 func parseCorsOptions(prefix string) cors.Options {
