@@ -59,14 +59,6 @@ All possible controls are listed below.
 REQUIRED CONTROLS
 =============
 
-- HYDRA_CLIENT_ID: The OAuth 2.0 Client ID to be used to connect to ORY Hydra. The client must allowed to request the
-	hydra.warden OAuth 2.0 Scope and allowed to access the warden resources.
-
-- HYDRA_CLIENT_SECRET: The OAuth 2.0 Client Secret of the Client ID referenced aboce.
-
-- HYDRA_URL: The URL of ORY Hydra.
-	Example: HYDRA_URL=https://hydra.com/
-
 - OATHKEEPER_API_URL: The URL of the Oathkeeper REST API
 	Example: OATHKEEPER_API_URL=https://api.oathkeeper.mydomain.com/
 
@@ -87,18 +79,66 @@ HTTP(S) CONTROLS
 	Default: PORT="4455"
 
 
+AUTHENTICATORS
+==============
+
+- OAuth 2.0 Client Credentials Authenticator:
+	- AUTHENTICATOR_OAUTH2_CLIENT_CREDENTIALS_TOKEN_URL: Sets the OAuth 2.0 Token URL that should be used to check if the provided credentials are valid or not.
+		Example: AUTHENTICATOR_OAUTH2_CLIENT_CREDENTIALS_TOKEN_URL=http://my-oauth2-server/oauth2/token
+
+- OAuth 2.0 Token Introspection Authenticator:
+	- AUTHENTICATOR_OAUTH2_INTROSPECTION_CLIENT_ID: The OAuth 2.0 Client ID the client that performs the OAuth 2.0 Token Introspection. The OAuth 2.0 Token Introspection
+    	endpoint is typically protected and requires a valid OAuth 2.0 Client in order to check if a token is valid or not.
+		Example: AUTHENTICATOR_OAUTH2_INTROSPECTION_CLIENT_ID=my-client-id
+
+	- AUTHENTICATOR_OAUTH2_INTROSPECTION_CLIENT_SECRET:T he OAuth 2.0 Client Secret of the client that performs the OAuth 2.0 Token Introspection.
+		Example: AUTHENTICATOR_OAUTH2_INTROSPECTION_CLIENT_ID=my-client-secret
+
+	- AUTHENTICATOR_OAUTH2_INTROSPECTION_TOKEN_URL: The OAuth 2.0 Token URL.
+		Example: AUTHENTICATOR_OAUTH2_INTROSPECTION_TOKEN_URL=http://my-oauth2-server/oauth2/token
+
+	- AUTHENTICATOR_OAUTH2_INTROSPECTION_INTROSPECT_URL: The OAuth 2.0 Token Introspection URL.
+		Example: AUTHENTICATOR_OAUTH2_INTROSPECTION_INTROSPECT_URL=http://my-oauth2-server/oauth2/introspect
+
+	- AUTHENTICATOR_OAUTH2_INTROSPECTION_SCOPE: If the OAuth 2.0 Token Introspection endpoint requires a certain OAuth 2.0 Scope
+    	in order to be accessed, you can set it using this environment variable. Use commas to define more than one OAuth 2.0 Scope.
+		Example: AUTHENTICATOR_OAUTH2_INTROSPECTION_SCOPE=scope-a,scope-b
+
+
+AUTHORIZERS
+==============
+
+- ORY Keto Warden Authorizer:
+	- AUTHORIZER_KETO_WARDEN_KETO_URL: The URL of ORY Keto's URL.
+		Example: AUTHORIZER_KETO_WARDEN_KETO_URL=http://keto-url/
+
+
+CREDENTIALS ISSUERS
+==============
+
+- ID Token Credentials Issuer:
+	- CREDENTIALS_ISSUER_ID_TOKEN_HYDRA_URL: The URL where ORY Hydra is located.
+		Example: CREDENTIALS_ISSUER_ID_TOKEN_HYDRA_URL=http://hydra-url/
+
+	- CREDENTIALS_ISSUER_ID_TOKEN_JWK_REFRESH_INTERVAL: ORY Oathkeeper stores JSON Web Keys for ID Token signing in memory. This value sets the refresh interval.
+		Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
+		Default: CREDENTIALS_ISSUER_ID_TOKEN_JWK_REFRESH_INTERVAL=5m
+
+	- CREDENTIALS_ISSUER_ID_TOKEN_HYDRA_JWK_SET_ID: The JSON Web Key set identifier that will be used to create, store, and retrieve the JSON Web Key from ORY Hydra.
+		Default: CREDENTIALS_ISSUER_ID_TOKEN_HYDRA_JWK_SET_ID=oathkeeper:id-token
+
+	- CREDENTIALS_ISSUER_ID_TOKEN_LIFESPAN: How long the ID token will be active. Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
+		Default: CREDENTIALS_ISSUER_ID_TOKEN_LIFESPAN=10m
+
+	- CREDENTIALS_ISSUER_ID_TOKEN_ISSUER: Who issued the token - this will be the value of the "iss" claim in the ID Token.
+		Example: CREDENTIALS_ISSUER_ID_TOKEN_ISSUER=http://oathkeeper-url/
+
+
 OTHER CONTROLS
 ==============
 - RULES_REFRESH_INTERVAL: ORY Oathkeeper stores rules in memory for faster access. This value sets the database refresh interval.
 	Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
 	Default: RULES_REFRESH_INTERVAL=5s
-
-- CREDENTIALS_ISSUER_ID_TOKEN_JWK_REFRESH_INTERVAL: ORY Oathkeeper stores JSON Web Keys for ID Token signing in memory. This value sets the refresh interval.
-	Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
-	Default: CREDENTIALS_ISSUER_ID_TOKEN_JWK_REFRESH_INTERVAL=5m
-
-- CREDENTIALS_ISSUER_ID_TOKEN_HYDRA_JWK_SET_ID: The JSON Web Key set identifier that will be used to create, store, and retrieve the JSON Web Key from ORY Hydra.
-	Default: CREDENTIALS_ISSUER_ID_TOKEN_HYDRA_JWK_SET_ID=oathkeeper:id-token
 ` + corsMessage,
 	Run: func(cmd *cobra.Command, args []string) {
 		oathkeeperSdk := oathkeeper.NewSDK(viper.GetString("OATHKEEPER_API_URL"))
@@ -133,7 +173,7 @@ OTHER CONTROLS
 					viper.GetString("AUTHENTICATOR_OAUTH2_INTROSPECTION_CLIENT_SECRET"),
 					viper.GetString("AUTHENTICATOR_OAUTH2_INTROSPECTION_TOKEN_URL"),
 					viper.GetString("AUTHENTICATOR_OAUTH2_INTROSPECTION_INTROSPECT_URL"),
-					strings.Split(viper.GetString("AUTHENTICATOR_OAUTH2_INTROSPECTION_SCOPES"), ","),
+					strings.Split(viper.GetString("AUTHENTICATOR_OAUTH2_INTROSPECTION_SCOPE"), ","),
 					fosite.WildcardScopeStrategy,
 				),
 				proxy.NewAuthenticatorOAuth2ClientCredentials(
