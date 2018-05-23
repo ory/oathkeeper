@@ -43,8 +43,16 @@
 
 [Full Changelog](https://github.com/ory/oathkeeper/compare/v0.11.12...HEAD)
 
+**Closed issues:**
+
+- Make Oathkeeper work without Hydra \(Fix JWK Manager\) [\#65](https://github.com/ory/oathkeeper/issues/65)
+- Expected at least one private key [\#61](https://github.com/ory/oathkeeper/issues/61)
+- Disallow unknown JSON fields [\#45](https://github.com/ory/oathkeeper/issues/45)
+- Write AWS Lambda function for oathkeeper [\#44](https://github.com/ory/oathkeeper/issues/44)
+
 **Merged pull requests:**
 
+- cmd: Doesn't fatal if no ORY Hydra is unresponsive. [\#66](https://github.com/ory/oathkeeper/pull/66) ([arekkas](https://github.com/arekkas))
 - Keto [\#60](https://github.com/ory/oathkeeper/pull/60) ([arekkas](https://github.com/arekkas))
 
 ## [v0.11.12](https://github.com/ory/oathkeeper/tree/v0.11.12) (2018-05-07)
