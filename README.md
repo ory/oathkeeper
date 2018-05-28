@@ -4,9 +4,10 @@
     <a href="https://discord.gg/PAMQWkr">Chat</a> |
     <a href="https://community.ory.am/">Forums</a> |
     <a href="http://eepurl.com/di390P">Newsletter</a><br/><br/>
-    <a href="https://www.ory.sh/docs/2-oathkeeper/">Guide</a> |
+    <a href="https://www.ory.sh/docs/guides/oathkeeper/">Guide</a> |
     <a href="https://www.ory.sh/docs/api/oathkeeper">API Docs</a> |
-    <a href="https://patreon.com/user?u=4298803">Support us on patreon!</a>
+    <a href="https://godoc.org/github.com/ory/oathkeeper">Code Docs</a><br/><br/>
+    <a href="https://opencollective.com/ory-hydra">Support this project!</a>
 </h4>
 
 ORY Oathkeeper is an Identity & Access Proxy (IAP) that authorizes HTTP requests based on sets of rules. The BeyondCorp
@@ -30,8 +31,6 @@ This service is under active development and may introduce breaking changes in f
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
-- [Installation](#installation)
-
 - [Installation](#installation)
 - [Ecosystem](#ecosystem)
   - [ORY Security Console: Administrative User Interface](#ory-security-console-administrative-user-interface)
@@ -96,7 +95,7 @@ Our services collect summarized, anonymized data which can optionally be turned 
 
 ### Guide
 
-The Guide is available [here](https://www.ory.sh/docs/2-oathkeeper/).
+The Guide is available [here](https://www.ory.sh/docs/guides/oathkeeper/).
 
 ### HTTP API documentation
 
