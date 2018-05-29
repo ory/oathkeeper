@@ -3,6 +3,7 @@
 **Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
 
 - [Change Log](#change-log)
+  - [Unreleased](#unreleased)
   - [v1.0.0-beta.2 (2018-05-29)](#v100-beta2-2018-05-29)
   - [v1.0.0-beta.1 (2018-05-29)](#v100-beta1-2018-05-29)
   - [v0.11.12 (2018-05-07)](#v01112-2018-05-07)
@@ -39,6 +40,14 @@
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 # Change Log
+
+## [Unreleased](https://github.com/ory/oathkeeper/tree/HEAD)
+
+[Full Changelog](https://github.com/ory/oathkeeper/compare/v1.0.0-beta.2...HEAD)
+
+**Merged pull requests:**
+
+- Minor improvements [\#69](https://github.com/ory/oathkeeper/pull/69) ([arekkas](https://github.com/arekkas))
 
 ## [v1.0.0-beta.2](https://github.com/ory/oathkeeper/tree/v1.0.0-beta.2) (2018-05-29)
 [Full Changelog](https://github.com/ory/oathkeeper/compare/v1.0.0-beta.1...v1.0.0-beta.2)
