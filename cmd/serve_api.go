@@ -26,6 +26,7 @@ import (
 
 	"github.com/julienschmidt/httprouter"
 	"github.com/meatballhat/negroni-logrus"
+	"github.com/ory/go-convenience/corsx"
 	"github.com/ory/graceful"
 	"github.com/ory/herodot"
 	"github.com/ory/oathkeeper/rsakey"
@@ -81,7 +82,7 @@ HTTP CONTROLS
 		n.Use(negronilogrus.NewMiddlewareFromLogger(logger, "oathkeeper-api"))
 		n.UseHandler(router)
 
-		ch := cors.New(parseCorsOptions("")).Handler(n)
+		ch := cors.New(corsx.ParseOptions()).Handler(n)
 
 		go refreshKeys(keyManager, 0)
 

@@ -243,6 +243,15 @@
   version = "v0.17.2"
 
 [[projects]]
+  name = "github.com/ory/go-convenience"
+  packages = [
+    "corsx",
+    "stringsx"
+  ]
+  revision = "42cb17c3e4dc0d7d7672cfaffbdfe8f5deb494db"
+  version = "v0.0.2"
+
+[[projects]]
   name = "github.com/ory/graceful"
   packages = ["."]
   revision = "3d30c83329259f53a904d428b38d8cb8fba7bd77"
@@ -292,10 +301,10 @@
   version = "v0.0.1"
 
 [[projects]]
-  branch = "master"
   name = "github.com/ory/sqlcon"
   packages = ["dockertest"]
-  revision = "a3e701ace784da54e7d5a96e7b08eb394f2af5e4"
+  revision = "08e1c6762dd59c776a735acc134889f757574f66"
+  version = "v0.0.2"
 
 [[projects]]
   name = "github.com/pborman/uuid"
@@ -528,6 +537,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "3ad3f9caafabd8a73eb89c253cbe0e7c6b1a02e7e6932558659078f268f90048"
+  inputs-digest = "eea0599444eac5f109cb98e610c4a37f1027f3ea26d433315e9e8fa3813468d8"
   solver-name = "gps-cdcl"
   solver-version = 1
