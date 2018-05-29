@@ -101,7 +101,7 @@ func connectToHydra(t *testing.T) *hydra.CodeGenSDK {
 
 	resource, err := pool.RunWithOptions(&dockertest.RunOptions{
 		Repository:   "oryd/hydra",
-		Tag:          "v1.0.0-beta.1",
+		Tag:          "v1.0.0-beta.2",
 		Cmd:          []string{"serve", "--dangerous-force-http"},
 		Env:          []string{"DATABASE_URL=memory"},
 		ExposedPorts: []string{"4444/tcp"},
