@@ -83,6 +83,8 @@ HTTP CONTROLS
 		n.Use(negronilogrus.NewMiddlewareFromLogger(logger, "oathkeeper-api"))
 
 		if ok, _ := cmd.Flags().GetBool("disable-telemetry"); !ok {
+			logger.Println("Transmission of telemetry data is enabled, to learn more go to: https://www.ory.sh/docs/guides/latest/telemetry/")
+
 			segmentMiddleware := metrics.NewMetricsManager(
 				metrics.Hash(viper.GetString("DATABASE_URL")),
 				viper.GetString("DATABASE_URL") != "memory",
