@@ -82,7 +82,9 @@ jobs:
           version: 17.10.0-ce
       - run: docker build --build-arg git_tag=$(git describe --tags) --build-arg git_commit=$(git rev-parse HEAD) -f Dockerfile -t oryd/oathkeeper:$CIRCLE_TAG .
       - run: docker login --username "$DOCKER_USERNAME" --password "$DOCKER_PASSWORD"
+      - run: docker tag oryd/oathkeeper:$CIRCLE_TAG oryd/oathkeeper:latest
       - run: docker push oryd/oathkeeper:$CIRCLE_TAG
+      - run: docker push oryd/oathkeeper:latest
 
   publish-docs:
     docker:
