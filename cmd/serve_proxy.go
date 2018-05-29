@@ -31,6 +31,7 @@ import (
 
 	"github.com/meatballhat/negroni-logrus"
 	"github.com/ory/fosite"
+	"github.com/ory/go-convenience/corsx"
 	"github.com/ory/graceful"
 	"github.com/ory/keto/sdk/go/keto"
 	"github.com/ory/metrics-middleware"
@@ -216,7 +217,7 @@ OTHER CONTROLS
 		n.Use(segmentMiddleware)
 		n.UseHandler(handler)
 
-		ch := cors.New(parseCorsOptions("")).Handler(n)
+		ch := cors.New(corsx.ParseOptions()).Handler(n)
 
 		var cert tls.Certificate
 		tlsCert := viper.GetString("HTTP_TLS_CERT")

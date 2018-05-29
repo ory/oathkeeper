@@ -21,14 +21,12 @@
 package cmd
 
 import (
-	"strconv"
 	"strings"
 	"time"
 
 	"github.com/ory/hydra/sdk/go/hydra"
 	"github.com/ory/oathkeeper/rsakey"
 	"github.com/ory/oathkeeper/rule"
-	"github.com/rs/cors"
 	"github.com/spf13/viper"
 )
 
@@ -94,23 +92,4 @@ func refreshKeys(k rsakey.Manager, fails int) {
 	time.Sleep(duration)
 
 	refreshKeys(k, 1)
-}
-
-func parseCorsOptions(prefix string) cors.Options {
-	if prefix != "" {
-		prefix = prefix + "_"
-	}
-
-	allowCredentials, _ := strconv.ParseBool(viper.GetString(prefix + "CORS_ALLOWED_CREDENTIALS"))
-	debug, _ := strconv.ParseBool(viper.GetString(prefix + "CORS_DEBUG"))
-	maxAge, _ := strconv.Atoi(viper.GetString(prefix + "CORS_MAX_AGE"))
-	return cors.Options{
-		AllowedOrigins:   strings.Split(viper.GetString(prefix+"CORS_ALLOWED_ORIGINS"), ","),
-		AllowedMethods:   strings.Split(viper.GetString(prefix+"CORS_ALLOWED_METHODS"), ","),
-		AllowedHeaders:   strings.Split(viper.GetString(prefix+"CORS_ALLOWED_HEADERS"), ","),
-		ExposedHeaders:   strings.Split(viper.GetString(prefix+"CORS_EXPOSED_HEADERS"), ","),
-		AllowCredentials: allowCredentials,
-		MaxAge:           maxAge,
-		Debug:            debug,
-	}
 }

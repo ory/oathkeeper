@@ -98,8 +98,12 @@
   version = "0.0.1"
 
 [[constraint]]
-  branch = "master"
+  version = "0.0.2"
   name = "github.com/ory/sqlcon"
+
+[[constraint]]
+  name = "github.com/ory/go-convenience"
+  version = "0.0.2"
 
 [[constraint]]
   name = "github.com/pborman/uuid"
