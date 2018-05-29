@@ -45,7 +45,7 @@ func TestCommandLineInterface(t *testing.T) {
 		expectErr bool
 	}{
 		{
-			args: []string{"serve", "api"},
+			args: []string{"--disable-telemetry", "serve", "api"},
 			wait: func() bool {
 				res, err := http.Get("http://localhost:4456")
 				if err != nil {

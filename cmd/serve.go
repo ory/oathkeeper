@@ -23,6 +23,9 @@ package cmd
 import (
 	"fmt"
 
+	"os"
+	"strconv"
+
 	"github.com/spf13/cobra"
 )
 
@@ -35,4 +38,7 @@ var serveCmd = &cobra.Command{
 
 func init() {
 	RootCmd.AddCommand(serveCmd)
+
+	disableTelemetryEnv, _ := strconv.ParseBool(os.Getenv("DISABLE_TELEMETRY"))
+	serveCmd.PersistentFlags().Bool("disable-telemetry", disableTelemetryEnv, "Disable anonymized telemetry reports - for more information please visit https://www.ory.sh/docs/guides/telemetry")
 }

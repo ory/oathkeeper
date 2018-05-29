@@ -202,21 +202,24 @@ OTHER CONTROLS
 			Transport: d,
 		}
 
-		segmentMiddleware := metrics.NewMetricsManager(
-			metrics.Hash(viper.GetString("DATABASE_URL")),
-			viper.GetString("DATABASE_URL") != "memory",
-			"MSx9A6YQ1qodnkzEFOv22cxOmOCJXMFa",
-			[]string{"/"},
-			logger,
-		)
-		go segmentMiddleware.RegisterSegment(Version, GitHash, BuildTime)
-		go segmentMiddleware.CommitMemoryStatistics()
-
 		n := negroni.New()
 		n.Use(negronilogrus.NewMiddlewareFromLogger(logger, "oathkeeper-proxy"))
-		n.Use(segmentMiddleware)
-		n.UseHandler(handler)
 
+		if ok, _ := cmd.Flags().GetBool("disable-telemetry"); !ok {
+			segmentMiddleware := metrics.NewMetricsManager(
+				metrics.Hash(viper.GetString("DATABASE_URL")),
+				viper.GetString("DATABASE_URL") != "memory",
+				"MSx9A6YQ1qodnkzEFOv22cxOmOCJXMFa",
+				[]string{"/"},
+				logger,
+				"ory-oathkeeper-proxy",
+			)
+			go segmentMiddleware.RegisterSegment(Version, GitHash, BuildTime)
+			go segmentMiddleware.CommitMemoryStatistics()
+			n.Use(segmentMiddleware)
+		}
+
+		n.UseHandler(handler)
 		ch := cors.New(corsx.ParseOptions()).Handler(n)
 
 		var cert tls.Certificate
