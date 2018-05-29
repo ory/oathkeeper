@@ -29,6 +29,7 @@ import (
 	"github.com/ory/go-convenience/corsx"
 	"github.com/ory/graceful"
 	"github.com/ory/herodot"
+	"github.com/ory/metrics-middleware"
 	"github.com/ory/oathkeeper/rsakey"
 	"github.com/ory/oathkeeper/rule"
 	"github.com/rs/cors"
@@ -37,8 +38,8 @@ import (
 	"github.com/urfave/negroni"
 )
 
-// managementCmd represents the management command
-var managementCmd = &cobra.Command{
+// serveApiCmd represents the management command
+var serveApiCmd = &cobra.Command{
 	Use:   "api",
 	Short: "Starts the ORY Oathkeeper HTTP API",
 	Long: `This starts a HTTP/2 REST API for managing ORY Oathkeeper.
@@ -80,8 +81,22 @@ HTTP CONTROLS
 
 		n := negroni.New()
 		n.Use(negronilogrus.NewMiddlewareFromLogger(logger, "oathkeeper-api"))
-		n.UseHandler(router)
 
+		if ok, _ := cmd.Flags().GetBool("disable-telemetry"); !ok {
+			segmentMiddleware := metrics.NewMetricsManager(
+				metrics.Hash(viper.GetString("DATABASE_URL")),
+				viper.GetString("DATABASE_URL") != "memory",
+				"MSx9A6YQ1qodnkzEFOv22cxOmOCJXMFa",
+				[]string{"/rules", "/.well-known/jwks.json"},
+				logger,
+				"ory-oathkeeper-api",
+			)
+			go segmentMiddleware.RegisterSegment(Version, GitHash, BuildTime)
+			go segmentMiddleware.CommitMemoryStatistics()
+			n.Use(segmentMiddleware)
+		}
+
+		n.UseHandler(router)
 		ch := cors.New(corsx.ParseOptions()).Handler(n)
 
 		go refreshKeys(keyManager, 0)
@@ -102,5 +117,5 @@ HTTP CONTROLS
 }
 
 func init() {
-	serveCmd.AddCommand(managementCmd)
+	serveCmd.AddCommand(serveApiCmd)
 }
