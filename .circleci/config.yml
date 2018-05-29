@@ -32,7 +32,7 @@ jobs:
         - TEST_DATABASE_POSTGRESQL=postgres://test:test@localhost:5432/oathkeeper?sslmode=disable
         - TEST_DATABASE_MYSQL=root:test@(localhost:3306)/mysql?parseTime=true
         - TEST_HYDRA_URL=http://localhost:4444
-      - image: oryd/hydra:unstable
+      - image: oryd/hydra:v1.0.0-beta.1
         environment:
         - DATABASE_URL=memory
         command: "serve --dangerous-force-http"
