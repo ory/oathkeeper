@@ -52,6 +52,7 @@
 
 **Merged pull requests:**
 
+- cmd: Improves cors parsing [\#67](https://github.com/ory/oathkeeper/pull/67) ([arekkas](https://github.com/arekkas))
 - cmd: Doesn't fatal if no ORY Hydra is unresponsive. [\#66](https://github.com/ory/oathkeeper/pull/66) ([arekkas](https://github.com/arekkas))
 - Keto [\#60](https://github.com/ory/oathkeeper/pull/60) ([arekkas](https://github.com/arekkas))
 
