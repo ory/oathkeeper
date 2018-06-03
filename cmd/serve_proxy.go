@@ -53,7 +53,7 @@ var proxyCmd = &cobra.Command{
 
 This command exposes a variety of controls via environment variables. You can
 set environments using "export KEY=VALUE" (Linux/macOS) or "set KEY=VALUE" (Windows). On Linux,
-you can also set environments by prepending key value pairs: "KEY=VALUE KEY2=VALUE2 hydra"
+you can also set environments by prepending key value pairs: "KEY=VALUE KEY2=VALUE2 oathkeeper"
 
 All possible controls are listed below.
 

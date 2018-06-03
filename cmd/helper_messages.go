@@ -48,7 +48,7 @@ var corsMessage = `CORS CONTROLS
 
 - CORS_EXPOSED_HEADERS: Indicates which headers (comma separated values) are safe to expose to the API of a CORS API specification.`
 
-var databaseUrl = `- DATABASE_URL: A URL to a persistent backend. Hydra supports various backends:
+var databaseUrl = `- DATABASE_URL: A URL to a persistent backend. ORY Oathkeeper supports various backends:
   - Memory: If DATABASE_URL is "memory", data will be written to memory and is lost when you restart this instance.
   	Example: DATABASE_URL=memory
 
