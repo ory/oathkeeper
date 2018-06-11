@@ -161,7 +161,7 @@ func TestProxy(t *testing.T) {
 			transform: func(r *http.Request) {
 				r.Header.Add("Authorization", "bearer token")
 			},
-			code: http.StatusInternalServerError,
+			code: http.StatusUnauthorized,
 		},
 		{
 			d:   "should fail because no credentials issuer was configured",

@@ -115,11 +115,11 @@ func (d *RequestHandler) HandleRequest(r *http.Request, rl *rule.Rule) error {
 					Warn("The authentication handler encountered an error")
 				return err
 			}
+		} else {
+			// The first authenticator that matches must return the session
+			found = true
+			break
 		}
-
-		// The first authenticator that matches must return the session
-		found = true
-		break
 	}
 
 	if !found {
