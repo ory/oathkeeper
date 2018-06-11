@@ -47,6 +47,7 @@
 
 **Merged pull requests:**
 
+- proxy: Resolves potential panic in request handler [\#70](https://github.com/ory/oathkeeper/pull/70) ([arekkas](https://github.com/arekkas))
 - Minor improvements [\#69](https://github.com/ory/oathkeeper/pull/69) ([arekkas](https://github.com/arekkas))
 
 ## [v1.0.0-beta.2](https://github.com/ory/oathkeeper/tree/v1.0.0-beta.2) (2018-05-29)
