@@ -31,7 +31,6 @@ This service is under active development and may introduce breaking changes in f
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
-- [Installation](#installation)
 
 - [Installation](#installation)
   - [Download binaries](#download-binaries)
