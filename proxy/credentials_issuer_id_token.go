@@ -112,7 +112,16 @@ func (a *CredentialsIDToken) Issue(r *http.Request, session *AuthenticationSessi
 	claims["nbf"] = now.Unix()
 	claims["sub"] = session.Subject
 
-	token := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
+	var token *jwt.Token
+	switch a.km.Algorithm() {
+	case "RS256":
+		token = jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
+	case "HS256":
+		token = jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	default:
+		return errors.Errorf("Encountered unknown signing algorithm %s while signing ID Token", a.km.Algorithm())
+	}
+
 	token.Header["kid"] = a.km.PublicKeyID()
 
 	signed, err := token.SignedString(privateKey)

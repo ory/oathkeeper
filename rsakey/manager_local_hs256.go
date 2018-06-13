@@ -20,10 +20,38 @@
 
 package rsakey
 
-type Manager interface {
-	Refresh() error
-	PrivateKey() (interface{}, error)
-	PublicKey() (interface{}, error)
-	PublicKeyID() string
-	Algorithm() string
+import (
+	"github.com/pborman/uuid"
+)
+
+type LocalHS256Manager struct {
+	key []byte
+	kid string
+}
+
+func NewLocalHS256Manager(key []byte) *LocalHS256Manager {
+	return &LocalHS256Manager{
+		key: key,
+		kid: uuid.New(),
+	}
+}
+
+func (m *LocalHS256Manager) Refresh() error {
+	return nil
+}
+
+func (m *LocalHS256Manager) PublicKey() (interface{}, error) {
+	return m.key, nil
+}
+
+func (m *LocalHS256Manager) PrivateKey() (interface{}, error) {
+	return m.key, nil
+}
+
+func (m *LocalHS256Manager) PublicKeyID() string {
+	return m.kid
+}
+
+func (m *LocalHS256Manager) Algorithm() string {
+	return "HS256"
 }

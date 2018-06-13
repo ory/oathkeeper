@@ -27,12 +27,16 @@ import (
 	"github.com/pkg/errors"
 )
 
-type LocalManager struct {
+type LocalRS256Manager struct {
 	key         *rsa.PrivateKey
 	KeyStrength int
 }
 
-func (m *LocalManager) Refresh() error {
+func (m *LocalRS256Manager) Refresh() error {
+	if m.key != nil {
+		return nil
+	}
+
 	if m.KeyStrength == 0 {
 		m.KeyStrength = 4096
 	}
@@ -46,7 +50,7 @@ func (m *LocalManager) Refresh() error {
 	return nil
 }
 
-func (m *LocalManager) PublicKey() (*rsa.PublicKey, error) {
+func (m *LocalRS256Manager) PublicKey() (interface{}, error) {
 	if m.key == nil {
 		if err := m.Refresh(); err != nil {
 			return nil, err
@@ -55,7 +59,7 @@ func (m *LocalManager) PublicKey() (*rsa.PublicKey, error) {
 	return &m.key.PublicKey, nil
 }
 
-func (m *LocalManager) PrivateKey() (*rsa.PrivateKey, error) {
+func (m *LocalRS256Manager) PrivateKey() (interface{}, error) {
 	if m.key == nil {
 		if err := m.Refresh(); err != nil {
 			return nil, err
@@ -64,10 +68,10 @@ func (m *LocalManager) PrivateKey() (*rsa.PrivateKey, error) {
 	return m.key, nil
 }
 
-func (m *LocalManager) PublicKeyID() string {
+func (m *LocalRS256Manager) PublicKeyID() string {
 	return "id-token:public"
 }
 
-func (m *LocalManager) Algorithm() string {
+func (m *LocalRS256Manager) Algorithm() string {
 	return "RS256"
 }
