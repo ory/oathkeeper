@@ -27,6 +27,8 @@ import (
 	"github.com/ory/hydra/sdk/go/hydra"
 	"github.com/ory/oathkeeper/rsakey"
 	"github.com/ory/oathkeeper/rule"
+	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 )
 
@@ -74,7 +76,7 @@ func refreshKeys(k rsakey.Manager, fails int) {
 	}
 
 	if err := k.Refresh(); err != nil {
-		logger.WithError(err).WithField("retry", fails).Errorln("Unable to refresh RSA keys for signing ID Token, 'id_token' credentials issuer will not work.")
+		logger.WithError(err).WithField("retry", fails).Errorln("Unable to refresh keys for signing ID Token, 'id_token' credentials issuer will not work.")
 		//if fails > 15 {
 		//	logger.WithError(err).WithField("retry", fails).Fatalf("Terminating after retry %d\n", fails)
 		//}
@@ -92,4 +94,27 @@ func refreshKeys(k rsakey.Manager, fails int) {
 	time.Sleep(duration)
 
 	refreshKeys(k, 1)
+}
+
+func keyManagerFactory(l logrus.FieldLogger) (keyManager rsakey.Manager, err error) {
+	switch a := strings.ToLower(viper.GetString("CREDENTIALS_ISSUER_ID_TOKEN_ALGORITHM")); a {
+	case "hs256":
+		secret := []byte(viper.GetString("CREDENTIALS_ISSUER_ID_TOKEN_HS256_SECRET"))
+		if len(secret) < 32 {
+			return nil, errors.New("The secret set in CREDENTIALS_ISSUER_ID_TOKEN_HS256_SECRET must be 32 characters long.")
+		}
+		keyManager = rsakey.NewLocalHS256Manager(secret)
+		//case "rs256":
+		//	keyManager = &rsakey.LocalRS256Manager{KeyStrength: 4096}
+	case "ory-hydra":
+		sdk := getHydraSDK()
+		keyManager = &rsakey.HydraManager{
+			SDK: sdk,
+			Set: viper.GetString("CREDENTIALS_ISSUER_ID_TOKEN_HYDRA_JWK_SET_ID"),
+		}
+	default:
+		return nil, errors.Errorf("Unknown ID Token singing algorithm %s", a)
+	}
+
+	return keyManager, nil
 }

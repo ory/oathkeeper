@@ -28,6 +28,8 @@ import (
 
 	"time"
 
+	"crypto/rsa"
+
 	"github.com/ory/dockertest"
 	"github.com/ory/hydra/sdk/go/hydra"
 	"github.com/pkg/errors"
@@ -55,9 +57,10 @@ func TestMain(m *testing.M) {
 
 func TestManager(t *testing.T) {
 	managers := map[string]Manager{
-		"local": &LocalManager{
+		"local_rs256": &LocalRS256Manager{
 			KeyStrength: 512,
 		},
+		"local_hs256": NewLocalHS256Manager([]byte("foobarbaz")),
 	}
 
 	if !testing.Short() {
@@ -71,11 +74,16 @@ func TestManager(t *testing.T) {
 	for k, m := range managers {
 		t.Run("case="+k, func(t *testing.T) {
 			require.NoError(t, m.Refresh())
-			assert.EqualValues(t, "RS256", m.Algorithm())
-
 			pub, err := m.PublicKey()
 			require.NoError(t, err)
-			assert.NotNil(t, pub)
+			require.NotNil(t, pub)
+
+			switch pub.(type) {
+			case *rsa.PublicKey:
+				assert.Equal(t, "RS256", m.Algorithm())
+			case []byte:
+				assert.Equal(t, "HS256", m.Algorithm())
+			}
 
 			priv, err := m.PrivateKey()
 			require.NoError(t, err)

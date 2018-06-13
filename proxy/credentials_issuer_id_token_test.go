@@ -27,6 +27,8 @@ import (
 	"testing"
 	"time"
 
+	"fmt"
+
 	"github.com/dgrijalva/jwt-go"
 	"github.com/go-errors/errors"
 	"github.com/ory/oathkeeper/rsakey"
@@ -36,27 +38,37 @@ import (
 )
 
 func TestCredentialsIssuerIDToken(t *testing.T) {
-	k := &rsakey.LocalManager{KeyStrength: 512}
-	b := NewCredentialsIssuerIDToken(k, logrus.New(), time.Hour, "some-issuer")
+	var keys = map[string]rsakey.Manager{
+		"hs256": rsakey.NewLocalHS256Manager([]byte("foobarbaz")),
+		"rs256": &rsakey.LocalRS256Manager{KeyStrength: 512},
+	}
 
-	assert.NotNil(t, b)
-	assert.NotEmpty(t, b.GetID())
+	for m, k := range keys {
+		t.Run(fmt.Sprintf("algo=%s", m), func(t *testing.T) {
+			b := NewCredentialsIssuerIDToken(k, logrus.New(), time.Hour, "some-issuer")
 
-	r := &http.Request{Header: http.Header{}}
-	s := &AuthenticationSession{Subject: "foo"}
-	require.NoError(t, b.Issue(r, s, json.RawMessage([]byte(`{ "aud": ["foo", "bar"] }`)), nil))
+			assert.NotNil(t, b)
+			assert.NotEmpty(t, b.GetID())
 
-	generated := strings.Replace(r.Header.Get("Authorization"), "Bearer ", "", 1)
-	token, err := jwt.ParseWithClaims(generated, new(Claims), func(token *jwt.Token) (interface{}, error) {
-		if _, ok := token.Method.(*jwt.SigningMethodRSA); !ok {
-			return nil, errors.Errorf("Unexpected signing method: %v", token.Header["alg"])
-		}
+			r := &http.Request{Header: http.Header{}}
+			s := &AuthenticationSession{Subject: "foo"}
+			require.NoError(t, b.Issue(r, s, json.RawMessage([]byte(`{ "aud": ["foo", "bar"] }`)), nil))
 
-		return k.PublicKey()
-	})
-	require.NoError(t, err)
+			generated := strings.Replace(r.Header.Get("Authorization"), "Bearer ", "", 1)
+			token, err := jwt.ParseWithClaims(generated, new(Claims), func(token *jwt.Token) (interface{}, error) {
+				_, rsa := token.Method.(*jwt.SigningMethodRSA)
+				_, hmac := token.Method.(*jwt.SigningMethodHMAC)
+				if !rsa && !hmac {
+					return nil, errors.Errorf("Unexpected signing method: %v", token.Header["alg"])
+				}
 
-	claims := token.Claims.(*Claims)
-	assert.Equal(t, "foo", claims.Subject)
-	assert.Equal(t, []string{"foo", "bar"}, claims.Audience)
+				return k.PublicKey()
+			})
+			require.NoError(t, err)
+
+			claims := token.Claims.(*Claims)
+			assert.Equal(t, "foo", claims.Subject)
+			assert.Equal(t, []string{"foo", "bar"}, claims.Audience)
+		})
+	}
 }

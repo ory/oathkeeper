@@ -85,7 +85,7 @@ func (m *HydraManager) Refresh() error {
 	return nil
 }
 
-func (m *HydraManager) PublicKey() (*rsa.PublicKey, error) {
+func (m *HydraManager) PublicKey() (interface{}, error) {
 	if m.key == nil {
 		if err := m.Refresh(); err != nil {
 			return nil, err
@@ -94,7 +94,7 @@ func (m *HydraManager) PublicKey() (*rsa.PublicKey, error) {
 	return &m.key.PublicKey, nil
 }
 
-func (m *HydraManager) PrivateKey() (*rsa.PrivateKey, error) {
+func (m *HydraManager) PrivateKey() (interface{}, error) {
 	if m.key == nil {
 		if err := m.Refresh(); err != nil {
 			return nil, err

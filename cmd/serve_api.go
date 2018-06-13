@@ -50,6 +50,9 @@ CORE CONTROLS
 ` + databaseUrl + `
 
 
+` + credentialsIssuer + `
+
+
 HTTP CONTROLS
 ==============
 
@@ -65,11 +68,9 @@ HTTP CONTROLS
 			logger.WithError(err).Fatalln("Unable to connect to rule backend")
 		}
 
-		sdk := getHydraSDK()
-
-		keyManager := &rsakey.HydraManager{
-			SDK: sdk,
-			Set: viper.GetString("CREDENTIALS_ISSUER_ID_TOKEN_HYDRA_JWK_SET_ID"),
+		keyManager, err := keyManagerFactory(logger)
+		if err != nil {
+			logger.WithError(err).Fatalln("Unable to initialize the ID Token signing algorithm")
 		}
 
 		writer := herodot.NewJSONWriter(logger)
@@ -109,7 +110,7 @@ HTTP CONTROLS
 			Handler: ch,
 		})
 
-		logger.Printf("Listening on %s.\n", addr)
+		logger.Printf("Listening on %s", addr)
 		if err := graceful.Graceful(server.ListenAndServe, server.Shutdown); err != nil {
 			logger.Fatalf("Unable to gracefully shutdown HTTP server because %s.\n", err)
 			return

@@ -8,14 +8,15 @@ before finalizing the upgrade process.
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
 
-- [0.1.0](#010)
+- [1.0.0-beta.2](#100-beta2)
   - [Changes to the CLI](#changes-to-the-cli)
+    - [`migrate`](#migrate)
   - [Not compatible with ORY Hydra < 1.0.0](#not-compatible-with-ory-hydra--100)
 - [0.11.12](#01112)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-## 0.1.0
+## 1.0.0-beta.2
 
 This release introduces serious breaking changes. If you are upgrading, you will - unfortunately - need to
 re-create the database schema and migrate your rules manually. While this is frustrating, there are a ton of features
