@@ -21,18 +21,31 @@ import (
 
 	"github.com/ory/oathkeeper/rule"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 // sqlCmd represents the sql command
 var sqlCmd = &cobra.Command{
 	Use: "sql <database-url>",
 	Run: func(cmd *cobra.Command, args []string) {
-		if len(args) != 1 {
-			fmt.Println(cmd.UsageString())
-			return
+		var dburl string
+		if readFromEnv, _ := cmd.Flags().GetBool("read-from-env"); readFromEnv {
+			if len(viper.GetString("DATABASE_URL")) == 0 {
+				fmt.Println(cmd.UsageString())
+				fmt.Println("")
+				fmt.Println("When using flag -e, environment variable DATABASE_URL must be set")
+				return
+			}
+			dburl = viper.GetString("DATABASE_URL")
+		} else {
+			if len(args) != 1 {
+				fmt.Println(cmd.UsageString())
+				return
+			}
+			dburl = args[0]
 		}
 
-		db, err := connectToSql(args[0])
+		db, err := connectToSql(dburl)
 		if err != nil {
 			fmt.Printf("Could not connect to database because %s.\n", err)
 			os.Exit(1)
@@ -64,4 +77,5 @@ func init() {
 	// is called directly, e.g.:
 	// sqlCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 
+	sqlCmd.Flags().BoolP("read-from-env", "e", false, "If set, reads the database URL from the environment variable DATABASE_URL.")
 }
