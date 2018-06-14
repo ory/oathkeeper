@@ -4,6 +4,7 @@
 
 - [Change Log](#change-log)
   - [Unreleased](#unreleased)
+  - [v1.0.0-beta.3 (2018-06-13)](#v100-beta3-2018-06-13)
   - [v1.0.0-beta.2 (2018-05-29)](#v100-beta2-2018-05-29)
   - [v1.0.0-beta.1 (2018-05-29)](#v100-beta1-2018-05-29)
   - [v0.11.12 (2018-05-07)](#v01112-2018-05-07)
@@ -43,7 +44,18 @@
 
 ## [Unreleased](https://github.com/ory/oathkeeper/tree/HEAD)
 
-[Full Changelog](https://github.com/ory/oathkeeper/compare/v1.0.0-beta.2...HEAD)
+[Full Changelog](https://github.com/ory/oathkeeper/compare/v1.0.0-beta.3...HEAD)
+
+**Implemented enhancements:**
+
+- cmd: Should not fatal if ORY Hydra SDK is unable to start [\#71](https://github.com/ory/oathkeeper/issues/71)
+
+**Merged pull requests:**
+
+- Reduces setup complexity [\#72](https://github.com/ory/oathkeeper/pull/72) ([arekkas](https://github.com/arekkas))
+
+## [v1.0.0-beta.3](https://github.com/ory/oathkeeper/tree/v1.0.0-beta.3) (2018-06-13)
+[Full Changelog](https://github.com/ory/oathkeeper/compare/v1.0.0-beta.2...v1.0.0-beta.3)
 
 **Merged pull requests:**
 
