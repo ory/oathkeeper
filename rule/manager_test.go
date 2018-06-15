@@ -25,6 +25,7 @@ import (
 
 	_ "github.com/go-sql-driver/mysql"
 	_ "github.com/lib/pq"
+	"github.com/ory/oathkeeper/helper"
 	"github.com/ory/oathkeeper/pkg"
 	"github.com/ory/sqlcon/dockertest"
 	"github.com/stretchr/testify/assert"
@@ -55,6 +56,9 @@ func TestManagers(t *testing.T) {
 		t.Run("case="+k, func(t *testing.T) {
 			_, err := manager.GetRule("1")
 			require.Error(t, err)
+
+			// Updating of a non-existent rule should throw 409
+			require.EqualError(t, manager.UpdateRule(&r3), helper.ErrResourceConflict.Error())
 
 			require.NoError(t, manager.CreateRule(&r1))
 			require.NoError(t, manager.CreateRule(&r2))
