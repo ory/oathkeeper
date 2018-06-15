@@ -47,6 +47,11 @@
 
 [Full Changelog](https://github.com/ory/oathkeeper/compare/v1.0.0-beta.4...HEAD)
 
+**Fixed bugs:**
+
+- Deletion of conflicting rule doesn't solve the route conflict [\#73](https://github.com/ory/oathkeeper/issues/73)
+- rules: Resolves an issue with cached matchers [\#75](https://github.com/ory/oathkeeper/pull/75) ([arekkas](https://github.com/arekkas))
+
 **Merged pull requests:**
 
 - ci: Prevent pushes from forks to coveralls [\#74](https://github.com/ory/oathkeeper/pull/74) ([arekkas](https://github.com/arekkas))
