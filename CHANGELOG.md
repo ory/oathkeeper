@@ -4,6 +4,7 @@
 
 - [Change Log](#change-log)
   - [Unreleased](#unreleased)
+  - [v1.0.0-beta.4 (2018-06-14)](#v100-beta4-2018-06-14)
   - [v1.0.0-beta.3 (2018-06-13)](#v100-beta3-2018-06-13)
   - [v1.0.0-beta.2 (2018-05-29)](#v100-beta2-2018-05-29)
   - [v1.0.0-beta.1 (2018-05-29)](#v100-beta1-2018-05-29)
@@ -44,7 +45,14 @@
 
 ## [Unreleased](https://github.com/ory/oathkeeper/tree/HEAD)
 
-[Full Changelog](https://github.com/ory/oathkeeper/compare/v1.0.0-beta.3...HEAD)
+[Full Changelog](https://github.com/ory/oathkeeper/compare/v1.0.0-beta.4...HEAD)
+
+**Merged pull requests:**
+
+- ci: Prevent pushes from forks to coveralls [\#74](https://github.com/ory/oathkeeper/pull/74) ([arekkas](https://github.com/arekkas))
+
+## [v1.0.0-beta.4](https://github.com/ory/oathkeeper/tree/v1.0.0-beta.4) (2018-06-14)
+[Full Changelog](https://github.com/ory/oathkeeper/compare/v1.0.0-beta.3...v1.0.0-beta.4)
 
 **Implemented enhancements:**
 
