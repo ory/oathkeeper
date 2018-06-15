@@ -100,29 +100,51 @@ func TestMatcher(t *testing.T) {
 	handler.SetRoutes(router)
 	server := httptest.NewServer(router)
 
-	for _, tr := range testRules {
-		require.NoError(t, manager.CreateRule(&tr))
-	}
-
 	matchers := map[string]Matcher{
 		"memory": NewCachedMatcher(manager),
 		"http":   NewHTTPMatcher(oathkeeper.NewSDK(server.URL)),
 	}
 
-	for name, matcher := range matchers {
-		t.Run("matcher="+name, func(t *testing.T) {
-			require.NoError(t, matcher.Refresh())
-
-			r, err := matcher.MatchRule("GET", mustParseURL(t, "https://localhost:34/baz"))
-			require.NoError(t, err)
-			assert.EqualValues(t, testRules[1], *r)
-
-			r, err = matcher.MatchRule("POST", mustParseURL(t, "https://localhost:1234/foo"))
-			require.NoError(t, err)
-			assert.EqualValues(t, testRules[0], *r)
-
-			r, err = matcher.MatchRule("DELETE", mustParseURL(t, "https://localhost:1234/foo"))
+	var testMatcher = func(t *testing.T, matcher Matcher, method string, url string, expectErr bool, expect *Rule) {
+		r, err := matcher.MatchRule(method, mustParseURL(t, url))
+		if expectErr {
 			require.Error(t, err)
+		} else {
+			require.NoError(t, err)
+			assert.EqualValues(t, *expect, *r)
+		}
+	}
+
+	for name, matcher := range matchers {
+		t.Run("matcher="+name+"/case=empty", func(t *testing.T) {
+			require.NoError(t, matcher.Refresh())
+			testMatcher(t, matcher, "GET", "https://localhost:34/baz", true, nil)
+			testMatcher(t, matcher, "POST", "https://localhost:1234/foo", true, nil)
+			testMatcher(t, matcher, "DELETE", "https://localhost:1234/foo", true, nil)
+		})
+	}
+
+	for _, tr := range testRules {
+		require.NoError(t, manager.CreateRule(&tr))
+	}
+
+	for name, matcher := range matchers {
+		t.Run("matcher="+name+"/case=created", func(t *testing.T) {
+			require.NoError(t, matcher.Refresh())
+			testMatcher(t, matcher, "GET", "https://localhost:34/baz", false, &testRules[1])
+			testMatcher(t, matcher, "POST", "https://localhost:1234/foo", false, &testRules[0])
+			testMatcher(t, matcher, "DELETE", "https://localhost:1234/foo", true, nil)
+		})
+	}
+
+	require.NoError(t, manager.DeleteRule(testRules[0].ID))
+
+	for name, matcher := range matchers {
+		t.Run("matcher="+name+"/case=updated", func(t *testing.T) {
+			require.NoError(t, matcher.Refresh())
+			testMatcher(t, matcher, "GET", "https://localhost:34/baz", false, &testRules[1])
+			testMatcher(t, matcher, "POST", "https://localhost:1234/foo", true, nil)
+			testMatcher(t, matcher, "DELETE", "https://localhost:1234/foo", true, nil)
 		})
 	}
 }

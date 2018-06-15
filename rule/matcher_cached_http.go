@@ -51,6 +51,7 @@ func (m *HTTPMatcher) Refresh() error {
 		return errors.Errorf("Unable to fetch rules from backend, got status code %d but expected %s", response.StatusCode, http.StatusOK)
 	}
 
+	inserted := map[string]bool{}
 	for _, r := range rules {
 		if len(r.Match.Methods) == 0 {
 			r.Match.Methods = []string{}
@@ -64,6 +65,7 @@ func (m *HTTPMatcher) Refresh() error {
 			}
 		}
 
+		inserted[r.Id] = true
 		m.Rules[r.Id] = Rule{
 			ID:          r.Id,
 			Description: r.Description,
@@ -82,6 +84,12 @@ func (m *HTTPMatcher) Refresh() error {
 				PreserveHost: r.Upstream.PreserveHost,
 				StripPath:    r.Upstream.StripPath,
 			},
+		}
+	}
+
+	for _, rule := range m.Rules {
+		if _, ok := inserted[rule.ID]; !ok {
+			delete(m.Rules, rule.ID)
 		}
 	}
 
