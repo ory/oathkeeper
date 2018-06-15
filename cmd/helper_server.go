@@ -139,16 +139,17 @@ func availableHandlerNames() ([]string, []string, []string) {
 			new(proxy.CredentialsIDToken).GetID(),
 		}
 }
+
 func enabledHandlerNames() (d []string, e []string, f []string) {
 	a, b, c := handlerFactories(nil)
 	for _, i := range a {
 		d = append(d, i.GetID())
 	}
 	for _, i := range b {
-		e = append(d, i.GetID())
+		e = append(e, i.GetID())
 	}
 	for _, i := range c {
-		f = append(d, i.GetID())
+		f = append(f, i.GetID())
 	}
 	return
 }

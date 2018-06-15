@@ -30,12 +30,9 @@ import (
 )
 
 func ValidateRule(
-	enabledAuthenticators []string,
-	availableAuthenticators []string,
-	enabledAuthorizers []string,
-	availableAuthorizers []string,
-	enabledCredentialsIssuers []string,
-	availableCredentialsIssuers []string,
+	enabledAuthenticators []string, availableAuthenticators []string,
+	enabledAuthorizers []string, availableAuthorizers []string,
+	enabledCredentialsIssuers []string, availableCredentialsIssuers []string,
 ) func(r *Rule) error {
 	methods := []string{"GET", "POST", "PUT", "HEAD", "DELETE", "PATCH", "OPTIONS", "TRACE", "CONNECT"}
 

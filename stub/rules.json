@@ -98,5 +98,46 @@
     "credentials_issuer": {
       "handler": "id_token"
     }
+  },
+  {
+    "id": "test-rule-3",
+    "upstream": {
+      "preserve_host": true,
+      "strip_path": "/api",
+      "url": "mybackend.com/api"
+    },
+    "match": {
+      "url": "myproxy.com/api",
+      "methods": [
+        "GET",
+        "POST"
+      ]
+    },
+    "authenticators": [
+      {
+        "handler": "noop"
+      },
+      {
+        "handler": "anonymous"
+      },
+      {
+        "handler": "oauth2_introspection",
+        "config": {
+          "required_scope": [
+            "foo",
+            "bar"
+          ]
+        }
+      },
+      {
+        "handler": "oauth2_client_credentials"
+      }
+    ],
+    "authorizer": {
+      "handler": "allow"
+    },
+    "credentials_issuer": {
+      "handler": "id_token"
+    }
   }
 ]

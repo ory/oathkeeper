@@ -79,8 +79,8 @@ HTTP CONTROLS
 		writer := herodot.NewJSONWriter(logger)
 		ruleHandler := rule.NewHandler(writer, rules, rule.ValidateRule(
 			enabledAuthenticators, availableAuthenticators,
-			enabledAuthorizers, enabledCredentialIssuers,
-			availableAuthorizers, availableCredentialIssuers,
+			enabledAuthorizers, availableAuthorizers,
+			enabledCredentialIssuers, availableCredentialIssuers,
 		))
 		keyHandler := rsakey.NewHandler(writer, keyManager)
 		router := httprouter.New()
