@@ -57,4 +57,9 @@ var (
 		CodeField:   http.StatusConflict,
 		StatusField: http.StatusText(http.StatusConflict),
 	}
+	ErrBadRequest = &herodot.DefaultError{
+		ErrorField:  "The request is malformed or contains invalid data",
+		CodeField:   http.StatusBadRequest,
+		StatusField: http.StatusText(http.StatusBadRequest),
+	}
 )

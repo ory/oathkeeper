@@ -73,8 +73,15 @@ HTTP CONTROLS
 			logger.WithError(err).Fatalln("Unable to initialize the ID Token signing algorithm")
 		}
 
+		enabledAuthenticators, enabledAuthorizers, enabledCredentialIssuers := enabledHandlerNames()
+		availableAuthenticators, availableAuthorizers, availableCredentialIssuers := availableHandlerNames()
+
 		writer := herodot.NewJSONWriter(logger)
-		ruleHandler := rule.NewHandler(writer, rules)
+		ruleHandler := rule.NewHandler(writer, rules, rule.ValidateRule(
+			enabledAuthenticators, availableAuthenticators,
+			enabledAuthorizers, enabledCredentialIssuers,
+			availableAuthorizers, availableCredentialIssuers,
+		))
 		keyHandler := rsakey.NewHandler(writer, keyManager)
 		router := httprouter.New()
 		ruleHandler.SetRoutes(router)

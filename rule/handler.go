@@ -36,15 +36,18 @@ import (
 type Handler struct {
 	H herodot.Writer
 	M Manager
+	V func(*Rule) error
 }
 
 func NewHandler(
 	h herodot.Writer,
 	m Manager,
+	v func(*Rule) error,
 ) *Handler {
 	return &Handler{
 		H: h,
 		M: m,
+		V: v,
 	}
 }
 
@@ -231,6 +234,10 @@ func (h *Handler) decodeRule(w http.ResponseWriter, r *http.Request) (*Rule, err
 	d.DisallowUnknownFields()
 	if err := d.Decode(rule); err != nil {
 		return nil, errors.WithStack(err)
+	}
+
+	if err := h.V(rule); err != nil {
+		return nil, err
 	}
 
 	return rule, nil
