@@ -43,14 +43,10 @@
       }
     ],
     "authorizer": {
-      "handler": "keto_warden",
-      "config": {
-        "required_resource": "foo:bar",
-        "required_action": "foo:bar"
-      }
+      "handler": "allow"
     },
     "credentials_issuer": {
-      "handler": "noop|idToken"
+      "handler": "noop"
     }
   },
   {
@@ -97,14 +93,10 @@
       }
     ],
     "authorizer": {
-      "handler": "keto_warden",
-      "config": {
-        "required_resource": "foo:bar",
-        "required_action": "foo:bar"
-      }
+      "handler": "deny"
     },
     "credentials_issuer": {
-      "handler": "noop|idToken"
+      "handler": "id_token"
     }
   }
 ]
