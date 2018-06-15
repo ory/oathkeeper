@@ -63,6 +63,7 @@
 
 **Merged pull requests:**
 
+- docs: Adds gh templates & code of conduct [\#78](https://github.com/ory/oathkeeper/pull/78) ([arekkas](https://github.com/arekkas))
 - ci: Prevent pushes from forks to coveralls [\#74](https://github.com/ory/oathkeeper/pull/74) ([arekkas](https://github.com/arekkas))
 
 ## [v1.0.0-beta.4](https://github.com/ory/oathkeeper/tree/v1.0.0-beta.4) (2018-06-14)
