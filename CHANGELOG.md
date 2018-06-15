@@ -47,6 +47,10 @@
 
 [Full Changelog](https://github.com/ory/oathkeeper/compare/v1.0.0-beta.4...HEAD)
 
+**Implemented enhancements:**
+
+- rule: Adds validator for rules [\#77](https://github.com/ory/oathkeeper/pull/77) ([arekkas](https://github.com/arekkas))
+
 **Fixed bugs:**
 
 - Deletion of conflicting rule doesn't solve the route conflict [\#73](https://github.com/ory/oathkeeper/issues/73)
