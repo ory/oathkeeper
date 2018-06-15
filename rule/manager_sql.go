@@ -107,6 +107,14 @@ func (s *SQLManager) CreateRule(rule *Rule) error {
 		return errors.WithStack(err)
 	}
 
+	if err := s.createRule(tx, rule); err != nil {
+		return err
+	}
+
+	return commit(tx)
+}
+
+func (s *SQLManager) createRule(tx *sqlx.Tx, rule *Rule) error {
 	sr := toSqlRule(rule)
 	if err := s.create(tx, "oathkeeper_rule", sqlParams, sr, "surrogate_id"); err != nil {
 		return err
@@ -119,13 +127,6 @@ func (s *SQLManager) CreateRule(rule *Rule) error {
 	}
 	if err := s.createMany(tx, "oathkeeper_rule_credentials_issuer", sqlParamsHandler, sr.CredentialsIssuers, rule.ID); err != nil {
 		return err
-	}
-
-	if err := tx.Commit(); err != nil {
-		if rErr := tx.Rollback(); rErr != nil {
-			return errors.Wrap(rErr, err.Error())
-		}
-		return errors.WithStack(err)
 	}
 	return nil
 }
@@ -169,11 +170,57 @@ func (s *SQLManager) create(tx *sqlx.Tx, table string, params []string, value in
 }
 
 func (s *SQLManager) UpdateRule(rule *Rule) error {
-	return s.CreateRule(rule)
+	_, err := s.GetRule(rule.ID)
+	if errors.Cause(err) == helper.ErrResourceNotFound {
+		return errors.WithStack(helper.ErrResourceConflict)
+	} else if err != nil {
+		return err
+	}
+
+	tx, err := s.db.Beginx()
+	if err != nil {
+		return errors.WithStack(err)
+	}
+
+	if err := s.deleteRule(tx, rule.ID); err != nil {
+		return err
+	}
+
+	if err := s.createRule(tx, rule); err != nil {
+		return err
+	}
+
+	return commit(tx)
+}
+
+func commit(tx *sqlx.Tx) error {
+	if err := tx.Commit(); err != nil {
+		if rErr := tx.Rollback(); rErr != nil {
+			return errors.Wrap(rErr, err.Error())
+		}
+		return errors.WithStack(err)
+	}
+	return nil
 }
 
 func (s *SQLManager) DeleteRule(id string) error {
-	if _, err := s.db.Exec(s.db.Rebind(`DELETE FROM oathkeeper_rule WHERE surrogate_id=?`), id); err != nil {
+	tx, err := s.db.Beginx()
+	if err != nil {
+		return errors.WithStack(err)
+	}
+
+	if err := s.deleteRule(tx, id); err != nil {
+		return err
+	}
+
+	return commit(tx)
+}
+
+func (s *SQLManager) deleteRule(tx *sqlx.Tx, id string) error {
+	if _, err := tx.Exec(s.db.Rebind(`DELETE FROM oathkeeper_rule WHERE surrogate_id=?`), id); err != nil {
+		if rErr := tx.Rollback(); rErr != nil {
+			return errors.Wrap(rErr, err.Error())
+		}
 		return errors.WithStack(err)
 	}
 	return nil

@@ -54,10 +54,19 @@ func (m *MemoryManager) GetRule(id string) (*Rule, error) {
 }
 
 func (m *MemoryManager) CreateRule(rule *Rule) error {
-	return m.UpdateRule(rule)
+	if _, ok := m.Rules[rule.ID]; ok {
+		return errors.WithStack(helper.ErrResourceConflict)
+	}
+
+	m.Rules[rule.ID] = *rule
+	return nil
 }
 
 func (m *MemoryManager) UpdateRule(rule *Rule) error {
+	if _, ok := m.Rules[rule.ID]; !ok {
+		return errors.WithStack(helper.ErrResourceConflict)
+	}
+
 	m.Rules[rule.ID] = *rule
 	return nil
 }

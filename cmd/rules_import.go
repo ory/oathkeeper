@@ -71,9 +71,10 @@ Usage example:
 		for _, r := range rules {
 			fmt.Printf("Importing rule %s...\n", r.ID)
 			client := oathkeeper.NewSDK(endpoint)
-			out, response, err := client.GetRule(r.ID)
-			if err == nil {
-				response.Body.Close()
+
+			shouldUpdate := false
+			if _, response, _ := client.GetRule(r.ID); err == nil && response.StatusCode == http.StatusOK {
+				shouldUpdate = true
 			}
 
 			rh := make([]swagger.RuleHandler, len(r.Authenticators))
@@ -104,7 +105,7 @@ Usage example:
 				},
 			}
 
-			if out != nil {
+			if shouldUpdate {
 				out, response, err := client.UpdateRule(r.ID, sr)
 				checkResponse(response, err, http.StatusOK)
 				fmt.Printf("Successfully imported rule %s...\n", out.Id)

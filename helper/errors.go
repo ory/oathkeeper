@@ -52,4 +52,9 @@ var (
 		CodeField:   http.StatusNotFound,
 		StatusField: http.StatusText(http.StatusNotFound),
 	}
+	ErrResourceConflict = &herodot.DefaultError{
+		ErrorField:  "The request could not be completed due to a conflict with the current state of the target resource",
+		CodeField:   http.StatusConflict,
+		StatusField: http.StatusText(http.StatusConflict),
+	}
 )
