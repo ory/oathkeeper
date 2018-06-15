@@ -50,7 +50,12 @@
 **Fixed bugs:**
 
 - Deletion of conflicting rule doesn't solve the route conflict [\#73](https://github.com/ory/oathkeeper/issues/73)
+- rules: Properly handle conflicts on PUT and POST [\#76](https://github.com/ory/oathkeeper/pull/76) ([arekkas](https://github.com/arekkas))
 - rules: Resolves an issue with cached matchers [\#75](https://github.com/ory/oathkeeper/pull/75) ([arekkas](https://github.com/arekkas))
+
+**Closed issues:**
+
+- PUT rules/unknownId does not error [\#38](https://github.com/ory/oathkeeper/issues/38)
 
 **Merged pull requests:**
 
