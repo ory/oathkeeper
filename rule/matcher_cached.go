@@ -71,8 +71,17 @@ func (m *CachedMatcher) Refresh() error {
 		return errors.WithStack(err)
 	}
 
+	inserted := map[string]bool{}
 	for _, rule := range rules {
+		inserted[rule.ID] = true
 		m.Rules[rule.ID] = rule
 	}
+
+	for _, rule := range m.Rules {
+		if _, ok := inserted[rule.ID]; !ok {
+			delete(m.Rules, rule.ID)
+		}
+	}
+
 	return nil
 }
