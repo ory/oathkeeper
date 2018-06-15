@@ -246,6 +246,7 @@
   name = "github.com/ory/go-convenience"
   packages = [
     "corsx",
+    "stringslice",
     "stringsx"
   ]
   revision = "42cb17c3e4dc0d7d7672cfaffbdfe8f5deb494db"
@@ -537,6 +538,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "eea0599444eac5f109cb98e610c4a37f1027f3ea26d433315e9e8fa3813468d8"
+  inputs-digest = "c0c8c5a4c4edd1c90ad7a45b25b66d7e2d3540c4715c8ba25e494d26a6e13516"
   solver-name = "gps-cdcl"
   solver-version = 1
