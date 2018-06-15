@@ -27,10 +27,7 @@ import (
 	"net/http"
 	"net/http/httputil"
 
-	"strings"
-
 	"github.com/meatballhat/negroni-logrus"
-	"github.com/ory/fosite"
 	"github.com/ory/go-convenience/corsx"
 	"github.com/ory/graceful"
 	"github.com/ory/keto/sdk/go/keto"
@@ -180,34 +177,8 @@ OTHER CONTROLS
 			authorizers = append(authorizers, proxy.NewAuthorizerKetoWarden(ketoSdk))
 		}
 
-		eval := proxy.NewRequestHandler(
-			logger,
-			[]proxy.Authenticator{
-				proxy.NewAuthenticatorNoOp(),
-				proxy.NewAuthenticatorAnonymous(viper.GetString("AUTHENTICATOR_ANONYMOUS_USERNAME")),
-				proxy.NewAuthenticatorOAuth2Introspection(
-					viper.GetString("AUTHENTICATOR_OAUTH2_INTROSPECTION_CLIENT_ID"),
-					viper.GetString("AUTHENTICATOR_OAUTH2_INTROSPECTION_CLIENT_SECRET"),
-					viper.GetString("AUTHENTICATOR_OAUTH2_INTROSPECTION_TOKEN_URL"),
-					viper.GetString("AUTHENTICATOR_OAUTH2_INTROSPECTION_INTROSPECT_URL"),
-					strings.Split(viper.GetString("AUTHENTICATOR_OAUTH2_INTROSPECTION_SCOPE"), ","),
-					fosite.WildcardScopeStrategy,
-				),
-				proxy.NewAuthenticatorOAuth2ClientCredentials(
-					viper.GetString("AUTHENTICATOR_OAUTH2_CLIENT_CREDENTIALS_TOKEN_URL"),
-				),
-			},
-			authorizers,
-			[]proxy.CredentialsIssuer{
-				proxy.NewCredentialsIssuerNoOp(),
-				proxy.NewCredentialsIssuerIDToken(
-					keyManager,
-					logger,
-					viper.GetDuration("CREDENTIALS_ISSUER_ID_TOKEN_LIFESPAN"),
-					viper.GetString("CREDENTIALS_ISSUER_ID_TOKEN_ISSUER"),
-				),
-			},
-		)
+		authenticators, authorizers, credentialIssuers := handlerFactories(keyManager)
+		eval := proxy.NewRequestHandler(logger, authenticators, authorizers, credentialIssuers)
 		d := proxy.NewProxy(eval, logger, matcher)
 		handler := &httputil.ReverseProxy{
 			Director:  d.Director,

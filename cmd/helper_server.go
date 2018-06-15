@@ -24,7 +24,10 @@ import (
 	"strings"
 	"time"
 
+	"github.com/ory/fosite"
 	"github.com/ory/hydra/sdk/go/hydra"
+	"github.com/ory/keto/sdk/go/keto"
+	"github.com/ory/oathkeeper/proxy"
 	"github.com/ory/oathkeeper/rsakey"
 	"github.com/ory/oathkeeper/rule"
 	"github.com/pkg/errors"
@@ -117,4 +120,79 @@ func keyManagerFactory(l logrus.FieldLogger) (keyManager rsakey.Manager, err err
 	}
 
 	return keyManager, nil
+}
+
+func availableHandlerNames() ([]string, []string, []string) {
+	return []string{
+			new(proxy.AuthenticatorNoOp).GetID(),
+			new(proxy.AuthenticatorAnonymous).GetID(),
+			new(proxy.AuthenticatorOAuth2Introspection).GetID(),
+			new(proxy.AuthenticatorOAuth2ClientCredentials).GetID(),
+		},
+		[]string{
+			new(proxy.AuthorizerAllow).GetID(),
+			new(proxy.AuthorizerDeny).GetID(),
+			new(proxy.AuthorizerKetoWarden).GetID(),
+		},
+		[]string{
+			new(proxy.CredentialsIssuerNoOp).GetID(),
+			new(proxy.CredentialsIDToken).GetID(),
+		}
+}
+
+func enabledHandlerNames() (d []string, e []string, f []string) {
+	a, b, c := handlerFactories(nil)
+	for _, i := range a {
+		d = append(d, i.GetID())
+	}
+	for _, i := range b {
+		e = append(e, i.GetID())
+	}
+	for _, i := range c {
+		f = append(f, i.GetID())
+	}
+	return
+}
+
+func handlerFactories(keyManager rsakey.Manager) ([]proxy.Authenticator, []proxy.Authorizer, []proxy.CredentialsIssuer) {
+	var authorizers = []proxy.Authorizer{
+		proxy.NewAuthorizerAllow(),
+		proxy.NewAuthorizerDeny(),
+	}
+
+	if u := viper.GetString("AUTHORIZER_KETO_WARDEN_KETO_URL"); len(u) > 0 {
+		ketoSdk, err := keto.NewCodeGenSDK(&keto.Configuration{
+			EndpointURL: viper.GetString("AUTHORIZER_KETO_WARDEN_KETO_URL"),
+		})
+		if err != nil {
+			logger.WithError(err).Fatal("Unable to initialize the ORY Keto SDK")
+		}
+		authorizers = append(authorizers, proxy.NewAuthorizerKetoWarden(ketoSdk))
+	}
+
+	return []proxy.Authenticator{
+			proxy.NewAuthenticatorNoOp(),
+			proxy.NewAuthenticatorAnonymous(viper.GetString("AUTHENTICATOR_ANONYMOUS_USERNAME")),
+			proxy.NewAuthenticatorOAuth2Introspection(
+				viper.GetString("AUTHENTICATOR_OAUTH2_INTROSPECTION_CLIENT_ID"),
+				viper.GetString("AUTHENTICATOR_OAUTH2_INTROSPECTION_CLIENT_SECRET"),
+				viper.GetString("AUTHENTICATOR_OAUTH2_INTROSPECTION_TOKEN_URL"),
+				viper.GetString("AUTHENTICATOR_OAUTH2_INTROSPECTION_INTROSPECT_URL"),
+				strings.Split(viper.GetString("AUTHENTICATOR_OAUTH2_INTROSPECTION_SCOPE"), ","),
+				fosite.WildcardScopeStrategy,
+			),
+			proxy.NewAuthenticatorOAuth2ClientCredentials(
+				viper.GetString("AUTHENTICATOR_OAUTH2_CLIENT_CREDENTIALS_TOKEN_URL"),
+			),
+		},
+		authorizers,
+		[]proxy.CredentialsIssuer{
+			proxy.NewCredentialsIssuerNoOp(),
+			proxy.NewCredentialsIssuerIDToken(
+				keyManager,
+				logger,
+				viper.GetDuration("CREDENTIALS_ISSUER_ID_TOKEN_LIFESPAN"),
+				viper.GetString("CREDENTIALS_ISSUER_ID_TOKEN_ISSUER"),
+			),
+		}
 }

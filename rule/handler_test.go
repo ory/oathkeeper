@@ -37,6 +37,11 @@ func TestHandler(t *testing.T) {
 	handler := &Handler{
 		H: herodot.NewJSONWriter(nil),
 		M: NewMemoryManager(),
+		V: ValidateRule(
+			[]string{"anonymous", "oauth2_introspection"}, []string{"anonymous", "oauth2_introspection"},
+			[]string{"allow", "deny"}, []string{"allow", "deny"},
+			[]string{"id_token"}, []string{"id_token"},
+		),
 	}
 	router := httprouter.New()
 	handler.SetRoutes(router)
@@ -76,8 +81,15 @@ func TestHandler(t *testing.T) {
 			PreserveHost: false,
 		},
 	}
+	invalidRule := swagger.Rule{
+		Id: "foo3",
+	}
 
 	t.Run("case=create a new rule", func(t *testing.T) {
+		_, response, err := client.CreateRule(invalidRule)
+		require.NoError(t, err)
+		assert.Equal(t, http.StatusBadRequest, response.StatusCode)
+
 		result, response, err := client.CreateRule(r1)
 		require.NoError(t, err)
 		assert.Equal(t, http.StatusCreated, response.StatusCode)
