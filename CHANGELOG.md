@@ -63,6 +63,7 @@
 
 **Merged pull requests:**
 
+- docs: Adds link to examples repository [\#79](https://github.com/ory/oathkeeper/pull/79) ([arekkas](https://github.com/arekkas))
 - docs: Adds gh templates & code of conduct [\#78](https://github.com/ory/oathkeeper/pull/78) ([arekkas](https://github.com/arekkas))
 - ci: Prevent pushes from forks to coveralls [\#74](https://github.com/ory/oathkeeper/pull/74) ([arekkas](https://github.com/arekkas))
 
