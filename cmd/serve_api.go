@@ -109,7 +109,7 @@ HTTP CONTROLS
 		n.UseHandler(router)
 		ch := cors.New(corsx.ParseOptions()).Handler(n)
 
-		go refreshKeys(keyManager, 0)
+		go refreshKeys(keyManager)
 
 		addr := fmt.Sprintf("%s:%s", viper.GetString("HOST"), viper.GetString("PORT"))
 		server := graceful.WithDefaults(&http.Server{

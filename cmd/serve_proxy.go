@@ -159,8 +159,8 @@ OTHER CONTROLS
 			logger.WithError(err).Fatalln("Unable to initialize the ID Token signing algorithm")
 		}
 
-		go refreshRules(matcher, 0)
-		go refreshKeys(keyManager, 0)
+		go refreshRules(matcher)
+		go refreshKeys(keyManager)
 
 		var authorizers = []proxy.Authorizer{
 			proxy.NewAuthorizerAllow(),
