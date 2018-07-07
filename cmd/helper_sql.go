@@ -21,61 +21,45 @@
 package cmd
 
 import (
-	"runtime"
-	"time"
-
 	"net/url"
 
 	"github.com/jmoiron/sqlx"
 	"github.com/ory/oathkeeper/rule"
+	"github.com/ory/sqlcon"
 	"github.com/pkg/errors"
 )
 
-func connectToSql(url string) (*sqlx.DB, error) {
-	db, err := sqlx.Open("postgres", url)
+func connectToSql(dburl string) (*sqlx.DB, error) {
+	u, err := url.Parse(dburl)
 	if err != nil {
-		return nil, errors.WithStack(err)
-	}
-
-	maxConns := maxParallelism() * 2
-	maxConnLifetime := time.Duration(0)
-	maxIdleConns := maxParallelism()
-	db.SetMaxOpenConns(maxConns)
-	db.SetMaxIdleConns(maxIdleConns)
-	db.SetConnMaxLifetime(maxConnLifetime)
-	return db, nil
-}
-
-func maxParallelism() int {
-	maxProcs := runtime.GOMAXPROCS(0)
-	numCPU := runtime.NumCPU()
-	if maxProcs < numCPU {
-		return maxProcs
-	}
-	return numCPU
-}
-
-func newRuleManager(db string) (rule.Manager, error) {
-	if db == "memory" {
-		return &rule.MemoryManager{Rules: map[string]rule.Rule{}}, nil
-	} else if db == "" {
-		return nil, errors.New("No database URL provided")
-	}
-
-	u, err := url.Parse(db)
-	if err != nil {
-		return nil, errors.WithStack(err)
+		logger.Fatalf("Could not parse DATABASE_URL: %s", err)
 	}
 
 	switch u.Scheme {
 	case "postgres":
-		db, err := connectToSql(db)
+		fallthrough
+	case "mysql":
+		connection, err := sqlcon.NewSQLConnection(dburl, logger)
 		if err != nil {
-			return nil, errors.WithStack(err)
+			logger.WithError(err).Fatalf(`Unable to initialize SQL connection`)
 		}
-
-		return rule.NewSQLManager(db), nil
+		return connection.GetDatabase(), nil
 	}
 
-	return nil, errors.Errorf("The provided database URL %s can not be handled", db)
+	return nil, errors.Errorf(`Unknown DSN "%s" in DATABASE_URL: %s`, u.Scheme, dburl)
+}
+
+func newRuleManager(dburl string) (rule.Manager, error) {
+	if dburl == "memory" {
+		return &rule.MemoryManager{Rules: map[string]rule.Rule{}}, nil
+	} else if dburl == "" {
+		return nil, errors.New("No database URL provided")
+	}
+
+	db, err := connectToSql(dburl)
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+
+	return rule.NewSQLManager(db), nil
 }

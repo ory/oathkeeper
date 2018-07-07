@@ -303,7 +303,10 @@
 
 [[projects]]
   name = "github.com/ory/sqlcon"
-  packages = ["dockertest"]
+  packages = [
+    ".",
+    "dockertest"
+  ]
   revision = "08e1c6762dd59c776a735acc134889f757574f66"
   version = "v0.0.2"
 
@@ -538,6 +541,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "c0c8c5a4c4edd1c90ad7a45b25b66d7e2d3540c4715c8ba25e494d26a6e13516"
+  inputs-digest = "833b7210006d4fa0e660d0cfccd5335656fb8c27d1700cf4b8d1490fa8b40e02"
   solver-name = "gps-cdcl"
   solver-version = 1
