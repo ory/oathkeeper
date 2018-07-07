@@ -60,11 +60,14 @@
 
 **Closed issues:**
 
+- kid does not match .well-known/jwks.json [\#83](https://github.com/ory/oathkeeper/issues/83)
 - MySQL not supported [\#82](https://github.com/ory/oathkeeper/issues/82)
+- Add input validator to rules [\#41](https://github.com/ory/oathkeeper/issues/41)
 - PUT rules/unknownId does not error [\#38](https://github.com/ory/oathkeeper/issues/38)
 
 **Merged pull requests:**
 
+- rsakey: Resolve HS256 kid mismatch [\#85](https://github.com/ory/oathkeeper/pull/85) ([arekkas](https://github.com/arekkas))
 - cmd: Allows connectivity to MySQL  [\#84](https://github.com/ory/oathkeeper/pull/84) ([arekkas](https://github.com/arekkas))
 - cmd: Resolves recursive stack overflow [\#81](https://github.com/ory/oathkeeper/pull/81) ([arekkas](https://github.com/arekkas))
 - docs: Adds link to examples repository [\#79](https://github.com/ory/oathkeeper/pull/79) ([arekkas](https://github.com/arekkas))
