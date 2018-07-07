@@ -53,16 +53,20 @@
 
 **Fixed bugs:**
 
+- Resolve stack overflow in key & rule refresher [\#80](https://github.com/ory/oathkeeper/issues/80)
 - Deletion of conflicting rule doesn't solve the route conflict [\#73](https://github.com/ory/oathkeeper/issues/73)
 - rules: Properly handle conflicts on PUT and POST [\#76](https://github.com/ory/oathkeeper/pull/76) ([arekkas](https://github.com/arekkas))
 - rules: Resolves an issue with cached matchers [\#75](https://github.com/ory/oathkeeper/pull/75) ([arekkas](https://github.com/arekkas))
 
 **Closed issues:**
 
+- MySQL not supported [\#82](https://github.com/ory/oathkeeper/issues/82)
 - PUT rules/unknownId does not error [\#38](https://github.com/ory/oathkeeper/issues/38)
 
 **Merged pull requests:**
 
+- cmd: Allows connectivity to MySQL  [\#84](https://github.com/ory/oathkeeper/pull/84) ([arekkas](https://github.com/arekkas))
+- cmd: Resolves recursive stack overflow [\#81](https://github.com/ory/oathkeeper/pull/81) ([arekkas](https://github.com/arekkas))
 - docs: Adds link to examples repository [\#79](https://github.com/ory/oathkeeper/pull/79) ([arekkas](https://github.com/arekkas))
 - docs: Adds gh templates & code of conduct [\#78](https://github.com/ory/oathkeeper/pull/78) ([arekkas](https://github.com/arekkas))
 - ci: Prevent pushes from forks to coveralls [\#74](https://github.com/ory/oathkeeper/pull/74) ([arekkas](https://github.com/arekkas))
