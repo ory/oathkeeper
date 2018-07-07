@@ -21,41 +21,15 @@
 package rsakey
 
 import (
-	"crypto/sha256"
-	"fmt"
+	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
-type LocalHS256Manager struct {
-	key []byte
-	kid string
-}
+func TestLocalHS256Manager(t *testing.T) {
+	key := []byte("somkey")
+	m1 := NewLocalHS256Manager(key)
+	m2 := NewLocalHS256Manager(key)
 
-func NewLocalHS256Manager(key []byte) *LocalHS256Manager {
-	h := sha256.New()
-	h.Write(key)
-
-	return &LocalHS256Manager{
-		key: key,
-		kid: fmt.Sprintf("%x", h.Sum(nil)),
-	}
-}
-
-func (m *LocalHS256Manager) Refresh() error {
-	return nil
-}
-
-func (m *LocalHS256Manager) PublicKey() (interface{}, error) {
-	return m.key, nil
-}
-
-func (m *LocalHS256Manager) PrivateKey() (interface{}, error) {
-	return m.key, nil
-}
-
-func (m *LocalHS256Manager) PublicKeyID() string {
-	return m.kid
-}
-
-func (m *LocalHS256Manager) Algorithm() string {
-	return "HS256"
+	assert.EqualValues(t, m1.PublicKeyID(), m2.PublicKeyID())
 }
