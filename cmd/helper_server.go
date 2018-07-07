@@ -50,53 +50,56 @@ func getHydraSDK() hydra.SDK {
 	return sdk
 }
 
-func refreshRules(m rule.Refresher, fails int) {
+func refreshRules(m rule.Refresher) {
 	duration, _ := time.ParseDuration(viper.GetString("RULES_REFRESH_INTERVAL"))
 	if duration == 0 {
 		duration = time.Second * 30
 	}
 
-	if err := m.Refresh(); err != nil {
-		logger.WithError(err).WithField("retry", fails).Errorln("Unable to refresh rules")
-		if fails > 15 {
-			logger.WithError(err).WithField("retry", fails).Fatalf("Terminating after retry %d\n", fails)
+	var fails int
+	for {
+		if err := m.Refresh(); err != nil {
+			logger.WithError(err).WithField("retry", fails).Errorln("Unable to refresh rules")
+			if fails > 15 {
+				logger.WithError(err).WithField("retry", fails).Fatalf("Terminating after retry %d\n", fails)
+			}
+
+			time.Sleep(time.Second * time.Duration(fails+1))
+
+			fails++
+		} else {
+			time.Sleep(duration)
+			fails = 0
 		}
-
-		time.Sleep(time.Second * time.Duration(fails+1))
-		refreshRules(m, fails+1)
-		return
 	}
-
-	time.Sleep(duration)
-
-	refreshRules(m, 0)
 }
 
-func refreshKeys(k rsakey.Manager, fails int) {
+func refreshKeys(k rsakey.Manager) {
 	duration, _ := time.ParseDuration(viper.GetString("CREDENTIALS_ISSUER_ID_TOKEN_JWK_REFRESH_INTERVAL"))
 	if duration == 0 {
 		duration = time.Minute * 5
 	}
 
-	if err := k.Refresh(); err != nil {
-		logger.WithError(err).WithField("retry", fails).Errorln("Unable to refresh keys for signing ID Token, 'id_token' credentials issuer will not work.")
-		//if fails > 15 {
-		//	logger.WithError(err).WithField("retry", fails).Fatalf("Terminating after retry %d\n", fails)
-		//}
+	var fails int
+	for {
+		if err := k.Refresh(); err != nil {
+			logger.WithError(err).WithField("retry", fails).Errorln("Unable to refresh keys for signing ID Token, 'id_token' credentials issuer will not work.")
+			//if fails > 15 {
+			//	logger.WithError(err).WithField("retry", fails).Fatalf("Terminating after retry %d\n", fails)
+			//}
 
-		wait := fails
-		if wait > 10 {
-			wait = 10
+			wait := fails
+			if wait > 10 {
+				wait = 10
+			}
+			time.Sleep(time.Second * time.Duration(wait^2))
+
+			fails++
+		} else {
+			fails = 0
+			time.Sleep(duration)
 		}
-		time.Sleep(time.Second * time.Duration(wait^2))
-
-		refreshKeys(k, fails+1)
-		return
 	}
-
-	time.Sleep(duration)
-
-	refreshKeys(k, 1)
 }
 
 func keyManagerFactory(l logrus.FieldLogger) (keyManager rsakey.Manager, err error) {
