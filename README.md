@@ -15,6 +15,8 @@ Model is designed by [Google](https://cloud.google.com/beyondcorp/) and secures 
 An Identity & Access Proxy is typically deployed in front of (think API Gateway) web-facing applications and is capable
 of authenticating and optionally authorizing access requests.
 
+While the full feature set of the BeyondCorp Whitepaper is not yet implemented, the goal of this project is to achieve this in the future.
+
 ORY Oathkeeper is a reverse proxy which evaluates incoming HTTP requests based on a set of rules that are defined
 by administartive users. ORY Oathkeeper is thus capable of:
 
