@@ -3,6 +3,8 @@
 **Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
 
 - [Change Log](#change-log)
+  - [Unreleased](#unreleased)
+  - [v1.0.0-beta.6 (2018-07-11)](#v100-beta6-2018-07-11)
   - [v1.0.0-beta.5 (2018-07-07)](#v100-beta5-2018-07-07)
   - [v1.0.0-beta.4 (2018-06-14)](#v100-beta4-2018-06-14)
   - [v1.0.0-beta.3 (2018-06-13)](#v100-beta3-2018-06-13)
@@ -42,6 +44,17 @@
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 # Change Log
+
+## [Unreleased](https://github.com/ory/oathkeeper/tree/HEAD)
+
+[Full Changelog](https://github.com/ory/oathkeeper/compare/v1.0.0-beta.6...HEAD)
+
+**Merged pull requests:**
+
+- README: grammatical fix in stability sentence [\#86](https://github.com/ory/oathkeeper/pull/86) ([philips](https://github.com/philips))
+
+## [v1.0.0-beta.6](https://github.com/ory/oathkeeper/tree/v1.0.0-beta.6) (2018-07-11)
+[Full Changelog](https://github.com/ory/oathkeeper/compare/v1.0.0-beta.5...v1.0.0-beta.6)
 
 ## [v1.0.0-beta.5](https://github.com/ory/oathkeeper/tree/v1.0.0-beta.5) (2018-07-07)
 [Full Changelog](https://github.com/ory/oathkeeper/compare/v1.0.0-beta.4...v1.0.0-beta.5)
