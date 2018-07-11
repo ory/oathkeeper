@@ -24,7 +24,7 @@ by administartive users. ORY Oathkeeper is thus capable of:
 * Restricting access to certain resources based on a set of rules (authorization).
 * Transforms access credentials (e.g. OAuth2 Access Tokens, SAML Assertions, ...) to a format (e.g. JSON Web Token, Plaintext, Basic Authorization, ...) consumable by your API services.
 
-This service stable, but under active development and may introduce breaking changes in future releases. Any breaking change will have extensive documentation and upgrade instructions.
+This service is stable, but under active development and may introduce breaking changes in future releases. Any breaking change will have extensive documentation and upgrade instructions.
 
 [![CircleCI](https://circleci.com/gh/ory/oathkeeper.svg?style=shield&circle-token=eb458bf636326d41674141b6bbfa475a39c9db1e)](https://circleci.com/gh/ory/oathkeeper)
 [![Coverage Status](https://coveralls.io/repos/github/ory/oathkeeper/badge.svg?branch=master)](https://coveralls.io/github/ory/oathkeeper?branch=master)
