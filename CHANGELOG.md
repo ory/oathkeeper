@@ -51,6 +51,7 @@
 
 **Merged pull requests:**
 
+- docs: fix broken link [\#87](https://github.com/ory/oathkeeper/pull/87) ([orisano](https://github.com/orisano))
 - README: grammatical fix in stability sentence [\#86](https://github.com/ory/oathkeeper/pull/86) ([philips](https://github.com/philips))
 
 ## [v1.0.0-beta.6](https://github.com/ory/oathkeeper/tree/v1.0.0-beta.6) (2018-07-11)
