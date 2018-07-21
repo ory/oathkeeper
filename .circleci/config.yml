@@ -62,7 +62,7 @@ jobs:
       # Submit coverage details
       - run: test -z "$CIRCLE_PR_NUMBER" && goveralls -service=circle-ci -coverprofile=coverage.txt -repotoken=$COVERALLS_REPO_TOKEN || echo "forks are not allowed to push to coveralls"
 
-  test-docker:
+  build-docker:
     docker:
       - image: library/docker:17.10
     steps:
@@ -72,7 +72,7 @@ jobs:
       - run: docker build -f Dockerfile -t oathkeeper-test .
       - run: docker run oathkeeper-test version
 
-  release:
+  release-docker:
     docker:
       - image: circleci/golang:1.10
     working_directory: /go/src/github.com/ory/oathkeeper
@@ -86,7 +86,7 @@ jobs:
       - run: docker push oryd/oathkeeper:$CIRCLE_TAG
       - run: docker push oryd/oathkeeper:latest
 
-  publish-docs:
+  release-docs:
     docker:
       - image: alpine/git:1.0.4
     working_directory: /go/src/github.com/ory/oathkeeper
@@ -98,7 +98,7 @@ jobs:
       - run: "cp ./docs/api.swagger.json ../docs/apis/oathkeeper.json"
       - run: "(cd ../docs && git add -A && git commit -a -m \"Updates ORY Oathkeeper Swagger definitions\" && git push origin) || exit 0"
 
-  changelog:
+  release-changelog:
     docker:
       - image: circleci/ruby:2.4-node
     steps:
@@ -118,6 +118,19 @@ jobs:
       - run: git remote add origin https://arekkas:$GITHUB_TOKEN@github.com/ory/oathkeeper.git
       - run: git push origin HEAD:master || true
 
+  release-binaries:
+    docker:
+      - image: circleci/golang:1.10
+    working_directory: /go/src/github.com/ory/oathkeeper
+    steps:
+      - checkout
+      - run: curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
+      - run: go get -u github.com/mitchellh/gox github.com/tcnksm/ghr
+      - run: dep ensure -vendor-only
+      - run: |
+          gox -parallel=2 -ldflags "-X github.com/ory/oathkeeper/cmd.Version=`git describe --tags` -X github.com/ory/oathkeeper/cmd.BuildTime=`TZ=UTC date -u '+%Y-%m-%dT%H:%M:%SZ'` -X github.com/ory/oathkeeper/cmd.GitHash=`git rev-parse HEAD`" -output "dist/{{.Dir}}-{{.OS}}-{{.Arch}}";
+      - run: ghr -t $GITHUB_TOKEN -u $CIRCLE_PROJECT_USERNAME -r $CIRCLE_PROJECT_REPONAME --replace `git describe --tags` dist/
+
 workflows:
   version: 2
   "test, build, and relase":
@@ -130,19 +143,15 @@ workflows:
           filters:
             tags:
               only: /.*/
+      - release-docs:
+          filters:
+            branches:
+              only: master
       - swagger:
           filters:
             tags:
               only: /.*/
-      - publish-docs:
-          filters:
-            branches:
-              only: master
-      - changelog:
-          filters:
-            branches:
-              only: master
-      - test-docker:
+      - build-docker:
           requires:
             - test
             - swagger
@@ -150,9 +159,26 @@ workflows:
           filters:
             tags:
               only: /.*/
-      - release:
+      - release-binaries:
           requires:
-            - test-docker
+            - build-docker
+          filters:
+            tags:
+              only: /.*/
+            branches:
+              ignore: /.*/
+      - release-docker:
+          requires:
+            - build-docker
+          filters:
+            tags:
+              only: /.*/
+            branches:
+              ignore: /.*/
+      - release-changelog:
+          requires:
+            - release-docker
+            - release-binaries
           filters:
             tags:
               only: /.*/
