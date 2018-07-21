@@ -49,9 +49,9 @@ func connectToSql(dburl string) (*sqlx.DB, error) {
 	return nil, errors.Errorf(`Unknown DSN "%s" in DATABASE_URL: %s`, u.Scheme, dburl)
 }
 
-func newRuleManager(dburl string) (rule.Manager, error) {
+func connectToDatabase(dburl string) (interface{}, error) {
 	if dburl == "memory" {
-		return &rule.MemoryManager{Rules: map[string]rule.Rule{}}, nil
+		return nil, nil
 	} else if dburl == "" {
 		return nil, errors.New("No database URL provided")
 	}
@@ -61,5 +61,18 @@ func newRuleManager(dburl string) (rule.Manager, error) {
 		return nil, errors.WithStack(err)
 	}
 
-	return rule.NewSQLManager(db), nil
+	return db, nil
+}
+
+func newRuleManager(database interface{}) (rule.Manager, error) {
+	if database == nil {
+		return &rule.MemoryManager{Rules: map[string]rule.Rule{}}, nil
+	}
+
+	switch db := database.(type) {
+	case *sqlx.DB:
+		return rule.NewSQLManager(db), nil
+	default:
+		return nil, errors.New("Unknown database type")
+	}
 }

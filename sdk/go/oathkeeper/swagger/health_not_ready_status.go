@@ -10,13 +10,8 @@
 
 package swagger
 
-type AuthenticationOAuth2ClientCredentialsRequest struct {
+type HealthNotReadyStatus struct {
 
-	// Token is the token to introspect.
-	Id string `json:"id,omitempty"`
-
-	// Scope is an array of scopes that are required.
-	Scope []string `json:"scope,omitempty"`
-
-	Secret string `json:"secret,omitempty"`
+	// Errors contains a list of errors that caused the not ready status.
+	Errors map[string]string `json:"errors,omitempty"`
 }
