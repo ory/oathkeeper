@@ -23,11 +23,14 @@ All URIs are relative to *http://localhost*
 Class | Method | HTTP request | Description
 ------------ | ------------- | ------------- | -------------
 *DefaultApi* | [**GetWellKnown**](docs/DefaultApi.md#getwellknown) | **Get** /.well-known/jwks.json | Returns well known keys
+*HealthApi* | [**IsInstanceAlive**](docs/HealthApi.md#isinstancealive) | **Get** /health/alive | Check the Alive Status
+*HealthApi* | [**IsInstanceReady**](docs/HealthApi.md#isinstanceready) | **Get** /health/ready | Check the Readiness Status
 *RuleApi* | [**CreateRule**](docs/RuleApi.md#createrule) | **Post** /rules | Create a rule
 *RuleApi* | [**DeleteRule**](docs/RuleApi.md#deleterule) | **Delete** /rules/{id} | Delete a rule
 *RuleApi* | [**GetRule**](docs/RuleApi.md#getrule) | **Get** /rules/{id} | Retrieve a rule
 *RuleApi* | [**ListRules**](docs/RuleApi.md#listrules) | **Get** /rules | List all rules
 *RuleApi* | [**UpdateRule**](docs/RuleApi.md#updaterule) | **Put** /rules/{id} | Update a rule
+*VersionApi* | [**GetVersion**](docs/VersionApi.md#getversion) | **Get** /version | Get the version of Oathkeeper
 
 
 ## Documentation For Models
@@ -38,6 +41,8 @@ Class | Method | HTTP request | Description
  - [AuthenticationOAuth2IntrospectionRequest](docs/AuthenticationOAuth2IntrospectionRequest.md)
  - [AuthenticationOAuth2Session](docs/AuthenticationOAuth2Session.md)
  - [Authenticator](docs/Authenticator.md)
+ - [HealthNotReadyStatus](docs/HealthNotReadyStatus.md)
+ - [HealthStatus](docs/HealthStatus.md)
  - [InlineResponse401](docs/InlineResponse401.md)
  - [IntrospectionResponse](docs/IntrospectionResponse.md)
  - [JsonWebKey](docs/JsonWebKey.md)
@@ -55,6 +60,7 @@ Class | Method | HTTP request | Description
  - [SwaggerRulesResponse](docs/SwaggerRulesResponse.md)
  - [SwaggerUpdateRuleParameters](docs/SwaggerUpdateRuleParameters.md)
  - [Upstream](docs/Upstream.md)
+ - [Version](docs/Version.md)
 
 
 ## Documentation For Authorization

@@ -10,6 +10,8 @@
 
 package swagger
 
-// It implements Marshaler and Unmarshaler and can be used to delay JSON decoding or precompute a JSON encoding.
-type RawMessage struct {
+type HealthStatus struct {
+
+	// Status always contains \"ok\".
+	Status string `json:"status,omitempty"`
 }

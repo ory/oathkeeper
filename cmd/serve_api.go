@@ -63,7 +63,12 @@ HTTP CONTROLS
 
 ` + corsMessage,
 	Run: func(cmd *cobra.Command, args []string) {
-		rules, err := newRuleManager(viper.GetString("DATABASE_URL"))
+		db, err := connectToDatabase(viper.GetString("DATABASE_URL"))
+		if err != nil {
+			logger.WithError(err).Fatalln("Unable to initialize database connectivity")
+		}
+
+		rules, err := newRuleManager(db)
 		if err != nil {
 			logger.WithError(err).Fatalln("Unable to connect to rule backend")
 		}
@@ -84,8 +89,10 @@ HTTP CONTROLS
 		))
 		keyHandler := rsakey.NewHandler(writer, keyManager)
 		router := httprouter.New()
+		health := newHealthHandler(db, writer, router)
 		ruleHandler.SetRoutes(router)
 		keyHandler.SetRoutes(router)
+		health.SetRoutes(router)
 
 		n := negroni.New()
 		n.Use(negronilogrus.NewMiddlewareFromLogger(logger, "oathkeeper-api"))

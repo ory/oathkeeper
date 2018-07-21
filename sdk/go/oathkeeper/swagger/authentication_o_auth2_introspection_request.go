@@ -12,7 +12,7 @@ package swagger
 
 type AuthenticationOAuth2IntrospectionRequest struct {
 
-	// Scopes is an array of scopes that are required.
+	// Scope is an array of scopes that are required.
 	Scope []string `json:"scope,omitempty"`
 
 	// Token is the token to introspect.

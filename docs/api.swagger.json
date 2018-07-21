@@ -50,6 +50,51 @@
         }
       }
     },
+    "/health/alive": {
+      "get": {
+        "description": "This endpoint returns a 200 status code when the HTTP server is up running.\nThis status does currently not include checks whether the database connection is working.\nThis endpoint does not require the `X-Forwarded-Proto` header when TLS termination is set.\n\nBe aware that if you are running multiple nodes of ORY Oathkeeper, the health status will never refer to the cluster state, only to a single instance.",
+        "tags": [
+          "health"
+        ],
+        "summary": "Check the Alive Status",
+        "operationId": "isInstanceAlive",
+        "responses": {
+          "200": {
+            "description": "healthStatus",
+            "schema": {
+              "$ref": "#/definitions/healthStatus"
+            }
+          },
+          "500": {
+            "$ref": "#/responses/genericError"
+          }
+        }
+      }
+    },
+    "/health/ready": {
+      "get": {
+        "description": "This endpoint returns a 200 status code when the HTTP server is up running and the environment dependencies (e.g.\nthe database) are responsive as well.\n\nThis status does currently not include checks whether the database connection is working.\nThis endpoint does not require the `X-Forwarded-Proto` header when TLS termination is set.\n\nBe aware that if you are running multiple nodes of ORY Oathkeeper, the health status will never refer to the cluster state, only to a single instance.",
+        "tags": [
+          "health"
+        ],
+        "summary": "Check the Readiness Status",
+        "operationId": "isInstanceReady",
+        "responses": {
+          "200": {
+            "description": "healthStatus",
+            "schema": {
+              "$ref": "#/definitions/healthStatus"
+            }
+          },
+          "503": {
+            "description": "healthNotReadyStatus",
+            "schema": {
+              "$ref": "#/definitions/healthNotReadyStatus"
+            }
+          }
+        }
+      }
+    },
     "/rules": {
       "get": {
         "description": "This method returns an array of all rules that are stored in the backend. This is useful if you want to get a full\nview of what rules you have currently in place.",
@@ -283,6 +328,24 @@
           }
         }
       }
+    },
+    "/version": {
+      "get": {
+        "description": "This endpoint returns the version as `{ \"version\": \"VERSION\" }`. The version is only correct with the prebuilt binary and not custom builds.",
+        "tags": [
+          "version"
+        ],
+        "summary": "Get the version of Oathkeeper",
+        "operationId": "getVersion",
+        "responses": {
+          "200": {
+            "description": "version",
+            "schema": {
+              "$ref": "#/definitions/version"
+            }
+          }
+        }
+      }
     }
   },
   "definitions": {
@@ -295,7 +358,7 @@
           "x-go-name": "ClientID"
         },
         "scope": {
-          "description": "Scopes is an array of scopes that are required.",
+          "description": "Scope is an array of scopes that are required.",
           "type": "array",
           "items": {
             "type": "string"
@@ -313,12 +376,12 @@
       "type": "object",
       "properties": {
         "scope": {
-          "description": "Scopes is an array of scopes that are required.",
+          "description": "Scope is an array of scopes that are required.",
           "type": "array",
           "items": {
             "type": "string"
           },
-          "x-go-name": "Scopes"
+          "x-go-name": "Scope"
         },
         "token": {
           "description": "Token is the token to introspect.",
@@ -386,6 +449,10 @@
           "type": "string",
           "x-go-name": "Subject"
         },
+        "token_type": {
+          "type": "string",
+          "x-go-name": "TokenType"
+        },
         "username": {
           "type": "string",
           "x-go-name": "Username"
@@ -439,7 +506,7 @@
           "type": "boolean",
           "x-go-name": "Allowed"
         },
-        "subject": {
+        "sub": {
           "description": "Subject is the identity that authorized issuing the token, for example a user or an OAuth2 app.\nThis is usually a uuid but you can choose a urn or some other id too.",
           "type": "string",
           "x-go-name": "Subject"
@@ -456,7 +523,7 @@
           "type": "boolean",
           "x-go-name": "Allowed"
         },
-        "subject": {
+        "sub": {
           "description": "Subject is the identity that authorized issuing the token, for example a user or an OAuth2 app.\nThis is usually a uuid but you can choose a urn or some other id too.",
           "type": "string",
           "x-go-name": "Subject"
@@ -473,7 +540,7 @@
           "type": "boolean",
           "x-go-name": "Allowed"
         },
-        "audience": {
+        "aud": {
           "type": "array",
           "items": {
             "type": "string"
@@ -485,35 +552,32 @@
           "type": "string",
           "x-go-name": "ClientID"
         },
-        "expires_at": {
+        "exp": {
           "description": "ExpiresAt is the expiry timestamp.",
           "type": "string",
           "format": "date-time",
           "x-go-name": "ExpiresAt"
         },
-        "granted_scope": {
-          "description": "GrantedScopes is a list of scopes that the subject authorized when asked for consent.",
-          "type": "array",
-          "items": {
-            "type": "string"
-          },
-          "x-go-name": "GrantedScopes"
-        },
-        "issued_at": {
+        "iat": {
           "description": "IssuedAt is the token creation time stamp.",
           "type": "string",
           "format": "date-time",
           "x-go-name": "IssuedAt"
         },
-        "issuer": {
+        "iss": {
           "description": "Issuer is the id of the issuer, typically an hydra instance.",
           "type": "string",
           "x-go-name": "Issuer"
         },
-        "not_before": {
+        "nbf": {
           "type": "string",
           "format": "date-time",
           "x-go-name": "NotBefore"
+        },
+        "scope": {
+          "description": "GrantedScopes is a list of scopes that the subject authorized when asked for consent.",
+          "type": "string",
+          "x-go-name": "GrantedScopes"
         },
         "session": {
           "description": "Session represents arbitrary session data.",
@@ -523,7 +587,7 @@
           },
           "x-go-name": "Extra"
         },
-        "subject": {
+        "sub": {
           "description": "Subject is the identity that authorized issuing the token, for example a user or an OAuth2 app.\nThis is usually a uuid but you can choose a urn or some other id too.",
           "type": "string",
           "x-go-name": "Subject"
@@ -535,6 +599,33 @@
       },
       "x-go-name": "OAuth2Session",
       "x-go-package": "github.com/ory/oathkeeper/vendor/github.com/ory/keto/authentication"
+    },
+    "healthNotReadyStatus": {
+      "type": "object",
+      "properties": {
+        "errors": {
+          "description": "Errors contains a list of errors that caused the not ready status.",
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "x-go-name": "Errors"
+        }
+      },
+      "x-go-name": "swaggerNotReadyStatus",
+      "x-go-package": "github.com/ory/oathkeeper/health"
+    },
+    "healthStatus": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "description": "Status always contains \"ok\".",
+          "type": "string",
+          "x-go-name": "Status"
+        }
+      },
+      "x-go-name": "swaggerHealthStatus",
+      "x-go-package": "github.com/ory/oathkeeper/health"
     },
     "jsonWebKey": {
       "type": "object",
@@ -790,6 +881,17 @@
         }
       },
       "x-go-package": "github.com/ory/oathkeeper/rule"
+    },
+    "version": {
+      "type": "object",
+      "properties": {
+        "version": {
+          "type": "string",
+          "x-go-name": "Version"
+        }
+      },
+      "x-go-name": "swaggerVersion",
+      "x-go-package": "github.com/ory/oathkeeper/health"
     }
   },
   "responses": {

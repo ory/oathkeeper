@@ -10,13 +10,6 @@
 
 package swagger
 
-type AuthenticationOAuth2ClientCredentialsRequest struct {
-
-	// Token is the token to introspect.
-	Id string `json:"id,omitempty"`
-
-	// Scope is an array of scopes that are required.
-	Scope []string `json:"scope,omitempty"`
-
-	Secret string `json:"secret,omitempty"`
+type Version struct {
+	Version string `json:"version,omitempty"`
 }
