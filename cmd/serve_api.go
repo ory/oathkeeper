@@ -30,6 +30,8 @@ import (
 	"github.com/ory/graceful"
 	"github.com/ory/herodot"
 	"github.com/ory/metrics-middleware"
+	"github.com/ory/oathkeeper/judge"
+	"github.com/ory/oathkeeper/proxy"
 	"github.com/ory/oathkeeper/rsakey"
 	"github.com/ory/oathkeeper/rule"
 	"github.com/rs/cors"
@@ -78,17 +80,23 @@ HTTP CONTROLS
 			logger.WithError(err).Fatalln("Unable to initialize the ID Token signing algorithm")
 		}
 
+		matcher := rule.NewCachedMatcher(rules)
+
 		enabledAuthenticators, enabledAuthorizers, enabledCredentialIssuers := enabledHandlerNames()
 		availableAuthenticators, availableAuthorizers, availableCredentialIssuers := availableHandlerNames()
 
+		authenticators, authorizers, credentialIssuers := handlerFactories(keyManager)
+		eval := proxy.NewRequestHandler(logger, authenticators, authorizers, credentialIssuers)
+
+		router := httprouter.New()
 		writer := herodot.NewJSONWriter(logger)
 		ruleHandler := rule.NewHandler(writer, rules, rule.ValidateRule(
 			enabledAuthenticators, availableAuthenticators,
 			enabledAuthorizers, availableAuthorizers,
 			enabledCredentialIssuers, availableCredentialIssuers,
 		))
+		judgeHandler := judge.NewHandler(eval, logger, matcher, router)
 		keyHandler := rsakey.NewHandler(writer, keyManager)
-		router := httprouter.New()
 		health := newHealthHandler(db, writer, router)
 		ruleHandler.SetRoutes(router)
 		keyHandler.SetRoutes(router)
@@ -113,7 +121,7 @@ HTTP CONTROLS
 			n.Use(segmentMiddleware)
 		}
 
-		n.UseHandler(router)
+		n.UseHandler(judgeHandler)
 		ch := cors.New(corsx.ParseOptions()).Handler(n)
 
 		go refreshKeys(keyManager)
