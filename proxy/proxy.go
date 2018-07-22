@@ -111,7 +111,7 @@ func (d *Proxy) RoundTrip(r *http.Request) (*http.Response, error) {
 }
 
 func (d *Proxy) Director(r *http.Request) {
-	enrichRequestedURL(r)
+	EnrichRequestedURL(r)
 	rl, err := d.Matcher.MatchRule(r.Method, r.URL)
 	if err != nil {
 		*r = *r.WithContext(context.WithValue(r.Context(), director, err))
@@ -132,9 +132,9 @@ func (d *Proxy) Director(r *http.Request) {
 	*r = *r.WithContext(context.WithValue(r.Context(), director, en))
 }
 
-// enrichRequestedURL sets Scheme and Host values in a URL passed down by a http server. Per default, the URL
+// EnrichRequestedURL sets Scheme and Host values in a URL passed down by a http server. Per default, the URL
 // does not contain host nor scheme values.
-func enrichRequestedURL(r *http.Request) {
+func EnrichRequestedURL(r *http.Request) {
 	r.URL.Scheme = "http"
 	r.URL.Host = r.Host
 	if r.TLS != nil {

@@ -25,6 +25,7 @@ Class | Method | HTTP request | Description
 *DefaultApi* | [**GetWellKnown**](docs/DefaultApi.md#getwellknown) | **Get** /.well-known/jwks.json | Returns well known keys
 *HealthApi* | [**IsInstanceAlive**](docs/HealthApi.md#isinstancealive) | **Get** /health/alive | Check the Alive Status
 *HealthApi* | [**IsInstanceReady**](docs/HealthApi.md#isinstanceready) | **Get** /health/ready | Check the Readiness Status
+*JudgeApi* | [**Judge**](docs/JudgeApi.md#judge) | **Get** /judge | Judge if a request should be allowed or not
 *RuleApi* | [**CreateRule**](docs/RuleApi.md#createrule) | **Post** /rules | Create a rule
 *RuleApi* | [**DeleteRule**](docs/RuleApi.md#deleterule) | **Delete** /rules/{id} | Delete a rule
 *RuleApi* | [**GetRule**](docs/RuleApi.md#getrule) | **Get** /rules/{id} | Retrieve a rule
