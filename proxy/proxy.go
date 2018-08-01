@@ -143,6 +143,10 @@ func EnrichRequestedURL(r *http.Request) {
 }
 
 func configureBackendURL(r *http.Request, rl *rule.Rule) error {
+	if rl.Upstream.URL == "" {
+		return errors.Errorf("Unable to forward the request because matched rule does not define an upstream URL")
+	}
+
 	p, err := url.Parse(rl.Upstream.URL)
 	if err != nil {
 		return errors.WithStack(err)

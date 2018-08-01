@@ -41,6 +41,9 @@ func ValidateRule(
 		// if !govalidator.IsURL(r.Match.URL) {
 		// 	 return errors.WithStack(helper.ErrBadRequest.WithReason(fmt.Sprintf("Value \"%s\" from match.url field is not a valid url.", r.Match.URL)))
 		// }
+		if r.Match.URL == "" {
+			return errors.WithStack(helper.ErrBadRequest.WithReason(fmt.Sprintf("Value \"%s\" from match.url field is not a valid url.", r.Match.URL)))
+		}
 
 		for _, m := range r.Match.Methods {
 			if !stringslice.Has(methods, m) {
@@ -48,7 +51,9 @@ func ValidateRule(
 			}
 		}
 
-		if !govalidator.IsURL(r.Upstream.URL) {
+		if r.Upstream.URL == "" {
+			// Having no upstream URL is fine here because the judge does not need an upstream!
+		} else if !govalidator.IsURL(r.Upstream.URL) {
 			return errors.WithStack(helper.ErrBadRequest.WithReason(fmt.Sprintf("Value \"%s\" from upstream.url field is not a valid url.", r.Upstream.URL)))
 		}
 
