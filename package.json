@@ -1,7 +1,7 @@
 {
-  "name": "ory-keto-sdk",
+  "name": "ory-oathkeeper-sdk",
   "version": "0.0.0",
-  "description": "The official JavaScript / NodeJS SDK for ORY Keto.",
+  "description": "The official JavaScript / NodeJS SDK for ORY Oathkeeper.",
   "license": "Apache-2.0",
   "main": "sdk/js/swagger/src/index.js",
   "scripts": {
