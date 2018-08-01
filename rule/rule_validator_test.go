@@ -39,17 +39,17 @@ func TestValidateRule(t *testing.T) {
 
 	assertReason(t, v(&Rule{}), "from match.url field is not a valid url.")
 
-	assertReason(t, v(&Rule{
-		Match: RuleMatch{URL: "asdf"},
-	}), "from match.url field is not a valid url.")
+	// assertReason(t, v(&Rule{
+	//	 Match: RuleMatch{URL: "asdf"},
+	// }), "from match.url field is not a valid url.")
 
 	assertReason(t, v(&Rule{
 		Match: RuleMatch{URL: "https://www.ory.sh", Methods: []string{"FOO"}},
 	}), "from match.methods is not a valid HTTP method")
 
-	assertReason(t, v(&Rule{
-		Match: RuleMatch{URL: "https://www.ory.sh", Methods: []string{"POST"}},
-	}), "from upstream.url field is not a valid url.")
+	// assertReason(t, v(&Rule{
+	//	 Match: RuleMatch{URL: "https://www.ory.sh", Methods: []string{"POST"}},
+	// }), "from upstream.url field is not a valid url.")
 
 	assertReason(t, v(&Rule{
 		Match:    RuleMatch{URL: "https://www.ory.sh", Methods: []string{"POST"}},
