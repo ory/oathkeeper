@@ -124,7 +124,8 @@ HTTP CONTROLS
 		n.UseHandler(judgeHandler)
 		ch := cors.New(corsx.ParseOptions()).Handler(n)
 
-		go refreshKeys(keyManager)
+		go refreshKeys(keyManager, 0)
+		go refreshRules(matcher, 0)
 
 		addr := fmt.Sprintf("%s:%s", viper.GetString("HOST"), viper.GetString("PORT"))
 		server := graceful.WithDefaults(&http.Server{
