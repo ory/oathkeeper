@@ -37,9 +37,10 @@ func ValidateRule(
 	methods := []string{"GET", "POST", "PUT", "HEAD", "DELETE", "PATCH", "OPTIONS", "TRACE", "CONNECT"}
 
 	return func(r *Rule) error {
-		if !govalidator.IsURL(r.Match.URL) {
-			return errors.WithStack(helper.ErrBadRequest.WithReason(fmt.Sprintf("Value \"%s\" from match.url field is not a valid url.", r.Match.URL)))
-		}
+		// This is disabled because it doesn't support checking for regular expressions (obviously).
+		// if !govalidator.IsURL(r.Match.URL) {
+		// 	 return errors.WithStack(helper.ErrBadRequest.WithReason(fmt.Sprintf("Value \"%s\" from match.url field is not a valid url.", r.Match.URL)))
+		// }
 
 		for _, m := range r.Match.Methods {
 			if !stringslice.Has(methods, m) {
