@@ -12,9 +12,15 @@ rm -rf ./sdk/js/swagger
 # curl -O scripts/swagger-codegen-cli-2.2.3.jar http://central.maven.org/maven2/io/swagger/swagger-codegen-cli/2.2.3/swagger-codegen-cli-2.2.3.jar
 
 java -jar scripts/swagger-codegen-cli-2.2.3.jar generate -i ./docs/api.swagger.json -l go -o ./sdk/go/oathkeeper/swagger
+java -jar scripts/swagger-codegen-cli-2.2.3.jar generate -i ./docs/api.swagger.json -l javascript -o ./sdk/js/swagger
 
 scripts/run-format.sh
 
 git checkout HEAD -- sdk/go/oathkeeper/swagger/rule_handler.go
 
 git add -A .
+
+rm -f ./sdk/js/swagger/package.json
+rm -rf ./sdk/js/swagger/test
+
+npm run prettier

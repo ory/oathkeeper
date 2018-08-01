@@ -1,0 +1,9 @@
+# OryOathkeeper.SwaggerUpdateRuleParameters
+
+## Properties
+Name | Type | Description | Notes
+------------ | ------------- | ------------- | -------------
+**body** | [**Rule**](Rule.md) |  | [optional] 
+**id** | **String** | in: path | 
+
+
