@@ -1,0 +1,21 @@
+{
+  "name": "ory_oathkeeper",
+  "version": "Latest",
+  "description": "ORY_Oathkeeper_is_a_reverse_proxy_that_checks_the_HTTP_Authorization_for_validity_against_a_set_of_rules__This_service_uses_Hydra_to_validate_access_tokens_and_policies_",
+  "license": "Unlicense",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "./node_modules/mocha/bin/mocha --recursive"
+  },
+  "browser": {
+    "fs": false
+  },
+  "dependencies": {
+    "superagent": "3.5.2"
+  },
+  "devDependencies": {
+    "mocha": "~2.3.4",
+    "sinon": "1.17.3",
+    "expect.js": "~0.3.1"
+  }
+}
