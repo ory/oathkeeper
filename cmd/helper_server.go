@@ -50,10 +50,12 @@ func getHydraSDK() hydra.SDK {
 	return sdk
 }
 
-func refreshRules(m rule.Refresher) {
-	duration, _ := time.ParseDuration(viper.GetString("RULES_REFRESH_INTERVAL"))
+func refreshRules(m rule.Refresher, duration time.Duration) {
 	if duration == 0 {
-		duration = time.Second * 30
+		duration, _ = time.ParseDuration(viper.GetString("RULES_REFRESH_INTERVAL"))
+		if duration == 0 {
+			duration = time.Second * 30
+		}
 	}
 
 	var fails int
@@ -74,10 +76,12 @@ func refreshRules(m rule.Refresher) {
 	}
 }
 
-func refreshKeys(k rsakey.Manager) {
-	duration, _ := time.ParseDuration(viper.GetString("CREDENTIALS_ISSUER_ID_TOKEN_JWK_REFRESH_INTERVAL"))
+func refreshKeys(k rsakey.Manager, duration time.Duration) {
 	if duration == 0 {
-		duration = time.Minute * 5
+		duration, _ = time.ParseDuration(viper.GetString("CREDENTIALS_ISSUER_ID_TOKEN_JWK_REFRESH_INTERVAL"))
+		if duration == 0 {
+			duration = time.Minute * 5
+		}
 	}
 
 	var fails int
