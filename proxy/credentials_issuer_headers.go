@@ -19,7 +19,7 @@ type CredentialsHeaders struct {
 
 func NewCredentialsIssuerHeaders() *CredentialsHeaders {
 	return &CredentialsHeaders{
-		rulesCache: template.New("rules"),
+		rulesCache: template.New("rules").Option("missingkey=zero"),
 	}
 }
 
@@ -38,6 +38,8 @@ func (a *CredentialsHeaders) Issue(r *http.Request, session *AuthenticationSessi
 		return errors.WithStack(err)
 	}
 
+	convertedSession := convertSession(session)
+
 	for hdr, templateString := range cfg {
 		var tmpl *template.Template
 		var err error
@@ -52,7 +54,7 @@ func (a *CredentialsHeaders) Issue(r *http.Request, session *AuthenticationSessi
 		}
 
 		headerValue := bytes.Buffer{}
-		err = tmpl.Execute(&headerValue, session)
+		err = tmpl.Execute(&headerValue, convertedSession)
 		if err != nil {
 			return errors.Wrapf(err, `error executing header template "%s" in rule "%s"`, templateString, rl.ID)
 		}
@@ -60,4 +62,22 @@ func (a *CredentialsHeaders) Issue(r *http.Request, session *AuthenticationSessi
 	}
 
 	return nil
+}
+
+type authSession struct {
+	Subject string
+	Extra   map[string]string
+}
+
+func convertSession(in *AuthenticationSession) *authSession {
+	out := authSession{
+		Subject: in.Subject,
+		Extra:   map[string]string{},
+	}
+
+	for k, v := range in.Extra {
+		out.Extra[k] = fmt.Sprintf("%s", v)
+	}
+
+	return &out
 }
