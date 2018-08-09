@@ -73,12 +73,4 @@ func TestCredentialsIssuerHeaders(t *testing.T) {
 			assert.Equal(t, specs.Match, specs.Request.Header)
 		})
 	}
-
-	/*
-		t.Run("Test Template Caching", func(t *testing.T) {
-			for testName, specs := range testMap {
-
-			}
-		})
-	*/
 }
