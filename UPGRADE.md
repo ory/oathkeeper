@@ -16,6 +16,15 @@ before finalizing the upgrade process.
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
+## 1.0.0-beta.8
+
+### `noop` authenticator no longer bypasses authorizers/credentials issuers
+
+The `noop` authenticator is now very similar to `anonymous` with the difference that no anonymous subject is being
+set.
+
+Previously, the `noop` authenticator bypassed the authorizer and credential issuers. This patch changes that.
+
 ## 1.0.0-beta.2
 
 This release introduces serious breaking changes. If you are upgrading, you will - unfortunately - need to

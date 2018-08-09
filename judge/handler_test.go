@@ -34,7 +34,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestProxy(t *testing.T) {
+func TestJudge(t *testing.T) {
 	matcher := &rule.CachedMatcher{Rules: map[string]rule.Rule{}}
 	rh := proxy.NewRequestHandler(
 		nil,
@@ -50,14 +50,18 @@ func TestProxy(t *testing.T) {
 	defer ts.Close()
 
 	ruleNoOpAuthenticator := rule.Rule{
-		Match:          rule.RuleMatch{Methods: []string{"GET"}, URL: ts.URL + "/authn-noop/<[0-9]+>"},
-		Authenticators: []rule.RuleHandler{{Handler: "noop"}},
-		Upstream:       rule.Upstream{URL: ""},
+		Match:             rule.RuleMatch{Methods: []string{"GET"}, URL: ts.URL + "/authn-noop/<[0-9]+>"},
+		Authenticators:    []rule.RuleHandler{{Handler: "noop"}},
+		Authorizer:        rule.RuleHandler{Handler: proxy.NewAuthorizerAllow().GetID()},
+		CredentialsIssuer: rule.RuleHandler{Handler: proxy.NewCredentialsIssuerNoOp().GetID()},
+		Upstream:          rule.Upstream{URL: ""},
 	}
 	ruleNoOpAuthenticatorModifyUpstream := rule.Rule{
-		Match:          rule.RuleMatch{Methods: []string{"GET"}, URL: ts.URL + "/strip-path/authn-noop/<[0-9]+>"},
-		Authenticators: []rule.RuleHandler{{Handler: "noop"}},
-		Upstream:       rule.Upstream{URL: "", StripPath: "/strip-path/", PreserveHost: true},
+		Match:             rule.RuleMatch{Methods: []string{"GET"}, URL: ts.URL + "/strip-path/authn-noop/<[0-9]+>"},
+		Authenticators:    []rule.RuleHandler{{Handler: "noop"}},
+		Authorizer:        rule.RuleHandler{Handler: proxy.NewAuthorizerAllow().GetID()},
+		CredentialsIssuer: rule.RuleHandler{Handler: proxy.NewCredentialsIssuerNoOp().GetID()},
+		Upstream:          rule.Upstream{URL: "", StripPath: "/strip-path/", PreserveHost: true},
 	}
 
 	for k, tc := range []struct {

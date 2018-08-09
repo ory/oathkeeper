@@ -32,5 +32,5 @@ func TestAuthenticatorNoop(t *testing.T) {
 	assert.NotEmpty(t, NewAuthenticatorNoOp().GetID())
 
 	_, err := NewAuthenticatorNoOp().Authenticate(nil, nil, nil)
-	require.Error(t, err)
+	require.NoError(t, err)
 }
