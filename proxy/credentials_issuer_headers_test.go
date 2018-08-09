@@ -1,9 +1,12 @@
 package proxy
 
 import (
+	"bytes"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"testing"
+	"text/template"
 
 	"github.com/ory/oathkeeper/rule"
 	"github.com/stretchr/testify/assert"
@@ -106,4 +109,30 @@ func TestCredentialsIssuerHeaders(t *testing.T) {
 			assert.Equal(t, specs.Match, specs.Request.Header)
 		})
 	}
+
+	t.Run("Caching", func(t *testing.T) {
+		for _, specs := range testMap {
+			issuer := NewCredentialsIssuerHeaders()
+
+			overrideHeaders := http.Header{}
+
+			cache := template.New("rules")
+
+			var cfg CredentialsHeadersConfig
+			d := json.NewDecoder(bytes.NewBuffer(specs.Config))
+			require.NoError(t, d.Decode(&cfg))
+
+			for hdr, _ := range cfg {
+				templateId := fmt.Sprintf("%s:%s", specs.Rule.ID, hdr)
+				cache.New(templateId).Parse("override")
+				overrideHeaders.Add(hdr, "override")
+			}
+
+			issuer.RulesCache = cache
+
+			require.NoError(t, issuer.Issue(specs.Request, specs.Session, specs.Config, specs.Rule))
+
+			assert.Equal(t, overrideHeaders, specs.Request.Header)
+		}
+	})
 }

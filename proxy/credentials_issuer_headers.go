@@ -14,12 +14,12 @@ import (
 type CredentialsHeadersConfig map[string]string
 
 type CredentialsHeaders struct {
-	rulesCache *template.Template
+	RulesCache *template.Template
 }
 
 func NewCredentialsIssuerHeaders() *CredentialsHeaders {
 	return &CredentialsHeaders{
-		rulesCache: template.New("rules").
+		RulesCache: template.New("rules").
 			Option("missingkey=zero").
 			Funcs(template.FuncMap{
 				"print": func(i interface{}) string {
@@ -52,9 +52,9 @@ func (a *CredentialsHeaders) Issue(r *http.Request, session *AuthenticationSessi
 		var err error
 
 		templateId := fmt.Sprintf("%s:%s", rl.ID, hdr)
-		tmpl = a.rulesCache.Lookup(templateId)
+		tmpl = a.RulesCache.Lookup(templateId)
 		if tmpl == nil {
-			tmpl, err = a.rulesCache.New(templateId).Parse(templateString)
+			tmpl, err = a.RulesCache.New(templateId).Parse(templateString)
 			if err != nil {
 				return errors.Wrapf(err, `error parsing header template "%s" in rule "%s"`, templateString, rl.ID)
 			}
