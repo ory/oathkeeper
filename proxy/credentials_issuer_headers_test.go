@@ -61,6 +61,32 @@ func TestCredentialsIssuerHeaders(t *testing.T) {
 			Request: &http.Request{Header: http.Header{}},
 			Match:   http.Header{"X-Issuer": []string{""}},
 		},
+		"Nested Extras": {
+			Session: &AuthenticationSession{
+				Subject: "foo",
+				Extra: map[string]interface{}{
+					"nested": map[string]interface{}{
+						"int":     int(10),
+						"float64": float64(3.14159),
+						"bool":    true,
+					},
+				},
+			},
+			Rule: &rule.Rule{ID: "test-rule7"},
+			Config: json.RawMessage([]byte(`{
+				"X-Nested-Int": "{{ print .Extra.nested.int }}",
+				"X-Nested-Float64": "{{ print .Extra.nested.float64 }}",
+				"X-Nested-Bool": "{{ print .Extra.nested.bool}}",
+				"X-Nested-Nonexistent": "{{ print .Extra.nested.nil }}"
+			}`)),
+			Request: &http.Request{Header: http.Header{}},
+			Match: http.Header{
+				"X-Nested-Int":         []string{"10"},
+				"X-Nested-Float64":     []string{"3.14159"},
+				"X-Nested-Bool":        []string{"true"},
+				"X-Nested-Nonexistent": []string{""},
+			},
+		},
 	}
 
 	for testName, specs := range testMap {
