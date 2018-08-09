@@ -73,7 +73,9 @@ Usage example:
 			client := oathkeeper.NewSDK(endpoint)
 
 			shouldUpdate := false
-			if _, response, _ := client.GetRule(r.ID); err == nil && response.StatusCode == http.StatusOK {
+			if _, response, err := client.GetRule(r.ID); err != nil {
+				must(err, "Unable to call endpoint %s because %s", endpoint, err)
+			} else if response.StatusCode == http.StatusOK {
 				shouldUpdate = true
 			}
 
