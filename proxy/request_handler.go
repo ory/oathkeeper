@@ -102,10 +102,10 @@ func (d *RequestHandler) HandleRequest(r *http.Request, rl *rule.Rule) error {
 			case ErrAuthenticatorNotResponsible.Error():
 				// The authentication handler is not responsible for handling this request, skip to the next handler
 				break
-			case ErrAuthenticatorBypassed.Error():
-				// The authentication handler says that no further authentication/authorization is required, and the request should
-				// be forwarded to its final destination.
-				return nil
+			//case ErrAuthenticatorBypassed.Error():
+			// The authentication handler says that no further authentication/authorization is required, and the request should
+			// be forwarded to its final destination.
+			//return nil
 			default:
 				d.Logger.WithError(err).
 					WithField("granted", false).

@@ -87,14 +87,18 @@ func TestProxy(t *testing.T) {
 	defer proxy.Close()
 
 	ruleNoOpAuthenticator := rule.Rule{
-		Match:          rule.RuleMatch{Methods: []string{"GET"}, URL: proxy.URL + "/authn-noop/<[0-9]+>"},
-		Authenticators: []rule.RuleHandler{{Handler: "noop"}},
-		Upstream:       rule.Upstream{URL: backend.URL},
+		Match:             rule.RuleMatch{Methods: []string{"GET"}, URL: proxy.URL + "/authn-noop/<[0-9]+>"},
+		Authenticators:    []rule.RuleHandler{{Handler: "noop"}},
+		Authorizer:        rule.RuleHandler{Handler: "allow"},
+		CredentialsIssuer: rule.RuleHandler{Handler: "noop"},
+		Upstream:          rule.Upstream{URL: backend.URL},
 	}
 	ruleNoOpAuthenticatorModifyUpstream := rule.Rule{
-		Match:          rule.RuleMatch{Methods: []string{"GET"}, URL: proxy.URL + "/strip-path/authn-noop/<[0-9]+>"},
-		Authenticators: []rule.RuleHandler{{Handler: "noop"}},
-		Upstream:       rule.Upstream{URL: backend.URL, StripPath: "/strip-path/", PreserveHost: true},
+		Match:             rule.RuleMatch{Methods: []string{"GET"}, URL: proxy.URL + "/strip-path/authn-noop/<[0-9]+>"},
+		Authenticators:    []rule.RuleHandler{{Handler: "noop"}},
+		Authorizer:        rule.RuleHandler{Handler: "allow"},
+		CredentialsIssuer: rule.RuleHandler{Handler: "noop"},
+		Upstream:          rule.Upstream{URL: backend.URL, StripPath: "/strip-path/", PreserveHost: true},
 	}
 
 	//acceptRuleStripHost := rule.Rule{MatchesMethods: []string{"GET"}, MatchesURLCompiled: mustCompileRegex(t, proxy.URL+"/users/<[0-9]+>"), Mode: "pass_through_accept", Upstream: rule.Upstream{URLParsed: u, StripPath: "/users/", PreserveHost: true}}

@@ -5,7 +5,6 @@ import (
 	"net/http"
 
 	"github.com/ory/oathkeeper/rule"
-	"github.com/pkg/errors"
 )
 
 type AuthenticatorNoOp struct{}
@@ -19,5 +18,5 @@ func (a *AuthenticatorNoOp) GetID() string {
 }
 
 func (a *AuthenticatorNoOp) Authenticate(r *http.Request, config json.RawMessage, rl *rule.Rule) (*AuthenticationSession, error) {
-	return nil, errors.WithStack(ErrAuthenticatorBypassed)
+	return &AuthenticationSession{Subject: ""}, nil
 }

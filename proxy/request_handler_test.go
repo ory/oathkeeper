@@ -73,7 +73,7 @@ func TestRequestHandler(t *testing.T) {
 		{
 			expectErr: true,
 			r:         newTestRequest(t, "http://localhost"),
-			j:         NewRequestHandler(nil, []Authenticator{NewAuthenticatorNoOp()}, []Authorizer{}, []CredentialsIssuer{}),
+			j:         NewRequestHandler(nil, []Authenticator{NewAuthenticatorNoOp()}, []Authorizer{NewAuthorizerAllow()}, []CredentialsIssuer{NewCredentialsIssuerNoOp()}),
 			rule: rule.Rule{
 				Authenticators:    []rule.RuleHandler{},
 				Authorizer:        rule.RuleHandler{},
@@ -83,11 +83,11 @@ func TestRequestHandler(t *testing.T) {
 		{
 			expectErr: false,
 			r:         newTestRequest(t, "http://localhost"),
-			j:         NewRequestHandler(nil, []Authenticator{NewAuthenticatorNoOp()}, []Authorizer{}, []CredentialsIssuer{}),
+			j:         NewRequestHandler(nil, []Authenticator{NewAuthenticatorNoOp()}, []Authorizer{NewAuthorizerAllow()}, []CredentialsIssuer{NewCredentialsIssuerNoOp()}),
 			rule: rule.Rule{
 				Authenticators:    []rule.RuleHandler{{Handler: NewAuthenticatorNoOp().GetID()}},
-				Authorizer:        rule.RuleHandler{},
-				CredentialsIssuer: rule.RuleHandler{},
+				Authorizer:        rule.RuleHandler{Handler: NewAuthorizerAllow().GetID()},
+				CredentialsIssuer: rule.RuleHandler{Handler: NewCredentialsIssuerNoOp().GetID()},
 			},
 		},
 		{
