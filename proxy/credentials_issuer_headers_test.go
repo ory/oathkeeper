@@ -54,6 +54,13 @@ func TestCredentialsIssuerHeaders(t *testing.T) {
 			Request: &http.Request{Header: http.Header{"X-User": []string{"admin"}, "X-Issuer": []string{"issuer"}, "X-Audience": []string{"audience"}}},
 			Match:   http.Header{"X-User": []string{"anonymous"}, "X-Issuer": []string{""}, "X-Audience": []string{""}},
 		},
+		"Missing Extras": {
+			Session: &AuthenticationSession{Subject: "foo", Extra: map[string]interface{}{}},
+			Rule:    &rule.Rule{ID: "test-rule6"},
+			Config:  json.RawMessage([]byte(`{"X-Issuer": "{{ print .Extra.iss }}"}`)),
+			Request: &http.Request{Header: http.Header{}},
+			Match:   http.Header{"X-Issuer": []string{""}},
+		},
 	}
 
 	for testName, specs := range testMap {
