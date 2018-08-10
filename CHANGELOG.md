@@ -3,7 +3,8 @@
 **Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
 
 - [Change Log](#change-log)
-  - [Unreleased](#unreleased)
+  - [v1.0.0-beta.8 (2018-08-09)](#v100-beta8-2018-08-09)
+  - [v1.0.0-beta.7 (2018-07-12)](#v100-beta7-2018-07-12)
   - [v1.0.0-beta.6 (2018-07-11)](#v100-beta6-2018-07-11)
   - [v1.0.0-beta.5 (2018-07-07)](#v100-beta5-2018-07-07)
   - [v1.0.0-beta.4 (2018-06-14)](#v100-beta4-2018-06-14)
@@ -45,9 +46,34 @@
 
 # Change Log
 
-## [Unreleased](https://github.com/ory/oathkeeper/tree/HEAD)
+## [v1.0.0-beta.8](https://github.com/ory/oathkeeper/tree/v1.0.0-beta.8) (2018-08-09)
+[Full Changelog](https://github.com/ory/oathkeeper/compare/v1.0.0-beta.7...v1.0.0-beta.8)
 
-[Full Changelog](https://github.com/ory/oathkeeper/compare/v1.0.0-beta.6...HEAD)
+**Implemented enhancements:**
+
+- Resolve various issues [\#93](https://github.com/ory/oathkeeper/pull/93) ([arekkas](https://github.com/arekkas))
+
+**Fixed bugs:**
+
+- Invalid Url Validator [\#92](https://github.com/ory/oathkeeper/issues/92)
+- Resolve various issues [\#93](https://github.com/ory/oathkeeper/pull/93) ([arekkas](https://github.com/arekkas))
+
+**Closed issues:**
+
+- `noop` authenticator should not bypass allow/deny authorizers [\#97](https://github.com/ory/oathkeeper/issues/97)
+- Build and upload binaries upon release [\#89](https://github.com/ory/oathkeeper/issues/89)
+- Feature request: vault authenticator [\#88](https://github.com/ory/oathkeeper/issues/88)
+- Add endpoint for answering access requests directly [\#42](https://github.com/ory/oathkeeper/issues/42)
+
+**Merged pull requests:**
+
+- Resolve various issues [\#99](https://github.com/ory/oathkeeper/pull/99) ([arekkas](https://github.com/arekkas))
+- Node sdk [\#94](https://github.com/ory/oathkeeper/pull/94) ([arekkas](https://github.com/arekkas))
+- judge: Add endpoint for answering access requests directly [\#91](https://github.com/ory/oathkeeper/pull/91) ([arekkas](https://github.com/arekkas))
+- health: Introduce health and version endpoint [\#90](https://github.com/ory/oathkeeper/pull/90) ([arekkas](https://github.com/arekkas))
+
+## [v1.0.0-beta.7](https://github.com/ory/oathkeeper/tree/v1.0.0-beta.7) (2018-07-12)
+[Full Changelog](https://github.com/ory/oathkeeper/compare/v1.0.0-beta.6...v1.0.0-beta.7)
 
 **Merged pull requests:**
 
