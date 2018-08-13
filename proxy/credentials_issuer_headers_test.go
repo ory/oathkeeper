@@ -25,42 +25,42 @@ func TestCredentialsIssuerHeaders(t *testing.T) {
 		"Simple Subject": {
 			Session: &AuthenticationSession{Subject: "foo"},
 			Rule:    &rule.Rule{ID: "test-rule"},
-			Config:  json.RawMessage([]byte(`{"X-User": "{{ print .Subject }}"}`)),
+			Config:  json.RawMessage([]byte(`{"headers":{"X-User": "{{ print .Subject }}"}}`)),
 			Request: &http.Request{Header: http.Header{}},
 			Match:   http.Header{"X-User": []string{"foo"}},
 		},
 		"Complex Subject": {
 			Session: &AuthenticationSession{Subject: "foo"},
 			Rule:    &rule.Rule{ID: "test-rule2"},
-			Config:  json.RawMessage([]byte(`{"X-User": "realm:resources:users:{{ print .Subject }}"}`)),
+			Config:  json.RawMessage([]byte(`{"headers":{"X-User": "realm:resources:users:{{ print .Subject }}"}}`)),
 			Request: &http.Request{Header: http.Header{}},
 			Match:   http.Header{"X-User": []string{"realm:resources:users:foo"}},
 		},
 		"Subject & Extras": {
 			Session: &AuthenticationSession{Subject: "foo", Extra: map[string]interface{}{"iss": "issuer", "aud": "audience"}},
 			Rule:    &rule.Rule{ID: "test-rule3"},
-			Config:  json.RawMessage([]byte(`{"X-User": "{{ print .Subject }}", "X-Issuer": "{{ print .Extra.iss }}", "X-Audience": "{{ print .Extra.aud }}"}`)),
+			Config:  json.RawMessage([]byte(`{"headers":{"X-User": "{{ print .Subject }}", "X-Issuer": "{{ print .Extra.iss }}", "X-Audience": "{{ print .Extra.aud }}"}}`)),
 			Request: &http.Request{Header: http.Header{}},
 			Match:   http.Header{"X-User": []string{"foo"}, "X-Issuer": []string{"issuer"}, "X-Audience": []string{"audience"}},
 		},
 		"All In One Header": {
 			Session: &AuthenticationSession{Subject: "foo", Extra: map[string]interface{}{"iss": "issuer", "aud": "audience"}},
 			Rule:    &rule.Rule{ID: "test-rule4"},
-			Config:  json.RawMessage([]byte(`{"X-Kitchen-Sink": "{{ print .Subject }} {{ print .Extra.iss }} {{ print .Extra.aud }}"}`)),
+			Config:  json.RawMessage([]byte(`{"headers":{"X-Kitchen-Sink": "{{ print .Subject }} {{ print .Extra.iss }} {{ print .Extra.aud }}"}}`)),
 			Request: &http.Request{Header: http.Header{}},
 			Match:   http.Header{"X-Kitchen-Sink": []string{"foo issuer audience"}},
 		},
 		"Scrub Incoming Headers": {
 			Session: &AuthenticationSession{Subject: "anonymous"},
 			Rule:    &rule.Rule{ID: "test-rule5"},
-			Config:  json.RawMessage([]byte(`{"X-User": "{{ print .Subject }}", "X-Issuer": "{{ print .Extra.iss }}", "X-Audience": "{{ print .Extra.aud }}"}`)),
+			Config:  json.RawMessage([]byte(`{"headers":{"X-User": "{{ print .Subject }}", "X-Issuer": "{{ print .Extra.iss }}", "X-Audience": "{{ print .Extra.aud }}"}}`)),
 			Request: &http.Request{Header: http.Header{"X-User": []string{"admin"}, "X-Issuer": []string{"issuer"}, "X-Audience": []string{"audience"}}},
 			Match:   http.Header{"X-User": []string{"anonymous"}, "X-Issuer": []string{""}, "X-Audience": []string{""}},
 		},
 		"Missing Extras": {
 			Session: &AuthenticationSession{Subject: "foo", Extra: map[string]interface{}{}},
 			Rule:    &rule.Rule{ID: "test-rule6"},
-			Config:  json.RawMessage([]byte(`{"X-Issuer": "{{ print .Extra.iss }}"}`)),
+			Config:  json.RawMessage([]byte(`{"headers":{"X-Issuer": "{{ print .Extra.iss }}"}}`)),
 			Request: &http.Request{Header: http.Header{}},
 			Match:   http.Header{"X-Issuer": []string{""}},
 		},
@@ -76,12 +76,12 @@ func TestCredentialsIssuerHeaders(t *testing.T) {
 				},
 			},
 			Rule: &rule.Rule{ID: "test-rule7"},
-			Config: json.RawMessage([]byte(`{
+			Config: json.RawMessage([]byte(`{"headers":{
 				"X-Nested-Int": "{{ print .Extra.nested.int }}",
 				"X-Nested-Float64": "{{ print .Extra.nested.float64 }}",
 				"X-Nested-Bool": "{{ print .Extra.nested.bool}}",
 				"X-Nested-Nonexistent": "{{ print .Extra.nested.nil }}"
-			}`)),
+			}}`)),
 			Request: &http.Request{Header: http.Header{}},
 			Match: http.Header{
 				"X-Nested-Int":         []string{"10"},
@@ -120,9 +120,10 @@ func TestCredentialsIssuerHeaders(t *testing.T) {
 
 			var cfg CredentialsHeadersConfig
 			d := json.NewDecoder(bytes.NewBuffer(specs.Config))
+			d.DisallowUnknownFields()
 			require.NoError(t, d.Decode(&cfg))
 
-			for hdr, _ := range cfg {
+			for hdr, _ := range cfg.Headers {
 				templateId := fmt.Sprintf("%s:%s", specs.Rule.ID, hdr)
 				cache.New(templateId).Parse("override")
 				overrideHeaders.Add(hdr, "override")
