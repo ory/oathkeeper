@@ -11,7 +11,9 @@ import (
 	"github.com/pkg/errors"
 )
 
-type CredentialsHeadersConfig map[string]string
+type CredentialsHeadersConfig struct {
+	Headers map[string]string `json:"headers"`
+}
 
 type CredentialsHeaders struct {
 	RulesCache *template.Template
@@ -43,11 +45,12 @@ func (a *CredentialsHeaders) Issue(r *http.Request, session *AuthenticationSessi
 
 	var cfg CredentialsHeadersConfig
 	d := json.NewDecoder(bytes.NewBuffer(config))
+	d.DisallowUnknownFields()
 	if err := d.Decode(&cfg); err != nil {
 		return errors.WithStack(err)
 	}
 
-	for hdr, templateString := range cfg {
+	for hdr, templateString := range cfg.Headers {
 		var tmpl *template.Template
 		var err error
 
