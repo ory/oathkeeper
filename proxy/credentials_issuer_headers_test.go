@@ -9,6 +9,7 @@ import (
 	"text/template"
 
 	"github.com/ory/oathkeeper/rule"
+	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -21,6 +22,7 @@ func TestCredentialsIssuerHeaders(t *testing.T) {
 		Config  json.RawMessage
 		Request *http.Request
 		Match   http.Header
+		Err     error
 	}{
 		"Simple Subject": {
 			Session: &AuthenticationSession{Subject: "foo"},
@@ -28,6 +30,7 @@ func TestCredentialsIssuerHeaders(t *testing.T) {
 			Config:  json.RawMessage([]byte(`{"headers":{"X-User": "{{ print .Subject }}"}}`)),
 			Request: &http.Request{Header: http.Header{}},
 			Match:   http.Header{"X-User": []string{"foo"}},
+			Err:     nil,
 		},
 		"Complex Subject": {
 			Session: &AuthenticationSession{Subject: "foo"},
@@ -35,6 +38,7 @@ func TestCredentialsIssuerHeaders(t *testing.T) {
 			Config:  json.RawMessage([]byte(`{"headers":{"X-User": "realm:resources:users:{{ print .Subject }}"}}`)),
 			Request: &http.Request{Header: http.Header{}},
 			Match:   http.Header{"X-User": []string{"realm:resources:users:foo"}},
+			Err:     nil,
 		},
 		"Subject & Extras": {
 			Session: &AuthenticationSession{Subject: "foo", Extra: map[string]interface{}{"iss": "issuer", "aud": "audience"}},
@@ -42,6 +46,7 @@ func TestCredentialsIssuerHeaders(t *testing.T) {
 			Config:  json.RawMessage([]byte(`{"headers":{"X-User": "{{ print .Subject }}", "X-Issuer": "{{ print .Extra.iss }}", "X-Audience": "{{ print .Extra.aud }}"}}`)),
 			Request: &http.Request{Header: http.Header{}},
 			Match:   http.Header{"X-User": []string{"foo"}, "X-Issuer": []string{"issuer"}, "X-Audience": []string{"audience"}},
+			Err:     nil,
 		},
 		"All In One Header": {
 			Session: &AuthenticationSession{Subject: "foo", Extra: map[string]interface{}{"iss": "issuer", "aud": "audience"}},
@@ -49,6 +54,7 @@ func TestCredentialsIssuerHeaders(t *testing.T) {
 			Config:  json.RawMessage([]byte(`{"headers":{"X-Kitchen-Sink": "{{ print .Subject }} {{ print .Extra.iss }} {{ print .Extra.aud }}"}}`)),
 			Request: &http.Request{Header: http.Header{}},
 			Match:   http.Header{"X-Kitchen-Sink": []string{"foo issuer audience"}},
+			Err:     nil,
 		},
 		"Scrub Incoming Headers": {
 			Session: &AuthenticationSession{Subject: "anonymous"},
@@ -56,6 +62,7 @@ func TestCredentialsIssuerHeaders(t *testing.T) {
 			Config:  json.RawMessage([]byte(`{"headers":{"X-User": "{{ print .Subject }}", "X-Issuer": "{{ print .Extra.iss }}", "X-Audience": "{{ print .Extra.aud }}"}}`)),
 			Request: &http.Request{Header: http.Header{"X-User": []string{"admin"}, "X-Issuer": []string{"issuer"}, "X-Audience": []string{"audience"}}},
 			Match:   http.Header{"X-User": []string{"anonymous"}, "X-Issuer": []string{""}, "X-Audience": []string{""}},
+			Err:     nil,
 		},
 		"Missing Extras": {
 			Session: &AuthenticationSession{Subject: "foo", Extra: map[string]interface{}{}},
@@ -63,6 +70,7 @@ func TestCredentialsIssuerHeaders(t *testing.T) {
 			Config:  json.RawMessage([]byte(`{"headers":{"X-Issuer": "{{ print .Extra.iss }}"}}`)),
 			Request: &http.Request{Header: http.Header{}},
 			Match:   http.Header{"X-Issuer": []string{""}},
+			Err:     nil,
 		},
 		"Nested Extras": {
 			Session: &AuthenticationSession{
@@ -89,6 +97,15 @@ func TestCredentialsIssuerHeaders(t *testing.T) {
 				"X-Nested-Bool":        []string{"true"},
 				"X-Nested-Nonexistent": []string{""},
 			},
+			Err: nil,
+		},
+		"Unknown Config Field": {
+			Session: &AuthenticationSession{Subject: "foo", Extra: map[string]interface{}{}},
+			Rule:    &rule.Rule{ID: "test-rule8"},
+			Config:  json.RawMessage(`{"bar":"baz"}`),
+			Request: &http.Request{Header: http.Header{}},
+			Match:   http.Header{},
+			Err:     errors.New(`json: unknown field "bar"`),
 		},
 	}
 
@@ -102,8 +119,13 @@ func TestCredentialsIssuerHeaders(t *testing.T) {
 			// Issuer must return non-empty ID
 			assert.NotEmpty(t, issuer.GetID())
 
-			// Issuer must run without error
-			require.NoError(t, issuer.Issue(specs.Request, specs.Session, specs.Config, specs.Rule))
+			if specs.Err == nil {
+				// Issuer must run without error
+				require.NoError(t, issuer.Issue(specs.Request, specs.Session, specs.Config, specs.Rule))
+			} else {
+				err := issuer.Issue(specs.Request, specs.Session, specs.Config, specs.Rule)
+				assert.Equal(t, specs.Err.Error(), err.Error())
+			}
 
 			// Output request headers must match test specs
 			assert.Equal(t, specs.Match, specs.Request.Header)
@@ -120,8 +142,7 @@ func TestCredentialsIssuerHeaders(t *testing.T) {
 
 			var cfg CredentialsHeadersConfig
 			d := json.NewDecoder(bytes.NewBuffer(specs.Config))
-			d.DisallowUnknownFields()
-			require.NoError(t, d.Decode(&cfg))
+			d.Decode(&cfg)
 
 			for hdr, _ := range cfg.Headers {
 				templateId := fmt.Sprintf("%s:%s", specs.Rule.ID, hdr)
@@ -131,7 +152,13 @@ func TestCredentialsIssuerHeaders(t *testing.T) {
 
 			issuer.RulesCache = cache
 
-			require.NoError(t, issuer.Issue(specs.Request, specs.Session, specs.Config, specs.Rule))
+			if specs.Err == nil {
+				// Issuer must run without error
+				require.NoError(t, issuer.Issue(specs.Request, specs.Session, specs.Config, specs.Rule))
+			} else {
+				err := issuer.Issue(specs.Request, specs.Session, specs.Config, specs.Rule)
+				assert.Equal(t, specs.Err.Error(), err.Error())
+			}
 
 			assert.Equal(t, overrideHeaders, specs.Request.Header)
 		}
