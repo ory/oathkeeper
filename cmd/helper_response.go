@@ -32,7 +32,7 @@ func checkResponse(response *swagger.APIResponse, err error, expectedStatusCode 
 	must(err, "A network error occurred: %s", err)
 
 	if response.StatusCode != expectedStatusCode {
-		fmt.Printf("Command failed because status code %d was expeceted but code %d was received", expectedStatusCode, response.StatusCode)
+		fmt.Printf("Command failed because status code %d was expected but code %d was received", expectedStatusCode, response.StatusCode)
 		os.Exit(1)
 		return
 	}
