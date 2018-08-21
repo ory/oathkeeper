@@ -205,7 +205,10 @@ OTHER CONTROLS
 		}
 
 		n.UseHandler(handler)
-		ch := cors.New(corsx.ParseOptions()).Handler(n)
+		var h http.Handler = n
+		if viper.GetString("CORS_ENABLED") == "true" {
+			h = cors.New(corsx.ParseOptions()).Handler(n)
+		}
 
 		var cert tls.Certificate
 		tlsCert := viper.GetString("HTTP_TLS_CERT")
@@ -223,7 +226,7 @@ OTHER CONTROLS
 		addr := fmt.Sprintf("%s:%s", viper.GetString("HOST"), viper.GetString("PORT"))
 		server := graceful.WithDefaults(&http.Server{
 			Addr:    addr,
-			Handler: ch,
+			Handler: h,
 			TLSConfig: &tls.Config{
 				Certificates: []tls.Certificate{cert},
 			},
