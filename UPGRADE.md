@@ -16,6 +16,32 @@ before finalizing the upgrade process.
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
+## 1.0.0-rc.1
+
+### Configuration changes
+
+To improve compatibility with ORY Hydra v1.0.0-beta.8, which introduces the public and admin endpoint, the following
+environment variables have now been made optional:
+
+- CREDENTIALS_ISSUER_ID_TOKEN_HYDRA_CLIENT_ID
+- CREDENTIALS_ISSUER_ID_TOKEN_HYDRA_CLIENT_SECRET
+- CREDENTIALS_ISSUER_ID_TOKEN_HYDRA_CLIENT_SCOPES
+- CREDENTIALS_ISSUER_ID_TOKEN_HYDRA_PUBLIC_URL
+- CREDENTIALS_ISSUER_ID_TOKEN_HYDRA_PUBLIC_URL
+- AUTHENTICATOR_OAUTH2_INTROSPECTION_CLIENT_ID
+- AUTHENTICATOR_OAUTH2_INTROSPECTION_CLIENT_SECRET
+- AUTHENTICATOR_OAUTH2_INTROSPECTION_TOKEN_URL
+- AUTHENTICATOR_OAUTH2_INTROSPECTION_SCOPE
+
+They are optional because ORY Hydra's administrative endpoints no longer require authorization as they now
+run on a privileged port. If you are running ORY Hydra behind a firewall that requires OAuth 2.0 Access tokens,
+or you are using another OAuth 2.0 Server that requires an access token, you can still use these settings.
+
+And the following environment variables have changed:
+
+- `CREDENTIALS_ISSUER_ID_TOKEN_HYDRA_URL` is now `CREDENTIALS_ISSUER_ID_TOKEN_HYDRA_ADMIN_URL` and
+`CREDENTIALS_ISSUER_ID_TOKEN_HYDRA_PUBLIC_URL` if ORY Hydra is protected with OAuth 2.0.
+
 ## 1.0.0-beta.8
 
 ### `noop` authenticator no longer bypasses authorizers/credentials issuers

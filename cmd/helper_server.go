@@ -39,7 +39,8 @@ func getHydraSDK() hydra.SDK {
 	sdk, err := hydra.NewSDK(&hydra.Configuration{
 		ClientID:     viper.GetString("CREDENTIALS_ISSUER_ID_TOKEN_HYDRA_CLIENT_ID"),
 		ClientSecret: viper.GetString("CREDENTIALS_ISSUER_ID_TOKEN_HYDRA_CLIENT_SECRET"),
-		EndpointURL:  viper.GetString("CREDENTIALS_ISSUER_ID_TOKEN_HYDRA_URL"),
+		AdminURL:     viper.GetString("CREDENTIALS_ISSUER_ID_TOKEN_HYDRA_ADMIN_URL"),
+		PublicURL:    viper.GetString("CREDENTIALS_ISSUER_ID_TOKEN_HYDRA_PUBLIC_URL"),
 		Scopes:       strings.Split(viper.GetString("CREDENTIALS_ISSUER_ID_TOKEN_HYDRA_CLIENT_SCOPES"), ","),
 	})
 
@@ -181,11 +182,11 @@ func handlerFactories(keyManager rsakey.Manager) ([]proxy.Authenticator, []proxy
 			proxy.NewAuthenticatorNoOp(),
 			proxy.NewAuthenticatorAnonymous(viper.GetString("AUTHENTICATOR_ANONYMOUS_USERNAME")),
 			proxy.NewAuthenticatorOAuth2Introspection(
-				viper.GetString("AUTHENTICATOR_OAUTH2_INTROSPECTION_CLIENT_ID"),
-				viper.GetString("AUTHENTICATOR_OAUTH2_INTROSPECTION_CLIENT_SECRET"),
-				viper.GetString("AUTHENTICATOR_OAUTH2_INTROSPECTION_TOKEN_URL"),
-				viper.GetString("AUTHENTICATOR_OAUTH2_INTROSPECTION_INTROSPECT_URL"),
-				strings.Split(viper.GetString("AUTHENTICATOR_OAUTH2_INTROSPECTION_SCOPE"), ","),
+				viper.GetString("AUTHENTICATOR_OAUTH2_INTROSPECTION_AUTHORIZATION_CLIENT_ID"),
+				viper.GetString("AUTHENTICATOR_OAUTH2_INTROSPECTION_AUTHORIZATION_CLIENT_SECRET"),
+				viper.GetString("AUTHENTICATOR_OAUTH2_INTROSPECTION_AUTHORIZATION_TOKEN_URL"),
+				viper.GetString("AUTHENTICATOR_OAUTH2_INTROSPECTION_URL"),
+				strings.Split(viper.GetString("AUTHENTICATOR_OAUTH2_INTROSPECTION_AUTHORIZATION_SCOPE"), ","),
 				fosite.WildcardScopeStrategy,
 			),
 			proxy.NewAuthenticatorOAuth2ClientCredentials(

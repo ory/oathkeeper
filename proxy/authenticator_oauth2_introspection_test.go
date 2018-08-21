@@ -22,16 +22,16 @@ package proxy
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"net/http"
 	"testing"
 
-	"github.com/golang/mock/gomock"
+	"github.com/julienschmidt/httprouter"
 	"github.com/ory/fosite"
-	"github.com/ory/keto/authentication"
+	"github.com/ory/hydra/sdk/go/hydra/swagger"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"net/http/httptest"
 )
 
 func TestAuthenticatorOAuth2Introspection(t *testing.T) {
@@ -39,91 +39,205 @@ func TestAuthenticatorOAuth2Introspection(t *testing.T) {
 	assert.NotEmpty(t, a.GetID())
 
 	for k, tc := range []struct {
-		setup      func(*testing.T, *MockauthenticatorOAuth2IntrospectionHelper)
+		d          string
+		setup      func(*testing.T, *httprouter.Router)
 		r          *http.Request
 		config     json.RawMessage
 		expectErr  bool
 		expectSess *AuthenticationSession
 	}{
 		{
+			d:         "should fail because no payloads",
 			r:         &http.Request{Header: http.Header{}},
 			expectErr: true,
 		},
 		{
+			d:      "should fail because wrong response",
 			r:      &http.Request{Header: http.Header{"Authorization": {"bearer token"}}},
-			config: []byte(`{ "required_scope": ["scope-a"] }`),
-			setup: func(t *testing.T, m *MockauthenticatorOAuth2IntrospectionHelper) {
-				m.EXPECT().Introspect(gomock.Eq("token"), gomock.Eq([]string{"scope-a"}), gomock.Eq(a.scopeStrategy)).Return(nil, errors.New("some error"))
+			config: []byte(`{ "required_scope": ["scope-a", "scope-b"] }`),
+			setup: func(t *testing.T, m *httprouter.Router) {
+				m.POST("/oauth2/introspect", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+					require.NoError(t, r.ParseForm())
+					require.Equal(t, "token", r.Form.Get("token"))
+					require.Equal(t, "scope-a scope-b", r.Form.Get("scope"))
+					w.WriteHeader(http.StatusNotFound)
+				})
 			},
 			expectErr: true,
 		},
 		{
+			d:      "should fail because not active",
 			r:      &http.Request{Header: http.Header{"Authorization": {"bearer token"}}},
-			config: []byte(`{ "required_scope": ["scope-a"], "trusted_issuers": ["foo", "bar"]}`),
-			setup: func(t *testing.T, m *MockauthenticatorOAuth2IntrospectionHelper) {
-				m.EXPECT().Introspect(gomock.Eq("token"), gomock.Eq([]string{"scope-a"}), gomock.Eq(a.scopeStrategy)).Return(&authentication.IntrospectionResponse{
-					Subject:  "subject",
-					Audience: []string{"audience"},
-					Issuer:   "issuer",
-					Username: "username",
-					Extra:    map[string]interface{}{"extra": "foo"},
-				}, nil)
+			config: []byte(`{}`),
+			setup: func(t *testing.T, m *httprouter.Router) {
+				m.POST("/oauth2/introspect", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+					require.NoError(t, r.ParseForm())
+					require.Equal(t, "token", r.Form.Get("token"))
+					require.NoError(t, json.NewEncoder(w).Encode(&swagger.OAuth2TokenIntrospection{
+						Active:   false,
+						Sub:      "subject",
+						Aud:      []string{"audience"},
+						Iss:      "issuer",
+						Username: "username",
+						Ext:      map[string]interface{}{"extra": "foo"},
+					}))
+				})
 			},
 			expectErr: true,
 		},
 		{
+			d:      "should pass because active and no issuer / audience expected",
 			r:      &http.Request{Header: http.Header{"Authorization": {"bearer token"}}},
-			config: []byte(`{ "required_scope": ["scope-a"], "target_audience": ["foo", "bar"]}`),
-			setup: func(t *testing.T, m *MockauthenticatorOAuth2IntrospectionHelper) {
-				m.EXPECT().Introspect(gomock.Eq("token"), gomock.Eq([]string{"scope-a"}), gomock.Eq(a.scopeStrategy)).Return(&authentication.IntrospectionResponse{
-					Subject:  "subject",
-					Audience: []string{"audience"},
-					Issuer:   "issuer",
-					Username: "username",
-					Extra:    map[string]interface{}{"extra": "foo"},
-				}, nil)
-			},
-			expectErr: true,
-		},
-		{
-			r:      &http.Request{Header: http.Header{"Authorization": {"bearer token"}}},
-			config: []byte(`{ "required_scope": ["scope-a"] }`),
-			setup: func(t *testing.T, m *MockauthenticatorOAuth2IntrospectionHelper) {
-				m.EXPECT().Introspect(gomock.Eq("token"), gomock.Eq([]string{"scope-a"}), gomock.Eq(a.scopeStrategy)).Return(&authentication.IntrospectionResponse{
-					Subject:  "subject",
-					Audience: []string{"audience"},
-					Issuer:   "issuer",
-					Username: "username",
-					Extra:    map[string]interface{}{"extra": "foo"},
-				}, nil)
+			config: []byte(`{}`),
+			setup: func(t *testing.T, m *httprouter.Router) {
+				m.POST("/oauth2/introspect", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+					require.NoError(t, r.ParseForm())
+					require.Equal(t, "token", r.Form.Get("token"))
+					require.NoError(t, json.NewEncoder(w).Encode(&swagger.OAuth2TokenIntrospection{
+						Active:   true,
+						Sub:      "subject",
+						Aud:      []string{"audience"},
+						Iss:      "issuer",
+						Username: "username",
+						Ext:      map[string]interface{}{"extra": "foo"},
+					}))
+				})
 			},
 			expectErr: false,
 		},
 		{
+			d:      "should pass because active and scope matching",
 			r:      &http.Request{Header: http.Header{"Authorization": {"bearer token"}}},
-			config: []byte(`{ "required_scope": ["scope-a"], "trusted_issuers": ["issuer", "issuer-bar"], "target_audience": ["audience"] }`),
-			setup: func(t *testing.T, m *MockauthenticatorOAuth2IntrospectionHelper) {
-				m.EXPECT().Introspect(gomock.Eq("token"), gomock.Eq([]string{"scope-a"}), gomock.Eq(a.scopeStrategy)).Return(&authentication.IntrospectionResponse{
-					Subject:  "subject",
-					Audience: []string{"audience"},
-					Issuer:   "issuer",
-					Username: "username",
-					Extra:    map[string]interface{}{"extra": "foo"},
-				}, nil)
+			config: []byte(`{ "required_scope": ["scope-a", "scope-b"] }`),
+			setup: func(t *testing.T, m *httprouter.Router) {
+				m.POST("/oauth2/introspect", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+					require.NoError(t, r.ParseForm())
+					require.Equal(t, "token", r.Form.Get("token"))
+					require.Equal(t, "scope-a scope-b", r.Form.Get("scope"))
+					require.NoError(t, json.NewEncoder(w).Encode(&swagger.OAuth2TokenIntrospection{
+						Active:   true,
+						Sub:      "subject",
+						Aud:      []string{"audience"},
+						Iss:      "issuer",
+						Username: "username",
+						Ext:      map[string]interface{}{"extra": "foo"},
+						Scope:    "scope-a scope-b",
+					}))
+				})
+			},
+			expectErr: false,
+		},
+		{
+			d:      "should fail because active but scope not matching",
+			r:      &http.Request{Header: http.Header{"Authorization": {"bearer token"}}},
+			config: []byte(`{ "required_scope": ["scope-a", "scope-b", "scope-c"] }`),
+			setup: func(t *testing.T, m *httprouter.Router) {
+				m.POST("/oauth2/introspect", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+					require.NoError(t, r.ParseForm())
+					require.Equal(t, "token", r.Form.Get("token"))
+					require.Equal(t, "scope-a scope-b scope-c", r.Form.Get("scope"))
+					require.NoError(t, json.NewEncoder(w).Encode(&swagger.OAuth2TokenIntrospection{
+						Active:   true,
+						Sub:      "subject",
+						Aud:      []string{"audience"},
+						Iss:      "issuer",
+						Username: "username",
+						Ext:      map[string]interface{}{"extra": "foo"},
+						Scope:    "scope-a scope-b",
+					}))
+				})
+			},
+			expectErr: false,
+		},
+		{
+			d:      "should fail because active but issuer not matching",
+			r:      &http.Request{Header: http.Header{"Authorization": {"bearer token"}}},
+			config: []byte(`{ "required_scope": ["scope-a"], "trusted_issuers": ["foo", "bar"]}`),
+			setup: func(t *testing.T, m *httprouter.Router) {
+				m.POST("/oauth2/introspect", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+					require.NoError(t, r.ParseForm())
+					require.NoError(t, json.NewEncoder(w).Encode(&swagger.OAuth2TokenIntrospection{
+						Active:   true,
+						Scope:    "scope-a",
+						Sub:      "subject",
+						Aud:      []string{"audience"},
+						Iss:      "not-foo",
+						Username: "username",
+						Ext:      map[string]interface{}{"extra": "foo"},
+					}))
+				})
+			},
+			expectErr: true,
+		},
+		{
+			d:      "should pass because active and issuer matching",
+			r:      &http.Request{Header: http.Header{"Authorization": {"bearer token"}}},
+			config: []byte(`{ "required_scope": ["scope-a"], "trusted_issuers": ["foo", "bar"]}`),
+			setup: func(t *testing.T, m *httprouter.Router) {
+				m.POST("/oauth2/introspect", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+					require.NoError(t, r.ParseForm())
+					require.NoError(t, json.NewEncoder(w).Encode(&swagger.OAuth2TokenIntrospection{
+						Active:   true,
+						Scope:    "scope-a",
+						Sub:      "subject",
+						Aud:      []string{"audience"},
+						Iss:      "foo",
+						Username: "username",
+						Ext:      map[string]interface{}{"extra": "foo"},
+					}))
+				})
+			},
+			expectErr: false,
+		},
+		{
+			d:      "should fail because active but audience not matching",
+			r:      &http.Request{Header: http.Header{"Authorization": {"bearer token"}}},
+			config: []byte(`{ "required_scope": ["scope-a"], "trusted_issuers": ["foo", "bar"], "target_audience": ["audience"] }`),
+			setup: func(t *testing.T, m *httprouter.Router) {
+				m.POST("/oauth2/introspect", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+					require.NoError(t, r.ParseForm())
+					require.NoError(t, json.NewEncoder(w).Encode(&swagger.OAuth2TokenIntrospection{
+						Active:   true,
+						Scope:    "scope-a",
+						Sub:      "subject",
+						Aud:      []string{"not-audience"},
+						Iss:      "foo",
+						Username: "username",
+						Ext:      map[string]interface{}{"extra": "foo"},
+					}))
+				})
+			},
+			expectErr: true,
+		},
+		{
+			d:      "should pass",
+			r:      &http.Request{Header: http.Header{"Authorization": {"bearer token"}}},
+			config: []byte(`{ "required_scope": ["scope-a"], "trusted_issuers": ["foo", "bar"], "target_audience": ["audience"] }`),
+			setup: func(t *testing.T, m *httprouter.Router) {
+				m.POST("/oauth2/introspect", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+					require.NoError(t, r.ParseForm())
+					require.NoError(t, json.NewEncoder(w).Encode(&swagger.OAuth2TokenIntrospection{
+						Active:   true,
+						Scope:    "scope-a",
+						Sub:      "subject",
+						Aud:      []string{"audience"},
+						Iss:      "foo",
+						Username: "username",
+						Ext:      map[string]interface{}{"extra": "foo"},
+					}))
+				})
 			},
 			expectErr: false,
 		},
 	} {
 		t.Run(fmt.Sprintf("case=%d", k), func(t *testing.T) {
-			ctrl := gomock.NewController(t)
-			defer ctrl.Finish()
-
-			m := NewMockauthenticatorOAuth2IntrospectionHelper(ctrl)
+			router := httprouter.New()
 			if tc.setup != nil {
-				tc.setup(t, m)
+				tc.setup(t, router)
 			}
-
-			a.helper = m
+			ts := httptest.NewServer(router)
+			defer ts.Close()
+			a.introspectionURL = ts.URL + "/oauth2/introspect"
 
 			sess, err := a.Authenticate(tc.r, tc.config, nil)
 			if tc.expectErr {

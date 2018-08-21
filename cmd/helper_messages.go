@@ -126,10 +126,9 @@ var credentialsIssuer = `CREDENTIALS ISSUERS
 
 		ORY-HYDRA ALGORITHM
 		===============
-			- CREDENTIALS_ISSUER_ID_TOKEN_HYDRA_URL: The URL where ORY Hydra is located.
+			- CREDENTIALS_ISSUER_ID_TOKEN_HYDRA_ADMIN_URL: The URL where ORY Hydra's Admin API is located.
 				--------------------------------------------------------------
-				Example: CREDENTIALS_ISSUER_ID_TOKEN_HYDRA_URL=http://hydra-url/
-				--------------------------------------------------------------
+				Example: CREDENTIALS_ISSUER_ID_TOKEN_HYDRA_ADMIN_URL=http://hydra-url/
 
 			- CREDENTIALS_ISSUER_ID_TOKEN_HYDRA_REFRESH_INTERVAL: This value sets how often ORY Oathkeeper checks if a new
 				key for signing is available at ORY Hydra. Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
@@ -141,7 +140,34 @@ var credentialsIssuer = `CREDENTIALS ISSUERS
 				store, and retrieve the JSON Web Key from ORY Hydra.
 				--------------------------------------------------------------
 				Default: CREDENTIALS_ISSUER_ID_TOKEN_HYDRA_JWK_SET_ID=oathkeeper:id-token
-				--------------------------------------------------------------`
+				--------------------------------------------------------------
+
+			If ORY Hydra's Admin API itself is protected with OAuth 2.0, you can provide the access credentials to perform
+			an OAuth 2.0 Client Credentials flow before accessing ORY Hydra's APIs.
+
+			These settings are usually not required and an optional! If you don't need this feature, leave them undefined.
+
+
+				- CREDENTIALS_ISSUER_ID_TOKEN_HYDRA_CLIENT_ID:  The ID of the OAuth 2.0 Client.
+					--------------------------------------------------------------
+					Example: CREDENTIALS_ISSUER_ID_TOKEN_HYDRA_CLIENT_ID=my-client
+					--------------------------------------------------------------
+
+				- CREDENTIALS_ISSUER_ID_TOKEN_HYDRA_CLIENT_SECRET: The secret of the OAuth 2.0 Client.
+					--------------------------------------------------------------
+					Example: CREDENTIALS_ISSUER_ID_TOKEN_HYDRA_CLIENT_SECRET=my-secret
+					--------------------------------------------------------------
+
+				- CREDENTIALS_ISSUER_ID_TOKEN_HYDRA_CLIENT_SCOPES: The OAuth 2.0 Scope the client should request.
+					--------------------------------------------------------------
+					Example: CREDENTIALS_ISSUER_ID_TOKEN_HYDRA_CLIENT_SCOPES=foo,bar
+					--------------------------------------------------------------
+
+				- CREDENTIALS_ISSUER_ID_TOKEN_HYDRA_PUBLIC_URL: The public URL where endpoint /oauth2/token is located.
+					--------------------------------------------------------------
+					Example: CREDENTIALS_ISSUER_ID_TOKEN_HYDRA_PUBLIC_URL=http://hydra-url/
+					--------------------------------------------------------------
+`
 
 func fatalf(msg string, args ...interface{}) {
 	fmt.Printf(msg+"\n", args...)
