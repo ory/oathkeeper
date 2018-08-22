@@ -203,5 +203,6 @@ func handlerFactories(keyManager rsakey.Manager) ([]proxy.Authenticator, []proxy
 				viper.GetString("CREDENTIALS_ISSUER_ID_TOKEN_ISSUER"),
 			),
 			proxy.NewCredentialsIssuerHeaders(),
+			proxy.NewCredentialsIssuerCookies(),
 		}
 }

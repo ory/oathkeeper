@@ -122,7 +122,10 @@ HTTP CONTROLS
 		}
 
 		n.UseHandler(judgeHandler)
-		ch := cors.New(corsx.ParseOptions()).Handler(n)
+		var h http.Handler = n
+		if viper.GetString("CORS_ENABLED") == "true" {
+			h = cors.New(corsx.ParseOptions()).Handler(n)
+		}
 
 		go refreshKeys(keyManager, 0)
 		go refreshRules(matcher, 0)
@@ -130,7 +133,7 @@ HTTP CONTROLS
 		addr := fmt.Sprintf("%s:%s", viper.GetString("HOST"), viper.GetString("PORT"))
 		server := graceful.WithDefaults(&http.Server{
 			Addr:    addr,
-			Handler: ch,
+			Handler: h,
 		})
 
 		logger.Printf("Listening on %s", addr)

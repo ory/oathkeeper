@@ -41,6 +41,11 @@ And the following environment variables have changed:
 `CREDENTIALS_ISSUER_ID_TOKEN_HYDRA_PUBLIC_URL` if ORY Hydra is protected with OAuth 2.0.
 - `AUTHENTICATOR_OAUTH2_INTROSPECTION_INTROSPECT_URL` is now `AUTHENTICATOR_OAUTH2_INTROSPECTION_URL`.
 
+### CORS is disabled by default
+
+A new environment variable `CORS_ENABLED` was introduced. It sets whether CORS is enabled ("true") or not ("false")".
+Default is disabled.
+
 ## 1.0.0-beta.8
 
 ### `noop` authenticator no longer bypasses authorizers/credentials issuers
