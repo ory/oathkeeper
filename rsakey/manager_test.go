@@ -95,7 +95,7 @@ func TestManager(t *testing.T) {
 func connectToHydra(t *testing.T) *hydra.CodeGenSDK {
 	if url := os.Getenv("TEST_HYDRA_URL"); url != "" {
 		sdk, err := hydra.NewSDK(&hydra.Configuration{
-			EndpointURL: url,
+			AdminURL: url,
 		})
 		require.NoError(t, err)
 		return sdk
@@ -109,8 +109,8 @@ func connectToHydra(t *testing.T) *hydra.CodeGenSDK {
 
 	resource, err := pool.RunWithOptions(&dockertest.RunOptions{
 		Repository:   "oryd/hydra",
-		Tag:          "v1.0.0-beta.2",
-		Cmd:          []string{"serve", "--dangerous-force-http"},
+		Tag:          "v1.0.0-beta.8",
+		Cmd:          []string{"serve", "all", "--dangerous-force-http"},
 		Env:          []string{"DATABASE_URL=memory"},
 		ExposedPorts: []string{"4444/tcp"},
 	})
@@ -140,7 +140,7 @@ func connectToHydra(t *testing.T) *hydra.CodeGenSDK {
 
 	resources = append(resources, resource)
 	sdk, err := hydra.NewSDK(&hydra.Configuration{
-		EndpointURL: "http://localhost:" + resource.GetPort("4444/tcp") + "/",
+		AdminURL: "http://localhost:" + resource.GetPort("4444/tcp") + "/",
 	})
 	require.NoError(t, err)
 	return sdk

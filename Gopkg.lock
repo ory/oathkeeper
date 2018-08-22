@@ -270,14 +270,13 @@
     "sdk/go/hydra",
     "sdk/go/hydra/swagger"
   ]
-  revision = "98044aa796e64e3b9bcc27f08188c46a26f07532"
+  revision = "251bd5c5b1cf84b012c33cda0fc27db2cfdf48fa"
   version = "master"
 
 [[projects]]
   branch = "master"
   name = "github.com/ory/keto"
   packages = [
-    "authentication",
     "sdk/go/keto",
     "sdk/go/keto/swagger"
   ]
@@ -541,6 +540,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "833b7210006d4fa0e660d0cfccd5335656fb8c27d1700cf4b8d1490fa8b40e02"
+  inputs-digest = "1213e51765e6ba29f566f40c6f5ab3f0e03ab2bbaa548e98d398994b37607618"
   solver-name = "gps-cdcl"
   solver-version = 1

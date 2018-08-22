@@ -6,11 +6,17 @@ import (
 	"fmt"
 	"net/http"
 
+	"context"
+	"net/url"
+	"strings"
+
 	"github.com/ory/fosite"
-	"github.com/ory/keto/authentication"
+	"github.com/ory/go-convenience/stringslice"
+	"github.com/ory/hydra/sdk/go/hydra/swagger"
 	"github.com/ory/oathkeeper/helper"
 	"github.com/ory/oathkeeper/rule"
 	"github.com/pkg/errors"
+	"golang.org/x/oauth2/clientcredentials"
 )
 
 type AuthenticatorOAuth2IntrospectionConfiguration struct {
@@ -27,18 +33,24 @@ type AuthenticatorOAuth2IntrospectionConfiguration struct {
 }
 
 type AuthenticatorOAuth2Introspection struct {
-	helper           authenticatorOAuth2IntrospectionHelper
+	client           *http.Client
 	introspectionURL string
 	scopeStrategy    fosite.ScopeStrategy
 }
 
-type authenticatorOAuth2IntrospectionHelper interface {
-	Introspect(token string, scopes []string, strategy fosite.ScopeStrategy) (*authentication.IntrospectionResponse, error)
-}
-
 func NewAuthenticatorOAuth2Introspection(clientID, clientSecret, tokenURL, introspectionURL string, scopes []string, strategy fosite.ScopeStrategy) *AuthenticatorOAuth2Introspection {
+	c := http.DefaultClient
+	if len(clientID)+len(clientSecret)+len(tokenURL)+len(scopes) > 0 {
+		c = (&clientcredentials.Config{
+			ClientID:     clientID,
+			ClientSecret: clientSecret,
+			TokenURL:     tokenURL,
+			Scopes:       scopes,
+		}).Client(context.Background())
+	}
+
 	return &AuthenticatorOAuth2Introspection{
-		helper:           authentication.NewOAuth2IntrospectionAuthentication(clientID, clientSecret, tokenURL, introspectionURL, scopes, strategy),
+		client:           c,
 		introspectionURL: introspectionURL,
 	}
 }
@@ -65,42 +77,60 @@ func (a *AuthenticatorOAuth2Introspection) Authenticate(r *http.Request, config 
 		return nil, errors.WithStack(ErrAuthenticatorNotResponsible)
 	}
 
-	ir, err := a.helper.Introspect(token, cf.Scopes, a.scopeStrategy)
+	body := url.Values{"token": {token}, "scope": {strings.Join(cf.Scopes, " ")}}
+	resp, err := a.client.Post(a.introspectionURL, "application/x-www-form-urlencoded", strings.NewReader(body.Encode()))
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, errors.Errorf("Introspection returned status code %d but expected %d", resp.StatusCode, http.StatusOK)
+	}
+
+	var ir swagger.OAuth2TokenIntrospection
+	if err := json.NewDecoder(resp.Body).Decode(&ir); err != nil {
+		return nil, errors.WithStack(err)
+	}
+
+	if len(ir.TokenType) > 0 && ir.TokenType != "access_token" {
+		return nil, errors.WithStack(helper.ErrForbidden.WithReason(fmt.Sprintf("Introspected token is not an access token but \"%s\"", ir.TokenType)))
+	}
+
+	if !ir.Active {
+		return nil, errors.WithStack(helper.ErrForbidden.WithReason("Access token introspection says token is not active"))
 	}
 
 	for _, audience := range cf.Audience {
-		if !stringInSlice(audience, ir.Audience) {
+		if !stringslice.Has(ir.Aud, audience) {
 			return nil, errors.WithStack(helper.ErrForbidden.WithReason(fmt.Sprintf("Token audience is not intended for target audience %s", audience)))
 		}
 	}
 
 	if len(cf.Issuers) > 0 {
-		if !stringInSlice(ir.Issuer, cf.Issuers) {
+		if !stringslice.Has(cf.Issuers, ir.Iss) {
 			return nil, errors.WithStack(helper.ErrForbidden.WithReason(fmt.Sprintf("Token issuer does not match any trusted issuer")))
 		}
 	}
 
-	if len(ir.Extra) == 0 {
-		ir.Extra = map[string]interface{}{}
-	}
-
-	ir.Extra["username"] = ir.Username
-	ir.Extra["client_id"] = ir.ClientID
-	ir.Extra["scope"] = ir.Scope
-
-	return &AuthenticationSession{
-		Subject: ir.Subject,
-		Extra:   ir.Extra,
-	}, nil
-}
-
-func stringInSlice(needle string, haystack []string) bool {
-	for _, b := range haystack {
-		if b == needle {
-			return true
+	if a.scopeStrategy != nil {
+		for _, scope := range cf.Scopes {
+			if !a.scopeStrategy(strings.Split(ir.Scope, " "), scope) {
+				return nil, errors.WithStack(helper.ErrForbidden.WithReason(fmt.Sprintf("Scope %s was not granted", scope)))
+			}
 		}
 	}
-	return false
+
+	if len(ir.Ext) == 0 {
+		ir.Ext = map[string]interface{}{}
+	}
+
+	ir.Ext["username"] = ir.Username
+	ir.Ext["client_id"] = ir.ClientId
+	ir.Ext["scope"] = ir.Scope
+
+	return &AuthenticationSession{
+		Subject: ir.Sub,
+		Extra:   ir.Ext,
+	}, nil
 }

@@ -93,33 +93,39 @@ AUTHENTICATORS
 		--------------------------------------------------------------
 
 - OAuth 2.0 Token Introspection Authenticator:
-	- AUTHENTICATOR_OAUTH2_INTROSPECTION_CLIENT_ID: The OAuth 2.0 Client ID the client that performs the OAuth 2.0
-		Token Introspection. The OAuth 2.0 Token Introspection endpoint is typically protected and requires a valid
-		OAuth 2.0 Client in order to check if a token is valid or not.
-		--------------------------------------------------------------
-		Example: AUTHENTICATOR_OAUTH2_INTROSPECTION_CLIENT_ID=my-client-id
-		--------------------------------------------------------------
-
-	- AUTHENTICATOR_OAUTH2_INTROSPECTION_CLIENT_SECRET:T he OAuth 2.0 Client Secret of the client that performs the OAuth 2.0 Token Introspection.
-		--------------------------------------------------------------
-		Example: AUTHENTICATOR_OAUTH2_INTROSPECTION_CLIENT_ID=my-client-secret
-		--------------------------------------------------------------
-
-	- AUTHENTICATOR_OAUTH2_INTROSPECTION_TOKEN_URL: The OAuth 2.0 Token URL.
-		--------------------------------------------------------------
-		Example: AUTHENTICATOR_OAUTH2_INTROSPECTION_TOKEN_URL=http://my-oauth2-server/oauth2/token
-		--------------------------------------------------------------
-
 	- AUTHENTICATOR_OAUTH2_INTROSPECTION_INTROSPECT_URL: The OAuth 2.0 Token Introspection URL.
 		--------------------------------------------------------------
 		Example: AUTHENTICATOR_OAUTH2_INTROSPECTION_INTROSPECT_URL=http://my-oauth2-server/oauth2/introspect
 		--------------------------------------------------------------
 
-	- AUTHENTICATOR_OAUTH2_INTROSPECTION_SCOPE: If the OAuth 2.0 Token Introspection endpoint requires a certain OAuth 2.0 Scope
-    	in order to be accessed, you can set it using this environment variable. Use commas to define more than one OAuth 2.0 Scope.
-		--------------------------------------------------------------
-		Example: AUTHENTICATOR_OAUTH2_INTROSPECTION_SCOPE=scope-a,scope-b
-		--------------------------------------------------------------
+	If the OAuth 2.0 Token Introspection Endpoint itself is protected with OAuth 2.0, you can provide the access credentials to perform
+	an OAuth 2.0 Client Credentials flow before accessing ORY Hydra's APIs.
+
+	These settings are usually not required and an optional! If you don't need this feature, leave them undefined.
+
+
+		- AUTHENTICATOR_OAUTH2_INTROSPECTION_CLIENT_ID: The OAuth 2.0 Client ID the client that performs the OAuth 2.0
+			Token Introspection. The OAuth 2.0 Token Introspection endpoint is typically protected and requires a valid
+			OAuth 2.0 Client in order to check if a token is valid or not.
+			--------------------------------------------------------------
+			Example: AUTHENTICATOR_OAUTH2_INTROSPECTION_CLIENT_ID=my-client-id
+			--------------------------------------------------------------
+
+		- AUTHENTICATOR_OAUTH2_INTROSPECTION_CLIENT_SECRET: The OAuth 2.0 Client Secret of the client that performs the OAuth 2.0 Token Introspection.
+			--------------------------------------------------------------
+			Example: AUTHENTICATOR_OAUTH2_INTROSPECTION_CLIENT_ID=my-client-secret
+			--------------------------------------------------------------
+
+		- AUTHENTICATOR_OAUTH2_INTROSPECTION_TOKEN_URL: The OAuth 2.0 Token URL.
+			--------------------------------------------------------------
+			Example: AUTHENTICATOR_OAUTH2_INTROSPECTION_TOKEN_URL=http://my-oauth2-server/oauth2/token
+			--------------------------------------------------------------
+
+		- AUTHENTICATOR_OAUTH2_INTROSPECTION_SCOPE: If the OAuth 2.0 Token Introspection endpoint requires a certain OAuth 2.0 Scope
+			in order to be accessed, you can set it using this environment variable. Use commas to define more than one OAuth 2.0 Scope.
+			--------------------------------------------------------------
+			Example: AUTHENTICATOR_OAUTH2_INTROSPECTION_SCOPE=scope-a,scope-b
+			--------------------------------------------------------------
 
 
 AUTHORIZERS

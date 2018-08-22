@@ -11,7 +11,6 @@ import (
 	"github.com/ory/oathkeeper/helper"
 	"github.com/ory/oathkeeper/rule"
 	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
 	"golang.org/x/oauth2/clientcredentials"
 )
 
@@ -63,7 +62,6 @@ func (a *AuthenticatorOAuth2ClientCredentials) Authenticate(r *http.Request, con
 		return nil, errors.Wrapf(helper.ErrUnauthorized, err.Error())
 	}
 
-	logrus.New().Printf("Got wow user pw, %s, %s", user, password)
 	c := &clientcredentials.Config{
 		ClientID:     user,
 		ClientSecret: password,
