@@ -26,12 +26,13 @@ import (
 	"net/http"
 	"testing"
 
+	"net/http/httptest"
+
 	"github.com/julienschmidt/httprouter"
 	"github.com/ory/fosite"
 	"github.com/ory/hydra/sdk/go/hydra/swagger"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"net/http/httptest"
 )
 
 func TestAuthenticatorOAuth2Introspection(t *testing.T) {

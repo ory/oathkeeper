@@ -7,6 +7,9 @@ import (
 	"net/http"
 
 	"context"
+	"net/url"
+	"strings"
+
 	"github.com/ory/fosite"
 	"github.com/ory/go-convenience/stringslice"
 	"github.com/ory/hydra/sdk/go/hydra/swagger"
@@ -14,8 +17,6 @@ import (
 	"github.com/ory/oathkeeper/rule"
 	"github.com/pkg/errors"
 	"golang.org/x/oauth2/clientcredentials"
-	"net/url"
-	"strings"
 )
 
 type AuthenticatorOAuth2IntrospectionConfiguration struct {
