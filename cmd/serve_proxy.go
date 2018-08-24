@@ -89,6 +89,11 @@ AUTHENTICATORS
 	- AUTHENTICATOR_JWT_JWKS_URL: The URL where ORY Oathkeeper can retrieve JSON Web Keys from for validating
 		the JSON Web Token. Usually something like "https://my-keys.com/.well-known/jwks.json". The response
 		of that endpoint must return a JSON Web Key Set (JWKS).
+	- AUTHENTICATOR_JWT_SCOPE_STRATEGY: The strategy to be used to validate the scope claim. Strategies "HIERARCHIC", "EXACT",
+		"WILDCARD", "NONE" are supported. For more information on each strategy, go to http://www.ory.sh/docs.
+		--------------------------------------------------------------
+		Default: AUTHENTICATOR_JWT_SCOPE_STRATEGY=EXACT
+		--------------------------------------------------------------
 
 - OAuth 2.0 Client Credentials Authenticator:
 	- AUTHENTICATOR_OAUTH2_CLIENT_CREDENTIALS_TOKEN_URL: Sets the OAuth 2.0 Token URL that should be used to check if
@@ -101,6 +106,12 @@ AUTHENTICATORS
 	- AUTHENTICATOR_OAUTH2_INTROSPECTION_INTROSPECT_URL: The OAuth 2.0 Token Introspection URL.
 		--------------------------------------------------------------
 		Example: AUTHENTICATOR_OAUTH2_INTROSPECTION_INTROSPECT_URL=http://my-oauth2-server/oauth2/introspect
+		--------------------------------------------------------------
+
+	- AUTHENTICATOR_OAUTH2_INTROSPECTION_SCOPE_STRATEGY: The strategy to be used to validate the scope claim.
+		Strategies "HIERARCHIC", "EXACT", "WILDCARD", "NONE" are supported. For more information on each strategy, go to http://www.ory.sh/docs.
+		--------------------------------------------------------------
+		Default: AUTHENTICATOR_OAUTH2_INTROSPECTION_SCOPE_STRATEGY=EXACT
 		--------------------------------------------------------------
 
 	If the OAuth 2.0 Token Introspection Endpoint itself is protected with OAuth 2.0, you can provide the access credentials to perform

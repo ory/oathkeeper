@@ -18,6 +18,14 @@ before finalizing the upgrade process.
 
 ## 1.0.0-rc.1
 
+### Scope Matching
+
+Previously, `fosite.WildcardScopeStrategy` was used to validate OAuth 2.0 Scope. This is now configurable
+with environment variables `AUTHENTICATOR_JWT_SCOPE_STRATEGY` and `AUTHENTICATOR_OAUTH2_INTROSPECTION_SCOPE_STRATEGY`.
+Supported strategies are `HIERARCHIC`, `EXACT`, `WILDCARD`, `NONE`.
+
+As part of this change, the default strategy is no longer `WILDCARD` but instead `EXACT`.
+
 ### Configuration changes
 
 To improve compatibility with ORY Hydra v1.0.0-beta.8, which introduces the public and admin endpoint, the following

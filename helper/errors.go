@@ -42,6 +42,11 @@ var (
 		CodeField:   http.StatusInternalServerError,
 		StatusField: http.StatusText(http.StatusInternalServerError),
 	}
+	ErrRuleFeatureDisabled = &herodot.DefaultError{
+		ErrorField:  "The matched rule uses a feature which is not enabled in the server configuration",
+		CodeField:   http.StatusInternalServerError,
+		StatusField: http.StatusText(http.StatusInternalServerError),
+	}
 	ErrMatchesNoRule = &herodot.DefaultError{
 		ErrorField:  "Requested url does not match any rules",
 		CodeField:   http.StatusNotFound,
