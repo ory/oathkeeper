@@ -91,6 +91,9 @@ func initConfig() {
 	viper.SetDefault("CREDENTIALS_ISSUER_ID_TOKEN_LIFESPAN", "10m")
 	viper.SetDefault("CREDENTIALS_ISSUER_ID_TOKEN_ISSUER", "http://localhost:"+viper.GetString("PORT"))
 
+	viper.SetDefault("AUTHENTICATOR_OAUTH2_INTROSPECTION_SCOPE_STRATEGY", "EXACT")
+	viper.SetDefault("AUTHENTICATOR_JWT_SCOPE_STRATEGY", "EXACT")
+
 	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err == nil {
 		fmt.Println("Using config file:", viper.ConfigFileUsed())

@@ -162,6 +162,22 @@ func enabledHandlerNames() (d []string, e []string, f []string) {
 	return
 }
 
+func getScopeStrategy(key string) fosite.ScopeStrategy {
+	switch id := viper.GetString(key); id {
+	case "HIERARCHIC":
+		return fosite.HierarchicScopeStrategy
+	case "EXACT":
+		return fosite.ExactScopeStrategy
+	case "WILDCARD":
+		return fosite.WildcardScopeStrategy
+	case "NONE":
+		return nil
+	default:
+		logger.Fatalf(`scope strategy "%s" from config %s is unknown, only "HIERARCHIC", "EXACT", "WILDCARD", "NONE" are supported`, id, key)
+	}
+	return nil
+}
+
 func handlerFactories(keyManager rsakey.Manager) ([]proxy.Authenticator, []proxy.Authorizer, []proxy.CredentialsIssuer) {
 	var authorizers = []proxy.Authorizer{
 		proxy.NewAuthorizerAllow(),
@@ -187,14 +203,14 @@ func handlerFactories(keyManager rsakey.Manager) ([]proxy.Authenticator, []proxy
 				viper.GetString("AUTHENTICATOR_OAUTH2_INTROSPECTION_AUTHORIZATION_TOKEN_URL"),
 				viper.GetString("AUTHENTICATOR_OAUTH2_INTROSPECTION_URL"),
 				strings.Split(viper.GetString("AUTHENTICATOR_OAUTH2_INTROSPECTION_AUTHORIZATION_SCOPE"), ","),
-				fosite.WildcardScopeStrategy,
+				getScopeStrategy("AUTHENTICATOR_OAUTH2_INTROSPECTION_SCOPE_STRATEGY"),
 			),
 			proxy.NewAuthenticatorOAuth2ClientCredentials(
 				viper.GetString("AUTHENTICATOR_OAUTH2_CLIENT_CREDENTIALS_TOKEN_URL"),
 			),
 			proxy.NewAuthenticatorJWT(
 				viper.GetString("AUTHENTICATOR_JWT_JWKS_URL"),
-				fosite.WildcardScopeStrategy,
+				getScopeStrategy("AUTHENTICATOR_JWT_SCOPE_STRATEGY"),
 			),
 		},
 		authorizers,

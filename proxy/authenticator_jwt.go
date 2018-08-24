@@ -94,7 +94,7 @@ func (a *AuthenticatorJWT) Authenticate(r *http.Request, config json.RawMessage,
 		case *jwt.SigningMethodHMAC:
 			return a.findSharedKey(token)
 		default:
-			return nil, errors.WithStack(helper.ErrUnauthorized.WithReason(fmt.Sprintf(`This request object uses unsupported signing algorithm "%s"."`, token.Header["alg"])))
+			return nil, errors.WithStack(helper.ErrUnauthorized.WithReason(fmt.Sprintf(`This request object uses unsupported signing algorithm "%s".`, token.Header["alg"])))
 		}
 	})
 
@@ -113,20 +113,26 @@ func (a *AuthenticatorJWT) Authenticate(r *http.Request, config json.RawMessage,
 
 	for _, audience := range cf.Audience {
 		if !stringslice.Has(parsedClaims.Audience, audience) {
-			return nil, errors.WithStack(helper.ErrForbidden.WithReason(fmt.Sprintf("Token audience %v is not intended for target audience %s", parsedClaims.Audience, audience)))
+			return nil, errors.WithStack(helper.ErrForbidden.WithReason(fmt.Sprintf("Token audience %v is not intended for target audience %s.", parsedClaims.Audience, audience)))
 		}
 	}
 
 	if len(cf.Issuers) > 0 {
 		if !stringslice.Has(cf.Issuers, parsedClaims.Issuer) {
-			return nil, errors.WithStack(helper.ErrForbidden.WithReason(fmt.Sprintf("Token issuer does not match any trusted issuer")))
+			return nil, errors.WithStack(helper.ErrForbidden.WithReason(fmt.Sprintf("Token issuer does not match any trusted issuer.")))
 		}
 	}
 
-	tokenScope := mapx.GetStringSliceDefault(map[interface{}]interface{}{"scope": claims["scope"]}, "scope", []string{})
-	for _, scope := range cf.Scopes {
-		if !a.scopeStrategy(tokenScope, scope) {
-			return nil, errors.WithStack(helper.ErrForbidden.WithReason(fmt.Sprintf("Token is missing required scope %s", scope)))
+	if a.scopeStrategy != nil {
+		tokenScope := mapx.GetStringSliceDefault(map[interface{}]interface{}{"scope": claims["scope"]}, "scope", []string{})
+		for _, scope := range cf.Scopes {
+			if !a.scopeStrategy(tokenScope, scope) {
+				return nil, errors.WithStack(helper.ErrForbidden.WithReason(fmt.Sprintf("Token is missing required scope %s.", scope)))
+			}
+		}
+	} else {
+		if len(cf.Scopes) > 0 {
+			return nil, errors.WithStack(helper.ErrRuleFeatureDisabled.WithReason("Scope validation was requested but scope strategy is set to \"NONE\"."))
 		}
 	}
 
