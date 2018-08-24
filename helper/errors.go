@@ -33,7 +33,7 @@ var (
 		StatusField: http.StatusText(http.StatusForbidden),
 	}
 	ErrUnauthorized = &herodot.DefaultError{
-		ErrorField:  "Access credentials are either expired or missing a scope",
+		ErrorField:  "Access credentials are invalid",
 		CodeField:   http.StatusUnauthorized,
 		StatusField: http.StatusText(http.StatusUnauthorized),
 	}

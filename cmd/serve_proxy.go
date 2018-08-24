@@ -85,6 +85,11 @@ HTTP(S) CONTROLS
 AUTHENTICATORS
 ==============
 
+- JSON Web Token Authenticator:
+	- AUTHENTICATOR_JWT_JWKS_URL: The URL where ORY Oathkeeper can retrieve JSON Web Keys from for validating
+		the JSON Web Token. Usually something like "https://my-keys.com/.well-known/jwks.json". The response
+		of that endpoint must return a JSON Web Key Set (JWKS).
+
 - OAuth 2.0 Client Credentials Authenticator:
 	- AUTHENTICATOR_OAUTH2_CLIENT_CREDENTIALS_TOKEN_URL: Sets the OAuth 2.0 Token URL that should be used to check if
 		the provided credentials are valid or not.

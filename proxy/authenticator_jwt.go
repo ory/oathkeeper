@@ -4,17 +4,20 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"bytes"
+	"crypto/ecdsa"
+	"crypto/rsa"
+	"fmt"
+
+	"github.com/dgrijalva/jwt-go"
+	"github.com/ory/fosite"
+	"github.com/ory/go-convenience/jwtx"
+	"github.com/ory/go-convenience/mapx"
+	"github.com/ory/go-convenience/stringslice"
+	"github.com/ory/oathkeeper/helper"
 	"github.com/ory/oathkeeper/rule"
 	"github.com/pkg/errors"
-	"github.com/ory/fosite"
 	"gopkg.in/square/go-jose.v2"
-	"bytes"
-	"github.com/ory/oathkeeper/helper"
-	"github.com/dgrijalva/jwt-go"
-	"fmt"
-	"github.com/ory/go-convenience/stringslice"
-	"crypto/rsa"
-	"crypto/ecdsa"
 )
 
 type AuthenticatorOAuth2JWTConfiguration struct {
@@ -76,22 +79,22 @@ func (a *AuthenticatorJWT) Authenticate(r *http.Request, config json.RawMessage,
 	}
 
 	// Parse the token.
-	parsedToken, err := jwt.Parse(token, func(t *jwt.Token) (interface{}, error) {
-		if !stringslice.Has(cf.AllowedAlgorithms, fmt.Sprintf("%s", t.Header["alg"])) {
-			return nil, errors.WithStack(helper.ErrUnauthorized.WithReason(fmt.Sprintf(`JSON Web Token used signing method "%s" which is not allowed.`, t.Header["alg"])))
+	parsedToken, err := jwt.ParseWithClaims(token, jwt.MapClaims{}, func(token *jwt.Token) (interface{}, error) {
+		if !stringslice.Has(cf.AllowedAlgorithms, fmt.Sprintf("%s", token.Header["alg"])) {
+			return nil, errors.WithStack(helper.ErrUnauthorized.WithReason(fmt.Sprintf(`JSON Web Token used signing method "%s" which is not allowed.`, token.Header["alg"])))
 		}
 
-		switch t.Method.(type) {
+		switch token.Method.(type) {
 		case *jwt.SigningMethodRSA:
-			return a.findRSAPublicKey(t)
+			return a.findRSAPublicKey(token)
 		case *jwt.SigningMethodECDSA:
-			return a.findECDSAPublicKey(t)
+			return a.findECDSAPublicKey(token)
 		case *jwt.SigningMethodRSAPSS:
-			return a.findRSAPublicKey(t)
+			return a.findRSAPublicKey(token)
 		case *jwt.SigningMethodHMAC:
-			return a.findSharedKey(t)
+			return a.findSharedKey(token)
 		default:
-			return nil, errors.WithStack(helper.ErrUnauthorized.WithReason(fmt.Sprintf(`This request object uses unsupported signing algorithm "%s"."`, t.Header["alg"])))
+			return nil, errors.WithStack(helper.ErrUnauthorized.WithReason(fmt.Sprintf(`This request object uses unsupported signing algorithm "%s"."`, token.Header["alg"])))
 		}
 	})
 
@@ -101,30 +104,36 @@ func (a *AuthenticatorJWT) Authenticate(r *http.Request, config json.RawMessage,
 		return nil, errors.WithStack(fosite.ErrInactiveToken)
 	}
 
-	if len(cf.Scopes) > 0 {
-
+	claims, ok := parsedToken.Claims.(jwt.MapClaims)
+	if !ok {
+		return nil, errors.Errorf("unable to type assert jwt claims to jwt.MapClaims")
 	}
 
-		if !stringslice.Has(cf.Audience, parsedToken.Claims["aud"]) {
-			return nil, errors.WithStack(helper.ErrForbidden.WithReason(fmt.Sprintf("Token audience is not intended for target audience %s", audience)))
+	parsedClaims := jwtx.ParseMapStringInterfaceClaims(claims)
+
+	for _, audience := range cf.Audience {
+		if !stringslice.Has(parsedClaims.Audience, audience) {
+			return nil, errors.WithStack(helper.ErrForbidden.WithReason(fmt.Sprintf("Token audience %v is not intended for target audience %s", parsedClaims.Audience, audience)))
 		}
-
-	if !stringslice.Has(cf.Issuers, parsedToken.Claims["iss"]) {
-		return nil, errors.WithStack(helper.ErrForbidden.WithReason(fmt.Sprintf("Token issuer does not match any trusted issuer")))
 	}
 
+	if len(cf.Issuers) > 0 {
+		if !stringslice.Has(cf.Issuers, parsedClaims.Issuer) {
+			return nil, errors.WithStack(helper.ErrForbidden.WithReason(fmt.Sprintf("Token issuer does not match any trusted issuer")))
+		}
+	}
+
+	tokenScope := mapx.GetStringSliceDefault(map[interface{}]interface{}{"scope": claims["scope"]}, "scope", []string{})
 	for _, scope := range cf.Scopes {
-		if !a.scopeStrategy(parsedToken.Claims["scope"], scope) {
-
-			// TO BE DONE
-			// TO BE DONE
-			// TO BE DONE
-			// TO BE DONE
-			// TO BE DONE
-			// TO BE DONE
-			return nil, errors.WithStack(helper.ErrForbidden.WithReason(fmt.Sprintf("Token claims TO BE DONE")))
+		if !a.scopeStrategy(tokenScope, scope) {
+			return nil, errors.WithStack(helper.ErrForbidden.WithReason(fmt.Sprintf("Token is missing required scope %s", scope)))
 		}
 	}
+
+	return &AuthenticationSession{
+		Subject: parsedClaims.Subject,
+		Extra:   claims,
+	}, nil
 }
 
 func (a *AuthenticatorJWT) findRSAPublicKey(t *jwt.Token) (*rsa.PublicKey, error) {
@@ -151,7 +160,7 @@ func (a *AuthenticatorJWT) findECDSAPublicKey(t *jwt.Token) (*ecdsa.PublicKey, e
 		return nil, err
 	}
 
-	if key, err := findRSAPublicKey(t, keys); err == nil {
+	if key, err := findECDSAPublicKey(t, keys); err == nil {
 		return key, nil
 	}
 
@@ -160,16 +169,16 @@ func (a *AuthenticatorJWT) findECDSAPublicKey(t *jwt.Token) (*ecdsa.PublicKey, e
 		return nil, err
 	}
 
-	return findRSAPublicKey(t, keys)
+	return findECDSAPublicKey(t, keys)
 }
 
-func (a *AuthenticatorJWT) findSharedKey(t *jwt.Token) (*rsa.PublicKey, error) {
+func (a *AuthenticatorJWT) findSharedKey(t *jwt.Token) ([]byte, error) {
 	keys, err := a.fetcher.Resolve(a.jwksURL, false)
 	if err != nil {
 		return nil, err
 	}
 
-	if key, err := findRSAPublicKey(t, keys); err == nil {
+	if key, err := findSharedKey(t, keys); err == nil {
 		return key, nil
 	}
 
@@ -185,12 +194,12 @@ func (a *AuthenticatorJWT) findSharedKey(t *jwt.Token) (*rsa.PublicKey, error) {
 func findRSAPublicKey(t *jwt.Token, set *jose.JSONWebKeySet) (*rsa.PublicKey, error) {
 	kid, ok := t.Header["kid"].(string)
 	if !ok {
-		return nil, errors.WithStack(helper.ErrForbidden.WithReason("The JSON Web Token must contain a kid header value but did not."))
+		return nil, errors.WithStack(helper.ErrUnauthorized.WithReason("The JSON Web Token must contain a kid header value but did not."))
 	}
 
 	keys := set.Key(kid)
 	if len(keys) == 0 {
-		return nil, errors.WithStack(helper.ErrForbidden.WithReason(fmt.Sprintf("The JSON Web Token uses signing key with kid \"%s\", which could not be found.", kid)))
+		return nil, errors.WithStack(helper.ErrUnauthorized.WithReason(fmt.Sprintf("The JSON Web Token uses signing key with kid \"%s\", which could not be found.", kid)))
 	}
 
 	for _, key := range keys {
@@ -202,18 +211,18 @@ func findRSAPublicKey(t *jwt.Token, set *jose.JSONWebKeySet) (*rsa.PublicKey, er
 		}
 	}
 
-	return nil, errors.WithStack(helper.ErrForbidden.WithReason(fmt.Sprintf("Unable to find RSA public key with use=\"sig\" for kid \"%s\" in JSON Web Key Set.", kid)))
+	return nil, errors.WithStack(helper.ErrUnauthorized.WithReason(fmt.Sprintf("Unable to find RSA public key with use=\"sig\" for kid \"%s\" in JSON Web Key Set.", kid)))
 }
 
 func findECDSAPublicKey(t *jwt.Token, set *jose.JSONWebKeySet) (*ecdsa.PublicKey, error) {
 	kid, ok := t.Header["kid"].(string)
 	if !ok {
-		return nil, errors.WithStack(helper.ErrForbidden.WithReason("The JSON Web Token must contain a kid header value but did not."))
+		return nil, errors.WithStack(helper.ErrUnauthorized.WithReason("The JSON Web Token must contain a kid header value but did not."))
 	}
 
 	keys := set.Key(kid)
 	if len(keys) == 0 {
-		return nil, errors.WithStack(helper.ErrForbidden.WithReason(fmt.Sprintf("The JSON Web Token uses signing key with kid \"%s\", which could not be found.", kid)))
+		return nil, errors.WithStack(helper.ErrUnauthorized.WithReason(fmt.Sprintf("The JSON Web Token uses signing key with kid \"%s\", which could not be found.", kid)))
 	}
 
 	for _, key := range keys {
@@ -225,18 +234,18 @@ func findECDSAPublicKey(t *jwt.Token, set *jose.JSONWebKeySet) (*ecdsa.PublicKey
 		}
 	}
 
-	return nil, errors.WithStack(helper.ErrForbidden.WithReason(fmt.Sprintf("Unable to find RSA public key with use=\"sig\" for kid \"%s\" in JSON Web Key Set.", kid)))
+	return nil, errors.WithStack(helper.ErrUnauthorized.WithReason(fmt.Sprintf("Unable to find RSA public key with use=\"sig\" for kid \"%s\" in JSON Web Key Set.", kid)))
 }
 
 func findSharedKey(t *jwt.Token, set *jose.JSONWebKeySet) ([]byte, error) {
 	kid, ok := t.Header["kid"].(string)
 	if !ok {
-		return nil, errors.WithStack(helper.ErrForbidden.WithReason("The JSON Web Token must contain a kid header value but did not."))
+		return nil, errors.WithStack(helper.ErrUnauthorized.WithReason("The JSON Web Token must contain a kid header value but did not."))
 	}
 
 	keys := set.Key(kid)
 	if len(keys) == 0 {
-		return nil, errors.WithStack(helper.ErrForbidden.WithReason(fmt.Sprintf("The JSON Web Token uses signing key with kid \"%s\", which could not be found.", kid)))
+		return nil, errors.WithStack(helper.ErrUnauthorized.WithReason(fmt.Sprintf("The JSON Web Token uses signing key with kid \"%s\", which could not be found.", kid)))
 	}
 
 	for _, key := range keys {
@@ -248,5 +257,5 @@ func findSharedKey(t *jwt.Token, set *jose.JSONWebKeySet) ([]byte, error) {
 		}
 	}
 
-	return nil, errors.WithStack(helper.ErrForbidden.WithReason(fmt.Sprintf("Unable to find shared key with use=\"sig\" for kid \"%s\" in JSON Web Key Set.", kid)))
+	return nil, errors.WithStack(helper.ErrUnauthorized.WithReason(fmt.Sprintf("Unable to find shared key with use=\"sig\" for kid \"%s\" in JSON Web Key Set.", kid)))
 }
