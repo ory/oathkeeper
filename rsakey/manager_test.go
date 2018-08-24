@@ -140,7 +140,8 @@ func connectToHydra(t *testing.T) *hydra.CodeGenSDK {
 
 	resources = append(resources, resource)
 	sdk, err := hydra.NewSDK(&hydra.Configuration{
-		AdminURL: "http://localhost:" + resource.GetPort("4444/tcp") + "/",
+		AdminURL:  "http://localhost:" + resource.GetPort("4445/tcp") + "/",
+		PublicURL: "http://localhost:" + resource.GetPort("4444/tcp") + "/",
 	})
 	require.NoError(t, err)
 	return sdk
