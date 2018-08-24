@@ -192,6 +192,10 @@ func handlerFactories(keyManager rsakey.Manager) ([]proxy.Authenticator, []proxy
 			proxy.NewAuthenticatorOAuth2ClientCredentials(
 				viper.GetString("AUTHENTICATOR_OAUTH2_CLIENT_CREDENTIALS_TOKEN_URL"),
 			),
+			proxy.NewAuthenticatorJWT(
+				viper.GetString("AUTHENTICATOR_JWT_JWKS_URL"),
+				fosite.WildcardScopeStrategy,
+			),
 		},
 		authorizers,
 		[]proxy.CredentialsIssuer{

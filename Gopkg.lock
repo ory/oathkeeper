@@ -239,18 +239,20 @@
 [[projects]]
   name = "github.com/ory/fosite"
   packages = ["."]
-  revision = "99029e0e1bc4b1d6dfa1ca8b85a46d79cffad6e8"
-  version = "v0.17.2"
+  revision = "a07ce27c814538c7d0e6228ae814482be2e96e7e"
+  version = "v0.21.3"
 
 [[projects]]
   name = "github.com/ory/go-convenience"
   packages = [
     "corsx",
+    "jwtx",
+    "mapx",
     "stringslice",
     "stringsx"
   ]
-  revision = "42cb17c3e4dc0d7d7672cfaffbdfe8f5deb494db"
-  version = "v0.0.2"
+  revision = "c47f601243faea2022b8bc0b90d7e1cd1f722807"
+  version = "v0.0.6"
 
 [[projects]]
   name = "github.com/ory/graceful"
@@ -540,6 +542,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "1213e51765e6ba29f566f40c6f5ab3f0e03ab2bbaa548e98d398994b37607618"
+  inputs-digest = "1a243d722f9e92c1f1366af096682f0e0c73df036d6bffb18856e82eea3950b7"
   solver-name = "gps-cdcl"
   solver-version = 1
