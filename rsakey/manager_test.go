@@ -112,7 +112,7 @@ func connectToHydra(t *testing.T) *hydra.CodeGenSDK {
 		Tag:          "v1.0.0-beta.8",
 		Cmd:          []string{"serve", "all", "--dangerous-force-http"},
 		Env:          []string{"DATABASE_URL=memory"},
-		ExposedPorts: []string{"4444/tcp"},
+		ExposedPorts: []string{"4444/tcp", "4445/tcp"},
 	})
 	if err != nil {
 		log.Fatalf("Could not start resource: %s", err)
