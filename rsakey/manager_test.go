@@ -93,7 +93,7 @@ func TestManager(t *testing.T) {
 }
 
 func connectToHydra(t *testing.T) *hydra.CodeGenSDK {
-	if url := os.Getenv("TEST_HYDRA_URL"); url != "" {
+	if url := os.Getenv("TEST_HYDRA_ADMIN_URL"); url != "" {
 		sdk, err := hydra.NewSDK(&hydra.Configuration{
 			AdminURL: url,
 		})
@@ -121,7 +121,7 @@ func connectToHydra(t *testing.T) *hydra.CodeGenSDK {
 
 	if err = pool.Retry(func() error {
 		var err error
-		u := "http://localhost:" + resource.GetPort("4444/tcp") + "/health/status"
+		u := "http://localhost:" + resource.GetPort("4445/tcp") + "/health/status"
 		t.Logf("Trying to connect to ORY Hydra at %s", u)
 		response, err := http.Get(u)
 		if err != nil {
