@@ -254,7 +254,7 @@ OTHER CONTROLS
 			logger.Printf("Listening on http://%s.\n", addr)
 			return server.ListenAndServe()
 		}, server.Shutdown); err != nil {
-			logger.Fatalf("Unable to gracefully shutdown HTTP(s) server because %s.\n", err)
+			logger.Fatalf("Unable to gracefully shutdown HTTP(s) server because %v.\n", err)
 			return
 		}
 		logger.Println("HTTP(s) server was shutdown gracefully")
