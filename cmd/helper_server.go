@@ -24,6 +24,8 @@ import (
 	"strings"
 	"time"
 
+	"net/url"
+
 	"github.com/ory/fosite"
 	"github.com/ory/hydra/sdk/go/hydra"
 	"github.com/ory/keto/sdk/go/keto"
@@ -178,41 +180,84 @@ func getScopeStrategy(key string) fosite.ScopeStrategy {
 	return nil
 }
 
+func authenticatorFactory(f func() (proxy.Authenticator, error)) proxy.Authenticator {
+	a, err := f()
+	if err != nil {
+		logger.WithError(err).Fatalf("Unable to initialize authenticator \"%s\" because an environment variable is missing or misconfigured.", a.GetID())
+	}
+	return a
+}
+func credentialsIssuerFactory(f func() (proxy.CredentialsIssuer, error)) proxy.CredentialsIssuer {
+	a, err := f()
+	if err != nil {
+		logger.WithError(err).Fatalf("Unable to initialize authenticator \"%s\" because an environment variable is missing or misconfigured.", a.GetID())
+	}
+	return a
+}
+
 func handlerFactories(keyManager rsakey.Manager) ([]proxy.Authenticator, []proxy.Authorizer, []proxy.CredentialsIssuer) {
 	var authorizers = []proxy.Authorizer{
 		proxy.NewAuthorizerAllow(),
 		proxy.NewAuthorizerDeny(),
 	}
-
-	if u := viper.GetString("AUTHORIZER_KETO_WARDEN_KETO_URL"); len(u) > 0 {
-		ketoSdk, err := keto.NewCodeGenSDK(&keto.Configuration{
-			EndpointURL: viper.GetString("AUTHORIZER_KETO_WARDEN_KETO_URL"),
-		})
-		if err != nil {
-			logger.WithError(err).Fatal("Unable to initialize the ORY Keto SDK")
-		}
-		authorizers = append(authorizers, proxy.NewAuthorizerKetoWarden(ketoSdk))
+	var authenticators = []proxy.Authenticator{
+		proxy.NewAuthenticatorNoOp(),
+		proxy.NewAuthenticatorAnonymous(viper.GetString("AUTHENTICATOR_ANONYMOUS_USERNAME")),
 	}
 
-	return []proxy.Authenticator{
-			proxy.NewAuthenticatorNoOp(),
-			proxy.NewAuthenticatorAnonymous(viper.GetString("AUTHENTICATOR_ANONYMOUS_USERNAME")),
-			proxy.NewAuthenticatorOAuth2Introspection(
+	if u := viper.GetString("AUTHENTICATOR_OAUTH2_INTROSPECTION_URL"); len(u) > 0 {
+		authenticators = append(authenticators, authenticatorFactory(func() (proxy.Authenticator, error) {
+			return proxy.NewAuthenticatorOAuth2Introspection(
 				viper.GetString("AUTHENTICATOR_OAUTH2_INTROSPECTION_AUTHORIZATION_CLIENT_ID"),
 				viper.GetString("AUTHENTICATOR_OAUTH2_INTROSPECTION_AUTHORIZATION_CLIENT_SECRET"),
 				viper.GetString("AUTHENTICATOR_OAUTH2_INTROSPECTION_AUTHORIZATION_TOKEN_URL"),
-				viper.GetString("AUTHENTICATOR_OAUTH2_INTROSPECTION_URL"),
+				u,
 				strings.Split(viper.GetString("AUTHENTICATOR_OAUTH2_INTROSPECTION_AUTHORIZATION_SCOPE"), ","),
 				getScopeStrategy("AUTHENTICATOR_OAUTH2_INTROSPECTION_SCOPE_STRATEGY"),
-			),
-			proxy.NewAuthenticatorOAuth2ClientCredentials(
-				viper.GetString("AUTHENTICATOR_OAUTH2_CLIENT_CREDENTIALS_TOKEN_URL"),
-			),
-			proxy.NewAuthenticatorJWT(
+			)
+		}))
+		logger.Info("Authenticator \"oauth2_client_credentials\" was configured and enabled successfully.")
+	} else {
+		logger.Warn("Authenticator \"oauth2_client_credentials\" is not configured and thus disabled.")
+	}
+
+	if u := viper.GetString("AUTHENTICATOR_OAUTH2_CLIENT_CREDENTIALS_TOKEN_URL"); len(u) > 0 {
+		authenticators = append(authenticators, authenticatorFactory(func() (proxy.Authenticator, error) {
+			return proxy.NewAuthenticatorOAuth2ClientCredentials(u)
+		}))
+		logger.Info("Authenticator \"oauth2_client_credentials\" was configured and enabled successfully.")
+	} else {
+		logger.Warn("Authenticator \"oauth2_client_credentials\" is not configured and thus disabled.")
+	}
+
+	if u := viper.GetString("AUTHENTICATOR_JWT_JWKS_URL"); len(u) > 0 {
+		authenticators = append(authenticators, authenticatorFactory(func() (proxy.Authenticator, error) {
+			return proxy.NewAuthenticatorJWT(
 				viper.GetString("AUTHENTICATOR_JWT_JWKS_URL"),
 				getScopeStrategy("AUTHENTICATOR_JWT_SCOPE_STRATEGY"),
-			),
-		},
+			)
+		}))
+		logger.Info("Authenticator \"jwt\" was configured and enabled successfully.")
+	} else {
+		logger.Warn("Authenticator \"jwt\" is not configured and thus disabled.")
+	}
+
+	if u := viper.GetString("AUTHORIZER_KETO_WARDEN_KETO_URL"); len(u) > 0 {
+		if _, err := url.ParseRequestURI(u); err != nil {
+			logger.WithError(err).Fatalf("Value \"%s\" from environment variable \"AUTHORIZER_KETO_WARDEN_KETO_URL\" is not a valid URL.", u)
+		}
+		ketoSdk, err := keto.NewCodeGenSDK(&keto.Configuration{
+			EndpointURL: u,
+		})
+		if err != nil {
+			logger.WithError(err).Fatal("Unable to initialize the ORY Keto SDK.")
+		}
+		authorizers = append(authorizers, proxy.NewAuthorizerKetoWarden(ketoSdk))
+	} else {
+		logger.Warn("Authorizer \"ory-keto\" is not configured and thus disabled.")
+	}
+
+	return authenticators,
 		authorizers,
 		[]proxy.CredentialsIssuer{
 			proxy.NewCredentialsIssuerNoOp(),

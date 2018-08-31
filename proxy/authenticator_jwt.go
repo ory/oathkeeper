@@ -9,6 +9,8 @@ import (
 	"crypto/rsa"
 	"fmt"
 
+	"net/url"
+
 	"github.com/dgrijalva/jwt-go"
 	"github.com/ory/fosite"
 	"github.com/ory/go-convenience/jwtx"
@@ -45,12 +47,16 @@ type AuthenticatorJWT struct {
 	scopeStrategy fosite.ScopeStrategy
 }
 
-func NewAuthenticatorJWT(jwksURL string, scopeStrategy fosite.ScopeStrategy) *AuthenticatorJWT {
+func NewAuthenticatorJWT(jwksURL string, scopeStrategy fosite.ScopeStrategy) (*AuthenticatorJWT, error) {
+	if _, err := url.ParseRequestURI(jwksURL); err != nil {
+		return new(AuthenticatorJWT), errors.Errorf(`unable to validate the JSON Web Token Authenticator's JWKs URL "%s" because %s`, jwksURL, err)
+	}
+
 	return &AuthenticatorJWT{
 		jwksURL:       jwksURL,
 		fetcher:       fosite.NewDefaultJWKSFetcherStrategy(),
 		scopeStrategy: scopeStrategy,
-	}
+	}, nil
 }
 
 func (a *AuthenticatorJWT) GetID() string {

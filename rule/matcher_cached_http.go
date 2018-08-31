@@ -48,7 +48,7 @@ func (m *HTTPMatcher) Refresh() error {
 		return errors.WithStack(err)
 	}
 	if response.StatusCode != http.StatusOK {
-		return errors.Errorf("Unable to fetch rules from backend, got status code %d but expected %s", response.StatusCode, http.StatusOK)
+		return errors.Errorf("unable to fetch rules from backend, got status code %d but expected %d", response.StatusCode, http.StatusOK)
 	}
 
 	inserted := map[string]bool{}

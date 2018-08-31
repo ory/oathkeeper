@@ -24,10 +24,14 @@ type AuthenticatorOAuth2ClientCredentials struct {
 	tokenURL string
 }
 
-func NewAuthenticatorOAuth2ClientCredentials(tokenURL string) *AuthenticatorOAuth2ClientCredentials {
+func NewAuthenticatorOAuth2ClientCredentials(tokenURL string) (*AuthenticatorOAuth2ClientCredentials, error) {
+	if _, err := url.ParseRequestURI(tokenURL); err != nil {
+		return new(AuthenticatorOAuth2ClientCredentials), errors.Errorf(`unable to validate the OAuth 2.0 Client Credentials Authenticator's Token Introspection URL "%s" because %s`, tokenURL, err)
+	}
+
 	return &AuthenticatorOAuth2ClientCredentials{
 		tokenURL: tokenURL,
-	}
+	}, nil
 }
 
 func (a *AuthenticatorOAuth2ClientCredentials) GetID() string {

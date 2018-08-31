@@ -119,7 +119,7 @@ type Upstream struct {
 // IsMatching returns an error if the provided method and URL do not match the rule.
 func (r *Rule) IsMatching(method string, u *url.URL) error {
 	if !stringInSlice(method, r.Match.Methods) {
-		return errors.Errorf("Rule %s does not match URL %s", u)
+		return errors.Errorf("rule %s does not match URL %s", r.ID, u)
 	}
 
 	c, err := r.CompileURL()
@@ -128,7 +128,7 @@ func (r *Rule) IsMatching(method string, u *url.URL) error {
 	}
 
 	if !c.MatchString(u.String()) {
-		return errors.Errorf("Rule %s does not match URL %s", u)
+		return errors.Errorf("rule %s does not match URL %s", r.ID, u)
 	}
 
 	return nil

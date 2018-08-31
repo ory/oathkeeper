@@ -83,6 +83,13 @@ func generateJWT(t *testing.T, claims jwt.Claims, method string) string {
 	return fmt.Sprintf("%s.%s", sign, j)
 }
 
+func TestNewAuthenticatorJWT(t *testing.T) {
+	_, err := NewAuthenticatorJWT("", fosite.ExactScopeStrategy)
+	require.Error(t, err)
+	_, err = NewAuthenticatorJWT("foo", fosite.ExactScopeStrategy)
+	require.Error(t, err)
+}
+
 func TestAuthenticatorJWT(t *testing.T) {
 	generateKeys(t)
 
@@ -97,7 +104,8 @@ func TestAuthenticatorJWT(t *testing.T) {
 	}))
 	defer ts.Close()
 
-	authenticator := NewAuthenticatorJWT(ts.URL, fosite.ExactScopeStrategy)
+	authenticator, err := NewAuthenticatorJWT(ts.URL, fosite.ExactScopeStrategy)
+	require.NoError(t, err)
 	assert.NotEmpty(t, authenticator.GetID())
 	now := time.Now().Round(time.Second)
 
