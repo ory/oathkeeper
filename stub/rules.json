@@ -19,27 +19,6 @@
       },
       {
         "handler": "anonymous"
-      },
-      {
-        "handler": "oauth2_introspection",
-        "config": {
-          "required_scope": [
-            "foo",
-            "bar"
-          ]
-        }
-      },
-      {
-        "handler": "oauth2_introspection",
-        "config": {
-          "required_scope": [
-            "foo",
-            "baz"
-          ]
-        }
-      },
-      {
-        "handler": "oauth2_client_credentials"
       }
     ],
     "authorizer": {
@@ -69,27 +48,6 @@
       },
       {
         "handler": "anonymous"
-      },
-      {
-        "handler": "oauth2_introspection",
-        "config": {
-          "required_scope": [
-            "foo",
-            "bar"
-          ]
-        }
-      },
-      {
-        "handler": "oauth2_introspection",
-        "config": {
-          "required_scope": [
-            "foo",
-            "baz"
-          ]
-        }
-      },
-      {
-        "handler": "oauth2_client_credentials"
       }
     ],
     "authorizer": {
@@ -119,18 +77,6 @@
       },
       {
         "handler": "anonymous"
-      },
-      {
-        "handler": "oauth2_introspection",
-        "config": {
-          "required_scope": [
-            "foo",
-            "bar"
-          ]
-        }
-      },
-      {
-        "handler": "oauth2_client_credentials"
       }
     ],
     "authorizer": {
