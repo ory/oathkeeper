@@ -22,16 +22,16 @@ package cmd
 
 import (
 	"crypto/tls"
-	"encoding/base64"
 	"fmt"
 	"net/http"
 	"net/http/httputil"
 
 	"github.com/meatballhat/negroni-logrus"
+	"github.com/ory/metrics-middleware"
+
 	"github.com/ory/go-convenience/corsx"
 	"github.com/ory/graceful"
 	"github.com/ory/keto/sdk/go/keto"
-	"github.com/ory/metrics-middleware"
 	"github.com/ory/oathkeeper/proxy"
 	"github.com/ory/oathkeeper/rule"
 	"github.com/ory/oathkeeper/sdk/go/oathkeeper"
@@ -64,12 +64,7 @@ REQUIRED CONTROLS
 
 HTTP(S) CONTROLS
 ==============
-
-- HTTP_TLS_KEY: Base64 encoded (without padding) string of the private key (PEM encoded) to be used for HTTP over TLS (HTTPS).
-	If not set, HTTPS will be disabled and instead HTTP will be served.
-
-- HTTP_TLS_CERT: Base64 encoded (without padding) string of the TLS certificate (PEM encoded) to be used for HTTP over TLS (HTTPS).
-	If not set, HTTPS will be disabled and instead HTTP will be served.
+` + tlsMessage + `
 
 - HOST: The host to listen on.
 	--------------------------------------------------------------
@@ -232,17 +227,14 @@ OTHER CONTROLS
 			h = cors.New(corsx.ParseOptions()).Handler(n)
 		}
 
-		var cert tls.Certificate
-		tlsCert := viper.GetString("HTTP_TLS_CERT")
-		tlsKey := viper.GetString("HTTP_TLS_KEY")
-		if tlsCert != "" && tlsKey != "" {
-			if tlsCert, err := base64.StdEncoding.DecodeString(tlsCert); err != nil {
-				logger.WithError(err).Fatalln("Unable to base64 decode the TLS Certificate")
-			} else if tlsKey, err := base64.StdEncoding.DecodeString(tlsKey); err != nil {
-				logger.WithError(err).Fatalln("Unable to base64 decode the TLS Private Key")
-			} else if cert, err = tls.X509KeyPair(tlsCert, tlsKey); err != nil {
-				logger.WithError(err).Fatalln("Unable to load X509 key pair")
-			}
+		cert, err := getTLSCertAndKey()
+		if err != nil {
+			logger.Fatalf("%v", err)
+		}
+
+		certs := []tls.Certificate{}
+		if cert != nil {
+			certs = append(certs, *cert)
 		}
 
 		addr := fmt.Sprintf("%s:%s", viper.GetString("HOST"), viper.GetString("PORT"))
@@ -250,15 +242,16 @@ OTHER CONTROLS
 			Addr:    addr,
 			Handler: h,
 			TLSConfig: &tls.Config{
-				Certificates: []tls.Certificate{cert},
+				Certificates: certs,
 			},
 		})
 
-		logger.Printf("Listening on %s.\n", addr)
 		if err := graceful.Graceful(func() error {
-			if tlsCert != "" && tlsKey != "" {
+			if cert != nil {
+				logger.Printf("Listening on https://%s.\n", addr)
 				return server.ListenAndServeTLS("", "")
 			}
+			logger.Printf("Listening on http://%s.\n", addr)
 			return server.ListenAndServe()
 		}, server.Shutdown); err != nil {
 			logger.Fatalf("Unable to gracefully shutdown HTTP(s) server because %s.\n", err)

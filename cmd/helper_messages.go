@@ -172,6 +172,22 @@ var credentialsIssuer = `CREDENTIALS ISSUERS
 					--------------------------------------------------------------
 `
 
+var tlsMessage = `
+NOTE: configure TLS params consistently both as PATH or as string. If no TLS pair is set, HTTPS will be disabled and instead HTTP will be served.
+
+- HTTPS_TLS_CERT_PATH: The path to the TLS certificate (pem encoded).
+	Example: HTTPS_TLS_CERT_PATH=~/cert.pem
+
+- HTTPS_TLS_KEY_PATH: The path to the TLS private key (pem encoded).
+	Example: HTTPS_TLS_KEY_PATH=~/key.pem
+
+- HTTP_TLS_CERT: Base64 encoded (without padding) string of the TLS certificate (PEM encoded) to be used for HTTP over TLS (HTTPS).
+	Example: HTTPS_TLS_CERT="-----BEGIN CERTIFICATE-----\nMIIDZTCCAk2gAwIBAgIEV5xOtDANBgkqhkiG9w0BAQ0FADA0MTIwMAYDVQQDDClP..."
+
+- HTTP_TLS_KEY: Base64 encoded (without padding) string of the private key (PEM encoded) to be used for HTTP over TLS (HTTPS).
+	Example: HTTPS_TLS_KEY="-----BEGIN ENCRYPTED PRIVATE KEY-----\nMIIFDjBABgkqhkiG9w0BBQ0wMzAbBgkqhkiG9w0BBQwwDg..."
+`
+
 func fatalf(msg string, args ...interface{}) {
 	fmt.Printf(msg+"\n", args...)
 	os.Exit(1)
