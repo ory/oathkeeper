@@ -21,6 +21,9 @@
 package cmd
 
 import (
+	"crypto/tls"
+	"encoding/base64"
+	"fmt"
 	"strings"
 	"time"
 
@@ -225,4 +228,39 @@ func handlerFactories(keyManager rsakey.Manager) ([]proxy.Authenticator, []proxy
 			proxy.NewCredentialsIssuerHeaders(),
 			proxy.NewCredentialsIssuerCookies(),
 		}
+}
+
+func getTLSCertAndKey() (*tls.Certificate, error) {
+	certString, keyString := viper.GetString("HTTP_TLS_CERT"), viper.GetString("HTTP_TLS_KEY")
+	certPath, keyPath := viper.GetString("HTTP_TLS_CERT_PATH"), viper.GetString("HTTP_TLS_KEY_PATH")
+
+	if certString == "" && keyString == "" && certPath == "" && keyPath == "" {
+		// serve http
+		return nil, nil
+	} else if certString != "" && keyString != "" {
+		tlsCertBytes, err := base64.StdEncoding.DecodeString(certString)
+		if err != nil {
+			return nil, fmt.Errorf("unable to base64 decode the TLS certificate: %v", err)
+		}
+		tlsKeyBytes, err := base64.StdEncoding.DecodeString(keyString)
+		if err != nil {
+			return nil, fmt.Errorf("unable to base64 decode the TLS private key: %v", err)
+		}
+
+		cert, err := tls.X509KeyPair(tlsCertBytes, tlsKeyBytes)
+		if err != nil {
+			return nil, fmt.Errorf("unable to load X509 key pair: %v", err)
+		}
+		return &cert, nil
+	}
+	if certPath != "" && keyPath != "" {
+		cert, err := tls.LoadX509KeyPair(certPath, keyPath)
+		if err != nil {
+			return nil, fmt.Errorf("unable to load X509 key pair from files: %v", err)
+		}
+		return &cert, nil
+	}
+	// serve http
+	logger.Warnln("TLS requires both cert and key to be specified. Fall back to serving HTTP")
+	return nil, nil
 }
