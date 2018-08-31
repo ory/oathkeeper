@@ -27,6 +27,7 @@ import (
 	"net/url"
 
 	"github.com/ory/fosite"
+	"github.com/ory/go-convenience/stringsx"
 	"github.com/ory/hydra/sdk/go/hydra"
 	"github.com/ory/keto/sdk/go/keto"
 	"github.com/ory/oathkeeper/proxy"
@@ -212,13 +213,13 @@ func handlerFactories(keyManager rsakey.Manager) ([]proxy.Authenticator, []proxy
 				viper.GetString("AUTHENTICATOR_OAUTH2_INTROSPECTION_AUTHORIZATION_CLIENT_SECRET"),
 				viper.GetString("AUTHENTICATOR_OAUTH2_INTROSPECTION_AUTHORIZATION_TOKEN_URL"),
 				u,
-				strings.Split(viper.GetString("AUTHENTICATOR_OAUTH2_INTROSPECTION_AUTHORIZATION_SCOPE"), ","),
+				stringsx.Splitx(viper.GetString("AUTHENTICATOR_OAUTH2_INTROSPECTION_AUTHORIZATION_SCOPE"), ","),
 				getScopeStrategy("AUTHENTICATOR_OAUTH2_INTROSPECTION_SCOPE_STRATEGY"),
 			)
 		}))
-		logger.Info("Authenticator \"oauth2_client_credentials\" was configured and enabled successfully.")
+		logger.Info("Authenticator \"oauth2_introspection\" was configured and enabled successfully.")
 	} else {
-		logger.Warn("Authenticator \"oauth2_client_credentials\" is not configured and thus disabled.")
+		logger.Warn("Authenticator \"oauth2_introspection\" is not configured and thus disabled.")
 	}
 
 	if u := viper.GetString("AUTHENTICATOR_OAUTH2_CLIENT_CREDENTIALS_TOKEN_URL"); len(u) > 0 {
