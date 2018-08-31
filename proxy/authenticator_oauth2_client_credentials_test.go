@@ -36,6 +36,13 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func TestNewAuthenticatorOAuth2ClientCredentials(t *testing.T) {
+	_, err := NewAuthenticatorOAuth2ClientCredentials("")
+	require.Error(t, err)
+	_, err = NewAuthenticatorOAuth2ClientCredentials("oauth2/token")
+	require.Error(t, err)
+}
+
 func TestAuthenticatorOAuth2ClientCredentials(t *testing.T) {
 	h := httprouter.New()
 	h.POST("/oauth2/token", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
@@ -49,12 +56,13 @@ func TestAuthenticatorOAuth2ClientCredentials(t *testing.T) {
 	})
 	ts := httptest.NewServer(h)
 
-	a := NewAuthenticatorOAuth2ClientCredentials(ts.URL + "/oauth2/token")
+	a, err := NewAuthenticatorOAuth2ClientCredentials(ts.URL + "/oauth2/token")
+	require.NoError(t, err)
 	//     "client",
 	// "secret",
 	//,
 	//[]string{"foo-scope"},)
-	assert.NotEmpty(t, NewAuthenticatorNoOp().GetID())
+	assert.NotEmpty(t, a.GetID())
 
 	authOk := &http.Request{Header: http.Header{}}
 	authOk.SetBasicAuth("client", "secret")

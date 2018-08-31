@@ -38,9 +38,26 @@ type AuthenticatorOAuth2Introspection struct {
 	scopeStrategy    fosite.ScopeStrategy
 }
 
-func NewAuthenticatorOAuth2Introspection(clientID, clientSecret, tokenURL, introspectionURL string, scopes []string, strategy fosite.ScopeStrategy) *AuthenticatorOAuth2Introspection {
+func NewAuthenticatorOAuth2Introspection(
+	clientID, clientSecret, tokenURL, introspectionURL string,
+	scopes []string, strategy fosite.ScopeStrategy,
+) (*AuthenticatorOAuth2Introspection, error) {
+	if _, err := url.ParseRequestURI(introspectionURL); err != nil {
+		return new(AuthenticatorOAuth2Introspection), errors.Errorf(`unable to validate the OAuth 2.0 Introspection Authenticator's Token Introspection URL "%s" because %s`, introspectionURL, err)
+	}
+
 	c := http.DefaultClient
 	if len(clientID)+len(clientSecret)+len(tokenURL)+len(scopes) > 0 {
+		if len(clientID) == 0 {
+			return new(AuthenticatorOAuth2Introspection), errors.Errorf("if OAuth 2.0 Authorization is used in the OAuth 2.0 Introspection Authenticator, the OAuth 2.0 Client ID must be set but was not")
+		}
+		if len(clientSecret) == 0 {
+			return new(AuthenticatorOAuth2Introspection), errors.Errorf("if OAuth 2.0 Authorization is used in the OAuth 2.0 Introspection Authenticator, the OAuth 2.0 Client ID must be set but was not")
+		}
+		if _, err := url.ParseRequestURI(tokenURL); err != nil {
+			return new(AuthenticatorOAuth2Introspection), errors.Errorf(`if OAuth 2.0 Authorization is used in the OAuth 2.0 Introspection Authenticator, the OAuth 2.0 Token URL must be set but validating URL "%s" failed because %s`, tokenURL, err)
+		}
+
 		c = (&clientcredentials.Config{
 			ClientID:     clientID,
 			ClientSecret: clientSecret,
@@ -52,7 +69,8 @@ func NewAuthenticatorOAuth2Introspection(clientID, clientSecret, tokenURL, intro
 	return &AuthenticatorOAuth2Introspection{
 		client:           c,
 		introspectionURL: introspectionURL,
-	}
+		scopeStrategy:    strategy,
+	}, nil
 }
 
 func (a *AuthenticatorOAuth2Introspection) GetID() string {

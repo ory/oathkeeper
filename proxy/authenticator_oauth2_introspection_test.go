@@ -35,10 +35,22 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestAuthenticatorOAuth2Introspection(t *testing.T) {
-	a := NewAuthenticatorOAuth2Introspection("", "", "", "", []string{}, fosite.ExactScopeStrategy)
-	assert.NotEmpty(t, a.GetID())
+func TestNewAuthenticatorOAuth2Introspection(t *testing.T) {
+	_, err := NewAuthenticatorOAuth2Introspection("", "", "", "", []string{}, fosite.ExactScopeStrategy)
+	require.Error(t, err)
+	_, err = NewAuthenticatorOAuth2Introspection("", "", "", "http://localhost:1234/oauth2/introspect", []string{}, fosite.ExactScopeStrategy)
+	require.NoError(t, err)
+	_, err = NewAuthenticatorOAuth2Introspection("foo", "", "", "http://localhost:1234/oauth2/introspect", []string{}, fosite.ExactScopeStrategy)
+	require.Error(t, err)
+	_, err = NewAuthenticatorOAuth2Introspection("", "foo", "", "http://localhost:1234/oauth2/introspect", []string{}, fosite.ExactScopeStrategy)
+	require.Error(t, err)
+	_, err = NewAuthenticatorOAuth2Introspection("foo", "foo", "foo", "http://localhost:1234/oauth2/introspect", []string{}, fosite.ExactScopeStrategy)
+	require.Error(t, err)
+	_, err = NewAuthenticatorOAuth2Introspection("foo", "foo", "http://localhost:1234/oauth2/token", "http://localhost:1234/oauth2/introspect", []string{}, fosite.ExactScopeStrategy)
+	require.NoError(t, err)
+}
 
+func TestAuthenticatorOAuth2Introspection(t *testing.T) {
 	for k, tc := range []struct {
 		d          string
 		setup      func(*testing.T, *httprouter.Router)
@@ -148,7 +160,7 @@ func TestAuthenticatorOAuth2Introspection(t *testing.T) {
 					}))
 				})
 			},
-			expectErr: false,
+			expectErr: true,
 		},
 		{
 			d:      "should fail because active but issuer not matching",
@@ -238,7 +250,10 @@ func TestAuthenticatorOAuth2Introspection(t *testing.T) {
 			}
 			ts := httptest.NewServer(router)
 			defer ts.Close()
-			a.introspectionURL = ts.URL + "/oauth2/introspect"
+
+			a, err := NewAuthenticatorOAuth2Introspection("", "", "", ts.URL+"/oauth2/introspect", []string{}, fosite.ExactScopeStrategy)
+			require.NoError(t, err)
+			assert.NotEmpty(t, a.GetID())
 
 			sess, err := a.Authenticate(tc.r, tc.config, nil)
 			if tc.expectErr {
