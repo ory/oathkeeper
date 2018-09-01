@@ -26,7 +26,6 @@
 //
 // ORY Oathkeeper stores as many rules as required and iterates through them on every request. Rules are essential
 // to the way ORY Oathkeeper works. To read more on rules, please refer to the developer guide: https://ory.gitbooks.io/oathkeeper/content/concepts.html#rules
-
 package rule
 
 // A rule

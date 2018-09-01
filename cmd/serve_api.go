@@ -21,6 +21,7 @@
 package cmd
 
 import (
+	"crypto/tls"
 	"fmt"
 	"net/http"
 
@@ -57,6 +58,7 @@ CORE CONTROLS
 
 HTTP CONTROLS
 ==============
+` + tlsMessage + `
 
 - HOST: The host to listen on.
 	Default: HOST="" (all interfaces)
@@ -130,15 +132,34 @@ HTTP CONTROLS
 		go refreshKeys(keyManager, 0)
 		go refreshRules(matcher, 0)
 
+		cert, err := getTLSCertAndKey()
+		if err != nil {
+			logger.Fatalf("%v", err)
+		}
+
+		certs := []tls.Certificate{}
+		if cert != nil {
+			certs = append(certs, *cert)
+		}
+
 		addr := fmt.Sprintf("%s:%s", viper.GetString("HOST"), viper.GetString("PORT"))
 		server := graceful.WithDefaults(&http.Server{
 			Addr:    addr,
 			Handler: h,
+			TLSConfig: &tls.Config{
+				Certificates: certs,
+			},
 		})
 
-		logger.Printf("Listening on %s", addr)
-		if err := graceful.Graceful(server.ListenAndServe, server.Shutdown); err != nil {
-			logger.Fatalf("Unable to gracefully shutdown HTTP server because %s.\n", err)
+		if err := graceful.Graceful(func() error {
+			if cert != nil {
+				logger.Printf("Listening on https://%s.\n", addr)
+				return server.ListenAndServeTLS("", "")
+			}
+			logger.Printf("Listening on http://%s.\n", addr)
+			return server.ListenAndServe()
+		}, server.Shutdown); err != nil {
+			logger.Fatalf("Unable to gracefully shutdown HTTP(s) server because %v.\n", err)
 			return
 		}
 		logger.Println("HTTP server was shutdown gracefully")

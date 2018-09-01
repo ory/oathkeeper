@@ -127,6 +127,10 @@ RHMZNMoDTRhmhQhj8M7N+FMtZAUOMddZ/1cvREtFW7+66w+XZvj9CQ/uectp/qb+
 	defer func() {
 		_ = os.Remove(tmpCert)
 		_ = os.Remove(tmpKey)
+		os.Setenv("HTTP_TLS_KEY_PATH", "")
+		os.Setenv("HTTP_TLS_CERT_PATH", "")
+		os.Setenv("HTTP_TLS_KEY", "")
+		os.Setenv("HTTP_TLS_CERT", "")
 	}()
 	_ = ioutil.WriteFile(tmpCert, []byte(certFileContent), 0600)
 	_ = ioutil.WriteFile(tmpKey, []byte(keyFileContent), 0600)
