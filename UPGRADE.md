@@ -18,6 +18,11 @@ before finalizing the upgrade process.
 
 ## 1.0.0-beta.9
 
+### Refresh Configuration
+
+Environment variable `CREDENTIALS_ISSUER_ID_TOKEN_HYDRA_REFRESH_INTERVAL` is now called
+`CREDENTIALS_ISSUER_ID_TOKEN_JWK_REFRESH_INTERVAL`.
+
 ### Scope Matching
 
 Previously, `fosite.WildcardScopeStrategy` was used to validate OAuth 2.0 Scope. This is now configurable
