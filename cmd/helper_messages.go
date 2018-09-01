@@ -108,6 +108,13 @@ var credentialsIssuer = `CREDENTIALS ISSUERS
 		Example: CREDENTIALS_ISSUER_ID_TOKEN_ISSUER=http://oathkeeper-url/
 		--------------------------------------------------------------
 
+	- CREDENTIALS_ISSUER_ID_TOKEN_JWK_REFRESH_INTERVAL: This value sets how often ORY Oathkeeper checks if a new
+		key for signing is available. This is only required for strategies that fetch the key from a remote location.
+		Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
+		--------------------------------------------------------------
+		Default: CREDENTIALS_ISSUER_ID_TOKEN_JWK_REFRESH_INTERVAL=5m
+		--------------------------------------------------------------
+
 	- CREDENTIALS_ISSUER_ID_TOKEN_ALGORITHM: The algorithm to be used for signing the ID Token. Supports HS256 (shared secret),
 		"ORY-HYDRA" (uses ORY Hydra to create, store, and fetch RSA Keys for signing).
 		--------------------------------------------------------------
@@ -132,12 +139,6 @@ var credentialsIssuer = `CREDENTIALS ISSUERS
 			- CREDENTIALS_ISSUER_ID_TOKEN_HYDRA_ADMIN_URL: The URL where ORY Hydra's Admin API is located.
 				--------------------------------------------------------------
 				Example: CREDENTIALS_ISSUER_ID_TOKEN_HYDRA_ADMIN_URL=http://hydra-url/
-
-			- CREDENTIALS_ISSUER_ID_TOKEN_HYDRA_REFRESH_INTERVAL: This value sets how often ORY Oathkeeper checks if a new
-				key for signing is available at ORY Hydra. Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
-				--------------------------------------------------------------
-				Default: CREDENTIALS_ISSUER_ID_TOKEN_HYDRA_REFRESH_INTERVAL=5m
-				--------------------------------------------------------------
 
 			- CREDENTIALS_ISSUER_ID_TOKEN_HYDRA_JWK_SET_ID: The JSON Web Key set identifier that will be used to create,
 				store, and retrieve the JSON Web Key from ORY Hydra.
