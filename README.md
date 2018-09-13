@@ -18,7 +18,7 @@ of authenticating and optionally authorizing access requests.
 While the full feature set of the BeyondCorp Whitepaper is not yet implemented, the goal of this project is to achieve this in the future.
 
 ORY Oathkeeper is a reverse proxy which evaluates incoming HTTP requests based on a set of rules that are defined
-by administartive users. ORY Oathkeeper is thus capable of:
+by administrative users. ORY Oathkeeper is thus capable of:
 
 * Identifying the user and providing the user session to API backends (authentication).
 * Restricting access to certain resources based on a set of rules (authorization).
