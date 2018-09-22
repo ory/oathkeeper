@@ -21,6 +21,8 @@
 package judge
 
 import (
+	"bytes"
+	"encoding/json"
 	"net/http"
 
 	"github.com/julienschmidt/httprouter"
@@ -34,6 +36,10 @@ import (
 const (
 	JudgePath = "/judge"
 )
+
+type CredentialsHeadersConfig struct {
+	Headers map[string]string `json:"headers"`
+}
 
 func NewHandler(handler *proxy.RequestHandler, logger logrus.FieldLogger, matcher rule.Matcher, router *httprouter.Router) *Handler {
 	if logger == nil {
@@ -112,6 +118,15 @@ func (h *Handler) judge(w http.ResponseWriter, r *http.Request) {
 		WithField("granted", true).
 		WithField("access_url", r.URL.String()).
 		Warn("Access request granted")
+
+	var cfg CredentialsHeadersConfig
+	d := json.NewDecoder(bytes.NewBuffer(rl.CredentialsIssuer.Config))
+	d.DisallowUnknownFields()
+	if err := d.Decode(&cfg); err == nil {
+		for hdr := range cfg.Headers {
+			w.Header().Set(hdr, r.Header.Get(hdr))
+		}
+	}
 
 	w.Header().Set("Authorization", r.Header.Get("Authorization"))
 	w.WriteHeader(http.StatusOK)
