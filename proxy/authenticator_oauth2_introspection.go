@@ -19,6 +19,7 @@ import (
 	"golang.org/x/oauth2/clientcredentials"
 )
 
+// AuthenticatorOAuth2IntrospectionConfiguration configures a token introspection authorizer
 type AuthenticatorOAuth2IntrospectionConfiguration struct {
 	// An array of OAuth 2.0 scopes that are required when accessing an endpoint protected by this handler.
 	// If the token used in the Authorization header did not request that specific scope, the request is denied.
@@ -30,14 +31,20 @@ type AuthenticatorOAuth2IntrospectionConfiguration struct {
 
 	// The token must have been issued by one of the issuers listed in this array.
 	Issuers []string `json:"trusted_issuers"`
+
+	// Cookies configures how token may be stored in cookies. Each supported cookie name appears as a key in the map.
+	Cookies map[string]helper.CookieTokenConfig `json:"cookies"`
 }
 
+// AuthenticatorOAuth2Introspection carries out authorization with token introspection
 type AuthenticatorOAuth2Introspection struct {
 	client           *http.Client
 	introspectionURL string
 	scopeStrategy    fosite.ScopeStrategy
 }
 
+// NewAuthenticatorOAuth2Introspection yields a new AuthenticatorOAuth2Introspection to carry out authorization
+// with token introspection
 func NewAuthenticatorOAuth2Introspection(
 	clientID, clientSecret, tokenURL, introspectionURL string,
 	scopes []string, strategy fosite.ScopeStrategy,
@@ -73,12 +80,17 @@ func NewAuthenticatorOAuth2Introspection(
 	}, nil
 }
 
+// GetID return the identifier for this authorizer
 func (a *AuthenticatorOAuth2Introspection) GetID() string {
 	return "oauth2_introspection"
 }
 
+// Authenticate verifies incoming credentials
 func (a *AuthenticatorOAuth2Introspection) Authenticate(r *http.Request, config json.RawMessage, rl *rule.Rule) (*AuthenticationSession, error) {
-	var cf AuthenticatorOAuth2IntrospectionConfiguration
+	var (
+		cf  AuthenticatorOAuth2IntrospectionConfiguration
+		err error
+	)
 
 	if len(config) == 0 {
 		config = []byte("{}")
@@ -86,15 +98,23 @@ func (a *AuthenticatorOAuth2Introspection) Authenticate(r *http.Request, config 
 
 	d := json.NewDecoder(bytes.NewBuffer(config))
 	d.DisallowUnknownFields()
-	if err := d.Decode(&cf); err != nil {
+	if err = d.Decode(&cf); err != nil {
 		return nil, errors.WithStack(err)
 	}
 
 	token := helper.BearerTokenFromRequest(r)
+
+	if token == "" && len(cf.Cookies) > 0 {
+		if token, err = helper.BearerTokenFromCookie(cf.Cookies, r); err != nil {
+			return nil, errors.WithStack(err)
+		}
+	}
+
 	if token == "" {
 		return nil, errors.WithStack(ErrAuthenticatorNotResponsible)
 	}
 
+	// Now check the token against introspection endpoint
 	body := url.Values{"token": {token}, "scope": {strings.Join(cf.Scopes, " ")}}
 	resp, err := a.client.Post(a.introspectionURL, "application/x-www-form-urlencoded", strings.NewReader(body.Encode()))
 	if err != nil {

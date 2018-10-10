@@ -34,7 +34,11 @@ type AuthenticatorOAuth2JWTConfiguration struct {
 	// The token must have been issued by one of the issuers listed in this array.
 	Issuers []string `json:"trusted_issuers"`
 
+	// AllowedAlgorithms lists supported signing methods (e.g. RS256, ...)
 	AllowedAlgorithms []string `json:"allowed_algorithms"`
+
+	// Cookies configures how token may be stored in cookies. Each supported cookie name appears as a key in the map.
+	Cookies map[string]helper.CookieTokenConfig `json:"cookies"`
 }
 
 type jwksFetcher interface {
@@ -59,12 +63,18 @@ func NewAuthenticatorJWT(jwksURL string, scopeStrategy fosite.ScopeStrategy) (*A
 	}, nil
 }
 
+// GetID return the identifier for this authorizer
 func (a *AuthenticatorJWT) GetID() string {
 	return "jwt"
 }
 
+// Authenticate verifies incoming credentials
 func (a *AuthenticatorJWT) Authenticate(r *http.Request, config json.RawMessage, rl *rule.Rule) (*AuthenticationSession, error) {
-	var cf AuthenticatorOAuth2JWTConfiguration
+	var (
+		cf  AuthenticatorOAuth2JWTConfiguration
+		err error
+	)
+
 	token := helper.BearerTokenFromRequest(r)
 	if token == "" {
 		return nil, errors.WithStack(ErrAuthenticatorNotResponsible)
@@ -76,12 +86,18 @@ func (a *AuthenticatorJWT) Authenticate(r *http.Request, config json.RawMessage,
 
 	d := json.NewDecoder(bytes.NewBuffer(config))
 	d.DisallowUnknownFields()
-	if err := d.Decode(&cf); err != nil {
+	if err = d.Decode(&cf); err != nil {
 		return nil, errors.WithStack(err)
 	}
 
 	if len(cf.AllowedAlgorithms) == 0 {
 		cf.AllowedAlgorithms = []string{"RS256"}
+	}
+
+	if token == "" && len(cf.Cookies) > 0 {
+		if token, err = helper.BearerTokenFromCookie(cf.Cookies, r); err != nil {
+			return nil, errors.WithStack(err)
+		}
 	}
 
 	// Parse the token.

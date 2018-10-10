@@ -24,6 +24,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"net/url"
 	"testing"
 
 	"net/http/httptest"
@@ -51,6 +52,13 @@ func TestNewAuthenticatorOAuth2Introspection(t *testing.T) {
 }
 
 func TestAuthenticatorOAuth2Introspection(t *testing.T) {
+	urlForToken, _ := url.Parse("https://example.com/abc?access_token=token")
+	cookie := http.Cookie{
+		Name:  "_cookie1",
+		Value: "eyJhY2Nlc3NfdG9rZW4iOiAidG9rZW4ifQ", // {"access_token": "token"}
+	}
+	cookieForToken := cookie.String()
+
 	for k, tc := range []struct {
 		d          string
 		setup      func(*testing.T, *httprouter.Router)
@@ -226,6 +234,46 @@ func TestAuthenticatorOAuth2Introspection(t *testing.T) {
 			d:      "should pass",
 			r:      &http.Request{Header: http.Header{"Authorization": {"bearer token"}}},
 			config: []byte(`{ "required_scope": ["scope-a"], "trusted_issuers": ["foo", "bar"], "target_audience": ["audience"] }`),
+			setup: func(t *testing.T, m *httprouter.Router) {
+				m.POST("/oauth2/introspect", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+					require.NoError(t, r.ParseForm())
+					require.NoError(t, json.NewEncoder(w).Encode(&swagger.OAuth2TokenIntrospection{
+						Active:   true,
+						Scope:    "scope-a",
+						Sub:      "subject",
+						Aud:      []string{"audience"},
+						Iss:      "foo",
+						Username: "username",
+						Ext:      map[string]interface{}{"extra": "foo"},
+					}))
+				})
+			},
+			expectErr: false,
+		},
+		{
+			d:      "should pass, with token as query param",
+			r:      &http.Request{URL: urlForToken},
+			config: []byte(`{ "required_scope": ["scope-a"], "trusted_issuers": ["foo", "bar"], "target_audience": ["audience"] }`),
+			setup: func(t *testing.T, m *httprouter.Router) {
+				m.POST("/oauth2/introspect", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+					require.NoError(t, r.ParseForm())
+					require.NoError(t, json.NewEncoder(w).Encode(&swagger.OAuth2TokenIntrospection{
+						Active:   true,
+						Scope:    "scope-a",
+						Sub:      "subject",
+						Aud:      []string{"audience"},
+						Iss:      "foo",
+						Username: "username",
+						Ext:      map[string]interface{}{"extra": "foo"},
+					}))
+				})
+			},
+			expectErr: false,
+		},
+		{
+			d:      "should pass, with token as cookie",
+			r:      &http.Request{Header: http.Header{"Cookie": []string{cookieForToken}}},
+			config: []byte(`{ "required_scope": ["scope-a"], "trusted_issuers": ["foo", "bar"], "target_audience": ["audience"], "cookies": {"_cookie1": {}}}`),
 			setup: func(t *testing.T, m *httprouter.Router) {
 				m.POST("/oauth2/introspect", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 					require.NoError(t, r.ParseForm())
