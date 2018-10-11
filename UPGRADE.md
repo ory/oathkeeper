@@ -16,6 +16,13 @@ before finalizing the upgrade process.
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
+## master
+
+### Refresh Configuration
+
+Environment variables `HTTP_TLS_xxx` are now called
+`HTTPS_TLS_xxx`.
+
 ## 1.0.0-beta.9
 
 ### Refresh Configuration
