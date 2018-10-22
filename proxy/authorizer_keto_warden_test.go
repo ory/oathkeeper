@@ -128,6 +128,30 @@ func TestAuthorizerKetoWarden(t *testing.T) {
 			session:   &AuthenticationSession{Subject: "peter"},
 			expectErr: false,
 		},
+		{
+			config: []byte(`{ "required_action": "action:$1:$2", "required_resource": "resource:$1:$2", "subject": "{{ .Extra.name }}" }`),
+			rule: &rule.Rule{
+				Match: rule.RuleMatch{
+					Methods: []string{"POST"},
+					URL:     "https://localhost/api/users/<[0-9]+>/<[a-z]+>",
+				},
+			},
+			r: &http.Request{URL: mustParseURL(t, "https://localhost/api/users/1234/abcde")},
+			setup: func(t *testing.T, m *MockWardenSDK) {
+				m.EXPECT().IsSubjectAuthorized(gomock.Eq(swagger.WardenSubjectAuthorizationRequest{
+					Action:   "action:1234:abcde",
+					Resource: "resource:1234:abcde",
+					Context:  map[string]interface{}{},
+					Subject:  "peter",
+				})).Return(
+					&swagger.WardenSubjectAuthorizationResponse{Allowed: true},
+					&swagger.APIResponse{Response: &http.Response{StatusCode: http.StatusOK}},
+					nil,
+				)
+			},
+			session:   &AuthenticationSession{Extra: map[string]interface{}{"name": "peter"}},
+			expectErr: false,
+		},
 	} {
 		t.Run(fmt.Sprintf("case=%d", k), func(t *testing.T) {
 			c := gomock.NewController(t)

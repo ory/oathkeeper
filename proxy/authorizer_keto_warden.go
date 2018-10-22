@@ -23,7 +23,9 @@ package proxy
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"net/http"
+	"text/template"
 	"time"
 
 	"github.com/asaskevich/govalidator"
@@ -38,6 +40,7 @@ import (
 type AuthorizerKetoWardenConfiguration struct {
 	RequiredAction   string `json:"required_action" valid:",required"`
 	RequiredResource string `json:"required_resource" valid:",required"`
+	Subject          string `json:"subject"`
 }
 
 type AuthorizerKetoWarden struct {
@@ -89,11 +92,20 @@ func (a *AuthorizerKetoWarden) Authorize(r *http.Request, session *Authenticatio
 		return errors.WithStack(err)
 	}
 
+	subject := session.Subject
+	if cf.Subject != "" {
+		templateId := fmt.Sprintf("%s:%s", rl.ID, "subject")
+		subject, err = a.ParseSubject(session, templateId, cf.Subject)
+		if err != nil {
+			return errors.WithStack(err)
+		}
+	}
+
 	defaultSession, response, err := a.K.IsSubjectAuthorized(swagger.WardenSubjectAuthorizationRequest{
 		Action:   compiled.ReplaceAllString(r.URL.String(), cf.RequiredAction),
 		Resource: compiled.ReplaceAllString(r.URL.String(), cf.RequiredResource),
 		Context:  a.contextCreator(r),
-		Subject:  session.Subject,
+		Subject:  subject,
 	})
 	if err != nil {
 		return errors.WithStack(err)
@@ -109,4 +121,28 @@ func (a *AuthorizerKetoWarden) Authorize(r *http.Request, session *Authenticatio
 	}
 
 	return nil
+}
+func (a *AuthorizerKetoWarden) ParseSubject(session *AuthenticationSession, templateId, templateString string) (string, error) {
+	tmplFn := template.New("rules").
+		Option("missingkey=zero").
+		Funcs(template.FuncMap{
+			"print": func(i interface{}) string {
+				if i == nil {
+					return ""
+				}
+				return fmt.Sprintf("%v", i)
+			},
+		})
+
+	tmpl, err := tmplFn.New(templateId).Parse(templateString)
+	if err != nil {
+		return "", err
+	}
+
+	subject := bytes.Buffer{}
+	err = tmpl.Execute(&subject, session)
+	if err != nil {
+		return "", err
+	}
+	return subject.String(), nil
 }
