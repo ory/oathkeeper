@@ -26,12 +26,10 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/http/httputil"
-	"testing"
-
-	"strings"
-
 	"net/url"
 	"strconv"
+	"strings"
+	"testing"
 
 	"github.com/ory/oathkeeper/rule"
 	"github.com/stretchr/testify/assert"

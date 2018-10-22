@@ -5,7 +5,6 @@ import (
 	"context"
 	"encoding/json"
 	"net/http"
-
 	"net/url"
 
 	"github.com/ory/oathkeeper/helper"

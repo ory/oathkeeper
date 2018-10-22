@@ -16,7 +16,6 @@ package cmd
 
 import (
 	"fmt"
-
 	"os"
 
 	"github.com/ory/oathkeeper/rule"

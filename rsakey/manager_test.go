@@ -21,14 +21,12 @@
 package rsakey
 
 import (
+	"crypto/rsa"
 	"log"
 	"net/http"
 	"os"
 	"testing"
-
 	"time"
-
-	"crypto/rsa"
 
 	"github.com/ory/dockertest"
 	"github.com/ory/hydra/sdk/go/hydra"

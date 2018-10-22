@@ -22,7 +22,6 @@ package cmd
 
 import (
 	"fmt"
-
 	"net/http"
 
 	"github.com/ory/oathkeeper/sdk/go/oathkeeper"
