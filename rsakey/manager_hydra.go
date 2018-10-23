@@ -22,10 +22,8 @@ package rsakey
 
 import (
 	"crypto/rsa"
-	"net/http"
-
 	"encoding/json"
-
+	"net/http"
 	"strings"
 
 	"github.com/ory/hydra/sdk/go/hydra"

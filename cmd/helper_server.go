@@ -24,10 +24,9 @@ import (
 	"crypto/tls"
 	"encoding/base64"
 	"fmt"
+	"net/url"
 	"strings"
 	"time"
-
-	"net/url"
 
 	"github.com/ory/fosite"
 	"github.com/ory/go-convenience/stringsx"

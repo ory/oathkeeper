@@ -23,7 +23,6 @@ package cmd
 import (
 	"fmt"
 	"os"
-
 	"time"
 
 	"github.com/sirupsen/logrus"

@@ -22,12 +22,11 @@ package proxy
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strings"
 	"testing"
 	"time"
-
-	"fmt"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/go-errors/errors"

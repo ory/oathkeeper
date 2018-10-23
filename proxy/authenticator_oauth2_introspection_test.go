@@ -24,9 +24,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"testing"
-
 	"net/http/httptest"
+	"testing"
 
 	"github.com/julienschmidt/httprouter"
 	"github.com/ory/fosite"

@@ -21,9 +21,8 @@
 package cmd
 
 import (
-	"net/http"
-
 	"fmt"
+	"net/http"
 
 	"github.com/ory/oathkeeper/pkg"
 	"github.com/ory/oathkeeper/sdk/go/oathkeeper"

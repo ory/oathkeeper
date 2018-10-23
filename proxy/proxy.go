@@ -24,9 +24,8 @@ import (
 	"context"
 	"io/ioutil"
 	"net/http"
-	"strings"
-
 	"net/url"
+	"strings"
 
 	"github.com/ory/herodot"
 	"github.com/ory/oathkeeper/rsakey"

@@ -22,7 +22,6 @@ package rule
 
 import (
 	"net/url"
-
 	"sync"
 
 	"github.com/ory/oathkeeper/helper"

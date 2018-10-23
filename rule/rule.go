@@ -21,12 +21,11 @@
 package rule
 
 import (
-	"strings"
-
 	"encoding/json"
 	"hash/crc32"
 	"net/url"
 	"regexp"
+	"strings"
 
 	"github.com/ory/ladon/compiler"
 	"github.com/pkg/errors"

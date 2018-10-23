@@ -21,12 +21,11 @@
 package cmd
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
-
-	"bytes"
 
 	"github.com/ory/oathkeeper/rule"
 	"github.com/ory/oathkeeper/sdk/go/oathkeeper"

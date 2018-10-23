@@ -27,11 +27,10 @@ import (
 	"net/http/httputil"
 
 	"github.com/meatballhat/negroni-logrus"
-	"github.com/ory/metrics-middleware"
-
 	"github.com/ory/go-convenience/corsx"
 	"github.com/ory/graceful"
 	"github.com/ory/keto/sdk/go/keto"
+	"github.com/ory/metrics-middleware"
 	"github.com/ory/oathkeeper/proxy"
 	"github.com/ory/oathkeeper/rule"
 	"github.com/ory/oathkeeper/sdk/go/oathkeeper"

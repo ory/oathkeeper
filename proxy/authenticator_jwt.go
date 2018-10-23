@@ -1,14 +1,12 @@
 package proxy
 
 import (
-	"encoding/json"
-	"net/http"
-
 	"bytes"
 	"crypto/ecdsa"
 	"crypto/rsa"
+	"encoding/json"
 	"fmt"
-
+	"net/http"
 	"net/url"
 
 	"github.com/dgrijalva/jwt-go"
