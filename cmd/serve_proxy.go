@@ -160,6 +160,24 @@ OTHER CONTROLS
 	Default: RULES_REFRESH_INTERVAL=5s
 	--------------------------------------------------------------
 
+- PROXY_SERVER_READ_TIMEOUT: The maximum duration for reading the entire request, including the body.
+	Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
+	--------------------------------------------------------------
+	Default: PROXY_SERVER_READ_TIMEOUT=5s
+	--------------------------------------------------------------
+
+- PROXY_SERVER_WRITE_TIMEOUT: The maximum duration before timing out writes of the response.
+	Increase this parameter to prevent unexpected closing a client connection if an upstream request is executing more than 5 seconds. 
+	Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
+	--------------------------------------------------------------
+	Default: PROXY_SERVER_WRITE_TIMEOUT=10s
+	--------------------------------------------------------------
+
+- PROXY_SERVER_IDLE_TIMEOUT: The maximum amount of time to wait for any action of a request session, reading data or writing the response.
+	Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
+	--------------------------------------------------------------
+	Default: PROXY_SERVER_IDLE_TIMEOUT=120s
+	--------------------------------------------------------------
 
 ` + corsMessage,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -243,6 +261,9 @@ OTHER CONTROLS
 			TLSConfig: &tls.Config{
 				Certificates: certs,
 			},
+			ReadTimeout:  viper.GetDuration("PROXY_SERVER_READ_TIMEOUT"),
+			WriteTimeout: viper.GetDuration("PROXY_SERVER_WRITE_TIMEOUT"),
+			IdleTimeout:  viper.GetDuration("PROXY_SERVER_IDLE_TIMEOUT"),
 		})
 
 		if err := graceful.Graceful(func() error {
