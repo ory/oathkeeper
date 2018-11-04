@@ -167,7 +167,7 @@ OTHER CONTROLS
 	--------------------------------------------------------------
 
 - PROXY_SERVER_WRITE_TIMEOUT: The maximum duration before timing out writes of the response.
-	Increase this parameter to prevent unexpected closing a client connection if an upstream request is executing more than 5 seconds. 
+	Increase this parameter to prevent unexpected closing a client connection if an upstream request is executing more than 10 seconds. 
 	Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
 	--------------------------------------------------------------
 	Default: PROXY_SERVER_WRITE_TIMEOUT=10s
