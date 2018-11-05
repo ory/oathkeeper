@@ -113,6 +113,8 @@ func (h *Handler) judge(w http.ResponseWriter, r *http.Request) {
 		WithField("access_url", r.URL.String()).
 		Warn("Access request granted")
 
-	w.Header().Set("Authorization", r.Header.Get("Authorization"))
+	for hdrName, _ := range r.Header {
+		w.Header().Set(hdrName, r.Header.Get(hdrName))
+	}
 	w.WriteHeader(http.StatusOK)
 }
