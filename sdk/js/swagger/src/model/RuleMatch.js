@@ -14,25 +14,22 @@
  *
  */
 
-(function(root, factory) {
+;(function(root, factory) {
   if (typeof define === 'function' && define.amd) {
     // AMD. Register as an anonymous module.
-    define(['ApiClient'], factory);
+    define(['ApiClient'], factory)
   } else if (typeof module === 'object' && module.exports) {
     // CommonJS-like environments that support module.exports, like Node.
-    module.exports = factory(require('../ApiClient'));
+    module.exports = factory(require('../ApiClient'))
   } else {
     // Browser globals (root is window)
     if (!root.OryOathkeeper) {
-      root.OryOathkeeper = {};
+      root.OryOathkeeper = {}
     }
-    root.OryOathkeeper.RuleMatch = factory(root.OryOathkeeper.ApiClient);
+    root.OryOathkeeper.RuleMatch = factory(root.OryOathkeeper.ApiClient)
   }
-}(this, function(ApiClient) {
-  'use strict';
-
-
-
+})(this, function(ApiClient) {
+  'use strict'
 
   /**
    * The RuleMatch model module.
@@ -46,11 +43,8 @@
    * @class
    */
   var exports = function() {
-    var _this = this;
-
-
-
-  };
+    var _this = this
+  }
 
   /**
    * Constructs a <code>RuleMatch</code> from a plain JavaScript object, optionally creating a new instance.
@@ -61,32 +55,28 @@
    */
   exports.constructFromObject = function(data, obj) {
     if (data) {
-      obj = obj || new exports();
+      obj = obj || new exports()
 
       if (data.hasOwnProperty('methods')) {
-        obj['methods'] = ApiClient.convertToType(data['methods'], ['String']);
+        obj['methods'] = ApiClient.convertToType(data['methods'], ['String'])
       }
       if (data.hasOwnProperty('url')) {
-        obj['url'] = ApiClient.convertToType(data['url'], 'String');
+        obj['url'] = ApiClient.convertToType(data['url'], 'String')
       }
     }
-    return obj;
+    return obj
   }
 
   /**
    * An array of HTTP methods (e.g. GET, POST, PUT, DELETE, ...). When ORY Oathkeeper searches for rules to decide what to do with an incoming request to the proxy server, it compares the HTTP method of the incoming request with the HTTP methods of each rules. If a match is found, the rule is considered a partial match. If the matchesUrl field is satisfied as well, the rule is considered a full match.
    * @member {Array.<String>} methods
    */
-  exports.prototype['methods'] = undefined;
+  exports.prototype['methods'] = undefined
   /**
-   * This field represents the URL pattern this rule matches. When ORY Oathkeeper searches for rules to decide what to do with an incoming request to the proxy server, it compares the full request URL (e.g. https://mydomain.com/api/resource) without query parameters of the incoming request with this field. If a match is found, the rule is considered a partial match. If the matchesMethods field is satisfied as well, the rule is considered a full match.  You can use regular expressions in this field to match more than one url. Regular expressions are encapsulated in brackets < and >. The following example matches all paths of the domain `mydomain.com`: `https://mydomain.com/<.*>`.  For more information refer to: https://ory.gitbooks.io/oathkeeper/content/concepts.html#rules
+   * This field represents the URL pattern this rule matches. When ORY Oathkeeper searches for rules to decide what to do with an incoming request to the proxy server, it compares the full request URL (e.g. https://mydomain.com/api/resource) without query parameters of the incoming request with this field. If a match is found, the rule is considered a partial match. If the matchesMethods field is satisfied as well, the rule is considered a full match.  You can use regular expressions in this field to match more than one url. Regular expressions are encapsulated in brackets < and >. The following example matches all paths of the domain `mydomain.com`: `https://mydomain.com/<.*>`.
    * @member {String} url
    */
-  exports.prototype['url'] = undefined;
+  exports.prototype['url'] = undefined
 
-
-
-  return exports;
-}));
-
-
+  return exports
+})
