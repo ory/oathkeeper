@@ -46,8 +46,6 @@ type RuleMatch struct {
 	//
 	// You can use regular expressions in this field to match more than one url. Regular expressions are encapsulated in
 	// brackets < and >. The following example matches all paths of the domain `mydomain.com`: `https://mydomain.com/<.*>`.
-	//
-	// For more information refer to: https://ory.gitbooks.io/oathkeeper/content/concepts.html#rules
 	URL string `json:"url" db:"url"`
 
 	compiledURL         *regexp.Regexp

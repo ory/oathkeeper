@@ -25,7 +25,7 @@
 // has no rule applied, the proxy server will return a 404 not found error.
 //
 // ORY Oathkeeper stores as many rules as required and iterates through them on every request. Rules are essential
-// to the way ORY Oathkeeper works. To read more on rules, please refer to the developer guide: https://ory.gitbooks.io/oathkeeper/content/concepts.html#rules
+// to the way ORY Oathkeeper works.
 package rule
 
 // A rule
@@ -93,8 +93,6 @@ type swaggerRuleMatch struct {
 	//
 	// You can use regular expressions in this field to match more than one url. Regular expressions are encapsulated in
 	// brackets < and >. The following example matches all paths of the domain `mydomain.com`: `https://mydomain.com/<.*>`.
-	//
-	// For more information refer to: https://ory.gitbooks.io/oathkeeper/content/concepts.html#rules
 	URL string `json:"url"`
 }
 

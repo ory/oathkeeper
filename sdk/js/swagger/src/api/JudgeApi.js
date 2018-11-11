@@ -14,22 +14,28 @@
  *
  */
 
-(function(root, factory) {
+;(function(root, factory) {
   if (typeof define === 'function' && define.amd) {
     // AMD. Register as an anonymous module.
-    define(['ApiClient', 'model/InlineResponse401'], factory);
+    define(['ApiClient', 'model/InlineResponse401'], factory)
   } else if (typeof module === 'object' && module.exports) {
     // CommonJS-like environments that support module.exports, like Node.
-    module.exports = factory(require('../ApiClient'), require('../model/InlineResponse401'));
+    module.exports = factory(
+      require('../ApiClient'),
+      require('../model/InlineResponse401')
+    )
   } else {
     // Browser globals (root is window)
     if (!root.OryOathkeeper) {
-      root.OryOathkeeper = {};
+      root.OryOathkeeper = {}
     }
-    root.OryOathkeeper.JudgeApi = factory(root.OryOathkeeper.ApiClient, root.OryOathkeeper.InlineResponse401);
+    root.OryOathkeeper.JudgeApi = factory(
+      root.OryOathkeeper.ApiClient,
+      root.OryOathkeeper.InlineResponse401
+    )
   }
-}(this, function(ApiClient, InlineResponse401) {
-  'use strict';
+})(this, function(ApiClient, InlineResponse401) {
+  'use strict'
 
   /**
    * Judge service.
@@ -38,15 +44,14 @@
    */
 
   /**
-   * Constructs a new JudgeApi. 
+   * Constructs a new JudgeApi.
    * @alias module:api/JudgeApi
    * @class
    * @param {module:ApiClient} apiClient Optional API client implementation to use,
    * default to {@link module:ApiClient#instance} if unspecified.
    */
   var exports = function(apiClient) {
-    this.apiClient = apiClient || ApiClient.instance;
-
+    this.apiClient = apiClient || ApiClient.instance
 
     /**
      * Callback function to receive the result of the judge operation.
@@ -62,30 +67,34 @@
      * @param {module:api/JudgeApi~judgeCallback} callback The callback function, accepting three arguments: error, data, response
      */
     this.judge = function(callback) {
-      var postBody = null;
+      var postBody = null
 
+      var pathParams = {}
+      var queryParams = {}
+      var headerParams = {}
+      var formParams = {}
 
-      var pathParams = {
-      };
-      var queryParams = {
-      };
-      var headerParams = {
-      };
-      var formParams = {
-      };
-
-      var authNames = [];
-      var contentTypes = ['application/json'];
-      var accepts = ['application/json'];
-      var returnType = null;
+      var authNames = []
+      var contentTypes = ['application/json']
+      var accepts = ['application/json']
+      var returnType = null
 
       return this.apiClient.callApi(
-        '/judge', 'GET',
-        pathParams, queryParams, headerParams, formParams, postBody,
-        authNames, contentTypes, accepts, returnType, callback
-      );
+        '/judge',
+        'GET',
+        pathParams,
+        queryParams,
+        headerParams,
+        formParams,
+        postBody,
+        authNames,
+        contentTypes,
+        accepts,
+        returnType,
+        callback
+      )
     }
-  };
+  }
 
-  return exports;
-}));
+  return exports
+})

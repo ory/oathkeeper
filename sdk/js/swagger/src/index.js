@@ -14,16 +14,85 @@
  *
  */
 
-(function(factory) {
+;(function(factory) {
   if (typeof define === 'function' && define.amd) {
     // AMD. Register as an anonymous module.
-    define(['ApiClient', 'model/AuthenticationDefaultSession', 'model/AuthenticationOAuth2ClientCredentialsRequest', 'model/AuthenticationOAuth2ClientCredentialsSession', 'model/AuthenticationOAuth2IntrospectionRequest', 'model/AuthenticationOAuth2Session', 'model/Authenticator', 'model/HealthNotReadyStatus', 'model/HealthStatus', 'model/InlineResponse401', 'model/IntrospectionResponse', 'model/JsonWebKey', 'model/JsonWebKeySet', 'model/OAuth2ClientCredentialsAuthentication', 'model/OAuth2IntrospectionAuthentication', 'model/Rule', 'model/RuleHandler', 'model/RuleMatch', 'model/Session', 'model/SwaggerCreateRuleParameters', 'model/SwaggerGetRuleParameters', 'model/SwaggerListRulesParameters', 'model/SwaggerRuleResponse', 'model/SwaggerRulesResponse', 'model/SwaggerUpdateRuleParameters', 'model/Upstream', 'model/Version', 'api/DefaultApi', 'api/HealthApi', 'api/JudgeApi', 'api/RuleApi', 'api/VersionApi'], factory);
+    define([
+      'ApiClient',
+      'model/HealthNotReadyStatus',
+      'model/HealthStatus',
+      'model/InlineResponse401',
+      'model/JsonWebKey',
+      'model/JsonWebKeySet',
+      'model/Rule',
+      'model/RuleHandler',
+      'model/RuleMatch',
+      'model/SwaggerCreateRuleParameters',
+      'model/SwaggerGetRuleParameters',
+      'model/SwaggerListRulesParameters',
+      'model/SwaggerRuleResponse',
+      'model/SwaggerRulesResponse',
+      'model/SwaggerUpdateRuleParameters',
+      'model/Upstream',
+      'model/Version',
+      'api/DefaultApi',
+      'api/HealthApi',
+      'api/JudgeApi',
+      'api/RuleApi',
+      'api/VersionApi'
+    ], factory)
   } else if (typeof module === 'object' && module.exports) {
     // CommonJS-like environments that support module.exports, like Node.
-    module.exports = factory(require('./ApiClient'), require('./model/AuthenticationDefaultSession'), require('./model/AuthenticationOAuth2ClientCredentialsRequest'), require('./model/AuthenticationOAuth2ClientCredentialsSession'), require('./model/AuthenticationOAuth2IntrospectionRequest'), require('./model/AuthenticationOAuth2Session'), require('./model/Authenticator'), require('./model/HealthNotReadyStatus'), require('./model/HealthStatus'), require('./model/InlineResponse401'), require('./model/IntrospectionResponse'), require('./model/JsonWebKey'), require('./model/JsonWebKeySet'), require('./model/OAuth2ClientCredentialsAuthentication'), require('./model/OAuth2IntrospectionAuthentication'), require('./model/Rule'), require('./model/RuleHandler'), require('./model/RuleMatch'), require('./model/Session'), require('./model/SwaggerCreateRuleParameters'), require('./model/SwaggerGetRuleParameters'), require('./model/SwaggerListRulesParameters'), require('./model/SwaggerRuleResponse'), require('./model/SwaggerRulesResponse'), require('./model/SwaggerUpdateRuleParameters'), require('./model/Upstream'), require('./model/Version'), require('./api/DefaultApi'), require('./api/HealthApi'), require('./api/JudgeApi'), require('./api/RuleApi'), require('./api/VersionApi'));
+    module.exports = factory(
+      require('./ApiClient'),
+      require('./model/HealthNotReadyStatus'),
+      require('./model/HealthStatus'),
+      require('./model/InlineResponse401'),
+      require('./model/JsonWebKey'),
+      require('./model/JsonWebKeySet'),
+      require('./model/Rule'),
+      require('./model/RuleHandler'),
+      require('./model/RuleMatch'),
+      require('./model/SwaggerCreateRuleParameters'),
+      require('./model/SwaggerGetRuleParameters'),
+      require('./model/SwaggerListRulesParameters'),
+      require('./model/SwaggerRuleResponse'),
+      require('./model/SwaggerRulesResponse'),
+      require('./model/SwaggerUpdateRuleParameters'),
+      require('./model/Upstream'),
+      require('./model/Version'),
+      require('./api/DefaultApi'),
+      require('./api/HealthApi'),
+      require('./api/JudgeApi'),
+      require('./api/RuleApi'),
+      require('./api/VersionApi')
+    )
   }
-}(function(ApiClient, AuthenticationDefaultSession, AuthenticationOAuth2ClientCredentialsRequest, AuthenticationOAuth2ClientCredentialsSession, AuthenticationOAuth2IntrospectionRequest, AuthenticationOAuth2Session, Authenticator, HealthNotReadyStatus, HealthStatus, InlineResponse401, IntrospectionResponse, JsonWebKey, JsonWebKeySet, OAuth2ClientCredentialsAuthentication, OAuth2IntrospectionAuthentication, Rule, RuleHandler, RuleMatch, Session, SwaggerCreateRuleParameters, SwaggerGetRuleParameters, SwaggerListRulesParameters, SwaggerRuleResponse, SwaggerRulesResponse, SwaggerUpdateRuleParameters, Upstream, Version, DefaultApi, HealthApi, JudgeApi, RuleApi, VersionApi) {
-  'use strict';
+})(function(
+  ApiClient,
+  HealthNotReadyStatus,
+  HealthStatus,
+  InlineResponse401,
+  JsonWebKey,
+  JsonWebKeySet,
+  Rule,
+  RuleHandler,
+  RuleMatch,
+  SwaggerCreateRuleParameters,
+  SwaggerGetRuleParameters,
+  SwaggerListRulesParameters,
+  SwaggerRuleResponse,
+  SwaggerRulesResponse,
+  SwaggerUpdateRuleParameters,
+  Upstream,
+  Version,
+  DefaultApi,
+  HealthApi,
+  JudgeApi,
+  RuleApi,
+  VersionApi
+) {
+  'use strict'
 
   /**
    * ORY_Oathkeeper_is_a_reverse_proxy_that_checks_the_HTTP_Authorization_for_validity_against_a_set_of_rules__This_service_uses_Hydra_to_validate_access_tokens_and_policies_.<br>
@@ -63,36 +132,6 @@
      */
     ApiClient: ApiClient,
     /**
-     * The AuthenticationDefaultSession model constructor.
-     * @property {module:model/AuthenticationDefaultSession}
-     */
-    AuthenticationDefaultSession: AuthenticationDefaultSession,
-    /**
-     * The AuthenticationOAuth2ClientCredentialsRequest model constructor.
-     * @property {module:model/AuthenticationOAuth2ClientCredentialsRequest}
-     */
-    AuthenticationOAuth2ClientCredentialsRequest: AuthenticationOAuth2ClientCredentialsRequest,
-    /**
-     * The AuthenticationOAuth2ClientCredentialsSession model constructor.
-     * @property {module:model/AuthenticationOAuth2ClientCredentialsSession}
-     */
-    AuthenticationOAuth2ClientCredentialsSession: AuthenticationOAuth2ClientCredentialsSession,
-    /**
-     * The AuthenticationOAuth2IntrospectionRequest model constructor.
-     * @property {module:model/AuthenticationOAuth2IntrospectionRequest}
-     */
-    AuthenticationOAuth2IntrospectionRequest: AuthenticationOAuth2IntrospectionRequest,
-    /**
-     * The AuthenticationOAuth2Session model constructor.
-     * @property {module:model/AuthenticationOAuth2Session}
-     */
-    AuthenticationOAuth2Session: AuthenticationOAuth2Session,
-    /**
-     * The Authenticator model constructor.
-     * @property {module:model/Authenticator}
-     */
-    Authenticator: Authenticator,
-    /**
      * The HealthNotReadyStatus model constructor.
      * @property {module:model/HealthNotReadyStatus}
      */
@@ -108,11 +147,6 @@
      */
     InlineResponse401: InlineResponse401,
     /**
-     * The IntrospectionResponse model constructor.
-     * @property {module:model/IntrospectionResponse}
-     */
-    IntrospectionResponse: IntrospectionResponse,
-    /**
      * The JsonWebKey model constructor.
      * @property {module:model/JsonWebKey}
      */
@@ -122,16 +156,6 @@
      * @property {module:model/JsonWebKeySet}
      */
     JsonWebKeySet: JsonWebKeySet,
-    /**
-     * The OAuth2ClientCredentialsAuthentication model constructor.
-     * @property {module:model/OAuth2ClientCredentialsAuthentication}
-     */
-    OAuth2ClientCredentialsAuthentication: OAuth2ClientCredentialsAuthentication,
-    /**
-     * The OAuth2IntrospectionAuthentication model constructor.
-     * @property {module:model/OAuth2IntrospectionAuthentication}
-     */
-    OAuth2IntrospectionAuthentication: OAuth2IntrospectionAuthentication,
     /**
      * The Rule model constructor.
      * @property {module:model/Rule}
@@ -147,11 +171,6 @@
      * @property {module:model/RuleMatch}
      */
     RuleMatch: RuleMatch,
-    /**
-     * The Session model constructor.
-     * @property {module:model/Session}
-     */
-    Session: Session,
     /**
      * The SwaggerCreateRuleParameters model constructor.
      * @property {module:model/SwaggerCreateRuleParameters}
@@ -217,7 +236,7 @@
      * @property {module:api/VersionApi}
      */
     VersionApi: VersionApi
-  };
+  }
 
-  return exports;
-}));
+  return exports
+})
