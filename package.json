@@ -1,5 +1,5 @@
 {
-  "name": "ory-oathkeeper-sdk",
+  "name": "@oryd/oathkeeper",
   "version": "0.0.0",
   "description": "The official JavaScript / NodeJS SDK for ORY Oathkeeper.",
   "license": "Apache-2.0",
