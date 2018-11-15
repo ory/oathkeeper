@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"strings"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/ory/fosite"
@@ -125,6 +126,16 @@ func (a *AuthenticatorJWT) Authenticate(r *http.Request, config json.RawMessage,
 		if !stringslice.Has(cf.Issuers, parsedClaims.Issuer) {
 			return nil, errors.WithStack(helper.ErrForbidden.WithReason(fmt.Sprintf("Token issuer does not match any trusted issuer.")))
 		}
+	}
+
+	if scopeClaim, err := mapx.GetString(map[interface{}]interface{}{"scope": claims["scope"]}, "scope"); err == nil {
+		scopeStrings := strings.Split(scopeClaim, " ")
+		scopeInterfaces := make([]interface{}, len(scopeStrings))
+
+		for i := range scopeStrings {
+			scopeInterfaces[i] = scopeStrings[i]
+		}
+		claims["scope"] = scopeInterfaces
 	}
 
 	if a.scopeStrategy != nil {
