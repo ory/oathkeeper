@@ -149,6 +149,28 @@ func TestAuthenticatorJWT(t *testing.T) {
 			},
 		},
 		{
+			d: "should pass because JWT scope can be a string",
+			r: &http.Request{Header: http.Header{"Authorization": []string{"bearer " + generateJWT(t, jwt.MapClaims{
+				"sub":   "sub",
+				"exp":   now.Add(time.Hour).Unix(),
+				"aud":   []string{"aud-1", "aud-2"},
+				"iss":   "iss-2",
+				"scope": "scope-3 scope-2 scope-1",
+			}, "RS256")}}},
+			config:    `{"target_audience": ["aud-1", "aud-2"], "trusted_issuers": ["iss-1", "iss-2"], "required_scope": ["scope-1", "scope-2"]}`,
+			expectErr: false,
+			expectSess: &AuthenticationSession{
+				Subject: "sub",
+				Extra: map[string]interface{}{
+					"sub":   "sub",
+					"exp":   float64(now.Add(time.Hour).Unix()),
+					"aud":   []interface{}{"aud-1", "aud-2"},
+					"iss":   "iss-2",
+					"scope": []interface{}{"scope-3", "scope-2", "scope-1"},
+				},
+			},
+		},
+		{
 			d: "should pass because JWT is valid and HS256 is allowed",
 			r: &http.Request{Header: http.Header{"Authorization": []string{"bearer " + generateJWT(t, jwt.MapClaims{
 				"sub": "sub",
