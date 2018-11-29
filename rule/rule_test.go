@@ -43,5 +43,6 @@ func TestRule(t *testing.T) {
 	}
 
 	assert.NoError(t, r.IsMatching("DELETE", mustParse(t, "https://localhost/users/1234")))
+	assert.NoError(t, r.IsMatching("DELETE", mustParse(t, "https://localhost/users/1234?key=value&key1=value1")))
 	assert.Error(t, r.IsMatching("DELETE", mustParse(t, "https://localhost/users/abcd")))
 }
