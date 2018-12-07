@@ -3,15 +3,15 @@
 **Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
 
 - [Change Log](#change-log)
-  - [v1.0.0-beta.9 (2018-09-01)](#v100-beta9-2018-09-01)
-  - [v1.0.0-beta.8 (2018-08-09)](#v100-beta8-2018-08-09)
-  - [v1.0.0-beta.7 (2018-07-12)](#v100-beta7-2018-07-12)
-  - [v1.0.0-beta.6 (2018-07-11)](#v100-beta6-2018-07-11)
-  - [v1.0.0-beta.5 (2018-07-07)](#v100-beta5-2018-07-07)
-  - [v1.0.0-beta.4 (2018-06-14)](#v100-beta4-2018-06-14)
-  - [v1.0.0-beta.3 (2018-06-13)](#v100-beta3-2018-06-13)
-  - [v1.0.0-beta.2 (2018-05-29)](#v100-beta2-2018-05-29)
-  - [v1.0.0-beta.1 (2018-05-29)](#v100-beta1-2018-05-29)
+  - [v0.13.9+oryOS.9 (2018-09-01)](#v0139oryos9-2018-09-01)
+  - [v0.13.8+oryOS.8 (2018-08-09)](#v0138oryos8-2018-08-09)
+  - [v0.13.7+oryOS.7 (2018-07-12)](#v0137oryos7-2018-07-12)
+  - [v0.13.6+oryOS.6 (2018-07-11)](#v0136oryos6-2018-07-11)
+  - [v0.13.5+oryOS.5 (2018-07-07)](#v0135oryos5-2018-07-07)
+  - [v0.13.4+oryOS.4 (2018-06-14)](#v0134oryos4-2018-06-14)
+  - [v0.13.3+oryOS.3 (2018-06-13)](#v0133oryos3-2018-06-13)
+  - [v0.13.2+oryOS.2 (2018-05-29)](#v0132oryos2-2018-05-29)
+  - [v0.13.1+oryOS.1 (2018-05-29)](#v0131oryos1-2018-05-29)
   - [v0.11.12 (2018-05-07)](#v01112-2018-05-07)
   - [v0.0.29 (2017-12-19)](#v0029-2017-12-19)
   - [v0.0.28 (2017-12-19)](#v0028-2017-12-19)
@@ -47,8 +47,8 @@
 
 # Change Log
 
-## [v1.0.0-beta.9](https://github.com/ory/oathkeeper/tree/v1.0.0-beta.9) (2018-09-01)
-[Full Changelog](https://github.com/ory/oathkeeper/compare/v1.0.0-beta.8...v1.0.0-beta.9)
+## [v0.13.9+oryOS.9](https://github.com/ory/oathkeeper/tree/v0.13.9+oryOS.9) (2018-09-01)
+[Full Changelog](https://github.com/ory/oathkeeper/compare/v0.13.8+oryOS.8...v0.13.9+oryOS.9)
 
 **Implemented enhancements:**
 
@@ -80,8 +80,8 @@
 - proxy: add cookies credentials issuer [\#102](https://github.com/ory/oathkeeper/pull/102) ([zikes](https://github.com/zikes))
 - Headers Credentials Issuer [\#100](https://github.com/ory/oathkeeper/pull/100) ([zikes](https://github.com/zikes))
 
-## [v1.0.0-beta.8](https://github.com/ory/oathkeeper/tree/v1.0.0-beta.8) (2018-08-09)
-[Full Changelog](https://github.com/ory/oathkeeper/compare/v1.0.0-beta.7...v1.0.0-beta.8)
+## [v0.13.8+oryOS.8](https://github.com/ory/oathkeeper/tree/v0.13.8+oryOS.8) (2018-08-09)
+[Full Changelog](https://github.com/ory/oathkeeper/compare/v0.13.7+oryOS.7...v0.13.8+oryOS.8)
 
 **Implemented enhancements:**
 
@@ -106,19 +106,19 @@
 - judge: Add endpoint for answering access requests directly [\#91](https://github.com/ory/oathkeeper/pull/91) ([aeneasr](https://github.com/aeneasr))
 - health: Introduce health and version endpoint [\#90](https://github.com/ory/oathkeeper/pull/90) ([aeneasr](https://github.com/aeneasr))
 
-## [v1.0.0-beta.7](https://github.com/ory/oathkeeper/tree/v1.0.0-beta.7) (2018-07-12)
-[Full Changelog](https://github.com/ory/oathkeeper/compare/v1.0.0-beta.6...v1.0.0-beta.7)
+## [v0.13.7+oryOS.7](https://github.com/ory/oathkeeper/tree/v0.13.7+oryOS.7) (2018-07-12)
+[Full Changelog](https://github.com/ory/oathkeeper/compare/v0.13.6+oryOS.6...v0.13.7+oryOS.7)
 
 **Merged pull requests:**
 
 - docs: fix broken link [\#87](https://github.com/ory/oathkeeper/pull/87) ([orisano](https://github.com/orisano))
 - README: grammatical fix in stability sentence [\#86](https://github.com/ory/oathkeeper/pull/86) ([philips](https://github.com/philips))
 
-## [v1.0.0-beta.6](https://github.com/ory/oathkeeper/tree/v1.0.0-beta.6) (2018-07-11)
-[Full Changelog](https://github.com/ory/oathkeeper/compare/v1.0.0-beta.5...v1.0.0-beta.6)
+## [v0.13.6+oryOS.6](https://github.com/ory/oathkeeper/tree/v0.13.6+oryOS.6) (2018-07-11)
+[Full Changelog](https://github.com/ory/oathkeeper/compare/v0.13.5+oryOS.5...v0.13.6+oryOS.6)
 
-## [v1.0.0-beta.5](https://github.com/ory/oathkeeper/tree/v1.0.0-beta.5) (2018-07-07)
-[Full Changelog](https://github.com/ory/oathkeeper/compare/v1.0.0-beta.4...v1.0.0-beta.5)
+## [v0.13.5+oryOS.5](https://github.com/ory/oathkeeper/tree/v0.13.5+oryOS.5) (2018-07-07)
+[Full Changelog](https://github.com/ory/oathkeeper/compare/v0.13.4+oryOS.4...v0.13.5+oryOS.5)
 
 **Implemented enhancements:**
 
@@ -147,8 +147,8 @@
 - docs: Adds gh templates & code of conduct [\#78](https://github.com/ory/oathkeeper/pull/78) ([aeneasr](https://github.com/aeneasr))
 - ci: Prevent pushes from forks to coveralls [\#74](https://github.com/ory/oathkeeper/pull/74) ([aeneasr](https://github.com/aeneasr))
 
-## [v1.0.0-beta.4](https://github.com/ory/oathkeeper/tree/v1.0.0-beta.4) (2018-06-14)
-[Full Changelog](https://github.com/ory/oathkeeper/compare/v1.0.0-beta.3...v1.0.0-beta.4)
+## [v0.13.4+oryOS.4](https://github.com/ory/oathkeeper/tree/v0.13.4+oryOS.4) (2018-06-14)
+[Full Changelog](https://github.com/ory/oathkeeper/compare/v0.13.3+oryOS.3...v0.13.4+oryOS.4)
 
 **Implemented enhancements:**
 
@@ -158,19 +158,19 @@
 
 - Reduces setup complexity [\#72](https://github.com/ory/oathkeeper/pull/72) ([aeneasr](https://github.com/aeneasr))
 
-## [v1.0.0-beta.3](https://github.com/ory/oathkeeper/tree/v1.0.0-beta.3) (2018-06-13)
-[Full Changelog](https://github.com/ory/oathkeeper/compare/v1.0.0-beta.2...v1.0.0-beta.3)
+## [v0.13.3+oryOS.3](https://github.com/ory/oathkeeper/tree/v0.13.3+oryOS.3) (2018-06-13)
+[Full Changelog](https://github.com/ory/oathkeeper/compare/v0.13.2+oryOS.2...v0.13.3+oryOS.3)
 
 **Merged pull requests:**
 
 - proxy: Resolves potential panic in request handler [\#70](https://github.com/ory/oathkeeper/pull/70) ([aeneasr](https://github.com/aeneasr))
 - Minor improvements [\#69](https://github.com/ory/oathkeeper/pull/69) ([aeneasr](https://github.com/aeneasr))
 
-## [v1.0.0-beta.2](https://github.com/ory/oathkeeper/tree/v1.0.0-beta.2) (2018-05-29)
-[Full Changelog](https://github.com/ory/oathkeeper/compare/v1.0.0-beta.1...v1.0.0-beta.2)
+## [v0.13.2+oryOS.2](https://github.com/ory/oathkeeper/tree/v0.13.2+oryOS.2) (2018-05-29)
+[Full Changelog](https://github.com/ory/oathkeeper/compare/v0.13.1+oryOS.1...v0.13.2+oryOS.2)
 
-## [v1.0.0-beta.1](https://github.com/ory/oathkeeper/tree/v1.0.0-beta.1) (2018-05-29)
-[Full Changelog](https://github.com/ory/oathkeeper/compare/v0.11.12...v1.0.0-beta.1)
+## [v0.13.1+oryOS.1](https://github.com/ory/oathkeeper/tree/v0.13.1+oryOS.1) (2018-05-29)
+[Full Changelog](https://github.com/ory/oathkeeper/compare/v0.11.12...v0.13.1+oryOS.1)
 
 **Closed issues:**
 
