@@ -97,9 +97,9 @@ AUTHENTICATORS
 		--------------------------------------------------------------
 
 - OAuth 2.0 Token Introspection Authenticator:
-	- AUTHENTICATOR_OAUTH2_INTROSPECTION_INTROSPECT_URL: The OAuth 2.0 Token Introspection URL.
+	- AUTHENTICATOR_OAUTH2_INTROSPECTION_URL: The OAuth 2.0 Token Introspection URL.
 		--------------------------------------------------------------
-		Example: AUTHENTICATOR_OAUTH2_INTROSPECTION_INTROSPECT_URL=http://my-oauth2-server/oauth2/introspect
+		Example: AUTHENTICATOR_OAUTH2_INTROSPECTION_URL=http://my-oauth2-server/oauth2/introspect
 		--------------------------------------------------------------
 
 	- AUTHENTICATOR_OAUTH2_INTROSPECTION_SCOPE_STRATEGY: The strategy to be used to validate the scope claim.
