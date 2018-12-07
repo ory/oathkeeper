@@ -8,7 +8,16 @@ before finalizing the upgrade process.
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
 
-- [1.0.0-beta.2](#100-beta2)
+- [Most recent release](#most-recent-release)
+  - [Refresh Configuration](#refresh-configuration)
+- [v0.13.9+oryOS.9](#v0139oryos9)
+  - [Refresh Configuration](#refresh-configuration-1)
+  - [Scope Matching](#scope-matching)
+  - [Configuration changes](#configuration-changes)
+  - [CORS is disabled by default](#cors-is-disabled-by-default)
+- [v0.13.8+oryOS.8](#v0138oryos8)
+  - [`noop` authenticator no longer bypasses authorizers/credentials issuers](#noop-authenticator-no-longer-bypasses-authorizerscredentials-issuers)
+- [v0.13.2+oryOS.2](#v0132oryos2)
   - [Changes to the CLI](#changes-to-the-cli)
     - [`migrate`](#migrate)
   - [Not compatible with ORY Hydra < 1.0.0](#not-compatible-with-ory-hydra--100)
@@ -16,14 +25,14 @@ before finalizing the upgrade process.
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-## master
+## Most recent release
 
 ### Refresh Configuration
 
 Environment variables `HTTP_TLS_xxx` are now called
 `HTTPS_TLS_xxx`.
 
-## 1.0.0-beta.9
+## v0.13.9+oryOS.9
 
 ### Refresh Configuration
 
@@ -66,7 +75,7 @@ And the following environment variables have changed:
 A new environment variable `CORS_ENABLED` was introduced. It sets whether CORS is enabled ("true") or not ("false")".
 Default is disabled.
 
-## 1.0.0-beta.8
+## v0.13.8+oryOS.8
 
 ### `noop` authenticator no longer bypasses authorizers/credentials issuers
 
@@ -75,7 +84,7 @@ set.
 
 Previously, the `noop` authenticator bypassed the authorizer and credential issuers. This patch changes that.
 
-## 1.0.0-beta.2
+## v0.13.2+oryOS.2
 
 This release introduces serious breaking changes. If you are upgrading, you will - unfortunately - need to
 re-create the database schema and migrate your rules manually. While this is frustrating, there are a ton of features
