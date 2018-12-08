@@ -5,34 +5,48 @@ version: 2
 jobs:
   format:
     docker:
-      - image: circleci/golang:1.10
-    working_directory: /go/src/github.com/ory/oathkeeper
+    - image: circleci/golang:1.11
+    working_directory: /go/src/github.com/ory/hydra
     steps:
-      - checkout
-      - run: curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
-      - run: go get -u golang.org/x/tools/cmd/goimports
-      - run: dep ensure -vendor-only
-      - run: ./scripts/test-format.sh
+    # This is disabled for now because goimports is really slow when go modules are used, see
+    # https://github.com/golang/go/issues/27287
+    #
+    #      - run:
+    #          name: Enable go1.11 modules
+    #          command: |
+    #            echo 'export GO111MODULE=on' >> $BASH_ENV
+    #            source $BASH_ENV
+    - checkout
+    - run:
+        name: Enable go1.11 modules
+        command: |
+          echo 'export GO111MODULE=on' >> $BASH_ENV
+          source $BASH_ENV
+    - run: curl -L https://git.io/vp6lP | sh
+    - run: mv ./bin/* $GOPATH/bin
+    - run: go mod download
+    - run: go mod vendor
+    - run: GO111MODULE=off gometalinter --disable-all --enable=goimports --enable=vet --vendor ./...
 
-  swagger:
-    docker:
-      - image: circleci/golang:1.10
-    working_directory: /go/src/github.com/ory/oathkeeper
-    steps:
-      - checkout
-      - run: curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
-      - run: go get -u github.com/go-swagger/go-swagger/cmd/swagger golang.org/x/tools/cmd/goimports
-      - run: dep ensure -vendor-only
-      - run: ./scripts/run-genswag.sh
+#  swagger:
+#    docker:
+#      - image: circleci/golang:1.11
+#    working_directory: /go/src/github.com/ory/oathkeeper
+#    steps:
+#      - checkout
+#      - run: curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
+#      - run: go get -u github.com/go-swagger/go-swagger/cmd/swagger golang.org/x/tools/cmd/goimports
+#      - run: dep ensure -vendor-only
+#      - run: ./scripts/run-genswag.sh
 
   test:
     docker:
-      - image: circleci/golang:1.10
+      - image: circleci/golang:1.11
         environment:
         - TEST_DATABASE_POSTGRESQL=postgres://test:test@localhost:5432/oathkeeper?sslmode=disable
         - TEST_DATABASE_MYSQL=root:test@(localhost:3306)/mysql?parseTime=true
         - TEST_HYDRA_ADMIN_URL=http://localhost:4445
-      - image: oryd/hydra:v1.0.0-beta.8
+      - image: oryd/hydra:v1.0.0-rc.3_oryOS.9
         environment:
         - DATABASE_URL=memory
         command: "serve all --dangerous-force-http"
@@ -46,20 +60,15 @@ jobs:
         - POSTGRES_DB=oathkeeper
     working_directory: /go/src/github.com/ory/oathkeeper
     steps:
+      - run:
+          name: Enable go1.11 modules
+          command: |
+            echo 'export GO111MODULE=on' >> $BASH_ENV
+            source $BASH_ENV
       - checkout
-      - run: go get -u github.com/go-swagger/go-swagger/cmd/swagger github.com/bradfitz/goimports github.com/mattn/goveralls golang.org/x/tools/cmd/cover github.com/ory/go-acc
-      - run: curl -L -s https://github.com/golang/dep/releases/download/v0.4.1/dep-linux-amd64 -o /go/bin/dep && chmod +x /go/bin/dep
-
-      # Installation
-      - run: curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -
-      - run: dep ensure -vendor-only
-      - run: go install github.com/ory/oathkeeper
-
-      # Tests
-      - run: go test -race -short $(go list ./... | grep -v cmd)
-      - run: go-acc -o coverage.txt ./...
-
-      # Submit coverage details
+      - run: go mod download
+      - run: go get -u github.com/mattn/goveralls golang.org/x/tools/cmd/cover github.com/ory/go-acc
+      - run: go-acc -o coverage.txt ./... -- -failfast -timeout=20m
       - run: test -z "$CIRCLE_PR_NUMBER" && goveralls -service=circle-ci -coverprofile=coverage.txt -repotoken=$COVERALLS_REPO_TOKEN || echo "forks are not allowed to push to coveralls"
 
   build-docker:
@@ -74,7 +83,7 @@ jobs:
 
   release-docker:
     docker:
-      - image: circleci/golang:1.10
+      - image: circleci/golang:1.11
     working_directory: /go/src/github.com/ory/oathkeeper
     steps:
       - checkout
@@ -120,13 +129,16 @@ jobs:
 
   release-binaries:
     docker:
-      - image: circleci/golang:1.10
+      - image: circleci/golang:1.11
     working_directory: /go/src/github.com/ory/oathkeeper
     steps:
+      - run:
+          name: Enable go1.11 modules
+          command: |
+            echo 'export GO111MODULE=on' >> $BASH_ENV
+            source $BASH_ENV
       - checkout
-      - run: curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
       - run: go get -u github.com/mitchellh/gox github.com/tcnksm/ghr
-      - run: dep ensure -vendor-only
       - run: |
           gox -parallel=2 -ldflags "-X github.com/ory/oathkeeper/cmd.Version=`git describe --tags` -X github.com/ory/oathkeeper/cmd.BuildTime=`TZ=UTC date -u '+%Y-%m-%dT%H:%M:%SZ'` -X github.com/ory/oathkeeper/cmd.GitHash=`git rev-parse HEAD`" -output "dist/{{.Dir}}-{{.OS}}-{{.Arch}}";
       - run: ghr -t $GITHUB_TOKEN -u $CIRCLE_PROJECT_USERNAME -r $CIRCLE_PROJECT_REPONAME --replace `git describe --tags` dist/
@@ -159,15 +171,15 @@ workflows:
       - release-docs:
           filters:
             branches:
-              only: master
-      - swagger:
-          filters:
-            tags:
-              only: /.*/
+#              only: master
+#      - swagger:
+#          filters:
+#            tags:
+#              only: /.*/
       - build-docker:
           requires:
             - test
-            - swagger
+#            - swagger
             - format
           filters:
             tags:
