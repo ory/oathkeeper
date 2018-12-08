@@ -31,7 +31,7 @@ import (
 	"github.com/ory/herodot"
 	"github.com/ory/oathkeeper/helper"
 	"github.com/ory/oathkeeper/pkg"
-	"github.com/ory/pagination"
+	"github.com/ory/x/pagination"
 )
 
 type Handler struct {

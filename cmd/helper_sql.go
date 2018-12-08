@@ -27,7 +27,7 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/ory/oathkeeper/rule"
-	"github.com/ory/sqlcon"
+	"github.com/ory/x/sqlcon"
 )
 
 func connectToSql(dburl string) (*sqlx.DB, error) {

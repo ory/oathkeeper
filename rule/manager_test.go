@@ -30,7 +30,7 @@ import (
 
 	"github.com/ory/oathkeeper/helper"
 	"github.com/ory/oathkeeper/pkg"
-	"github.com/ory/sqlcon/dockertest"
+	"github.com/ory/x/sqlcon/dockertest"
 )
 
 func TestMain(m *testing.M) {

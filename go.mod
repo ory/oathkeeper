@@ -16,12 +16,9 @@ require (
 	github.com/ory/graceful v0.1.0
 	github.com/ory/herodot v0.5.0
 	github.com/ory/hydra v0.0.0-20181208123928-e4bc6c269c6f
-	github.com/ory/keto v1.0.0-beta.9.0.20181208140000-637c78cba697
+	github.com/ory/keto v1.0.0-beta.9.0.20181208142658-3dd5f7d61bb4
 	github.com/ory/ladon v1.0.0
-	github.com/ory/metrics-middleware v0.0.1
-	github.com/ory/pagination v0.0.1
-	github.com/ory/sqlcon v0.0.7
-	github.com/ory/x v0.0.33
+	github.com/ory/x v0.0.34
 	github.com/pborman/uuid v1.2.0
 	github.com/pkg/errors v0.8.0
 	github.com/rs/cors v1.6.0
