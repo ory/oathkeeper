@@ -27,11 +27,12 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
+
 	"github.com/ory/herodot"
 	"github.com/ory/oathkeeper/rsakey"
 	"github.com/ory/oathkeeper/rule"
-	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
 )
 
 func NewProxy(handler *RequestHandler, logger logrus.FieldLogger, matcher rule.Matcher) *Proxy {

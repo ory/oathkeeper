@@ -23,10 +23,11 @@ package proxy
 import (
 	"net/http"
 
-	"github.com/ory/oathkeeper/helper"
-	"github.com/ory/oathkeeper/rule"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
+
+	"github.com/ory/oathkeeper/helper"
+	"github.com/ory/oathkeeper/rule"
 )
 
 type RequestHandler struct {

@@ -24,9 +24,10 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/spf13/cobra"
+
 	"github.com/ory/oathkeeper/pkg"
 	"github.com/ory/oathkeeper/sdk/go/oathkeeper"
-	"github.com/spf13/cobra"
 )
 
 // listCmd represents the list command

@@ -31,9 +31,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/ory/oathkeeper/rule"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/ory/oathkeeper/rule"
 )
 
 //type jurorDenyAll struct{}

@@ -24,10 +24,11 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/ory/herodot"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/ory/herodot"
 )
 
 func TestValidateRule(t *testing.T) {

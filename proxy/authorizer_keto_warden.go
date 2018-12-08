@@ -29,26 +29,31 @@ import (
 	"time"
 
 	"github.com/asaskevich/govalidator"
-	"github.com/ory/keto/sdk/go/keto"
+	"github.com/pkg/errors"
+	"github.com/tomasen/realip"
+
 	"github.com/ory/keto/sdk/go/keto/swagger"
 	"github.com/ory/oathkeeper/helper"
 	"github.com/ory/oathkeeper/rule"
-	"github.com/pkg/errors"
-	"github.com/tomasen/realip"
 )
+
+type KetoWardenSDK interface {
+	DoOryAccessControlPoliciesAllow(flavor string, body swagger.OryAccessControlPolicyAllowedInput) (*swagger.AuthorizationResult, *swagger.APIResponse, error)
+}
 
 type AuthorizerKetoWardenConfiguration struct {
 	RequiredAction   string `json:"required_action" valid:",required"`
 	RequiredResource string `json:"required_resource" valid:",required"`
 	Subject          string `json:"subject"`
+	Flavor           string `json:"flavor"`
 }
 
 type AuthorizerKetoWarden struct {
-	K              keto.WardenSDK
+	K              KetoWardenSDK
 	contextCreator authorizerKetoWardenContext
 }
 
-func NewAuthorizerKetoWarden(k keto.WardenSDK) *AuthorizerKetoWarden {
+func NewAuthorizerKetoWarden(k KetoWardenSDK) *AuthorizerKetoWarden {
 	return &AuthorizerKetoWarden{
 		K:              k,
 		contextCreator: contextFromRequest,
@@ -101,7 +106,12 @@ func (a *AuthorizerKetoWarden) Authorize(r *http.Request, session *Authenticatio
 		}
 	}
 
-	defaultSession, response, err := a.K.IsSubjectAuthorized(swagger.WardenSubjectAuthorizationRequest{
+	flavor := "regex"
+	if len(cf.Flavor) > 0 {
+		flavor = cf.Flavor
+	}
+
+	defaultSession, response, err := a.K.DoOryAccessControlPoliciesAllow(flavor, swagger.OryAccessControlPolicyAllowedInput{
 		Action:   compiled.ReplaceAllString(r.URL.String(), cf.RequiredAction),
 		Resource: compiled.ReplaceAllString(r.URL.String(), cf.RequiredResource),
 		Context:  a.contextCreator(r),

@@ -4,8 +4,9 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/ory/oathkeeper/rule"
 	"github.com/pkg/errors"
+
+	"github.com/ory/oathkeeper/rule"
 )
 
 type AuthenticatorAnonymous struct {

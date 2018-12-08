@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/go-errors/errors"
+
 	"github.com/ory/oathkeeper/rule"
 )
 

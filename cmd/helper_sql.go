@@ -24,9 +24,10 @@ import (
 	"net/url"
 
 	"github.com/jmoiron/sqlx"
+	"github.com/pkg/errors"
+
 	"github.com/ory/oathkeeper/rule"
 	"github.com/ory/sqlcon"
-	"github.com/pkg/errors"
 )
 
 func connectToSql(dburl string) (*sqlx.DB, error) {

@@ -8,10 +8,11 @@ import (
 	"testing"
 	"text/template"
 
-	"github.com/ory/oathkeeper/rule"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/ory/oathkeeper/rule"
 )
 
 func TestCredentialsIssuerHeaders(t *testing.T) {

@@ -6,11 +6,11 @@ format:
 
 .PHONY: gen-mocks
 gen-mocks:
-		mockgen -package proxy -destination proxy/keto_sdk_mock.go -source ./vendor/github.com/ory/keto/sdk/go/keto/sdk_warden.go WardenSDK
-        mockgen -package proxy -destination proxy/authenticator_oauth2_introspection_mock.go -source ./proxy/authenticator_oauth2_introspection.go authenticatorOAuth2IntrospectionHelper
+		mockgen -package proxy -destination proxy/keto_warden_sdk_mock.go -source ./proxy/authorizer_keto_warden.go KetoWardenSDK
+		mockgen -package proxy -destination proxy/authenticator_oauth2_introspection_mock.go -source ./proxy/authenticator_oauth2_introspection.go authenticatorOAuth2IntrospectionHelper
 
 .PHONY: gen
-gen: gen-mocks gen-sdk
+		gen: gen-mocks gen-sdk
 
 .PHONY: gen-sdk
 gen-sdk:

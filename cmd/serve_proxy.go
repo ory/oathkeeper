@@ -27,17 +27,18 @@ import (
 	"net/http/httputil"
 
 	"github.com/meatballhat/negroni-logrus"
-	"github.com/ory/go-convenience/corsx"
-	"github.com/ory/graceful"
-	"github.com/ory/keto/sdk/go/keto"
-	"github.com/ory/metrics-middleware"
-	"github.com/ory/oathkeeper/proxy"
-	"github.com/ory/oathkeeper/rule"
-	"github.com/ory/oathkeeper/sdk/go/oathkeeper"
 	"github.com/rs/cors"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/urfave/negroni"
+
+	"github.com/ory/graceful"
+	"github.com/ory/keto/sdk/go/keto"
+	"github.com/ory/oathkeeper/proxy"
+	"github.com/ory/oathkeeper/rule"
+	"github.com/ory/oathkeeper/sdk/go/oathkeeper"
+	"github.com/ory/x/corsx"
+	"github.com/ory/x/metricsx"
 )
 
 // proxyCmd represents the proxy command
@@ -225,13 +226,15 @@ OTHER CONTROLS
 		if ok, _ := cmd.Flags().GetBool("disable-telemetry"); !ok {
 			logger.Println("Transmission of telemetry data is enabled, to learn more go to: https://www.ory.sh/docs/ecosystem/sqa")
 
-			segmentMiddleware := metrics.NewMetricsManager(
-				metrics.Hash(viper.GetString("DATABASE_URL")),
+			segmentMiddleware := metricsx.NewMetricsManager(
+				metricsx.Hash(viper.GetString("DATABASE_URL")),
 				viper.GetString("DATABASE_URL") != "memory",
 				"MSx9A6YQ1qodnkzEFOv22cxOmOCJXMFa",
 				[]string{"/"},
 				logger,
 				"ory-oathkeeper-proxy",
+				100,
+				"",
 			)
 			go segmentMiddleware.RegisterSegment(Version, GitHash, BuildTime)
 			go segmentMiddleware.CommitMemoryStatistics()

@@ -27,10 +27,11 @@ import (
 	"io/ioutil"
 	"net/http"
 
+	"github.com/spf13/cobra"
+
 	"github.com/ory/oathkeeper/rule"
 	"github.com/ory/oathkeeper/sdk/go/oathkeeper"
 	"github.com/ory/oathkeeper/sdk/go/oathkeeper/swagger"
-	"github.com/spf13/cobra"
 )
 
 // importCmd represents the import command

@@ -28,6 +28,10 @@ import (
 	"strings"
 	"time"
 
+	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
+	"github.com/spf13/viper"
+
 	"github.com/ory/fosite"
 	"github.com/ory/go-convenience/stringsx"
 	"github.com/ory/hydra/sdk/go/hydra"
@@ -35,9 +39,6 @@ import (
 	"github.com/ory/oathkeeper/proxy"
 	"github.com/ory/oathkeeper/rsakey"
 	"github.com/ory/oathkeeper/rule"
-	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
-	"github.com/spf13/viper"
 )
 
 func getHydraSDK() hydra.SDK {

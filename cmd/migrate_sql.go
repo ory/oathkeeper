@@ -18,9 +18,10 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/ory/oathkeeper/rule"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+
+	"github.com/ory/oathkeeper/rule"
 )
 
 // sqlCmd represents the sql command

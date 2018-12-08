@@ -24,9 +24,10 @@ import (
 	"fmt"
 
 	"github.com/asaskevich/govalidator"
+	"github.com/pkg/errors"
+
 	"github.com/ory/go-convenience/stringslice"
 	"github.com/ory/oathkeeper/helper"
-	"github.com/pkg/errors"
 )
 
 func ValidateRule(

@@ -9,13 +9,14 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/pkg/errors"
+	"golang.org/x/oauth2/clientcredentials"
+
 	"github.com/ory/fosite"
 	"github.com/ory/go-convenience/stringslice"
 	"github.com/ory/hydra/sdk/go/hydra/swagger"
 	"github.com/ory/oathkeeper/helper"
 	"github.com/ory/oathkeeper/rule"
-	"github.com/pkg/errors"
-	"golang.org/x/oauth2/clientcredentials"
 )
 
 type AuthenticatorOAuth2IntrospectionConfiguration struct {

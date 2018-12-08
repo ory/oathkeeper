@@ -23,9 +23,10 @@ package rule
 import (
 	"net/http"
 
+	"github.com/pkg/errors"
+
 	"github.com/ory/oathkeeper/pkg"
 	"github.com/ory/oathkeeper/sdk/go/oathkeeper"
-	"github.com/pkg/errors"
 )
 
 type HTTPMatcher struct {

@@ -24,8 +24,9 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/ory/oathkeeper/sdk/go/oathkeeper"
 	"github.com/spf13/cobra"
+
+	"github.com/ory/oathkeeper/sdk/go/oathkeeper"
 )
 
 // getCmd represents the get command
