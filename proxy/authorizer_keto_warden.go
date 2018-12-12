@@ -61,7 +61,7 @@ func NewAuthorizerKetoWarden(k KetoWardenSDK) *AuthorizerKetoWarden {
 }
 
 func (a *AuthorizerKetoWarden) GetID() string {
-	return "keto_warden"
+	return "keto_engine_acp_ory"
 }
 
 type authorizerKetoWardenContext func(r *http.Request) map[string]interface{}
@@ -124,10 +124,10 @@ func (a *AuthorizerKetoWarden) Authorize(r *http.Request, session *Authenticatio
 		return errors.Errorf("Expected status code %d but got %d", http.StatusOK, response.StatusCode)
 	}
 	if defaultSession == nil {
-		return errors.WithStack(helper.ErrUnauthorized)
+		return errors.WithStack(helper.ErrForbidden)
 	}
 	if !defaultSession.Allowed {
-		return errors.WithStack(helper.ErrUnauthorized)
+		return errors.WithStack(helper.ErrForbidden)
 	}
 
 	return nil

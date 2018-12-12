@@ -143,10 +143,10 @@ AUTHORIZERS
 ==============
 
 - ORY Keto Warden Authorizer:
-	- AUTHORIZER_KETO_WARDEN_KETO_URL: The URL of ORY Keto's URL. If the value is empty, then the ORY Keto Warden Authorizer
+	- AUTHORIZER_KETO_URL: The URL of ORY Keto's URL. If the value is empty, then the ORY Keto Warden Authorizer
 		will be disabled.
 		--------------------------------------------------------------
-		Example: AUTHORIZER_KETO_WARDEN_KETO_URL=http://keto-url/
+		Example: AUTHORIZER_KETO_URL=http://keto-url/
 		--------------------------------------------------------------
 
 
@@ -202,9 +202,9 @@ OTHER CONTROLS
 			proxy.NewAuthorizerDeny(),
 		}
 
-		if u := viper.GetString("AUTHORIZER_KETO_WARDEN_KETO_URL"); len(u) > 0 {
+		if u := viper.GetString("AUTHORIZER_KETO_URL"); len(u) > 0 {
 			ketoSdk, err := keto.NewCodeGenSDK(&keto.Configuration{
-				EndpointURL: viper.GetString("AUTHORIZER_KETO_WARDEN_KETO_URL"),
+				EndpointURL: viper.GetString("AUTHORIZER_KETO_URL"),
 			})
 			if err != nil {
 				logger.WithError(err).Fatal("Unable to initialize the ORY Keto SDK")

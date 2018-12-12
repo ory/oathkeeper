@@ -246,9 +246,9 @@ func handlerFactories(keyManager rsakey.Manager) ([]proxy.Authenticator, []proxy
 		logger.Warn("Authenticator \"jwt\" is not configured and thus disabled.")
 	}
 
-	if u := viper.GetString("AUTHORIZER_KETO_WARDEN_KETO_URL"); len(u) > 0 {
+	if u := viper.GetString("AUTHORIZER_KETO_URL"); len(u) > 0 {
 		if _, err := url.ParseRequestURI(u); err != nil {
-			logger.WithError(err).Fatalf("Value \"%s\" from environment variable \"AUTHORIZER_KETO_WARDEN_KETO_URL\" is not a valid URL.", u)
+			logger.WithError(err).Fatalf("Value \"%s\" from environment variable \"AUTHORIZER_KETO_URL\" is not a valid URL.", u)
 		}
 		ketoSdk, err := keto.NewCodeGenSDK(&keto.Configuration{
 			EndpointURL: u,
