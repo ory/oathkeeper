@@ -28,11 +28,12 @@ import (
 	"testing"
 
 	"github.com/golang/mock/gomock"
-	"github.com/ory/keto/sdk/go/keto/swagger"
-	"github.com/ory/oathkeeper/rule"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/ory/keto/sdk/go/keto/swagger"
+	"github.com/ory/oathkeeper/rule"
 )
 
 func mustParseURL(t *testing.T, u string) *url.URL {
@@ -45,7 +46,7 @@ func TestAuthorizerKetoWarden(t *testing.T) {
 	assert.NotEmpty(t, NewAuthorizerKetoWarden(nil).GetID())
 
 	for k, tc := range []struct {
-		setup     func(*testing.T, *MockWardenSDK)
+		setup     func(*testing.T, *MockKetoWardenSDK)
 		r         *http.Request
 		session   *AuthenticationSession
 		config    json.RawMessage
@@ -64,14 +65,14 @@ func TestAuthorizerKetoWarden(t *testing.T) {
 				},
 			},
 			r: &http.Request{URL: &url.URL{}},
-			setup: func(t *testing.T, m *MockWardenSDK) {
-				m.EXPECT().IsSubjectAuthorized(gomock.Any()).Return(nil, nil, errors.New("foo"))
+			setup: func(t *testing.T, m *MockKetoWardenSDK) {
+				m.EXPECT().DoOryAccessControlPoliciesAllow(gomock.Eq("regex"), gomock.Any()).Return(nil, nil, errors.New("foo"))
 			},
 			session:   new(AuthenticationSession),
 			expectErr: true,
 		},
 		{
-			config: []byte(`{ "required_action": "action", "required_resource": "resource" }`),
+			config: []byte(`{ "required_action": "action", "required_resource": "resource", "flavor": "regex" }`),
 			rule: &rule.Rule{
 				Match: rule.RuleMatch{
 					Methods: []string{"POST"},
@@ -79,14 +80,14 @@ func TestAuthorizerKetoWarden(t *testing.T) {
 				},
 			},
 			r: &http.Request{URL: &url.URL{}},
-			setup: func(t *testing.T, m *MockWardenSDK) {
-				m.EXPECT().IsSubjectAuthorized(gomock.Any()).Return(nil, &swagger.APIResponse{Response: &http.Response{StatusCode: http.StatusInternalServerError}}, nil)
+			setup: func(t *testing.T, m *MockKetoWardenSDK) {
+				m.EXPECT().DoOryAccessControlPoliciesAllow(gomock.Eq("regex"), gomock.Any()).Return(nil, &swagger.APIResponse{Response: &http.Response{StatusCode: http.StatusInternalServerError}}, nil)
 			},
 			session:   new(AuthenticationSession),
 			expectErr: true,
 		},
 		{
-			config: []byte(`{ "required_action": "action", "required_resource": "resource" }`),
+			config: []byte(`{ "required_action": "action", "required_resource": "resource", "flavor": "exact" }`),
 			rule: &rule.Rule{
 				Match: rule.RuleMatch{
 					Methods: []string{"POST"},
@@ -94,9 +95,9 @@ func TestAuthorizerKetoWarden(t *testing.T) {
 				},
 			},
 			r: &http.Request{URL: &url.URL{}},
-			setup: func(t *testing.T, m *MockWardenSDK) {
-				m.EXPECT().IsSubjectAuthorized(gomock.Any()).Return(
-					&swagger.WardenSubjectAuthorizationResponse{Allowed: false},
+			setup: func(t *testing.T, m *MockKetoWardenSDK) {
+				m.EXPECT().DoOryAccessControlPoliciesAllow(gomock.Eq("exact"), gomock.Any()).Return(
+					&swagger.AuthorizationResult{Allowed: false},
 					&swagger.APIResponse{Response: &http.Response{StatusCode: http.StatusOK}},
 					nil,
 				)
@@ -113,14 +114,14 @@ func TestAuthorizerKetoWarden(t *testing.T) {
 				},
 			},
 			r: &http.Request{URL: mustParseURL(t, "https://localhost/api/users/1234/abcde")},
-			setup: func(t *testing.T, m *MockWardenSDK) {
-				m.EXPECT().IsSubjectAuthorized(gomock.Eq(swagger.WardenSubjectAuthorizationRequest{
+			setup: func(t *testing.T, m *MockKetoWardenSDK) {
+				m.EXPECT().DoOryAccessControlPoliciesAllow(gomock.Any(), gomock.Eq(swagger.OryAccessControlPolicyAllowedInput{
 					Action:   "action:1234:abcde",
 					Resource: "resource:1234:abcde",
 					Context:  map[string]interface{}{},
 					Subject:  "peter",
 				})).Return(
-					&swagger.WardenSubjectAuthorizationResponse{Allowed: true},
+					&swagger.AuthorizationResult{Allowed: true},
 					&swagger.APIResponse{Response: &http.Response{StatusCode: http.StatusOK}},
 					nil,
 				)
@@ -137,14 +138,14 @@ func TestAuthorizerKetoWarden(t *testing.T) {
 				},
 			},
 			r: &http.Request{URL: mustParseURL(t, "https://localhost/api/users/1234/abcde")},
-			setup: func(t *testing.T, m *MockWardenSDK) {
-				m.EXPECT().IsSubjectAuthorized(gomock.Eq(swagger.WardenSubjectAuthorizationRequest{
+			setup: func(t *testing.T, m *MockKetoWardenSDK) {
+				m.EXPECT().DoOryAccessControlPoliciesAllow(gomock.Any(), gomock.Eq(swagger.OryAccessControlPolicyAllowedInput{
 					Action:   "action:1234:abcde",
 					Resource: "resource:1234:abcde",
 					Context:  map[string]interface{}{},
 					Subject:  "peter",
 				})).Return(
-					&swagger.WardenSubjectAuthorizationResponse{Allowed: true},
+					&swagger.AuthorizationResult{Allowed: true},
 					&swagger.APIResponse{Response: &http.Response{StatusCode: http.StatusOK}},
 					nil,
 				)
@@ -157,7 +158,7 @@ func TestAuthorizerKetoWarden(t *testing.T) {
 			c := gomock.NewController(t)
 			defer c.Finish()
 
-			sdk := NewMockWardenSDK(c)
+			sdk := NewMockKetoWardenSDK(c)
 			if tc.setup != nil {
 				tc.setup(t, sdk)
 			}

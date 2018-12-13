@@ -24,8 +24,9 @@ import (
 	"net/http"
 
 	"github.com/julienschmidt/httprouter"
-	"github.com/ory/herodot"
 	"gopkg.in/square/go-jose.v2"
+
+	"github.com/ory/herodot"
 )
 
 type Handler struct {

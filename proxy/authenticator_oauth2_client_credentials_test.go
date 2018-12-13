@@ -28,12 +28,13 @@ import (
 	"testing"
 
 	"github.com/julienschmidt/httprouter"
-	"github.com/ory/herodot"
-	"github.com/ory/oathkeeper/helper"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/ory/herodot"
+	"github.com/ory/oathkeeper/helper"
 )
 
 func TestNewAuthenticatorOAuth2ClientCredentials(t *testing.T) {

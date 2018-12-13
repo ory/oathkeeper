@@ -33,11 +33,12 @@ import (
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
-	"github.com/ory/fosite"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"gopkg.in/square/go-jose.v2"
+
+	"github.com/ory/fosite"
 )
 
 var keys = map[string]interface{}{"HS256": []byte("some-secret")}

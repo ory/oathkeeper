@@ -26,10 +26,11 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/ory/hydra/sdk/go/hydra"
-	"github.com/ory/hydra/sdk/go/hydra/swagger"
 	"github.com/pkg/errors"
 	"gopkg.in/square/go-jose.v2"
+
+	"github.com/ory/hydra/sdk/go/hydra"
+	"github.com/ory/hydra/sdk/go/hydra/swagger"
 )
 
 type HydraManager struct {

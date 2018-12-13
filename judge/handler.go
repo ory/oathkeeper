@@ -24,11 +24,12 @@ import (
 	"net/http"
 
 	"github.com/julienschmidt/httprouter"
+	"github.com/sirupsen/logrus"
+
 	"github.com/ory/herodot"
 	"github.com/ory/oathkeeper/proxy"
 	"github.com/ory/oathkeeper/rsakey"
 	"github.com/ory/oathkeeper/rule"
-	"github.com/sirupsen/logrus"
 )
 
 const (

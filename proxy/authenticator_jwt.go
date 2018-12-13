@@ -11,14 +11,15 @@ import (
 	"strings"
 
 	"github.com/dgrijalva/jwt-go"
+	"github.com/pkg/errors"
+	"gopkg.in/square/go-jose.v2"
+
 	"github.com/ory/fosite"
 	"github.com/ory/go-convenience/jwtx"
 	"github.com/ory/go-convenience/mapx"
 	"github.com/ory/go-convenience/stringslice"
 	"github.com/ory/oathkeeper/helper"
 	"github.com/ory/oathkeeper/rule"
-	"github.com/pkg/errors"
-	"gopkg.in/square/go-jose.v2"
 )
 
 type AuthenticatorOAuth2JWTConfiguration struct {

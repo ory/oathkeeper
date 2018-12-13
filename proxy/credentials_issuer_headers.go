@@ -7,8 +7,9 @@ import (
 	"net/http"
 	"text/template"
 
-	"github.com/ory/oathkeeper/rule"
 	"github.com/pkg/errors"
+
+	"github.com/ory/oathkeeper/rule"
 )
 
 type CredentialsHeadersConfig struct {

@@ -25,12 +25,13 @@ import (
 	"net/http"
 
 	"github.com/julienschmidt/httprouter"
+	"github.com/pborman/uuid"
+	"github.com/pkg/errors"
+
 	"github.com/ory/herodot"
 	"github.com/ory/oathkeeper/helper"
 	"github.com/ory/oathkeeper/pkg"
-	"github.com/ory/pagination"
-	"github.com/pborman/uuid"
-	"github.com/pkg/errors"
+	"github.com/ory/x/pagination"
 )
 
 type Handler struct {

@@ -24,9 +24,10 @@ import (
 	"net/url"
 	"sync"
 
+	"github.com/pkg/errors"
+
 	"github.com/ory/oathkeeper/helper"
 	"github.com/ory/oathkeeper/pkg"
-	"github.com/pkg/errors"
 )
 
 type CachedMatcher struct {

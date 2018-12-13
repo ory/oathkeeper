@@ -27,11 +27,12 @@ import (
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
-	"github.com/ory/oathkeeper/rsakey"
-	"github.com/ory/oathkeeper/rule"
 	"github.com/pborman/uuid"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
+
+	"github.com/ory/oathkeeper/rsakey"
+	"github.com/ory/oathkeeper/rule"
 )
 
 type CredentialsIDTokenConfig struct {

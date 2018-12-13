@@ -28,10 +28,11 @@ import (
 	"testing"
 
 	"github.com/julienschmidt/httprouter"
-	"github.com/ory/oathkeeper/proxy"
-	"github.com/ory/oathkeeper/rule"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/ory/oathkeeper/proxy"
+	"github.com/ory/oathkeeper/rule"
 )
 
 func TestJudge(t *testing.T) {

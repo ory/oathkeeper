@@ -25,12 +25,44 @@ before finalizing the upgrade process.
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-## Most recent release
+## master
 
-### Refresh Configuration
+## v0.14.0+oryOS.10
 
-Environment variables `HTTP_TLS_xxx` are now called
-`HTTPS_TLS_xxx`.
+### Changes to the ORY Keto Authorizer
+
+As ORY Keto's API and scope have changed, the `keto_warden` authorizer has changed as well. The most important
+change is that the identifier changed from `keto_warden` to `keto_engine_acp_ory`. This reflects the new ORY Keto concept
+which supports different engines. The functionality of the authorizer itself remains the same. A new configuration
+option called `flavor` was added, which sets what flavor (e.g. `regex`, `exact`, ...). Here's an exemplary diff
+of a rule using `keto_warden`
+
+```
+{
+  "id": "...",
+  "upstream": ...,
+  "match": ...,
+  "authenticators": ...,
+  "authorizer": {
+-    "handler": "keto_warden",
++    "handler": "keto_engine_acp_ory",
+    "config": {
+      "required_action": "...",
+      "required_resource": ...",
+      "subject": ...",
++      "flavor": "exact" (optional, defaults to `regex`)
+    }
+  },
+  "credentials_issuer": ...
+}
+```
+
+As part of this change, environment variable `AUTHORIZER_KETO_WARDEN_KETO_URL` was renamed to `AUTHORIZER_KETO_URL`.
+
+### Environment variables
+
+- Environment variables `HTTP_TLS_xxx` are now called `HTTPS_TLS_xxx`.
+- Environment variable `AUTHORIZER_KETO_WARDEN_KETO_URL` is now `AUTHORIZER_KETO_URL`.
 
 ## v0.13.9+oryOS.9
 

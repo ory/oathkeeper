@@ -28,8 +28,9 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/ory/ladon/compiler"
 	"github.com/pkg/errors"
+
+	"github.com/ory/ladon/compiler"
 )
 
 type RuleMatch struct {

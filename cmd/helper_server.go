@@ -28,6 +28,10 @@ import (
 	"strings"
 	"time"
 
+	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
+	"github.com/spf13/viper"
+
 	"github.com/ory/fosite"
 	"github.com/ory/go-convenience/stringsx"
 	"github.com/ory/hydra/sdk/go/hydra"
@@ -35,9 +39,6 @@ import (
 	"github.com/ory/oathkeeper/proxy"
 	"github.com/ory/oathkeeper/rsakey"
 	"github.com/ory/oathkeeper/rule"
-	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
-	"github.com/spf13/viper"
 )
 
 func getHydraSDK() hydra.SDK {
@@ -245,9 +246,9 @@ func handlerFactories(keyManager rsakey.Manager) ([]proxy.Authenticator, []proxy
 		logger.Warn("Authenticator \"jwt\" is not configured and thus disabled.")
 	}
 
-	if u := viper.GetString("AUTHORIZER_KETO_WARDEN_KETO_URL"); len(u) > 0 {
+	if u := viper.GetString("AUTHORIZER_KETO_URL"); len(u) > 0 {
 		if _, err := url.ParseRequestURI(u); err != nil {
-			logger.WithError(err).Fatalf("Value \"%s\" from environment variable \"AUTHORIZER_KETO_WARDEN_KETO_URL\" is not a valid URL.", u)
+			logger.WithError(err).Fatalf("Value \"%s\" from environment variable \"AUTHORIZER_KETO_URL\" is not a valid URL.", u)
 		}
 		ketoSdk, err := keto.NewCodeGenSDK(&keto.Configuration{
 			EndpointURL: u,

@@ -7,10 +7,11 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/ory/oathkeeper/helper"
-	"github.com/ory/oathkeeper/rule"
 	"github.com/pkg/errors"
 	"golang.org/x/oauth2/clientcredentials"
+
+	"github.com/ory/oathkeeper/helper"
+	"github.com/ory/oathkeeper/rule"
 )
 
 type AuthenticatorOAuth2Configuration struct {
