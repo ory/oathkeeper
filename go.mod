@@ -16,13 +16,13 @@ require (
 	github.com/ory/graceful v0.1.0
 	github.com/ory/herodot v0.5.0
 	github.com/ory/hydra v0.0.0-20181208123928-e4bc6c269c6f
-	github.com/ory/keto v1.0.0-beta.9.0.20181208142658-3dd5f7d61bb4
+	github.com/ory/keto v0.0.0-20181213093025-a8d7f9f546ae
 	github.com/ory/ladon v1.0.0
 	github.com/ory/x v0.0.34
 	github.com/pborman/uuid v1.2.0
 	github.com/pkg/errors v0.8.0
 	github.com/rs/cors v1.6.0
-	github.com/rubenv/sql-migrate v0.0.0-20180704111356-ba2c6a7295c59448dbc195cef2f41df5163b3892
+	github.com/rubenv/sql-migrate v0.0.0-20181106121204-ba2c6a7295c5
 	github.com/sirupsen/logrus v1.1.1
 	github.com/spf13/cobra v0.0.3
 	github.com/spf13/viper v1.2.1
