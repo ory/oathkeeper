@@ -90,6 +90,12 @@ func (a *AuthenticatorHive) Authenticate(r *http.Request, config json.RawMessage
 		return nil, errors.WithStack(helper.ErrUnauthorized.WithReason("No session cookie found in request."))
 	}
 
+	// Todo check for AuthenticatedAt and ExpiresAt
+
+	// Todo check for AuthenticationFactor
+
+	// Todo update session (?) , check LastUpdatedAt
+
 	return &AuthenticationSession{
 		Subject: internal.Subject,
 		Extra:   internal.SessionMetadata,
