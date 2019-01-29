@@ -24,6 +24,7 @@ import (
 	"crypto/tls"
 	"encoding/base64"
 	"fmt"
+	"net/http"
 	"net/url"
 	"strings"
 	"time"
@@ -244,6 +245,19 @@ func handlerFactories(keyManager rsakey.Manager) ([]proxy.Authenticator, []proxy
 		logger.Info("Authenticator \"jwt\" was configured and enabled successfully.")
 	} else {
 		logger.Warn("Authenticator \"jwt\" is not configured and thus disabled.")
+	}
+
+	if sess, init := viper.GetString("AUTHENTICATOR_HIVE_SESSION_URL"), viper.GetString("AUTHENTICATOR_HIVE_SESSION_INIT_URL"); len(sess) > 0 && len(init) > 0 {
+		authenticators = append(authenticators, authenticatorFactory(func() (proxy.Authenticator, error) {
+			return proxy.NewAuthenticatorHive(
+				http.DefaultClient,
+				viper.GetString("AUTHENTICATOR_HIVE_SESSION_URL"),
+				viper.GetString("AUTHENTICATOR_HIVE_SESSION_INIT_URL"),
+			), nil
+		}))
+		logger.Info("Authenticator \"hive\" was configured and enabled successfully.")
+	} else {
+		logger.Warn("Authenticator \"hive\" is not configured and thus disabled.")
 	}
 
 	if u := viper.GetString("AUTHORIZER_KETO_URL"); len(u) > 0 {

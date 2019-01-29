@@ -100,6 +100,14 @@ func (d *RequestHandler) HandleRequest(r *http.Request, rl *rule.Rule) error {
 		session, err = anh.Authenticate(r, a.Config, rl)
 		if err != nil {
 			switch errors.Cause(err).Error() {
+			case helper.ErrForceResponse.Error():
+				d.Logger.WithError(err).
+					WithField("granted", false).
+					WithField("access_url", r.URL.String()).
+					WithField("authentication_handler", a.Handler).
+					WithField("reason_id", "authentication_handler_forced_response").
+					Warn("The authentication handler forced a direct response (e.g. redirect)")
+				return err
 			case ErrAuthenticatorNotResponsible.Error():
 				// The authentication handler is not responsible for handling this request, skip to the next handler
 				break

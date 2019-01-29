@@ -37,6 +37,11 @@ var (
 		CodeField:   http.StatusUnauthorized,
 		StatusField: http.StatusText(http.StatusUnauthorized),
 	}
+	ErrForceResponse = &herodot.DefaultError{
+		ErrorField:  "Broke out of context to force HTTP response",
+		CodeField:   0,
+		StatusField: "",
+	}
 	ErrMatchesMoreThanOneRule = &herodot.DefaultError{
 		ErrorField:  "Expected exactly one rule but found multiple rules",
 		CodeField:   http.StatusInternalServerError,
@@ -44,6 +49,11 @@ var (
 	}
 	ErrRuleFeatureDisabled = &herodot.DefaultError{
 		ErrorField:  "The matched rule uses a feature which is not enabled in the server configuration",
+		CodeField:   http.StatusInternalServerError,
+		StatusField: http.StatusText(http.StatusInternalServerError),
+	}
+	ErrRuleMisconfiguration = &herodot.DefaultError{
+		ErrorField:  "The matched rule exposes an invalid configuration",
 		CodeField:   http.StatusInternalServerError,
 		StatusField: http.StatusText(http.StatusInternalServerError),
 	}
@@ -61,6 +71,11 @@ var (
 		ErrorField:  "The request could not be completed due to a conflict with the current state of the target resource",
 		CodeField:   http.StatusConflict,
 		StatusField: http.StatusText(http.StatusConflict),
+	}
+	ErrServerError = &herodot.DefaultError{
+		StatusField: http.StatusText(http.StatusInternalServerError),
+		ErrorField:  "An internal server error occurred, please contact the system administrator",
+		CodeField:   http.StatusInternalServerError,
 	}
 	ErrBadRequest = &herodot.DefaultError{
 		ErrorField:  "The request is malformed or contains invalid data",

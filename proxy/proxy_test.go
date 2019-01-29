@@ -21,6 +21,9 @@
 package proxy
 
 import (
+	"bytes"
+	"context"
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -30,6 +33,10 @@ import (
 	"strconv"
 	"strings"
 	"testing"
+
+	"github.com/pkg/errors"
+
+	"github.com/ory/oathkeeper/helper"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -62,6 +69,42 @@ import (
 //	}, nil
 //}
 
+type mockAuthenticatorForceResponse struct {
+	redirect string
+}
+
+func newMockAuthenticatorForceResponse(redirect string) *mockAuthenticatorForceResponse {
+	return &mockAuthenticatorForceResponse{redirect: redirect}
+}
+
+func (a *mockAuthenticatorForceResponse) GetID() string {
+	if len(a.redirect) > 0 {
+		return "redirect"
+	} else {
+		return "response"
+	}
+}
+
+func (a *mockAuthenticatorForceResponse) Authenticate(r *http.Request, config json.RawMessage, rl *rule.Rule) (*AuthenticationSession, error) {
+	if len(a.redirect) > 0 {
+		rw := NewSimpleResponseWriter()
+		http.Redirect(rw, r, a.redirect, http.StatusFound)
+		*r = *r.WithContext(context.WithValue(r.Context(), directorForcedResponse, &http.Response{
+			StatusCode: rw.code,
+			Body:       ioutil.NopCloser(new(bytes.Buffer)),
+			Header:     rw.header,
+		}))
+		return nil, errors.WithStack(helper.ErrForceResponse)
+	} else {
+		*r = *r.WithContext(context.WithValue(r.Context(), directorForcedResponse, &http.Response{
+			StatusCode: http.StatusOK,
+			Body:       ioutil.NopCloser(bytes.NewBufferString("response")),
+			Header:     http.Header{"Content-Type": {"text/text"}},
+		}))
+		return nil, errors.WithStack(helper.ErrForceResponse)
+	}
+}
+
 func TestProxy(t *testing.T) {
 	backend := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		//assert.NotEmpty(t, helper.BearerTokenFromRequest(r))
@@ -70,13 +113,24 @@ func TestProxy(t *testing.T) {
 		fmt.Fprint(w, "url="+r.URL.String())
 	}))
 	defer backend.Close()
+
+	redirectTS := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte("redirected"))
+	}))
+	defer redirectTS.Close()
+
 	//&rsakey.LocalManager{KeyStrength: 512}
 	//u, _ := url.Parse(backend.URL)
 	matcher := &rule.CachedMatcher{Rules: map[string]rule.Rule{}}
 
 	rh := NewRequestHandler(
 		nil,
-		[]Authenticator{NewAuthenticatorNoOp(), NewAuthenticatorAnonymous("anonymous"), NewAuthenticatorBroken()},
+		[]Authenticator{NewAuthenticatorNoOp(),
+			NewAuthenticatorAnonymous("anonymous"),
+			NewAuthenticatorBroken(),
+			newMockAuthenticatorForceResponse(""),
+			newMockAuthenticatorForceResponse(redirectTS.URL),
+		},
 		[]Authorizer{NewAuthorizerAllow(), NewAuthorizerDeny()},
 		[]CredentialsIssuer{NewCredentialsIssuerNoOp(), NewCredentialsIssuerBroken()},
 	)
@@ -228,8 +282,38 @@ func TestProxy(t *testing.T) {
 			}},
 			code: http.StatusInternalServerError,
 		},
+		{
+			d:   "should force a redirect",
+			url: proxy.URL + "/authn-redirect/1234",
+			rules: []rule.Rule{{
+				Match:             rule.RuleMatch{Methods: []string{"GET"}, URL: proxy.URL + "/authn-redirect/<[0-9]+>"},
+				Authenticators:    []rule.RuleHandler{{Handler: "redirect"}},
+				Authorizer:        rule.RuleHandler{Handler: "allow"},
+				CredentialsIssuer: rule.RuleHandler{Handler: "noop"},
+				Upstream:          rule.Upstream{URL: backend.URL},
+			}},
+			code: http.StatusOK,
+			messages: []string{
+				"redirected",
+			},
+		},
+		{
+			d:   "should force a response",
+			url: proxy.URL + "/authn-response/1234",
+			rules: []rule.Rule{{
+				Match:             rule.RuleMatch{Methods: []string{"GET"}, URL: proxy.URL + "/authn-response/<[0-9]+>"},
+				Authenticators:    []rule.RuleHandler{{Handler: "response"}},
+				Authorizer:        rule.RuleHandler{Handler: "allow"},
+				CredentialsIssuer: rule.RuleHandler{Handler: "noop"},
+				Upstream:          rule.Upstream{URL: backend.URL},
+			}},
+			code: http.StatusOK,
+			messages: []string{
+				"response",
+			},
+		},
 	} {
-		t.Run(fmt.Sprintf("case=%d", k), func(t *testing.T) {
+		t.Run(fmt.Sprintf("case=%d/description=%s", k, tc.d), func(t *testing.T) {
 			matcher.Rules = map[string]rule.Rule{}
 			for k, r := range tc.rules {
 				matcher.Rules[strconv.Itoa(k)] = r

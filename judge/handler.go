@@ -23,6 +23,10 @@ package judge
 import (
 	"net/http"
 
+	"github.com/pkg/errors"
+
+	"github.com/ory/oathkeeper/helper"
+
 	"github.com/julienschmidt/httprouter"
 	"github.com/sirupsen/logrus"
 
@@ -100,7 +104,10 @@ func (h *Handler) judge(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := h.RequestHandler.HandleRequest(r, rl); err != nil {
+	if err := h.RequestHandler.HandleRequest(r, rl); errors.Cause(err).Error() == helper.ErrForceResponse.Error() {
+		// TODO ErrForceResponse
+		panic("Not yet implemented")
+	} else if err != nil {
 		h.Logger.WithError(err).
 			WithField("granted", false).
 			WithField("access_url", r.URL.String()).

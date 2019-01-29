@@ -27,6 +27,8 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/ory/oathkeeper/helper"
+
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 
@@ -57,12 +59,25 @@ type Proxy struct {
 
 type key int
 
-const director key = 0
+const (
+	director key = iota
+	directorForcedResponse
+)
 
 func (d *Proxy) RoundTrip(r *http.Request) (*http.Response, error) {
 	rw := NewSimpleResponseWriter()
 
-	if err, ok := r.Context().Value(director).(error); ok && err != nil {
+	if err, ok := r.Context().Value(director).(error); ok && err.Error() == helper.ErrForceResponse.Error() {
+		d.Logger.WithError(err).
+			WithField("granted", false).
+			WithField("access_url", r.URL.String()).
+			Warn("Access request denied and a response (e.g. redirect) was forced")
+
+		if res, ok := r.Context().Value(directorForcedResponse).(*http.Response); ok && res != nil {
+			return res, nil
+		}
+		return nil, helper.ErrServerError.WithReason("ErrForceResponse was used without including a response - a fatal error in the codebase")
+	} else if ok && err != nil {
 		d.Logger.WithError(err).
 			WithField("granted", false).
 			WithField("access_url", r.URL.String()).
