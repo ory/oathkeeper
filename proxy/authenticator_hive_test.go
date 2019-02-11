@@ -218,7 +218,7 @@ func TestAuthenticatorHive(t *testing.T) {
 					writer.Write(w, r, &session.Session{
 						SID: "2-session-id",
 						Identity: &identity.Identity{
-							Subject: "some-subject",
+							URN: "some-subject",
 						},
 					})
 				},

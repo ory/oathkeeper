@@ -237,7 +237,7 @@ func (a *AuthenticatorHive) Authenticate(r *http.Request, config json.RawMessage
 	}
 
 	return &AuthenticationSession{
-		Subject: s.Identity.Subject,
+		Subject: s.Identity.URN,
 		Extra:   extra,
 	}, nil
 }
