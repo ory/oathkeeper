@@ -139,11 +139,11 @@ func keyManagerFactory(l logrus.FieldLogger) (keyManager rsakey.Manager, err err
 
 func availableHandlerNames() ([]string, []string, []string) {
 	return []string{
-			new(proxy.AuthenticatorNoOp).GetID(),
-			new(proxy.AuthenticatorAnonymous).GetID(),
-			new(proxy.AuthenticatorOAuth2Introspection).GetID(),
-			new(proxy.AuthenticatorOAuth2ClientCredentials).GetID(),
-		},
+		new(proxy.AuthenticatorNoOp).GetID(),
+		new(proxy.AuthenticatorAnonymous).GetID(),
+		new(proxy.AuthenticatorOAuth2Introspection).GetID(),
+		new(proxy.AuthenticatorOAuth2ClientCredentials).GetID(),
+	},
 		[]string{
 			new(proxy.AuthorizerAllow).GetID(),
 			new(proxy.AuthorizerDeny).GetID(),

@@ -12,7 +12,7 @@ import (
 	"github.com/hashicorp/golang-lru"
 	"github.com/pkg/errors"
 
-	"github.com/ory/hive-cloud/hive-api/session"
+	"github.com/ory/hive-cloud/hive/session"
 	"github.com/ory/oathkeeper/helper"
 
 	"github.com/ory/oathkeeper/rule"
@@ -96,6 +96,7 @@ func (a *AuthenticatorHive) findSession(c *http.Cookie) (*session.Session, error
 		return nil, errors.WithStack(helper.ErrServerError.WithDebug(err.Error()))
 	}
 	req.AddCookie(c)
+
 	res, err := a.client.Do(req)
 	if err != nil {
 		return nil, errors.WithStack(helper.ErrServerError.WithDebug(err.Error()))
