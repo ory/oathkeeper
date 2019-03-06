@@ -63,6 +63,10 @@ func (a *AuthenticatorJWT) GetID() string {
 	return "jwt"
 }
 
+type tracer interface {
+	StackTrace() errors.StackTrace
+}
+
 func (a *AuthenticatorJWT) Authenticate(r *http.Request, config json.RawMessage, rl *rule.Rule) (*AuthenticationSession, error) {
 	var cf AuthenticatorOAuth2JWTConfiguration
 	token := helper.BearerTokenFromRequest(r)
@@ -105,7 +109,11 @@ func (a *AuthenticatorJWT) Authenticate(r *http.Request, config json.RawMessage,
 	})
 
 	if err != nil {
-		return nil, errors.WithStack(err)
+		if _, ok := err.(tracer); ok {
+			return nil, err
+		} else {
+			return nil, errors.WithStack(err)
+		}
 	} else if !parsedToken.Valid {
 		return nil, errors.WithStack(fosite.ErrInactiveToken)
 	}
