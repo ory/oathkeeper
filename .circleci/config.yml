@@ -5,20 +5,20 @@ version: 2
 jobs:
   format:
     docker:
-    - image: circleci/golang:1.11
+    - image: circleci/golang:1.12
     working_directory: /go/src/github.com/ory/oathkeeper
     steps:
       # This is disabled for now because goimports is really slow when go modules are used, see
       # https://github.com/golang/go/issues/27287
       #
       #      - run:
-      #          name: Enable go1.11 modules
+      #          name: Enable go1.12 modules
       #          command: |
       #            echo 'export GO111MODULE=on' >> $BASH_ENV
       #            source $BASH_ENV
       - checkout
       - run:
-          name: Enable go1.11 modules
+          name: Enable go1.12 modules
           command: |
             echo 'export GO111MODULE=on' >> $BASH_ENV
             source $BASH_ENV
@@ -30,7 +30,7 @@ jobs:
 
 #  swagger:
 #    docker:
-#      - image: circleci/golang:1.11
+#      - image: circleci/golang:1.12
 #    working_directory: /go/src/github.com/ory/oathkeeper
 #    steps:
 #      - checkout
@@ -41,7 +41,7 @@ jobs:
 
   test:
     docker:
-      - image: circleci/golang:1.11
+      - image: circleci/golang:1.12
         environment:
         - TEST_DATABASE_POSTGRESQL=postgres://test:test@localhost:5432/oathkeeper?sslmode=disable
         - TEST_DATABASE_MYSQL=root:test@(localhost:3306)/mysql?parseTime=true
@@ -61,12 +61,12 @@ jobs:
     working_directory: /go/src/github.com/ory/oathkeeper
     steps:
       - run:
-          name: Enable go1.11 modules
+          name: Enable go1.12 modules
           command: |
             echo 'export GO111MODULE=on' >> $BASH_ENV
             source $BASH_ENV
       - checkout
-      - run: go mod download
+      - run: go get ./...
       - run: go-acc -o coverage.txt ./... -- -failfast -timeout=20m
       - run: test -z "$CIRCLE_PR_NUMBER" && goveralls -service=circle-ci -coverprofile=coverage.txt -repotoken=$COVERALLS_REPO_TOKEN || echo "forks are not allowed to push to coveralls"
 
@@ -82,7 +82,7 @@ jobs:
 
   release-docker:
     docker:
-      - image: circleci/golang:1.11
+      - image: circleci/golang:1.12
     working_directory: /go/src/github.com/ory/oathkeeper
     steps:
       - checkout
@@ -126,11 +126,11 @@ jobs:
 
   release-binaries:
     docker:
-      - image: circleci/golang:1.11
+      - image: circleci/golang:1.12
     working_directory: /go/src/github.com/ory/oathkeeper
     steps:
       - run:
-          name: Enable go1.11 modules
+          name: Enable go1.12 modules
           command: |
             echo 'export GO111MODULE=on' >> $BASH_ENV
             source $BASH_ENV
