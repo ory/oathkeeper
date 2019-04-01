@@ -5,20 +5,20 @@ version: 2
 jobs:
   format:
     docker:
-    - image: circleci/golang:1.11
+    - image: circleci/golang:1.12
     working_directory: /go/src/github.com/ory/oathkeeper
     steps:
       # This is disabled for now because goimports is really slow when go modules are used, see
       # https://github.com/golang/go/issues/27287
       #
       #      - run:
-      #          name: Enable go1.11 modules
+      #          name: Enable go1.12 modules
       #          command: |
       #            echo 'export GO111MODULE=on' >> $BASH_ENV
       #            source $BASH_ENV
       - checkout
       - run:
-          name: Enable go1.11 modules
+          name: Enable go1.12 modules
           command: |
             echo 'export GO111MODULE=on' >> $BASH_ENV
             source $BASH_ENV
@@ -30,7 +30,7 @@ jobs:
 
 #  swagger:
 #    docker:
-#      - image: circleci/golang:1.11
+#      - image: circleci/golang:1.12
 #    working_directory: /go/src/github.com/ory/oathkeeper
 #    steps:
 #      - checkout
@@ -41,7 +41,7 @@ jobs:
 
   test:
     docker:
-      - image: circleci/golang:1.11
+      - image: circleci/golang:1.12
         environment:
         - TEST_DATABASE_POSTGRESQL=postgres://test:test@localhost:5432/oathkeeper?sslmode=disable
         - TEST_DATABASE_MYSQL=root:test@(localhost:3306)/mysql?parseTime=true
@@ -61,13 +61,13 @@ jobs:
     working_directory: /go/src/github.com/ory/oathkeeper
     steps:
       - run:
-          name: Enable go1.11 modules
+          name: Enable go1.12 modules
           command: |
             echo 'export GO111MODULE=on' >> $BASH_ENV
             source $BASH_ENV
       - checkout
       - run: go mod download
-      - run: go get -u github.com/mattn/goveralls golang.org/x/tools/cmd/cover github.com/ory/go-acc
+      - run: go install github.com/ory/go-acc github.com/mattn/goveralls
       - run: go-acc -o coverage.txt ./... -- -failfast -timeout=20m
       - run: test -z "$CIRCLE_PR_NUMBER" && goveralls -service=circle-ci -coverprofile=coverage.txt -repotoken=$COVERALLS_REPO_TOKEN || echo "forks are not allowed to push to coveralls"
 
@@ -83,7 +83,7 @@ jobs:
 
   release-docker:
     docker:
-      - image: circleci/golang:1.11
+      - image: circleci/golang:1.12
     working_directory: /go/src/github.com/ory/oathkeeper
     steps:
       - checkout
@@ -127,16 +127,17 @@ jobs:
 
   release-binaries:
     docker:
-      - image: circleci/golang:1.11
+      - image: circleci/golang:1.12
     working_directory: /go/src/github.com/ory/oathkeeper
     steps:
       - run:
-          name: Enable go1.11 modules
+          name: Enable go1.12 modules
           command: |
             echo 'export GO111MODULE=on' >> $BASH_ENV
             source $BASH_ENV
       - checkout
-      - run: go get -u github.com/mitchellh/gox github.com/tcnksm/ghr
+      - run: go mod download
+      - run: go install github.com/mitchellh/gox github.com/tcnksm/ghr
       - run: |
           gox -parallel=2 -ldflags "-X github.com/ory/oathkeeper/cmd.Version=`git describe --tags` -X github.com/ory/oathkeeper/cmd.BuildTime=`TZ=UTC date -u '+%Y-%m-%dT%H:%M:%SZ'` -X github.com/ory/oathkeeper/cmd.GitHash=`git rev-parse HEAD`" -output "dist/{{.Dir}}-{{.OS}}-{{.Arch}}";
       - run: ghr -t $GITHUB_TOKEN -u $CIRCLE_PROJECT_USERNAME -r $CIRCLE_PROJECT_REPONAME --replace `git describe --tags` dist/
