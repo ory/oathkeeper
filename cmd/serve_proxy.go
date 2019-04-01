@@ -236,8 +236,8 @@ OTHER CONTROLS
 				100,
 				"",
 			)
-			go segmentMiddleware.RegisterSegment(Version, GitHash, BuildTime)
-			go segmentMiddleware.CommitMemoryStatistics()
+			go segmentMiddleware.Identify(Version, GitHash, BuildTime)
+			go segmentMiddleware.ObserveMemory()
 			n.Use(segmentMiddleware)
 		}
 

@@ -32,6 +32,9 @@ require (
 	github.com/stretchr/testify v1.3.0
 	github.com/tomasen/realip v0.0.0-20180522021738-f0c99a92ddce
 	github.com/urfave/negroni v1.0.0
+	github.com/xeipuuv/gojsonpointer v0.0.0-20180127040702-4e3ac2762d5f // indirect
+	github.com/xeipuuv/gojsonreference v0.0.0-20180127040603-bd5ef7bd5415 // indirect
+	github.com/xeipuuv/gojsonschema v1.1.0 // indirect
 	golang.org/x/oauth2 v0.0.0-20190212230446-3e8b2be13635
 	gopkg.in/resty.v1 v1.10.3
 	gopkg.in/square/go-jose.v2 v2.2.2
