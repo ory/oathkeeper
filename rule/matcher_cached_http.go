@@ -52,6 +52,8 @@ func (m *HTTPMatcher) Refresh() error {
 		return errors.Errorf("unable to fetch rules from backend, got status code %d but expected %d", response.StatusCode, http.StatusOK)
 	}
 
+	m.Lock()
+	defer m.Unlock()
 	inserted := map[string]bool{}
 	for _, r := range rules {
 		if len(r.Match.Methods) == 0 {
