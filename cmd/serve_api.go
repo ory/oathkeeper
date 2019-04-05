@@ -26,8 +26,8 @@ import (
 	"net/http"
 
 	"github.com/julienschmidt/httprouter"
+	"github.com/meatballhat/negroni-logrus"
 	negronilogrus "github.com/meatballhat/negroni-logrus"
-	"github.com/rs/cors"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/urfave/negroni"
@@ -116,17 +116,14 @@ HTTP CONTROLS
 				WriteKey:         "MSx9A6YQ1qodnkzEFOv22cxOmOCJXMFa",
 				WhitelistedPaths: []string{"/rules", "/.well-known/jwks.json", "/judge"},
 				BuildVersion:     Version,
-				BuildTime:        GitHash,
-				BuildHash:        BuildTime,
+				BuildTime:        BuildTime,
+				BuildHash:        GitHash,
 			},
 		)
 		n.Use(metrics)
 
 		n.UseHandler(judgeHandler)
-		var h http.Handler = n
-		if corsx.IsEnabled(logger, "") {
-			h = cors.New(corsx.ParseOptions(logger, "")).Handler(n)
-		}
+		h := corsx.Initialize(n, logger, "")
 
 		go refreshKeys(keyManager, 0)
 		go refreshRules(matcher, 0)

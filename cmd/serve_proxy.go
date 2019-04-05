@@ -27,7 +27,6 @@ import (
 	"net/http/httputil"
 
 	negronilogrus "github.com/meatballhat/negroni-logrus"
-	"github.com/rs/cors"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/urfave/negroni"
@@ -238,10 +237,7 @@ OTHER CONTROLS
 		n.Use(metrics)
 
 		n.UseHandler(handler)
-		var h http.Handler = n
-		if corsx.IsEnabled(logger, "") {
-			h = cors.New(corsx.ParseOptions(logger, "")).Handler(n)
-		}
+		h := corsx.Initialize(n, logger, "")
 
 		cert, err := getTLSCertAndKey()
 		if err != nil {
