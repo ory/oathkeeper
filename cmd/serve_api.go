@@ -26,7 +26,6 @@ import (
 	"net/http"
 
 	"github.com/julienschmidt/httprouter"
-	"github.com/meatballhat/negroni-logrus"
 	negronilogrus "github.com/meatballhat/negroni-logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
