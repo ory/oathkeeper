@@ -10,6 +10,8 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/ory/x/stringsx"
+
 	"github.com/dgrijalva/jwt-go"
 	"github.com/pkg/errors"
 	"gopkg.in/square/go-jose.v2"
@@ -148,9 +150,8 @@ func (a *AuthenticatorJWT) Authenticate(r *http.Request, config json.RawMessage,
 	}
 
 	if a.scopeStrategy != nil {
-		tokenScope := mapx.GetStringSliceDefault(map[interface{}]interface{}{"scope": claims["scope"]}, "scope", []string{})
 		for _, scope := range cf.Scopes {
-			if !a.scopeStrategy(tokenScope, scope) {
+			if !a.scopeStrategy(getScopeClaim(claims), scope) {
 				return nil, errors.WithStack(helper.ErrForbidden.WithReason(fmt.Sprintf("Token is missing required scope %s.", scope)))
 			}
 		}
@@ -164,6 +165,38 @@ func (a *AuthenticatorJWT) Authenticate(r *http.Request, config json.RawMessage,
 		Subject: parsedClaims.Subject,
 		Extra:   claims,
 	}, nil
+}
+
+func getScopeClaim(claims map[string]interface{}) []string {
+	var ok bool
+	var interim interface{}
+
+	for _, k := range []string{"scp", "scope", "scopes"} {
+		if interim, ok = claims[k]; ok {
+			break
+		}
+	}
+
+	if !ok {
+		return []string{}
+	}
+
+	switch i := interim.(type) {
+	case []string:
+		return i
+	case []interface{}:
+		vs := make([]string, len(i))
+		for k, v := range i {
+			if vv, ok := v.(string); ok {
+				vs[k] = vv
+			}
+		}
+		return vs
+	case string:
+		return stringsx.Splitx(i, " ")
+	default:
+		return []string{}
+	}
 }
 
 func (a *AuthenticatorJWT) findRSAPublicKey(t *jwt.Token) (*rsa.PublicKey, error) {

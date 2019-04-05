@@ -280,3 +280,25 @@ func TestAuthenticatorJWT(t *testing.T) {
 		})
 	}
 }
+
+func TestGetScopeClaim(t *testing.T) {
+	for k, tc := range []struct {
+		i map[string]interface{}
+		e []string
+	}{
+		{i: map[string]interface{}{}, e: []string{}},
+		{i: map[string]interface{}{"scp": "foo bar"}, e: []string{"foo", "bar"}},
+		{i: map[string]interface{}{"scope": "foo bar"}, e: []string{"foo", "bar"}},
+		{i: map[string]interface{}{"scopes": "foo bar"}, e: []string{"foo", "bar"}},
+		{i: map[string]interface{}{"scp": []string{"foo", "bar"}}, e: []string{"foo", "bar"}},
+		{i: map[string]interface{}{"scope": []string{"foo", "bar"}}, e: []string{"foo", "bar"}},
+		{i: map[string]interface{}{"scopes": []string{"foo", "bar"}}, e: []string{"foo", "bar"}},
+		{i: map[string]interface{}{"scp": []interface{}{"foo", "bar"}}, e: []string{"foo", "bar"}},
+		{i: map[string]interface{}{"scope": []interface{}{"foo", "bar"}}, e: []string{"foo", "bar"}},
+		{i: map[string]interface{}{"scopes": []interface{}{"foo", "bar"}}, e: []string{"foo", "bar"}},
+	} {
+		t.Run(fmt.Sprintf("case=%d", k), func(t *testing.T) {
+			assert.EqualValues(t, tc.e, getScopeClaim(tc.i))
+		})
+	}
+}
