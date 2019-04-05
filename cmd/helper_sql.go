@@ -44,7 +44,7 @@ func connectToSql(dburl string) (*sqlx.DB, error) {
 		if err != nil {
 			logger.WithError(err).Fatalf(`Unable to initialize SQL connection`)
 		}
-		return connection.GetDatabase(), nil
+		return connection.GetDatabase()
 	}
 
 	return nil, errors.Errorf(`Unknown DSN "%s" in DATABASE_URL: %s`, u.Scheme, dburl)
