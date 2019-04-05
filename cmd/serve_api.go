@@ -27,7 +27,6 @@ import (
 
 	"github.com/julienschmidt/httprouter"
 	negronilogrus "github.com/meatballhat/negroni-logrus"
-	"github.com/rs/cors"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/urfave/negroni"
@@ -108,29 +107,22 @@ HTTP CONTROLS
 		n := negroni.New()
 		n.Use(negronilogrus.NewMiddlewareFromLogger(logger, "oathkeeper-api"))
 
-		if ok, _ := cmd.Flags().GetBool("disable-telemetry"); !ok {
-			logger.Println("Transmission of telemetry data is enabled, to learn more go to: https://www.ory.sh/docs/ecosystem/sqa")
-
-			segmentMiddleware := metricsx.NewMetricsManager(
-				metricsx.Hash(viper.GetString("DATABASE_URL")),
-				viper.GetString("DATABASE_URL") != "memory",
-				"MSx9A6YQ1qodnkzEFOv22cxOmOCJXMFa",
-				[]string{"/rules", "/.well-known/jwks.json"},
-				logger,
-				"ory-oathkeeper-api",
-				100,
-				"",
-			)
-			go segmentMiddleware.RegisterSegment(Version, GitHash, BuildTime)
-			go segmentMiddleware.CommitMemoryStatistics()
-			n.Use(segmentMiddleware)
-		}
+		metrics := metricsx.New(cmd, logger,
+			&metricsx.Options{
+				Service:          "ory-oathkeeper",
+				ClusterID:        metricsx.Hash(viper.GetString("DATABASE_URL")),
+				IsDevelopment:    viper.GetString("DATABASE_URL") != "memory",
+				WriteKey:         "MSx9A6YQ1qodnkzEFOv22cxOmOCJXMFa",
+				WhitelistedPaths: []string{"/rules", "/.well-known/jwks.json", "/judge"},
+				BuildVersion:     Version,
+				BuildTime:        BuildTime,
+				BuildHash:        GitHash,
+			},
+		)
+		n.Use(metrics)
 
 		n.UseHandler(judgeHandler)
-		var h http.Handler = n
-		if viper.GetString("CORS_ENABLED") == "true" {
-			h = cors.New(corsx.ParseOptions()).Handler(n)
-		}
+		h := corsx.Initialize(n, logger, "")
 
 		go refreshKeys(keyManager, 0)
 		go refreshRules(matcher, 0)
