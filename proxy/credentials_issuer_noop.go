@@ -37,6 +37,6 @@ func (a *CredentialsIssuerNoOp) GetID() string {
 	return "noop"
 }
 
-func (a *CredentialsIssuerNoOp) Issue(r *http.Request, session *AuthenticationSession, config json.RawMessage, rl *rule.Rule)  (http.Header, error) {
+func (a *CredentialsIssuerNoOp) Issue(r *http.Request, session *AuthenticationSession, config json.RawMessage, rl *rule.Rule) (http.Header, error) {
 	return r.Header, nil
 }

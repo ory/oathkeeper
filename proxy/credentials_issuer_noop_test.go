@@ -32,6 +32,6 @@ func TestCredentialsIssuerNoOp(t *testing.T) {
 	assert.NotNil(t, NewCredentialsIssuerNoOp())
 	assert.NotEmpty(t, NewCredentialsIssuerNoOp().GetID())
 
-	_, err :=  NewCredentialsIssuerNoOp().Issue(&http.Request{Header: map[string][]string{}}, nil, nil, nil)
-	require.NoError(t,err)
+	_, err := NewCredentialsIssuerNoOp().Issue(&http.Request{Header: map[string][]string{}}, nil, nil, nil)
+	require.NoError(t, err)
 }
