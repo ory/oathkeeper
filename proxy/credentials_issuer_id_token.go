@@ -78,10 +78,10 @@ func (c *Claims) Valid() error {
 	return nil
 }
 
-func (a *CredentialsIDToken) Issue(r *http.Request, session *AuthenticationSession, config json.RawMessage, rl *rule.Rule) error {
+func (a *CredentialsIDToken) Issue(r *http.Request, session *AuthenticationSession, config json.RawMessage, rl *rule.Rule) (http.Header, error) {
 	privateKey, err := a.km.PrivateKey()
 	if err != nil {
-		return errors.WithStack(err)
+		return nil, errors.WithStack(err)
 	}
 	if len(config) == 0 {
 		config = []byte("{}")
@@ -91,7 +91,7 @@ func (a *CredentialsIDToken) Issue(r *http.Request, session *AuthenticationSessi
 	d := json.NewDecoder(bytes.NewBuffer(config))
 	d.DisallowUnknownFields()
 	if err := d.Decode(&cc); err != nil {
-		return errors.WithStack(err)
+		return nil, errors.WithStack(err)
 	}
 
 	now := time.Now().UTC()
@@ -120,16 +120,17 @@ func (a *CredentialsIDToken) Issue(r *http.Request, session *AuthenticationSessi
 	case "HS256":
 		token = jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	default:
-		return errors.Errorf("Encountered unknown signing algorithm %s while signing ID Token", a.km.Algorithm())
+		return nil, errors.Errorf("Encountered unknown signing algorithm %s while signing ID Token", a.km.Algorithm())
 	}
 
 	token.Header["kid"] = a.km.PublicKeyID()
 
 	signed, err := token.SignedString(privateKey)
 	if err != nil {
-		return errors.WithStack(err)
+		return nil, errors.WithStack(err)
 	}
 
-	r.Header.Set("Authorization", "Bearer "+signed)
-	return nil
+	headers := http.Header{}
+	headers.Set("Authorization", "Bearer "+signed)
+	return headers, nil
 }

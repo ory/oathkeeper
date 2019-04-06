@@ -39,7 +39,7 @@ func (a *CredentialsHeaders) GetID() string {
 	return "headers"
 }
 
-func (a *CredentialsHeaders) Issue(r *http.Request, session *AuthenticationSession, config json.RawMessage, rl *rule.Rule) error {
+func (a *CredentialsHeaders) Issue(r *http.Request, session *AuthenticationSession, config json.RawMessage, rl *rule.Rule) (http.Header, error) {
 	if len(config) == 0 {
 		config = []byte("{}")
 	}
@@ -48,9 +48,10 @@ func (a *CredentialsHeaders) Issue(r *http.Request, session *AuthenticationSessi
 	d := json.NewDecoder(bytes.NewBuffer(config))
 	d.DisallowUnknownFields()
 	if err := d.Decode(&cfg); err != nil {
-		return errors.WithStack(err)
+		return nil, errors.WithStack(err)
 	}
 
+	headers := http.Header{}
 	for hdr, templateString := range cfg.Headers {
 		var tmpl *template.Template
 		var err error
@@ -60,17 +61,17 @@ func (a *CredentialsHeaders) Issue(r *http.Request, session *AuthenticationSessi
 		if tmpl == nil {
 			tmpl, err = a.RulesCache.New(templateId).Parse(templateString)
 			if err != nil {
-				return errors.Wrapf(err, `error parsing header template "%s" in rule "%s"`, templateString, rl.ID)
+				return nil, errors.Wrapf(err, `error parsing headers template "%s" in rule "%s"`, templateString, rl.ID)
 			}
 		}
 
 		headerValue := bytes.Buffer{}
 		err = tmpl.Execute(&headerValue, session)
 		if err != nil {
-			return errors.Wrapf(err, `error executing header template "%s" in rule "%s"`, templateString, rl.ID)
+			return nil, errors.Wrapf(err, `error executing headers template "%s" in rule "%s"`, templateString, rl.ID)
 		}
-		r.Header.Set(hdr, headerValue.String())
+		headers.Set(hdr, headerValue.String())
 	}
 
-	return nil
+	return headers, nil
 }

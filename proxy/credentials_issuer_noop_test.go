@@ -21,6 +21,7 @@
 package proxy
 
 import (
+	"net/http"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -31,5 +32,6 @@ func TestCredentialsIssuerNoOp(t *testing.T) {
 	assert.NotNil(t, NewCredentialsIssuerNoOp())
 	assert.NotEmpty(t, NewCredentialsIssuerNoOp().GetID())
 
-	require.NoError(t, NewCredentialsIssuerNoOp().Issue(nil, nil, nil, nil))
+	_, err :=  NewCredentialsIssuerNoOp().Issue(&http.Request{Header: map[string][]string{}}, nil, nil, nil)
+	require.NoError(t,err)
 }

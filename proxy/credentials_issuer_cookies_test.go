@@ -131,13 +131,15 @@ func TestCredentialsIssuerCookies(t *testing.T) {
 			// Issuer must return non-empty ID
 			assert.NotEmpty(t, issuer.GetID())
 
+			header, err := issuer.Issue(specs.Request, specs.Session, specs.Config, specs.Rule)
 			if specs.Err == nil {
-				require.NoError(t, issuer.Issue(specs.Request, specs.Session, specs.Config, specs.Rule))
+				// Issuer must run without error
+				require.NoError(t, err)
 			} else {
-				err := issuer.Issue(specs.Request, specs.Session, specs.Config, specs.Rule)
 				assert.Equal(t, specs.Err.Error(), err.Error())
 			}
 
+			specs.Request.Header = header
 			assert.Equal(t, serializeCookies(specs.Match), serializeCookies(specs.Request.Cookies()))
 		})
 	}
@@ -154,7 +156,7 @@ func TestCredentialsIssuerCookies(t *testing.T) {
 			d := json.NewDecoder(bytes.NewBuffer(specs.Config))
 			d.Decode(&cfg)
 
-			for cookie, _ := range cfg.Cookies {
+			for cookie := range cfg.Cookies {
 				templateId := fmt.Sprintf("%s:%s", specs.Rule.ID, cookie)
 				cache.New(templateId).Parse("override")
 				overrideCookies = append(overrideCookies, &http.Cookie{Name: cookie, Value: "override"})
@@ -162,13 +164,15 @@ func TestCredentialsIssuerCookies(t *testing.T) {
 
 			issuer.RulesCache = cache
 
+			header, err := issuer.Issue(specs.Request, specs.Session, specs.Config, specs.Rule)
 			if specs.Err == nil {
-				require.NoError(t, issuer.Issue(specs.Request, specs.Session, specs.Config, specs.Rule))
+				// Issuer must run without error
+				require.NoError(t, err)
 			} else {
-				err := issuer.Issue(specs.Request, specs.Session, specs.Config, specs.Rule)
 				assert.Equal(t, specs.Err.Error(), err.Error())
 			}
 
+			specs.Request.Header = header
 			assert.Equal(t, serializeCookies(overrideCookies), serializeCookies(specs.Request.Cookies()))
 		}
 	})

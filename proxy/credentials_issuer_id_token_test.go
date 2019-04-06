@@ -52,7 +52,10 @@ func TestCredentialsIssuerIDToken(t *testing.T) {
 
 			r := &http.Request{Header: http.Header{}}
 			s := &AuthenticationSession{Subject: "foo"}
-			require.NoError(t, b.Issue(r, s, json.RawMessage([]byte(`{ "aud": ["foo", "bar"] }`)), nil))
+
+			header, err := b.Issue(r, s, json.RawMessage([]byte(`{ "aud": ["foo", "bar"] }`)), nil)
+			require.NoError(t, err)
+			r.Header = header
 
 			generated := strings.Replace(r.Header.Get("Authorization"), "Bearer ", "", 1)
 			token, err := jwt.ParseWithClaims(generated, new(Claims), func(token *jwt.Token) (interface{}, error) {
