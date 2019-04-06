@@ -27,7 +27,6 @@ import (
 	"net/http/httputil"
 	"net/url"
 
-	"github.com/meatballhat/negroni-logrus"
 	negronilogrus "github.com/meatballhat/negroni-logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
