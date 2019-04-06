@@ -21,9 +21,13 @@
 package rule
 
 import (
-	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"testing"
+
+	"github.com/ory/oathkeeper/sdk/go/oathkeeper/client"
+	"github.com/ory/oathkeeper/sdk/go/oathkeeper/client/rule"
+	"github.com/ory/oathkeeper/sdk/go/oathkeeper/models"
 
 	"github.com/julienschmidt/httprouter"
 	"github.com/stretchr/testify/assert"
@@ -31,7 +35,6 @@ import (
 
 	"github.com/ory/herodot"
 	"github.com/ory/oathkeeper/pkg"
-	"github.com/ory/oathkeeper/sdk/go/oathkeeper/swagger"
 )
 
 func TestHandler(t *testing.T) {
@@ -48,86 +51,87 @@ func TestHandler(t *testing.T) {
 	handler.SetRoutes(router)
 	server := httptest.NewServer(router)
 
-	client := swagger.NewRuleApiWithBasePath(server.URL)
+	u, err := url.ParseRequestURI(server.URL)
+	require.NoError(t, err)
 
-	r1 := swagger.Rule{
-		Id: "foo1",
-		Match: swagger.RuleMatch{
-			Url:     "https://localhost:1234/<foo|bar>",
+	cl := client.NewHTTPClientWithConfig(nil, &client.TransportConfig{
+		Host:     u.Host,
+		BasePath: u.Path,
+		Schemes:  []string{u.Scheme},
+	})
+
+	r1 := models.SwaggerRule{
+		ID: "foo1",
+		Match: &models.SwaggerRuleMatch{
+			URL:     "https://localhost:1234/<foo|bar>",
 			Methods: []string{"POST"},
 		},
 		Description:       "Create users rule",
-		Authorizer:        swagger.RuleHandler{Handler: "allow", Config: []byte(`{"type":"any"}`)},
-		Authenticators:    []swagger.RuleHandler{{Handler: "anonymous", Config: []byte(`{"name":"anonymous1"}`)}},
-		CredentialsIssuer: swagger.RuleHandler{Handler: "id_token", Config: []byte(`{"issuer":"anything"}`)},
-		Upstream: swagger.Upstream{
-			Url:          "http://localhost:1235/",
+		Authorizer:        &models.SwaggerRuleHandler{Handler: "allow", Config: map[string]interface{}{"type": "any"}},
+		Authenticators:    []*models.SwaggerRuleHandler{{Handler: "anonymous", Config: map[string]interface{}{"name": "anonymous1"}}},
+		CredentialsIssuer: &models.SwaggerRuleHandler{Handler: "id_token", Config: map[string]interface{}{"issuer": "anything"}},
+		Upstream: &models.Upstream{
+			URL:          "http://localhost:1235/",
 			StripPath:    "/bar",
 			PreserveHost: true,
 		},
 	}
-	r2 := swagger.Rule{
-		Id: "foo2",
-		Match: swagger.RuleMatch{
-			Url:     "https://localhost:34/<baz|bar>",
+	r2 := models.SwaggerRule{
+		ID: "foo2",
+		Match: &models.SwaggerRuleMatch{
+			URL:     "https://localhost:34/<baz|bar>",
 			Methods: []string{"GET"},
 		},
 		Description:       "Get users rule",
-		Authorizer:        swagger.RuleHandler{Handler: "deny", Config: []byte(`{"type":"any"}`)},
-		Authenticators:    []swagger.RuleHandler{{Handler: "oauth2_introspection", Config: []byte(`{"name":"anonymous1"}`)}},
-		CredentialsIssuer: swagger.RuleHandler{Handler: "id_token", Config: []byte(`{"issuer":"anything"}`)},
-		Upstream: swagger.Upstream{
-			Url:          "http://localhost:333/",
+		Authorizer:        &models.SwaggerRuleHandler{Handler: "deny", Config: map[string]interface{}{"type": "any"}},
+		Authenticators:    []*models.SwaggerRuleHandler{{Handler: "oauth2_introspection", Config: map[string]interface{}{"name": "anonymous1"}}},
+		CredentialsIssuer: &models.SwaggerRuleHandler{Handler: "id_token", Config: map[string]interface{}{"issuer": "anything"}},
+		Upstream: &models.Upstream{
+			URL:          "http://localhost:333/",
 			StripPath:    "/foo",
 			PreserveHost: false,
 		},
 	}
-	invalidRule := swagger.Rule{
-		Id: "foo3",
+	invalidRule := models.SwaggerRule{
+		ID: "foo3",
 	}
 
 	t.Run("case=create a new rule", func(t *testing.T) {
-		_, response, err := client.CreateRule(invalidRule)
-		require.NoError(t, err)
-		assert.Equal(t, http.StatusBadRequest, response.StatusCode)
+		_, err := cl.Rule.CreateRule(rule.NewCreateRuleParams().WithBody(&invalidRule))
+		require.Error(t, err)
 
-		result, response, err := client.CreateRule(r1)
+		result, err := cl.Rule.CreateRule(rule.NewCreateRuleParams().WithBody(&r1))
 		require.NoError(t, err)
-		assert.Equal(t, http.StatusCreated, response.StatusCode)
-		assert.EqualValues(t, r1, *result)
+		assert.EqualValues(t, r1, *result.Payload)
 
-		result, response, err = client.CreateRule(r2)
+		result, err = cl.Rule.CreateRule(rule.NewCreateRuleParams().WithBody(&r2))
 		require.NoError(t, err)
-		assert.Equal(t, http.StatusCreated, response.StatusCode)
-		assert.NotEmpty(t, result.Id)
-		r2.Id = result.Id
+		assert.NotEmpty(t, result.Payload.ID)
+		r2.ID = result.Payload.ID
 
-		results, response, err := client.ListRules(pkg.RulesUpperLimit, 0)
+		results, err := cl.Rule.ListRules(rule.NewListRulesParams().WithLimit(&pkg.RulesUpperLimit))
 		require.NoError(t, err)
-		require.Len(t, results, 2)
-		assert.True(t, results[0].Id != results[1].Id)
+		require.Len(t, results.Payload, 2)
+		assert.True(t, results.Payload[0].ID != results.Payload[1].ID)
 
-		r1.Id = "newfoo"
-		result, response, err = client.UpdateRule("foo1", r1)
+		r1.ID = "newfoo"
+		uresult, err := cl.Rule.UpdateRule(rule.NewUpdateRuleParams().WithID("foo1").WithBody(&r1))
 		require.NoError(t, err)
-		assert.Equal(t, http.StatusOK, response.StatusCode)
-		assert.Equal(t, "foo1", result.Id)
-		r1.Id = "foo1"
+		assert.Equal(t, "foo1", uresult.Payload.ID)
+		r1.ID = "foo1"
 
-		result, response, err = client.GetRule(r2.Id)
+		gresult, err := cl.Rule.GetRule(rule.NewGetRuleParams().WithID(r2.ID))
 		require.NoError(t, err)
-		assert.Equal(t, http.StatusOK, response.StatusCode)
-		assert.EqualValues(t, r2, *result)
+		assert.EqualValues(t, r2, *gresult.Payload)
 
-		response, err = client.DeleteRule(r1.Id)
+		_, err = cl.Rule.DeleteRule(rule.NewDeleteRuleParams().WithID(r1.ID))
 		require.NoError(t, err)
 
-		_, response, err = client.GetRule(r1.Id)
-		require.NoError(t, err)
-		assert.Equal(t, http.StatusNotFound, response.StatusCode)
+		_, err = cl.Rule.GetRule(rule.NewGetRuleParams().WithID(r1.ID))
+		require.Error(t, err)
 
-		results, response, err = client.ListRules(pkg.RulesUpperLimit, 0)
+		results, err = cl.Rule.ListRules(rule.NewListRulesParams().WithLimit(&pkg.RulesUpperLimit))
 		require.NoError(t, err)
-		assert.Len(t, results, 1)
+		assert.Len(t, results.Payload, 1)
 	})
 }

@@ -25,7 +25,9 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httputil"
+	"net/url"
 
+	"github.com/meatballhat/negroni-logrus"
 	negronilogrus "github.com/meatballhat/negroni-logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -35,7 +37,6 @@ import (
 	"github.com/ory/keto/sdk/go/keto"
 	"github.com/ory/oathkeeper/proxy"
 	"github.com/ory/oathkeeper/rule"
-	"github.com/ory/oathkeeper/sdk/go/oathkeeper"
 	"github.com/ory/x/corsx"
 	"github.com/ory/x/metricsx"
 )
@@ -181,9 +182,12 @@ OTHER CONTROLS
 
 ` + corsMessage,
 	Run: func(cmd *cobra.Command, args []string) {
-		oathkeeperSdk := oathkeeper.NewSDK(viper.GetString("OATHKEEPER_API_URL"))
+		u, err := url.ParseRequestURI(viper.GetString("OATHKEEPER_API_URL"))
+		if err != nil {
+			logger.WithError(err).Fatalf(`Value from environment variable "OATHKEEPER_API_URL" is not a valid URL: %s`, err)
+		}
 
-		matcher := rule.NewHTTPMatcher(oathkeeperSdk)
+		matcher := rule.NewHTTPMatcher(u)
 		if err := matcher.Refresh(); err != nil {
 			logger.WithError(err).Fatalln("Unable to refresh rules")
 		}
@@ -263,13 +267,13 @@ OTHER CONTROLS
 
 		if err := graceful.Graceful(func() error {
 			if cert != nil {
-				logger.Printf("Listening on https://%s.\n", addr)
+				logger.Printf("Listening on https://%s", addr)
 				return server.ListenAndServeTLS("", "")
 			}
-			logger.Printf("Listening on http://%s.\n", addr)
+			logger.Printf("Listening on http://%s", addr)
 			return server.ListenAndServe()
 		}, server.Shutdown); err != nil {
-			logger.Fatalf("Unable to gracefully shutdown HTTP(s) server because %v.\n", err)
+			logger.Fatalf("Unable to gracefully shutdown HTTP(s) server because %v", err)
 			return
 		}
 		logger.Println("HTTP(s) server was shutdown gracefully")

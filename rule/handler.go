@@ -119,7 +119,7 @@ func (h *Handler) Create(w http.ResponseWriter, r *http.Request, _ httprouter.Pa
 //       403: genericError
 //       500: genericError
 func (h *Handler) List(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-	limit, offset := pagination.Parse(r, 100, 0, pkg.RulesUpperLimit)
+	limit, offset := pagination.Parse(r, 100, 0, int(pkg.RulesUpperLimit))
 	rules, err := h.M.ListRules(limit, offset)
 	if err != nil {
 		h.H.WriteError(w, r, err)

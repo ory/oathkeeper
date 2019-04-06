@@ -22,11 +22,11 @@ package cmd
 
 import (
 	"fmt"
-	"net/http"
 
 	"github.com/spf13/cobra"
 
-	"github.com/ory/oathkeeper/sdk/go/oathkeeper"
+	"github.com/ory/oathkeeper/sdk/go/oathkeeper/client/rule"
+	"github.com/ory/x/cmdx"
 )
 
 // deleteCmd represents the delete command
@@ -38,16 +38,13 @@ var deleteCmd = &cobra.Command{
 	oathkeeper rules --endpoint=http://localhost:4456/ delete rule-1
 `,
 	Run: func(cmd *cobra.Command, args []string) {
-		endpoint, _ := cmd.Flags().GetString("endpoint")
-		if endpoint == "" {
-			fatalf("Please specify the endpoint url using the --endpoint flag, for more information use `oathkeeper help rules`")
-		} else if len(args) != 1 {
+		if len(args) != 1 {
 			fatalf("Please specify the rule id, for more information use `oathkeeper help rules delete`")
 		}
 
-		client := oathkeeper.NewSDK(endpoint)
-		response, err := client.DeleteRule(args[0])
-		checkResponse(response, err, http.StatusNoContent)
+		client := newClient(cmd)
+		_, err := client.Rule.DeleteRule(rule.NewDeleteRuleParams().WithID(args[0]))
+		cmdx.Must(err, "%s", err)
 		fmt.Printf("Successfully deleted rule %s\n", args[0])
 	},
 }

@@ -27,6 +27,13 @@ before finalizing the upgrade process.
 
 ## master
 
+## v0.15.0+oryOS.10
+
+### New Go SDK Generator
+
+The ORY Oathkeeper Go SDK is no being generated using [`go-swagger`](https://github.com/go-swagger/go-swagger) instead of
+[`swagger-codegen`](https://github.com/go-swagger/go-swagger). If you have questions regarding upgrading, please open an issue.
+
 ## v0.14.0+oryOS.10
 
 ### Changes to the ORY Keto Authorizer
