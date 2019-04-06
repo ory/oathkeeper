@@ -21,22 +21,25 @@
 package rule
 
 import (
+	"encoding/json"
+	"fmt"
 	"net/http"
+	"net/url"
 
 	"github.com/pkg/errors"
 
 	"github.com/ory/oathkeeper/pkg"
-	"github.com/ory/oathkeeper/sdk/go/oathkeeper"
+	"github.com/ory/x/urlx"
 )
 
 type HTTPMatcher struct {
-	O oathkeeper.SDK
+	u *url.URL
 	*CachedMatcher
 }
 
-func NewHTTPMatcher(o oathkeeper.SDK) *HTTPMatcher {
+func NewHTTPMatcher(u *url.URL) *HTTPMatcher {
 	return &HTTPMatcher{
-		O: o,
+		u: u,
 		CachedMatcher: &CachedMatcher{
 			Rules: map[string]Rule{},
 		},
@@ -44,12 +47,20 @@ func NewHTTPMatcher(o oathkeeper.SDK) *HTTPMatcher {
 }
 
 func (m *HTTPMatcher) Refresh() error {
-	rules, response, err := m.O.ListRules(pkg.RulesUpperLimit, 0)
+	from := urlx.CopyWithQuery(urlx.AppendPaths(m.u, "/rules"), url.Values{"limit": {fmt.Sprintf("%d", pkg.RulesUpperLimit)}})
+	res, err := http.DefaultClient.Get(from.String())
 	if err != nil {
 		return errors.WithStack(err)
 	}
-	if response.StatusCode != http.StatusOK {
-		return errors.Errorf("unable to fetch rules from backend, got status code %d but expected %d", response.StatusCode, http.StatusOK)
+	defer res.Body.Close()
+
+	if res.StatusCode != http.StatusOK {
+		return errors.Errorf("unable to fetch rules from backend got status code %d but expected %d when calling %s", res.StatusCode, http.StatusOK, from)
+	}
+
+	var rules []Rule
+	if err := json.NewDecoder(res.Body).Decode(&rules); err != nil {
+		return errors.WithStack(err)
 	}
 
 	m.Lock()
@@ -60,39 +71,17 @@ func (m *HTTPMatcher) Refresh() error {
 			r.Match.Methods = []string{}
 		}
 
-		rh := make([]RuleHandler, len(r.Authenticators))
-		for k, authn := range r.Authenticators {
-			rh[k] = RuleHandler{
-				Handler: authn.Handler,
-				Config:  []byte(authn.Config),
-			}
+		if len(r.Authenticators) == 0 {
+			r.Authenticators = []RuleHandler{}
 		}
 
-		inserted[r.Id] = true
-		m.Rules[r.Id] = Rule{
-			ID:          r.Id,
-			Description: r.Description,
-			Match:       RuleMatch{Methods: r.Match.Methods, URL: r.Match.Url},
-			Authorizer: RuleHandler{
-				Handler: r.Authorizer.Handler,
-				Config:  []byte(r.Authorizer.Config),
-			},
-			Authenticators: rh,
-			CredentialsIssuer: RuleHandler{
-				Handler: r.CredentialsIssuer.Handler,
-				Config:  []byte(r.CredentialsIssuer.Config),
-			},
-			Upstream: Upstream{
-				URL:          r.Upstream.Url,
-				PreserveHost: r.Upstream.PreserveHost,
-				StripPath:    r.Upstream.StripPath,
-			},
-		}
+		inserted[r.ID] = true
+		m.Rules[r.ID] = r
 	}
 
-	for _, rule := range m.Rules {
-		if _, ok := inserted[rule.ID]; !ok {
-			delete(m.Rules, rule.ID)
+	for _, r := range m.Rules {
+		if _, ok := inserted[r.ID]; !ok {
+			delete(m.Rules, r.ID)
 		}
 	}
 

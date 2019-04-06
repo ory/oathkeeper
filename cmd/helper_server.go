@@ -70,7 +70,7 @@ func refreshRules(m rule.Refresher, duration time.Duration) {
 		if err := m.Refresh(); err != nil {
 			logger.WithError(err).WithField("retry", fails).Errorln("Unable to refresh rules")
 			if fails > 15 {
-				logger.WithError(err).WithField("retry", fails).Fatalf("Terminating after retry %d\n", fails)
+				logger.WithError(err).WithField("retry", fails).Fatalf("Terminating after retry %d", fails)
 			}
 
 			time.Sleep(time.Second * time.Duration(fails+1))

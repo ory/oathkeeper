@@ -25,13 +25,14 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"net/http"
+
+	swaggerRule "github.com/ory/oathkeeper/sdk/go/oathkeeper/client/rule"
+	"github.com/ory/oathkeeper/sdk/go/oathkeeper/models"
+	"github.com/ory/x/cmdx"
 
 	"github.com/spf13/cobra"
 
 	"github.com/ory/oathkeeper/rule"
-	"github.com/ory/oathkeeper/sdk/go/oathkeeper"
-	"github.com/ory/oathkeeper/sdk/go/oathkeeper/swagger"
 )
 
 // importCmd represents the import command
@@ -70,51 +71,49 @@ Usage example:
 
 		for _, r := range rules {
 			fmt.Printf("Importing rule %s...\n", r.ID)
-			client := oathkeeper.NewSDK(endpoint)
+			client := newClient(cmd)
 
 			shouldUpdate := false
-			if _, response, err := client.GetRule(r.ID); err != nil {
-				must(err, "Unable to call endpoint %s because %s", endpoint, err)
-			} else if response.StatusCode == http.StatusOK {
+			if _, err := client.Rule.GetRule(swaggerRule.NewGetRuleParams().WithID(r.ID)); err == nil {
 				shouldUpdate = true
 			}
 
-			rh := make([]swagger.RuleHandler, len(r.Authenticators))
+			rh := make([]*models.SwaggerRuleHandler, len(r.Authenticators))
 			for k, authn := range r.Authenticators {
-				rh[k] = swagger.RuleHandler{
+				rh[k] = &models.SwaggerRuleHandler{
 					Handler: authn.Handler,
-					Config:  []byte(authn.Config),
+					Config:  json.RawMessage(authn.Config),
 				}
 			}
 
-			sr := swagger.Rule{
-				Id:          r.ID,
+			sr := models.SwaggerRule{
+				ID:          r.ID,
 				Description: r.Description,
-				Match:       swagger.RuleMatch{Methods: r.Match.Methods, Url: r.Match.URL},
-				Authorizer: swagger.RuleHandler{
+				Match:       &models.SwaggerRuleMatch{Methods: r.Match.Methods, URL: r.Match.URL},
+				Authorizer: &models.SwaggerRuleHandler{
 					Handler: r.Authorizer.Handler,
-					Config:  []byte(r.Authorizer.Config),
+					Config:  models.RawMessage(r.Authorizer.Config),
 				},
 				Authenticators: rh,
-				CredentialsIssuer: swagger.RuleHandler{
+				CredentialsIssuer: &models.SwaggerRuleHandler{
 					Handler: r.CredentialsIssuer.Handler,
-					Config:  []byte(r.CredentialsIssuer.Config),
+					Config:  models.RawMessage(r.CredentialsIssuer.Config),
 				},
-				Upstream: swagger.Upstream{
-					Url:          r.Upstream.URL,
+				Upstream: &models.Upstream{
+					URL:          r.Upstream.URL,
 					PreserveHost: r.Upstream.PreserveHost,
 					StripPath:    r.Upstream.StripPath,
 				},
 			}
 
 			if shouldUpdate {
-				out, response, err := client.UpdateRule(r.ID, sr)
-				checkResponse(response, err, http.StatusOK)
-				fmt.Printf("Successfully imported rule %s...\n", out.Id)
+				response, err := client.Rule.UpdateRule(swaggerRule.NewUpdateRuleParams().WithID(r.ID).WithBody(&sr))
+				cmdx.Must(err, "%s", err)
+				fmt.Printf("Successfully imported rule %s...\n", response.Payload.ID)
 			} else {
-				out, response, err := client.CreateRule(sr)
-				checkResponse(response, err, http.StatusCreated)
-				fmt.Printf("Successfully imported rule %s...\n", out.Id)
+				response, err := client.Rule.CreateRule(swaggerRule.NewCreateRuleParams().WithBody(&sr))
+				cmdx.Must(err, "%s", err)
+				fmt.Printf("Successfully imported rule %s...\n", response.Payload.ID)
 			}
 		}
 		fmt.Printf("Successfully imported all rules from %s", args[0])

@@ -66,7 +66,7 @@ func (m *CachedMatcher) Refresh() error {
 	m.Lock()
 	defer m.Unlock()
 
-	rules, err := m.Manager.ListRules(pkg.RulesUpperLimit, 0)
+	rules, err := m.Manager.ListRules(int(pkg.RulesUpperLimit), 0)
 	if err != nil {
 		return errors.WithStack(err)
 	}

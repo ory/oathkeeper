@@ -22,12 +22,13 @@ package cmd
 
 import (
 	"fmt"
-	"net/http"
 
 	"github.com/spf13/cobra"
 
+	"github.com/ory/oathkeeper/sdk/go/oathkeeper/client/rule"
+	"github.com/ory/x/cmdx"
+
 	"github.com/ory/oathkeeper/pkg"
-	"github.com/ory/oathkeeper/sdk/go/oathkeeper"
 )
 
 // listCmd represents the list command
@@ -44,10 +45,11 @@ var listCmd = &cobra.Command{
 			fatalf("Please specify the endpoint url using the --endpoint flag, for more information use `oathkeeper help rules`")
 		}
 
-		client := oathkeeper.NewSDK(endpoint)
-		rules, response, err := client.ListRules(pkg.RulesUpperLimit, 0)
-		checkResponse(response, err, http.StatusOK)
-		fmt.Println(formatResponse(rules))
+		limit := int64(pkg.RulesUpperLimit)
+		client := newClient(cmd)
+		r, err := client.Rule.ListRules(rule.NewListRulesParams().WithLimit(&limit))
+		cmdx.Must(err, "%s", err)
+		fmt.Println(formatResponse(r))
 	},
 }
 

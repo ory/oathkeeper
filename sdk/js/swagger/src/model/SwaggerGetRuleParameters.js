@@ -14,24 +14,25 @@
  *
  */
 
-;(function(root, factory) {
+(function(root, factory) {
   if (typeof define === 'function' && define.amd) {
     // AMD. Register as an anonymous module.
-    define(['ApiClient'], factory)
+    define(['ApiClient'], factory);
   } else if (typeof module === 'object' && module.exports) {
     // CommonJS-like environments that support module.exports, like Node.
-    module.exports = factory(require('../ApiClient'))
+    module.exports = factory(require('../ApiClient'));
   } else {
     // Browser globals (root is window)
     if (!root.OryOathkeeper) {
-      root.OryOathkeeper = {}
+      root.OryOathkeeper = {};
     }
-    root.OryOathkeeper.SwaggerGetRuleParameters = factory(
-      root.OryOathkeeper.ApiClient
-    )
+    root.OryOathkeeper.SwaggerGetRuleParameters = factory(root.OryOathkeeper.ApiClient);
   }
-})(this, function(ApiClient) {
-  'use strict'
+}(this, function(ApiClient) {
+  'use strict';
+
+
+
 
   /**
    * The SwaggerGetRuleParameters model module.
@@ -46,10 +47,10 @@
    * @param id {String} in: path
    */
   var exports = function(id) {
-    var _this = this
+    var _this = this;
 
-    _this['id'] = id
-  }
+    _this['id'] = id;
+  };
 
   /**
    * Constructs a <code>SwaggerGetRuleParameters</code> from a plain JavaScript object, optionally creating a new instance.
@@ -60,20 +61,24 @@
    */
   exports.constructFromObject = function(data, obj) {
     if (data) {
-      obj = obj || new exports()
+      obj = obj || new exports();
 
       if (data.hasOwnProperty('id')) {
-        obj['id'] = ApiClient.convertToType(data['id'], 'String')
+        obj['id'] = ApiClient.convertToType(data['id'], 'String');
       }
     }
-    return obj
+    return obj;
   }
 
   /**
    * in: path
    * @member {String} id
    */
-  exports.prototype['id'] = undefined
+  exports.prototype['id'] = undefined;
 
-  return exports
-})
+
+
+  return exports;
+}));
+
+

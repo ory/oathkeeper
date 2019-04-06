@@ -24,19 +24,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
-
-	"github.com/ory/oathkeeper/sdk/go/oathkeeper/swagger"
 )
-
-func checkResponse(response *swagger.APIResponse, err error, expectedStatusCode int) {
-	must(err, "A network error occurred: %s", err)
-
-	if response.StatusCode != expectedStatusCode {
-		fmt.Printf("Command failed because status code %d was expected but code %d was received", expectedStatusCode, response.StatusCode)
-		os.Exit(1)
-		return
-	}
-}
 
 func formatResponse(response interface{}) string {
 	out, err := json.MarshalIndent(response, "", "\t")

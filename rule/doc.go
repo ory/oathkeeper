@@ -104,7 +104,7 @@ type swaggerRuleHandler struct {
 
 	// Config contains the configuration for the handler. Please read the user
 	// guide for a complete list of each handler's available settings.
-	Config string `json:"config"`
+	Config interface{} `json:"config"`
 }
 
 // swaggerRule is a single rule that will get checked on every HTTP request.
