@@ -32,5 +32,6 @@ func TestCredentialsIssuerBroken(t *testing.T) {
 	assert.NotNil(t, b)
 	assert.NotEmpty(t, b.GetID())
 
-	require.Error(t, b.Issue(nil, nil, nil, nil))
+	_, err := b.Issue(nil, nil, nil, nil)
+	require.Error(t, err)
 }

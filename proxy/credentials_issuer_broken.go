@@ -38,6 +38,6 @@ func (a *CredentialsIssuerBroken) GetID() string {
 	return "broken"
 }
 
-func (a *CredentialsIssuerBroken) Issue(r *http.Request, session *AuthenticationSession, config json.RawMessage, rl *rule.Rule) error {
-	return errors.New("forced denial of credentials")
+func (a *CredentialsIssuerBroken) Issue(r *http.Request, session *AuthenticationSession, config json.RawMessage, rl *rule.Rule) (http.Header, error) {
+	return nil, errors.New("forced denial of credentials")
 }

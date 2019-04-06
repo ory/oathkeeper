@@ -194,7 +194,7 @@ func TestJudge(t *testing.T) {
 			require.NoError(t, err)
 			defer res.Body.Close()
 
-			assert.Equal(t, res.Header.Get("Authorization"), tc.authz)
+			assert.Equal(t, tc.authz, res.Header.Get("Authorization"))
 			assert.Equal(t, tc.code, res.StatusCode)
 		})
 	}

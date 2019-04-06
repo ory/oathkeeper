@@ -120,12 +120,17 @@ func TestCredentialsIssuerHeaders(t *testing.T) {
 			// Issuer must return non-empty ID
 			assert.NotEmpty(t, issuer.GetID())
 
+			header, err := issuer.Issue(specs.Request, specs.Session, specs.Config, specs.Rule)
 			if specs.Err == nil {
 				// Issuer must run without error
-				require.NoError(t, issuer.Issue(specs.Request, specs.Session, specs.Config, specs.Rule))
+				require.NoError(t, err)
 			} else {
-				err := issuer.Issue(specs.Request, specs.Session, specs.Config, specs.Rule)
 				assert.Equal(t, specs.Err.Error(), err.Error())
+			}
+
+			specs.Request.Header = header
+			if header == nil {
+				specs.Request.Header = http.Header{}
 			}
 
 			// Output request headers must match test specs
@@ -145,7 +150,7 @@ func TestCredentialsIssuerHeaders(t *testing.T) {
 			d := json.NewDecoder(bytes.NewBuffer(specs.Config))
 			d.Decode(&cfg)
 
-			for hdr, _ := range cfg.Headers {
+			for hdr := range cfg.Headers {
 				templateId := fmt.Sprintf("%s:%s", specs.Rule.ID, hdr)
 				cache.New(templateId).Parse("override")
 				overrideHeaders.Add(hdr, "override")
@@ -153,12 +158,17 @@ func TestCredentialsIssuerHeaders(t *testing.T) {
 
 			issuer.RulesCache = cache
 
+			header, err := issuer.Issue(specs.Request, specs.Session, specs.Config, specs.Rule)
 			if specs.Err == nil {
 				// Issuer must run without error
-				require.NoError(t, issuer.Issue(specs.Request, specs.Session, specs.Config, specs.Rule))
+				require.NoError(t, err)
 			} else {
-				err := issuer.Issue(specs.Request, specs.Session, specs.Config, specs.Rule)
 				assert.Equal(t, specs.Err.Error(), err.Error())
+			}
+
+			specs.Request.Header = header
+			if header == nil {
+				specs.Request.Header = http.Header{}
 			}
 
 			assert.Equal(t, overrideHeaders, specs.Request.Header)

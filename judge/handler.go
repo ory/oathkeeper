@@ -100,7 +100,8 @@ func (h *Handler) judge(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := h.RequestHandler.HandleRequest(r, rl); err != nil {
+	headers, err := h.RequestHandler.HandleRequest(r, rl)
+	if err != nil {
 		h.Logger.WithError(err).
 			WithField("granted", false).
 			WithField("access_url", r.URL.String()).
@@ -114,6 +115,9 @@ func (h *Handler) judge(w http.ResponseWriter, r *http.Request) {
 		WithField("access_url", r.URL.String()).
 		Warn("Access request granted")
 
-	w.Header().Set("Authorization", r.Header.Get("Authorization"))
+	for k := range headers {
+		w.Header().Set(k, headers.Get(k))
+	}
+
 	w.WriteHeader(http.StatusOK)
 }
