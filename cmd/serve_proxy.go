@@ -233,8 +233,8 @@ OTHER CONTROLS
 				WriteKey:         "MSx9A6YQ1qodnkzEFOv22cxOmOCJXMFa",
 				WhitelistedPaths: []string{"/"},
 				BuildVersion:     Version,
-				BuildTime:        GitHash,
-				BuildHash:        BuildTime,
+				BuildTime:        Commit,
+				BuildHash:        Date,
 			},
 		)
 		n.Use(metrics)

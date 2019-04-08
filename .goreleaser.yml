@@ -9,8 +9,10 @@ before:
     - go mod download
 builds:
   -
+    flags:
+      - -a
     ldflags:
-      - -s -w -X main.Version={{.Tag}} -X main.Commit={{.FullCommit}} -X main.Date={{.Date}}
+      - -s -w -X github.com/ory/oathkeeper/cmd.Version={{.Tag}} -X github.com/ory/oathkeeper/cmd.Commit={{.FullCommit}} -X github.com/ory/oathkeeper/cmd.Date={{.Date}}
     binary: oathkeeper
     env:
       - CGO_ENABLED=0
@@ -68,6 +70,7 @@ dockers:
       - "oryd/oathkeeper:v{{ .Major }}.{{ .Minor }}"
       - "oryd/oathkeeper:v{{ .Major }}.{{ .Minor }}.{{ .Patch }}"
       - "oryd/oathkeeper:{{ .Env.DOCKER_FULL_TAG }}"
+      - "oryd/oathkeeper:{{ .Env.DOCKER_SHORT_TAG }}"
       - "oryd/oathkeeper:latest"
     extra_files:
       - .releaser/LICENSE.txt
