@@ -71,27 +71,23 @@ jobs:
       - run: go-acc -o coverage.txt ./... -- -failfast -timeout=20m
       - run: test -z "$CIRCLE_PR_NUMBER" && goveralls -service=circle-ci -coverprofile=coverage.txt -repotoken=$COVERALLS_REPO_TOKEN || echo "forks are not allowed to push to coveralls"
 
-  build-docker:
-    docker:
-      - image: library/docker:17.10
-    steps:
-      - checkout
-      - setup_remote_docker:
-          version: 17.10.0-ce
-      - run: docker build -f Dockerfile -t oathkeeper-test .
-      - run: docker run oathkeeper-test version
-
-  release-docker:
+  release:
     docker:
       - image: circleci/golang:1.12
     working_directory: /go/src/github.com/ory/oathkeeper
     steps:
+      - run:
+          name: Enable go1.12 modules
+          command: |
+            echo 'export GO111MODULE=on' >> $BASH_ENV
+            echo 'export DOCKER_FULL_TAG=$(echo $CIRCLE_TAG | tr '+' '_')' >> $BASH_ENV
+            echo 'export DOCKER_SHORT_TAG=$(echo $CIRCLE_TAG | cut -d '+' -f1)' >> $BASH_ENV
+            source $BASH_ENV
       - checkout
-      - setup_remote_docker:
-          version: 17.10.0-ce
-      - run: docker build --build-arg git_tag=$(git describe --tags) --build-arg git_commit=$(git rev-parse HEAD) -f Dockerfile -t oryd/oathkeeper:$(echo $CIRCLE_TAG | tr '+' '_') .
+      - setup_remote_docker
       - run: docker login --username "$DOCKER_USERNAME" --password "$DOCKER_PASSWORD"
-      - run: docker push oryd/oathkeeper:$(echo $CIRCLE_TAG | tr '+' '_')
+      - run: cp ./.releaser/LICENSE.txt ./LICENSE.txt
+      - run: curl -sL https://git.io/goreleaser | bash
 
   release-docs:
     docker:
@@ -125,23 +121,6 @@ jobs:
       - run: git remote add origin https://arekkas:$GITHUB_TOKEN@github.com/ory/oathkeeper.git
       - run: git push origin HEAD:master || true
 
-  release-binaries:
-    docker:
-      - image: circleci/golang:1.12
-    working_directory: /go/src/github.com/ory/oathkeeper
-    steps:
-      - run:
-          name: Enable go1.12 modules
-          command: |
-            echo 'export GO111MODULE=on' >> $BASH_ENV
-            source $BASH_ENV
-      - checkout
-      - run: go mod download
-      - run: go install github.com/mitchellh/gox github.com/tcnksm/ghr
-      - run: |
-          gox -parallel=2 -ldflags "-X github.com/ory/oathkeeper/cmd.Version=`git describe --tags` -X github.com/ory/oathkeeper/cmd.BuildTime=`TZ=UTC date -u '+%Y-%m-%dT%H:%M:%SZ'` -X github.com/ory/oathkeeper/cmd.GitHash=`git rev-parse HEAD`" -output "dist/{{.Dir}}-{{.OS}}-{{.Arch}}";
-      - run: ghr -t $GITHUB_TOKEN -u $CIRCLE_PROJECT_USERNAME -r $CIRCLE_PROJECT_REPONAME --replace `git describe --tags` dist/
-
   release-npm:
     docker:
       - image: circleci/node:8.9.3
@@ -171,29 +150,10 @@ workflows:
           filters:
             branches:
               only: master
-#      - swagger:
-#          filters:
-#            tags:
-#              only: /.*/
-      - build-docker:
+      - release:
           requires:
             - test
-#            - swagger
             - format
-          filters:
-            tags:
-              only: /.*/
-      - release-binaries:
-          requires:
-            - build-docker
-          filters:
-            tags:
-              only: /.*/
-            branches:
-              ignore: /.*/
-      - release-docker:
-          requires:
-            - build-docker
           filters:
             tags:
               only: /.*/
@@ -201,7 +161,7 @@ workflows:
               ignore: /.*/
       - release-npm:
           requires:
-            - build-docker
+            - release
           filters:
             tags:
               only: /.*/
@@ -209,8 +169,7 @@ workflows:
               ignore: /.*/
       - release-changelog:
           requires:
-            - release-docker
-            - release-binaries
+            - release
             - release-npm
           filters:
             tags:

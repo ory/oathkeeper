@@ -37,9 +37,6 @@ This service is stable, but under active development and may introduce breaking 
 
 
 - [Installation](#installation)
-  - [Download binaries](#download-binaries)
-  - [Using Docker](#using-docker)
-  - [Building from source](#building-from-source)
 - [Ecosystem](#ecosystem)
   - [ORY Security Console: Administrative User Interface](#ory-security-console-administrative-user-interface)
   - [ORY Hydra: OAuth2 & OpenID Connect Server](#ory-hydra-oauth2--openid-connect-server)
@@ -61,7 +58,8 @@ This service is stable, but under active development and may introduce breaking 
 
 ## Installation
 
-There are various ways of installing ORY Oathkeeper on your system.
+Head over to the [ORY Developer Documentation](https://www.ory.sh/docs/oathkeeper/install) to learn how to install ORY
+Oathkeeper on Linux, macOS, Windows, and Docker and how to build ORY Oathkeeper from source.
 
 ### Download binaries
 
