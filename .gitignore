@@ -2,3 +2,4 @@ vendor
 .idea
 _book
 node_modules/
+LICENSE.txt
