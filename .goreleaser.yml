@@ -1,0 +1,76 @@
+# This is an example goreleaser.yaml file with some sane defaults.
+# Make sure to check the documentation at http://goreleaser.com
+project_name: oathkeeper
+
+env:
+  - GO111MODULE=on
+before:
+  hooks:
+    - go mod download
+builds:
+  -
+    flags:
+      - -a
+    ldflags:
+      - -s -w -X github.com/ory/oathkeeper/cmd.Version={{.Tag}} -X github.com/ory/oathkeeper/cmd.Commit={{.FullCommit}} -X github.com/ory/oathkeeper/cmd.Date={{.Date}}
+    binary: oathkeeper
+    env:
+      - CGO_ENABLED=0
+    goarch:
+      - amd64
+      - 386
+      - arm
+      - arm64
+    goarm:
+      - 5
+      - 6
+      - 7
+    goos:
+      - freebsd
+      - linux
+      - windows
+      - darwin
+archive:
+  replacements:
+    darwin: macOS
+    linux: Linux
+    windows: Windows
+    386: 32-bit
+    amd64: 64-bit
+  format_overrides:
+    - goos: windows
+      format: zip
+  files:
+    -  LICENSE.txt
+snapshot:
+  name_template: "{{ .Tag }}-next"
+changelog:
+  sort: asc
+brew:
+  github:
+    owner: ory
+    name: homebrew-oathkeeper
+  homepage:  https://www.ory.sh
+  commit_author:
+    name: ory
+    email: hi@ory.sh
+
+scoop:
+  bucket:
+    owner: ory
+    name: scoop-oathkeeper
+  homepage:  https://www.ory.sh
+  commit_author:
+    name: ory
+    email: hi@ory.sh
+
+dockers:
+  - image_templates:
+      - "oryd/oathkeeper:v{{ .Major }}"
+      - "oryd/oathkeeper:v{{ .Major }}.{{ .Minor }}"
+      - "oryd/oathkeeper:v{{ .Major }}.{{ .Minor }}.{{ .Patch }}"
+      - "oryd/oathkeeper:{{ .Env.DOCKER_FULL_TAG }}"
+      - "oryd/oathkeeper:{{ .Env.DOCKER_SHORT_TAG }}"
+      - "oryd/oathkeeper:latest"
+    extra_files:
+      - .releaser/LICENSE.txt

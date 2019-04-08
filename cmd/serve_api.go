@@ -115,8 +115,8 @@ HTTP CONTROLS
 				WriteKey:         "MSx9A6YQ1qodnkzEFOv22cxOmOCJXMFa",
 				WhitelistedPaths: []string{"/rules", "/.well-known/jwks.json", "/judge"},
 				BuildVersion:     Version,
-				BuildTime:        BuildTime,
-				BuildHash:        GitHash,
+				BuildTime:        Date,
+				BuildHash:        Commit,
 			},
 		)
 		n.Use(metrics)

@@ -23,7 +23,6 @@ package cmd
 import (
 	"fmt"
 	"os"
-	"time"
 
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -33,9 +32,9 @@ import (
 var cfgFile string
 
 var (
-	Version   = "dev-master"
-	BuildTime = time.Now().String()
-	GitHash   = "undefined"
+	Version = "master"
+	Date    = "undefined"
+	Commit  = "undefined"
 )
 
 // RootCmd represents the base command when called without any subcommands
