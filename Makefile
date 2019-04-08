@@ -31,3 +31,16 @@ sdk:
 		rm -f ./sdk/js/swagger/package.json
 		rm -rf ./sdk/js/swagger/test
 		rm -rf ./vendor
+
+.PHONY: install-stable
+install-stable:
+		OATHKEEPER_LATEST=$$(git describe --abbrev=0 --tags)
+		git checkout $$OATHKEEPER_LATEST
+		GO111MODULE=on go install \
+				-ldflags "-X github.com/ory/oathkeeper/cmd.Version=$$OATHKEEPER_LATEST -X github.com/ory/oathkeeper/cmd.Date=`TZ=UTC date -u '+%Y-%m-%dT%H:%M:%SZ'` -X github.com/ory/oathkeeper/cmd.Commit=`git rev-parse HEAD`" \
+				.
+		git checkout master
+
+.PHONY: install
+install:
+		GO111MODULE=on go install .
