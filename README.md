@@ -37,6 +37,9 @@ This service is stable, but under active development and may introduce breaking 
 
 
 - [Installation](#installation)
+  - [Download binaries](#download-binaries)
+  - [Using Docker](#using-docker)
+  - [Building from source](#building-from-source)
 - [Ecosystem](#ecosystem)
   - [ORY Security Console: Administrative User Interface](#ory-security-console-administrative-user-interface)
   - [ORY Hydra: OAuth2 & OpenID Connect Server](#ory-hydra-oauth2--openid-connect-server)
