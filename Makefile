@@ -30,3 +30,4 @@ sdk:
 
 		rm -f ./sdk/js/swagger/package.json
 		rm -rf ./sdk/js/swagger/test
+		rm -rf ./vendor
