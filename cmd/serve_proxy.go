@@ -27,13 +27,14 @@ import (
 	"net/http/httputil"
 	"net/url"
 
+	"github.com/ory/x/urlx"
+
 	negronilogrus "github.com/meatballhat/negroni-logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/urfave/negroni"
 
 	"github.com/ory/graceful"
-	"github.com/ory/keto/sdk/go/keto"
 	"github.com/ory/oathkeeper/proxy"
 	"github.com/ory/oathkeeper/rule"
 	"github.com/ory/x/corsx"
@@ -205,13 +206,7 @@ OTHER CONTROLS
 		}
 
 		if u := viper.GetString("AUTHORIZER_KETO_URL"); len(u) > 0 {
-			ketoSdk, err := keto.NewCodeGenSDK(&keto.Configuration{
-				EndpointURL: viper.GetString("AUTHORIZER_KETO_URL"),
-			})
-			if err != nil {
-				logger.WithError(err).Fatal("Unable to initialize the ORY Keto SDK")
-			}
-			authorizers = append(authorizers, proxy.NewAuthorizerKetoWarden(ketoSdk))
+			authorizers = append(authorizers, proxy.NewAuthorizerKetoWarden(urlx.ParseOrFatal(logger, u)))
 		}
 
 		authenticators, authorizers, credentialIssuers := handlerFactories(keyManager)

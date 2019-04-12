@@ -4,13 +4,11 @@ SHELL=/bin/bash -o pipefail
 format:
 		goreturns -w -local github.com/ory $$(listx .)
 
-.PHONY: gen-mocks
-gen-mocks:
-		mockgen -package proxy -destination proxy/keto_warden_sdk_mock.go -source ./proxy/authorizer_keto_warden.go KetoWardenSDK
-		mockgen -package proxy -destination proxy/authenticator_oauth2_introspection_mock.go -source ./proxy/authenticator_oauth2_introspection.go authenticatorOAuth2IntrospectionHelper
+.PHONY: mocks
+mocks:
 
 .PHONY: gen
-		gen: gen-mocks sdk
+		gen: mocks sdk
 
 .PHONY: sdk
 sdk:

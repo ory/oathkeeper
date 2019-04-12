@@ -25,7 +25,6 @@ require (
 	github.com/golang/protobuf v1.3.1 // indirect
 	github.com/gorilla/handlers v1.4.0 // indirect
 	github.com/gorilla/mux v1.7.1 // indirect
-	github.com/gorilla/sessions v1.1.3 // indirect
 	github.com/hashicorp/golang-lru v0.5.1 // indirect
 	github.com/jessevdk/go-flags v1.4.0 // indirect
 	github.com/jmoiron/sqlx v1.2.0
@@ -39,17 +38,16 @@ require (
 	github.com/mitchellh/gox v1.0.0
 	github.com/onsi/ginkgo v1.8.0 // indirect
 	github.com/onsi/gomega v1.5.0 // indirect
+	github.com/opencontainers/runc v1.0.0-rc5 // indirect
 	github.com/opentracing/opentracing-go v1.1.0 // indirect
 	github.com/ory/dockertest v3.3.4+incompatible
-	github.com/ory/fosite v0.29.1
+	github.com/ory/fosite v0.29.2
 	github.com/ory/go-acc v0.0.0-20181118080137-ddc355013f90
 	github.com/ory/go-convenience v0.1.0
 	github.com/ory/graceful v0.1.1
 	github.com/ory/herodot v0.6.0
-	github.com/ory/hydra v0.0.0-20181208123928-e4bc6c269c6f
-	github.com/ory/keto v0.0.0-20181213093025-a8d7f9f546ae
 	github.com/ory/ladon v1.0.1
-	github.com/ory/x v0.0.40
+	github.com/ory/x v0.0.46
 	github.com/pborman/uuid v1.2.0
 	github.com/pelletier/go-toml v1.3.0 // indirect
 	github.com/pkg/errors v0.8.1
@@ -64,6 +62,7 @@ require (
 	github.com/tcnksm/go-gitconfig v0.1.2 // indirect
 	github.com/tcnksm/go-latest v0.0.0-20170313132115-e3007ae9052e // indirect
 	github.com/tomasen/realip v0.0.0-20180522021738-f0c99a92ddce
+	github.com/toqueteos/webbrowser v1.1.0 // indirect
 	github.com/urfave/negroni v1.0.0
 	go.opencensus.io v0.20.0 // indirect
 	golang.org/x/crypto v0.0.0-20190404164418-38d8ce5564a5 // indirect
@@ -74,7 +73,6 @@ require (
 	google.golang.org/appengine v1.5.0 // indirect
 	google.golang.org/genproto v0.0.0-20190404172233-64821d5d2107 // indirect
 	google.golang.org/grpc v1.19.1 // indirect
-	gopkg.in/resty.v1 v1.10.3 // indirect
 	gopkg.in/square/go-jose.v2 v2.3.0
 )
 

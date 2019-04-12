@@ -21,12 +21,18 @@
 package cmd
 
 import (
+	"context"
 	"crypto/tls"
 	"encoding/base64"
 	"fmt"
+	"net/http"
 	"net/url"
 	"strings"
 	"time"
+
+	"golang.org/x/oauth2/clientcredentials"
+
+	"github.com/ory/x/urlx"
 
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
@@ -34,27 +40,29 @@ import (
 
 	"github.com/ory/fosite"
 	"github.com/ory/go-convenience/stringsx"
-	"github.com/ory/hydra/sdk/go/hydra"
-	"github.com/ory/keto/sdk/go/keto"
 	"github.com/ory/oathkeeper/proxy"
 	"github.com/ory/oathkeeper/rsakey"
 	"github.com/ory/oathkeeper/rule"
 )
 
-func getHydraSDK() hydra.SDK {
-	sdk, err := hydra.NewSDK(&hydra.Configuration{
-		ClientID:     viper.GetString("CREDENTIALS_ISSUER_ID_TOKEN_HYDRA_CLIENT_ID"),
-		ClientSecret: viper.GetString("CREDENTIALS_ISSUER_ID_TOKEN_HYDRA_CLIENT_SECRET"),
-		AdminURL:     viper.GetString("CREDENTIALS_ISSUER_ID_TOKEN_HYDRA_ADMIN_URL"),
-		PublicURL:    viper.GetString("CREDENTIALS_ISSUER_ID_TOKEN_HYDRA_PUBLIC_URL"),
-		Scopes:       strings.Split(viper.GetString("CREDENTIALS_ISSUER_ID_TOKEN_HYDRA_CLIENT_SCOPES"), ","),
-	})
-
-	if err != nil {
-		logger.WithError(err).Fatalln("Unable to connect to Hydra SDK")
-		return nil
+func getHydraSDK() (*http.Client, *url.URL) {
+	var (
+		id     = viper.GetString("CREDENTIALS_ISSUER_ID_TOKEN_HYDRA_CLIENT_ID")
+		secret = viper.GetString("CREDENTIALS_ISSUER_ID_TOKEN_HYDRA_CLIENT_SECRET")
+		admin  = viper.GetString("CREDENTIALS_ISSUER_ID_TOKEN_HYDRA_ADMIN_URL")
+		public = viper.GetString("CREDENTIALS_ISSUER_ID_TOKEN_HYDRA_PUBLIC_URL")
+		scope  = stringsx.Splitx(viper.GetString("CREDENTIALS_ISSUER_ID_TOKEN_HYDRA_CLIENT_SCOPES"), ",")
+	)
+	u := urlx.ParseOrFatal(logger, admin)
+	if len(id)+len(secret)+len(scope) > 0 {
+		return (&clientcredentials.Config{
+			ClientID:     id,
+			ClientSecret: secret,
+			TokenURL:     urlx.AppendPaths(urlx.ParseOrFatal(logger, public), "/oauth2/token").String(),
+			Scopes:       scope,
+		}).Client(context.Background()), u
 	}
-	return sdk
+	return &http.Client{Timeout: time.Second * 5}, u
 }
 
 func refreshRules(m rule.Refresher, duration time.Duration) {
@@ -124,11 +132,8 @@ func keyManagerFactory(l logrus.FieldLogger) (keyManager rsakey.Manager, err err
 		//case "rs256":
 		//	keyManager = &rsakey.LocalRS256Manager{KeyStrength: 4096}
 	case "ory-hydra":
-		sdk := getHydraSDK()
-		keyManager = &rsakey.HydraManager{
-			SDK: sdk,
-			Set: viper.GetString("CREDENTIALS_ISSUER_ID_TOKEN_HYDRA_JWK_SET_ID"),
-		}
+		c, u := getHydraSDK()
+		keyManager = rsakey.NewHydraManager(viper.GetString("CREDENTIALS_ISSUER_ID_TOKEN_HYDRA_JWK_SET_ID"), c, u)
 	default:
 		return nil, errors.Errorf("Unknown ID Token singing algorithm %s", a)
 	}
@@ -247,16 +252,12 @@ func handlerFactories(keyManager rsakey.Manager) ([]proxy.Authenticator, []proxy
 	}
 
 	if u := viper.GetString("AUTHORIZER_KETO_URL"); len(u) > 0 {
-		if _, err := url.ParseRequestURI(u); err != nil {
+		uu, err := url.ParseRequestURI(u)
+		if err != nil {
 			logger.WithError(err).Fatalf("Value \"%s\" from environment variable \"AUTHORIZER_KETO_URL\" is not a valid URL.", u)
 		}
-		ketoSdk, err := keto.NewCodeGenSDK(&keto.Configuration{
-			EndpointURL: u,
-		})
-		if err != nil {
-			logger.WithError(err).Fatal("Unable to initialize the ORY Keto SDK.")
-		}
-		authorizers = append(authorizers, proxy.NewAuthorizerKetoWarden(ketoSdk))
+
+		authorizers = append(authorizers, proxy.NewAuthorizerKetoWarden(uu))
 	} else {
 		logger.Warn("Authorizer \"ory-keto\" is not configured and thus disabled.")
 	}

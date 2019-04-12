@@ -25,6 +25,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"time"
 
 	"github.com/pkg/errors"
 
@@ -34,12 +35,14 @@ import (
 
 type HTTPMatcher struct {
 	u *url.URL
+	c *http.Client
 	*CachedMatcher
 }
 
 func NewHTTPMatcher(u *url.URL) *HTTPMatcher {
 	return &HTTPMatcher{
 		u: u,
+		c: &http.Client{Timeout: time.Second * 5},
 		CachedMatcher: &CachedMatcher{
 			Rules: map[string]Rule{},
 		},
