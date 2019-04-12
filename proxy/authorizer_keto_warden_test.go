@@ -24,15 +24,16 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"net/http/httptest"
 	"net/url"
 	"testing"
 
+	"github.com/ory/x/urlx"
+
 	"github.com/golang/mock/gomock"
-	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/ory/keto/sdk/go/keto/swagger"
 	"github.com/ory/oathkeeper/rule"
 )
 
@@ -46,7 +47,7 @@ func TestAuthorizerKetoWarden(t *testing.T) {
 	assert.NotEmpty(t, NewAuthorizerKetoWarden(nil).GetID())
 
 	for k, tc := range []struct {
-		setup     func(*testing.T, *MockKetoWardenSDK)
+		setup     func(t *testing.T) *httptest.Server
 		r         *http.Request
 		session   *AuthenticationSession
 		config    json.RawMessage
@@ -64,10 +65,7 @@ func TestAuthorizerKetoWarden(t *testing.T) {
 					URL:     "https://localhost/",
 				},
 			},
-			r: &http.Request{URL: &url.URL{}},
-			setup: func(t *testing.T, m *MockKetoWardenSDK) {
-				m.EXPECT().DoOryAccessControlPoliciesAllow(gomock.Eq("regex"), gomock.Any()).Return(nil, nil, errors.New("foo"))
-			},
+			r:         &http.Request{URL: &url.URL{}},
 			session:   new(AuthenticationSession),
 			expectErr: true,
 		},
@@ -80,8 +78,10 @@ func TestAuthorizerKetoWarden(t *testing.T) {
 				},
 			},
 			r: &http.Request{URL: &url.URL{}},
-			setup: func(t *testing.T, m *MockKetoWardenSDK) {
-				m.EXPECT().DoOryAccessControlPoliciesAllow(gomock.Eq("regex"), gomock.Any()).Return(nil, &swagger.APIResponse{Response: &http.Response{StatusCode: http.StatusInternalServerError}}, nil)
+			setup: func(t *testing.T) *httptest.Server {
+				return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+					w.WriteHeader(http.StatusForbidden)
+				}))
 			},
 			session:   new(AuthenticationSession),
 			expectErr: true,
@@ -95,12 +95,11 @@ func TestAuthorizerKetoWarden(t *testing.T) {
 				},
 			},
 			r: &http.Request{URL: &url.URL{}},
-			setup: func(t *testing.T, m *MockKetoWardenSDK) {
-				m.EXPECT().DoOryAccessControlPoliciesAllow(gomock.Eq("exact"), gomock.Any()).Return(
-					&swagger.AuthorizationResult{Allowed: false},
-					&swagger.APIResponse{Response: &http.Response{StatusCode: http.StatusOK}},
-					nil,
-				)
+			setup: func(t *testing.T) *httptest.Server {
+				return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+					assert.Contains(t, r.URL.Path, "exact")
+					w.Write([]byte(`{"allowed":false}`))
+				}))
 			},
 			session:   new(AuthenticationSession),
 			expectErr: true,
@@ -114,17 +113,19 @@ func TestAuthorizerKetoWarden(t *testing.T) {
 				},
 			},
 			r: &http.Request{URL: mustParseURL(t, "https://localhost/api/users/1234/abcde")},
-			setup: func(t *testing.T, m *MockKetoWardenSDK) {
-				m.EXPECT().DoOryAccessControlPoliciesAllow(gomock.Any(), gomock.Eq(swagger.OryAccessControlPolicyAllowedInput{
-					Action:   "action:1234:abcde",
-					Resource: "resource:1234:abcde",
-					Context:  map[string]interface{}{},
-					Subject:  "peter",
-				})).Return(
-					&swagger.AuthorizationResult{Allowed: true},
-					&swagger.APIResponse{Response: &http.Response{StatusCode: http.StatusOK}},
-					nil,
-				)
+			setup: func(t *testing.T) *httptest.Server {
+				return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+					var ki ketoWardenInput
+					require.NoError(t, json.NewDecoder(r.Body).Decode(&ki))
+					assert.EqualValues(t, ketoWardenInput{
+						Action:   "action:1234:abcde",
+						Resource: "resource:1234:abcde",
+						Context:  map[string]interface{}{},
+						Subject:  "peter",
+					}, ki)
+					assert.Contains(t, r.URL.Path, "regex")
+					w.Write([]byte(`{"allowed":true}`))
+				}))
 			},
 			session:   &AuthenticationSession{Subject: "peter"},
 			expectErr: false,
@@ -138,17 +139,19 @@ func TestAuthorizerKetoWarden(t *testing.T) {
 				},
 			},
 			r: &http.Request{URL: mustParseURL(t, "https://localhost/api/users/1234/abcde")},
-			setup: func(t *testing.T, m *MockKetoWardenSDK) {
-				m.EXPECT().DoOryAccessControlPoliciesAllow(gomock.Any(), gomock.Eq(swagger.OryAccessControlPolicyAllowedInput{
-					Action:   "action:1234:abcde",
-					Resource: "resource:1234:abcde",
-					Context:  map[string]interface{}{},
-					Subject:  "peter",
-				})).Return(
-					&swagger.AuthorizationResult{Allowed: true},
-					&swagger.APIResponse{Response: &http.Response{StatusCode: http.StatusOK}},
-					nil,
-				)
+			setup: func(t *testing.T) *httptest.Server {
+				return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+					var ki ketoWardenInput
+					require.NoError(t, json.NewDecoder(r.Body).Decode(&ki))
+					assert.EqualValues(t, ketoWardenInput{
+						Action:   "action:1234:abcde",
+						Resource: "resource:1234:abcde",
+						Context:  map[string]interface{}{},
+						Subject:  "peter",
+					}, ki)
+					assert.Contains(t, r.URL.Path, "regex")
+					w.Write([]byte(`{"allowed":true}`))
+				}))
 			},
 			session:   &AuthenticationSession{Extra: map[string]interface{}{"name": "peter"}},
 			expectErr: false,
@@ -158,11 +161,13 @@ func TestAuthorizerKetoWarden(t *testing.T) {
 			c := gomock.NewController(t)
 			defer c.Finish()
 
-			sdk := NewMockKetoWardenSDK(c)
+			var baseURL = urlx.ParseOrPanic("http://73fa403f-7e9c-48ef-870f-d21b2c34fc80c6cb6404-bb36-4e70-8b90-45155657fda6/")
 			if tc.setup != nil {
-				tc.setup(t, sdk)
+				ts := tc.setup(t)
+				defer ts.Close()
+				baseURL = urlx.ParseOrPanic(ts.URL)
 			}
-			a := NewAuthorizerKetoWarden(sdk)
+			a := NewAuthorizerKetoWarden(baseURL)
 			a.contextCreator = func(r *http.Request) map[string]interface{} {
 				return map[string]interface{}{}
 			}

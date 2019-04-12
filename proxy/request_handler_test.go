@@ -24,20 +24,12 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
-	"regexp"
 	"testing"
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/ory/ladon/compiler"
 	"github.com/ory/oathkeeper/rule"
 )
-
-func mustCompileRegex(t *testing.T, pattern string) *regexp.Regexp {
-	exp, err := compiler.CompileRegex(pattern, '<', '>')
-	require.NoError(t, err)
-	return exp
-}
 
 func mustGenerateURL(t *testing.T, u string) *url.URL {
 	up, err := url.Parse(u)
