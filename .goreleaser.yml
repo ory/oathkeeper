@@ -69,7 +69,7 @@ dockers:
       - "oryd/oathkeeper:v{{ .Major }}"
       - "oryd/oathkeeper:v{{ .Major }}.{{ .Minor }}"
       - "oryd/oathkeeper:v{{ .Major }}.{{ .Minor }}.{{ .Patch }}"
-      - "oryd/oathkeeper:{{ .Env.DOCKER_FULL_TAG }}"
+#      - "oryd/oathkeeper:{{ .Env.DOCKER_FULL_TAG }}"
       - "oryd/oathkeeper:{{ .Env.DOCKER_SHORT_TAG }}"
       - "oryd/oathkeeper:latest"
     extra_files:
