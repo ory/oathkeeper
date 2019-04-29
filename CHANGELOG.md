@@ -3,6 +3,8 @@
 **Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
 
 - [Change Log](#change-log)
+  - [v0.15.1 (2019-04-29)](#v0151-2019-04-29)
+  - [v0.15.0 (2019-04-29)](#v0150-2019-04-29)
   - [v0.14.2+oryOS.10 (2018-12-13)](#v0142oryos10-2018-12-13)
   - [v0.14.1+oryOS.10 (2018-12-13)](#v0141oryos10-2018-12-13)
   - [v0.14.0+oryOS.10 (2018-12-13)](#v0140oryos10-2018-12-13)
@@ -58,6 +60,50 @@
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 # Change Log
+
+## [v0.15.1](https://github.com/ory/oathkeeper/tree/v0.15.1) (2019-04-29)
+[Full Changelog](https://github.com/ory/oathkeeper/compare/v0.15.0...v0.15.1)
+
+**Merged pull requests:**
+
+- vendor: Add go.sum [\#180](https://github.com/ory/oathkeeper/pull/180) ([aeneasr](https://github.com/aeneasr))
+
+## [v0.15.0](https://github.com/ory/oathkeeper/tree/v0.15.0) (2019-04-29)
+[Full Changelog](https://github.com/ory/oathkeeper/compare/v0.14.2+oryOS.10...v0.15.0)
+
+**Implemented enhancements:**
+
+- Adopt new Keto SDK [\#172](https://github.com/ory/oathkeeper/issues/172)
+
+**Fixed bugs:**
+
+- Adopt new Keto SDK [\#172](https://github.com/ory/oathkeeper/issues/172)
+
+**Closed issues:**
+
+- Forward all auth\* headers in judge mode [\#166](https://github.com/ory/oathkeeper/issues/166)
+- Move to go-swagger client [\#165](https://github.com/ory/oathkeeper/issues/165)
+- Unable to install oathkeeper CLI [\#161](https://github.com/ory/oathkeeper/issues/161)
+- Using Oathkeeper - External Consumer App [\#158](https://github.com/ory/oathkeeper/issues/158)
+- Allow multiple rules for one URL [\#157](https://github.com/ory/oathkeeper/issues/157)
+- CORS Not working as expected [\#151](https://github.com/ory/oathkeeper/issues/151)
+- keto\_engine\_acp\_ory not working with oryOS10 [\#150](https://github.com/ory/oathkeeper/issues/150)
+- Update README building-from-source part with the gomodule way [\#149](https://github.com/ory/oathkeeper/issues/149)
+- required\_scope of authenticator validate only scope claim and not scp claim [\#138](https://github.com/ory/oathkeeper/issues/138)
+
+**Merged pull requests:**
+
+- docker: Remove full tag from build pipeline [\#179](https://github.com/ory/oathkeeper/pull/179) ([aeneasr](https://github.com/aeneasr))
+-  sdk: Remove sdk dependencies to keto/hydra [\#173](https://github.com/ory/oathkeeper/pull/173) ([aeneasr](https://github.com/aeneasr))
+- ci: Adopt new release pipeline [\#171](https://github.com/ory/oathkeeper/pull/171) ([aeneasr](https://github.com/aeneasr))
+- sdk: Move to go-swagger SDK code generation [\#170](https://github.com/ory/oathkeeper/pull/170) ([aeneasr](https://github.com/aeneasr))
+- judge: Set request headers for credential issuers [\#169](https://github.com/ory/oathkeeper/pull/169) ([aeneasr](https://github.com/aeneasr))
+- Update dependencies [\#163](https://github.com/ory/oathkeeper/pull/163) ([aeneasr](https://github.com/aeneasr))
+- proxy: Use scp,scope,scopes in jwt authenticator [\#162](https://github.com/ory/oathkeeper/pull/162) ([aeneasr](https://github.com/aeneasr))
+- ci: Resolve CI build issue [\#160](https://github.com/ory/oathkeeper/pull/160) ([aeneasr](https://github.com/aeneasr))
+- Ensure rule matcher is locked before updating [\#159](https://github.com/ory/oathkeeper/pull/159) ([jtescher](https://github.com/jtescher))
+- proxy: improve debugability of JWT authenticator [\#156](https://github.com/ory/oathkeeper/pull/156) ([aeneasr](https://github.com/aeneasr))
+- issue \#149 - Update README building-from-source part with the gomodul… [\#152](https://github.com/ory/oathkeeper/pull/152) ([pink-lucifer](https://github.com/pink-lucifer))
 
 ## [v0.14.2+oryOS.10](https://github.com/ory/oathkeeper/tree/v0.14.2+oryOS.10) (2018-12-13)
 [Full Changelog](https://github.com/ory/oathkeeper/compare/v0.14.1+oryOS.10...v0.14.2+oryOS.10)
