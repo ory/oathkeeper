@@ -2,6 +2,7 @@ package proxy
 
 import (
 	"encoding/json"
+	"github.com/ory/oathkeeper/driver/configuration"
 	"net/http"
 
 	"github.com/pkg/errors"
@@ -10,12 +11,12 @@ import (
 )
 
 type AuthenticatorAnonymous struct {
-	AnonymousIdentifier string
+	c configuration.Provider
 }
 
-func NewAuthenticatorAnonymous(anonymousIdentifier string) *AuthenticatorAnonymous {
+func NewAuthenticatorAnonymous(c configuration.Provider) *AuthenticatorAnonymous {
 	return &AuthenticatorAnonymous{
-		AnonymousIdentifier: anonymousIdentifier,
+		c: c,
 	}
 }
 
@@ -28,5 +29,5 @@ func (a *AuthenticatorAnonymous) Authenticate(r *http.Request, config json.RawMe
 		return nil, errors.WithStack(ErrAuthenticatorNotResponsible)
 	}
 
-	return &AuthenticationSession{Subject: a.AnonymousIdentifier}, nil
+	return &AuthenticationSession{Subject: a.c.AuthenticatorAnonymousIdentifier()}, nil
 }

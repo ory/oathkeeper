@@ -40,7 +40,7 @@ func TestMain(m *testing.M) {
 }
 
 func TestManagers(t *testing.T) {
-	managers := map[string]Manager{
+	managers := map[string]Repository{
 		"memory": NewMemoryManager(),
 	}
 
@@ -113,40 +113,4 @@ func TestManagers(t *testing.T) {
 			assert.True(t, results[0].ID != r1.ID)
 		})
 	}
-}
-
-func connectToPostgres(t *testing.T, managers map[string]Manager) {
-	db, err := dockertest.ConnectToTestPostgreSQL()
-	if err != nil {
-		t.Logf("Could not connect to database: %v", err)
-		t.FailNow()
-		return
-	}
-
-	s := NewSQLManager(db)
-	if _, err := s.CreateSchemas(); err != nil {
-		t.Logf("Could not create postgres schema: %v", err)
-		t.FailNow()
-		return
-	}
-
-	managers["postgres"] = s
-}
-
-func connectToMySQL(t *testing.T, managers map[string]Manager) {
-	db, err := dockertest.ConnectToTestMySQL()
-	if err != nil {
-		t.Logf("Could not connect to database: %v", err)
-		t.FailNow()
-		return
-	}
-
-	s := NewSQLManager(db)
-	if _, err := s.CreateSchemas(); err != nil {
-		t.Logf("Could not create postgres schema: %v", err)
-		t.FailNow()
-		return
-	}
-
-	managers["mysql"] = s
 }

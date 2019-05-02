@@ -21,33 +21,71 @@
 package rule
 
 import (
+	"context"
+	"github.com/pkg/errors"
 	"net/url"
 	"sync"
 
-	"github.com/pkg/errors"
-
 	"github.com/ory/oathkeeper/helper"
-	"github.com/ory/oathkeeper/pkg"
+	"github.com/ory/x/pagination"
 )
 
-type CachedMatcher struct {
-	Rules   map[string]Rule
-	Manager Manager
+type MemoryManager struct {
 	sync.RWMutex
+	rules []Rule
 }
 
-func NewCachedMatcher(m Manager) *CachedMatcher {
-	return &CachedMatcher{
-		Manager: m,
-		Rules:   map[string]Rule{},
+func NewMemoryManager() *MemoryManager {
+	return &MemoryManager{rules: []Rule{}}
+}
+
+func (m *MemoryManager) Count(ctx context.Context) (int, error) {
+	return len(m.rules), nil
+}
+
+func (m *MemoryManager) List(limit, offset int) ([]Rule, error) {
+	start, end := pagination.Index(limit, offset, len(m.rules))
+	return m.rules[start:end], nil
+}
+
+func (m *MemoryManager) Get(id string) (*Rule, error) {
+	for _, r := range m.rules {
+		if r.ID == id {
+			return &r, nil
+		}
 	}
+
+	return nil, errors.WithStack(helper.ErrResourceNotFound)
 }
 
-func (m *CachedMatcher) MatchRule(method string, u *url.URL) (*Rule, error) {
+func (m *MemoryManager) Upsert(rule *Rule) error {
+	for k, r := range m.rules {
+		if r.ID == rule.ID {
+			m.rules[k] = *rule
+			return nil
+		}
+	}
+
+	m.rules = append(m.rules, *rule)
+	return nil
+}
+
+func (m *MemoryManager) Delete(id string) error {
+	for k, r := range m.rules {
+		if r.ID == id {
+			m.rules = append(m.rules[:k], m.rules[k+1:]...)
+			return nil
+		}
+	}
+
+	return errors.WithStack(helper.ErrResourceNotFound)
+}
+
+func (m *MemoryManager) Match(method string, u *url.URL) (*Rule, error) {
 	m.RLock()
 	defer m.RUnlock()
 	var rules []Rule
-	for _, rule := range m.Rules {
+	for _, rule := range m.rules {
 		if err := rule.IsMatching(method, u); err == nil {
 			rules = append(rules, rule)
 		}
@@ -60,28 +98,4 @@ func (m *CachedMatcher) MatchRule(method string, u *url.URL) (*Rule, error) {
 	}
 
 	return &rules[0], nil
-}
-
-func (m *CachedMatcher) Refresh() error {
-	m.Lock()
-	defer m.Unlock()
-
-	rules, err := m.Manager.ListRules(int(pkg.RulesUpperLimit), 0)
-	if err != nil {
-		return errors.WithStack(err)
-	}
-
-	inserted := map[string]bool{}
-	for _, rule := range rules {
-		inserted[rule.ID] = true
-		m.Rules[rule.ID] = rule
-	}
-
-	for _, rule := range m.Rules {
-		if _, ok := inserted[rule.ID]; !ok {
-			delete(m.Rules, rule.ID)
-		}
-	}
-
-	return nil
 }

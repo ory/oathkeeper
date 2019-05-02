@@ -88,9 +88,9 @@ type Rule struct {
 	// making the request.
 	Authorizer RuleHandler `json:"authorizer" db:"authorizer"`
 
-	// CredentialsIssuer is the handler which will issue the credentials which will be used when ORY Oathkeeper
-	// forwards a granted request to the upstream server.
-	CredentialsIssuer RuleHandler `json:"credentials_issuer" db:"credentials_issuer"`
+	// Transformer is a handler that transform the HTTP request. A common use case is generating a new set of credentials
+	// (e.g. JWT) which then will be forwarded to the upstream server.
+	Transformer RuleHandler `json:"transformer" db:"transformer"`
 
 	// Upstream is the location of the server where requests matching this rule should be forwarded to.
 	Upstream Upstream `json:"upstream" db:"upstream"`

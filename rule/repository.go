@@ -20,14 +20,15 @@
 
 package rule
 
-type Manager interface {
-	ListRules(limit, offset int) ([]Rule, error)
-	CreateRule(*Rule) error
-	GetRule(id string) (*Rule, error)
-	DeleteRule(id string) error
-	UpdateRule(*Rule) error
+import "net/url"
+
+type Repository interface {
+	List(limit, offset int) ([]Rule, error)
+	Upsert(*Rule) error
+	Get(id string) (*Rule, error)
+	Delete(id string) error
 }
 
-type Refresher interface {
-	Refresh() error
+type Matcher interface {
+	MatchRule(method string, u *url.URL) (*Rule, error)
 }

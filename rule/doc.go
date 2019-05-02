@@ -43,13 +43,6 @@ type swaggerRulesResponse struct {
 	Body []swaggerRule
 }
 
-// swagger:parameters getRule deleteRule
-type swaggerGetRuleParameters struct {
-	// in: path
-	// required: true
-	ID string `json:"id"`
-}
-
 // swagger:parameters listRules
 type swaggerListRulesParameters struct {
 	// The maximum amount of rules returned.
@@ -59,22 +52,6 @@ type swaggerListRulesParameters struct {
 	// The offset from where to start looking.
 	// in: query
 	Offset int `json:"offset"`
-}
-
-// swagger:parameters updateRule
-type swaggerUpdateRuleParameters struct {
-	// in: path
-	// required: true
-	ID string `json:"id"`
-
-	// in: body
-	Body swaggerRule
-}
-
-// swagger:parameters createRule
-type swaggerCreateRuleParameters struct {
-	// in: body
-	Body swaggerRule
 }
 
 // swagger:model ruleMatch
@@ -132,9 +109,9 @@ type swaggerRule struct {
 	// making the request.
 	Authorizer swaggerRuleHandler `json:"authorizer"`
 
-	// CredentialsIssuer is the handler which will issue the credentials which will be used when ORY Oathkeeper
-	// forwards a granted request to the upstream server.
-	CredentialsIssuer swaggerRuleHandler `json:"credentials_issuer"`
+	// Transformer is a handler that transform the HTTP request. A common use case is generating a new set of credentials
+	// (e.g. JWT) which then will be forwarded to the upstream server.
+	Transformer swaggerRuleHandler `json:"transformer"`
 
 	// Upstream is the location of the server where requests matching this rule should be forwarded to.
 	Upstream *Upstream `json:"upstream"`

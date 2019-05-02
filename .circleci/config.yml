@@ -41,28 +41,13 @@ jobs:
     docker:
       - image: circleci/golang:1.12
         environment:
-        - TEST_DATABASE_POSTGRESQL=postgres://test:test@localhost:5432/oathkeeper?sslmode=disable
-        - TEST_DATABASE_MYSQL=root:test@(localhost:3306)/mysql?parseTime=true
-        - TEST_HYDRA_ADMIN_URL=http://localhost:4445
+        - GO111MODULE=on
       - image: oryd/hydra:v1.0.0-rc.3_oryOS.9
         environment:
         - DATABASE_URL=memory
         command: "serve all --dangerous-force-http"
-      - image: mysql:5.7
-        environment:
-        - MYSQL_ROOT_PASSWORD=test
-      - image: postgres:9.5
-        environment:
-        - POSTGRES_USER=test
-        - POSTGRES_PASSWORD=test
-        - POSTGRES_DB=oathkeeper
     working_directory: /go/src/github.com/ory/oathkeeper
     steps:
-      - run:
-          name: Enable go1.12 modules
-          command: |
-            echo 'export GO111MODULE=on' >> $BASH_ENV
-            source $BASH_ENV
       - checkout
       - run: go mod download
       - run: go install github.com/ory/go-acc github.com/mattn/goveralls

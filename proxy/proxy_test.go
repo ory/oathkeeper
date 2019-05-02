@@ -86,18 +86,18 @@ func TestProxy(t *testing.T) {
 	defer proxy.Close()
 
 	ruleNoOpAuthenticator := rule.Rule{
-		Match:             rule.RuleMatch{Methods: []string{"GET"}, URL: proxy.URL + "/authn-noop/<[0-9]+>"},
-		Authenticators:    []rule.RuleHandler{{Handler: "noop"}},
-		Authorizer:        rule.RuleHandler{Handler: "allow"},
-		CredentialsIssuer: rule.RuleHandler{Handler: "noop"},
-		Upstream:          rule.Upstream{URL: backend.URL},
+		Match:          rule.RuleMatch{Methods: []string{"GET"}, URL: proxy.URL + "/authn-noop/<[0-9]+>"},
+		Authenticators: []rule.RuleHandler{{Handler: "noop"}},
+		Authorizer:     rule.RuleHandler{Handler: "allow"},
+		Transformer:    rule.RuleHandler{Handler: "noop"},
+		Upstream:       rule.Upstream{URL: backend.URL},
 	}
 	ruleNoOpAuthenticatorModifyUpstream := rule.Rule{
-		Match:             rule.RuleMatch{Methods: []string{"GET"}, URL: proxy.URL + "/strip-path/authn-noop/<[0-9]+>"},
-		Authenticators:    []rule.RuleHandler{{Handler: "noop"}},
-		Authorizer:        rule.RuleHandler{Handler: "allow"},
-		CredentialsIssuer: rule.RuleHandler{Handler: "noop"},
-		Upstream:          rule.Upstream{URL: backend.URL, StripPath: "/strip-path/", PreserveHost: true},
+		Match:          rule.RuleMatch{Methods: []string{"GET"}, URL: proxy.URL + "/strip-path/authn-noop/<[0-9]+>"},
+		Authenticators: []rule.RuleHandler{{Handler: "noop"}},
+		Authorizer:     rule.RuleHandler{Handler: "allow"},
+		Transformer:    rule.RuleHandler{Handler: "noop"},
+		Upstream:       rule.Upstream{URL: backend.URL, StripPath: "/strip-path/", PreserveHost: true},
 	}
 
 	//acceptRuleStripHost := rule.Rule{MatchesMethods: []string{"GET"}, MatchesURLCompiled: mustCompileRegex(t, proxy.URL+"/users/<[0-9]+>"), Mode: "pass_through_accept", Upstream: rule.Upstream{URLParsed: u, StripPath: "/users/", PreserveHost: true}}
@@ -181,11 +181,11 @@ func TestProxy(t *testing.T) {
 			d:   "should pass with anonymous and everything else set to noop",
 			url: proxy.URL + "/authn-anon/authz-allow/cred-noop/1234",
 			rules: []rule.Rule{{
-				Match:             rule.RuleMatch{Methods: []string{"GET"}, URL: proxy.URL + "/authn-anon/authz-allow/cred-noop/<[0-9]+>"},
-				Authenticators:    []rule.RuleHandler{{Handler: "anonymous"}},
-				Authorizer:        rule.RuleHandler{Handler: "allow"},
-				CredentialsIssuer: rule.RuleHandler{Handler: "noop"},
-				Upstream:          rule.Upstream{URL: backend.URL},
+				Match:          rule.RuleMatch{Methods: []string{"GET"}, URL: proxy.URL + "/authn-anon/authz-allow/cred-noop/<[0-9]+>"},
+				Authenticators: []rule.RuleHandler{{Handler: "anonymous"}},
+				Authorizer:     rule.RuleHandler{Handler: "allow"},
+				Transformer:    rule.RuleHandler{Handler: "noop"},
+				Upstream:       rule.Upstream{URL: backend.URL},
 			}},
 			code: http.StatusOK,
 			messages: []string{
@@ -198,11 +198,11 @@ func TestProxy(t *testing.T) {
 			d:   "should fail when authorizer fails",
 			url: proxy.URL + "/authn-anon/authz-deny/cred-noop/1234",
 			rules: []rule.Rule{{
-				Match:             rule.RuleMatch{Methods: []string{"GET"}, URL: proxy.URL + "/authn-anon/authz-deny/cred-noop/<[0-9]+>"},
-				Authenticators:    []rule.RuleHandler{{Handler: "anonymous"}},
-				Authorizer:        rule.RuleHandler{Handler: "deny"},
-				CredentialsIssuer: rule.RuleHandler{Handler: "noop"},
-				Upstream:          rule.Upstream{URL: backend.URL},
+				Match:          rule.RuleMatch{Methods: []string{"GET"}, URL: proxy.URL + "/authn-anon/authz-deny/cred-noop/<[0-9]+>"},
+				Authenticators: []rule.RuleHandler{{Handler: "anonymous"}},
+				Authorizer:     rule.RuleHandler{Handler: "deny"},
+				Transformer:    rule.RuleHandler{Handler: "noop"},
+				Upstream:       rule.Upstream{URL: backend.URL},
 			}},
 			code: http.StatusForbidden,
 		},
@@ -220,11 +220,11 @@ func TestProxy(t *testing.T) {
 			d:   "should fail when credentials issuer fails",
 			url: proxy.URL + "/authn-anonymous/authz-allow/cred-broken/1234",
 			rules: []rule.Rule{{
-				Match:             rule.RuleMatch{Methods: []string{"GET"}, URL: proxy.URL + "/authn-anonymous/authz-allow/cred-broken/<[0-9]+>"},
-				Authenticators:    []rule.RuleHandler{{Handler: "anonymous"}},
-				Authorizer:        rule.RuleHandler{Handler: "allow"},
-				CredentialsIssuer: rule.RuleHandler{Handler: "broken"},
-				Upstream:          rule.Upstream{URL: backend.URL},
+				Match:          rule.RuleMatch{Methods: []string{"GET"}, URL: proxy.URL + "/authn-anonymous/authz-allow/cred-broken/<[0-9]+>"},
+				Authenticators: []rule.RuleHandler{{Handler: "anonymous"}},
+				Authorizer:     rule.RuleHandler{Handler: "allow"},
+				Transformer:    rule.RuleHandler{Handler: "broken"},
+				Upstream:       rule.Upstream{URL: backend.URL},
 			}},
 			code: http.StatusInternalServerError,
 		},

@@ -27,7 +27,28 @@ before finalizing the upgrade process.
 
 ## master
 
-## v0.15.0+oryOS.10
+## v0.16.0+oryOS.12
+
+### Rule changes
+
+Credential Issuer -> (Request) Transformer
+
+### RSA key
+
+* should no be imported from file/env
+
+* should still work with hydra though
+
+### Serve Changes
+
+* serve api -> stays the same
+* serve proxy -> expose 2 ports, one proxy on api for health check, metrics and so on
+
+### SQL Store Deprecation
+
+SQL -> in memory / from disk
+
+## v0.15.0+oryOS.11
 
 ### New Go SDK Generator
 

@@ -6,6 +6,7 @@ import (
 	"crypto/rsa"
 	"encoding/json"
 	"fmt"
+	"github.com/ory/oathkeeper/driver/configuration"
 	"net/http"
 	"net/url"
 	"strings"
@@ -44,21 +45,16 @@ type jwksFetcher interface {
 }
 
 type AuthenticatorJWT struct {
-	jwksURL       string
+	c configuration.Provider
+
 	fetcher       jwksFetcher
-	scopeStrategy fosite.ScopeStrategy
 }
 
-func NewAuthenticatorJWT(jwksURL string, scopeStrategy fosite.ScopeStrategy) (*AuthenticatorJWT, error) {
-	if _, err := url.ParseRequestURI(jwksURL); err != nil {
-		return new(AuthenticatorJWT), errors.Errorf(`unable to validate the JSON Web Token Authenticator's JWKs URL "%s" because %s`, jwksURL, err)
-	}
-
+func NewAuthenticatorJWT(c configuration.Provider) *AuthenticatorJWT {
 	return &AuthenticatorJWT{
-		jwksURL:       jwksURL,
+		c:             c,
 		fetcher:       fosite.NewDefaultJWKSFetcherStrategy(),
-		scopeStrategy: scopeStrategy,
-	}, nil
+	}
 }
 
 func (a *AuthenticatorJWT) GetID() string {
@@ -149,15 +145,16 @@ func (a *AuthenticatorJWT) Authenticate(r *http.Request, config json.RawMessage,
 		claims["scope"] = scopeInterfaces
 	}
 
-	if a.scopeStrategy != nil {
+
+	if  ss := a.c.AuthenticatorJWTScopeStrategy(); ss != nil {
 		for _, scope := range cf.Scopes {
-			if !a.scopeStrategy(getScopeClaim(claims), scope) {
-				return nil, errors.WithStack(helper.ErrForbidden.WithReason(fmt.Sprintf("Token is missing required scope %s.", scope)))
+			if !ss(getScopeClaim(claims), scope) {
+				return nil, errors.WithStack(helper.ErrForbidden.WithReason(fmt.Sprintf(`JSON Web Token is missing required scope "%s".`, scope)))
 			}
 		}
 	} else {
 		if len(cf.Scopes) > 0 {
-			return nil, errors.WithStack(helper.ErrRuleFeatureDisabled.WithReason("Scope validation was requested but scope strategy is set to \"NONE\"."))
+			return nil, errors.WithStack(helper.ErrRuleFeatureDisabled.WithReason("Scope validation was requested but scope strategy is set to \"none\"."))
 		}
 	}
 
@@ -200,7 +197,7 @@ func getScopeClaim(claims map[string]interface{}) []string {
 }
 
 func (a *AuthenticatorJWT) findRSAPublicKey(t *jwt.Token) (*rsa.PublicKey, error) {
-	keys, err := a.fetcher.Resolve(a.jwksURL, false)
+	keys, err := a.fetcher.Resolve(a.c.AuthenticatorJWTJWKSURIs(), false)
 	if err != nil {
 		return nil, err
 	}

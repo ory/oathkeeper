@@ -95,27 +95,27 @@ func TestValidateRule(t *testing.T) {
 	}), "Value credentials_issuer.handler can not be empty.")
 
 	assertReason(t, v(&Rule{
-		Match:             RuleMatch{URL: "https://www.ory.sh", Methods: []string{"POST"}},
-		Upstream:          Upstream{URL: "https://www.ory.sh"},
-		Authenticators:    []RuleHandler{{Handler: "an1"}},
-		Authorizer:        RuleHandler{Handler: "az2"},
-		CredentialsIssuer: RuleHandler{Handler: "foo"},
+		Match:          RuleMatch{URL: "https://www.ory.sh", Methods: []string{"POST"}},
+		Upstream:       Upstream{URL: "https://www.ory.sh"},
+		Authenticators: []RuleHandler{{Handler: "an1"}},
+		Authorizer:     RuleHandler{Handler: "az2"},
+		Transformer:    RuleHandler{Handler: "foo"},
 	}), "is unknown, enabled credentials issuers are:")
 
 	assert.NoError(t, v(&Rule{
-		Match:             RuleMatch{URL: "https://www.ory.sh", Methods: []string{"POST"}},
-		Upstream:          Upstream{URL: "https://www.ory.sh"},
-		Authenticators:    []RuleHandler{{Handler: "an1"}, {Handler: "an2"}},
-		Authorizer:        RuleHandler{Handler: "az1"},
-		CredentialsIssuer: RuleHandler{Handler: "ci1"},
+		Match:          RuleMatch{URL: "https://www.ory.sh", Methods: []string{"POST"}},
+		Upstream:       Upstream{URL: "https://www.ory.sh"},
+		Authenticators: []RuleHandler{{Handler: "an1"}, {Handler: "an2"}},
+		Authorizer:     RuleHandler{Handler: "az1"},
+		Transformer:    RuleHandler{Handler: "ci1"},
 	}))
 
 	assert.NoError(t, v(&Rule{
-		Match:             RuleMatch{URL: "https://www.ory.sh", Methods: []string{"POST"}},
-		Upstream:          Upstream{URL: "https://www.ory.sh"},
-		Authenticators:    []RuleHandler{{Handler: "an2"}},
-		Authorizer:        RuleHandler{Handler: "az1"},
-		CredentialsIssuer: RuleHandler{Handler: "ci2"},
+		Match:          RuleMatch{URL: "https://www.ory.sh", Methods: []string{"POST"}},
+		Upstream:       Upstream{URL: "https://www.ory.sh"},
+		Authenticators: []RuleHandler{{Handler: "an2"}},
+		Authorizer:     RuleHandler{Handler: "az1"},
+		Transformer:    RuleHandler{Handler: "ci2"},
 	}))
 }
 

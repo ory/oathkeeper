@@ -1,38 +1,114 @@
-/*
- * Copyright © 2017-2018 Aeneas Rekkas <aeneas+oss@aeneas.io>
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *
- * @author       Aeneas Rekkas <aeneas+oss@aeneas.io>
- * @copyright  2017-2018 Aeneas Rekkas <aeneas+oss@aeneas.io>
- * @license  	   Apache-2.0
- */
-
 package health
 
-// swagger:model healthStatus
-type swaggerHealthStatus struct {
-	// Status always contains "ok".
-	Status string `json:"status"`
-}
+// Alive returns an ok status if the instance is ready to handle HTTP requests.
+//
+// swagger:route GET /health/alive public isInstanceAlive
+//
+// Check alive status
+//
+// This endpoint returns a 200 status code when the HTTP server is up running.
+// This status does currently not include checks whether the database connection is working.
+//
+// If the service supports TLS Edge Termination, this endpoint does not require the
+// `X-Forwarded-Proto` header to be set.
+//
+// Be aware that if you are running multiple nodes of this service, the health status will never
+// refer to the cluster state, only to a single instance.
+//
+//     Produces:
+//     - application/json
+//
+//     Responses:
+//       200: healthStatus
+//       500: genericError
+func swaggerPublicIsInstanceAlive() {}
 
-// swagger:model healthNotReadyStatus
-type swaggerNotReadyStatus struct {
-	// Errors contains a list of errors that caused the not ready status.
-	Errors map[string]string `json:"errors"`
-}
+// Alive returns an ok status if the instance is ready to handle HTTP requests.
+//
+// swagger:route GET /health/alive admin isInstanceAlive
+//
+// Check alive status
+//
+// This endpoint returns a 200 status code when the HTTP server is up running.
+// This status does currently not include checks whether the database connection is working.
+//
+// If the service supports TLS Edge Termination, this endpoint does not require the
+// `X-Forwarded-Proto` header to be set.
+//
+// Be aware that if you are running multiple nodes of this service, the health status will never
+// refer to the cluster state, only to a single instance.
+//
+//     Produces:
+//     - application/json
+//
+//     Responses:
+//       200: healthStatus
+//       500: genericError
+func swaggerAdminIsInstanceAlive() {}
 
-// swagger:model version
-type swaggerVersion struct {
-	Version string `json:"version"`
-}
+// Ready returns an ok status if the instance is ready to handle HTTP requests and all ReadyCheckers are ok.
+//
+// swagger:route GET /health/ready health isInstanceReady
+//
+// Check readiness status
+//
+// This endpoint returns a 200 status code when the HTTP server is up running and the environment dependencies (e.g.
+// the database) are responsive as well.
+//
+// If the service supports TLS Edge Termination, this endpoint does not require the
+// `X-Forwarded-Proto` header to be set.
+//
+// Be aware that if you are running multiple nodes of this service, the health status will never
+// refer to the cluster state, only to a single instance.
+//
+//     Produces:
+//     - application/json
+//
+//     Responses:
+//       200: healthStatus
+//       503: healthNotReadyStatus
+func swaggerAdminIsInstanceReady() {}
+
+// Ready returns an ok status if the instance is ready to handle HTTP requests and all ReadyCheckers are ok.
+//
+// swagger:route GET /health/ready public isInstanceReady
+//
+// Check readiness status
+//
+// This endpoint returns a 200 status code when the HTTP server is up running and the environment dependencies (e.g.
+// the database) are responsive as well.
+//
+// If the service supports TLS Edge Termination, this endpoint does not require the
+// `X-Forwarded-Proto` header to be set.
+//
+// Be aware that if you are running multiple nodes of this service, the health status will never
+// refer to the cluster state, only to a single instance.
+//
+//     Produces:
+//     - application/json
+//
+//     Responses:
+//       200: healthStatus
+//       503: healthNotReadyStatus
+func swaggerPublicIsInstanceReady() {}
+
+// Version returns this service's versions.
+//
+// swagger:route GET /version admin getVersion
+//
+// Get service version
+//
+// This endpoint returns the service version typically notated using semantic versioning.
+//
+// If the service supports TLS Edge Termination, this endpoint does not require the
+// `X-Forwarded-Proto` header to be set.
+//
+// Be aware that if you are running multiple nodes of this service, the health status will never
+// refer to the cluster state, only to a single instance.
+//
+//     Produces:
+//     - application/json
+//
+//	   Responses:
+// 			200: version
+func swaggerGetVersion() {}

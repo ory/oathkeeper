@@ -30,6 +30,8 @@ import (
 	"github.com/ory/oathkeeper/helper"
 )
 
+type Validator func(r *Rule) error
+
 func ValidateRule(
 	enabledAuthenticators []string, availableAuthenticators []string,
 	enabledAuthorizers []string, availableAuthorizers []string,
@@ -84,16 +86,16 @@ func ValidateRule(
 			return errors.WithStack(helper.ErrBadRequest.WithReason(fmt.Sprintf("Authorizer \"%s\" is unknown, enabled authorizers are: %v", r.Authorizer.Handler, enabledAuthorizers)))
 		}
 
-		if r.CredentialsIssuer.Handler == "" {
+		if r.Transformer.Handler == "" {
 			return errors.WithStack(helper.ErrBadRequest.WithReason("Value credentials_issuer.handler can not be empty."))
 		}
 
-		if !stringslice.Has(enabledCredentialsIssuers, r.CredentialsIssuer.Handler) {
-			if stringslice.Has(availableCredentialsIssuers, r.CredentialsIssuer.Handler) {
-				return errors.WithStack(helper.ErrBadRequest.WithReason(fmt.Sprintf("Credentials issuer \"%s\" is valid but has not enabled by the server's configuration, enabled credentials issuers are: %v", r.CredentialsIssuer.Handler, enabledCredentialsIssuers)))
+		if !stringslice.Has(enabledCredentialsIssuers, r.Transformer.Handler) {
+			if stringslice.Has(availableCredentialsIssuers, r.Transformer.Handler) {
+				return errors.WithStack(helper.ErrBadRequest.WithReason(fmt.Sprintf("Credentials issuer \"%s\" is valid but has not enabled by the server's configuration, enabled credentials issuers are: %v", r.Transformer.Handler, enabledCredentialsIssuers)))
 			}
 
-			return errors.WithStack(helper.ErrBadRequest.WithReason(fmt.Sprintf("Credentials issuer \"%s\" is unknown, enabled credentials issuers are: %v", r.CredentialsIssuer.Handler, enabledCredentialsIssuers)))
+			return errors.WithStack(helper.ErrBadRequest.WithReason(fmt.Sprintf("Credentials issuer \"%s\" is unknown, enabled credentials issuers are: %v", r.Transformer.Handler, enabledCredentialsIssuers)))
 		}
 
 		return nil

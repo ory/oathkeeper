@@ -155,18 +155,18 @@ func (d *RequestHandler) HandleRequest(r *http.Request, rl *rule.Rule) (http.Hea
 		return nil, err
 	}
 
-	sh, ok := d.CredentialIssuers[rl.CredentialsIssuer.Handler]
+	sh, ok := d.CredentialIssuers[rl.Transformer.Handler]
 	if !ok {
 		d.Logger.
 			WithField("granted", false).
 			WithField("access_url", r.URL.String()).
-			WithField("session_handler", rl.CredentialsIssuer.Handler).
+			WithField("session_handler", rl.Transformer.Handler).
 			WithField("reason_id", "unknown_credential_issuer").
 			Warn("Unknown credential issuer requested")
 		return nil, errors.New("Unknown credential issuer requested")
 	}
 
-	headers, err := sh.Issue(r, session, rl.CredentialsIssuer.Config, rl)
+	headers, err := sh.Issue(r, session, rl.Transformer.Config, rl)
 	if err != nil {
 		return nil, err
 	}
