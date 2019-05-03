@@ -22,6 +22,7 @@ package proxy
 
 import (
 	"encoding/json"
+	"github.com/ory/oathkeeper/driver/configuration"
 	"net/http"
 
 	"github.com/pkg/errors"
@@ -30,10 +31,12 @@ import (
 	"github.com/ory/oathkeeper/rule"
 )
 
-type AuthorizerDeny struct{}
+type AuthorizerDeny struct {
+	c configuration.Provider
+}
 
-func NewAuthorizerDeny() *AuthorizerDeny {
-	return new(AuthorizerDeny)
+func NewAuthorizerDeny(c configuration.Provider) *AuthorizerDeny {
+	return &AuthorizerDeny{c: c}
 }
 
 func (a *AuthorizerDeny) GetID() string {
@@ -42,4 +45,12 @@ func (a *AuthorizerDeny) GetID() string {
 
 func (a *AuthorizerDeny) Authorize(r *http.Request, session *AuthenticationSession, config json.RawMessage, rl *rule.Rule) error {
 	return errors.WithStack(helper.ErrForbidden)
+}
+
+func (a *AuthorizerDeny) Validate() error {
+	if !a.c.AuthorizerDenyIsEnabled() {
+		return errors.WithStack(ErrAuthenticatorNotEnabled.WithReasonf("Authorizer % is disabled per configuration.", a.GetID()))
+	}
+
+	return nil
 }

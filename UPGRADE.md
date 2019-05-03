@@ -29,6 +29,10 @@ before finalizing the upgrade process.
 
 ## v0.16.0+oryOS.12
 
+### new
+
+* new unauthorized authorizer
+
 ### Rule changes
 
 Credential Issuer -> (Request) Transformer

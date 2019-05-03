@@ -24,6 +24,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/ory/oathkeeper/driver/configuration"
 	"net/http"
 	"net/url"
 	"text/template"
@@ -47,15 +48,18 @@ type AuthorizerKetoWardenConfiguration struct {
 }
 
 type AuthorizerKetoWarden struct {
-	c              *http.Client
+	c configuration.Provider
+
+	client         *http.Client
 	contextCreator authorizerKetoWardenContext
 	baseURL        *url.URL
 }
 
-func NewAuthorizerKetoWarden(baseURL *url.URL) *AuthorizerKetoWarden {
+func NewAuthorizerKetoWarden(c configuration.Provider) *AuthorizerKetoWarden {
 	return &AuthorizerKetoWarden{
-		c:              &http.Client{Timeout: time.Second * 5},
-		baseURL:        baseURL,
+		c:      c,
+		client: &http.Client{Timeout: time.Second * 5},
+		// baseURL:        baseURL,
 		contextCreator: contextFromRequest,
 	}
 }
@@ -132,7 +136,7 @@ func (a *AuthorizerKetoWarden) Authorize(r *http.Request, session *Authenticatio
 		return errors.WithStack(err)
 	}
 
-	res, err := a.c.Do(req)
+	res, err := a.client.Do(req)
 	if err != nil {
 		return errors.WithStack(err)
 	}
@@ -157,6 +161,7 @@ func (a *AuthorizerKetoWarden) Authorize(r *http.Request, session *Authenticatio
 
 	return nil
 }
+
 func (a *AuthorizerKetoWarden) ParseSubject(session *AuthenticationSession, templateId, templateString string) (string, error) {
 	tmplFn := template.New("rules").
 		Option("missingkey=zero").
@@ -180,4 +185,12 @@ func (a *AuthorizerKetoWarden) ParseSubject(session *AuthenticationSession, temp
 		return "", err
 	}
 	return subject.String(), nil
+}
+
+func (a *AuthorizerKetoWarden) Validate() error {
+	if !a.client.AuthorizerKetoWardenIsEnabled() {
+		return errors.WithStack(ErrAuthenticatorNotEnabled.WithReasonf("Authorizer % is disabled per configuration.", a.GetID()))
+	}
+
+	return nil
 }

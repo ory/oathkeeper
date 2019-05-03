@@ -39,7 +39,11 @@ type reasoner interface {
 	Reason() string
 }
 
-type JWKSFetcherStrategy struct {
+type JWKSFetcher interface {
+	Resolve(ctx context.Context, locations []url.URL, kid string, use string) (*jose.JSONWebKey, error)
+}
+
+type ResilientJWKSFetcher struct {
 	sync.RWMutex
 
 	ttl         time.Duration
@@ -50,17 +54,17 @@ type JWKSFetcherStrategy struct {
 	l           logrus.FieldLogger
 }
 
-func NewJWKSFetcherStrategy(l logrus.FieldLogger) *JWKSFetcherStrategy {
-	return NewJWKSFetcherStrategyWithTimeout(l, time.Second, time.Second*10, time.Minute*5)
+func NewResilientJWKSFetcher(l logrus.FieldLogger) *ResilientJWKSFetcher {
+	return NewResilientJWKSFetcherWithTimeout(l, time.Second, time.Second*10, time.Minute*5)
 }
 
-// NewJWKSFetcherStrategyWithTimeout returns a new JWKS Fetcher with:
+// NewResilientJWKSFetcherWithTimeout returns a new JWKS Fetcher with:
 //
 // - cancelAfter: If reached, the fetcher will stop waiting for responses and return an error.
 // - waitForResponse: While the fetcher might stop waiting for responses, we will give the server more time to respond
 //		and add the keys to the registry unless waitForResponse is reached in which case we'll terminate the request.
-func NewJWKSFetcherStrategyWithTimeout(l logrus.FieldLogger, cancelAfter time.Duration, waitForResponse time.Duration, ttl time.Duration) *JWKSFetcherStrategy {
-	return &JWKSFetcherStrategy{
+func NewResilientJWKSFetcherWithTimeout(l logrus.FieldLogger, cancelAfter time.Duration, waitForResponse time.Duration, ttl time.Duration) *ResilientJWKSFetcher {
+	return &ResilientJWKSFetcher{
 		cancelAfter: cancelAfter,
 		l:           l,
 		ttl:         ttl,
@@ -72,8 +76,8 @@ func NewJWKSFetcherStrategyWithTimeout(l logrus.FieldLogger, cancelAfter time.Du
 	}
 }
 
-func (s *JWKSFetcherStrategy) Resolve(ctx context.Context, locations []url.URL, kid string) (*jose.JSONWebKey, error) {
-	if key := s.key(kid, locations); key != nil {
+func (s *ResilientJWKSFetcher) Resolve(ctx context.Context, locations []url.URL, kid string, use string) (*jose.JSONWebKey, error) {
+	if key := s.key(kid, locations, use); key != nil {
 		return key, nil
 	}
 
@@ -103,14 +107,18 @@ func (s *JWKSFetcherStrategy) Resolve(ctx context.Context, locations []url.URL, 
 		// We're done!
 	}
 
-	if key := s.key(kid, locations); key != nil {
+	if key := s.key(kid, locations, use); key != nil {
 		return key, nil
 	}
 
-	return nil, errors.WithStack(herodot.ErrForbidden.WithReason("The provided JSON Web Token was signed with an unknown key.").WithDebug("Check that the provided JSON Web Key URIs contain a key that can verify the signature of the provided JSON Web Token."))
+	return nil, errors.WithStack(herodot.
+		ErrForbidden.
+		WithReasonf(`The provided JSON Web Token was signed with an unknown key. Expected a key with kid "%s" and use "%s".`, kid, use).
+		WithDebug("Check that the provided JSON Web Key URIs contain a key that can verify the signature of the provided JSON Web Token."),
+	)
 }
 
-func (s *JWKSFetcherStrategy) key(kid string, locations []url.URL) *jose.JSONWebKey {
+func (s *ResilientJWKSFetcher) key(kid string, locations []url.URL, use string) *jose.JSONWebKey {
 	for _, l := range locations {
 		s.RLock()
 		keys, ok1 := s.keys[l.String()]
@@ -121,15 +129,17 @@ func (s *JWKSFetcherStrategy) key(kid string, locations []url.URL) *jose.JSONWeb
 			continue
 		}
 
-		if kk := keys.Key(kid); len(kk) > 0 {
-			return &kk[0]
+		for _, k := range keys.Key(kid) {
+			if k.Use == use {
+				return &k
+			}
 		}
 	}
 
 	return nil
 }
 
-func (s *JWKSFetcherStrategy) resolveAll(done chan struct{}, errs chan error, locations []url.URL) {
+func (s *ResilientJWKSFetcher) resolveAll(done chan struct{}, errs chan error, locations []url.URL) {
 	var wg sync.WaitGroup
 
 	for _, l := range locations {
@@ -142,24 +152,45 @@ func (s *JWKSFetcherStrategy) resolveAll(done chan struct{}, errs chan error, lo
 	close(errs)
 }
 
-func (s *JWKSFetcherStrategy) resolve(wg *sync.WaitGroup, errs chan error, location url.URL) {
+func (s *ResilientJWKSFetcher) resolve(wg *sync.WaitGroup, errs chan error, location url.URL) {
 	defer wg.Done()
 
 	res, err := s.client.Get(location.String())
 	if err != nil {
-		errs <- errors.WithStack(herodot.ErrInternalServerError.WithReasonf(`Unable to fetch JSON Web Keys from location "%s" because %s".`, location.String(), err))
+		errs <- errors.WithStack(herodot.
+			ErrInternalServerError.
+			WithReasonf(
+				`Unable to fetch JSON Web Keys from location "%s" because %s".`,
+				location.String(),
+				err,
+			),
+		)
 		return
 	}
 	defer res.Body.Close()
 
 	if res.StatusCode < 200 || res.StatusCode >= 400 {
-		errs <- errors.WithStack(herodot.ErrInternalServerError.WithReasonf(`Expected successful status code from location "%s", but received code "%d".`, location.String(), res.StatusCode))
+		errs <- errors.WithStack(herodot.
+			ErrInternalServerError.
+			WithReasonf(
+				`Expected successful status code from location "%s", but received code "%d".`,
+				location.String(),
+				res.StatusCode,
+			),
+		)
 		return
 	}
 
 	var set jose.JSONWebKeySet
 	if err := json.NewDecoder(res.Body).Decode(&set); err != nil {
-		errs <- errors.WithStack(herodot.ErrInternalServerError.WithReasonf(`Unable to decode JSON Web Keys from location "%s" because "%s".`, location.String(), err))
+		errs <- errors.WithStack(herodot.
+			ErrInternalServerError.
+			WithReasonf(
+				`Unable to decode JSON Web Keys from location "%s" because "%s".`,
+				location.String(),
+				err,
+			),
+		)
 		return
 	}
 

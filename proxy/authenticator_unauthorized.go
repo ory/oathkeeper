@@ -22,6 +22,7 @@ package proxy
 
 import (
 	"encoding/json"
+	"github.com/ory/oathkeeper/driver/configuration"
 	"net/http"
 
 	"github.com/pkg/errors"
@@ -30,16 +31,26 @@ import (
 	"github.com/ory/oathkeeper/rule"
 )
 
-type AuthenticatorBroken struct{}
-
-func NewAuthenticatorBroken() *AuthenticatorBroken {
-	return new(AuthenticatorBroken)
+type AuthenticatorUnauthorized struct {
+	c configuration.Provider
 }
 
-func (a *AuthenticatorBroken) GetID() string {
-	return "broken"
+func NewAuthenticatorUnauthorized(c configuration.Provider) *AuthenticatorUnauthorized {
+	return &AuthenticatorUnauthorized{c: c}
 }
 
-func (a *AuthenticatorBroken) Authenticate(r *http.Request, config json.RawMessage, rl *rule.Rule) (*AuthenticationSession, error) {
+func (a *AuthenticatorUnauthorized) Validate() error {
+	if !a.c.AuthenticatorOAuth2ClientCredentialsIsEnabled() {
+		return errors.WithStack(ErrAuthenticatorNotEnabled.WithReasonf("Authenticator % is disabled per configuration.", a.GetID()))
+	}
+
+	return nil
+}
+
+func (a *AuthenticatorUnauthorized) GetID() string {
+	return "unauthorized"
+}
+
+func (a *AuthenticatorUnauthorized) Authenticate(r *http.Request, config json.RawMessage, rl *rule.Rule) (*AuthenticationSession, error) {
 	return nil, errors.WithStack(helper.ErrUnauthorized)
 }

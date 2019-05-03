@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"github.com/ory/oathkeeper/driver/configuration"
 	"net/http"
 	"net/url"
 
@@ -21,21 +22,27 @@ type AuthenticatorOAuth2Configuration struct {
 }
 
 type AuthenticatorOAuth2ClientCredentials struct {
-	tokenURL string
+	c configuration.Provider
 }
 
-func NewAuthenticatorOAuth2ClientCredentials(tokenURL string) (*AuthenticatorOAuth2ClientCredentials, error) {
-	if _, err := url.ParseRequestURI(tokenURL); err != nil {
-		return new(AuthenticatorOAuth2ClientCredentials), errors.Errorf(`unable to validate the OAuth 2.0 Client Credentials Authenticator's Token Introspection URL "%s" because %s`, tokenURL, err)
-	}
-
-	return &AuthenticatorOAuth2ClientCredentials{
-		tokenURL: tokenURL,
-	}, nil
+func NewAuthenticatorOAuth2ClientCredentials(c configuration.Provider) *AuthenticatorOAuth2ClientCredentials {
+	return &AuthenticatorOAuth2ClientCredentials{c: c}
 }
 
 func (a *AuthenticatorOAuth2ClientCredentials) GetID() string {
 	return "oauth2_client_credentials"
+}
+
+func (a *AuthenticatorOAuth2ClientCredentials) Validate() error {
+	if !a.c.AuthenticatorOAuth2ClientCredentialsIsEnabled() {
+		return errors.WithStack(ErrAuthenticatorNotEnabled.WithReasonf("Authenticator % is disabled per configuration.", a.GetID()))
+	}
+
+	if a.c.AuthenticatorOAuth2ClientCredentialsTokenURL() == nil {
+		return errors.WithStack(ErrAuthenticatorNotEnabled.WithReasonf(`Configuration for authenticator % did not specify any values for configuration key "%s" and is thus disabled.`, a.GetID(), configuration.ViperKeyAuthenticatorClientCredentialsTokenURL))
+	}
+
+	return nil
 }
 
 func (a *AuthenticatorOAuth2ClientCredentials) Authenticate(r *http.Request, config json.RawMessage, rl *rule.Rule) (*AuthenticationSession, error) {
@@ -70,7 +77,7 @@ func (a *AuthenticatorOAuth2ClientCredentials) Authenticate(r *http.Request, con
 		ClientID:     user,
 		ClientSecret: password,
 		Scopes:       cf.Scopes,
-		TokenURL:     a.tokenURL,
+		TokenURL:     a.c.AuthenticatorOAuth2ClientCredentialsTokenURL().String(),
 	}
 
 	token, err := c.Token(context.Background())

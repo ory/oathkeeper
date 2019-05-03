@@ -89,29 +89,67 @@ profiling: cpu
 authenticators:
   # Configures the anonymous authenticator
   anonymous:
-    # Set enabled to true if the authenticator should be enabled and false to disable the authenticator. Defaults to true.
+    # Set enabled to true if the authenticator should be enabled and false to disable the authenticator. Defaults to false.
     enabled: true
+
     # Sets the anonymous username. Defaults to "anonymous". Common names include "guest", "anon", "anonymous", "unknown".
     username: anonymous
 
   # Configures the jwt authenticator
   jwt:
-    # Set enabled to true if the authenticator should be enabled and false to disable the authenticator. Defaults to true.
+    # Set enabled to true if the authenticator should be enabled and false to disable the authenticator. Defaults to false.
     enabled: true
-    # Sets the strategy to be used to validate/match the scope. Supports "hierarchic", "exact", "wildcard", "none". Defaults
-    # to "exact".
-    scope_strategy: exact
-    # URIs to look up JSON Web Key Sets from for verifying JWT signatures.
-    jwks_uris:
+
+    # REQUIRED IF ENABLED - URIs to look up JSON Web Key Sets from for verifying JWT signatures.
+    jwks_urls:
       - https://my-website.com/.well-known/jwks.json
       - https://my-other-website.com/.well-known/jwks.json
 
+    # Sets the strategy to be used to validate/match the scope. Supports "hierarchic", "exact", "wildcard", "none". Defaults
+    # to "none".
+    scope_strategy: none
+
   # Configures the noop authenticator
   noop:
-    # Set enabled to true if the authenticator should be enabled and false to disable the authenticator. Defaults to true.
+    # Set enabled to true if the authenticator should be enabled and false to disable the authenticator. Defaults to false.
     enabled: true
 
   # Configures the oauth2_client_credentials authenticator
   oauth2_client_credentials:
+    # Set enabled to true if the authenticator should be enabled and false to disable the authenticator. Defaults to false.
+    enabled: true
 
+    # REQUIRED IF ENABLED - The OAuth 2.0 Token Endpoint that will be used to validate the client credentials.
+    token_url: https://my-website.com/oauth2/token
 
+  # Configures the oauth2_introspection authenticator
+  oauth2_introspection:
+    # Set enabled to true if the authenticator should be enabled and false to disable the authenticator. Defaults to false.
+    enabled: true
+
+    # REQUIRED IF ENABLED - The OAuth 2.0 Token Introspection endpoint.
+    introspection_url: https://my-website.com/oauth2/introspection
+
+    # Sets the strategy to be used to validate/match the token scope. Supports "hierarchic", "exact", "wildcard", "none". Defaults
+    # to "none".
+    scope_strategy: exact
+
+    # Enable pre-authorization in cases where the OAuth 2.0 Token Introspection endpoint is protected by OAuth 2.0 Bearer
+    # Tokens which can be retrieved using the OAuth 2.0 Client Credentials grant.
+    pre_authorization:
+      # Enable pre-authorization. Defaults to false.
+      enabled: true
+
+      # REQUIRED IF ENABLED - The OAuth 2.0 Client ID to be used for the OAuth 2.0 Client Credentials Grant.
+      client_id: some_id
+
+      # REQUIRED IF ENABLED - The OAuth 2.0 Client Secret to be used for the OAuth 2.0 Client Credentials Grant.
+      client_secret: some_secret
+
+      # REQUIRED IF ENABLED - The OAuth 2.0 Scope to be requested during the OAuth 2.0 Client Credentials Grant.
+      scope:
+        - foo
+        - bar
+
+      # REQUIRED IF ENABLED - The OAuth 2.0 Token Endpoint where the OAuth 2.0 Client Credentials Grant will be performed.
+      token_url: https://my-website.com/oauth2/token

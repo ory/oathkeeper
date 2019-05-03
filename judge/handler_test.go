@@ -39,7 +39,7 @@ func TestJudge(t *testing.T) {
 	matcher := &rule.CachedMatcher{Rules: map[string]rule.Rule{}}
 	rh := proxy.NewRequestHandler(
 		nil,
-		[]proxy.Authenticator{proxy.NewAuthenticatorNoOp(), proxy.NewAuthenticatorAnonymous("anonymous"), proxy.NewAuthenticatorBroken()},
+		[]proxy.Authenticator{proxy.NewAuthenticatorNoOp(), proxy.NewAuthenticatorAnonymous("anonymous"), proxy.NewAuthenticatorUnauthorized()},
 		[]proxy.Authorizer{proxy.NewAuthorizerAllow(), proxy.NewAuthorizerDeny()},
 		[]proxy.CredentialsIssuer{proxy.NewCredentialsIssuerNoOp(), proxy.NewCredentialsIssuerBroken()},
 	)

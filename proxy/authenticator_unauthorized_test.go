@@ -29,9 +29,9 @@ import (
 )
 
 func TestAuthenticatorBroken(t *testing.T) {
-	assert.NotNil(t, NewAuthenticatorBroken())
-	assert.NotEmpty(t, NewAuthenticatorBroken().GetID())
+	assert.NotNil(t, NewAuthenticatorUnauthorized())
+	assert.NotEmpty(t, NewAuthenticatorUnauthorized().GetID())
 
-	_, err := NewAuthenticatorBroken().Authenticate(&http.Request{Header: http.Header{}}, nil, nil)
+	_, err := NewAuthenticatorUnauthorized().Authenticate(&http.Request{Header: http.Header{}}, nil, nil)
 	require.Error(t, err)
 }

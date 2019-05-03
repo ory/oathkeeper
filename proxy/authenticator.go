@@ -2,6 +2,7 @@ package proxy
 
 import (
 	"encoding/json"
+	"github.com/ory/herodot"
 	"net/http"
 
 	"github.com/go-errors/errors"
@@ -10,11 +11,16 @@ import (
 )
 
 var ErrAuthenticatorNotResponsible = errors.New("Authenticator not responsible")
-var ErrAuthenticatorBypassed = errors.New("Authenticator is disabled")
+var ErrAuthenticatorNotEnabled = herodot.DefaultError{
+	ErrorField: "authenticator matching this route is misconfigured or disabled",
+	CodeField:   http.StatusInternalServerError,
+	StatusField: http.StatusText(http.StatusInternalServerError),
+}
 
 type Authenticator interface {
 	Authenticate(r *http.Request, config json.RawMessage, rl *rule.Rule) (*AuthenticationSession, error)
 	GetID() string
+	Validate() error
 }
 
 type AuthenticationSession struct {

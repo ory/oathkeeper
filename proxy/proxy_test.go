@@ -76,7 +76,7 @@ func TestProxy(t *testing.T) {
 
 	rh := NewRequestHandler(
 		nil,
-		[]Authenticator{NewAuthenticatorNoOp(), NewAuthenticatorAnonymous("anonymous"), NewAuthenticatorBroken()},
+		[]Authenticator{NewAuthenticatorNoOp(), NewAuthenticatorAnonymous("anonymous"), NewAuthenticatorUnauthorized()},
 		[]Authorizer{NewAuthorizerAllow(), NewAuthorizerDeny()},
 		[]CredentialsIssuer{NewCredentialsIssuerNoOp(), NewCredentialsIssuerBroken()},
 	)

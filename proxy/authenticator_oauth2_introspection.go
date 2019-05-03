@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/ory/oathkeeper/driver/configuration"
 	"net/http"
 	"net/url"
 	"strings"
@@ -32,14 +33,15 @@ type AuthenticatorOAuth2IntrospectionConfiguration struct {
 }
 
 type AuthenticatorOAuth2Introspection struct {
+	c configuration.Provider
+
 	client           *http.Client
 	introspectionURL string
 	scopeStrategy    fosite.ScopeStrategy
 }
 
 func NewAuthenticatorOAuth2Introspection(
-	clientID, clientSecret, tokenURL, introspectionURL string,
-	scopes []string, strategy fosite.ScopeStrategy,
+	c configuration.Provider,
 ) (*AuthenticatorOAuth2Introspection, error) {
 	if _, err := url.ParseRequestURI(introspectionURL); err != nil {
 		return new(AuthenticatorOAuth2Introspection), errors.Errorf(`unable to validate the OAuth 2.0 Introspection Authenticator's Token Introspection URL "%s" because %s`, introspectionURL, err)

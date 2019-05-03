@@ -20,6 +20,14 @@ func NewAuthenticatorAnonymous(c configuration.Provider) *AuthenticatorAnonymous
 	}
 }
 
+func (a *AuthenticatorAnonymous) Validate() error {
+	if !a.c.AuthenticatorAnonymousIsEnabled() {
+		return errors.WithStack(ErrAuthenticatorNotEnabled.WithReasonf("Authenticator % is disabled per configuration.", a.GetID()))
+	}
+
+	return nil
+}
+
 func (a *AuthenticatorAnonymous) GetID() string {
 	return "anonymous"
 }
