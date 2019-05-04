@@ -3,6 +3,7 @@
 **Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
 
 - [Change Log](#change-log)
+  - [v0.15.2 (2019-05-04)](#v0152-2019-05-04)
   - [v0.15.1 (2019-04-29)](#v0151-2019-04-29)
   - [v0.15.0 (2019-04-29)](#v0150-2019-04-29)
   - [v0.14.2+oryOS.10 (2018-12-13)](#v0142oryos10-2018-12-13)
@@ -60,6 +61,17 @@
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 # Change Log
+
+## [v0.15.2](https://github.com/ory/oathkeeper/tree/v0.15.2) (2019-05-04)
+[Full Changelog](https://github.com/ory/oathkeeper/compare/v0.15.1...v0.15.2)
+
+**Fixed bugs:**
+
+- Credential issuer config is base64 encoded [\#182](https://github.com/ory/oathkeeper/issues/182)
+
+**Merged pull requests:**
+
+- Fix json encode of config for "credentials\_issuer" and "authorizer" during import [\#184](https://github.com/ory/oathkeeper/pull/184) ([stszap](https://github.com/stszap))
 
 ## [v0.15.1](https://github.com/ory/oathkeeper/tree/v0.15.1) (2019-04-29)
 [Full Changelog](https://github.com/ory/oathkeeper/compare/v0.15.0...v0.15.1)
