@@ -92,12 +92,12 @@ Usage example:
 				Match:       &models.SwaggerRuleMatch{Methods: r.Match.Methods, URL: r.Match.URL},
 				Authorizer: &models.SwaggerRuleHandler{
 					Handler: r.Authorizer.Handler,
-					Config:  models.RawMessage(r.Authorizer.Config),
+					Config:  json.RawMessage(r.Authorizer.Config),
 				},
 				Authenticators: rh,
 				CredentialsIssuer: &models.SwaggerRuleHandler{
 					Handler: r.CredentialsIssuer.Handler,
-					Config:  models.RawMessage(r.CredentialsIssuer.Config),
+					Config:  json.RawMessage(r.CredentialsIssuer.Config),
 				},
 				Upstream: &models.Upstream{
 					URL:          r.Upstream.URL,
