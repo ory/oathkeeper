@@ -9,13 +9,13 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/ory/fosite"
-	"github.com/ory/go-convenience/stringslice"
-	"github.com/ory/hydra/sdk/go/hydra/swagger"
-	"github.com/ory/oathkeeper/helper"
-	"github.com/ory/oathkeeper/rule"
 	"github.com/pkg/errors"
 	"golang.org/x/oauth2/clientcredentials"
+
+	"github.com/ory/fosite"
+	"github.com/ory/go-convenience/stringslice"
+	"github.com/ory/oathkeeper/helper"
+	"github.com/ory/oathkeeper/rule"
 )
 
 type AuthenticatorOAuth2IntrospectionConfiguration struct {
@@ -76,7 +76,20 @@ func (a *AuthenticatorOAuth2Introspection) GetID() string {
 	return "oauth2_introspection"
 }
 
+type introspection struct {
+	Active    bool                   `json:"active"`
+	Extra     map[string]interface{} `json:"ext"`
+	Subject   string                 `json:"sub,omitempty"`
+	Username  string                 `json:"username"`
+	Audience  []string               `json:"aud"`
+	TokenType string                 `json:"token_type"`
+	Issuer    string                 `json:"iss"`
+	ClientID  string                 `json:"client_id,omitempty"`
+	Scope     string                 `json:"scope,omitempty"`
+}
+
 func (a *AuthenticatorOAuth2Introspection) Authenticate(r *http.Request, config json.RawMessage, rl *rule.Rule) (*AuthenticationSession, error) {
+	var i introspection
 	var cf AuthenticatorOAuth2IntrospectionConfiguration
 
 	if len(config) == 0 {
@@ -105,49 +118,48 @@ func (a *AuthenticatorOAuth2Introspection) Authenticate(r *http.Request, config 
 		return nil, errors.Errorf("Introspection returned status code %d but expected %d", resp.StatusCode, http.StatusOK)
 	}
 
-	var ir swagger.OAuth2TokenIntrospection
-	if err := json.NewDecoder(resp.Body).Decode(&ir); err != nil {
+	if err := json.NewDecoder(resp.Body).Decode(&i); err != nil {
 		return nil, errors.WithStack(err)
 	}
 
-	if len(ir.TokenType) > 0 && ir.TokenType != "access_token" {
-		return nil, errors.WithStack(helper.ErrForbidden.WithReason(fmt.Sprintf("Introspected token is not an access token but \"%s\"", ir.TokenType)))
+	if len(i.TokenType) > 0 && i.TokenType != "access_token" {
+		return nil, errors.WithStack(helper.ErrForbidden.WithReason(fmt.Sprintf("Introspected token is not an access token but \"%s\"", i.TokenType)))
 	}
 
-	if !ir.Active {
-		return nil, errors.WithStack(helper.ErrForbidden.WithReason("Access token introspection says token is not active"))
+	if !i.Active {
+		return nil, errors.WithStack(helper.ErrForbidden.WithReason("Access token i says token is not active"))
 	}
 
 	for _, audience := range cf.Audience {
-		if !stringslice.Has(ir.Aud, audience) {
+		if !stringslice.Has(i.Audience, audience) {
 			return nil, errors.WithStack(helper.ErrForbidden.WithReason(fmt.Sprintf("Token audience is not intended for target audience %s", audience)))
 		}
 	}
 
 	if len(cf.Issuers) > 0 {
-		if !stringslice.Has(cf.Issuers, ir.Iss) {
+		if !stringslice.Has(cf.Issuers, i.Issuer) {
 			return nil, errors.WithStack(helper.ErrForbidden.WithReason(fmt.Sprintf("Token issuer does not match any trusted issuer")))
 		}
 	}
 
 	if a.scopeStrategy != nil {
 		for _, scope := range cf.Scopes {
-			if !a.scopeStrategy(strings.Split(ir.Scope, " "), scope) {
+			if !a.scopeStrategy(strings.Split(i.Scope, " "), scope) {
 				return nil, errors.WithStack(helper.ErrForbidden.WithReason(fmt.Sprintf("Scope %s was not granted", scope)))
 			}
 		}
 	}
 
-	if len(ir.Ext) == 0 {
-		ir.Ext = map[string]interface{}{}
+	if len(i.Extra) == 0 {
+		i.Extra = map[string]interface{}{}
 	}
 
-	ir.Ext["username"] = ir.Username
-	ir.Ext["client_id"] = ir.ClientId
-	ir.Ext["scope"] = ir.Scope
+	i.Extra["username"] = i.Username
+	i.Extra["client_id"] = i.ClientID
+	i.Extra["scope"] = i.Scope
 
 	return &AuthenticationSession{
-		Subject: ir.Sub,
-		Extra:   ir.Ext,
+		Subject: i.Subject,
+		Extra:   i.Extra,
 	}, nil
 }

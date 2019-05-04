@@ -24,15 +24,18 @@ import (
 	"crypto/rsa"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
 	"testing"
 	"time"
 
-	"github.com/ory/dockertest"
-	"github.com/ory/hydra/sdk/go/hydra"
+	"github.com/ory/x/urlx"
+
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/ory/dockertest"
 )
 
 var resources []*dockertest.Resource
@@ -62,11 +65,7 @@ func TestManager(t *testing.T) {
 	}
 
 	if !testing.Short() {
-		sdk := connectToHydra(t)
-		managers["hydra"] = &HydraManager{
-			SDK: sdk,
-			Set: "test-key",
-		}
+		managers["hydra"] = NewHydraManager("test-key", http.DefaultClient, connectToHydra(t))
 	}
 
 	for k, m := range managers {
@@ -90,13 +89,9 @@ func TestManager(t *testing.T) {
 	}
 }
 
-func connectToHydra(t *testing.T) *hydra.CodeGenSDK {
-	if url := os.Getenv("TEST_HYDRA_ADMIN_URL"); url != "" {
-		sdk, err := hydra.NewSDK(&hydra.Configuration{
-			AdminURL: url,
-		})
-		require.NoError(t, err)
-		return sdk
+func connectToHydra(t *testing.T) *url.URL {
+	if u := os.Getenv("TEST_HYDRA_ADMIN_URL"); u != "" {
+		return urlx.ParseOrPanic(u)
 	}
 
 	var err error
@@ -137,10 +132,5 @@ func connectToHydra(t *testing.T) *hydra.CodeGenSDK {
 	}
 
 	resources = append(resources, resource)
-	sdk, err := hydra.NewSDK(&hydra.Configuration{
-		AdminURL:  "http://localhost:" + resource.GetPort("4445/tcp") + "/",
-		PublicURL: "http://localhost:" + resource.GetPort("4444/tcp") + "/",
-	})
-	require.NoError(t, err)
-	return sdk
+	return urlx.ParseOrPanic("http://localhost:" + resource.GetPort("4445/tcp") + "/")
 }

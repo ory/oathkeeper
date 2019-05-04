@@ -28,6 +28,6 @@ import (
 )
 
 type CredentialsIssuer interface {
-	Issue(r *http.Request, session *AuthenticationSession, config json.RawMessage, rl *rule.Rule) error
+	Issue(r *http.Request, session *AuthenticationSession, config json.RawMessage, rl *rule.Rule) (http.Header, error)
 	GetID() string
 }

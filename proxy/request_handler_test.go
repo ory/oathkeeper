@@ -24,19 +24,12 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
-	"regexp"
 	"testing"
 
-	"github.com/ory/ladon/compiler"
-	"github.com/ory/oathkeeper/rule"
 	"github.com/stretchr/testify/require"
-)
 
-func mustCompileRegex(t *testing.T, pattern string) *regexp.Regexp {
-	exp, err := compiler.CompileRegex(pattern, '<', '>')
-	require.NoError(t, err)
-	return exp
-}
+	"github.com/ory/oathkeeper/rule"
+)
 
 func mustGenerateURL(t *testing.T, u string) *url.URL {
 	up, err := url.Parse(u)
@@ -122,10 +115,11 @@ func TestRequestHandler(t *testing.T) {
 		},
 	} {
 		t.Run(fmt.Sprintf("case=%d", k), func(t *testing.T) {
+			_, err := tc.j.HandleRequest(tc.r, &tc.rule)
 			if tc.expectErr {
-				require.Error(t, tc.j.HandleRequest(tc.r, &tc.rule))
+				require.Error(t, err)
 			} else {
-				require.NoError(t, tc.j.HandleRequest(tc.r, &tc.rule))
+				require.NoError(t, err)
 			}
 		})
 	}

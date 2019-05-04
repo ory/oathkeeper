@@ -26,19 +26,19 @@ import (
 	"net/http"
 
 	"github.com/julienschmidt/httprouter"
-	"github.com/meatballhat/negroni-logrus"
-	"github.com/ory/go-convenience/corsx"
+	negronilogrus "github.com/meatballhat/negroni-logrus"
+	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
+	"github.com/urfave/negroni"
+
 	"github.com/ory/graceful"
 	"github.com/ory/herodot"
-	"github.com/ory/metrics-middleware"
 	"github.com/ory/oathkeeper/judge"
 	"github.com/ory/oathkeeper/proxy"
 	"github.com/ory/oathkeeper/rsakey"
 	"github.com/ory/oathkeeper/rule"
-	"github.com/rs/cors"
-	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
-	"github.com/urfave/negroni"
+	"github.com/ory/x/corsx"
+	"github.com/ory/x/metricsx"
 )
 
 // serveApiCmd represents the management command
@@ -107,27 +107,22 @@ HTTP CONTROLS
 		n := negroni.New()
 		n.Use(negronilogrus.NewMiddlewareFromLogger(logger, "oathkeeper-api"))
 
-		if ok, _ := cmd.Flags().GetBool("disable-telemetry"); !ok {
-			logger.Println("Transmission of telemetry data is enabled, to learn more go to: https://www.ory.sh/docs/guides/latest/telemetry/")
-
-			segmentMiddleware := metrics.NewMetricsManager(
-				metrics.Hash(viper.GetString("DATABASE_URL")),
-				viper.GetString("DATABASE_URL") != "memory",
-				"MSx9A6YQ1qodnkzEFOv22cxOmOCJXMFa",
-				[]string{"/rules", "/.well-known/jwks.json"},
-				logger,
-				"ory-oathkeeper-api",
-			)
-			go segmentMiddleware.RegisterSegment(Version, GitHash, BuildTime)
-			go segmentMiddleware.CommitMemoryStatistics()
-			n.Use(segmentMiddleware)
-		}
+		metrics := metricsx.New(cmd, logger,
+			&metricsx.Options{
+				Service:          "ory-oathkeeper",
+				ClusterID:        metricsx.Hash(viper.GetString("DATABASE_URL")),
+				IsDevelopment:    viper.GetString("DATABASE_URL") != "memory",
+				WriteKey:         "MSx9A6YQ1qodnkzEFOv22cxOmOCJXMFa",
+				WhitelistedPaths: []string{"/rules", "/.well-known/jwks.json", "/judge"},
+				BuildVersion:     Version,
+				BuildTime:        Date,
+				BuildHash:        Commit,
+			},
+		)
+		n.Use(metrics)
 
 		n.UseHandler(judgeHandler)
-		var h http.Handler = n
-		if viper.GetString("CORS_ENABLED") == "true" {
-			h = cors.New(corsx.ParseOptions()).Handler(n)
-		}
+		h := corsx.Initialize(n, logger, "")
 
 		go refreshKeys(keyManager, 0)
 		go refreshRules(matcher, 0)
@@ -153,13 +148,13 @@ HTTP CONTROLS
 
 		if err := graceful.Graceful(func() error {
 			if cert != nil {
-				logger.Printf("Listening on https://%s.\n", addr)
+				logger.Printf("Listening on https://%s", addr)
 				return server.ListenAndServeTLS("", "")
 			}
-			logger.Printf("Listening on http://%s.\n", addr)
+			logger.Printf("Listening on http://%s", addr)
 			return server.ListenAndServe()
 		}, server.Shutdown); err != nil {
-			logger.Fatalf("Unable to gracefully shutdown HTTP(s) server because %v.\n", err)
+			logger.Fatalf("Unable to gracefully shutdown HTTP(s) server because %v", err)
 			return
 		}
 		logger.Println("HTTP server was shutdown gracefully")

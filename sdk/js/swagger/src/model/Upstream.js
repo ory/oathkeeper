@@ -14,22 +14,25 @@
  *
  */
 
-;(function(root, factory) {
+(function(root, factory) {
   if (typeof define === 'function' && define.amd) {
     // AMD. Register as an anonymous module.
-    define(['ApiClient'], factory)
+    define(['ApiClient'], factory);
   } else if (typeof module === 'object' && module.exports) {
     // CommonJS-like environments that support module.exports, like Node.
-    module.exports = factory(require('../ApiClient'))
+    module.exports = factory(require('../ApiClient'));
   } else {
     // Browser globals (root is window)
     if (!root.OryOathkeeper) {
-      root.OryOathkeeper = {}
+      root.OryOathkeeper = {};
     }
-    root.OryOathkeeper.Upstream = factory(root.OryOathkeeper.ApiClient)
+    root.OryOathkeeper.Upstream = factory(root.OryOathkeeper.ApiClient);
   }
-})(this, function(ApiClient) {
-  'use strict'
+}(this, function(ApiClient) {
+  'use strict';
+
+
+
 
   /**
    * The Upstream model module.
@@ -39,12 +42,17 @@
 
   /**
    * Constructs a new <code>Upstream</code>.
+   * Upstream Upstream upstream
    * @alias module:model/Upstream
    * @class
    */
   var exports = function() {
-    var _this = this
-  }
+    var _this = this;
+
+
+
+
+  };
 
   /**
    * Constructs a <code>Upstream</code> from a plain JavaScript object, optionally creating a new instance.
@@ -55,42 +63,40 @@
    */
   exports.constructFromObject = function(data, obj) {
     if (data) {
-      obj = obj || new exports()
+      obj = obj || new exports();
 
       if (data.hasOwnProperty('preserve_host')) {
-        obj['preserve_host'] = ApiClient.convertToType(
-          data['preserve_host'],
-          'Boolean'
-        )
+        obj['preserve_host'] = ApiClient.convertToType(data['preserve_host'], 'Boolean');
       }
       if (data.hasOwnProperty('strip_path')) {
-        obj['strip_path'] = ApiClient.convertToType(
-          data['strip_path'],
-          'String'
-        )
+        obj['strip_path'] = ApiClient.convertToType(data['strip_path'], 'String');
       }
       if (data.hasOwnProperty('url')) {
-        obj['url'] = ApiClient.convertToType(data['url'], 'String')
+        obj['url'] = ApiClient.convertToType(data['url'], 'String');
       }
     }
-    return obj
+    return obj;
   }
 
   /**
    * PreserveHost, if false (the default), tells ORY Oathkeeper to set the upstream request's Host header to the hostname of the API's upstream's URL. Setting this flag to true instructs ORY Oathkeeper not to do so.
    * @member {Boolean} preserve_host
    */
-  exports.prototype['preserve_host'] = undefined
+  exports.prototype['preserve_host'] = undefined;
   /**
    * StripPath if set, replaces the provided path prefix when forwarding the requested URL to the upstream URL.
    * @member {String} strip_path
    */
-  exports.prototype['strip_path'] = undefined
+  exports.prototype['strip_path'] = undefined;
   /**
    * URL is the URL the request will be proxied to.
    * @member {String} url
    */
-  exports.prototype['url'] = undefined
+  exports.prototype['url'] = undefined;
 
-  return exports
-})
+
+
+  return exports;
+}));
+
+

@@ -24,9 +24,10 @@ import (
 	"net/url"
 	"sync"
 
+	"github.com/pkg/errors"
+
 	"github.com/ory/oathkeeper/helper"
 	"github.com/ory/oathkeeper/pkg"
-	"github.com/pkg/errors"
 )
 
 type CachedMatcher struct {
@@ -65,7 +66,7 @@ func (m *CachedMatcher) Refresh() error {
 	m.Lock()
 	defer m.Unlock()
 
-	rules, err := m.Manager.ListRules(pkg.RulesUpperLimit, 0)
+	rules, err := m.Manager.ListRules(int(pkg.RulesUpperLimit), 0)
 	if err != nil {
 		return errors.WithStack(err)
 	}

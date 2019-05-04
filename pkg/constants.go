@@ -20,4 +20,4 @@
 
 package pkg
 
-const RulesUpperLimit = 50000
+var RulesUpperLimit = int64(50000)

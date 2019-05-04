@@ -21,9 +21,10 @@
 package rule
 
 import (
-	"github.com/ory/oathkeeper/helper"
-	"github.com/ory/pagination"
 	"github.com/pkg/errors"
+
+	"github.com/ory/oathkeeper/helper"
+	"github.com/ory/x/pagination"
 )
 
 type MemoryManager struct {

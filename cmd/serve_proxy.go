@@ -25,19 +25,20 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httputil"
+	"net/url"
 
-	"github.com/meatballhat/negroni-logrus"
-	"github.com/ory/go-convenience/corsx"
-	"github.com/ory/graceful"
-	"github.com/ory/keto/sdk/go/keto"
-	"github.com/ory/metrics-middleware"
-	"github.com/ory/oathkeeper/proxy"
-	"github.com/ory/oathkeeper/rule"
-	"github.com/ory/oathkeeper/sdk/go/oathkeeper"
-	"github.com/rs/cors"
+	"github.com/ory/x/urlx"
+
+	negronilogrus "github.com/meatballhat/negroni-logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/urfave/negroni"
+
+	"github.com/ory/graceful"
+	"github.com/ory/oathkeeper/proxy"
+	"github.com/ory/oathkeeper/rule"
+	"github.com/ory/x/corsx"
+	"github.com/ory/x/metricsx"
 )
 
 // proxyCmd represents the proxy command
@@ -97,9 +98,9 @@ AUTHENTICATORS
 		--------------------------------------------------------------
 
 - OAuth 2.0 Token Introspection Authenticator:
-	- AUTHENTICATOR_OAUTH2_INTROSPECTION_INTROSPECT_URL: The OAuth 2.0 Token Introspection URL.
+	- AUTHENTICATOR_OAUTH2_INTROSPECTION_URL: The OAuth 2.0 Token Introspection URL.
 		--------------------------------------------------------------
-		Example: AUTHENTICATOR_OAUTH2_INTROSPECTION_INTROSPECT_URL=http://my-oauth2-server/oauth2/introspect
+		Example: AUTHENTICATOR_OAUTH2_INTROSPECTION_URL=http://my-oauth2-server/oauth2/introspect
 		--------------------------------------------------------------
 
 	- AUTHENTICATOR_OAUTH2_INTROSPECTION_SCOPE_STRATEGY: The strategy to be used to validate the scope claim.
@@ -142,10 +143,10 @@ AUTHORIZERS
 ==============
 
 - ORY Keto Warden Authorizer:
-	- AUTHORIZER_KETO_WARDEN_KETO_URL: The URL of ORY Keto's URL. If the value is empty, then the ORY Keto Warden Authorizer
+	- AUTHORIZER_KETO_URL: The URL of ORY Keto's URL. If the value is empty, then the ORY Keto Warden Authorizer
 		will be disabled.
 		--------------------------------------------------------------
-		Example: AUTHORIZER_KETO_WARDEN_KETO_URL=http://keto-url/
+		Example: AUTHORIZER_KETO_URL=http://keto-url/
 		--------------------------------------------------------------
 
 
@@ -181,9 +182,12 @@ OTHER CONTROLS
 
 ` + corsMessage,
 	Run: func(cmd *cobra.Command, args []string) {
-		oathkeeperSdk := oathkeeper.NewSDK(viper.GetString("OATHKEEPER_API_URL"))
+		u, err := url.ParseRequestURI(viper.GetString("OATHKEEPER_API_URL"))
+		if err != nil {
+			logger.WithError(err).Fatalf(`Value from environment variable "OATHKEEPER_API_URL" is not a valid URL: %s`, err)
+		}
 
-		matcher := rule.NewHTTPMatcher(oathkeeperSdk)
+		matcher := rule.NewHTTPMatcher(u)
 		if err := matcher.Refresh(); err != nil {
 			logger.WithError(err).Fatalln("Unable to refresh rules")
 		}
@@ -201,14 +205,8 @@ OTHER CONTROLS
 			proxy.NewAuthorizerDeny(),
 		}
 
-		if u := viper.GetString("AUTHORIZER_KETO_WARDEN_KETO_URL"); len(u) > 0 {
-			ketoSdk, err := keto.NewCodeGenSDK(&keto.Configuration{
-				EndpointURL: viper.GetString("AUTHORIZER_KETO_WARDEN_KETO_URL"),
-			})
-			if err != nil {
-				logger.WithError(err).Fatal("Unable to initialize the ORY Keto SDK")
-			}
-			authorizers = append(authorizers, proxy.NewAuthorizerKetoWarden(ketoSdk))
+		if u := viper.GetString("AUTHORIZER_KETO_URL"); len(u) > 0 {
+			authorizers = append(authorizers, proxy.NewAuthorizerKetoWarden(urlx.ParseOrFatal(logger, u)))
 		}
 
 		authenticators, authorizers, credentialIssuers := handlerFactories(keyManager)
@@ -222,27 +220,22 @@ OTHER CONTROLS
 		n := negroni.New()
 		n.Use(negronilogrus.NewMiddlewareFromLogger(logger, "oathkeeper-proxy"))
 
-		if ok, _ := cmd.Flags().GetBool("disable-telemetry"); !ok {
-			logger.Println("Transmission of telemetry data is enabled, to learn more go to: https://www.ory.sh/docs/guides/latest/telemetry/")
-
-			segmentMiddleware := metrics.NewMetricsManager(
-				metrics.Hash(viper.GetString("DATABASE_URL")),
-				viper.GetString("DATABASE_URL") != "memory",
-				"MSx9A6YQ1qodnkzEFOv22cxOmOCJXMFa",
-				[]string{"/"},
-				logger,
-				"ory-oathkeeper-proxy",
-			)
-			go segmentMiddleware.RegisterSegment(Version, GitHash, BuildTime)
-			go segmentMiddleware.CommitMemoryStatistics()
-			n.Use(segmentMiddleware)
-		}
+		metrics := metricsx.New(cmd, logger,
+			&metricsx.Options{
+				Service:          "ory-oathkeeper",
+				ClusterID:        metricsx.Hash(viper.GetString("DATABASE_URL")),
+				IsDevelopment:    viper.GetString("DATABASE_URL") != "memory",
+				WriteKey:         "MSx9A6YQ1qodnkzEFOv22cxOmOCJXMFa",
+				WhitelistedPaths: []string{"/"},
+				BuildVersion:     Version,
+				BuildTime:        Commit,
+				BuildHash:        Date,
+			},
+		)
+		n.Use(metrics)
 
 		n.UseHandler(handler)
-		var h http.Handler = n
-		if viper.GetString("CORS_ENABLED") == "true" {
-			h = cors.New(corsx.ParseOptions()).Handler(n)
-		}
+		h := corsx.Initialize(n, logger, "")
 
 		cert, err := getTLSCertAndKey()
 		if err != nil {
@@ -268,13 +261,13 @@ OTHER CONTROLS
 
 		if err := graceful.Graceful(func() error {
 			if cert != nil {
-				logger.Printf("Listening on https://%s.\n", addr)
+				logger.Printf("Listening on https://%s", addr)
 				return server.ListenAndServeTLS("", "")
 			}
-			logger.Printf("Listening on http://%s.\n", addr)
+			logger.Printf("Listening on http://%s", addr)
 			return server.ListenAndServe()
 		}, server.Shutdown); err != nil {
-			logger.Fatalf("Unable to gracefully shutdown HTTP(s) server because %v.\n", err)
+			logger.Fatalf("Unable to gracefully shutdown HTTP(s) server because %v", err)
 			return
 		}
 		logger.Println("HTTP(s) server was shutdown gracefully")

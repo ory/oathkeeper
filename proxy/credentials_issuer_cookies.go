@@ -7,8 +7,9 @@ import (
 	"net/http"
 	"text/template"
 
-	"github.com/ory/oathkeeper/rule"
 	"github.com/pkg/errors"
+
+	"github.com/ory/oathkeeper/rule"
 )
 
 type CredentialsCookiesConfig struct {
@@ -38,7 +39,7 @@ func (a *CredentialsCookies) GetID() string {
 	return "cookies"
 }
 
-func (a *CredentialsCookies) Issue(r *http.Request, session *AuthenticationSession, config json.RawMessage, rl *rule.Rule) error {
+func (a *CredentialsCookies) Issue(r *http.Request, session *AuthenticationSession, config json.RawMessage, rl *rule.Rule) (http.Header, error) {
 	if len(config) == 0 {
 		config = []byte("{}")
 	}
@@ -46,8 +47,7 @@ func (a *CredentialsCookies) Issue(r *http.Request, session *AuthenticationSessi
 	// Cache request cookies
 	requestCookies := r.Cookies()
 
-	// Remove existing cookies
-	r.Header.Del("Cookie")
+	req := http.Request{Header: map[string][]string{}}
 
 	// Keep track of rule cookies in a map
 	cookies := map[string]bool{}
@@ -56,7 +56,7 @@ func (a *CredentialsCookies) Issue(r *http.Request, session *AuthenticationSessi
 	d := json.NewDecoder(bytes.NewBuffer(config))
 	d.DisallowUnknownFields()
 	if err := d.Decode(&cfg); err != nil {
-		return errors.WithStack(err)
+		return nil, errors.WithStack(err)
 	}
 
 	for cookie, templateString := range cfg.Cookies {
@@ -68,17 +68,17 @@ func (a *CredentialsCookies) Issue(r *http.Request, session *AuthenticationSessi
 		if tmpl == nil {
 			tmpl, err = a.RulesCache.New(templateId).Parse(templateString)
 			if err != nil {
-				return errors.Wrapf(err, `error parsing cookie template "%s" in rule "%s"`, templateString, rl.ID)
+				return nil, errors.Wrapf(err, `error parsing cookie template "%s" in rule "%s"`, templateString, rl.ID)
 			}
 		}
 
 		cookieValue := bytes.Buffer{}
 		err = tmpl.Execute(&cookieValue, session)
 		if err != nil {
-			return errors.Wrapf(err, `error executing cookie template "%s" in rule "%s"`, templateString, rl.ID)
+			return nil, errors.Wrapf(err, `error executing cookie template "%s" in rule "%s"`, templateString, rl.ID)
 		}
 
-		r.AddCookie(&http.Cookie{
+		req.AddCookie(&http.Cookie{
 			Name:  cookie,
 			Value: cookieValue.String(),
 		})
@@ -91,9 +91,9 @@ func (a *CredentialsCookies) Issue(r *http.Request, session *AuthenticationSessi
 		// Test if cookie is handled by rule
 		if _, ok := cookies[cookie.Name]; !ok {
 			// Re-add cookie if not handled by rule
-			r.AddCookie(cookie)
+			req.AddCookie(cookie)
 		}
 	}
 
-	return nil
+	return req.Header, nil
 }

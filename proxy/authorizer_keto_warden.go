@@ -25,38 +25,43 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"net/url"
 	"text/template"
 	"time"
 
+	"github.com/ory/x/urlx"
+
 	"github.com/asaskevich/govalidator"
-	"github.com/ory/keto/sdk/go/keto"
-	"github.com/ory/keto/sdk/go/keto/swagger"
-	"github.com/ory/oathkeeper/helper"
-	"github.com/ory/oathkeeper/rule"
 	"github.com/pkg/errors"
 	"github.com/tomasen/realip"
+
+	"github.com/ory/oathkeeper/helper"
+	"github.com/ory/oathkeeper/rule"
 )
 
 type AuthorizerKetoWardenConfiguration struct {
 	RequiredAction   string `json:"required_action" valid:",required"`
 	RequiredResource string `json:"required_resource" valid:",required"`
 	Subject          string `json:"subject"`
+	Flavor           string `json:"flavor"`
 }
 
 type AuthorizerKetoWarden struct {
-	K              keto.WardenSDK
+	c              *http.Client
 	contextCreator authorizerKetoWardenContext
+	baseURL        *url.URL
 }
 
-func NewAuthorizerKetoWarden(k keto.WardenSDK) *AuthorizerKetoWarden {
+func NewAuthorizerKetoWarden(baseURL *url.URL) *AuthorizerKetoWarden {
 	return &AuthorizerKetoWarden{
-		K:              k,
+		c:              &http.Client{Timeout: time.Second * 5},
+		baseURL:        baseURL,
 		contextCreator: contextFromRequest,
 	}
 }
 
 func (a *AuthorizerKetoWarden) GetID() string {
-	return "keto_warden"
+	return "keto_engine_acp_ory"
 }
 
 type authorizerKetoWardenContext func(r *http.Request) map[string]interface{}
@@ -66,6 +71,13 @@ func contextFromRequest(r *http.Request) map[string]interface{} {
 		"remoteIpAddress": realip.RealIP(r),
 		"requestedAt":     time.Now().UTC(),
 	}
+}
+
+type ketoWardenInput struct {
+	Action   string                 `json:"action"`
+	Context  map[string]interface{} `json:"context"`
+	Resource string                 `json:"resource"`
+	Subject  string                 `json:"subject"`
 }
 
 func (a *AuthorizerKetoWarden) Authorize(r *http.Request, session *AuthenticationSession, config json.RawMessage, rl *rule.Rule) error {
@@ -101,23 +113,46 @@ func (a *AuthorizerKetoWarden) Authorize(r *http.Request, session *Authenticatio
 		}
 	}
 
-	defaultSession, response, err := a.K.IsSubjectAuthorized(swagger.WardenSubjectAuthorizationRequest{
+	flavor := "regex"
+	if len(cf.Flavor) > 0 {
+		flavor = cf.Flavor
+	}
+
+	var b bytes.Buffer
+	if err := json.NewEncoder(&b).Encode(&ketoWardenInput{
 		Action:   compiled.ReplaceAllString(r.URL.String(), cf.RequiredAction),
 		Resource: compiled.ReplaceAllString(r.URL.String(), cf.RequiredResource),
 		Context:  a.contextCreator(r),
 		Subject:  subject,
-	})
+	}); err != nil {
+		return errors.WithStack(err)
+	}
+	req, err := http.NewRequest("POST", urlx.AppendPaths(a.baseURL, "/engines/acp/ory", flavor, "/allowed").String(), &b)
 	if err != nil {
 		return errors.WithStack(err)
 	}
-	if response.StatusCode != http.StatusOK {
-		return errors.Errorf("Expected status code %d but got %d", http.StatusOK, response.StatusCode)
+
+	res, err := a.c.Do(req)
+	if err != nil {
+		return errors.WithStack(err)
 	}
-	if defaultSession == nil {
-		return errors.WithStack(helper.ErrUnauthorized)
+	defer res.Body.Close()
+
+	if res.StatusCode == http.StatusForbidden {
+		return errors.WithStack(helper.ErrForbidden)
+	} else if res.StatusCode != http.StatusOK {
+		return errors.Errorf("expected status code %d but got %d", http.StatusOK, res.StatusCode)
 	}
-	if !defaultSession.Allowed {
-		return errors.WithStack(helper.ErrUnauthorized)
+
+	var result struct {
+		Allowed bool `json:"allowed"`
+	}
+	if err := json.NewDecoder(res.Body).Decode(&result); err != nil {
+		return errors.WithStack(err)
+	}
+
+	if !result.Allowed {
+		return errors.WithStack(helper.ErrForbidden)
 	}
 
 	return nil

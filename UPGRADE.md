@@ -8,7 +8,16 @@ before finalizing the upgrade process.
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
 
-- [1.0.0-beta.2](#100-beta2)
+- [Most recent release](#most-recent-release)
+  - [Refresh Configuration](#refresh-configuration)
+- [v0.13.9+oryOS.9](#v0139oryos9)
+  - [Refresh Configuration](#refresh-configuration-1)
+  - [Scope Matching](#scope-matching)
+  - [Configuration changes](#configuration-changes)
+  - [CORS is disabled by default](#cors-is-disabled-by-default)
+- [v0.13.8+oryOS.8](#v0138oryos8)
+  - [`noop` authenticator no longer bypasses authorizers/credentials issuers](#noop-authenticator-no-longer-bypasses-authorizerscredentials-issuers)
+- [v0.13.2+oryOS.2](#v0132oryos2)
   - [Changes to the CLI](#changes-to-the-cli)
     - [`migrate`](#migrate)
   - [Not compatible with ORY Hydra < 1.0.0](#not-compatible-with-ory-hydra--100)
@@ -18,12 +27,51 @@ before finalizing the upgrade process.
 
 ## master
 
-### Refresh Configuration
+## v0.15.0+oryOS.10
 
-Environment variables `HTTP_TLS_xxx` are now called
-`HTTPS_TLS_xxx`.
+### New Go SDK Generator
 
-## 1.0.0-beta.9
+The ORY Oathkeeper Go SDK is no being generated using [`go-swagger`](https://github.com/go-swagger/go-swagger) instead of
+[`swagger-codegen`](https://github.com/go-swagger/go-swagger). If you have questions regarding upgrading, please open an issue.
+
+## v0.14.0+oryOS.10
+
+### Changes to the ORY Keto Authorizer
+
+As ORY Keto's API and scope have changed, the `keto_warden` authorizer has changed as well. The most important
+change is that the identifier changed from `keto_warden` to `keto_engine_acp_ory`. This reflects the new ORY Keto concept
+which supports different engines. The functionality of the authorizer itself remains the same. A new configuration
+option called `flavor` was added, which sets what flavor (e.g. `regex`, `exact`, ...). Here's an exemplary diff
+of a rule using `keto_warden`
+
+```
+{
+  "id": "...",
+  "upstream": ...,
+  "match": ...,
+  "authenticators": ...,
+  "authorizer": {
+-    "handler": "keto_warden",
++    "handler": "keto_engine_acp_ory",
+    "config": {
+      "required_action": "...",
+      "required_resource": ...",
+      "subject": ...",
++      "flavor": "exact" (optional, defaults to `regex`)
+    }
+  },
+  "credentials_issuer": ...
+}
+```
+
+As part of this change, environment variable `AUTHORIZER_KETO_WARDEN_KETO_URL` was renamed to `AUTHORIZER_KETO_URL`.
+
+### Environment variables
+
+- Environment variables `HTTP_TLS_xxx` are now called `HTTPS_TLS_xxx`.
+- Environment variable `AUTHORIZER_KETO_WARDEN_KETO_URL` is now `AUTHORIZER_KETO_URL`.
+
+## v0.13.9+oryOS.9
 
 ### Refresh Configuration
 
@@ -66,7 +114,7 @@ And the following environment variables have changed:
 A new environment variable `CORS_ENABLED` was introduced. It sets whether CORS is enabled ("true") or not ("false")".
 Default is disabled.
 
-## 1.0.0-beta.8
+## v0.13.8+oryOS.8
 
 ### `noop` authenticator no longer bypasses authorizers/credentials issuers
 
@@ -75,7 +123,7 @@ set.
 
 Previously, the `noop` authenticator bypassed the authorizer and credential issuers. This patch changes that.
 
-## 1.0.0-beta.2
+## v0.13.2+oryOS.2
 
 This release introduces serious breaking changes. If you are upgrading, you will - unfortunately - need to
 re-create the database schema and migrate your rules manually. While this is frustrating, there are a ton of features

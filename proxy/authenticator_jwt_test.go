@@ -33,11 +33,12 @@ import (
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
-	"github.com/ory/fosite"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"gopkg.in/square/go-jose.v2"
+
+	"github.com/ory/fosite"
 )
 
 var keys = map[string]interface{}{"HS256": []byte("some-secret")}
@@ -134,6 +135,28 @@ func TestAuthenticatorJWT(t *testing.T) {
 				"aud":   []string{"aud-1", "aud-2"},
 				"iss":   "iss-2",
 				"scope": []string{"scope-3", "scope-2", "scope-1"},
+			}, "RS256")}}},
+			config:    `{"target_audience": ["aud-1", "aud-2"], "trusted_issuers": ["iss-1", "iss-2"], "required_scope": ["scope-1", "scope-2"]}`,
+			expectErr: false,
+			expectSess: &AuthenticationSession{
+				Subject: "sub",
+				Extra: map[string]interface{}{
+					"sub":   "sub",
+					"exp":   float64(now.Add(time.Hour).Unix()),
+					"aud":   []interface{}{"aud-1", "aud-2"},
+					"iss":   "iss-2",
+					"scope": []interface{}{"scope-3", "scope-2", "scope-1"},
+				},
+			},
+		},
+		{
+			d: "should pass because JWT scope can be a string",
+			r: &http.Request{Header: http.Header{"Authorization": []string{"bearer " + generateJWT(t, jwt.MapClaims{
+				"sub":   "sub",
+				"exp":   now.Add(time.Hour).Unix(),
+				"aud":   []string{"aud-1", "aud-2"},
+				"iss":   "iss-2",
+				"scope": "scope-3 scope-2 scope-1",
 			}, "RS256")}}},
 			config:    `{"target_audience": ["aud-1", "aud-2"], "trusted_issuers": ["iss-1", "iss-2"], "required_scope": ["scope-1", "scope-2"]}`,
 			expectErr: false,
@@ -254,6 +277,28 @@ func TestAuthenticatorJWT(t *testing.T) {
 			if tc.expectSess != nil {
 				assert.Equal(t, tc.expectSess, session)
 			}
+		})
+	}
+}
+
+func TestGetScopeClaim(t *testing.T) {
+	for k, tc := range []struct {
+		i map[string]interface{}
+		e []string
+	}{
+		{i: map[string]interface{}{}, e: []string{}},
+		{i: map[string]interface{}{"scp": "foo bar"}, e: []string{"foo", "bar"}},
+		{i: map[string]interface{}{"scope": "foo bar"}, e: []string{"foo", "bar"}},
+		{i: map[string]interface{}{"scopes": "foo bar"}, e: []string{"foo", "bar"}},
+		{i: map[string]interface{}{"scp": []string{"foo", "bar"}}, e: []string{"foo", "bar"}},
+		{i: map[string]interface{}{"scope": []string{"foo", "bar"}}, e: []string{"foo", "bar"}},
+		{i: map[string]interface{}{"scopes": []string{"foo", "bar"}}, e: []string{"foo", "bar"}},
+		{i: map[string]interface{}{"scp": []interface{}{"foo", "bar"}}, e: []string{"foo", "bar"}},
+		{i: map[string]interface{}{"scope": []interface{}{"foo", "bar"}}, e: []string{"foo", "bar"}},
+		{i: map[string]interface{}{"scopes": []interface{}{"foo", "bar"}}, e: []string{"foo", "bar"}},
+	} {
+		t.Run(fmt.Sprintf("case=%d", k), func(t *testing.T) {
+			assert.EqualValues(t, tc.e, getScopeClaim(tc.i))
 		})
 	}
 }

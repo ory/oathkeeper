@@ -27,11 +27,12 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
+
 	"github.com/ory/herodot"
 	"github.com/ory/oathkeeper/rsakey"
 	"github.com/ory/oathkeeper/rule"
-	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
 )
 
 func NewProxy(handler *RequestHandler, logger logrus.FieldLogger, matcher rule.Matcher) *Proxy {
@@ -117,9 +118,14 @@ func (d *Proxy) Director(r *http.Request) {
 		return
 	}
 
-	if err := d.RequestHandler.HandleRequest(r, rl); err != nil {
+	headers, err := d.RequestHandler.HandleRequest(r, rl)
+	if err != nil {
 		*r = *r.WithContext(context.WithValue(r.Context(), director, err))
 		return
+	}
+
+	for h := range headers {
+		r.Header.Set(h, headers.Get(h))
 	}
 
 	if err := configureBackendURL(r, rl); err != nil {

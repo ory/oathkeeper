@@ -61,7 +61,8 @@ This service is stable, but under active development and may introduce breaking 
 
 ## Installation
 
-There are various ways of installing ORY Oathkeeper on your system.
+Head over to the [ORY Developer Documentation](https://www.ory.sh/docs/oathkeeper/install) to learn how to install ORY
+Oathkeeper on Linux, macOS, Windows, and Docker and how to build ORY Oathkeeper from source.
 
 ### Download binaries
 
@@ -86,8 +87,7 @@ ec91228cb105db315553499c81918258f52cee9636ea2a4821bdb8226872f54b
 
 ### Building from source
 
-If you wish to compile ORY Oathkeeper yourself, you need to install and set up [Go 1.10+](https://golang.org/) and add `$GOPATH/bin`
-to your `$PATH` as well as [golang/dep](http://github.com/golang/dep).
+If you wish to compile ORY Oathkeeper yourself, you need to install and set up [Go 1.11+](https://golang.org/).
 
 The following commands will check out the latest release tag of ORY Oathkeeper and compile it and set up flags so that `oathkeeper version`
 works as expected. Please note that this will only work with a linux shell like bash or sh.
@@ -97,12 +97,11 @@ go get -d -u github.com/ory/oathkeeper
 cd $(go env GOPATH)/src/github.com/ory/oathkeeper
 OATHKEEPER_LATEST=$(git describe --abbrev=0 --tags)
 git checkout $OATHKEEPER_LATEST
-dep ensure -vendor-only
-go install \
+GO111MODULE=on go install \
     -ldflags "-X github.com/ory/oathkeeper/cmd.Version=$OATHKEEPER_LATEST -X github.com/ory/oathkeeper/cmd.BuildTime=`TZ=UTC date -u '+%Y-%m-%dT%H:%M:%SZ'` -X github.com/ory/oathkeeper/cmd.GitHash=`git rev-parse HEAD`" \
     github.com/ory/oathkeeper
 git checkout master
-oathkeeper help
+$GOPATH/bin/oathkeeper help
 ```
 
 ## Ecosystem
@@ -187,7 +186,8 @@ Thank you to all our backers! 🙏 [[Become a backer](https://opencollective.com
 
 <a href="https://opencollective.com/ory#backers" target="_blank"><img src="https://opencollective.com/ory/backers.svg?width=890"></a>
 
-We would also like to thank (past & current) supporters (in alphabetical order) on [Patreon](https://www.patreon.com/_ory): Alexander Alimovs, Chancy Kennedy, Drozzy, Oz Haven, TheCrealm
+We would also like to thank (past & current) supporters (in alphabetical order) on [Patreon](https://www.patreon.com/_ory): Alexander Alimovs, Billy, Chancy Kennedy, Drozzy, Edwin Trejos, Howard Edidin, Ken Adler Oz Haven, Stefan Hans, TheCrealm
+
 
 ## Sponsors
 

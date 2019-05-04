@@ -26,11 +26,11 @@ import (
 	"testing"
 
 	"github.com/julienschmidt/httprouter"
-	"github.com/ory/herodot"
-	"github.com/ory/oathkeeper/sdk/go/oathkeeper"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/ory/herodot"
 )
 
 var testRules = []Rule{
@@ -100,9 +100,12 @@ func TestMatcher(t *testing.T) {
 	handler.SetRoutes(router)
 	server := httptest.NewServer(router)
 
+	u, err := url.ParseRequestURI(server.URL)
+	require.NoError(t, err)
+
 	matchers := map[string]Matcher{
 		"memory": NewCachedMatcher(manager),
-		"http":   NewHTTPMatcher(oathkeeper.NewSDK(server.URL)),
+		"http":   NewHTTPMatcher(u),
 	}
 
 	var testMatcher = func(t *testing.T, matcher Matcher, method string, url string, expectErr bool, expect *Rule) {

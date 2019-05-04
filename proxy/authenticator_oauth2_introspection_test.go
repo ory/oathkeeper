@@ -28,10 +28,10 @@ import (
 	"testing"
 
 	"github.com/julienschmidt/httprouter"
-	"github.com/ory/fosite"
-	"github.com/ory/hydra/sdk/go/hydra/swagger"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/ory/fosite"
 )
 
 func TestNewAuthenticatorOAuth2Introspection(t *testing.T) {
@@ -85,13 +85,13 @@ func TestAuthenticatorOAuth2Introspection(t *testing.T) {
 				m.POST("/oauth2/introspect", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 					require.NoError(t, r.ParseForm())
 					require.Equal(t, "token", r.Form.Get("token"))
-					require.NoError(t, json.NewEncoder(w).Encode(&swagger.OAuth2TokenIntrospection{
+					require.NoError(t, json.NewEncoder(w).Encode(&introspection{
 						Active:   false,
-						Sub:      "subject",
-						Aud:      []string{"audience"},
-						Iss:      "issuer",
+						Subject:  "subject",
+						Audience: []string{"audience"},
+						Issuer:   "issuer",
 						Username: "username",
-						Ext:      map[string]interface{}{"extra": "foo"},
+						Extra:    map[string]interface{}{"extra": "foo"},
 					}))
 				})
 			},
@@ -105,13 +105,13 @@ func TestAuthenticatorOAuth2Introspection(t *testing.T) {
 				m.POST("/oauth2/introspect", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 					require.NoError(t, r.ParseForm())
 					require.Equal(t, "token", r.Form.Get("token"))
-					require.NoError(t, json.NewEncoder(w).Encode(&swagger.OAuth2TokenIntrospection{
+					require.NoError(t, json.NewEncoder(w).Encode(&introspection{
 						Active:   true,
-						Sub:      "subject",
-						Aud:      []string{"audience"},
-						Iss:      "issuer",
+						Subject:  "subject",
+						Audience: []string{"audience"},
+						Issuer:   "issuer",
 						Username: "username",
-						Ext:      map[string]interface{}{"extra": "foo"},
+						Extra:    map[string]interface{}{"extra": "foo"},
 					}))
 				})
 			},
@@ -126,13 +126,13 @@ func TestAuthenticatorOAuth2Introspection(t *testing.T) {
 					require.NoError(t, r.ParseForm())
 					require.Equal(t, "token", r.Form.Get("token"))
 					require.Equal(t, "scope-a scope-b", r.Form.Get("scope"))
-					require.NoError(t, json.NewEncoder(w).Encode(&swagger.OAuth2TokenIntrospection{
+					require.NoError(t, json.NewEncoder(w).Encode(&introspection{
 						Active:   true,
-						Sub:      "subject",
-						Aud:      []string{"audience"},
-						Iss:      "issuer",
+						Subject:  "subject",
+						Audience: []string{"audience"},
+						Issuer:   "issuer",
 						Username: "username",
-						Ext:      map[string]interface{}{"extra": "foo"},
+						Extra:    map[string]interface{}{"extra": "foo"},
 						Scope:    "scope-a scope-b",
 					}))
 				})
@@ -148,13 +148,13 @@ func TestAuthenticatorOAuth2Introspection(t *testing.T) {
 					require.NoError(t, r.ParseForm())
 					require.Equal(t, "token", r.Form.Get("token"))
 					require.Equal(t, "scope-a scope-b scope-c", r.Form.Get("scope"))
-					require.NoError(t, json.NewEncoder(w).Encode(&swagger.OAuth2TokenIntrospection{
+					require.NoError(t, json.NewEncoder(w).Encode(&introspection{
 						Active:   true,
-						Sub:      "subject",
-						Aud:      []string{"audience"},
-						Iss:      "issuer",
+						Subject:  "subject",
+						Audience: []string{"audience"},
+						Issuer:   "issuer",
 						Username: "username",
-						Ext:      map[string]interface{}{"extra": "foo"},
+						Extra:    map[string]interface{}{"extra": "foo"},
 						Scope:    "scope-a scope-b",
 					}))
 				})
@@ -168,14 +168,14 @@ func TestAuthenticatorOAuth2Introspection(t *testing.T) {
 			setup: func(t *testing.T, m *httprouter.Router) {
 				m.POST("/oauth2/introspect", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 					require.NoError(t, r.ParseForm())
-					require.NoError(t, json.NewEncoder(w).Encode(&swagger.OAuth2TokenIntrospection{
+					require.NoError(t, json.NewEncoder(w).Encode(&introspection{
 						Active:   true,
 						Scope:    "scope-a",
-						Sub:      "subject",
-						Aud:      []string{"audience"},
-						Iss:      "not-foo",
+						Subject:  "subject",
+						Audience: []string{"audience"},
+						Issuer:   "not-foo",
 						Username: "username",
-						Ext:      map[string]interface{}{"extra": "foo"},
+						Extra:    map[string]interface{}{"extra": "foo"},
 					}))
 				})
 			},
@@ -188,14 +188,14 @@ func TestAuthenticatorOAuth2Introspection(t *testing.T) {
 			setup: func(t *testing.T, m *httprouter.Router) {
 				m.POST("/oauth2/introspect", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 					require.NoError(t, r.ParseForm())
-					require.NoError(t, json.NewEncoder(w).Encode(&swagger.OAuth2TokenIntrospection{
+					require.NoError(t, json.NewEncoder(w).Encode(&introspection{
 						Active:   true,
 						Scope:    "scope-a",
-						Sub:      "subject",
-						Aud:      []string{"audience"},
-						Iss:      "foo",
+						Subject:  "subject",
+						Audience: []string{"audience"},
+						Issuer:   "foo",
 						Username: "username",
-						Ext:      map[string]interface{}{"extra": "foo"},
+						Extra:    map[string]interface{}{"extra": "foo"},
 					}))
 				})
 			},
@@ -208,14 +208,14 @@ func TestAuthenticatorOAuth2Introspection(t *testing.T) {
 			setup: func(t *testing.T, m *httprouter.Router) {
 				m.POST("/oauth2/introspect", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 					require.NoError(t, r.ParseForm())
-					require.NoError(t, json.NewEncoder(w).Encode(&swagger.OAuth2TokenIntrospection{
+					require.NoError(t, json.NewEncoder(w).Encode(&introspection{
 						Active:   true,
 						Scope:    "scope-a",
-						Sub:      "subject",
-						Aud:      []string{"not-audience"},
-						Iss:      "foo",
+						Subject:  "subject",
+						Audience: []string{"not-audience"},
+						Issuer:   "foo",
 						Username: "username",
-						Ext:      map[string]interface{}{"extra": "foo"},
+						Extra:    map[string]interface{}{"extra": "foo"},
 					}))
 				})
 			},
@@ -228,14 +228,14 @@ func TestAuthenticatorOAuth2Introspection(t *testing.T) {
 			setup: func(t *testing.T, m *httprouter.Router) {
 				m.POST("/oauth2/introspect", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 					require.NoError(t, r.ParseForm())
-					require.NoError(t, json.NewEncoder(w).Encode(&swagger.OAuth2TokenIntrospection{
+					require.NoError(t, json.NewEncoder(w).Encode(&introspection{
 						Active:   true,
 						Scope:    "scope-a",
-						Sub:      "subject",
-						Aud:      []string{"audience"},
-						Iss:      "foo",
+						Subject:  "subject",
+						Audience: []string{"audience"},
+						Issuer:   "foo",
 						Username: "username",
-						Ext:      map[string]interface{}{"extra": "foo"},
+						Extra:    map[string]interface{}{"extra": "foo"},
 					}))
 				})
 			},

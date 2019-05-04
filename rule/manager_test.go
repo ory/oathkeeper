@@ -25,11 +25,12 @@ import (
 
 	_ "github.com/go-sql-driver/mysql"
 	_ "github.com/lib/pq"
-	"github.com/ory/oathkeeper/helper"
-	"github.com/ory/oathkeeper/pkg"
-	"github.com/ory/sqlcon/dockertest"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/ory/oathkeeper/helper"
+	"github.com/ory/oathkeeper/pkg"
+	"github.com/ory/x/sqlcon/dockertest"
 )
 
 func TestMain(m *testing.M) {
@@ -88,7 +89,7 @@ func TestManagers(t *testing.T) {
 			}
 			assert.EqualValues(t, &r3, result)
 
-			results, err := manager.ListRules(pkg.RulesUpperLimit, 0)
+			results, err := manager.ListRules(int(pkg.RulesUpperLimit), 0)
 			require.NoError(t, err)
 			assert.Len(t, results, 3)
 			assert.True(t, results[0].ID != results[1].ID)
@@ -106,7 +107,7 @@ func TestManagers(t *testing.T) {
 
 			require.NoError(t, manager.DeleteRule(r1.ID))
 
-			results, err = manager.ListRules(pkg.RulesUpperLimit, 0)
+			results, err = manager.ListRules(int(pkg.RulesUpperLimit), 0)
 			require.NoError(t, err)
 			assert.Len(t, results, 2)
 			assert.True(t, results[0].ID != r1.ID)

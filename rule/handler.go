@@ -25,12 +25,13 @@ import (
 	"net/http"
 
 	"github.com/julienschmidt/httprouter"
+	"github.com/pborman/uuid"
+	"github.com/pkg/errors"
+
 	"github.com/ory/herodot"
 	"github.com/ory/oathkeeper/helper"
 	"github.com/ory/oathkeeper/pkg"
-	"github.com/ory/pagination"
-	"github.com/pborman/uuid"
-	"github.com/pkg/errors"
+	"github.com/ory/x/pagination"
 )
 
 type Handler struct {
@@ -118,7 +119,7 @@ func (h *Handler) Create(w http.ResponseWriter, r *http.Request, _ httprouter.Pa
 //       403: genericError
 //       500: genericError
 func (h *Handler) List(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-	limit, offset := pagination.Parse(r, 100, 0, pkg.RulesUpperLimit)
+	limit, offset := pagination.Parse(r, 100, 0, int(pkg.RulesUpperLimit))
 	rules, err := h.M.ListRules(limit, offset)
 	if err != nil {
 		h.H.WriteError(w, r, err)

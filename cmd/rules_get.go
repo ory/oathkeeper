@@ -22,10 +22,11 @@ package cmd
 
 import (
 	"fmt"
-	"net/http"
 
-	"github.com/ory/oathkeeper/sdk/go/oathkeeper"
 	"github.com/spf13/cobra"
+
+	"github.com/ory/oathkeeper/sdk/go/oathkeeper/client/rule"
+	"github.com/ory/x/cmdx"
 )
 
 // getCmd represents the get command
@@ -44,10 +45,10 @@ var getCmd = &cobra.Command{
 			fatalf("Please specify the rule id, for more information use `oathkeeper help rules get`")
 		}
 
-		client := oathkeeper.NewSDK(endpoint)
-		rule, response, err := client.GetRule(args[0])
-		checkResponse(response, err, http.StatusOK)
-		fmt.Println(formatResponse(rule))
+		client := newClient(cmd)
+		r, err := client.Rule.GetRule(rule.NewGetRuleParams().WithID(args[0]))
+		cmdx.Must(err, "%s", err)
+		fmt.Println(formatResponse(r))
 	},
 }
 

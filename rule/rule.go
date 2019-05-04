@@ -22,13 +22,15 @@ package rule
 
 import (
 	"encoding/json"
+	"fmt"
 	"hash/crc32"
 	"net/url"
 	"regexp"
 	"strings"
 
-	"github.com/ory/ladon/compiler"
 	"github.com/pkg/errors"
+
+	"github.com/ory/ladon/compiler"
 )
 
 type RuleMatch struct {
@@ -124,7 +126,7 @@ func (r *Rule) IsMatching(method string, u *url.URL) error {
 		return errors.WithStack(err)
 	}
 
-	if !c.MatchString(u.String()) {
+	if !c.MatchString(fmt.Sprintf("%s://%s%s", u.Scheme, u.Host, u.Path)) {
 		return errors.Errorf("rule %s does not match URL %s", r.ID, u)
 	}
 

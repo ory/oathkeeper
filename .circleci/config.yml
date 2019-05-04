@@ -5,34 +5,46 @@ version: 2
 jobs:
   format:
     docker:
-      - image: circleci/golang:1.10
+    - image: circleci/golang:1.12
     working_directory: /go/src/github.com/ory/oathkeeper
     steps:
+      # This is disabled for now because goimports is really slow when go modules are used, see
+      # https://github.com/golang/go/issues/27287
+      #
+      #      - run:
+      #          name: Enable go1.12 modules
+      #          command: |
+      #            echo 'export GO111MODULE=on' >> $BASH_ENV
+      #            source $BASH_ENV
       - checkout
-      - run: curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
-      - run: go get -u golang.org/x/tools/cmd/goimports
-      - run: dep ensure -vendor-only
-      - run: ./scripts/test-format.sh
+      - run:
+          name: Enable go1.12 modules
+          command: |
+            echo 'export GO111MODULE=on' >> $BASH_ENV
+            source $BASH_ENV
+      - run: curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | sh -s -- -b $(go env GOPATH)/bin v1.16.0
+      - run: go mod download
+      - run: golangci-lint run ./...
 
-  swagger:
-    docker:
-      - image: circleci/golang:1.10
-    working_directory: /go/src/github.com/ory/oathkeeper
-    steps:
-      - checkout
-      - run: curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
-      - run: go get -u github.com/go-swagger/go-swagger/cmd/swagger golang.org/x/tools/cmd/goimports
-      - run: dep ensure -vendor-only
-      - run: ./scripts/run-genswag.sh
+#  swagger:
+#    docker:
+#      - image: circleci/golang:1.12
+#    working_directory: /go/src/github.com/ory/oathkeeper
+#    steps:
+#      - checkout
+#      - run: curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
+#      - run: go get -u github.com/go-swagger/go-swagger/cmd/swagger golang.org/x/tools/cmd/goimports
+#      - run: dep ensure -vendor-only
+#      - run: ./scripts/run-genswag.sh
 
   test:
     docker:
-      - image: circleci/golang:1.10
+      - image: circleci/golang:1.12
         environment:
         - TEST_DATABASE_POSTGRESQL=postgres://test:test@localhost:5432/oathkeeper?sslmode=disable
         - TEST_DATABASE_MYSQL=root:test@(localhost:3306)/mysql?parseTime=true
         - TEST_HYDRA_ADMIN_URL=http://localhost:4445
-      - image: oryd/hydra:v1.0.0-beta.8
+      - image: oryd/hydra:v1.0.0-rc.3_oryOS.9
         environment:
         - DATABASE_URL=memory
         command: "serve all --dangerous-force-http"
@@ -46,45 +58,34 @@ jobs:
         - POSTGRES_DB=oathkeeper
     working_directory: /go/src/github.com/ory/oathkeeper
     steps:
+      - run:
+          name: Enable go1.12 modules
+          command: |
+            echo 'export GO111MODULE=on' >> $BASH_ENV
+            source $BASH_ENV
       - checkout
-      - run: go get -u github.com/go-swagger/go-swagger/cmd/swagger github.com/bradfitz/goimports github.com/mattn/goveralls golang.org/x/tools/cmd/cover github.com/ory/go-acc
-      - run: curl -L -s https://github.com/golang/dep/releases/download/v0.4.1/dep-linux-amd64 -o /go/bin/dep && chmod +x /go/bin/dep
-
-      # Installation
-      - run: curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -
-      - run: dep ensure -vendor-only
-      - run: go install github.com/ory/oathkeeper
-
-      # Tests
-      - run: go test -race -short $(go list ./... | grep -v cmd)
-      - run: go-acc -o coverage.txt ./...
-
-      # Submit coverage details
+      - run: go mod download
+      - run: go install github.com/ory/go-acc github.com/mattn/goveralls
+      - run: go-acc -o coverage.txt ./... -- -failfast -timeout=20m
       - run: test -z "$CIRCLE_PR_NUMBER" && goveralls -service=circle-ci -coverprofile=coverage.txt -repotoken=$COVERALLS_REPO_TOKEN || echo "forks are not allowed to push to coveralls"
 
-  build-docker:
+  release:
     docker:
-      - image: library/docker:17.10
-    steps:
-      - checkout
-      - setup_remote_docker:
-          version: 17.10.0-ce
-      - run: docker build -f Dockerfile -t oathkeeper-test .
-      - run: docker run oathkeeper-test version
-
-  release-docker:
-    docker:
-      - image: circleci/golang:1.10
+      - image: circleci/golang:1.12
     working_directory: /go/src/github.com/ory/oathkeeper
     steps:
+      - run:
+          name: Enable go1.12 modules
+          command: |
+            echo 'export GO111MODULE=on' >> $BASH_ENV
+            echo 'export DOCKER_FULL_TAG=$(echo $CIRCLE_TAG | tr '+' '_')' >> $BASH_ENV
+            echo 'export DOCKER_SHORT_TAG=$(echo $CIRCLE_TAG | cut -d '+' -f1)' >> $BASH_ENV
+            source $BASH_ENV
       - checkout
-      - setup_remote_docker:
-          version: 17.10.0-ce
-      - run: docker build --build-arg git_tag=$(git describe --tags) --build-arg git_commit=$(git rev-parse HEAD) -f Dockerfile -t oryd/oathkeeper:$CIRCLE_TAG .
+      - setup_remote_docker
       - run: docker login --username "$DOCKER_USERNAME" --password "$DOCKER_PASSWORD"
-      - run: docker tag oryd/oathkeeper:$CIRCLE_TAG oryd/oathkeeper:latest
-      - run: docker push oryd/oathkeeper:$CIRCLE_TAG
-      - run: docker push oryd/oathkeeper:latest
+      - run: cp ./.releaser/LICENSE.txt ./LICENSE.txt
+      - run: curl -sL https://git.io/goreleaser | bash
 
   release-docs:
     docker:
@@ -118,19 +119,6 @@ jobs:
       - run: git remote add origin https://arekkas:$GITHUB_TOKEN@github.com/ory/oathkeeper.git
       - run: git push origin HEAD:master || true
 
-  release-binaries:
-    docker:
-      - image: circleci/golang:1.10
-    working_directory: /go/src/github.com/ory/oathkeeper
-    steps:
-      - checkout
-      - run: curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
-      - run: go get -u github.com/mitchellh/gox github.com/tcnksm/ghr
-      - run: dep ensure -vendor-only
-      - run: |
-          gox -parallel=2 -ldflags "-X github.com/ory/oathkeeper/cmd.Version=`git describe --tags` -X github.com/ory/oathkeeper/cmd.BuildTime=`TZ=UTC date -u '+%Y-%m-%dT%H:%M:%SZ'` -X github.com/ory/oathkeeper/cmd.GitHash=`git rev-parse HEAD`" -output "dist/{{.Dir}}-{{.OS}}-{{.Arch}}";
-      - run: ghr -t $GITHUB_TOKEN -u $CIRCLE_PROJECT_USERNAME -r $CIRCLE_PROJECT_REPONAME --replace `git describe --tags` dist/
-
   release-npm:
     docker:
       - image: circleci/node:8.9.3
@@ -160,29 +148,10 @@ workflows:
           filters:
             branches:
               only: master
-      - swagger:
-          filters:
-            tags:
-              only: /.*/
-      - build-docker:
+      - release:
           requires:
             - test
-            - swagger
             - format
-          filters:
-            tags:
-              only: /.*/
-      - release-binaries:
-          requires:
-            - build-docker
-          filters:
-            tags:
-              only: /.*/
-            branches:
-              ignore: /.*/
-      - release-docker:
-          requires:
-            - build-docker
           filters:
             tags:
               only: /.*/
@@ -190,7 +159,7 @@ workflows:
               ignore: /.*/
       - release-npm:
           requires:
-            - build-docker
+            - release
           filters:
             tags:
               only: /.*/
@@ -198,8 +167,7 @@ workflows:
               ignore: /.*/
       - release-changelog:
           requires:
-            - release-docker
-            - release-binaries
+            - release
             - release-npm
           filters:
             tags:

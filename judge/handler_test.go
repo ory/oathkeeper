@@ -28,10 +28,11 @@ import (
 	"testing"
 
 	"github.com/julienschmidt/httprouter"
-	"github.com/ory/oathkeeper/proxy"
-	"github.com/ory/oathkeeper/rule"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/ory/oathkeeper/proxy"
+	"github.com/ory/oathkeeper/rule"
 )
 
 func TestJudge(t *testing.T) {
@@ -193,7 +194,7 @@ func TestJudge(t *testing.T) {
 			require.NoError(t, err)
 			defer res.Body.Close()
 
-			assert.Equal(t, res.Header.Get("Authorization"), tc.authz)
+			assert.Equal(t, tc.authz, res.Header.Get("Authorization"))
 			assert.Equal(t, tc.code, res.StatusCode)
 		})
 	}

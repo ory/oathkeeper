@@ -14,30 +14,22 @@
  *
  */
 
-;(function(root, factory) {
+(function(root, factory) {
   if (typeof define === 'function' && define.amd) {
     // AMD. Register as an anonymous module.
-    define(['ApiClient', 'model/InlineResponse401', 'model/Rule'], factory)
+    define(['ApiClient', 'model/InlineResponse401', 'model/Rule'], factory);
   } else if (typeof module === 'object' && module.exports) {
     // CommonJS-like environments that support module.exports, like Node.
-    module.exports = factory(
-      require('../ApiClient'),
-      require('../model/InlineResponse401'),
-      require('../model/Rule')
-    )
+    module.exports = factory(require('../ApiClient'), require('../model/InlineResponse401'), require('../model/Rule'));
   } else {
     // Browser globals (root is window)
     if (!root.OryOathkeeper) {
-      root.OryOathkeeper = {}
+      root.OryOathkeeper = {};
     }
-    root.OryOathkeeper.RuleApi = factory(
-      root.OryOathkeeper.ApiClient,
-      root.OryOathkeeper.InlineResponse401,
-      root.OryOathkeeper.Rule
-    )
+    root.OryOathkeeper.RuleApi = factory(root.OryOathkeeper.ApiClient, root.OryOathkeeper.InlineResponse401, root.OryOathkeeper.Rule);
   }
-})(this, function(ApiClient, InlineResponse401, Rule) {
-  'use strict'
+}(this, function(ApiClient, InlineResponse401, Rule) {
+  'use strict';
 
   /**
    * Rule service.
@@ -46,14 +38,15 @@
    */
 
   /**
-   * Constructs a new RuleApi.
+   * Constructs a new RuleApi. 
    * @alias module:api/RuleApi
    * @class
    * @param {module:ApiClient} apiClient Optional API client implementation to use,
    * default to {@link module:ApiClient#instance} if unspecified.
    */
   var exports = function(apiClient) {
-    this.apiClient = apiClient || ApiClient.instance
+    this.apiClient = apiClient || ApiClient.instance;
+
 
     /**
      * Callback function to receive the result of the createRule operation.
@@ -67,38 +60,34 @@
      * Create a rule
      * This method allows creation of rules. If a rule id exists, you will receive an error.
      * @param {Object} opts Optional parameters
-     * @param {module:model/Rule} opts.body
+     * @param {module:model/Rule} opts.body 
      * @param {module:api/RuleApi~createRuleCallback} callback The callback function, accepting three arguments: error, data, response
      * data is of type: {@link module:model/Rule}
      */
     this.createRule = function(opts, callback) {
-      opts = opts || {}
-      var postBody = opts['body']
+      opts = opts || {};
+      var postBody = opts['body'];
 
-      var pathParams = {}
-      var queryParams = {}
-      var headerParams = {}
-      var formParams = {}
 
-      var authNames = []
-      var contentTypes = ['application/json']
-      var accepts = ['application/json']
-      var returnType = Rule
+      var pathParams = {
+      };
+      var queryParams = {
+      };
+      var headerParams = {
+      };
+      var formParams = {
+      };
+
+      var authNames = [];
+      var contentTypes = ['application/json'];
+      var accepts = ['application/json'];
+      var returnType = Rule;
 
       return this.apiClient.callApi(
-        '/rules',
-        'POST',
-        pathParams,
-        queryParams,
-        headerParams,
-        formParams,
-        postBody,
-        authNames,
-        contentTypes,
-        accepts,
-        returnType,
-        callback
-      )
+        '/rules', 'POST',
+        pathParams, queryParams, headerParams, formParams, postBody,
+        authNames, contentTypes, accepts, returnType, callback
+      );
     }
 
     /**
@@ -112,45 +101,38 @@
     /**
      * Delete a rule
      * Use this endpoint to delete a rule.
-     * @param {String} id
+     * @param {String} id 
      * @param {module:api/RuleApi~deleteRuleCallback} callback The callback function, accepting three arguments: error, data, response
      */
     this.deleteRule = function(id, callback) {
-      var postBody = null
+      var postBody = null;
 
       // verify the required parameter 'id' is set
       if (id === undefined || id === null) {
-        throw new Error(
-          "Missing the required parameter 'id' when calling deleteRule"
-        )
+        throw new Error("Missing the required parameter 'id' when calling deleteRule");
       }
+
 
       var pathParams = {
-        id: id
-      }
-      var queryParams = {}
-      var headerParams = {}
-      var formParams = {}
+        'id': id
+      };
+      var queryParams = {
+      };
+      var headerParams = {
+      };
+      var formParams = {
+      };
 
-      var authNames = []
-      var contentTypes = ['application/json']
-      var accepts = ['application/json']
-      var returnType = null
+      var authNames = [];
+      var contentTypes = ['application/json'];
+      var accepts = ['application/json'];
+      var returnType = null;
 
       return this.apiClient.callApi(
-        '/rules/{id}',
-        'DELETE',
-        pathParams,
-        queryParams,
-        headerParams,
-        formParams,
-        postBody,
-        authNames,
-        contentTypes,
-        accepts,
-        returnType,
-        callback
-      )
+        '/rules/{id}', 'DELETE',
+        pathParams, queryParams, headerParams, formParams, postBody,
+        authNames, contentTypes, accepts, returnType, callback
+      );
     }
 
     /**
@@ -164,46 +146,39 @@
     /**
      * Retrieve a rule
      * Use this method to retrieve a rule from the storage. If it does not exist you will receive a 404 error.
-     * @param {String} id
+     * @param {String} id 
      * @param {module:api/RuleApi~getRuleCallback} callback The callback function, accepting three arguments: error, data, response
      * data is of type: {@link module:model/Rule}
      */
     this.getRule = function(id, callback) {
-      var postBody = null
+      var postBody = null;
 
       // verify the required parameter 'id' is set
       if (id === undefined || id === null) {
-        throw new Error(
-          "Missing the required parameter 'id' when calling getRule"
-        )
+        throw new Error("Missing the required parameter 'id' when calling getRule");
       }
+
 
       var pathParams = {
-        id: id
-      }
-      var queryParams = {}
-      var headerParams = {}
-      var formParams = {}
+        'id': id
+      };
+      var queryParams = {
+      };
+      var headerParams = {
+      };
+      var formParams = {
+      };
 
-      var authNames = []
-      var contentTypes = ['application/json']
-      var accepts = ['application/json']
-      var returnType = Rule
+      var authNames = [];
+      var contentTypes = ['application/json'];
+      var accepts = ['application/json'];
+      var returnType = Rule;
 
       return this.apiClient.callApi(
-        '/rules/{id}',
-        'GET',
-        pathParams,
-        queryParams,
-        headerParams,
-        formParams,
-        postBody,
-        authNames,
-        contentTypes,
-        accepts,
-        returnType,
-        callback
-      )
+        '/rules/{id}', 'GET',
+        pathParams, queryParams, headerParams, formParams, postBody,
+        authNames, contentTypes, accepts, returnType, callback
+      );
     }
 
     /**
@@ -224,36 +199,31 @@
      * data is of type: {@link Array.<module:model/Rule>}
      */
     this.listRules = function(opts, callback) {
-      opts = opts || {}
-      var postBody = null
+      opts = opts || {};
+      var postBody = null;
 
-      var pathParams = {}
+
+      var pathParams = {
+      };
       var queryParams = {
-        limit: opts['limit'],
-        offset: opts['offset']
-      }
-      var headerParams = {}
-      var formParams = {}
+        'limit': opts['limit'],
+        'offset': opts['offset']
+      };
+      var headerParams = {
+      };
+      var formParams = {
+      };
 
-      var authNames = []
-      var contentTypes = ['application/json']
-      var accepts = ['application/json']
-      var returnType = [Rule]
+      var authNames = [];
+      var contentTypes = ['application/json'];
+      var accepts = ['application/json'];
+      var returnType = [Rule];
 
       return this.apiClient.callApi(
-        '/rules',
-        'GET',
-        pathParams,
-        queryParams,
-        headerParams,
-        formParams,
-        postBody,
-        authNames,
-        contentTypes,
-        accepts,
-        returnType,
-        callback
-      )
+        '/rules', 'GET',
+        pathParams, queryParams, headerParams, formParams, postBody,
+        authNames, contentTypes, accepts, returnType, callback
+      );
     }
 
     /**
@@ -267,51 +237,44 @@
     /**
      * Update a rule
      * Use this method to update a rule. Keep in mind that you need to send the full rule payload as this endpoint does not support patching.
-     * @param {String} id
+     * @param {String} id 
      * @param {Object} opts Optional parameters
-     * @param {module:model/Rule} opts.body
+     * @param {module:model/Rule} opts.body 
      * @param {module:api/RuleApi~updateRuleCallback} callback The callback function, accepting three arguments: error, data, response
      * data is of type: {@link module:model/Rule}
      */
     this.updateRule = function(id, opts, callback) {
-      opts = opts || {}
-      var postBody = opts['body']
+      opts = opts || {};
+      var postBody = opts['body'];
 
       // verify the required parameter 'id' is set
       if (id === undefined || id === null) {
-        throw new Error(
-          "Missing the required parameter 'id' when calling updateRule"
-        )
+        throw new Error("Missing the required parameter 'id' when calling updateRule");
       }
+
 
       var pathParams = {
-        id: id
-      }
-      var queryParams = {}
-      var headerParams = {}
-      var formParams = {}
+        'id': id
+      };
+      var queryParams = {
+      };
+      var headerParams = {
+      };
+      var formParams = {
+      };
 
-      var authNames = []
-      var contentTypes = ['application/json']
-      var accepts = ['application/json']
-      var returnType = Rule
+      var authNames = [];
+      var contentTypes = ['application/json'];
+      var accepts = ['application/json'];
+      var returnType = Rule;
 
       return this.apiClient.callApi(
-        '/rules/{id}',
-        'PUT',
-        pathParams,
-        queryParams,
-        headerParams,
-        formParams,
-        postBody,
-        authNames,
-        contentTypes,
-        accepts,
-        returnType,
-        callback
-      )
+        '/rules/{id}', 'PUT',
+        pathParams, queryParams, headerParams, formParams, postBody,
+        authNames, contentTypes, accepts, returnType, callback
+      );
     }
-  }
+  };
 
-  return exports
-})
+  return exports;
+}));

@@ -24,6 +24,7 @@ import (
 	"net/http"
 
 	"github.com/julienschmidt/httprouter"
+
 	"github.com/ory/herodot"
 )
 

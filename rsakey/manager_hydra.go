@@ -24,43 +24,67 @@ import (
 	"crypto/rsa"
 	"encoding/json"
 	"net/http"
+	"net/url"
 	"strings"
+	"time"
 
-	"github.com/ory/hydra/sdk/go/hydra"
-	"github.com/ory/hydra/sdk/go/hydra/swagger"
+	"github.com/ory/x/urlx"
+
 	"github.com/pkg/errors"
 	"gopkg.in/square/go-jose.v2"
 )
 
 type HydraManager struct {
-	key *rsa.PrivateKey
-	SDK hydra.SDK
-	Set string
+	key      *rsa.PrivateKey
+	Set      string
+	client   *http.Client
+	adminURL *url.URL
+}
+
+func NewHydraManager(
+	set string,
+	client *http.Client,
+	adminURL *url.URL,
+) *HydraManager {
+	if client == nil {
+		client = &http.Client{Timeout: time.Second * 5}
+	}
+	return &HydraManager{
+		client:   client,
+		Set:      set,
+		adminURL: adminURL,
+	}
 }
 
 func (m *HydraManager) Refresh() error {
-	_, response, err := m.SDK.GetJsonWebKeySet(m.Set)
+	res, err := m.client.Get(urlx.AppendPaths(m.adminURL, "/keys/", m.Set).String())
 	if err != nil {
 		return errors.WithStack(err)
-	} else if response.StatusCode == http.StatusNotFound {
-		response.Body.Close()
+	}
+	defer res.Body.Close()
 
-		_, response, err = m.SDK.CreateJsonWebKeySet(m.Set, swagger.JsonWebKeySetGeneratorRequest{
-			Alg: "RS256",
-		})
+	if res.StatusCode == http.StatusNotFound {
+		req, err := http.NewRequest("POST", urlx.AppendPaths(m.adminURL, "/keys/", m.Set).String(), strings.NewReader(`{"alg":"RS256"}`))
 		if err != nil {
 			return errors.WithStack(err)
-		} else if response.StatusCode != http.StatusCreated {
-			return errors.Errorf("Expected status code %d but got %d", http.StatusOK, response.StatusCode)
 		}
-	} else if response.StatusCode != http.StatusOK {
-		return errors.Errorf("Expected status code %d but got %d", http.StatusOK, response.StatusCode)
+		req.Header.Set("Content-Type", "application/json")
+
+		res, err = m.client.Do(req)
+		if err != nil {
+			return errors.WithStack(err)
+		}
+		defer res.Body.Close()
+
+		if res.StatusCode != http.StatusCreated {
+			return errors.Errorf("Expected status code %d but got %d", http.StatusOK, res.StatusCode)
+		}
+	} else if res.StatusCode != http.StatusOK {
+		return errors.Errorf("Expected status code %d but got %d", http.StatusOK, res.StatusCode)
 	}
 
-	payload := response.Payload
-	set := new(jose.JSONWebKeySet)
-
-	if err := json.Unmarshal(payload, set); err != nil {
+	var set jose.JSONWebKeySet
+	if err := json.NewDecoder(res.Body).Decode(&set); err != nil {
 		return errors.WithStack(err)
 	}
 

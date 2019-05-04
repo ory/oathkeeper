@@ -22,15 +22,17 @@ package health
 
 import (
 	"errors"
-	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"testing"
 
+	"github.com/ory/oathkeeper/sdk/go/oathkeeper/client"
+
 	"github.com/julienschmidt/httprouter"
-	"github.com/ory/herodot"
-	"github.com/ory/oathkeeper/sdk/go/oathkeeper/swagger"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/ory/herodot"
 )
 
 func TestHealth(t *testing.T) {
@@ -48,27 +50,27 @@ func TestHealth(t *testing.T) {
 	handler.SetRoutes(router)
 	ts := httptest.NewServer(router)
 
-	healthClient := swagger.NewHealthApiWithBasePath(ts.URL)
-
-	body, response, err := healthClient.IsInstanceAlive()
+	u, err := url.ParseRequestURI(ts.URL)
 	require.NoError(t, err)
-	require.EqualValues(t, http.StatusOK, response.StatusCode)
-	assert.EqualValues(t, "ok", body.Status)
+	cl := client.NewHTTPClientWithConfig(nil, &client.TransportConfig{
+		Host:     u.Host,
+		BasePath: u.Path,
+		Schemes:  []string{u.Scheme},
+	})
 
-	versionClient := swagger.NewVersionApiWithBasePath(ts.URL)
-	version, response, err := versionClient.GetVersion()
+	aliveRes, err := cl.Health.IsInstanceAlive(nil)
 	require.NoError(t, err)
-	require.EqualValues(t, http.StatusOK, response.StatusCode)
-	require.EqualValues(t, version.Version, handler.VersionString)
+	assert.EqualValues(t, "ok", aliveRes.Payload.Status)
 
-	_, response, err = healthClient.IsInstanceReady()
+	versionRes, err := cl.Version.GetVersion(nil)
 	require.NoError(t, err)
-	require.EqualValues(t, http.StatusServiceUnavailable, response.StatusCode)
-	assert.Equal(t, `{"errors":{"test":"not alive"}}`, string(response.Payload))
+	require.EqualValues(t, versionRes.Payload.Version, handler.VersionString)
+
+	_, err = cl.Health.IsInstanceReady(nil)
+	require.Error(t, err)
 
 	alive = nil
-	body, response, err = healthClient.IsInstanceReady()
+	readyRes, err := cl.Health.IsInstanceReady(nil)
 	require.NoError(t, err)
-	require.EqualValues(t, http.StatusOK, response.StatusCode)
-	assert.EqualValues(t, "ok", body.Status)
+	assert.EqualValues(t, "ok", readyRes.Payload.Status)
 }

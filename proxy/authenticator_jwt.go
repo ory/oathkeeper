@@ -8,16 +8,20 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"strings"
+
+	"github.com/ory/x/stringsx"
 
 	"github.com/dgrijalva/jwt-go"
+	"github.com/pkg/errors"
+	"gopkg.in/square/go-jose.v2"
+
 	"github.com/ory/fosite"
 	"github.com/ory/go-convenience/jwtx"
 	"github.com/ory/go-convenience/mapx"
 	"github.com/ory/go-convenience/stringslice"
 	"github.com/ory/oathkeeper/helper"
 	"github.com/ory/oathkeeper/rule"
-	"github.com/pkg/errors"
-	"gopkg.in/square/go-jose.v2"
 )
 
 type AuthenticatorOAuth2JWTConfiguration struct {
@@ -59,6 +63,10 @@ func NewAuthenticatorJWT(jwksURL string, scopeStrategy fosite.ScopeStrategy) (*A
 
 func (a *AuthenticatorJWT) GetID() string {
 	return "jwt"
+}
+
+type tracer interface {
+	StackTrace() errors.StackTrace
 }
 
 func (a *AuthenticatorJWT) Authenticate(r *http.Request, config json.RawMessage, rl *rule.Rule) (*AuthenticationSession, error) {
@@ -103,7 +111,11 @@ func (a *AuthenticatorJWT) Authenticate(r *http.Request, config json.RawMessage,
 	})
 
 	if err != nil {
-		return nil, errors.WithStack(err)
+		if _, ok := err.(tracer); ok {
+			return nil, err
+		} else {
+			return nil, errors.WithStack(err)
+		}
 	} else if !parsedToken.Valid {
 		return nil, errors.WithStack(fosite.ErrInactiveToken)
 	}
@@ -127,10 +139,19 @@ func (a *AuthenticatorJWT) Authenticate(r *http.Request, config json.RawMessage,
 		}
 	}
 
+	if scopeClaim, err := mapx.GetString(map[interface{}]interface{}{"scope": claims["scope"]}, "scope"); err == nil {
+		scopeStrings := strings.Split(scopeClaim, " ")
+		scopeInterfaces := make([]interface{}, len(scopeStrings))
+
+		for i := range scopeStrings {
+			scopeInterfaces[i] = scopeStrings[i]
+		}
+		claims["scope"] = scopeInterfaces
+	}
+
 	if a.scopeStrategy != nil {
-		tokenScope := mapx.GetStringSliceDefault(map[interface{}]interface{}{"scope": claims["scope"]}, "scope", []string{})
 		for _, scope := range cf.Scopes {
-			if !a.scopeStrategy(tokenScope, scope) {
+			if !a.scopeStrategy(getScopeClaim(claims), scope) {
 				return nil, errors.WithStack(helper.ErrForbidden.WithReason(fmt.Sprintf("Token is missing required scope %s.", scope)))
 			}
 		}
@@ -144,6 +165,38 @@ func (a *AuthenticatorJWT) Authenticate(r *http.Request, config json.RawMessage,
 		Subject: parsedClaims.Subject,
 		Extra:   claims,
 	}, nil
+}
+
+func getScopeClaim(claims map[string]interface{}) []string {
+	var ok bool
+	var interim interface{}
+
+	for _, k := range []string{"scp", "scope", "scopes"} {
+		if interim, ok = claims[k]; ok {
+			break
+		}
+	}
+
+	if !ok {
+		return []string{}
+	}
+
+	switch i := interim.(type) {
+	case []string:
+		return i
+	case []interface{}:
+		vs := make([]string, len(i))
+		for k, v := range i {
+			if vv, ok := v.(string); ok {
+				vs[k] = vv
+			}
+		}
+		return vs
+	case string:
+		return stringsx.Splitx(i, " ")
+	default:
+		return []string{}
+	}
 }
 
 func (a *AuthenticatorJWT) findRSAPublicKey(t *jwt.Token) (*rsa.PublicKey, error) {
