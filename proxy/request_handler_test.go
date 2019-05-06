@@ -56,7 +56,7 @@ func TestRequestHandler(t *testing.T) {
 		{
 			expectErr: true,
 			r:         newTestRequest(t, "http://localhost"),
-			j:         NewRequestHandler(nil, []Authenticator{}, []Authorizer{}, []CredentialsIssuer{}),
+			j:         NewRequestHandler(nil, []Authenticator{}, []Authorizer{}, []Transformer{}),
 			rule: rule.Rule{
 				Authenticators: []rule.RuleHandler{},
 				Authorizer:     rule.RuleHandler{},
@@ -66,7 +66,7 @@ func TestRequestHandler(t *testing.T) {
 		{
 			expectErr: true,
 			r:         newTestRequest(t, "http://localhost"),
-			j:         NewRequestHandler(nil, []Authenticator{NewAuthenticatorNoOp()}, []Authorizer{NewAuthorizerAllow()}, []CredentialsIssuer{NewCredentialsIssuerNoOp()}),
+			j:         NewRequestHandler(nil, []Authenticator{NewAuthenticatorNoOp()}, []Authorizer{NewAuthorizerAllow()}, []Transformer{NewCredentialsIssuerNoOp()}),
 			rule: rule.Rule{
 				Authenticators: []rule.RuleHandler{},
 				Authorizer:     rule.RuleHandler{},
@@ -76,7 +76,7 @@ func TestRequestHandler(t *testing.T) {
 		{
 			expectErr: false,
 			r:         newTestRequest(t, "http://localhost"),
-			j:         NewRequestHandler(nil, []Authenticator{NewAuthenticatorNoOp()}, []Authorizer{NewAuthorizerAllow()}, []CredentialsIssuer{NewCredentialsIssuerNoOp()}),
+			j:         NewRequestHandler(nil, []Authenticator{NewAuthenticatorNoOp()}, []Authorizer{NewAuthorizerAllow()}, []Transformer{NewCredentialsIssuerNoOp()}),
 			rule: rule.Rule{
 				Authenticators: []rule.RuleHandler{{Handler: NewAuthenticatorNoOp().GetID()}},
 				Authorizer:     rule.RuleHandler{Handler: NewAuthorizerAllow().GetID()},
@@ -86,7 +86,7 @@ func TestRequestHandler(t *testing.T) {
 		{
 			expectErr: true,
 			r:         newTestRequest(t, "http://localhost"),
-			j:         NewRequestHandler(nil, []Authenticator{NewAuthenticatorAnonymous("anonymous")}, []Authorizer{}, []CredentialsIssuer{}),
+			j:         NewRequestHandler(nil, []Authenticator{NewAuthenticatorAnonymous("anonymous")}, []Authorizer{}, []Transformer{}),
 			rule: rule.Rule{
 				Authenticators: []rule.RuleHandler{{Handler: NewAuthenticatorAnonymous("").GetID()}},
 				Authorizer:     rule.RuleHandler{},
@@ -96,7 +96,7 @@ func TestRequestHandler(t *testing.T) {
 		{
 			expectErr: true,
 			r:         newTestRequest(t, "http://localhost"),
-			j:         NewRequestHandler(nil, []Authenticator{NewAuthenticatorAnonymous("anonymous")}, []Authorizer{NewAuthorizerAllow()}, []CredentialsIssuer{}),
+			j:         NewRequestHandler(nil, []Authenticator{NewAuthenticatorAnonymous("anonymous")}, []Authorizer{NewAuthorizerAllow()}, []Transformer{}),
 			rule: rule.Rule{
 				Authenticators: []rule.RuleHandler{{Handler: NewAuthenticatorAnonymous("").GetID()}},
 				Authorizer:     rule.RuleHandler{Handler: "allow"},
@@ -106,7 +106,7 @@ func TestRequestHandler(t *testing.T) {
 		{
 			expectErr: false,
 			r:         newTestRequest(t, "http://localhost"),
-			j:         NewRequestHandler(nil, []Authenticator{NewAuthenticatorAnonymous("anonymous")}, []Authorizer{NewAuthorizerAllow()}, []CredentialsIssuer{NewCredentialsIssuerNoOp()}),
+			j:         NewRequestHandler(nil, []Authenticator{NewAuthenticatorAnonymous("anonymous")}, []Authorizer{NewAuthorizerAllow()}, []Transformer{NewCredentialsIssuerNoOp()}),
 			rule: rule.Rule{
 				Authenticators: []rule.RuleHandler{{Handler: NewAuthenticatorAnonymous("").GetID()}},
 				Authorizer:     rule.RuleHandler{Handler: "allow"},

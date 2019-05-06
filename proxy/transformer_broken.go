@@ -22,22 +22,34 @@ package proxy
 
 import (
 	"encoding/json"
-	"errors"
+	"github.com/pkg/errors"
 	"net/http"
 
 	"github.com/ory/oathkeeper/rule"
 )
 
-type CredentialsIssuerBroken struct{}
-
-func NewCredentialsIssuerBroken() *CredentialsIssuerBroken {
-	return new(CredentialsIssuerBroken)
+type TransformerBroken struct {
+	enabled bool
 }
 
-func (a *CredentialsIssuerBroken) GetID() string {
+func NewTransformerBroken(enabled bool) *TransformerBroken {
+	return &TransformerBroken{
+		enabled: enabled,
+	}
+}
+
+func (a *TransformerBroken) GetID() string {
 	return "broken"
 }
 
-func (a *CredentialsIssuerBroken) Issue(r *http.Request, session *AuthenticationSession, config json.RawMessage, rl *rule.Rule) (http.Header, error) {
+func (a *TransformerBroken) Transform(r *http.Request, session *AuthenticationSession, config json.RawMessage, rl *rule.Rule) (http.Header, error) {
 	return nil, errors.New("forced denial of credentials")
+}
+
+func (a *TransformerBroken) Validate() error {
+	if !a.enabled {
+		return errors.WithStack(ErrAuthenticatorNotEnabled.WithReasonf("Transformer % is disabled per configuration.", a.GetID()))
+	}
+
+	return nil
 }

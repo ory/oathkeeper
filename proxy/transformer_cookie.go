@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/ory/oathkeeper/driver/configuration"
 	"net/http"
 	"text/template"
 
@@ -16,30 +17,23 @@ type CredentialsCookiesConfig struct {
 	Cookies map[string]string `json:"cookies"`
 }
 
-type CredentialsCookies struct {
-	RulesCache *template.Template
+type TransformerCookie struct {
+	templates *template.Template
+	c configuration.Provider
 }
 
-func NewCredentialsIssuerCookies() *CredentialsCookies {
-	return &CredentialsCookies{
-		RulesCache: template.New("rules").
-			Option("missingkey=zero").
-			Funcs(template.FuncMap{
-				"print": func(i interface{}) string {
-					if i == nil {
-						return ""
-					}
-					return fmt.Sprintf("%v", i)
-				},
-			}),
+func NewTransformerCookies(c configuration.Provider) *TransformerCookie {
+	return &TransformerCookie{
+		c: c,
+		templates: newTemplate("cookie"),
 	}
 }
 
-func (a *CredentialsCookies) GetID() string {
-	return "cookies"
+func (a *TransformerCookie) GetID() string {
+	return "cookie"
 }
 
-func (a *CredentialsCookies) Issue(r *http.Request, session *AuthenticationSession, config json.RawMessage, rl *rule.Rule) (http.Header, error) {
+func (a *TransformerCookie) Transform(r *http.Request, session *AuthenticationSession, config json.RawMessage, rl *rule.Rule) (http.Header, error) {
 	if len(config) == 0 {
 		config = []byte("{}")
 	}
@@ -64,9 +58,9 @@ func (a *CredentialsCookies) Issue(r *http.Request, session *AuthenticationSessi
 		var err error
 
 		templateId := fmt.Sprintf("%s:%s", rl.ID, cookie)
-		tmpl = a.RulesCache.Lookup(templateId)
+		tmpl = a.templates.Lookup(templateId)
 		if tmpl == nil {
-			tmpl, err = a.RulesCache.New(templateId).Parse(templateString)
+			tmpl, err = a.templates.New(templateId).Parse(templateString)
 			if err != nil {
 				return nil, errors.Wrapf(err, `error parsing cookie template "%s" in rule "%s"`, templateString, rl.ID)
 			}
@@ -96,4 +90,12 @@ func (a *CredentialsCookies) Issue(r *http.Request, session *AuthenticationSessi
 	}
 
 	return req.Header, nil
+}
+
+func (a *TransformerCookie) Validate() error {
+	if !a.c.TransformerCookieIsEnabled() {
+		return errors.WithStack(ErrAuthenticatorNotEnabled.WithReasonf("Transformer % is disabled per configuration.", a.GetID()))
+	}
+
+	return nil
 }

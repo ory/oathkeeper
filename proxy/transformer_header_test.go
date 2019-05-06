@@ -120,7 +120,7 @@ func TestCredentialsIssuerHeaders(t *testing.T) {
 			// Issuer must return non-empty ID
 			assert.NotEmpty(t, issuer.GetID())
 
-			header, err := issuer.Issue(specs.Request, specs.Session, specs.Config, specs.Rule)
+			header, err := issuer.Transform(specs.Request, specs.Session, specs.Config, specs.Rule)
 			if specs.Err == nil {
 				// Issuer must run without error
 				require.NoError(t, err)
@@ -156,9 +156,9 @@ func TestCredentialsIssuerHeaders(t *testing.T) {
 				overrideHeaders.Add(hdr, "override")
 			}
 
-			issuer.RulesCache = cache
+			issuer.t = cache
 
-			header, err := issuer.Issue(specs.Request, specs.Session, specs.Config, specs.Rule)
+			header, err := issuer.Transform(specs.Request, specs.Session, specs.Config, specs.Rule)
 			if specs.Err == nil {
 				// Issuer must run without error
 				require.NoError(t, err)

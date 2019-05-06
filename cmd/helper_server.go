@@ -154,8 +154,8 @@ func availableHandlerNames() ([]string, []string, []string) {
 			new(proxy.AuthorizerKetoWarden).GetID(),
 		},
 		[]string{
-			new(proxy.CredentialsIssuerNoOp).GetID(),
-			new(proxy.CredentialsIDToken).GetID(),
+			new(proxy.TransformerNoop).GetID(),
+			new(proxy.TransformerIDToken).GetID(),
 		}
 }
 
@@ -196,7 +196,7 @@ func authenticatorFactory(f func() (proxy.Authenticator, error)) proxy.Authentic
 	}
 	return a
 }
-func credentialsIssuerFactory(f func() (proxy.CredentialsIssuer, error)) proxy.CredentialsIssuer {
+func credentialsIssuerFactory(f func() (proxy.Transformer, error)) proxy.Transformer {
 	a, err := f()
 	if err != nil {
 		logger.WithError(err).Fatalf("Unable to initialize authenticator \"%s\" because an environment variable is missing or misconfigured.", a.GetID())
@@ -204,7 +204,7 @@ func credentialsIssuerFactory(f func() (proxy.CredentialsIssuer, error)) proxy.C
 	return a
 }
 
-func handlerFactories(keyManager rsakey.Manager) ([]proxy.Authenticator, []proxy.Authorizer, []proxy.CredentialsIssuer) {
+func handlerFactories(keyManager rsakey.Manager) ([]proxy.Authenticator, []proxy.Authorizer, []proxy.Transformer) {
 	var authorizers = []proxy.Authorizer{
 		proxy.NewAuthorizerAllow(),
 		proxy.NewAuthorizerDeny(),
@@ -264,7 +264,7 @@ func handlerFactories(keyManager rsakey.Manager) ([]proxy.Authenticator, []proxy
 
 	return authenticators,
 		authorizers,
-		[]proxy.CredentialsIssuer{
+		[]proxy.Transformer{
 			proxy.NewCredentialsIssuerNoOp(),
 			proxy.NewCredentialsIssuerIDToken(
 				keyManager,
@@ -273,7 +273,7 @@ func handlerFactories(keyManager rsakey.Manager) ([]proxy.Authenticator, []proxy
 				viper.GetString("CREDENTIALS_ISSUER_ID_TOKEN_ISSUER"),
 			),
 			proxy.NewCredentialsIssuerHeaders(),
-			proxy.NewCredentialsIssuerCookies(),
+			proxy.NewTransformerCookies(),
 		}
 }
 

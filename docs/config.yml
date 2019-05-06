@@ -153,3 +153,43 @@ authenticators:
 
       # REQUIRED IF ENABLED - The OAuth 2.0 Token Endpoint where the OAuth 2.0 Client Credentials Grant will be performed.
       token_url: https://my-website.com/oauth2/token
+
+  # Configures the unauthorized authenticator
+  unauthorized:
+    # Set enabled to true if the authenticator should be enabled and false to disable the authenticator. Defaults to false.
+    enabled: true
+
+# All authorizers can be configured under this configuration key
+authorizers:
+  # Configures the allow authorizer
+  allow:
+    # Set enabled to true if the authenticator should be enabled and false to disable the authorizer. Defaults to false.
+    enabled: true
+
+  # Configures the deny authorizer
+  deny:
+    # Set enabled to true if the authenticator should be enabled and false to disable the authorizer. Defaults to false.
+    enabled: true
+
+  keto_engine_acp_ory:
+    # Set enabled to true if the authenticator should be enabled and false to disable the authorizer. Defaults to false.
+    enabled: true
+    # The base URL of ORY Keto, typically something like http(s)://<host>[:<port>]/
+    base_url: http://my-keto/
+
+
+# All transformers can be configured under this configuration key
+transformers:
+  cookies:
+    enabled: true
+
+  headers:
+    enabled: true
+
+  id_token:
+    enabled: true
+    ttl: 60s
+    issuer_url:
+
+  noop:
+    enabled: true

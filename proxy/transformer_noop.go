@@ -21,17 +21,32 @@
 package proxy
 
 import (
+	"encoding/json"
+	"github.com/ory/oathkeeper/driver/configuration"
+	"github.com/pkg/errors"
 	"net/http"
-	"testing"
 
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
+	"github.com/ory/oathkeeper/rule"
 )
 
-func TestCredentialsIssuerNoOp(t *testing.T) {
-	assert.NotNil(t, NewCredentialsIssuerNoOp())
-	assert.NotEmpty(t, NewCredentialsIssuerNoOp().GetID())
+type TransformerNoop struct{c configuration.Provider}
 
-	_, err := NewCredentialsIssuerNoOp().Issue(&http.Request{Header: map[string][]string{}}, nil, nil, nil)
-	require.NoError(t, err)
+func NewCredentialsIssuerNoOp(c configuration.Provider) *TransformerNoop {
+	return &TransformerNoop{c:c}
+}
+
+func (a *TransformerNoop) GetID() string {
+	return "noop"
+}
+
+func (a *TransformerNoop) Transform(r *http.Request, session *AuthenticationSession, config json.RawMessage, rl *rule.Rule) (http.Header, error) {
+	return r.Header, nil
+}
+
+func (a *TransformerNoop) Validate() error {
+	if !a.c.TransformerIDTokenIsEnabled() {
+		return errors.WithStack(ErrAuthenticatorNotEnabled.WithReasonf("Transformer % is disabled per configuration.", a.GetID()))
+	}
+
+	return nil
 }

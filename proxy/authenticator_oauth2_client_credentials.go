@@ -5,6 +5,8 @@ import (
 	"context"
 	"encoding/json"
 	"github.com/ory/oathkeeper/driver/configuration"
+	"github.com/ory/x/httpx"
+	"golang.org/x/oauth2"
 	"net/http"
 	"net/url"
 
@@ -80,7 +82,11 @@ func (a *AuthenticatorOAuth2ClientCredentials) Authenticate(r *http.Request, con
 		TokenURL:     a.c.AuthenticatorOAuth2ClientCredentialsTokenURL().String(),
 	}
 
-	token, err := c.Token(context.Background())
+	token, err := c.Token(context.WithValue(
+		context.Background(),
+		oauth2.HTTPClient,
+		httpx.NewResilientClientLatencyToleranceMedium(nil),
+	))
 	if err != nil {
 		return nil, errors.Wrapf(helper.ErrUnauthorized, err.Error())
 	}

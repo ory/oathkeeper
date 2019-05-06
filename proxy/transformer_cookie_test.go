@@ -123,7 +123,7 @@ func TestCredentialsIssuerCookies(t *testing.T) {
 
 	for testName, specs := range testMap {
 		t.Run(testName, func(t *testing.T) {
-			issuer := NewCredentialsIssuerCookies()
+			issuer := NewTransformerCookies()
 
 			// Must return non-nil issuer
 			assert.NotNil(t, issuer)
@@ -131,7 +131,7 @@ func TestCredentialsIssuerCookies(t *testing.T) {
 			// Issuer must return non-empty ID
 			assert.NotEmpty(t, issuer.GetID())
 
-			header, err := issuer.Issue(specs.Request, specs.Session, specs.Config, specs.Rule)
+			header, err := issuer.Transform(specs.Request, specs.Session, specs.Config, specs.Rule)
 			if specs.Err == nil {
 				// Issuer must run without error
 				require.NoError(t, err)
@@ -146,7 +146,7 @@ func TestCredentialsIssuerCookies(t *testing.T) {
 
 	t.Run("Caching", func(t *testing.T) {
 		for _, specs := range testMap {
-			issuer := NewCredentialsIssuerCookies()
+			issuer := NewTransformerCookies()
 
 			overrideCookies := []*http.Cookie{}
 
@@ -162,9 +162,9 @@ func TestCredentialsIssuerCookies(t *testing.T) {
 				overrideCookies = append(overrideCookies, &http.Cookie{Name: cookie, Value: "override"})
 			}
 
-			issuer.RulesCache = cache
+			issuer.templates = cache
 
-			header, err := issuer.Issue(specs.Request, specs.Session, specs.Config, specs.Rule)
+			header, err := issuer.Transform(specs.Request, specs.Session, specs.Config, specs.Rule)
 			if specs.Err == nil {
 				// Issuer must run without error
 				require.NoError(t, err)

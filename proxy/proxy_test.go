@@ -78,7 +78,7 @@ func TestProxy(t *testing.T) {
 		nil,
 		[]Authenticator{NewAuthenticatorNoOp(), NewAuthenticatorAnonymous("anonymous"), NewAuthenticatorUnauthorized()},
 		[]Authorizer{NewAuthorizerAllow(), NewAuthorizerDeny()},
-		[]CredentialsIssuer{NewCredentialsIssuerNoOp(), NewCredentialsIssuerBroken()},
+		[]Transformer{NewCredentialsIssuerNoOp(), NewTransformerBroken()},
 	)
 
 	d := NewProxy(rh, nil, matcher)

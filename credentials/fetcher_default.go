@@ -29,8 +29,11 @@ import (
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"gopkg.in/square/go-jose.v2"
+	"io"
 	"net/http"
 	"net/url"
+	"os"
+	"strings"
 	"sync"
 	"time"
 )
@@ -39,11 +42,9 @@ type reasoner interface {
 	Reason() string
 }
 
-type JWKSFetcher interface {
-	Resolve(ctx context.Context, locations []url.URL, kid string, use string) (*jose.JSONWebKey, error)
-}
+var _ Fetcher = new(FetcherDefault)
 
-type ResilientJWKSFetcher struct {
+type FetcherDefault struct {
 	sync.RWMutex
 
 	ttl         time.Duration
@@ -54,33 +55,40 @@ type ResilientJWKSFetcher struct {
 	l           logrus.FieldLogger
 }
 
-func NewResilientJWKSFetcher(l logrus.FieldLogger) *ResilientJWKSFetcher {
-	return NewResilientJWKSFetcherWithTimeout(l, time.Second, time.Second*10, time.Minute*5)
-}
-
-// NewResilientJWKSFetcherWithTimeout returns a new JWKS Fetcher with:
+// NewFetcherDefault returns a new JWKS Fetcher with:
 //
 // - cancelAfter: If reached, the fetcher will stop waiting for responses and return an error.
 // - waitForResponse: While the fetcher might stop waiting for responses, we will give the server more time to respond
 //		and add the keys to the registry unless waitForResponse is reached in which case we'll terminate the request.
-func NewResilientJWKSFetcherWithTimeout(l logrus.FieldLogger, cancelAfter time.Duration, waitForResponse time.Duration, ttl time.Duration) *ResilientJWKSFetcher {
-	return &ResilientJWKSFetcher{
+func NewFetcherDefault(l logrus.FieldLogger, cancelAfter time.Duration, ttl time.Duration) *FetcherDefault {
+	return &FetcherDefault{
 		cancelAfter: cancelAfter,
 		l:           l,
 		ttl:         ttl,
 		keys:        make(map[string]jose.JSONWebKeySet),
 		fetchedAt:   make(map[string]time.Time),
-		client: &http.Client{
-			Transport: httpx.NewDefaultResilientRoundTripper(cancelAfter/2, waitForResponse),
-		},
+		client:      httpx.NewResilientClientLatencyToleranceHigh(nil),
 	}
 }
 
-func (s *ResilientJWKSFetcher) Resolve(ctx context.Context, locations []url.URL, kid string, use string) (*jose.JSONWebKey, error) {
-	if key := s.key(kid, locations, use); key != nil {
-		return key, nil
+func (s *FetcherDefault) ResolveSets(ctx context.Context, locations []url.URL) ([]jose.JSONWebKeySet, error) {
+	if set := s.set(locations); set != nil {
+		return set, nil
 	}
 
+	s.fetchParallel(ctx, locations)
+
+	if set := s.set(locations); set != nil {
+		return set, nil
+	}
+
+	return nil, errors.WithStack(herodot.
+		ErrInternalServerError.
+		WithReasonf(`None of the provided URLs returned a valid JSON Web Key Set.`),
+	)
+}
+
+func (s *FetcherDefault) fetchParallel(ctx context.Context, locations []url.URL) {
 	ctx, _ = context.WithTimeout(ctx, s.cancelAfter)
 	errs := make(chan error)
 	done := make(chan struct{})
@@ -106,19 +114,27 @@ func (s *ResilientJWKSFetcher) Resolve(ctx context.Context, locations []url.URL,
 	case <-done:
 		// We're done!
 	}
+}
+
+func (s *FetcherDefault) ResolveKey(ctx context.Context, locations []url.URL, kid string, use string) (*jose.JSONWebKey, error) {
+	if key := s.key(kid, locations, use); key != nil {
+		return key, nil
+	}
+
+	s.fetchParallel(ctx, locations)
 
 	if key := s.key(kid, locations, use); key != nil {
 		return key, nil
 	}
 
 	return nil, errors.WithStack(herodot.
-		ErrForbidden.
-		WithReasonf(`The provided JSON Web Token was signed with an unknown key. Expected a key with kid "%s" and use "%s".`, kid, use).
-		WithDebug("Check that the provided JSON Web Key URIs contain a key that can verify the signature of the provided JSON Web Token."),
+		ErrInternalServerError.
+		WithReasonf(`JSON Web Key ID "%s" with use "%s" could not be found in any of the provided URIs.`, kid, use).
+		WithDebug("Check that the provided JSON Web Key URIs contain a key that can verify the signature of the provided JSON Web Key ID."),
 	)
 }
 
-func (s *ResilientJWKSFetcher) key(kid string, locations []url.URL, use string) *jose.JSONWebKey {
+func (s *FetcherDefault) key(kid string, locations []url.URL, use string) *jose.JSONWebKey {
 	for _, l := range locations {
 		s.RLock()
 		keys, ok1 := s.keys[l.String()]
@@ -139,7 +155,25 @@ func (s *ResilientJWKSFetcher) key(kid string, locations []url.URL, use string) 
 	return nil
 }
 
-func (s *ResilientJWKSFetcher) resolveAll(done chan struct{}, errs chan error, locations []url.URL) {
+func (s *FetcherDefault) set(locations []url.URL) []jose.JSONWebKeySet {
+	var result []jose.JSONWebKeySet
+	for _, l := range locations {
+		s.RLock()
+		keys, ok1 := s.keys[l.String()]
+		fetchedAt, ok2 := s.fetchedAt[l.String()]
+		s.RUnlock()
+
+		if !ok1 || !ok2 || fetchedAt.Add(s.ttl).Before(time.Now().UTC()) {
+			continue
+		}
+
+		result = append(result, keys)
+	}
+
+	return result
+}
+
+func (s *FetcherDefault) resolveAll(done chan struct{}, errs chan error, locations []url.URL) {
 	var wg sync.WaitGroup
 
 	for _, l := range locations {
@@ -152,37 +186,72 @@ func (s *ResilientJWKSFetcher) resolveAll(done chan struct{}, errs chan error, l
 	close(errs)
 }
 
-func (s *ResilientJWKSFetcher) resolve(wg *sync.WaitGroup, errs chan error, location url.URL) {
+func (s *FetcherDefault) resolve(wg *sync.WaitGroup, errs chan error, location url.URL) {
 	defer wg.Done()
 
-	res, err := s.client.Get(location.String())
-	if err != nil {
-		errs <- errors.WithStack(herodot.
-			ErrInternalServerError.
-			WithReasonf(
-				`Unable to fetch JSON Web Keys from location "%s" because %s".`,
-				location.String(),
-				err,
-			),
-		)
-		return
-	}
-	defer res.Body.Close()
+	var reader io.Reader
 
-	if res.StatusCode < 200 || res.StatusCode >= 400 {
+	switch location.Scheme {
+	case "file":
+		f, err := os.Open(strings.Replace(location.String(), "file://", "", 1))
+		if err != nil {
+			errs <- errors.WithStack(herodot.
+				ErrInternalServerError.
+				WithReasonf(
+					`Unable to fetch JSON Web Keys from location "%s" because "%s".`,
+					location.String(),
+					err,
+				),
+			)
+			return
+		}
+		defer f.Close()
+
+		reader = f
+	case "https":
+		fallthrough
+	case "http":
+		res, err := s.client.Get(location.String())
+		if err != nil {
+			errs <- errors.WithStack(herodot.
+				ErrInternalServerError.
+				WithReasonf(
+					`Unable to fetch JSON Web Keys from location "%s" because "%s".`,
+					location.String(),
+					err,
+				),
+			)
+			return
+		}
+		defer res.Body.Close()
+
+		if res.StatusCode < 200 || res.StatusCode >= 400 {
+			errs <- errors.WithStack(herodot.
+				ErrInternalServerError.
+				WithReasonf(
+					`Expected successful status code from location "%s", but received code "%d".`,
+					location.String(),
+					res.StatusCode,
+				),
+			)
+			return
+		}
+
+		reader = res.Body
+	default:
 		errs <- errors.WithStack(herodot.
 			ErrInternalServerError.
 			WithReasonf(
-				`Expected successful status code from location "%s", but received code "%d".`,
+				`Unable to fetch JSON Web Keys from location "%s" because URL scheme "%s" is not supported.`,
 				location.String(),
-				res.StatusCode,
+				location.Scheme,
 			),
 		)
-		return
+
 	}
 
 	var set jose.JSONWebKeySet
-	if err := json.NewDecoder(res.Body).Decode(&set); err != nil {
+	if err := json.NewDecoder(reader).Decode(&set); err != nil {
 		errs <- errors.WithStack(herodot.
 			ErrInternalServerError.
 			WithReasonf(

@@ -22,21 +22,21 @@ package proxy
 
 import (
 	"encoding/json"
+	"github.com/ory/herodot"
 	"net/http"
 
 	"github.com/ory/oathkeeper/rule"
 )
 
-type CredentialsIssuerNoOp struct{}
-
-func NewCredentialsIssuerNoOp() *CredentialsIssuerNoOp {
-	return new(CredentialsIssuerNoOp)
+var ErrTransformerNotEnabled = herodot.DefaultError{
+	ErrorField: "transformer matching this route is misconfigured or disabled",
+	CodeField:   http.StatusInternalServerError,
+	StatusField: http.StatusText(http.StatusInternalServerError),
 }
 
-func (a *CredentialsIssuerNoOp) GetID() string {
-	return "noop"
-}
 
-func (a *CredentialsIssuerNoOp) Issue(r *http.Request, session *AuthenticationSession, config json.RawMessage, rl *rule.Rule) (http.Header, error) {
-	return r.Header, nil
+type Transformer interface {
+	Transform(r *http.Request, session *AuthenticationSession, config json.RawMessage, rl *rule.Rule) (http.Header, error)
+	GetID() string
+	Validate() error
 }

@@ -29,6 +29,21 @@ before finalizing the upgrade process.
 
 ## v0.16.0+oryOS.12
 
+### id token
+
+jwks are now no longer fetched from hydra
+
+instead you can use `oathkeeper credentials generate [--alg <RS256>] [--bits <2048|4096>] <transformer_id_token>`
+
+```
+jwk-keygen --use sig --alg RS256 --bits 4096
+```
+
+### renamed
+
+cookies -> cookie
+headers -> header
+
 ### new
 
 * new unauthorized authorizer

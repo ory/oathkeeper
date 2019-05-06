@@ -23,66 +23,45 @@ package proxy
 import (
 	"bytes"
 	"encoding/json"
+	"github.com/ory/oathkeeper/credentials"
+	"github.com/ory/oathkeeper/driver/configuration"
 	"net/http"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
+	"github.com/ory/oathkeeper/rule"
 	"github.com/pborman/uuid"
 	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
-
-	"github.com/ory/oathkeeper/rsakey"
-	"github.com/ory/oathkeeper/rule"
 )
+
+type TransformerIDTokenRegistry interface {
+	JWTSigner() *credentials.DefaultSigner
+}
 
 type CredentialsIDTokenConfig struct {
 	Audience []string `json:"aud"`
 }
 
-type CredentialsIDToken struct {
-	km       rsakey.Manager
-	l        logrus.FieldLogger
-	lifetime time.Duration
-	issuer   string
+type TransformerIDToken struct {
+	c configuration.Provider
+	r TransformerIDTokenRegistry
 }
 
 func NewCredentialsIssuerIDToken(
-	k rsakey.Manager,
-	l logrus.FieldLogger,
-	lifetime time.Duration,
-	issuer string,
-) *CredentialsIDToken {
-	return &CredentialsIDToken{
-		km:       k,
-		l:        l,
-		lifetime: lifetime,
-		issuer:   issuer,
+	c configuration.Provider,
+	r TransformerIDTokenRegistry,
+) *TransformerIDToken {
+	return &TransformerIDToken{
+		r: r,
+		c: c,
 	}
 }
 
-func (a *CredentialsIDToken) GetID() string {
+func (a *TransformerIDToken) GetID() string {
 	return "id_token"
 }
 
-type Claims struct {
-	Audience  []string `json:"aud,omitempty"`
-	ExpiresAt int64    `json:"exp,omitempty"`
-	Id        string   `json:"jti,omitempty"`
-	IssuedAt  int64    `json:"iat,omitempty"`
-	Issuer    string   `json:"iss,omitempty"`
-	NotBefore int64    `json:"nbf,omitempty"`
-	Subject   string   `json:"sub,omitempty"`
-}
-
-func (c *Claims) Valid() error {
-	return nil
-}
-
-func (a *CredentialsIDToken) Issue(r *http.Request, session *AuthenticationSession, config json.RawMessage, rl *rule.Rule) (http.Header, error) {
-	privateKey, err := a.km.PrivateKey()
-	if err != nil {
-		return nil, errors.WithStack(err)
-	}
+func (a *TransformerIDToken) Transform(r *http.Request, session *AuthenticationSession, config json.RawMessage, rl *rule.Rule) (http.Header, error) {
 	if len(config) == 0 {
 		config = []byte("{}")
 	}
@@ -106,10 +85,10 @@ func (a *CredentialsIDToken) Issue(r *http.Request, session *AuthenticationSessi
 		claims["aud"] = cc.Audience
 	}
 
-	claims["exp"] = now.Add(a.lifetime).Unix()
+	claims["exp"] = now.Add(a.c.TransformerIDTokenTTL()).Unix()
 	claims["jti"] = uuid.New()
 	claims["iat"] = now.Unix()
-	claims["iss"] = a.issuer
+	claims["iss"] = a.c.TransformerIDTokenIssuerURL().String()
 	claims["nbf"] = now.Unix()
 	claims["sub"] = session.Subject
 
@@ -133,4 +112,12 @@ func (a *CredentialsIDToken) Issue(r *http.Request, session *AuthenticationSessi
 	headers := http.Header{}
 	headers.Set("Authorization", "Bearer "+signed)
 	return headers, nil
+}
+
+func (a *TransformerIDToken) Validate() error {
+	if !a.c.TransformerIDTokenIsEnabled() {
+		return errors.WithStack(ErrAuthenticatorNotEnabled.WithReasonf("Transformer % is disabled per configuration.", a.GetID()))
+	}
+
+	return nil
 }

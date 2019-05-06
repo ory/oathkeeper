@@ -40,7 +40,7 @@ func NewAuthenticatorUnauthorized(c configuration.Provider) *AuthenticatorUnauth
 }
 
 func (a *AuthenticatorUnauthorized) Validate() error {
-	if !a.c.AuthenticatorOAuth2ClientCredentialsIsEnabled() {
+	if !a.c.AuthenticatorUnauthorizedIsEnabled() {
 		return errors.WithStack(ErrAuthenticatorNotEnabled.WithReasonf("Authenticator % is disabled per configuration.", a.GetID()))
 	}
 

@@ -34,7 +34,7 @@ type RequestHandler struct {
 	Logger                 logrus.FieldLogger
 	AuthorizationHandlers  map[string]Authorizer
 	AuthenticationHandlers map[string]Authenticator
-	CredentialIssuers      map[string]CredentialsIssuer
+	CredentialIssuers      map[string]Transformer
 	Issuer                 string
 }
 
@@ -42,7 +42,7 @@ func NewRequestHandler(
 	l logrus.FieldLogger,
 	authenticationHandlers []Authenticator,
 	authorizationHandlers []Authorizer,
-	credentialIssuers []CredentialsIssuer,
+	credentialIssuers []Transformer,
 ) *RequestHandler {
 	if l == nil {
 		l = logrus.New()
@@ -52,7 +52,7 @@ func NewRequestHandler(
 		Logger:                 l,
 		AuthorizationHandlers:  map[string]Authorizer{},
 		AuthenticationHandlers: map[string]Authenticator{},
-		CredentialIssuers:      map[string]CredentialsIssuer{},
+		CredentialIssuers:      map[string]Transformer{},
 	}
 
 	for _, h := range authorizationHandlers {
@@ -166,7 +166,7 @@ func (d *RequestHandler) HandleRequest(r *http.Request, rl *rule.Rule) (http.Hea
 		return nil, errors.New("Unknown credential issuer requested")
 	}
 
-	headers, err := sh.Issue(r, session, rl.Transformer.Config, rl)
+	headers, err := sh.Transform(r, session, rl.Transformer.Config, rl)
 	if err != nil {
 		return nil, err
 	}

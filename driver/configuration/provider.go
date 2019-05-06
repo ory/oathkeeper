@@ -5,6 +5,7 @@ import (
 	"github.com/rs/cors"
 	"golang.org/x/oauth2/clientcredentials"
 	"net/url"
+	"time"
 )
 
 type Provider interface {
@@ -13,6 +14,12 @@ type Provider interface {
 	CORSEnabled(iface string) bool
 	CORSOptions(iface string) cors.Options
 
+	ProviderAuthenticators
+	ProviderAuthorizers
+	ProviderTransformers
+}
+
+type ProviderAuthenticators interface {
 	AuthenticatorAnonymousIsEnabled() bool
 	AuthenticatorAnonymousIdentifier() string
 
@@ -25,12 +32,31 @@ type Provider interface {
 	AuthenticatorOAuth2ClientCredentialsIsEnabled() bool
 	AuthenticatorOAuth2ClientCredentialsTokenURL() *url.URL
 
+	AuthenticatorOAuth2TokenIntrospectionIsEnabled() bool
 	AuthenticatorOAuth2TokenIntrospectionScopeStrategy() fosite.ScopeStrategy
 	AuthenticatorOAuth2TokenIntrospectionIntrospectionURL() *url.URL
-	AuthenticatorOAuth2TokenIntrospectionAuthorization() *clientcredentials.Config
+	AuthenticatorOAuth2TokenIntrospectionPreAuthorization() *clientcredentials.Config
 
+	AuthenticatorUnauthorizedIsEnabled() bool
+}
+
+type ProviderAuthorizers interface {
 	AuthorizerAllowIsEnabled() bool
+
 	AuthorizerDenyIsEnabled() bool
 
-	AuthorizerKetoWardenIsEnabled() bool
+	AuthorizerKetoEngineACPORYIsEnabled() bool
+	AuthorizerKetoEngineACPORYAuthorizedURL() *url.URL
+}
+
+type ProviderTransformers interface {
+	TransformerCookieIsEnabled() bool
+
+	TransformerHeaderIsEnabled() bool
+
+	TransformerIDTokenIsEnabled() bool
+	TransformerIDTokenIssuerURL() *url.URL
+	TransformerIDTokenTTL() time.Duration
+
+	TransformerNoopIsEnabled() bool
 }

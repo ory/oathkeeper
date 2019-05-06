@@ -41,7 +41,7 @@ func TestJudge(t *testing.T) {
 		nil,
 		[]proxy.Authenticator{proxy.NewAuthenticatorNoOp(), proxy.NewAuthenticatorAnonymous("anonymous"), proxy.NewAuthenticatorUnauthorized()},
 		[]proxy.Authorizer{proxy.NewAuthorizerAllow(), proxy.NewAuthorizerDeny()},
-		[]proxy.CredentialsIssuer{proxy.NewCredentialsIssuerNoOp(), proxy.NewCredentialsIssuerBroken()},
+		[]proxy.Transformer{proxy.NewCredentialsIssuerNoOp(), proxy.NewTransformerBroken()},
 	)
 
 	router := httprouter.New()

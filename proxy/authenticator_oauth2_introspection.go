@@ -5,18 +5,16 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/ory/fosite"
+	"github.com/ory/go-convenience/stringslice"
 	"github.com/ory/oathkeeper/driver/configuration"
+	"github.com/ory/oathkeeper/helper"
+	"github.com/ory/oathkeeper/rule"
+	"github.com/ory/x/httpx"
+	"github.com/pkg/errors"
 	"net/http"
 	"net/url"
 	"strings"
-
-	"github.com/pkg/errors"
-	"golang.org/x/oauth2/clientcredentials"
-
-	"github.com/ory/fosite"
-	"github.com/ory/go-convenience/stringslice"
-	"github.com/ory/oathkeeper/helper"
-	"github.com/ory/oathkeeper/rule"
 )
 
 type AuthenticatorOAuth2IntrospectionConfiguration struct {
@@ -42,36 +40,13 @@ type AuthenticatorOAuth2Introspection struct {
 
 func NewAuthenticatorOAuth2Introspection(
 	c configuration.Provider,
-) (*AuthenticatorOAuth2Introspection, error) {
-	if _, err := url.ParseRequestURI(introspectionURL); err != nil {
-		return new(AuthenticatorOAuth2Introspection), errors.Errorf(`unable to validate the OAuth 2.0 Introspection Authenticator's Token Introspection URL "%s" because %s`, introspectionURL, err)
+) *AuthenticatorOAuth2Introspection {
+	var rt http.RoundTripper
+	if conf := c.AuthenticatorOAuth2TokenIntrospectionPreAuthorization(); conf != nil {
+		rt = conf.Client(context.Background()).Transport
 	}
 
-	c := http.DefaultClient
-	if len(clientID)+len(clientSecret)+len(tokenURL)+len(scopes) > 0 {
-		if len(clientID) == 0 {
-			return new(AuthenticatorOAuth2Introspection), errors.Errorf("if OAuth 2.0 Authorization is used in the OAuth 2.0 Introspection Authenticator, the OAuth 2.0 Client ID must be set but was not")
-		}
-		if len(clientSecret) == 0 {
-			return new(AuthenticatorOAuth2Introspection), errors.Errorf("if OAuth 2.0 Authorization is used in the OAuth 2.0 Introspection Authenticator, the OAuth 2.0 Client ID must be set but was not")
-		}
-		if _, err := url.ParseRequestURI(tokenURL); err != nil {
-			return new(AuthenticatorOAuth2Introspection), errors.Errorf(`if OAuth 2.0 Authorization is used in the OAuth 2.0 Introspection Authenticator, the OAuth 2.0 Token URL must be set but validating URL "%s" failed because %s`, tokenURL, err)
-		}
-
-		c = (&clientcredentials.Config{
-			ClientID:     clientID,
-			ClientSecret: clientSecret,
-			TokenURL:     tokenURL,
-			Scopes:       scopes,
-		}).Client(context.Background())
-	}
-
-	return &AuthenticatorOAuth2Introspection{
-		client:           c,
-		introspectionURL: introspectionURL,
-		scopeStrategy:    strategy,
-	}, nil
+	return &AuthenticatorOAuth2Introspection{client: httpx.NewResilientClientLatencyToleranceSmall(rt)}
 }
 
 func (a *AuthenticatorOAuth2Introspection) GetID() string {
@@ -144,9 +119,9 @@ func (a *AuthenticatorOAuth2Introspection) Authenticate(r *http.Request, config 
 		}
 	}
 
-	if a.scopeStrategy != nil {
+	if a.c.AuthenticatorOAuth2TokenIntrospectionScopeStrategy() != nil {
 		for _, scope := range cf.Scopes {
-			if !a.scopeStrategy(strings.Split(i.Scope, " "), scope) {
+			if !a.c.AuthenticatorOAuth2TokenIntrospectionScopeStrategy()(strings.Split(i.Scope, " "), scope) {
 				return nil, errors.WithStack(helper.ErrForbidden.WithReason(fmt.Sprintf("Scope %s was not granted", scope)))
 			}
 		}
@@ -164,4 +139,16 @@ func (a *AuthenticatorOAuth2Introspection) Authenticate(r *http.Request, config 
 		Subject: i.Subject,
 		Extra:   i.Extra,
 	}, nil
+}
+
+func (a *AuthenticatorOAuth2Introspection) Validate() error {
+	if !a.c.AuthenticatorOAuth2TokenIntrospectionIsEnabled() {
+		return errors.WithStack(ErrAuthenticatorNotEnabled.WithReasonf("Authenticator % is disabled per configuration.", a.GetID()))
+	}
+
+	if a.c.AuthenticatorOAuth2TokenIntrospectionIntrospectionURL() == nil {
+		return errors.WithStack(ErrAuthenticatorNotEnabled.WithReasonf(`Configuration for authenticator % did not specify any values for configuration key "%s" and is thus disabled.`, a.GetID(), configuration.ViperKeyAuthenticatorOAuth2TokenIntrospectionIntrospectionURL))
+	}
+
+	return nil
 }

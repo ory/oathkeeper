@@ -21,17 +21,17 @@
 package proxy
 
 import (
+	"net/http"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
-func TestCredentialsIssuerBroken(t *testing.T) {
-	b := NewCredentialsIssuerBroken()
-	assert.NotNil(t, b)
-	assert.NotEmpty(t, b.GetID())
+func TestCredentialsIssuerNoOp(t *testing.T) {
+	assert.NotNil(t, NewCredentialsIssuerNoOp())
+	assert.NotEmpty(t, NewCredentialsIssuerNoOp().GetID())
 
-	_, err := b.Issue(nil, nil, nil, nil)
-	require.Error(t, err)
+	_, err := NewCredentialsIssuerNoOp().Transform(&http.Request{Header: map[string][]string{}}, nil, nil, nil)
+	require.NoError(t, err)
 }

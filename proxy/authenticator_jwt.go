@@ -24,7 +24,7 @@ import (
 )
 
 type AuthenticatorJWTRegistry interface {
-	JWKSFetcher() credentials.JWKSFetcher
+	JWKSFetcher() credentials.Fetcher
 }
 
 type AuthenticatorOAuth2JWTConfiguration struct {
@@ -101,11 +101,11 @@ func (a *AuthenticatorJWT) Authenticate(r *http.Request, config json.RawMessage,
 		}
 
 		kid, ok := token.Header["kid"].(string)
-		if !ok {
+		if !ok  || kid == "" {
 			return nil, errors.WithStack(helper.ErrUnauthorized.WithReason("The JSON Web Token must contain a kid header value but did not."))
 		}
 
-		key, err := a.r.JWKSFetcher().Resolve(r.Context(), a.c.AuthenticatorJWTJWKSURIs(), kid, "sig")
+		key, err := a.r.JWKSFetcher().ResolveKey(r.Context(), a.c.AuthenticatorJWTJWKSURIs(), kid, "sig")
 		if err != nil {
 			return nil, helper.ErrUnauthorized.WithTrace(err).WithDebugf("%s", err)
 		}
@@ -184,36 +184,4 @@ func (a *AuthenticatorJWT) Authenticate(r *http.Request, config json.RawMessage,
 		Subject: parsedClaims.Subject,
 		Extra:   claims,
 	}, nil
-}
-
-func getScopeClaim(claims map[string]interface{}) []string {
-	var ok bool
-	var interim interface{}
-
-	for _, k := range []string{"scp", "scope", "scopes"} {
-		if interim, ok = claims[k]; ok {
-			break
-		}
-	}
-
-	if !ok {
-		return []string{}
-	}
-
-	switch i := interim.(type) {
-	case []string:
-		return i
-	case []interface{}:
-		vs := make([]string, len(i))
-		for k, v := range i {
-			if vv, ok := v.(string); ok {
-				vs[k] = vv
-			}
-		}
-		return vs
-	case string:
-		return stringsx.Splitx(i, " ")
-	default:
-		return []string{}
-	}
 }

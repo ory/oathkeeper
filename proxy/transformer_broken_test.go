@@ -21,13 +21,17 @@
 package proxy
 
 import (
-	"encoding/json"
-	"net/http"
+	"testing"
 
-	"github.com/ory/oathkeeper/rule"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
-type CredentialsIssuer interface {
-	Issue(r *http.Request, session *AuthenticationSession, config json.RawMessage, rl *rule.Rule) (http.Header, error)
-	GetID() string
+func TestCredentialsIssuerBroken(t *testing.T) {
+	b := NewTransformerBroken()
+	assert.NotNil(t, b)
+	assert.NotEmpty(t, b.GetID())
+
+	_, err := b.Transform(nil, nil, nil, nil)
+	require.Error(t, err)
 }

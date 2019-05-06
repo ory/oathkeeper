@@ -25,8 +25,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/ory/oathkeeper/driver/configuration"
+	"github.com/ory/x/httpx"
 	"net/http"
-	"net/url"
 	"text/template"
 	"time"
 
@@ -52,14 +52,12 @@ type AuthorizerKetoWarden struct {
 
 	client         *http.Client
 	contextCreator authorizerKetoWardenContext
-	baseURL        *url.URL
 }
 
 func NewAuthorizerKetoWarden(c configuration.Provider) *AuthorizerKetoWarden {
 	return &AuthorizerKetoWarden{
 		c:      c,
-		client: &http.Client{Timeout: time.Second * 5},
-		// baseURL:        baseURL,
+		client: httpx.NewResilientClientLatencyToleranceSmall(nil),
 		contextCreator: contextFromRequest,
 	}
 }
@@ -131,7 +129,7 @@ func (a *AuthorizerKetoWarden) Authorize(r *http.Request, session *Authenticatio
 	}); err != nil {
 		return errors.WithStack(err)
 	}
-	req, err := http.NewRequest("POST", urlx.AppendPaths(a.baseURL, "/engines/acp/ory", flavor, "/allowed").String(), &b)
+	req, err := http.NewRequest("POST", urlx.AppendPaths(a.c.AuthorizerKetoEngineACPORYAuthorizedURL(), "/engines/acp/ory", flavor, "/allowed").String(), &b)
 	if err != nil {
 		return errors.WithStack(err)
 	}
@@ -188,8 +186,12 @@ func (a *AuthorizerKetoWarden) ParseSubject(session *AuthenticationSession, temp
 }
 
 func (a *AuthorizerKetoWarden) Validate() error {
-	if !a.client.AuthorizerKetoWardenIsEnabled() {
+	if !a.c.AuthorizerKetoEngineACPORYIsEnabled() {
 		return errors.WithStack(ErrAuthenticatorNotEnabled.WithReasonf("Authorizer % is disabled per configuration.", a.GetID()))
+	}
+
+	if a.c.AuthorizerKetoEngineACPORYAuthorizedURL() == nil {
+		return errors.WithStack(ErrAuthenticatorNotEnabled.WithReasonf(`Configuration for authorizer % did not specify any values for configuration key "%s" and is thus disabled.`, a.GetID(), configuration.ViperKeyAuthorizerKetoEngineACPORYAuthorizedURL))
 	}
 
 	return nil
