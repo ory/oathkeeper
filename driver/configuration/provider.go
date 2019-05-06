@@ -9,14 +9,12 @@ import (
 )
 
 type Provider interface {
-	ServesHTTPS() bool
-
 	CORSEnabled(iface string) bool
 	CORSOptions(iface string) cors.Options
 
 	ProviderAuthenticators
 	ProviderAuthorizers
-	ProviderTransformers
+	ProviderMutators
 }
 
 type ProviderAuthenticators interface {
@@ -49,14 +47,15 @@ type ProviderAuthorizers interface {
 	AuthorizerKetoEngineACPORYAuthorizedURL() *url.URL
 }
 
-type ProviderTransformers interface {
-	TransformerCookieIsEnabled() bool
+type ProviderMutators interface {
+	MutatorCookieIsEnabled() bool
 
-	TransformerHeaderIsEnabled() bool
+	MutatorHeaderIsEnabled() bool
 
-	TransformerIDTokenIsEnabled() bool
-	TransformerIDTokenIssuerURL() *url.URL
-	TransformerIDTokenTTL() time.Duration
+	MutatorIDTokenIsEnabled() bool
+	MutatorIDTokenIssuerURL() *url.URL
+	MutatorIDTokenJWKSURL() *url.URL
+	MutatorIDTokenTTL() time.Duration
 
-	TransformerNoopIsEnabled() bool
+	MutatorNoopIsEnabled() bool
 }

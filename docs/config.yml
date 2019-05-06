@@ -163,33 +163,49 @@ authenticators:
 authorizers:
   # Configures the allow authorizer
   allow:
-    # Set enabled to true if the authenticator should be enabled and false to disable the authorizer. Defaults to false.
+    # Set enabled to true if the authorizer should be enabled and false to disable the authorizer. Defaults to false.
     enabled: true
 
   # Configures the deny authorizer
   deny:
-    # Set enabled to true if the authenticator should be enabled and false to disable the authorizer. Defaults to false.
+    # Set enabled to true if the authorizer should be enabled and false to disable the authorizer. Defaults to false.
     enabled: true
 
   keto_engine_acp_ory:
-    # Set enabled to true if the authenticator should be enabled and false to disable the authorizer. Defaults to false.
+    # Set enabled to true if the authorizer should be enabled and false to disable the authorizer. Defaults to false.
     enabled: true
-    # The base URL of ORY Keto, typically something like http(s)://<host>[:<port>]/
+    # REQUIRED IF ENABLED - The base URL of ORY Keto, typically something like http(s)://<host>[:<port>]/
     base_url: http://my-keto/
 
 
-# All transformers can be configured under this configuration key
-transformers:
-  cookies:
+# All mutators can be configured under this configuration key
+mutators:
+  # Configures the cookie mutator
+  cookie:
+    # Set enabled to true if the mutator should be enabled and false to disable the mutator. Defaults to false.
     enabled: true
 
-  headers:
+  # Configures the header mutator
+  header:
+    # Set enabled to true if the mutator should be enabled and false to disable the mutator. Defaults to false.
     enabled: true
 
+  # Configures the id_token mutator
   id_token:
+    # Set enabled to true if the mutator should be enabled and false to disable the mutator. Defaults to false.
     enabled: true
-    ttl: 60s
-    issuer_url:
+    # REQUIRED IF ENABLED - Sets the "iss" value of the ID Token.
+    issuer_url: https://my-oathkeeper/
+    # REQUIRED IF ENABLED - Sets the URL where keys should be fetched from. Supports remote locations (http, https) as
+    # well as local filesystem paths.
+    jwks_url: https://fetch-keys/from/this/location.json
+    # jwks_url: file:///from/this/absolute/location.json
+    # jwks_url: file://../from/this/relative/location.json
 
+    # Sets the time-to-live of the ID token. Defaults to one minute. Valid time units are: s (second), m (minute), h (hour).
+    ttl: 60s
+
+  # Configures the noop mutator
   noop:
+    # Set enabled to true if the mutator should be enabled and false to disable the mutator. Defaults to false.
     enabled: true

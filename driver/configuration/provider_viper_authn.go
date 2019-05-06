@@ -55,9 +55,15 @@ func (v *ViperProvider) AuthenticatorJWTIsEnabled() bool {
 	return viperx.GetBool(v.l, ViperKeyAuthenticatorJWTIsEnabled, false)
 
 }
-func (v *ViperProvider) AuthenticatorJWTJWKSURIs() []string {
-	return viperx.GetStringSlice(v.l, ViperKeyAuthenticatorJWTJWKSURIs, []string{}, "AUTHENTICATOR_JWT_JWKS_URL")
+func (v *ViperProvider) AuthenticatorJWTJWKSURIs() []url.URL {
+	res := make([]url.URL, 0)
+	for _, u := range viperx.GetStringSlice(v.l, ViperKeyAuthenticatorJWTJWKSURIs, []string{}, "AUTHENTICATOR_JWT_JWKS_URL") {
+		p := v.getURL(u, ViperKeyAuthenticatorJWTJWKSURIs)
+		res = append(res, *p)
+	}
+	return res
 }
+
 func (v *ViperProvider) AuthenticatorJWTScopeStrategy() fosite.ScopeStrategy {
 	return v.toScopeStrategy(
 		viperx.GetString(v.l, ViperKeyAuthenticatorJWTScopeStrategy, "none", "AUTHENTICATOR_JWT_SCOPE_STRATEGY"),

@@ -25,6 +25,9 @@ import (
 	"crypto/tls"
 	"encoding/base64"
 	"fmt"
+	"github.com/ory/oathkeeper/pipeline/authn"
+	"github.com/ory/oathkeeper/pipeline/authz"
+	"github.com/ory/oathkeeper/pipeline/mutate"
 	"net/http"
 	"net/url"
 	"strings"
@@ -40,7 +43,6 @@ import (
 
 	"github.com/ory/fosite"
 	"github.com/ory/go-convenience/stringsx"
-	"github.com/ory/oathkeeper/proxy"
 	"github.com/ory/oathkeeper/rsakey"
 	"github.com/ory/oathkeeper/rule"
 )
@@ -143,19 +145,19 @@ func keyManagerFactory(l logrus.FieldLogger) (keyManager rsakey.Manager, err err
 
 func availableHandlerNames() ([]string, []string, []string) {
 	return []string{
-			new(proxy.AuthenticatorNoOp).GetID(),
-			new(proxy.AuthenticatorAnonymous).GetID(),
-			new(proxy.AuthenticatorOAuth2Introspection).GetID(),
-			new(proxy.AuthenticatorOAuth2ClientCredentials).GetID(),
+			new(authn.AuthenticatorNoOp).GetID(),
+			new(authn.AuthenticatorAnonymous).GetID(),
+			new(authn.AuthenticatorOAuth2Introspection).GetID(),
+			new(authn.AuthenticatorOAuth2ClientCredentials).GetID(),
 		},
 		[]string{
-			new(proxy.AuthorizerAllow).GetID(),
-			new(proxy.AuthorizerDeny).GetID(),
-			new(proxy.AuthorizerKetoWarden).GetID(),
+			new(authz.AuthorizerAllow).GetID(),
+			new(authz.AuthorizerDeny).GetID(),
+			new(authz.AuthorizerKetoWarden).GetID(),
 		},
 		[]string{
-			new(proxy.TransformerNoop).GetID(),
-			new(proxy.TransformerIDToken).GetID(),
+			new(mutate.TransformerNoop).GetID(),
+			new(mutate.TransformerIDToken).GetID(),
 		}
 }
 
@@ -189,14 +191,14 @@ func getScopeStrategy(key string) fosite.ScopeStrategy {
 	return nil
 }
 
-func authenticatorFactory(f func() (proxy.Authenticator, error)) proxy.Authenticator {
+func authenticatorFactory(f func() (authn.Authenticator, error)) authn.Authenticator {
 	a, err := f()
 	if err != nil {
 		logger.WithError(err).Fatalf("Unable to initialize authenticator \"%s\" because an environment variable is missing or misconfigured.", a.GetID())
 	}
 	return a
 }
-func credentialsIssuerFactory(f func() (proxy.Transformer, error)) proxy.Transformer {
+func credentialsIssuerFactory(f func() (mutate.Mutator, error)) mutate.Mutator {
 	a, err := f()
 	if err != nil {
 		logger.WithError(err).Fatalf("Unable to initialize authenticator \"%s\" because an environment variable is missing or misconfigured.", a.GetID())
@@ -204,19 +206,19 @@ func credentialsIssuerFactory(f func() (proxy.Transformer, error)) proxy.Transfo
 	return a
 }
 
-func handlerFactories(keyManager rsakey.Manager) ([]proxy.Authenticator, []proxy.Authorizer, []proxy.Transformer) {
-	var authorizers = []proxy.Authorizer{
-		proxy.NewAuthorizerAllow(),
-		proxy.NewAuthorizerDeny(),
+func handlerFactories(keyManager rsakey.Manager) ([]authn.Authenticator, []authz.Authorizer, []mutate.Mutator) {
+	var authorizers = []authz.Authorizer{
+		authz.NewAuthorizerAllow(),
+		authz.NewAuthorizerDeny(),
 	}
-	var authenticators = []proxy.Authenticator{
-		proxy.NewAuthenticatorNoOp(),
-		proxy.NewAuthenticatorAnonymous(viper.GetString("AUTHENTICATOR_ANONYMOUS_USERNAME")),
+	var authenticators = []authn.Authenticator{
+		authn.NewAuthenticatorNoOp(),
+		authn.NewAuthenticatorAnonymous(viper.GetString("AUTHENTICATOR_ANONYMOUS_USERNAME")),
 	}
 
 	if u := viper.GetString("AUTHENTICATOR_OAUTH2_INTROSPECTION_URL"); len(u) > 0 {
-		authenticators = append(authenticators, authenticatorFactory(func() (proxy.Authenticator, error) {
-			return proxy.NewAuthenticatorOAuth2Introspection(
+		authenticators = append(authenticators, authenticatorFactory(func() (authn.Authenticator, error) {
+			return authn.NewAuthenticatorOAuth2Introspection(
 				viper.GetString("AUTHENTICATOR_OAUTH2_INTROSPECTION_AUTHORIZATION_CLIENT_ID"),
 				viper.GetString("AUTHENTICATOR_OAUTH2_INTROSPECTION_AUTHORIZATION_CLIENT_SECRET"),
 				viper.GetString("AUTHENTICATOR_OAUTH2_INTROSPECTION_AUTHORIZATION_TOKEN_URL"),
@@ -231,8 +233,8 @@ func handlerFactories(keyManager rsakey.Manager) ([]proxy.Authenticator, []proxy
 	}
 
 	if u := viper.GetString("AUTHENTICATOR_OAUTH2_CLIENT_CREDENTIALS_TOKEN_URL"); len(u) > 0 {
-		authenticators = append(authenticators, authenticatorFactory(func() (proxy.Authenticator, error) {
-			return proxy.NewAuthenticatorOAuth2ClientCredentials(u)
+		authenticators = append(authenticators, authenticatorFactory(func() (authn.Authenticator, error) {
+			return authn.NewAuthenticatorOAuth2ClientCredentials(u)
 		}))
 		logger.Info("Authenticator \"oauth2_client_credentials\" was configured and enabled successfully.")
 	} else {
@@ -240,8 +242,8 @@ func handlerFactories(keyManager rsakey.Manager) ([]proxy.Authenticator, []proxy
 	}
 
 	if u := viper.GetString("AUTHENTICATOR_JWT_JWKS_URL"); len(u) > 0 {
-		authenticators = append(authenticators, authenticatorFactory(func() (proxy.Authenticator, error) {
-			return proxy.NewAuthenticatorJWT(
+		authenticators = append(authenticators, authenticatorFactory(func() (authn.Authenticator, error) {
+			return authn.NewAuthenticatorJWT(
 				viper.GetString("AUTHENTICATOR_JWT_JWKS_URL"),
 				getScopeStrategy("AUTHENTICATOR_JWT_SCOPE_STRATEGY"),
 			)
@@ -257,23 +259,23 @@ func handlerFactories(keyManager rsakey.Manager) ([]proxy.Authenticator, []proxy
 			logger.WithError(err).Fatalf("Value \"%s\" from environment variable \"AUTHORIZER_KETO_URL\" is not a valid URL.", u)
 		}
 
-		authorizers = append(authorizers, proxy.NewAuthorizerKetoWarden(uu))
+		authorizers = append(authorizers, authz.NewAuthorizerKetoWarden(uu))
 	} else {
 		logger.Warn("Authorizer \"ory-keto\" is not configured and thus disabled.")
 	}
 
 	return authenticators,
 		authorizers,
-		[]proxy.Transformer{
-			proxy.NewCredentialsIssuerNoOp(),
-			proxy.NewCredentialsIssuerIDToken(
+		[]mutate.Mutator{
+			mutate.NewCredentialsIssuerNoOp(),
+			mutate.NewCredentialsIssuerIDToken(
 				keyManager,
 				logger,
 				viper.GetDuration("CREDENTIALS_ISSUER_ID_TOKEN_LIFESPAN"),
 				viper.GetString("CREDENTIALS_ISSUER_ID_TOKEN_ISSUER"),
 			),
-			proxy.NewCredentialsIssuerHeaders(),
-			proxy.NewTransformerCookies(),
+			mutate.NewCredentialsIssuerHeaders(),
+			mutate.NewTransformerCookies(),
 		}
 }
 

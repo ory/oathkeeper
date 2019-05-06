@@ -29,6 +29,10 @@ before finalizing the upgrade process.
 
 ## v0.16.0+oryOS.12
 
+### all env vars have been renamed but you can use older ones np
+
+### everything is disabled by default you must enable it explicitly
+
 ### id token
 
 jwks are now no longer fetched from hydra
@@ -43,6 +47,7 @@ jwk-keygen --use sig --alg RS256 --bits 4096
 
 cookies -> cookie
 headers -> header
+credentials issuer -> mutator
 
 ### new
 

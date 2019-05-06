@@ -2,13 +2,29 @@ package configuration
 
 import (
 	"github.com/ory/fosite"
+	"github.com/ory/x/corsx"
+	"github.com/rs/cors"
 	"github.com/sirupsen/logrus"
 	"net/url"
 	"strings"
 )
 
+var _ Provider = new(ViperProvider)
+
 type ViperProvider struct {
 	l logrus.FieldLogger
+}
+
+func NewViperProvider(l logrus.FieldLogger) *ViperProvider {
+	return &ViperProvider{l: l}
+}
+
+func (v *ViperProvider) CORSEnabled(iface string) bool {
+	return corsx.IsEnabled(v.l, "serve."+iface)
+}
+
+func (v *ViperProvider) CORSOptions(iface string) cors.Options {
+	return corsx.ParseOptions(v.l, "serve."+iface)
 }
 
 func (v *ViperProvider) getURL(value string, key string) *url.URL {

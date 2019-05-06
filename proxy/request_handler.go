@@ -21,6 +21,9 @@
 package proxy
 
 import (
+	"github.com/ory/oathkeeper/pipeline/authn"
+	"github.com/ory/oathkeeper/pipeline/authz"
+	"github.com/ory/oathkeeper/pipeline/mutate"
 	"net/http"
 
 	"github.com/pkg/errors"
@@ -32,17 +35,17 @@ import (
 
 type RequestHandler struct {
 	Logger                 logrus.FieldLogger
-	AuthorizationHandlers  map[string]Authorizer
-	AuthenticationHandlers map[string]Authenticator
-	CredentialIssuers      map[string]Transformer
+	AuthorizationHandlers  map[string]authz.Authorizer
+	AuthenticationHandlers map[string]authn.Authenticator
+	CredentialIssuers      map[string]mutate.Mutator
 	Issuer                 string
 }
 
 func NewRequestHandler(
 	l logrus.FieldLogger,
-	authenticationHandlers []Authenticator,
-	authorizationHandlers []Authorizer,
-	credentialIssuers []Transformer,
+	authenticationHandlers []authn.Authenticator,
+	authorizationHandlers []authz.Authorizer,
+	credentialIssuers []mutate.Mutator,
 ) *RequestHandler {
 	if l == nil {
 		l = logrus.New()
@@ -50,9 +53,9 @@ func NewRequestHandler(
 
 	j := &RequestHandler{
 		Logger:                 l,
-		AuthorizationHandlers:  map[string]Authorizer{},
-		AuthenticationHandlers: map[string]Authenticator{},
-		CredentialIssuers:      map[string]Transformer{},
+		AuthorizationHandlers:  map[string]authz.Authorizer{},
+		AuthenticationHandlers: map[string]authn.Authenticator{},
+		CredentialIssuers:      map[string]mutate.Mutator{},
 	}
 
 	for _, h := range authorizationHandlers {
@@ -72,7 +75,7 @@ func NewRequestHandler(
 
 func (d *RequestHandler) HandleRequest(r *http.Request, rl *rule.Rule) (http.Header, error) {
 	var err error
-	var session *AuthenticationSession
+	var session *authn.AuthenticationSession
 	var found bool
 
 	if len(rl.Authenticators) == 0 {
@@ -100,7 +103,7 @@ func (d *RequestHandler) HandleRequest(r *http.Request, rl *rule.Rule) (http.Hea
 		session, err = anh.Authenticate(r, a.Config, rl)
 		if err != nil {
 			switch errors.Cause(err).Error() {
-			case ErrAuthenticatorNotResponsible.Error():
+			case authn.ErrAuthenticatorNotResponsible.Error():
 				// The authentication handler is not responsible for handling this request, skip to the next handler
 				break
 			//case ErrAuthenticatorBypassed.Error():
@@ -166,7 +169,7 @@ func (d *RequestHandler) HandleRequest(r *http.Request, rl *rule.Rule) (http.Hea
 		return nil, errors.New("Unknown credential issuer requested")
 	}
 
-	headers, err := sh.Transform(r, session, rl.Transformer.Config, rl)
+	headers, err := sh.Mutate(r, session, rl.Transformer.Config, rl)
 	if err != nil {
 		return nil, err
 	}

@@ -22,6 +22,9 @@ package proxy
 
 import (
 	"fmt"
+	"github.com/ory/oathkeeper/pipeline/authn"
+	"github.com/ory/oathkeeper/pipeline/authz"
+	"github.com/ory/oathkeeper/pipeline/mutate"
 	"net/http"
 	"net/url"
 	"testing"
@@ -56,7 +59,7 @@ func TestRequestHandler(t *testing.T) {
 		{
 			expectErr: true,
 			r:         newTestRequest(t, "http://localhost"),
-			j:         NewRequestHandler(nil, []Authenticator{}, []Authorizer{}, []Transformer{}),
+			j:         NewRequestHandler(nil, []authn.Authenticator{}, []authz.Authorizer{}, []mutate.Mutator{}),
 			rule: rule.Rule{
 				Authenticators: []rule.RuleHandler{},
 				Authorizer:     rule.RuleHandler{},
@@ -66,7 +69,7 @@ func TestRequestHandler(t *testing.T) {
 		{
 			expectErr: true,
 			r:         newTestRequest(t, "http://localhost"),
-			j:         NewRequestHandler(nil, []Authenticator{NewAuthenticatorNoOp()}, []Authorizer{NewAuthorizerAllow()}, []Transformer{NewCredentialsIssuerNoOp()}),
+			j:         NewRequestHandler(nil, []authn.Authenticator{authn.NewAuthenticatorNoOp()}, []authz.Authorizer{authz.NewAuthorizerAllow()}, []mutate.Mutator{mutate.NewCredentialsIssuerNoOp()}),
 			rule: rule.Rule{
 				Authenticators: []rule.RuleHandler{},
 				Authorizer:     rule.RuleHandler{},
@@ -76,19 +79,19 @@ func TestRequestHandler(t *testing.T) {
 		{
 			expectErr: false,
 			r:         newTestRequest(t, "http://localhost"),
-			j:         NewRequestHandler(nil, []Authenticator{NewAuthenticatorNoOp()}, []Authorizer{NewAuthorizerAllow()}, []Transformer{NewCredentialsIssuerNoOp()}),
+			j:         NewRequestHandler(nil, []authn.Authenticator{authn.NewAuthenticatorNoOp()}, []authz.Authorizer{authz.NewAuthorizerAllow()}, []mutate.Mutator{mutate.NewCredentialsIssuerNoOp()}),
 			rule: rule.Rule{
-				Authenticators: []rule.RuleHandler{{Handler: NewAuthenticatorNoOp().GetID()}},
-				Authorizer:     rule.RuleHandler{Handler: NewAuthorizerAllow().GetID()},
-				Transformer:    rule.RuleHandler{Handler: NewCredentialsIssuerNoOp().GetID()},
+				Authenticators: []rule.RuleHandler{{Handler: authn.NewAuthenticatorNoOp().GetID()}},
+				Authorizer:     rule.RuleHandler{Handler: authz.NewAuthorizerAllow().GetID()},
+				Transformer:    rule.RuleHandler{Handler: mutate.NewCredentialsIssuerNoOp().GetID()},
 			},
 		},
 		{
 			expectErr: true,
 			r:         newTestRequest(t, "http://localhost"),
-			j:         NewRequestHandler(nil, []Authenticator{NewAuthenticatorAnonymous("anonymous")}, []Authorizer{}, []Transformer{}),
+			j:         NewRequestHandler(nil, []authn.Authenticator{authn.NewAuthenticatorAnonymous("anonymous")}, []authz.Authorizer{}, []mutate.Mutator{}),
 			rule: rule.Rule{
-				Authenticators: []rule.RuleHandler{{Handler: NewAuthenticatorAnonymous("").GetID()}},
+				Authenticators: []rule.RuleHandler{{Handler: authn.NewAuthenticatorAnonymous("").GetID()}},
 				Authorizer:     rule.RuleHandler{},
 				Transformer:    rule.RuleHandler{},
 			},
@@ -96,9 +99,9 @@ func TestRequestHandler(t *testing.T) {
 		{
 			expectErr: true,
 			r:         newTestRequest(t, "http://localhost"),
-			j:         NewRequestHandler(nil, []Authenticator{NewAuthenticatorAnonymous("anonymous")}, []Authorizer{NewAuthorizerAllow()}, []Transformer{}),
+			j:         NewRequestHandler(nil, []authn.Authenticator{authn.NewAuthenticatorAnonymous("anonymous")}, []authz.Authorizer{authz.NewAuthorizerAllow()}, []mutate.Mutator{}),
 			rule: rule.Rule{
-				Authenticators: []rule.RuleHandler{{Handler: NewAuthenticatorAnonymous("").GetID()}},
+				Authenticators: []rule.RuleHandler{{Handler: authn.NewAuthenticatorAnonymous("").GetID()}},
 				Authorizer:     rule.RuleHandler{Handler: "allow"},
 				Transformer:    rule.RuleHandler{},
 			},
@@ -106,9 +109,9 @@ func TestRequestHandler(t *testing.T) {
 		{
 			expectErr: false,
 			r:         newTestRequest(t, "http://localhost"),
-			j:         NewRequestHandler(nil, []Authenticator{NewAuthenticatorAnonymous("anonymous")}, []Authorizer{NewAuthorizerAllow()}, []Transformer{NewCredentialsIssuerNoOp()}),
+			j:         NewRequestHandler(nil, []authn.Authenticator{authn.NewAuthenticatorAnonymous("anonymous")}, []authz.Authorizer{authz.NewAuthorizerAllow()}, []mutate.Mutator{mutate.NewCredentialsIssuerNoOp()}),
 			rule: rule.Rule{
-				Authenticators: []rule.RuleHandler{{Handler: NewAuthenticatorAnonymous("").GetID()}},
+				Authenticators: []rule.RuleHandler{{Handler: authn.NewAuthenticatorAnonymous("").GetID()}},
 				Authorizer:     rule.RuleHandler{Handler: "allow"},
 				Transformer:    rule.RuleHandler{Handler: "noop"},
 			},

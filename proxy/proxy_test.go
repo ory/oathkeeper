@@ -22,6 +22,9 @@ package proxy
 
 import (
 	"fmt"
+	"github.com/ory/oathkeeper/pipeline/authn"
+	"github.com/ory/oathkeeper/pipeline/authz"
+	"github.com/ory/oathkeeper/pipeline/mutate"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
@@ -76,9 +79,9 @@ func TestProxy(t *testing.T) {
 
 	rh := NewRequestHandler(
 		nil,
-		[]Authenticator{NewAuthenticatorNoOp(), NewAuthenticatorAnonymous("anonymous"), NewAuthenticatorUnauthorized()},
-		[]Authorizer{NewAuthorizerAllow(), NewAuthorizerDeny()},
-		[]Transformer{NewCredentialsIssuerNoOp(), NewTransformerBroken()},
+		[]authn.Authenticator{authn.NewAuthenticatorNoOp(), authn.NewAuthenticatorAnonymous("anonymous"), authn.NewAuthenticatorUnauthorized()},
+		[]authz.Authorizer{authz.NewAuthorizerAllow(), authz.NewAuthorizerDeny()},
+		[]mutate.Mutator{mutate.NewCredentialsIssuerNoOp(), mutate.NewTransformerBroken()},
 	)
 
 	d := NewProxy(rh, nil, matcher)

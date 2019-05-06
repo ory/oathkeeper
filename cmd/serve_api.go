@@ -23,6 +23,7 @@ package cmd
 import (
 	"crypto/tls"
 	"fmt"
+	"github.com/ory/oathkeeper/api"
 	"net/http"
 
 	"github.com/julienschmidt/httprouter"
@@ -33,7 +34,6 @@ import (
 
 	"github.com/ory/graceful"
 	"github.com/ory/herodot"
-	"github.com/ory/oathkeeper/judge"
 	"github.com/ory/oathkeeper/proxy"
 	"github.com/ory/oathkeeper/rsakey"
 	"github.com/ory/oathkeeper/rule"
@@ -92,12 +92,12 @@ HTTP CONTROLS
 
 		router := httprouter.New()
 		writer := herodot.NewJSONWriter(logger)
-		ruleHandler := rule.NewHandler(writer, rules, rule.ValidateRule(
+		ruleHandler := api.NewHandler(writer, rules, rule.ValidateRule(
 			enabledAuthenticators, availableAuthenticators,
 			enabledAuthorizers, availableAuthorizers,
 			enabledCredentialIssuers, availableCredentialIssuers,
 		))
-		judgeHandler := judge.NewHandler(eval, logger, matcher, router)
+		judgeHandler := api.NewHandler(eval, logger, matcher, router)
 		keyHandler := rsakey.NewHandler(writer, keyManager)
 		health := newHealthHandler(db, writer, router)
 		ruleHandler.SetRoutes(router)

@@ -23,6 +23,7 @@ package cmd
 import (
 	"crypto/tls"
 	"fmt"
+	"github.com/ory/oathkeeper/pipeline/authz"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
@@ -200,13 +201,13 @@ OTHER CONTROLS
 		go refreshRules(matcher, 0)
 		go refreshKeys(keyManager, 0)
 
-		var authorizers = []proxy.Authorizer{
-			proxy.NewAuthorizerAllow(),
-			proxy.NewAuthorizerDeny(),
+		var authorizers = []authz.Authorizer{
+			authz.NewAuthorizerAllow(),
+			authz.NewAuthorizerDeny(),
 		}
 
 		if u := viper.GetString("AUTHORIZER_KETO_URL"); len(u) > 0 {
-			authorizers = append(authorizers, proxy.NewAuthorizerKetoWarden(urlx.ParseOrFatal(logger, u)))
+			authorizers = append(authorizers, authz.NewAuthorizerKetoWarden(urlx.ParseOrFatal(logger, u)))
 		}
 
 		authenticators, authorizers, credentialIssuers := handlerFactories(keyManager)

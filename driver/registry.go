@@ -1,8 +1,9 @@
 package driver
 
 import (
+	"github.com/ory/oathkeeper/api"
+	"github.com/ory/oathkeeper/credential"
 	"github.com/ory/oathkeeper/driver/configuration"
-	"github.com/ory/oathkeeper/judge"
 	"github.com/ory/oathkeeper/rule"
 	"github.com/ory/oathkeeper/x"
 	"github.com/ory/x/healthx"
@@ -20,10 +21,14 @@ type Registry interface {
 	BuildHash() string
 
 	HealthHandler() *healthx.Handler
-	RuleHandler() *rule.Handler
-	JudgeHandler() *judge.Handler
+	RuleHandler() *api.RuleHandler
+	JudgeHandler() *api.JudgeHandler
+	CredentialHandler() *api.CredentialHandler
 
 	rule.Registry
+	credential.FetcherRegistry
+	credential.SignerRegistry
+	credential.VerifierRegistry
 
 	x.RegistryWriter
 	x.RegistryLogger
