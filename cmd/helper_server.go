@@ -25,13 +25,14 @@ import (
 	"crypto/tls"
 	"encoding/base64"
 	"fmt"
-	"github.com/ory/oathkeeper/pipeline/authn"
-	"github.com/ory/oathkeeper/pipeline/authz"
-	"github.com/ory/oathkeeper/pipeline/mutate"
 	"net/http"
 	"net/url"
 	"strings"
 	"time"
+
+	"github.com/ory/oathkeeper/pipeline/authn"
+	"github.com/ory/oathkeeper/pipeline/authz"
+	"github.com/ory/oathkeeper/pipeline/mutate"
 
 	"golang.org/x/oauth2/clientcredentials"
 
@@ -267,14 +268,14 @@ func handlerFactories(keyManager rsakey.Manager) ([]authn.Authenticator, []authz
 	return authenticators,
 		authorizers,
 		[]mutate.Mutator{
-			mutate.NewCredentialsIssuerNoOp(),
-			mutate.NewCredentialsIssuerIDToken(
+			mutate.NewMutatorNoop(),
+			mutate.NewMutatorIDToken(
 				keyManager,
 				logger,
 				viper.GetDuration("CREDENTIALS_ISSUER_ID_TOKEN_LIFESPAN"),
 				viper.GetString("CREDENTIALS_ISSUER_ID_TOKEN_ISSUER"),
 			),
-			mutate.NewCredentialsIssuerHeaders(),
+			mutate.NewMutatorHeader(),
 			mutate.NewTransformerCookies(),
 		}
 }

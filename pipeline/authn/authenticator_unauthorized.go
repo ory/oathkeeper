@@ -22,13 +22,14 @@ package authn
 
 import (
 	"encoding/json"
-	"github.com/ory/oathkeeper/driver/configuration"
 	"net/http"
+
+	"github.com/ory/oathkeeper/driver/configuration"
+	"github.com/ory/oathkeeper/pipeline"
 
 	"github.com/pkg/errors"
 
 	"github.com/ory/oathkeeper/helper"
-	"github.com/ory/oathkeeper/rule"
 )
 
 type AuthenticatorUnauthorized struct {
@@ -41,7 +42,7 @@ func NewAuthenticatorUnauthorized(c configuration.Provider) *AuthenticatorUnauth
 
 func (a *AuthenticatorUnauthorized) Validate() error {
 	if !a.c.AuthenticatorUnauthorizedIsEnabled() {
-		return errors.WithStack(ErrAuthenticatorNotEnabled.WithReasonf("Authenticator % is disabled per configuration.", a.GetID()))
+		return errors.WithStack(ErrAuthenticatorNotEnabled.WithReasonf(`Authenticator "%s" is disabled per configuration.`, a.GetID()))
 	}
 
 	return nil
@@ -51,6 +52,6 @@ func (a *AuthenticatorUnauthorized) GetID() string {
 	return "unauthorized"
 }
 
-func (a *AuthenticatorUnauthorized) Authenticate(r *http.Request, config json.RawMessage, rl *rule.Rule) (*AuthenticationSession, error) {
+func (a *AuthenticatorUnauthorized) Authenticate(r *http.Request, config json.RawMessage, _ pipeline.Rule) (*AuthenticationSession, error) {
 	return nil, errors.WithStack(helper.ErrUnauthorized)
 }

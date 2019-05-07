@@ -2,11 +2,12 @@ package authn
 
 import (
 	"encoding/json"
-	"github.com/ory/oathkeeper/driver/configuration"
-	"github.com/pkg/errors"
 	"net/http"
 
-	"github.com/ory/oathkeeper/rule"
+	"github.com/pkg/errors"
+
+	"github.com/ory/oathkeeper/driver/configuration"
+	"github.com/ory/oathkeeper/pipeline"
 )
 
 type AuthenticatorNoOp struct {
@@ -23,12 +24,12 @@ func (a *AuthenticatorNoOp) GetID() string {
 
 func (a *AuthenticatorNoOp) Validate() error {
 	if !a.c.AuthenticatorNoopIsEnabled() {
-		return errors.WithStack(ErrAuthenticatorNotEnabled.WithReasonf("Authenticator % is disabled per configuration.", a.GetID()))
+		return errors.WithStack(ErrAuthenticatorNotEnabled.WithReasonf(`Authenticator "%s" is disabled per configuration.`, a.GetID()))
 	}
 
 	return nil
 }
 
-func (a *AuthenticatorNoOp) Authenticate(r *http.Request, config json.RawMessage, rl *rule.Rule) (*AuthenticationSession, error) {
+func (a *AuthenticatorNoOp) Authenticate(r *http.Request, config json.RawMessage, _ pipeline.Rule) (*AuthenticationSession, error) {
 	return &AuthenticationSession{Subject: ""}, nil
 }

@@ -1,10 +1,12 @@
 package configuration
 
 import (
+	"net/url"
+
+	"golang.org/x/oauth2/clientcredentials"
+
 	"github.com/ory/fosite"
 	"github.com/ory/x/viperx"
-	"golang.org/x/oauth2/clientcredentials"
-	"net/url"
 )
 
 // Authenticators
@@ -98,7 +100,7 @@ func (v *ViperProvider) AuthenticatorOAuth2TokenIntrospectionIntrospectionURL() 
 	)
 }
 func (v *ViperProvider) AuthenticatorOAuth2TokenIntrospectionPreAuthorization() *clientcredentials.Config {
-	if ! viperx.GetBool(v.l, ViperKeyAuthenticatorOAuth2TokenIntrospectionPreAuthorizationEnabled, false) {
+	if !viperx.GetBool(v.l, ViperKeyAuthenticatorOAuth2TokenIntrospectionPreAuthorizationEnabled, false) {
 		v.l.Infof("Authenticator oauth2_token_introspection did not specify pre-authorization which is thus disabled")
 		return nil
 	}

@@ -1,23 +1,24 @@
-package mutate
+package mutate_test
 
 import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/ory/oathkeeper/pipeline/authn"
 	"net/http"
 	"testing"
 	"text/template"
+
+	"github.com/ory/oathkeeper/pipeline/authn"
 
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
+	. "github.com/ory/oathkeeper/pipeline/mutate"
 	"github.com/ory/oathkeeper/rule"
 )
 
 func TestCredentialsIssuerHeaders(t *testing.T) {
-
 	var testMap = map[string]struct {
 		Session *authn.AuthenticationSession
 		Rule    *rule.Rule
@@ -113,7 +114,7 @@ func TestCredentialsIssuerHeaders(t *testing.T) {
 
 	for testName, specs := range testMap {
 		t.Run(testName, func(t *testing.T) {
-			issuer := NewCredentialsIssuerHeaders()
+			issuer := NewMutatorHeader()
 
 			// Must return non-nil issuer
 			assert.NotNil(t, issuer)
@@ -141,7 +142,7 @@ func TestCredentialsIssuerHeaders(t *testing.T) {
 
 	t.Run("Caching", func(t *testing.T) {
 		for _, specs := range testMap {
-			issuer := NewCredentialsIssuerHeaders()
+			issuer := NewMutatorHeader()
 
 			overrideHeaders := http.Header{}
 

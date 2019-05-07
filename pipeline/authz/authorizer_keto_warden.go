@@ -24,12 +24,14 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/ory/oathkeeper/driver/configuration"
-	"github.com/ory/oathkeeper/pipeline/authn"
-	"github.com/ory/x/httpx"
 	"net/http"
 	"text/template"
 	"time"
+
+	"github.com/ory/oathkeeper/driver/configuration"
+	"github.com/ory/oathkeeper/pipeline"
+	"github.com/ory/oathkeeper/pipeline/authn"
+	"github.com/ory/x/httpx"
 
 	"github.com/ory/x/urlx"
 
@@ -38,7 +40,6 @@ import (
 	"github.com/tomasen/realip"
 
 	"github.com/ory/oathkeeper/helper"
-	"github.com/ory/oathkeeper/rule"
 )
 
 type AuthorizerKetoWardenConfiguration struct {
@@ -57,8 +58,8 @@ type AuthorizerKetoWarden struct {
 
 func NewAuthorizerKetoWarden(c configuration.Provider) *AuthorizerKetoWarden {
 	return &AuthorizerKetoWarden{
-		c:      c,
-		client: httpx.NewResilientClientLatencyToleranceSmall(nil),
+		c:              c,
+		client:         httpx.NewResilientClientLatencyToleranceSmall(nil),
 		contextCreator: contextFromRequest,
 	}
 }
@@ -83,7 +84,7 @@ type ketoWardenInput struct {
 	Subject  string                 `json:"subject"`
 }
 
-func (a *AuthorizerKetoWarden) Authorize(r *http.Request, session *authn.AuthenticationSession, config json.RawMessage, rl *rule.Rule) error {
+func (a *AuthorizerKetoWarden) Authorize(r *http.Request, session *authn.AuthenticationSession, config json.RawMessage, rl pipeline.Rule) error {
 	var cf AuthorizerKetoWardenConfiguration
 
 	if len(config) == 0 {
@@ -109,7 +110,7 @@ func (a *AuthorizerKetoWarden) Authorize(r *http.Request, session *authn.Authent
 
 	subject := session.Subject
 	if cf.Subject != "" {
-		templateId := fmt.Sprintf("%s:%s", rl.ID, "subject")
+		templateId := fmt.Sprintf("%s:%s", rl.GetID(), "subject")
 		subject, err = a.ParseSubject(session, templateId, cf.Subject)
 		if err != nil {
 			return errors.WithStack(err)

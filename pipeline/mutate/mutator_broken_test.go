@@ -28,7 +28,7 @@ import (
 )
 
 func TestCredentialsIssuerBroken(t *testing.T) {
-	b := NewTransformerBroken()
+	b := NewMutatorBroken()
 	assert.NotNil(t, b)
 	assert.NotEmpty(t, b.GetID())
 

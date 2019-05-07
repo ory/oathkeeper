@@ -22,21 +22,21 @@ package mutate
 
 import (
 	"encoding/json"
-	"github.com/ory/herodot"
-	"github.com/ory/oathkeeper/pipeline/authn"
 	"net/http"
 
-	"github.com/ory/oathkeeper/rule"
+	"github.com/ory/herodot"
+	"github.com/ory/oathkeeper/pipeline"
+	"github.com/ory/oathkeeper/pipeline/authn"
 )
 
 var ErrMutatorNotEnabled = herodot.DefaultError{
-	ErrorField: "mutator matching this route is misconfigured or disabled",
+	ErrorField:  "mutator matching this route is misconfigured or disabled",
 	CodeField:   http.StatusInternalServerError,
 	StatusField: http.StatusText(http.StatusInternalServerError),
 }
 
 type Mutator interface {
-	Mutate(r *http.Request, session *authn.AuthenticationSession, config json.RawMessage, rl *rule.Rule) (http.Header, error)
+	Mutate(r *http.Request, session *authn.AuthenticationSession, config json.RawMessage, _ pipeline.Rule) (http.Header, error)
 	GetID() string
 	Validate() error
 }

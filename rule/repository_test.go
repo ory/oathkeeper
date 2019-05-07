@@ -21,15 +21,18 @@
 package rule
 
 import (
+	"context"
+	"fmt"
 	"testing"
+
+	"github.com/bxcodec/faker"
+	"github.com/pkg/errors"
 
 	_ "github.com/go-sql-driver/mysql"
 	_ "github.com/lib/pq"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/ory/oathkeeper/helper"
-	"github.com/ory/oathkeeper/pkg"
 	"github.com/ory/x/sqlcon/dockertest"
 )
 
@@ -39,78 +42,77 @@ func TestMain(m *testing.M) {
 	ex.Exit(code)
 }
 
-func TestManagers(t *testing.T) {
-	managers := map[string]Repository{
-		"memory": NewMemoryManager(),
-	}
+type validatorNoop struct {
+	ret error
+}
 
-	if !testing.Short() {
-		connectToPostgres(t, managers)
-		connectToMySQL(t, managers)
-	}
+func (v *validatorNoop) Validate(*Rule) error {
+	return v.ret
+}
 
-	for k, manager := range managers {
-		r1 := testRules[0]
-		r2 := testRules[1]
-		r3 := testRules[2]
+func TestRepository(t *testing.T) {
+	for name, repo := range map[string]Repository{
+		"memory": NewRepositoryMemory(new(validatorNoop)),
+	} {
+		t.Run(fmt.Sprintf("repository=%s", name), func(t *testing.T) {
+			var rules []Rule
+			for i := 0; i < 4; i++ {
+				var rule Rule
+				require.NoError(t, faker.FakeData(&rule))
+				rules = append(rules, rule)
+			}
 
-		t.Run("case="+k, func(t *testing.T) {
-			_, err := manager.GetRule("1")
+			for _, expect := range rules {
+				_, err := repo.Get(context.Background(), expect.ID)
+				require.Error(t, err)
+			}
+
+			inserted := make([]Rule, len(rules))
+			copy(inserted, rules)
+			inserted = inserted[:len(inserted)-1] // insert all elements but the last
+			require.NoError(t, repo.Set(context.Background(), inserted))
+
+			for _, expect := range inserted {
+				got, err := repo.Get(context.Background(), expect.ID)
+				require.NoError(t, err)
+				assert.EqualValues(t, expect, *got)
+			}
+
+			count, err := repo.Count(context.Background())
+			require.NoError(t, err)
+			assert.Equal(t, len(inserted), count)
+
+			updated := make([]Rule, len(rules))
+			copy(updated, rules)
+			updated = append(updated[:len(updated)-2], updated[len(updated)-1]) // insert all elements (including last) except before last
+			require.NoError(t, repo.Set(context.Background(), updated))
+
+			count, err = repo.Count(context.Background())
+			require.NoError(t, err)
+			assert.Equal(t, len(updated), count)
+
+			for _, expect := range updated {
+				got, err := repo.Get(context.Background(), expect.ID)
+				require.NoError(t, err)
+				assert.EqualValues(t, expect, *got)
+			}
+
+			_, err = repo.Get(context.Background(), rules[len(rules)-2].ID) // check if before last still exists
 			require.Error(t, err)
 
-			// Updating of a non-existent rule should throw 409
-			require.EqualError(t, manager.UpdateRule(&r3), helper.ErrResourceConflict.Error())
-
-			require.NoError(t, manager.CreateRule(&r1))
-			require.NoError(t, manager.CreateRule(&r2))
-			require.NoError(t, manager.CreateRule(&r3))
-
-			result, err := manager.GetRule(r1.ID)
+			count, err = repo.Count(context.Background())
 			require.NoError(t, err)
-			assert.EqualValues(t, &r1, result)
+			assert.Equal(t, len(rules)-1, count)
+		})
+	}
 
-			result, err = manager.GetRule(r2.ID)
-			require.NoError(t, err)
-			assert.EqualValues(t, &r2, result)
-
-			result, err = manager.GetRule(r3.ID)
-			require.NoError(t, err)
-			// this makes sure that the conversion worked properly
-			if string(r3.Authorizer.Config) == "{}" {
-				r3.Authorizer.Config = nil
-			}
-			if string(r3.CredentialsIssuer.Config) == "{}" {
-				r3.CredentialsIssuer.Config = nil
-			}
-			for k, an := range r3.Authenticators {
-				if string(an.Config) == "{}" {
-					r3.Authenticators[k].Config = nil
-				}
-			}
-			assert.EqualValues(t, &r3, result)
-
-			results, err := manager.ListRules(int(pkg.RulesUpperLimit), 0)
-			require.NoError(t, err)
-			assert.Len(t, results, 3)
-			assert.True(t, results[0].ID != results[1].ID)
-
-			r1.Authorizer = RuleHandler{Handler: "allow", Config: []byte(`{ "type": "some" }`)}
-			r1.Authenticators = []RuleHandler{{Handler: "auth_none", Config: []byte(`{ "name": "foo" }`)}}
-			r1.CredentialsIssuer = RuleHandler{Handler: "plain", Config: []byte(`{ "text": "anything" }`)}
-			r1.Description = r1.Description + "abc"
-			r1.Match.Methods = []string{"HEAD"}
-			require.NoError(t, manager.UpdateRule(&r1))
-
-			result, err = manager.GetRule(r1.ID)
-			require.NoError(t, err)
-			assert.EqualValues(t, &r1, result)
-
-			require.NoError(t, manager.DeleteRule(r1.ID))
-
-			results, err = manager.ListRules(int(pkg.RulesUpperLimit), 0)
-			require.NoError(t, err)
-			assert.Len(t, results, 2)
-			assert.True(t, results[0].ID != r1.ID)
+	for name, repo := range map[string]Repository{
+		"memory": NewRepositoryMemory(&validatorNoop{ret: errors.New("")}),
+	} {
+		t.Run(fmt.Sprintf("repository=%s", name), func(t *testing.T) {
+			var rule Rule
+			require.NoError(t, faker.FakeData(&rule))
+			require.Error(t, repo.Set(context.Background(), []Rule{rule}))
 		})
 	}
 }

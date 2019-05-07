@@ -1,12 +1,14 @@
 package configuration
 
 import (
-	"github.com/ory/fosite"
-	"github.com/ory/x/corsx"
-	"github.com/rs/cors"
-	"github.com/sirupsen/logrus"
 	"net/url"
 	"strings"
+
+	"github.com/rs/cors"
+	"github.com/sirupsen/logrus"
+
+	"github.com/ory/fosite"
+	"github.com/ory/x/corsx"
 )
 
 var _ Provider = new(ViperProvider)

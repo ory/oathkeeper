@@ -22,12 +22,13 @@ package authz
 
 import (
 	"encoding/json"
-	"github.com/ory/oathkeeper/driver/configuration"
-	"github.com/ory/oathkeeper/pipeline/authn"
-	"github.com/pkg/errors"
 	"net/http"
 
-	"github.com/ory/oathkeeper/rule"
+	"github.com/pkg/errors"
+
+	"github.com/ory/oathkeeper/driver/configuration"
+	"github.com/ory/oathkeeper/pipeline"
+	"github.com/ory/oathkeeper/pipeline/authn"
 )
 
 type AuthorizerAllow struct {
@@ -42,7 +43,7 @@ func (a *AuthorizerAllow) GetID() string {
 	return "allow"
 }
 
-func (a *AuthorizerAllow) Authorize(r *http.Request, session *authn.AuthenticationSession, config json.RawMessage, rl *rule.Rule) error {
+func (a *AuthorizerAllow) Authorize(r *http.Request, session *authn.AuthenticationSession, config json.RawMessage, _ pipeline.Rule) error {
 	return nil
 }
 

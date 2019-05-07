@@ -1,13 +1,15 @@
-package mutate
+package mutate_test
 
 import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/ory/oathkeeper/pipeline/authn"
 	"net/http"
 	"testing"
 	"text/template"
+
+	"github.com/ory/oathkeeper/pipeline/authn"
+	. "github.com/ory/oathkeeper/pipeline/mutate"
 
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"

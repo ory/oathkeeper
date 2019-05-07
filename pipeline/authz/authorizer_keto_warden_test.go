@@ -18,16 +18,19 @@
  * @license  	   Apache-2.0
  */
 
-package authz
+package authz_test
 
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/ory/oathkeeper/pipeline/authn"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
 	"testing"
+
+	"github.com/ory/oathkeeper/pipeline"
+	"github.com/ory/oathkeeper/pipeline/authn"
+	. "github.com/ory/oathkeeper/pipeline/authz"
 
 	"github.com/ory/x/urlx"
 
@@ -52,7 +55,7 @@ func TestAuthorizerKetoWarden(t *testing.T) {
 		r         *http.Request
 		session   *authn.AuthenticationSession
 		config    json.RawMessage
-		rule      *rule.Rule
+		rule      pipeline.Rule
 		expectErr bool
 	}{
 		{

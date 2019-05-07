@@ -22,25 +22,26 @@ package mutate
 
 import (
 	"encoding/json"
-	"github.com/ory/oathkeeper/driver/configuration"
-	"github.com/ory/oathkeeper/pipeline/authn"
-	"github.com/pkg/errors"
 	"net/http"
 
-	"github.com/ory/oathkeeper/rule"
+	"github.com/pkg/errors"
+
+	"github.com/ory/oathkeeper/driver/configuration"
+	"github.com/ory/oathkeeper/pipeline"
+	"github.com/ory/oathkeeper/pipeline/authn"
 )
 
-type MutatorNoop struct{c configuration.Provider}
+type MutatorNoop struct{ c configuration.Provider }
 
-func NewCredentialsIssuerNoOp(c configuration.Provider) *MutatorNoop {
-	return &MutatorNoop{c:c}
+func NewMutatorNoop(c configuration.Provider) *MutatorNoop {
+	return &MutatorNoop{c: c}
 }
 
 func (a *MutatorNoop) GetID() string {
 	return "noop"
 }
 
-func (a *MutatorNoop) Mutate(r *http.Request, session *authn.AuthenticationSession, config json.RawMessage, rl *rule.Rule) (http.Header, error) {
+func (a *MutatorNoop) Mutate(r *http.Request, session *authn.AuthenticationSession, config json.RawMessage, _ pipeline.Rule) (http.Header, error) {
 	return r.Header, nil
 }
 

@@ -1,11 +1,12 @@
 package api
 
 import (
+	"net/http"
+	"net/url"
+
 	"github.com/ory/oathkeeper/credential"
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/x"
-	"net/http"
-	"net/url"
 
 	"github.com/julienschmidt/httprouter"
 	"gopkg.in/square/go-jose.v2"

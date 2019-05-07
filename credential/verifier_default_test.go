@@ -3,15 +3,17 @@ package credential
 import (
 	"context"
 	"fmt"
-	"github.com/dgrijalva/jwt-go"
-	"github.com/ory/fosite"
-	"github.com/ory/x/urlx"
-	"github.com/pkg/errors"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 	"net/url"
 	"testing"
 	"time"
+
+	"github.com/dgrijalva/jwt-go"
+	"github.com/pkg/errors"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+
+	"github.com/ory/fosite"
+	"github.com/ory/x/urlx"
 )
 
 func TestVerifierDefault(t *testing.T) {

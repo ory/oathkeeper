@@ -1,8 +1,9 @@
 package configuration
 
 import (
-	"github.com/ory/x/viperx"
 	"net/url"
+
+	"github.com/ory/x/viperx"
 )
 
 const (
@@ -10,7 +11,7 @@ const (
 
 	ViperKeyAuthorizerDenyIsEnabled = "authorizers.deny.enabled"
 
-	ViperKeyAuthorizerKetoEngineACPORYIsEnabled = "authorizers.keto_engine_acp_ory.enabled"
+	ViperKeyAuthorizerKetoEngineACPORYIsEnabled     = "authorizers.keto_engine_acp_ory.enabled"
 	ViperKeyAuthorizerKetoEngineACPORYAuthorizedURL = "authorizers.keto_engine_acp_ory.base_url"
 )
 

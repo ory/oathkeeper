@@ -4,14 +4,14 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/ory/oathkeeper/driver/configuration"
-	"github.com/ory/oathkeeper/pipeline/authn"
 	"net/http"
 	"text/template"
 
-	"github.com/pkg/errors"
+	"github.com/ory/oathkeeper/driver/configuration"
+	"github.com/ory/oathkeeper/pipeline"
+	"github.com/ory/oathkeeper/pipeline/authn"
 
-	"github.com/ory/oathkeeper/rule"
+	"github.com/pkg/errors"
 )
 
 type CredentialsHeadersConfig struct {
@@ -23,8 +23,9 @@ type MutatorHeader struct {
 	t *template.Template
 }
 
-func NewCredentialsIssuerHeaders(c configuration.Provider) *MutatorHeader {
+func NewMutatorHeader(c configuration.Provider) *MutatorHeader {
 	return &MutatorHeader{
+		c: c,
 		t: newTemplate("header"),
 	}
 }
@@ -33,7 +34,7 @@ func (a *MutatorHeader) GetID() string {
 	return "header"
 }
 
-func (a *MutatorHeader) Mutate(r *http.Request, session *authn.AuthenticationSession, config json.RawMessage, rl *rule.Rule) (http.Header, error) {
+func (a *MutatorHeader) Mutate(r *http.Request, session *authn.AuthenticationSession, config json.RawMessage, rl pipeline.Rule) (http.Header, error) {
 	if len(config) == 0 {
 		config = []byte("{}")
 	}
@@ -50,19 +51,19 @@ func (a *MutatorHeader) Mutate(r *http.Request, session *authn.AuthenticationSes
 		var tmpl *template.Template
 		var err error
 
-		templateId := fmt.Sprintf("%s:%s", rl.ID, hdr)
+		templateId := fmt.Sprintf("%s:%s", rl.GetID(), hdr)
 		tmpl = a.t.Lookup(templateId)
 		if tmpl == nil {
 			tmpl, err = a.t.New(templateId).Parse(templateString)
 			if err != nil {
-				return nil, errors.Wrapf(err, `error parsing headers template "%s" in rule "%s"`, templateString, rl.ID)
+				return nil, errors.Wrapf(err, `error parsing headers template "%s" in rule "%s"`, templateString, rl.GetID())
 			}
 		}
 
 		headerValue := bytes.Buffer{}
 		err = tmpl.Execute(&headerValue, session)
 		if err != nil {
-			return nil, errors.Wrapf(err, `error executing headers template "%s" in rule "%s"`, templateString, rl.ID)
+			return nil, errors.Wrapf(err, `error executing headers template "%s" in rule "%s"`, templateString, rl.GetID())
 		}
 		headers.Set(hdr, headerValue.String())
 	}

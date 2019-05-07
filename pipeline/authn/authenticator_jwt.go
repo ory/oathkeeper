@@ -3,15 +3,17 @@ package authn
 import (
 	"bytes"
 	"encoding/json"
+	"net/http"
+
 	"github.com/dgrijalva/jwt-go"
+	"github.com/pkg/errors"
+
 	"github.com/ory/go-convenience/jwtx"
 	"github.com/ory/herodot"
 	"github.com/ory/oathkeeper/credential"
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/helper"
-	"github.com/ory/oathkeeper/rule"
-	"github.com/pkg/errors"
-	"net/http"
+	"github.com/ory/oathkeeper/pipeline"
 )
 
 type AuthenticatorJWTRegistry interface {
@@ -54,7 +56,7 @@ func (a *AuthenticatorJWT) GetID() string {
 
 func (a *AuthenticatorJWT) Validate() error {
 	if !a.c.AuthenticatorJWTIsEnabled() {
-		return errors.WithStack(ErrAuthenticatorNotEnabled.WithReasonf("Authenticator % is disabled per configuration.", a.GetID()))
+		return errors.WithStack(ErrAuthenticatorNotEnabled.WithReasonf(`Authenticator "%s" is disabled per configuration.`, a.GetID()))
 	}
 
 	if len(a.c.AuthenticatorJWTJWKSURIs()) == 0 {
@@ -64,7 +66,7 @@ func (a *AuthenticatorJWT) Validate() error {
 	return nil
 }
 
-func (a *AuthenticatorJWT) Authenticate(r *http.Request, config json.RawMessage, rl *rule.Rule) (*AuthenticationSession, error) {
+func (a *AuthenticatorJWT) Authenticate(r *http.Request, config json.RawMessage, _ pipeline.Rule) (*AuthenticationSession, error) {
 	var cf AuthenticatorOAuth2JWTConfiguration
 	token := helper.BearerTokenFromRequest(r)
 	if token == "" {

@@ -1,11 +1,13 @@
 package configuration
 
 import (
-	"github.com/ory/fosite"
-	"github.com/rs/cors"
-	"golang.org/x/oauth2/clientcredentials"
 	"net/url"
 	"time"
+
+	"github.com/rs/cors"
+	"golang.org/x/oauth2/clientcredentials"
+
+	"github.com/ory/fosite"
 )
 
 type Provider interface {

@@ -21,10 +21,11 @@
 package proxy
 
 import (
+	"net/http"
+
 	"github.com/ory/oathkeeper/pipeline/authn"
 	"github.com/ory/oathkeeper/pipeline/authz"
 	"github.com/ory/oathkeeper/pipeline/mutate"
-	"net/http"
 
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
@@ -158,18 +159,18 @@ func (d *RequestHandler) HandleRequest(r *http.Request, rl *rule.Rule) (http.Hea
 		return nil, err
 	}
 
-	sh, ok := d.CredentialIssuers[rl.Transformer.Handler]
+	sh, ok := d.CredentialIssuers[rl.Mutator.Handler]
 	if !ok {
 		d.Logger.
 			WithField("granted", false).
 			WithField("access_url", r.URL.String()).
-			WithField("session_handler", rl.Transformer.Handler).
+			WithField("session_handler", rl.Mutator.Handler).
 			WithField("reason_id", "unknown_credential_issuer").
 			Warn("Unknown credential issuer requested")
 		return nil, errors.New("Unknown credential issuer requested")
 	}
 
-	headers, err := sh.Mutate(r, session, rl.Transformer.Config, rl)
+	headers, err := sh.Mutate(r, session, rl.Mutator.Config, rl)
 	if err != nil {
 		return nil, err
 	}

@@ -22,34 +22,35 @@ package mutate
 
 import (
 	"encoding/json"
-	"github.com/ory/oathkeeper/pipeline/authn"
-	"github.com/pkg/errors"
 	"net/http"
 
-	"github.com/ory/oathkeeper/rule"
+	"github.com/pkg/errors"
+
+	"github.com/ory/oathkeeper/pipeline"
+	"github.com/ory/oathkeeper/pipeline/authn"
 )
 
-type TransformerBroken struct {
+type MutatorBroken struct {
 	enabled bool
 }
 
-func NewTransformerBroken(enabled bool) *TransformerBroken {
-	return &TransformerBroken{
+func NewMutatorBroken(enabled bool) *MutatorBroken {
+	return &MutatorBroken{
 		enabled: enabled,
 	}
 }
 
-func (a *TransformerBroken) GetID() string {
+func (a *MutatorBroken) GetID() string {
 	return "broken"
 }
 
-func (a *TransformerBroken) Mutate(r *http.Request, session *authn.AuthenticationSession, config json.RawMessage, rl *rule.Rule) (http.Header, error) {
+func (a *MutatorBroken) Mutate(r *http.Request, session *authn.AuthenticationSession, config json.RawMessage, _ pipeline.Rule) (http.Header, error) {
 	return nil, errors.New("forced denial of credentials")
 }
 
-func (a *TransformerBroken) Validate() error {
+func (a *MutatorBroken) Validate() error {
 	if !a.enabled {
-		return errors.WithStack(authn.ErrAuthenticatorNotEnabled.WithReasonf("Transformer % is disabled per configuration.", a.GetID()))
+		return errors.WithStack(authn.ErrAuthenticatorNotEnabled.WithReasonf("Mutator % is disabled per configuration.", a.GetID()))
 	}
 
 	return nil

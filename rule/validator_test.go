@@ -18,11 +18,18 @@
  * @license  	   Apache-2.0
  */
 
-package rule
+package rule_test
 
 import (
+	"fmt"
 	"strings"
 	"testing"
+
+	"github.com/spf13/viper"
+
+	"github.com/ory/oathkeeper/driver/configuration"
+	"github.com/ory/oathkeeper/internal"
+	. "github.com/ory/oathkeeper/rule"
 
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
@@ -32,91 +39,123 @@ import (
 )
 
 func TestValidateRule(t *testing.T) {
-	v := ValidateRule(
-		[]string{"an1", "an2"}, []string{"an1", "an2", "an3"},
-		[]string{"az1", "az2"}, []string{"az1", "az2", "az3"},
-		[]string{"ci1", "ci2"}, []string{"ci1", "ci2", "ci3"},
-	)
+	var prep = func(an, az, m bool) func() {
+		return func() {
+			viper.Set(configuration.ViperKeyAuthenticatorNoopIsEnabled, an)
+			viper.Set(configuration.ViperKeyAuthorizerAllowIsEnabled, az)
+			viper.Set(configuration.ViperKeyMutatorNoopIsEnabled, m)
+		}
+	}
 
-	assertReason(t, v(&Rule{}), "from match.url field is not a valid url.")
+	for k, tc := range []struct {
+		setup     func()
+		r         *Rule
+		expectErr string
+	}{
+		{
+			r:         &Rule{},
+			expectErr: `Value "" of "match.url" field is not a valid url.`,
+		},
+		{
+			r:         &Rule{Match: RuleMatch{URL: "https://www.ory.sh", Methods: []string{"FOO"}}},
+			expectErr: `Value "FOO" of "match.methods" is not a valid HTTP method, valid methods are:`,
+		},
+		{
+			r: &Rule{
+				Match:    RuleMatch{URL: "https://www.ory.sh", Methods: []string{"POST"}},
+				Upstream: Upstream{URL: "https://www.ory.sh"},
+			},
+			expectErr: `Value of "authenticators" must be set and can not be an empty array.`,
+		},
+		{
+			setup: prep(true, false, false),
+			r: &Rule{
+				Match:          RuleMatch{URL: "https://www.ory.sh", Methods: []string{"POST"}},
+				Upstream:       Upstream{URL: "https://www.ory.sh"},
+				Authenticators: []RuleHandler{{Handler: "foo"}},
+			},
+			expectErr: `Value "foo" of "authenticators[0]" is not in list of supported authenticators: [noop]`,
+		},
+		{
+			setup: prep(false, false, false),
+			r: &Rule{
+				Match:          RuleMatch{URL: "https://www.ory.sh", Methods: []string{"POST"}},
+				Upstream:       Upstream{URL: "https://www.ory.sh"},
+				Authenticators: []RuleHandler{{Handler: "noop"}},
+			},
+			expectErr: `Authenticator "noop" is disabled per configuration.`,
+		},
+		{
+			setup: prep(true, false, false),
+			r: &Rule{
+				Match:          RuleMatch{URL: "https://www.ory.sh", Methods: []string{"POST"}},
+				Upstream:       Upstream{URL: "https://www.ory.sh"},
+				Authenticators: []RuleHandler{{Handler: "noop"}},
+			},
+			expectErr: `Value of "authorizer.handler" can not be empty.`,
+		},
+		{
+			setup: prep(true, true, false),
+			r: &Rule{
+				Match:          RuleMatch{URL: "https://www.ory.sh", Methods: []string{"POST"}},
+				Upstream:       Upstream{URL: "https://www.ory.sh"},
+				Authenticators: []RuleHandler{{Handler: "noop"}},
+				Authorizer:     RuleHandler{Handler: "foo"},
+			},
+			expectErr: `Value "foo" of "authorizer.handler" is not in list of supported authorizers: [allow]`,
+		},
+		{
+			setup: prep(true, true, false),
+			r: &Rule{
+				Match:          RuleMatch{URL: "https://www.ory.sh", Methods: []string{"POST"}},
+				Upstream:       Upstream{URL: "https://www.ory.sh"},
+				Authenticators: []RuleHandler{{Handler: "noop"}},
+				Authorizer:     RuleHandler{Handler: "allow"},
+			},
+			expectErr: `Value of "mutator.handler" can not be empty.`,
+		},
+		{
+			setup: prep(true, true, true),
+			r: &Rule{
+				Match:          RuleMatch{URL: "https://www.ory.sh", Methods: []string{"POST"}},
+				Upstream:       Upstream{URL: "https://www.ory.sh"},
+				Authenticators: []RuleHandler{{Handler: "noop"}},
+				Authorizer:     RuleHandler{Handler: "allow"},
+				Mutator:        RuleHandler{Handler: "foo"},
+			},
+			expectErr: `Value "foo" of "mutator.handler" is not in list of supported mutators: [noop]`,
+		},
+		{
+			setup: prep(true, true, true),
+			r: &Rule{
+				Match:          RuleMatch{URL: "https://www.ory.sh", Methods: []string{"POST"}},
+				Upstream:       Upstream{URL: "https://www.ory.sh"},
+				Authenticators: []RuleHandler{{Handler: "noop"}},
+				Authorizer:     RuleHandler{Handler: "allow"},
+				Mutator:        RuleHandler{Handler: "noop"},
+			},
+		},
+	} {
+		t.Run(fmt.Sprintf("case=%d", k), func(t *testing.T) {
+			conf := internal.NewConfigurationWithDefaults()
+			if tc.setup != nil {
+				tc.setup()
+			}
 
-	// assertReason(t, v(&Rule{
-	//	 Match: RuleMatch{URL: "asdf"},
-	// }), "from match.url field is not a valid url.")
+			r := internal.NewRegistry(conf)
+			v := NewValidatorDefault(r)
 
-	assertReason(t, v(&Rule{
-		Match: RuleMatch{URL: "https://www.ory.sh", Methods: []string{"FOO"}},
-	}), "from match.methods is not a valid HTTP method")
+			err := v.Validate(tc.r)
+			if tc.expectErr == "" {
+				require.NoError(t, err)
+				return
+			}
 
-	// assertReason(t, v(&Rule{
-	//	 Match: RuleMatch{URL: "https://www.ory.sh", Methods: []string{"POST"}},
-	// }), "from upstream.url field is not a valid url.")
-
-	assertReason(t, v(&Rule{
-		Match:    RuleMatch{URL: "https://www.ory.sh", Methods: []string{"POST"}},
-		Upstream: Upstream{URL: "foo"},
-	}), "from upstream.url field is not a valid url.")
-
-	assertReason(t, v(&Rule{
-		Match:    RuleMatch{URL: "https://www.ory.sh", Methods: []string{"POST"}},
-		Upstream: Upstream{URL: "https://www.ory.sh"},
-	}), "At least one authenticator must be set.")
-
-	assertReason(t, v(&Rule{
-		Match:          RuleMatch{URL: "https://www.ory.sh", Methods: []string{"POST"}},
-		Upstream:       Upstream{URL: "https://www.ory.sh"},
-		Authenticators: []RuleHandler{{Handler: "foo"}},
-	}), "is unknown, enabled authenticators are")
-
-	assertReason(t, v(&Rule{
-		Match:          RuleMatch{URL: "https://www.ory.sh", Methods: []string{"POST"}},
-		Upstream:       Upstream{URL: "https://www.ory.sh"},
-		Authenticators: []RuleHandler{{Handler: "an3"}},
-	}), "is valid but has not enabled by the server's configuration, enabled authorizers are:")
-
-	assertReason(t, v(&Rule{
-		Match:          RuleMatch{URL: "https://www.ory.sh", Methods: []string{"POST"}},
-		Upstream:       Upstream{URL: "https://www.ory.sh"},
-		Authenticators: []RuleHandler{{Handler: "an1"}},
-	}), "Value authorizer.handler can not be empty.")
-
-	assertReason(t, v(&Rule{
-		Match:          RuleMatch{URL: "https://www.ory.sh", Methods: []string{"POST"}},
-		Upstream:       Upstream{URL: "https://www.ory.sh"},
-		Authenticators: []RuleHandler{{Handler: "an1"}},
-		Authorizer:     RuleHandler{Handler: "foo"},
-	}), "s unknown, enabled authorizers are:")
-
-	assertReason(t, v(&Rule{
-		Match:          RuleMatch{URL: "https://www.ory.sh", Methods: []string{"POST"}},
-		Upstream:       Upstream{URL: "https://www.ory.sh"},
-		Authenticators: []RuleHandler{{Handler: "an1"}},
-		Authorizer:     RuleHandler{Handler: "az2"},
-	}), "Value credentials_issuer.handler can not be empty.")
-
-	assertReason(t, v(&Rule{
-		Match:          RuleMatch{URL: "https://www.ory.sh", Methods: []string{"POST"}},
-		Upstream:       Upstream{URL: "https://www.ory.sh"},
-		Authenticators: []RuleHandler{{Handler: "an1"}},
-		Authorizer:     RuleHandler{Handler: "az2"},
-		Transformer:    RuleHandler{Handler: "foo"},
-	}), "is unknown, enabled credentials issuers are:")
-
-	assert.NoError(t, v(&Rule{
-		Match:          RuleMatch{URL: "https://www.ory.sh", Methods: []string{"POST"}},
-		Upstream:       Upstream{URL: "https://www.ory.sh"},
-		Authenticators: []RuleHandler{{Handler: "an1"}, {Handler: "an2"}},
-		Authorizer:     RuleHandler{Handler: "az1"},
-		Transformer:    RuleHandler{Handler: "ci1"},
-	}))
-
-	assert.NoError(t, v(&Rule{
-		Match:          RuleMatch{URL: "https://www.ory.sh", Methods: []string{"POST"}},
-		Upstream:       Upstream{URL: "https://www.ory.sh"},
-		Authenticators: []RuleHandler{{Handler: "an2"}},
-		Authorizer:     RuleHandler{Handler: "az1"},
-		Transformer:    RuleHandler{Handler: "ci2"},
-	}))
+			require.Error(t, err)
+			reason := errors.Cause(err).(*herodot.DefaultError).ReasonField
+			assert.True(t, strings.Contains(reason, tc.expectErr), "%s != %s", reason, tc.expectErr)
+		})
+	}
 }
 
 func assertReason(t *testing.T, err error, sub string) {

@@ -2,12 +2,12 @@ package authn
 
 import (
 	"encoding/json"
-	"github.com/ory/oathkeeper/driver/configuration"
 	"net/http"
 
-	"github.com/pkg/errors"
+	"github.com/ory/oathkeeper/driver/configuration"
+	"github.com/ory/oathkeeper/pipeline"
 
-	"github.com/ory/oathkeeper/rule"
+	"github.com/pkg/errors"
 )
 
 type AuthenticatorAnonymous struct {
@@ -22,7 +22,7 @@ func NewAuthenticatorAnonymous(c configuration.Provider) *AuthenticatorAnonymous
 
 func (a *AuthenticatorAnonymous) Validate() error {
 	if !a.c.AuthenticatorAnonymousIsEnabled() {
-		return errors.WithStack(ErrAuthenticatorNotEnabled.WithReasonf("Authenticator % is disabled per configuration.", a.GetID()))
+		return errors.WithStack(ErrAuthenticatorNotEnabled.WithReasonf(`Authenticator "%s" is disabled per configuration.`, a.GetID()))
 	}
 
 	return nil
@@ -32,7 +32,7 @@ func (a *AuthenticatorAnonymous) GetID() string {
 	return "anonymous"
 }
 
-func (a *AuthenticatorAnonymous) Authenticate(r *http.Request, config json.RawMessage, rl *rule.Rule) (*AuthenticationSession, error) {
+func (a *AuthenticatorAnonymous) Authenticate(r *http.Request, config json.RawMessage, _ pipeline.Rule) (*AuthenticationSession, error) {
 	if len(r.Header.Get("Authorization")) != 0 {
 		return nil, errors.WithStack(ErrAuthenticatorNotResponsible)
 	}

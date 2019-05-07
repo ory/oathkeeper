@@ -83,7 +83,7 @@ func initConfig() {
 
 		viper.SetConfigType("yaml")
 		viper.SetConfigName(".oathkeeper") // name of config file (without extension)
-		viper.AddConfigPath("$HOME")  // adding home directory as first search path
+		viper.AddConfigPath("$HOME")       // adding home directory as first search path
 	}
 
 	//viper.SetDefault("log.level", "info")

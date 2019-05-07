@@ -1,20 +1,21 @@
 package internal
 
 import (
+	"github.com/spf13/viper"
+
 	"github.com/ory/oathkeeper/driver"
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/x/logrusx"
-	"github.com/spf13/viper"
 )
 
-func resetConfig() {
+func ResetViper() {
 	viper.Set(configuration.ViperKeyMutatorIDTokenJWKSURL, nil)
 
 	viper.Set("LOG_LEVEL", "debug")
 }
 
 func NewConfigurationWithDefaults() *configuration.ViperProvider {
-	resetConfig()
+	ResetViper()
 	return configuration.NewViperProvider(logrusx.New())
 }
 

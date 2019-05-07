@@ -21,89 +21,119 @@
 package rule
 
 import (
-	"fmt"
-
 	"github.com/asaskevich/govalidator"
 	"github.com/pkg/errors"
 
 	"github.com/ory/go-convenience/stringslice"
-	"github.com/ory/oathkeeper/helper"
+	"github.com/ory/herodot"
+	"github.com/ory/oathkeeper/pipeline/authn"
+	"github.com/ory/oathkeeper/pipeline/authz"
+	"github.com/ory/oathkeeper/pipeline/mutate"
 )
 
-type Validator struct {
-
+var methods = []string{
+	"GET",
+	"POST",
+	"PUT",
+	"HEAD",
+	"DELETE",
+	"PATCH",
+	"OPTIONS",
+	"TRACE",
+	"CONNECT",
 }
 
-func (v *Validator) Validate(r *Rule) error {
-
+type validatorRegistry interface {
+	authn.Registry
+	authz.Registry
+	mutate.Registry
 }
 
-func ValidateRule(
-	enabledAuthenticators []string, availableAuthenticators []string,
-	enabledAuthorizers []string, availableAuthorizers []string,
-	enabledCredentialsIssuers []string, availableCredentialsIssuers []string,
-) func(r *Rule) error {
-	methods := []string{"GET", "POST", "PUT", "HEAD", "DELETE", "PATCH", "OPTIONS", "TRACE", "CONNECT"}
+type Validator interface {
+	Validate(r *Rule) error
+}
 
-	return func(r *Rule) error {
-		// This is disabled because it doesn't support checking for regular expressions (obviously).
-		// if !govalidator.IsURL(r.Match.URL) {
-		// 	 return errors.WithStack(helper.ErrBadRequest.WithReason(fmt.Sprintf("Value \"%s\" from match.url field is not a valid url.", r.Match.URL)))
-		// }
-		if r.Match.URL == "" {
-			return errors.WithStack(helper.ErrBadRequest.WithReason(fmt.Sprintf("Value \"%s\" from match.url field is not a valid url.", r.Match.URL)))
-		}
+type ValidatorDefault struct {
+	r validatorRegistry
+}
 
-		for _, m := range r.Match.Methods {
-			if !stringslice.Has(methods, m) {
-				return errors.WithStack(helper.ErrBadRequest.WithReason(fmt.Sprintf("Value \"%s\" from match.methods is not a valid HTTP method, valid methods are: %v", m, methods)))
-			}
-		}
+func NewValidatorDefault(r validatorRegistry) *ValidatorDefault {
+	return &ValidatorDefault{r: r}
+}
 
-		if r.Upstream.URL == "" {
-			// Having no upstream URL is fine here because the judge does not need an upstream!
-		} else if !govalidator.IsURL(r.Upstream.URL) {
-			return errors.WithStack(helper.ErrBadRequest.WithReason(fmt.Sprintf("Value \"%s\" from upstream.url field is not a valid url.", r.Upstream.URL)))
-		}
-
-		if len(r.Authenticators) == 0 {
-			return errors.WithStack(helper.ErrBadRequest.WithReason("At least one authenticator must be set."))
-		}
-
-		for _, a := range r.Authenticators {
-			if !stringslice.Has(enabledAuthenticators, a.Handler) {
-				if stringslice.Has(availableAuthenticators, a.Handler) {
-					return errors.WithStack(helper.ErrBadRequest.WithReason(fmt.Sprintf("Authenticator \"%s\" is valid but has not enabled by the server's configuration, enabled authorizers are: %v", a.Handler, enabledAuthenticators)))
-				}
-
-				return errors.WithStack(helper.ErrBadRequest.WithReason(fmt.Sprintf("Authenticator \"%s\" is unknown, enabled authenticators are: %v", a.Handler, enabledAuthenticators)))
-			}
-		}
-
-		if r.Authorizer.Handler == "" {
-			return errors.WithStack(helper.ErrBadRequest.WithReason("Value authorizer.handler can not be empty."))
-		}
-
-		if !stringslice.Has(enabledAuthorizers, r.Authorizer.Handler) {
-			if stringslice.Has(availableAuthorizers, r.Authorizer.Handler) {
-				return errors.WithStack(helper.ErrBadRequest.WithReason(fmt.Sprintf("Authorizer \"%s\" is valid but has not enabled by the server's configuration, enabled authorizers are: %v", r.Authorizer.Handler, enabledAuthorizers)))
-			}
-
-			return errors.WithStack(helper.ErrBadRequest.WithReason(fmt.Sprintf("Authorizer \"%s\" is unknown, enabled authorizers are: %v", r.Authorizer.Handler, enabledAuthorizers)))
-		}
-
-		if r.Transformer.Handler == "" {
-			return errors.WithStack(helper.ErrBadRequest.WithReason("Value credentials_issuer.handler can not be empty."))
-		}
-
-		if !stringslice.Has(enabledCredentialsIssuers, r.Transformer.Handler) {
-			if stringslice.Has(availableCredentialsIssuers, r.Transformer.Handler) {
-				return errors.WithStack(helper.ErrBadRequest.WithReason(fmt.Sprintf("Credentials issuer \"%s\" is valid but has not enabled by the server's configuration, enabled credentials issuers are: %v", r.Transformer.Handler, enabledCredentialsIssuers)))
-			}
-
-			return errors.WithStack(helper.ErrBadRequest.WithReason(fmt.Sprintf("Credentials issuer \"%s\" is unknown, enabled credentials issuers are: %v", r.Transformer.Handler, enabledCredentialsIssuers)))
-		}
-
-		return nil
+func (v *ValidatorDefault) validateAuthenticators(r *Rule) error {
+	if len(r.Authenticators) == 0 {
+		return errors.WithStack(herodot.ErrInternalServerError.WithReason(`Value of "authenticators" must be set and can not be an empty array.`))
 	}
+
+	for k, a := range r.Authenticators {
+		auth, err := v.r.PipelineAuthenticator(a.Handler)
+		if err != nil {
+			return herodot.ErrInternalServerError.WithReasonf(`Value "%s" of "authenticators[%d]" is not in list of supported authenticators: %v`, a.Handler, k, v.r.AvailablePipelineAuthenticators()).WithTrace(err).WithDebug(err.Error())
+		}
+
+		if err := auth.Validate(); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (v *ValidatorDefault) validateAuthorizer(r *Rule) error {
+	if r.Authorizer.Handler == "" {
+		return errors.WithStack(herodot.ErrInternalServerError.WithReason(`Value of "authorizer.handler" can not be empty.`))
+	}
+
+	auth, err := v.r.PipelineAuthorizer(r.Authorizer.Handler)
+	if err != nil {
+		return errors.WithStack(herodot.ErrInternalServerError.WithReasonf(`Value "%s" of "authorizer.handler" is not in list of supported authorizers: %v`, r.Authorizer.Handler, v.r.AvailablePipelineAuthorizers()).WithTrace(err).WithDebug(err.Error()))
+	}
+
+	return auth.Validate()
+}
+
+func (v *ValidatorDefault) validateMutator(r *Rule) error {
+	if r.Mutator.Handler == "" {
+		return errors.WithStack(herodot.ErrInternalServerError.WithReason(`Value of "mutator.handler" can not be empty.`))
+	}
+
+	mutator, err := v.r.PipelineMutator(r.Mutator.Handler)
+	if err != nil {
+		return herodot.ErrInternalServerError.WithReasonf(`Value "%s" of "mutator.handler" is not in list of supported mutators: %v`, r.Mutator.Handler, v.r.AvailablePipelineMutators()).WithTrace(err).WithDebug(err.Error())
+	}
+
+	return mutator.Validate()
+}
+
+func (v *ValidatorDefault) Validate(r *Rule) error {
+	if r.Match.URL == "" {
+		return errors.WithStack(herodot.ErrInternalServerError.WithReasonf(`Value "%s" of "match.url" field is not a valid url.`, r.Match.URL))
+	}
+
+	for _, m := range r.Match.Methods {
+		if !stringslice.Has(methods, m) {
+			return errors.WithStack(herodot.ErrInternalServerError.WithReasonf(`Value "%s" of "match.methods" is not a valid HTTP method, valid methods are: %v`, m, methods))
+		}
+	}
+
+	if r.Upstream.URL == "" {
+		// Having no upstream URL is fine here because the judge does not need an upstream!
+	} else if !govalidator.IsURL(r.Upstream.URL) {
+		return errors.WithStack(herodot.ErrInternalServerError.WithReasonf(`Value "%s" of "upstream.url" is not a valid url.`, r.Upstream.URL))
+	}
+
+	if err := v.validateAuthenticators(r); err != nil {
+		return err
+	}
+
+	if err := v.validateAuthorizer(r); err != nil {
+		return err
+	}
+
+	if err := v.validateMutator(r); err != nil {
+		return err
+	}
+
+	return nil
 }

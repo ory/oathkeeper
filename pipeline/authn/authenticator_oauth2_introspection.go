@@ -5,16 +5,18 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net/http"
+	"net/url"
+	"strings"
+
+	"github.com/pkg/errors"
+
 	"github.com/ory/fosite"
 	"github.com/ory/go-convenience/stringslice"
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/helper"
-	"github.com/ory/oathkeeper/rule"
+	"github.com/ory/oathkeeper/pipeline"
 	"github.com/ory/x/httpx"
-	"github.com/pkg/errors"
-	"net/http"
-	"net/url"
-	"strings"
 )
 
 type AuthenticatorOAuth2IntrospectionConfiguration struct {
@@ -65,7 +67,7 @@ type introspection struct {
 	Scope     string                 `json:"scope,omitempty"`
 }
 
-func (a *AuthenticatorOAuth2Introspection) Authenticate(r *http.Request, config json.RawMessage, rl *rule.Rule) (*AuthenticationSession, error) {
+func (a *AuthenticatorOAuth2Introspection) Authenticate(r *http.Request, config json.RawMessage, _ pipeline.Rule) (*AuthenticationSession, error) {
 	var i introspection
 	var cf AuthenticatorOAuth2IntrospectionConfiguration
 
@@ -143,7 +145,7 @@ func (a *AuthenticatorOAuth2Introspection) Authenticate(r *http.Request, config 
 
 func (a *AuthenticatorOAuth2Introspection) Validate() error {
 	if !a.c.AuthenticatorOAuth2TokenIntrospectionIsEnabled() {
-		return errors.WithStack(ErrAuthenticatorNotEnabled.WithReasonf("Authenticator % is disabled per configuration.", a.GetID()))
+		return errors.WithStack(ErrAuthenticatorNotEnabled.WithReasonf(`Authenticator "%s" is disabled per configuration.`, a.GetID()))
 	}
 
 	if a.c.AuthenticatorOAuth2TokenIntrospectionIntrospectionURL() == nil {

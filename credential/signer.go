@@ -2,8 +2,9 @@ package credential
 
 import (
 	"context"
-	"github.com/dgrijalva/jwt-go"
 	"net/url"
+
+	"github.com/dgrijalva/jwt-go"
 )
 
 type Signer interface {

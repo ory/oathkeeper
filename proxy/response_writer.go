@@ -34,7 +34,7 @@ type simpleResponseWriter struct {
 func NewSimpleResponseWriter() *simpleResponseWriter {
 	return &simpleResponseWriter{
 		header: http.Header{},
-		buffer: bytes.NewBuffer([]byte{}),
+		buffer: new(bytes.Buffer),
 	}
 }
 

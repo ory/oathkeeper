@@ -2,16 +2,18 @@ package api_test
 
 import (
 	"encoding/json"
-	"github.com/ory/oathkeeper/driver/configuration"
-	"github.com/ory/oathkeeper/internal"
-	"github.com/ory/oathkeeper/x"
+	"net/http"
+	"net/http/httptest"
+	"testing"
+
 	"github.com/spf13/viper"
 	"github.com/square/go-jose"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"net/http"
-	"net/http/httptest"
-	"testing"
+
+	"github.com/ory/oathkeeper/driver/configuration"
+	"github.com/ory/oathkeeper/internal"
+	"github.com/ory/oathkeeper/x"
 )
 
 func TestCredentialsHandler(t *testing.T) {

@@ -21,8 +21,9 @@
 package api
 
 import (
-	"github.com/ory/oathkeeper/x"
 	"net/http"
+
+	"github.com/ory/oathkeeper/x"
 
 	"github.com/julienschmidt/httprouter"
 	"github.com/sirupsen/logrus"
@@ -38,7 +39,6 @@ const (
 
 type judgeHandlerRegistry interface {
 	x.RegistryWriter
-
 }
 
 type JudgeHandler struct {
@@ -94,7 +94,7 @@ func (h *JudgeHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 //       404: genericError
 //       500: genericError
 func (h *JudgeHandler) judge(w http.ResponseWriter, r *http.Request) {
-	rl, err := h.Matcher.MatchRule(r.Method, r.URL)
+	rl, err := h.Matcher.Match(r.Context(), r.Method, r.URL)
 	if err != nil {
 		h.Logger.WithError(err).
 			WithField("granted", false).

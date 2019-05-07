@@ -21,9 +21,10 @@
 package api
 
 import (
+	"net/http"
+
 	"github.com/ory/oathkeeper/rule"
 	"github.com/ory/oathkeeper/x"
-	"net/http"
 
 	"github.com/julienschmidt/httprouter"
 	"github.com/pkg/errors"
@@ -70,7 +71,7 @@ func (h *RuleHandler) SetRoutes(r *httprouter.Router) {
 //       500: genericError
 func (h *RuleHandler) listRules(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	limit, offset := pagination.Parse(r, 50, 0, 500)
-	rules, err := h.r.RuleManager().List(limit, offset)
+	rules, err := h.r.RuleManager().List(r.Context(), limit, offset)
 	if err != nil {
 		h.r.Writer().WriteError(w, r, err)
 		return
@@ -98,7 +99,7 @@ func (h *RuleHandler) listRules(w http.ResponseWriter, r *http.Request, _ httpro
 //       404: genericError
 //       500: genericError
 func (h *RuleHandler) getRules(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	rl, err := h.r.RuleManager().Get(ps.ByName("id"))
+	rl, err := h.r.RuleManager().Get(r.Context(), ps.ByName("id"))
 	if errors.Cause(err) == helper.ErrResourceNotFound {
 		h.r.Writer().WriteErrorCode(w, r, http.StatusNotFound, err)
 		return

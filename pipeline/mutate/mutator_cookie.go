@@ -4,14 +4,14 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/ory/oathkeeper/driver/configuration"
-	"github.com/ory/oathkeeper/pipeline/authn"
 	"net/http"
 	"text/template"
 
-	"github.com/pkg/errors"
+	"github.com/ory/oathkeeper/driver/configuration"
+	"github.com/ory/oathkeeper/pipeline"
+	"github.com/ory/oathkeeper/pipeline/authn"
 
-	"github.com/ory/oathkeeper/rule"
+	"github.com/pkg/errors"
 )
 
 type CredentialsCookiesConfig struct {
@@ -20,12 +20,12 @@ type CredentialsCookiesConfig struct {
 
 type MutatorCookie struct {
 	templates *template.Template
-	c configuration.Provider
+	c         configuration.Provider
 }
 
-func NewMutatorCookies(c configuration.Provider) *MutatorCookie {
+func NewMutatorCookie(c configuration.Provider) *MutatorCookie {
 	return &MutatorCookie{
-		c: c,
+		c:         c,
 		templates: newTemplate("cookie"),
 	}
 }
@@ -34,7 +34,7 @@ func (a *MutatorCookie) GetID() string {
 	return "cookie"
 }
 
-func (a *MutatorCookie) Mutate(r *http.Request, session *authn.AuthenticationSession, config json.RawMessage, rl *rule.Rule) (http.Header, error) {
+func (a *MutatorCookie) Mutate(r *http.Request, session *authn.AuthenticationSession, config json.RawMessage, rl pipeline.Rule) (http.Header, error) {
 	if len(config) == 0 {
 		config = []byte("{}")
 	}
@@ -58,19 +58,19 @@ func (a *MutatorCookie) Mutate(r *http.Request, session *authn.AuthenticationSes
 		var tmpl *template.Template
 		var err error
 
-		templateId := fmt.Sprintf("%s:%s", rl.ID, cookie)
+		templateId := fmt.Sprintf("%s:%s", rl.GetID(), cookie)
 		tmpl = a.templates.Lookup(templateId)
 		if tmpl == nil {
 			tmpl, err = a.templates.New(templateId).Parse(templateString)
 			if err != nil {
-				return nil, errors.Wrapf(err, `error parsing cookie template "%s" in rule "%s"`, templateString, rl.ID)
+				return nil, errors.Wrapf(err, `error parsing cookie template "%s" in rule "%s"`, templateString, rl.GetID())
 			}
 		}
 
 		cookieValue := bytes.Buffer{}
 		err = tmpl.Execute(&cookieValue, session)
 		if err != nil {
-			return nil, errors.Wrapf(err, `error executing cookie template "%s" in rule "%s"`, templateString, rl.ID)
+			return nil, errors.Wrapf(err, `error executing cookie template "%s" in rule "%s"`, templateString, rl.GetID())
 		}
 
 		req.AddCookie(&http.Cookie{

@@ -4,17 +4,19 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"github.com/ory/oathkeeper/driver/configuration"
-	"github.com/ory/x/httpx"
-	"golang.org/x/oauth2"
 	"net/http"
 	"net/url"
+
+	"golang.org/x/oauth2"
+
+	"github.com/ory/oathkeeper/driver/configuration"
+	"github.com/ory/oathkeeper/pipeline"
+	"github.com/ory/x/httpx"
 
 	"github.com/pkg/errors"
 	"golang.org/x/oauth2/clientcredentials"
 
 	"github.com/ory/oathkeeper/helper"
-	"github.com/ory/oathkeeper/rule"
 )
 
 type AuthenticatorOAuth2Configuration struct {
@@ -37,7 +39,7 @@ func (a *AuthenticatorOAuth2ClientCredentials) GetID() string {
 
 func (a *AuthenticatorOAuth2ClientCredentials) Validate() error {
 	if !a.c.AuthenticatorOAuth2ClientCredentialsIsEnabled() {
-		return errors.WithStack(ErrAuthenticatorNotEnabled.WithReasonf("Authenticator % is disabled per configuration.", a.GetID()))
+		return errors.WithStack(ErrAuthenticatorNotEnabled.WithReasonf(`Authenticator "%s" is disabled per configuration.`, a.GetID()))
 	}
 
 	if a.c.AuthenticatorOAuth2ClientCredentialsTokenURL() == nil {
@@ -47,7 +49,7 @@ func (a *AuthenticatorOAuth2ClientCredentials) Validate() error {
 	return nil
 }
 
-func (a *AuthenticatorOAuth2ClientCredentials) Authenticate(r *http.Request, config json.RawMessage, rl *rule.Rule) (*AuthenticationSession, error) {
+func (a *AuthenticatorOAuth2ClientCredentials) Authenticate(r *http.Request, config json.RawMessage, _ pipeline.Rule) (*AuthenticationSession, error) {
 	var cf AuthenticatorOAuth2Configuration
 	if len(config) == 0 {
 		config = []byte("{}")

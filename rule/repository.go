@@ -20,15 +20,13 @@
 
 package rule
 
-import "net/url"
+import (
+	"context"
+)
 
 type Repository interface {
-	List(limit, offset int) ([]Rule, error)
-	Upsert(*Rule) error
-	Get(id string) (*Rule, error)
-	Delete(id string) error
-}
-
-type Matcher interface {
-	MatchRule(method string, u *url.URL) (*Rule, error)
+	List(ctx context.Context, limit, offset int) ([]Rule, error)
+	Set(context.Context, []Rule) error
+	Get(context.Context, string) (*Rule, error)
+	Count(context.Context) (int, error)
 }

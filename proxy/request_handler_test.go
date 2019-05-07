@@ -22,12 +22,13 @@ package proxy
 
 import (
 	"fmt"
-	"github.com/ory/oathkeeper/pipeline/authn"
-	"github.com/ory/oathkeeper/pipeline/authz"
-	"github.com/ory/oathkeeper/pipeline/mutate"
 	"net/http"
 	"net/url"
 	"testing"
+
+	"github.com/ory/oathkeeper/pipeline/authn"
+	"github.com/ory/oathkeeper/pipeline/authz"
+	"github.com/ory/oathkeeper/pipeline/mutate"
 
 	"github.com/stretchr/testify/require"
 
@@ -63,27 +64,27 @@ func TestRequestHandler(t *testing.T) {
 			rule: rule.Rule{
 				Authenticators: []rule.RuleHandler{},
 				Authorizer:     rule.RuleHandler{},
-				Transformer:    rule.RuleHandler{},
+				Mutator:        rule.RuleHandler{},
 			},
 		},
 		{
 			expectErr: true,
 			r:         newTestRequest(t, "http://localhost"),
-			j:         NewRequestHandler(nil, []authn.Authenticator{authn.NewAuthenticatorNoOp()}, []authz.Authorizer{authz.NewAuthorizerAllow()}, []mutate.Mutator{mutate.NewCredentialsIssuerNoOp()}),
+			j:         NewRequestHandler(nil, []authn.Authenticator{authn.NewAuthenticatorNoOp()}, []authz.Authorizer{authz.NewAuthorizerAllow()}, []mutate.Mutator{mutate.NewMutatorNoop()}),
 			rule: rule.Rule{
 				Authenticators: []rule.RuleHandler{},
 				Authorizer:     rule.RuleHandler{},
-				Transformer:    rule.RuleHandler{},
+				Mutator:        rule.RuleHandler{},
 			},
 		},
 		{
 			expectErr: false,
 			r:         newTestRequest(t, "http://localhost"),
-			j:         NewRequestHandler(nil, []authn.Authenticator{authn.NewAuthenticatorNoOp()}, []authz.Authorizer{authz.NewAuthorizerAllow()}, []mutate.Mutator{mutate.NewCredentialsIssuerNoOp()}),
+			j:         NewRequestHandler(nil, []authn.Authenticator{authn.NewAuthenticatorNoOp()}, []authz.Authorizer{authz.NewAuthorizerAllow()}, []mutate.Mutator{mutate.NewMutatorNoop()}),
 			rule: rule.Rule{
 				Authenticators: []rule.RuleHandler{{Handler: authn.NewAuthenticatorNoOp().GetID()}},
 				Authorizer:     rule.RuleHandler{Handler: authz.NewAuthorizerAllow().GetID()},
-				Transformer:    rule.RuleHandler{Handler: mutate.NewCredentialsIssuerNoOp().GetID()},
+				Mutator:        rule.RuleHandler{Handler: mutate.NewMutatorNoop().GetID()},
 			},
 		},
 		{
@@ -93,7 +94,7 @@ func TestRequestHandler(t *testing.T) {
 			rule: rule.Rule{
 				Authenticators: []rule.RuleHandler{{Handler: authn.NewAuthenticatorAnonymous("").GetID()}},
 				Authorizer:     rule.RuleHandler{},
-				Transformer:    rule.RuleHandler{},
+				Mutator:        rule.RuleHandler{},
 			},
 		},
 		{
@@ -103,17 +104,17 @@ func TestRequestHandler(t *testing.T) {
 			rule: rule.Rule{
 				Authenticators: []rule.RuleHandler{{Handler: authn.NewAuthenticatorAnonymous("").GetID()}},
 				Authorizer:     rule.RuleHandler{Handler: "allow"},
-				Transformer:    rule.RuleHandler{},
+				Mutator:        rule.RuleHandler{},
 			},
 		},
 		{
 			expectErr: false,
 			r:         newTestRequest(t, "http://localhost"),
-			j:         NewRequestHandler(nil, []authn.Authenticator{authn.NewAuthenticatorAnonymous("anonymous")}, []authz.Authorizer{authz.NewAuthorizerAllow()}, []mutate.Mutator{mutate.NewCredentialsIssuerNoOp()}),
+			j:         NewRequestHandler(nil, []authn.Authenticator{authn.NewAuthenticatorAnonymous("anonymous")}, []authz.Authorizer{authz.NewAuthorizerAllow()}, []mutate.Mutator{mutate.NewMutatorNoop()}),
 			rule: rule.Rule{
 				Authenticators: []rule.RuleHandler{{Handler: authn.NewAuthenticatorAnonymous("").GetID()}},
 				Authorizer:     rule.RuleHandler{Handler: "allow"},
-				Transformer:    rule.RuleHandler{Handler: "noop"},
+				Mutator:        rule.RuleHandler{Handler: "noop"},
 			},
 		},
 	} {

@@ -22,14 +22,15 @@ package authz
 
 import (
 	"encoding/json"
-	"github.com/ory/oathkeeper/driver/configuration"
-	"github.com/ory/oathkeeper/pipeline/authn"
 	"net/http"
+
+	"github.com/ory/oathkeeper/driver/configuration"
+	"github.com/ory/oathkeeper/pipeline"
+	"github.com/ory/oathkeeper/pipeline/authn"
 
 	"github.com/pkg/errors"
 
 	"github.com/ory/oathkeeper/helper"
-	"github.com/ory/oathkeeper/rule"
 )
 
 type AuthorizerDeny struct {
@@ -44,7 +45,7 @@ func (a *AuthorizerDeny) GetID() string {
 	return "deny"
 }
 
-func (a *AuthorizerDeny) Authorize(r *http.Request, session *authn.AuthenticationSession, config json.RawMessage, rl *rule.Rule) error {
+func (a *AuthorizerDeny) Authorize(r *http.Request, session *authn.AuthenticationSession, config json.RawMessage, _ pipeline.Rule) error {
 	return errors.WithStack(helper.ErrForbidden)
 }
 

@@ -23,14 +23,15 @@ package mutate
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/ory/oathkeeper/credential"
-	"github.com/ory/oathkeeper/driver/configuration"
-	"github.com/ory/oathkeeper/pipeline/authn"
 	"net/http"
 	"time"
 
+	"github.com/ory/oathkeeper/credential"
+	"github.com/ory/oathkeeper/driver/configuration"
+	"github.com/ory/oathkeeper/pipeline"
+	"github.com/ory/oathkeeper/pipeline/authn"
+
 	"github.com/dgrijalva/jwt-go"
-	"github.com/ory/oathkeeper/rule"
 	"github.com/pborman/uuid"
 	"github.com/pkg/errors"
 )
@@ -48,7 +49,7 @@ type MutatorIDToken struct {
 	r MutatorIDTokenRegistry
 }
 
-func NewCredentialsIssuerIDToken(
+func NewMutatorIDToken(
 	c configuration.Provider,
 	r MutatorIDTokenRegistry,
 ) *MutatorIDToken {
@@ -62,7 +63,7 @@ func (a *MutatorIDToken) GetID() string {
 	return "id_token"
 }
 
-func (a *MutatorIDToken) Mutate(r *http.Request, session *authn.AuthenticationSession, config json.RawMessage, rl *rule.Rule) (http.Header, error) {
+func (a *MutatorIDToken) Mutate(r *http.Request, session *authn.AuthenticationSession, config json.RawMessage, _ pipeline.Rule) (http.Header, error) {
 	if len(config) == 0 {
 		config = []byte("{}")
 	}
@@ -98,6 +99,9 @@ func (a *MutatorIDToken) Mutate(r *http.Request, session *authn.AuthenticationSe
 		a.c.MutatorIDTokenJWKSURL(),
 		claims,
 	)
+	if err != nil {
+		return nil, err
+	}
 
 	headers := http.Header{}
 	headers.Set("Authorization", "Bearer "+signed)

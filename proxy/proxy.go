@@ -31,14 +31,10 @@ import (
 	"github.com/sirupsen/logrus"
 
 	"github.com/ory/herodot"
-	"github.com/ory/oathkeeper/rsakey"
 	"github.com/ory/oathkeeper/rule"
 )
 
 func NewProxy(handler *RequestHandler, logger logrus.FieldLogger, matcher rule.Matcher) *Proxy {
-	if logger == nil {
-		logger = logrus.New()
-	}
 	return &Proxy{
 		Logger:         logger,
 		Matcher:        matcher,
@@ -50,7 +46,6 @@ func NewProxy(handler *RequestHandler, logger logrus.FieldLogger, matcher rule.M
 type Proxy struct {
 	Logger         logrus.FieldLogger
 	RequestHandler *RequestHandler
-	KeyManager     rsakey.Manager
 	Matcher        rule.Matcher
 	H              herodot.Writer
 }
@@ -112,7 +107,7 @@ func (d *Proxy) RoundTrip(r *http.Request) (*http.Response, error) {
 
 func (d *Proxy) Director(r *http.Request) {
 	EnrichRequestedURL(r)
-	rl, err := d.Matcher.MatchRule(r.Method, r.URL)
+	rl, err := d.Matcher.Match(r.Context(), r.Method, r.URL)
 	if err != nil {
 		*r = *r.WithContext(context.WithValue(r.Context(), director, err))
 		return

@@ -23,11 +23,12 @@ package mutate
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/ory/oathkeeper/pipeline/authn"
 	"net/http"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/ory/oathkeeper/pipeline/authn"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/go-errors/errors"
@@ -46,7 +47,7 @@ func TestCredentialsIssuerIDToken(t *testing.T) {
 
 	for m, k := range keys {
 		t.Run(fmt.Sprintf("algo=%s", m), func(t *testing.T) {
-			b := NewCredentialsIssuerIDToken(k, logrus.New(), time.Hour, "some-issuer")
+			b := NewMutatorIDToken(k, logrus.New(), time.Hour, "some-issuer")
 
 			assert.NotNil(t, b)
 			assert.NotEmpty(t, b.GetID())

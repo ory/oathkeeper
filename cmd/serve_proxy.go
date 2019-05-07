@@ -23,10 +23,11 @@ package cmd
 import (
 	"crypto/tls"
 	"fmt"
-	"github.com/ory/oathkeeper/pipeline/authz"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
+
+	"github.com/ory/oathkeeper/pipeline/authz"
 
 	"github.com/ory/x/urlx"
 

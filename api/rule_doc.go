@@ -20,6 +20,8 @@
 
 package api
 
+import "github.com/ory/oathkeeper/rule"
+
 // A rule
 // swagger:response rule
 type swaggerRuleResponse struct {
@@ -101,10 +103,10 @@ type swaggerRule struct {
 	// making the request.
 	Authorizer swaggerRuleHandler `json:"authorizer"`
 
-	// Transformer is a handler that transform the HTTP request. A common use case is generating a new set of credentials
+	// Mutator is a handler that transform the HTTP request. A common use case is generating a new set of credentials
 	// (e.g. JWT) which then will be forwarded to the upstream server.
 	Transformer swaggerRuleHandler `json:"transformer"`
 
 	// Upstream is the location of the server where requests matching this rule should be forwarded to.
-	Upstream *Upstream `json:"upstream"`
+	Upstream *rule.Upstream `json:"upstream"`
 }

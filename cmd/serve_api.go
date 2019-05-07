@@ -23,8 +23,9 @@ package cmd
 import (
 	"crypto/tls"
 	"fmt"
-	"github.com/ory/oathkeeper/api"
 	"net/http"
+
+	"github.com/ory/oathkeeper/api"
 
 	"github.com/julienschmidt/httprouter"
 	negronilogrus "github.com/meatballhat/negroni-logrus"

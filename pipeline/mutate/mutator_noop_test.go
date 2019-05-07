@@ -29,9 +29,9 @@ import (
 )
 
 func TestCredentialsIssuerNoOp(t *testing.T) {
-	assert.NotNil(t, NewCredentialsIssuerNoOp())
-	assert.NotEmpty(t, NewCredentialsIssuerNoOp().GetID())
+	assert.NotNil(t, NewMutatorNoop())
+	assert.NotEmpty(t, NewMutatorNoop().GetID())
 
-	_, err := NewCredentialsIssuerNoOp().Mutate(&http.Request{Header: map[string][]string{}}, nil, nil, nil)
+	_, err := NewMutatorNoop().Mutate(&http.Request{Header: map[string][]string{}}, nil, nil, nil)
 	require.NoError(t, err)
 }

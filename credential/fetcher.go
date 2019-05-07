@@ -2,8 +2,9 @@ package credential
 
 import (
 	"context"
-	"gopkg.in/square/go-jose.v2"
 	"net/url"
+
+	"gopkg.in/square/go-jose.v2"
 )
 
 type Fetcher interface {

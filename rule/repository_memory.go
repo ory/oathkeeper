@@ -22,33 +22,49 @@ package rule
 
 import (
 	"context"
-	"github.com/pkg/errors"
 	"net/url"
 	"sync"
+
+	"github.com/pkg/errors"
 
 	"github.com/ory/oathkeeper/helper"
 	"github.com/ory/x/pagination"
 )
 
-type MemoryManager struct {
+var _ Repository = new(RepositoryMemory)
+
+type RepositoryMemory struct {
 	sync.RWMutex
 	rules []Rule
+	v     Validator
 }
 
-func NewMemoryManager() *MemoryManager {
-	return &MemoryManager{rules: []Rule{}}
+func NewRepositoryMemory(v Validator) *RepositoryMemory {
+	return &RepositoryMemory{
+		v:     v,
+		rules: make([]Rule, 0),
+	}
 }
 
-func (m *MemoryManager) Count(ctx context.Context) (int, error) {
+func (m *RepositoryMemory) Count(ctx context.Context) (int, error) {
+	m.RLock()
+	defer m.RUnlock()
+
 	return len(m.rules), nil
 }
 
-func (m *MemoryManager) List(limit, offset int) ([]Rule, error) {
+func (m *RepositoryMemory) List(ctx context.Context, limit, offset int) ([]Rule, error) {
+	m.RLock()
+	defer m.RUnlock()
+
 	start, end := pagination.Index(limit, offset, len(m.rules))
 	return m.rules[start:end], nil
 }
 
-func (m *MemoryManager) Get(id string) (*Rule, error) {
+func (m *RepositoryMemory) Get(ctx context.Context, id string) (*Rule, error) {
+	m.RLock()
+	defer m.RUnlock()
+
 	for _, r := range m.rules {
 		if r.ID == id {
 			return &r, nil
@@ -58,32 +74,24 @@ func (m *MemoryManager) Get(id string) (*Rule, error) {
 	return nil, errors.WithStack(helper.ErrResourceNotFound)
 }
 
-func (m *MemoryManager) Upsert(rule *Rule) error {
-	for k, r := range m.rules {
-		if r.ID == rule.ID {
-			m.rules[k] = *rule
-			return nil
+func (m *RepositoryMemory) Set(ctx context.Context, rules []Rule) error {
+	for _, check := range rules {
+		if err := m.v.Validate(&check); err != nil {
+			return err
 		}
 	}
 
-	m.rules = append(m.rules, *rule)
+	m.Lock()
+	m.rules = rules
+	m.Unlock()
+
 	return nil
 }
 
-func (m *MemoryManager) Delete(id string) error {
-	for k, r := range m.rules {
-		if r.ID == id {
-			m.rules = append(m.rules[:k], m.rules[k+1:]...)
-			return nil
-		}
-	}
-
-	return errors.WithStack(helper.ErrResourceNotFound)
-}
-
-func (m *MemoryManager) Match(method string, u *url.URL) (*Rule, error) {
+func (m *RepositoryMemory) Match(ctx context.Context, method string, u *url.URL) (*Rule, error) {
 	m.RLock()
 	defer m.RUnlock()
+
 	var rules []Rule
 	for _, rule := range m.rules {
 		if err := rule.IsMatching(method, u); err == nil {

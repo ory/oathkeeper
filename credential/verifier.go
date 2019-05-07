@@ -2,9 +2,11 @@ package credential
 
 import (
 	"context"
-	"github.com/dgrijalva/jwt-go"
-	"github.com/ory/fosite"
 	"net/url"
+
+	"github.com/dgrijalva/jwt-go"
+
+	"github.com/ory/fosite"
 )
 
 type Verifier interface {
@@ -24,6 +26,6 @@ type ValidationContext struct {
 	Issuers       []string
 	Audiences     []string
 	ScopeStrategy fosite.ScopeStrategy
-	Scope []string
+	Scope         []string
 	KeyURLs       []url.URL
 }

@@ -2,23 +2,23 @@ package authn
 
 import (
 	"encoding/json"
-	"github.com/ory/herodot"
 	"net/http"
 
-	"github.com/go-errors/errors"
+	"github.com/ory/herodot"
+	"github.com/ory/oathkeeper/pipeline"
 
-	"github.com/ory/oathkeeper/rule"
+	"github.com/go-errors/errors"
 )
 
 var ErrAuthenticatorNotResponsible = errors.New("Authenticator not responsible")
 var ErrAuthenticatorNotEnabled = herodot.DefaultError{
-	ErrorField: "authenticator matching this route is misconfigured or disabled",
+	ErrorField:  "authenticator matching this route is misconfigured or disabled",
 	CodeField:   http.StatusInternalServerError,
 	StatusField: http.StatusText(http.StatusInternalServerError),
 }
 
 type Authenticator interface {
-	Authenticate(r *http.Request, config json.RawMessage, rl *rule.Rule) (*AuthenticationSession, error)
+	Authenticate(r *http.Request, config json.RawMessage, rl pipeline.Rule) (*AuthenticationSession, error)
 	GetID() string
 	Validate() error
 }

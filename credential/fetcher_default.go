@@ -24,11 +24,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/ory/herodot"
-	"github.com/ory/x/httpx"
-	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
-	"gopkg.in/square/go-jose.v2"
 	"io"
 	"net/http"
 	"net/url"
@@ -36,6 +31,13 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
+	"gopkg.in/square/go-jose.v2"
+
+	"github.com/ory/herodot"
+	"github.com/ory/x/httpx"
 )
 
 type reasoner interface {

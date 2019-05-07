@@ -1,9 +1,10 @@
 package configuration
 
 import (
-	"github.com/ory/x/viperx"
 	"net/url"
 	"time"
+
+	"github.com/ory/x/viperx"
 )
 
 const (

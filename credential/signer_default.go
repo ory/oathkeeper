@@ -4,12 +4,13 @@ import (
 	"context"
 	"crypto/ecdsa"
 	"crypto/rsa"
+	"net/url"
+	"reflect"
+
 	"github.com/dgrijalva/jwt-go"
 	"github.com/pkg/errors"
 	"golang.org/x/crypto/ed25519"
 	"gopkg.in/square/go-jose.v2"
-	"net/url"
-	"reflect"
 )
 
 var _ Signer = new(DefaultSigner)

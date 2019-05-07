@@ -5,14 +5,16 @@ import (
 	"crypto/ecdsa"
 	"crypto/rsa"
 	"fmt"
+
 	"github.com/dgrijalva/jwt-go"
+	"github.com/pkg/errors"
+
 	"github.com/ory/fosite"
 	"github.com/ory/herodot"
 	"github.com/ory/oathkeeper/helper"
 	"github.com/ory/x/jwtx"
 	"github.com/ory/x/stringslice"
 	"github.com/ory/x/stringsx"
-	"github.com/pkg/errors"
 )
 
 var _ Verifier = new(VerifierDefault)
