@@ -43,7 +43,7 @@ func (a *AuthenticatorOAuth2ClientCredentials) Validate() error {
 	}
 
 	if a.c.AuthenticatorOAuth2ClientCredentialsTokenURL() == nil {
-		return errors.WithStack(ErrAuthenticatorNotEnabled.WithReasonf(`Configuration for authenticator % did not specify any values for configuration key "%s" and is thus disabled.`, a.GetID(), configuration.ViperKeyAuthenticatorClientCredentialsTokenURL))
+		return errors.WithStack(ErrAuthenticatorNotEnabled.WithReasonf(`Configuration for authenticator "%s" did not specify any values for configuration key "%s" and is thus disabled.`, a.GetID(), configuration.ViperKeyAuthenticatorClientCredentialsTokenURL))
 	}
 
 	return nil

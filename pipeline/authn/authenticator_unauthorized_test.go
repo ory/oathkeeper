@@ -18,9 +18,13 @@
  * @license  	   Apache-2.0
  */
 
-package authn
+package authn_test
 
 import (
+	"github.com/ory/oathkeeper/driver/configuration"
+	"github.com/ory/oathkeeper/internal"
+	. "github.com/ory/oathkeeper/pipeline/authn"
+	"github.com/spf13/viper"
 	"net/http"
 	"testing"
 
@@ -29,9 +33,21 @@ import (
 )
 
 func TestAuthenticatorBroken(t *testing.T) {
-	assert.NotNil(t, NewAuthenticatorUnauthorized())
-	assert.NotEmpty(t, NewAuthenticatorUnauthorized().GetID())
+	conf := internal.NewConfigurationWithDefaults()
 
-	_, err := NewAuthenticatorUnauthorized().Authenticate(&http.Request{Header: http.Header{}}, nil, nil)
-	require.Error(t, err)
+	a := NewAuthenticatorUnauthorized(conf)
+	assert.Equal(t, "unauthorized", a.GetID())
+
+	t.Run("case=authenticate", func(t *testing.T) {
+		_, err := a.Authenticate(&http.Request{Header: http.Header{}}, nil, nil)
+		require.Error(t, err)
+	})
+
+	t.Run("case=validate enabled/disabled", func(t *testing.T) {
+		viper.Set(configuration.ViperKeyAuthenticatorUnauthorizedIsEnabled, true)
+		require.NoError(t, a.Validate())
+
+		viper.Set(configuration.ViperKeyAuthenticatorUnauthorizedIsEnabled, false)
+		require.Error(t, a.Validate())
+	})
 }

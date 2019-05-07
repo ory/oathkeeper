@@ -18,9 +18,13 @@
  * @license  	   Apache-2.0
  */
 
-package authn
+package authn_test
 
 import (
+	. "github.com/ory/oathkeeper/pipeline/authn"
+	"github.com/ory/oathkeeper/driver/configuration"
+	"github.com/ory/oathkeeper/internal"
+	"github.com/spf13/viper"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -28,9 +32,21 @@ import (
 )
 
 func TestAuthenticatorNoop(t *testing.T) {
-	assert.NotNil(t, NewAuthenticatorNoOp())
-	assert.NotEmpty(t, NewAuthenticatorNoOp().GetID())
+	conf := internal.NewConfigurationWithDefaults()
 
-	_, err := NewAuthenticatorNoOp().Authenticate(nil, nil, nil)
-	require.NoError(t, err)
+	a := NewAuthenticatorNoOp(conf)
+	assert.Equal(t, "noop", a.GetID())
+
+	t.Run("case=authenticate", func(t *testing.T) {
+		_, err := a.Authenticate(nil, nil, nil)
+		require.NoError(t, err)
+	})
+
+	t.Run("case=validate enabled/disabled", func(t *testing.T) {
+		viper.Set(configuration.ViperKeyAuthenticatorNoopIsEnabled, true)
+		require.NoError(t, a.Validate())
+
+		viper.Set(configuration.ViperKeyAuthenticatorNoopIsEnabled, false)
+		require.Error(t, a.Validate())
+	})
 }

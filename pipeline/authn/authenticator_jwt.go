@@ -60,7 +60,7 @@ func (a *AuthenticatorJWT) Validate() error {
 	}
 
 	if len(a.c.AuthenticatorJWTJWKSURIs()) == 0 {
-		return errors.WithStack(ErrAuthenticatorNotEnabled.WithReasonf(`Configuration for authenticator % did not specify any values for configuration key "%s" and is thus disabled.`, a.GetID(), configuration.ViperKeyAuthenticatorJWTJWKSURIs))
+		return errors.WithStack(ErrAuthenticatorNotEnabled.WithReasonf(`Configuration for authenticator "%s" did not specify any values for configuration key "%s" and is thus disabled.`, a.GetID(), configuration.ViperKeyAuthenticatorJWTJWKSURIs))
 	}
 
 	return nil

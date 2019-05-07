@@ -18,9 +18,13 @@
  * @license  	   Apache-2.0
  */
 
-package authn
+package authn_test
 
 import (
+	"github.com/ory/oathkeeper/driver/configuration"
+	"github.com/ory/oathkeeper/internal"
+	. "github.com/ory/oathkeeper/pipeline/authn"
+	"github.com/spf13/viper"
 	"net/http"
 	"testing"
 
@@ -29,13 +33,28 @@ import (
 )
 
 func TestAuthenticatorAnonymous(t *testing.T) {
-	assert.NotNil(t, NewAuthenticatorAnonymous(""))
-	assert.NotEmpty(t, NewAuthenticatorAnonymous("").GetID())
+	conf := internal.NewConfigurationWithDefaults()
+	viper.Set(configuration.ViperKeyAuthenticatorAnonymousIdentifier, "anon")
 
-	session, err := NewAuthenticatorAnonymous("anon").Authenticate(&http.Request{Header: http.Header{}}, nil, nil)
-	require.NoError(t, err)
-	assert.Equal(t, "anon", session.Subject)
+	a := NewAuthenticatorAnonymous(conf)
+	assert.Equal(t, "anonymous", a.GetID())
 
-	_, err = NewAuthenticatorAnonymous("anon").Authenticate(&http.Request{Header: http.Header{"Authorization": {"foo"}}}, nil, nil)
-	require.Error(t, err)
+	t.Run("case=is anonymous user", func(t *testing.T) {
+		session, err := a.Authenticate(&http.Request{Header: http.Header{}}, nil, nil)
+		require.NoError(t, err)
+		assert.Equal(t, "anon", session.Subject)
+	})
+
+	t.Run("case=has credentials", func(t *testing.T) {
+		_, err := a.Authenticate(&http.Request{Header: http.Header{"Authorization": {"foo"}}}, nil, nil)
+		require.Error(t, err)
+	})
+
+	t.Run("case=validate enabled/disabled", func(t *testing.T) {
+		viper.Set(configuration.ViperKeyAuthenticatorAnonymousIsEnabled, true)
+		require.NoError(t, a.Validate())
+
+		viper.Set(configuration.ViperKeyAuthenticatorAnonymousIsEnabled, false)
+		require.Error(t, a.Validate())
+	})
 }
