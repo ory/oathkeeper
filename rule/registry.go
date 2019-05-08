@@ -1,6 +1,6 @@
 package rule
 
 type Registry interface {
-	RuleValidator() ValidatorDefault
-	RuleManager() Repository
+	RuleValidator() Validator
+	RuleRepository() Repository
 }

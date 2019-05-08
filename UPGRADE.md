@@ -29,6 +29,8 @@ before finalizing the upgrade process.
 
 ## v0.16.0+oryOS.12
 
+scope is being transformed to scp always!!
+
 ### all env vars have been renamed but you can use older ones np
 
 ### everything is disabled by default you must enable it explicitly

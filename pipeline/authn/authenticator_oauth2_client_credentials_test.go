@@ -18,7 +18,7 @@
  * @license  	   Apache-2.0
  */
 
-package authn
+package authn_test
 
 import (
 	"encoding/json"
@@ -26,6 +26,12 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/spf13/viper"
+
+	"github.com/ory/oathkeeper/driver/configuration"
+	"github.com/ory/oathkeeper/internal"
+	"github.com/ory/oathkeeper/pipeline/authn"
 
 	"github.com/julienschmidt/httprouter"
 	"github.com/pkg/errors"
@@ -37,14 +43,14 @@ import (
 	"github.com/ory/oathkeeper/helper"
 )
 
-func TestNewAuthenticatorOAuth2ClientCredentials(t *testing.T) {
-	_, err := NewAuthenticatorOAuth2ClientCredentials("")
-	require.Error(t, err)
-	_, err = NewAuthenticatorOAuth2ClientCredentials("oauth2/token")
-	require.Error(t, err)
-}
-
 func TestAuthenticatorOAuth2ClientCredentials(t *testing.T) {
+	conf := internal.NewConfigurationWithDefaults()
+	reg := internal.NewRegistry(conf)
+
+	a, err := reg.PipelineAuthenticator("oauth2_client_credentials")
+	require.NoError(t, err)
+	assert.Equal(t, "oauth2_client_credentials", a.GetID())
+
 	h := httprouter.New()
 	h.POST("/oauth2/token", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 		h := herodot.NewJSONWriter(logrus.New())
@@ -57,14 +63,6 @@ func TestAuthenticatorOAuth2ClientCredentials(t *testing.T) {
 	})
 	ts := httptest.NewServer(h)
 
-	a, err := NewAuthenticatorOAuth2ClientCredentials(ts.URL + "/oauth2/token")
-	require.NoError(t, err)
-	//     "client",
-	// "secret",
-	//,
-	//[]string{"foo-scope"},)
-	assert.NotEmpty(t, a.GetID())
-
 	authOk := &http.Request{Header: http.Header{}}
 	authOk.SetBasicAuth("client", "secret")
 
@@ -72,26 +70,38 @@ func TestAuthenticatorOAuth2ClientCredentials(t *testing.T) {
 	authInvalid.SetBasicAuth("foo", "bar")
 
 	for k, tc := range []struct {
+		setup         func()
 		r             *http.Request
 		config        json.RawMessage
 		expectErr     error
-		expectSession *AuthenticationSession
+		expectSession *authn.AuthenticationSession
 	}{
 		{
+			setup: func() {
+				viper.Set(configuration.ViperKeyAuthenticatorClientCredentialsTokenURL, "")
+			},
 			r:         &http.Request{Header: http.Header{}},
-			expectErr: ErrAuthenticatorNotResponsible,
+			expectErr: authn.ErrAuthenticatorNotResponsible,
 		},
 		{
-			r:         authInvalid,
+			r: authInvalid,
+			setup: func() {
+				viper.Set(configuration.ViperKeyAuthenticatorClientCredentialsTokenURL, ts.URL+"/oauth2/token")
+			},
 			expectErr: helper.ErrUnauthorized,
 		},
 		{
+			setup: func() {
+				viper.Set(configuration.ViperKeyAuthenticatorClientCredentialsTokenURL, ts.URL+"/oauth2/token")
+			},
 			r:             authOk,
 			expectErr:     nil,
-			expectSession: &AuthenticationSession{Subject: "client"},
+			expectSession: &authn.AuthenticationSession{Subject: "client"},
 		},
 	} {
-		t.Run(fmt.Sprintf("case=%d", k), func(t *testing.T) {
+		t.Run(fmt.Sprintf("method=authenticate/case=%d", k), func(t *testing.T) {
+			tc.setup()
+
 			session, err := a.Authenticate(tc.r, tc.config, nil)
 
 			if tc.expectErr != nil {
@@ -105,4 +115,22 @@ func TestAuthenticatorOAuth2ClientCredentials(t *testing.T) {
 			}
 		})
 	}
+
+	t.Run("method=validate", func(t *testing.T) {
+		viper.Set(configuration.ViperKeyAuthenticatorOAuth2ClientCredentialsIsEnabled, false)
+		viper.Set(configuration.ViperKeyAuthenticatorClientCredentialsTokenURL, "")
+		require.Error(t, a.Validate())
+
+		viper.Set(configuration.ViperKeyAuthenticatorOAuth2ClientCredentialsIsEnabled, false)
+		viper.Set(configuration.ViperKeyAuthenticatorClientCredentialsTokenURL, ts.URL+"/oauth2/token")
+		require.Error(t, a.Validate())
+
+		viper.Set(configuration.ViperKeyAuthenticatorOAuth2ClientCredentialsIsEnabled, true)
+		viper.Set(configuration.ViperKeyAuthenticatorClientCredentialsTokenURL, "")
+		require.Error(t, a.Validate())
+
+		viper.Set(configuration.ViperKeyAuthenticatorOAuth2ClientCredentialsIsEnabled, true)
+		viper.Set(configuration.ViperKeyAuthenticatorClientCredentialsTokenURL, ts.URL+"/oauth2/token")
+		require.NoError(t, a.Validate())
+	})
 }

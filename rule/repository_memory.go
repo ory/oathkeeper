@@ -33,15 +33,19 @@ import (
 
 var _ Repository = new(RepositoryMemory)
 
+type repositoryMemoryRegistry interface {
+	RuleValidator() Validator
+}
+
 type RepositoryMemory struct {
 	sync.RWMutex
 	rules []Rule
-	v     Validator
+	r     repositoryMemoryRegistry
 }
 
-func NewRepositoryMemory(v Validator) *RepositoryMemory {
+func NewRepositoryMemory(r repositoryMemoryRegistry) *RepositoryMemory {
 	return &RepositoryMemory{
-		v:     v,
+		r:     r,
 		rules: make([]Rule, 0),
 	}
 }
@@ -76,7 +80,7 @@ func (m *RepositoryMemory) Get(ctx context.Context, id string) (*Rule, error) {
 
 func (m *RepositoryMemory) Set(ctx context.Context, rules []Rule) error {
 	for _, check := range rules {
-		if err := m.v.Validate(&check); err != nil {
+		if err := m.r.RuleValidator().Validate(&check); err != nil {
 			return err
 		}
 	}

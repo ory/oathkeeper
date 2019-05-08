@@ -21,12 +21,13 @@
 package authn_test
 
 import (
-	"github.com/ory/oathkeeper/driver/configuration"
-	"github.com/ory/oathkeeper/internal"
-	. "github.com/ory/oathkeeper/pipeline/authn"
-	"github.com/spf13/viper"
 	"net/http"
 	"testing"
+
+	"github.com/spf13/viper"
+
+	"github.com/ory/oathkeeper/driver/configuration"
+	"github.com/ory/oathkeeper/internal"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -35,22 +36,24 @@ import (
 func TestAuthenticatorAnonymous(t *testing.T) {
 	conf := internal.NewConfigurationWithDefaults()
 	viper.Set(configuration.ViperKeyAuthenticatorAnonymousIdentifier, "anon")
+	reg := internal.NewRegistry(conf)
 
-	a := NewAuthenticatorAnonymous(conf)
+	a, err := reg.PipelineAuthenticator("anonymous")
+	require.NoError(t, err)
 	assert.Equal(t, "anonymous", a.GetID())
 
-	t.Run("case=is anonymous user", func(t *testing.T) {
+	t.Run("method=authenticate/case=is anonymous user", func(t *testing.T) {
 		session, err := a.Authenticate(&http.Request{Header: http.Header{}}, nil, nil)
 		require.NoError(t, err)
 		assert.Equal(t, "anon", session.Subject)
 	})
 
-	t.Run("case=has credentials", func(t *testing.T) {
+	t.Run("method=authenticate/case=has credentials", func(t *testing.T) {
 		_, err := a.Authenticate(&http.Request{Header: http.Header{"Authorization": {"foo"}}}, nil, nil)
 		require.Error(t, err)
 	})
 
-	t.Run("case=validate enabled/disabled", func(t *testing.T) {
+	t.Run("method=validate", func(t *testing.T) {
 		viper.Set(configuration.ViperKeyAuthenticatorAnonymousIsEnabled, true)
 		require.NoError(t, a.Validate())
 

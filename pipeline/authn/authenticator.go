@@ -18,7 +18,7 @@ var ErrAuthenticatorNotEnabled = herodot.DefaultError{
 }
 
 type Authenticator interface {
-	Authenticate(r *http.Request, config json.RawMessage, rl pipeline.Rule) (*AuthenticationSession, error)
+	Authenticate(r *http.Request, config json.RawMessage, rule pipeline.Rule) (*AuthenticationSession, error)
 	GetID() string
 	Validate() error
 }

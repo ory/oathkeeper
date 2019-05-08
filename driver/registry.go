@@ -5,7 +5,7 @@ import (
 	"github.com/sirupsen/logrus"
 
 	"github.com/ory/oathkeeper/api"
-	"github.com/ory/oathkeeper/credential"
+	"github.com/ory/oathkeeper/credentials"
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/pipeline/authn"
 	"github.com/ory/oathkeeper/pipeline/authz"
@@ -32,16 +32,16 @@ type Registry interface {
 	HealthHandler() *healthx.Handler
 	RuleHandler() *api.RuleHandler
 	JudgeHandler() *api.JudgeHandler
-	CredentialHandler() *api.CredentialHandler
+	CredentialHandler() *api.CredentialsHandler
 
 	authn.Registry
 	authz.Registry
 	mutate.Registry
 
 	rule.Registry
-	credential.FetcherRegistry
-	credential.SignerRegistry
-	credential.VerifierRegistry
+	credentials.FetcherRegistry
+	credentials.SignerRegistry
+	credentials.VerifierRegistry
 
 	x.RegistryWriter
 	x.RegistryLogger

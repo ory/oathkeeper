@@ -4,12 +4,14 @@ import (
 	"sync"
 	"time"
 
+	"github.com/ory/x/logrusx"
+
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 
 	"github.com/ory/herodot"
 	"github.com/ory/oathkeeper/api"
-	"github.com/ory/oathkeeper/credential"
+	"github.com/ory/oathkeeper/credentials"
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/pipeline/authn"
 	"github.com/ory/oathkeeper/pipeline/authz"
@@ -26,19 +28,24 @@ type RegistryMemory struct {
 	buildVersion string
 	buildHash    string
 	buildDate    string
-	l            logrus.FieldLogger
+	logger       logrus.FieldLogger
+	writer       herodot.Writer
 	c            configuration.Provider
 
-	ch *api.CredentialHandler
+	ch *api.CredentialsHandler
 
-	cf credential.Fetcher
+	credentialsFetcher  credentials.Fetcher
+	credentialsVerifier credentials.Verifier
+	credentialsSigner   credentials.Signer
+	ruleValidator       rule.Validator
+	ruleRepository      rule.Repository
 
 	authenticators map[string]authn.Authenticator
 	authorizers    map[string]authz.Authorizer
 	mutators       map[string]mutate.Mutator
 }
 
-func (m *RegistryMemory) Init() error {
+func (r *RegistryMemory) Init() error {
 	return nil
 }
 
@@ -46,195 +53,231 @@ func NewRegistryMemory() *RegistryMemory {
 	return &RegistryMemory{}
 }
 
-func (m *RegistryMemory) BuildVersion() string {
-	return m.buildVersion
+func (r *RegistryMemory) BuildVersion() string {
+	return r.buildVersion
 }
 
-func (m *RegistryMemory) BuildDate() string {
-	return m.buildDate
+func (r *RegistryMemory) BuildDate() string {
+	return r.buildDate
 }
 
-func (m *RegistryMemory) BuildHash() string {
-	return m.buildHash
+func (r *RegistryMemory) BuildHash() string {
+	return r.buildHash
 }
 
-func (m *RegistryMemory) WithConfig(c configuration.Provider) Registry {
-	m.c = c
-	return m
+func (r *RegistryMemory) WithConfig(c configuration.Provider) Registry {
+	r.c = c
+	return r
 }
 
-func (m *RegistryMemory) WithBuildInfo(version, hash, date string) Registry {
-	m.buildVersion = version
-	m.buildHash = hash
-	m.buildDate = date
-	return m
+func (r *RegistryMemory) WithBuildInfo(version, hash, date string) Registry {
+	r.buildVersion = version
+	r.buildHash = hash
+	r.buildDate = date
+	return r
 }
 
-func (m *RegistryMemory) WithLogger(l logrus.FieldLogger) Registry {
-	m.l = l
-	return m
+func (r *RegistryMemory) WithLogger(l logrus.FieldLogger) Registry {
+	r.logger = l
+	return r
 }
 
-func (m *RegistryMemory) CredentialHandler() *api.CredentialHandler {
-	if m.ch == nil {
-		m.ch = api.NewCredentialHandler(m.c, m)
+func (r *RegistryMemory) CredentialHandler() *api.CredentialsHandler {
+	if r.ch == nil {
+		r.ch = api.NewCredentialHandler(r.c, r)
 	}
 
-	return m.ch
+	return r.ch
 }
 
-func (m *RegistryMemory) HealthHandler() *healthx.Handler {
+func (r *RegistryMemory) HealthHandler() *healthx.Handler {
 	panic("implement me")
 }
 
-func (m *RegistryMemory) RuleValidator() rule.ValidatorDefault {
+func (r *RegistryMemory) RuleValidator() rule.Validator {
+	if r.ruleValidator == nil {
+		r.ruleValidator = rule.NewValidatorDefault(r)
+	}
+	return r.ruleValidator
+}
+
+func (r *RegistryMemory) RuleRepository() rule.Repository {
+	if r.ruleRepository == nil {
+		r.ruleRepository = rule.NewRepositoryMemory(r)
+	}
+	return r.ruleRepository
+}
+
+func (r *RegistryMemory) Writer() herodot.Writer {
+	if r.writer == nil {
+		r.writer = herodot.NewJSONWriter(r.Logger())
+	}
+	return r.writer
+}
+
+func (r *RegistryMemory) Logger() logrus.FieldLogger {
+	if r.logger == nil {
+		r.logger = logrusx.New()
+	}
+	return r.logger
+}
+
+func (r *RegistryMemory) RuleHandler() *api.RuleHandler {
 	panic("implement me")
 }
 
-func (m *RegistryMemory) RuleManager() rule.Repository {
+func (r *RegistryMemory) JudgeHandler() *api.JudgeHandler {
 	panic("implement me")
 }
 
-func (m *RegistryMemory) Writer() herodot.Writer {
-	panic("implement me")
-}
-
-func (m *RegistryMemory) Logger() logrus.FieldLogger {
-	panic("implement me")
-}
-
-func (m *RegistryMemory) RuleHandler() *api.RuleHandler {
-	panic("implement me")
-}
-
-func (m *RegistryMemory) JudgeHandler() *api.JudgeHandler {
-	panic("implement me")
-}
-
-func (m *RegistryMemory) CredentialsFetcher() credential.Fetcher {
-	if m.cf == nil {
-		m.cf = credential.NewFetcherDefault(m.Logger(), time.Second, time.Second*30)
+func (r *RegistryMemory) CredentialsFetcher() credentials.Fetcher {
+	if r.credentialsFetcher == nil {
+		r.credentialsFetcher = credentials.NewFetcherDefault(r.Logger(), time.Second, time.Second*30)
 	}
 
-	return m.cf
+	return r.credentialsFetcher
 }
 
-func (m *RegistryMemory) CredentialsSigner() credential.Signer {
-	panic("implement me")
+func (r *RegistryMemory) CredentialsSigner() credentials.Signer {
+	if r.credentialsSigner == nil {
+		r.credentialsSigner = credentials.NewSignerDefault(r)
+	}
+
+	return r.credentialsSigner
 }
 
-func (m *RegistryMemory) CredentialsVerifier() credential.Verifier {
-	panic("implement me")
+func (r *RegistryMemory) CredentialsVerifier() credentials.Verifier {
+	if r.credentialsVerifier == nil {
+		r.credentialsVerifier = credentials.NewVerifierDefault(r)
+	}
+
+	return r.credentialsVerifier
 }
 
-func (m *RegistryMemory) AvailablePipelineAuthenticators() (available []string) {
-	m.prepareAuthn()
-	m.RLock()
-	defer m.RUnlock()
+func (r *RegistryMemory) AvailablePipelineAuthenticators() (available []string) {
+	r.prepareAuthn()
+	r.RLock()
+	defer r.RUnlock()
 
-	available = make([]string, 0, len(m.authenticators))
-	for k := range m.authenticators {
+	available = make([]string, 0, len(r.authenticators))
+	for k := range r.authenticators {
 		available = append(available, k)
 	}
 	return
 }
 
-func (m *RegistryMemory) PipelineAuthenticator(id string) (authn.Authenticator, error) {
-	m.prepareAuthn()
-	m.RLock()
-	defer m.RUnlock()
+func (r *RegistryMemory) PipelineAuthenticator(id string) (authn.Authenticator, error) {
+	r.prepareAuthn()
+	r.RLock()
+	defer r.RUnlock()
 
-	a, ok := m.authenticators[id]
+	a, ok := r.authenticators[id]
 	if !ok {
 		return nil, errors.WithStack(ErrPipelineHandlerNotFound)
 	}
 	return a, nil
 }
 
-func (m *RegistryMemory) AvailablePipelineAuthorizers() (available []string) {
-	m.prepareAuthz()
-	m.RLock()
-	defer m.RUnlock()
+func (r *RegistryMemory) AvailablePipelineAuthorizers() (available []string) {
+	r.prepareAuthz()
+	r.RLock()
+	defer r.RUnlock()
 
-	available = make([]string, 0, len(m.authorizers))
-	for k := range m.authorizers {
+	available = make([]string, 0, len(r.authorizers))
+	for k := range r.authorizers {
 		available = append(available, k)
 	}
 	return
 }
 
-func (m *RegistryMemory) PipelineAuthorizer(id string) (authz.Authorizer, error) {
-	m.prepareAuthz()
-	m.RLock()
-	defer m.RUnlock()
+func (r *RegistryMemory) PipelineAuthorizer(id string) (authz.Authorizer, error) {
+	r.prepareAuthz()
+	r.RLock()
+	defer r.RUnlock()
 
-	a, ok := m.authorizers[id]
+	a, ok := r.authorizers[id]
 	if !ok {
 		return nil, errors.WithStack(ErrPipelineHandlerNotFound)
 	}
 	return a, nil
 }
 
-func (m *RegistryMemory) AvailablePipelineMutators() (available []string) {
-	m.prepareMutators()
-	m.RLock()
-	defer m.RUnlock()
+func (r *RegistryMemory) AvailablePipelineMutators() (available []string) {
+	r.prepareMutators()
+	r.RLock()
+	defer r.RUnlock()
 
-	available = make([]string, 0, len(m.mutators))
-	for k := range m.mutators {
+	available = make([]string, 0, len(r.mutators))
+	for k := range r.mutators {
 		available = append(available, k)
 	}
 
 	return
 }
 
-func (m *RegistryMemory) PipelineMutator(id string) (mutate.Mutator, error) {
-	m.prepareMutators()
-	m.RLock()
-	defer m.RUnlock()
+func (r *RegistryMemory) PipelineMutator(id string) (mutate.Mutator, error) {
+	r.prepareMutators()
+	r.RLock()
+	defer r.RUnlock()
 
-	a, ok := m.mutators[id]
+	a, ok := r.mutators[id]
 	if !ok {
 		return nil, errors.WithStack(ErrPipelineHandlerNotFound)
 	}
 	return a, nil
 }
 
-func (m *RegistryMemory) prepareAuthn() {
-	m.Lock()
-	defer m.Unlock()
-	if m.authenticators == nil {
-		interim := []authn.Authenticator{authn.NewAuthenticatorNoOp(m.c)}
+func (r *RegistryMemory) prepareAuthn() {
+	r.Lock()
+	defer r.Unlock()
+	if r.authenticators == nil {
+		interim := []authn.Authenticator{
+			authn.NewAuthenticatorAnonymous(r.c),
+			authn.NewAuthenticatorJWT(r.c, r),
+			authn.NewAuthenticatorNoOp(r.c),
+			authn.NewAuthenticatorOAuth2ClientCredentials(r.c),
+			authn.NewAuthenticatorOAuth2Introspection(r.c),
+			authn.NewAuthenticatorUnauthorized(r.c),
+		}
 
-		m.authenticators = map[string]authn.Authenticator{}
+		r.authenticators = map[string]authn.Authenticator{}
 		for _, a := range interim {
-			m.authenticators[a.GetID()] = a
+			r.authenticators[a.GetID()] = a
 		}
 	}
 }
 
-func (m *RegistryMemory) prepareAuthz() {
-	m.Lock()
-	defer m.Unlock()
-	if m.authorizers == nil {
-		interim := []authz.Authorizer{authz.NewAuthorizerAllow(m.c)}
+func (r *RegistryMemory) prepareAuthz() {
+	r.Lock()
+	defer r.Unlock()
+	if r.authorizers == nil {
+		interim := []authz.Authorizer{
+			authz.NewAuthorizerAllow(r.c),
+			authz.NewAuthorizerDeny(r.c),
+			authz.NewAuthorizerKetoWarden(r.c),
+		}
 
-		m.authorizers = map[string]authz.Authorizer{}
+		r.authorizers = map[string]authz.Authorizer{}
 		for _, a := range interim {
-			m.authorizers[a.GetID()] = a
+			r.authorizers[a.GetID()] = a
 		}
 	}
 }
 
-func (m *RegistryMemory) prepareMutators() {
-	m.Lock()
-	defer m.Unlock()
-	if m.mutators == nil {
-		interim := []mutate.Mutator{mutate.NewMutatorNoop(m.c)}
+func (r *RegistryMemory) prepareMutators() {
+	r.Lock()
+	defer r.Unlock()
+	if r.mutators == nil {
+		interim := []mutate.Mutator{
+			mutate.NewMutatorCookie(r.c),
+			mutate.NewMutatorHeader(r.c),
+			mutate.NewMutatorIDToken(r.c, r),
+			mutate.NewMutatorNoop(r.c),
+		}
 
-		m.mutators = map[string]mutate.Mutator{}
+		r.mutators = map[string]mutate.Mutator{}
 		for _, a := range interim {
-			m.mutators[a.GetID()] = a
+			r.mutators[a.GetID()] = a
 		}
 	}
 }

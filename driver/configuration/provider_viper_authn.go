@@ -60,8 +60,9 @@ func (v *ViperProvider) AuthenticatorJWTIsEnabled() bool {
 func (v *ViperProvider) AuthenticatorJWTJWKSURIs() []url.URL {
 	res := make([]url.URL, 0)
 	for _, u := range viperx.GetStringSlice(v.l, ViperKeyAuthenticatorJWTJWKSURIs, []string{}, "AUTHENTICATOR_JWT_JWKS_URL") {
-		p := v.getURL(u, ViperKeyAuthenticatorJWTJWKSURIs)
-		res = append(res, *p)
+		if p := v.getURL(u, ViperKeyAuthenticatorJWTJWKSURIs); p != nil {
+			res = append(res, *p)
+		}
 	}
 	return res
 }
@@ -113,17 +114,17 @@ func (v *ViperProvider) AuthenticatorOAuth2TokenIntrospectionPreAuthorization() 
 	)
 
 	if len(id) == 0 {
-		v.l.Errorf(`Authenticator oauth2_token_introspection has pre-authorization enabled but no configuration value "" is missing or empty. Thus, pre-authorization is disabled.`, ViperKeyAuthenticatorOAuth2TokenIntrospectionPreAuthorizationClientID)
+		v.l.Errorf(`Authenticator oauth2_token_introspection has pre-authorization enabled but configuration value "%s" is missing or empty. Thus, pre-authorization is disabled.`, ViperKeyAuthenticatorOAuth2TokenIntrospectionPreAuthorizationClientID)
 		return nil
 	}
 
 	if len(secret) == 0 {
-		v.l.Errorf(`Authenticator oauth2_token_introspection has pre-authorization enabled but no configuration value "" is missing or empty. Thus, pre-authorization is disabled.`, ViperKeyAuthenticatorOAuth2TokenIntrospectionPreAuthorizationClientSecret)
+		v.l.Errorf(`Authenticator oauth2_token_introspection has pre-authorization enabled but configuration value "%s" is missing or empty. Thus, pre-authorization is disabled.`, ViperKeyAuthenticatorOAuth2TokenIntrospectionPreAuthorizationClientSecret)
 		return nil
 	}
 
 	if len(tu) == 0 {
-		v.l.Errorf(`Authenticator oauth2_token_introspection has pre-authorization enabled but no configuration value "" is missing or empty. Thus, pre-authorization is disabled.`, ViperKeyAuthenticatorOAuth2TokenIntrospectionPreAuthorizationTokenURL)
+		v.l.Errorf(`Authenticator oauth2_token_introspection has pre-authorization enabled but configuration value "%s" is missing or empty. Thus, pre-authorization is disabled.`, ViperKeyAuthenticatorOAuth2TokenIntrospectionPreAuthorizationTokenURL)
 		return nil
 	}
 

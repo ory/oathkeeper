@@ -26,7 +26,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/ory/oathkeeper/credential"
+	"github.com/ory/oathkeeper/credentials"
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/pipeline"
 	"github.com/ory/oathkeeper/pipeline/authn"
@@ -37,7 +37,7 @@ import (
 )
 
 type MutatorIDTokenRegistry interface {
-	credential.SignerRegistry
+	credentials.SignerRegistry
 }
 
 type CredentialsIDTokenConfig struct {

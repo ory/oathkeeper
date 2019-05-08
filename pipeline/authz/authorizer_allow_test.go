@@ -23,13 +23,32 @@ package authz
 import (
 	"testing"
 
+	"github.com/spf13/viper"
+
+	"github.com/ory/oathkeeper/driver/configuration"
+	"github.com/ory/oathkeeper/internal"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func TestAuthorizerAllow(t *testing.T) {
-	a := NewAuthorizerAllow()
+	conf := internal.NewConfigurationWithDefaults()
+	reg := internal.NewRegistry(conf)
 
-	assert.NotEmpty(t, a.GetID())
-	require.NoError(t, a.Authorize(nil, nil, nil, nil))
+	a, err := reg.PipelineAuthorizer("allow")
+	require.NoError(t, err)
+	assert.Equal(t, "allow", a.GetID())
+
+	t.Run("case=never returns an error", func(t *testing.T) {
+		require.NoError(t, a.Authorize(nil, nil, nil, nil))
+	})
+
+	t.Run("case=validate enabled/disabled", func(t *testing.T) {
+		viper.Set(configuration.ViperKeyAuthorizerAllowIsEnabled, true)
+		require.NoError(t, a.Validate())
+
+		viper.Set(configuration.ViperKeyAuthorizerAllowIsEnabled, false)
+		require.Error(t, a.Validate())
+	})
 }

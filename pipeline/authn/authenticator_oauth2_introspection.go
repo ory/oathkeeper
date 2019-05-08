@@ -11,7 +11,6 @@ import (
 
 	"github.com/pkg/errors"
 
-	"github.com/ory/fosite"
 	"github.com/ory/go-convenience/stringslice"
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/helper"
@@ -35,27 +34,23 @@ type AuthenticatorOAuth2IntrospectionConfiguration struct {
 type AuthenticatorOAuth2Introspection struct {
 	c configuration.Provider
 
-	client           *http.Client
-	introspectionURL string
-	scopeStrategy    fosite.ScopeStrategy
+	client *http.Client
 }
 
-func NewAuthenticatorOAuth2Introspection(
-	c configuration.Provider,
-) *AuthenticatorOAuth2Introspection {
+func NewAuthenticatorOAuth2Introspection(c configuration.Provider) *AuthenticatorOAuth2Introspection {
 	var rt http.RoundTripper
 	if conf := c.AuthenticatorOAuth2TokenIntrospectionPreAuthorization(); conf != nil {
 		rt = conf.Client(context.Background()).Transport
 	}
 
-	return &AuthenticatorOAuth2Introspection{client: httpx.NewResilientClientLatencyToleranceSmall(rt)}
+	return &AuthenticatorOAuth2Introspection{c: c, client: httpx.NewResilientClientLatencyToleranceSmall(rt)}
 }
 
 func (a *AuthenticatorOAuth2Introspection) GetID() string {
 	return "oauth2_introspection"
 }
 
-type introspection struct {
+type AuthenticatorOAuth2IntrospectionResult struct {
 	Active    bool                   `json:"active"`
 	Extra     map[string]interface{} `json:"ext"`
 	Subject   string                 `json:"sub,omitempty"`
@@ -68,7 +63,7 @@ type introspection struct {
 }
 
 func (a *AuthenticatorOAuth2Introspection) Authenticate(r *http.Request, config json.RawMessage, _ pipeline.Rule) (*AuthenticationSession, error) {
-	var i introspection
+	var i AuthenticatorOAuth2IntrospectionResult
 	var cf AuthenticatorOAuth2IntrospectionConfiguration
 
 	if len(config) == 0 {
@@ -87,7 +82,7 @@ func (a *AuthenticatorOAuth2Introspection) Authenticate(r *http.Request, config 
 	}
 
 	body := url.Values{"token": {token}, "scope": {strings.Join(cf.Scopes, " ")}}
-	resp, err := a.client.Post(a.introspectionURL, "application/x-www-form-urlencoded", strings.NewReader(body.Encode()))
+	resp, err := a.client.Post(a.c.AuthenticatorOAuth2TokenIntrospectionIntrospectionURL().String(), "application/x-www-form-urlencoded", strings.NewReader(body.Encode()))
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}

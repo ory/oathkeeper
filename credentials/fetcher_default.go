@@ -18,7 +18,7 @@
  * @license 	Apache-2.0
  *
  */
-package credential
+package credentials
 
 import (
 	"context"
@@ -190,7 +190,6 @@ func (s *FetcherDefault) resolveAll(done chan struct{}, errs chan error, locatio
 
 func (s *FetcherDefault) resolve(wg *sync.WaitGroup, errs chan error, location url.URL) {
 	defer wg.Done()
-
 	var reader io.Reader
 
 	switch location.Scheme {
@@ -249,7 +248,7 @@ func (s *FetcherDefault) resolve(wg *sync.WaitGroup, errs chan error, location u
 				location.Scheme,
 			),
 		)
-
+		return
 	}
 
 	var set jose.JSONWebKeySet

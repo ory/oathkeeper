@@ -1,4 +1,4 @@
-package credential
+package credentials
 
 import (
 	"context"
@@ -139,6 +139,24 @@ func TestVerifierDefault(t *testing.T) {
 				"iss": "iss-2",
 				"scp": []string{"scope-3", "scope-2", "scope-1"},
 			},
+		},
+		{
+			d: "should fail when scope validation was requested but no scope strategy is set",
+			c: &ValidationContext{
+				Algorithms: []string{"HS256"},
+				Audiences:  []string{"aud-1", "aud-2"},
+				Issuers:    []string{"iss-1", "iss-2"},
+				Scope:      []string{"scope-1", "scope-2"},
+				KeyURLs:    []url.URL{*urlx.ParseOrPanic("file://../stub/jwks-hs.json")},
+			},
+			token: sign(jwt.MapClaims{
+				"sub":    "sub",
+				"exp":    now.Add(time.Hour).Unix(),
+				"aud":    []string{"aud-1", "aud-2"},
+				"iss":    "iss-2",
+				"scopes": "scope-3 scope-2 scope-1",
+			}, "file://../stub/jwks-hs.json"),
+			expectErr: true,
 		},
 		{
 			d: "should fail when algorithm does not match",
@@ -287,6 +305,31 @@ func TestVerifierDefault(t *testing.T) {
 			if tc.expectClaims != nil {
 				assert.EqualValues(t, tc.expectClaims, claims.Claims)
 			}
+		})
+	}
+}
+
+func TestScope(t *testing.T) {
+	for k, tc := range []struct {
+		i  map[string]interface{}
+		ev []string
+		ek string
+	}{
+		{i: map[string]interface{}{}, ev: []string{}},
+		{i: map[string]interface{}{"scp": "foo bar"}, ev: []string{"foo", "bar"}, ek: "scp"},
+		{i: map[string]interface{}{"scope": "foo bar"}, ev: []string{"foo", "bar"}, ek: "scope"},
+		{i: map[string]interface{}{"scopes": "foo bar"}, ev: []string{"foo", "bar"}, ek: "scopes"},
+		{i: map[string]interface{}{"scp": []string{"foo", "bar"}}, ev: []string{"foo", "bar"}, ek: "scp"},
+		{i: map[string]interface{}{"scope": []string{"foo", "bar"}}, ev: []string{"foo", "bar"}, ek: "scope"},
+		{i: map[string]interface{}{"scopes": []string{"foo", "bar"}}, ev: []string{"foo", "bar"}, ek: "scopes"},
+		{i: map[string]interface{}{"scp": []interface{}{"foo", "bar"}}, ev: []string{"foo", "bar"}, ek: "scp"},
+		{i: map[string]interface{}{"scope": []interface{}{"foo", "bar"}}, ev: []string{"foo", "bar"}, ek: "scope"},
+		{i: map[string]interface{}{"scopes": []interface{}{"foo", "bar"}}, ev: []string{"foo", "bar"}, ek: "scopes"},
+	} {
+		t.Run(fmt.Sprintf("case=%d", k), func(t *testing.T) {
+			value, key := scope(tc.i)
+			assert.EqualValues(t, tc.ev, value)
+			assert.EqualValues(t, tc.ek, key)
 		})
 	}
 }

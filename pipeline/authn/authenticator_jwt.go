@@ -10,14 +10,14 @@ import (
 
 	"github.com/ory/go-convenience/jwtx"
 	"github.com/ory/herodot"
-	"github.com/ory/oathkeeper/credential"
+	"github.com/ory/oathkeeper/credentials"
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/helper"
 	"github.com/ory/oathkeeper/pipeline"
 )
 
 type AuthenticatorJWTRegistry interface {
-	credential.VerifierRegistry
+	credentials.VerifierRegistry
 }
 
 type AuthenticatorOAuth2JWTConfiguration struct {
@@ -41,8 +41,8 @@ type AuthenticatorJWT struct {
 }
 
 func NewAuthenticatorJWT(
-	r AuthenticatorJWTRegistry,
 	c configuration.Provider,
+	r AuthenticatorJWTRegistry,
 ) *AuthenticatorJWT {
 	return &AuthenticatorJWT{
 		c: c,
@@ -87,7 +87,7 @@ func (a *AuthenticatorJWT) Authenticate(r *http.Request, config json.RawMessage,
 		cf.AllowedAlgorithms = []string{"RS256"}
 	}
 
-	pt, err := a.r.CredentialsVerifier().Verify(r.Context(), token, &credential.ValidationContext{
+	pt, err := a.r.CredentialsVerifier().Verify(r.Context(), token, &credentials.ValidationContext{
 		Algorithms:    cf.AllowedAlgorithms,
 		KeyURLs:       a.c.AuthenticatorJWTJWKSURIs(),
 		Scope:         cf.Scope,

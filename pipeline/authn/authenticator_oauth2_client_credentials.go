@@ -68,12 +68,12 @@ func (a *AuthenticatorOAuth2ClientCredentials) Authenticate(r *http.Request, con
 
 	var err error
 	user, err = url.QueryUnescape(user)
-	if !ok {
+	if err != nil {
 		return nil, errors.Wrapf(helper.ErrUnauthorized, err.Error())
 	}
 
 	password, err = url.QueryUnescape(password)
-	if !ok {
+	if err != nil {
 		return nil, errors.Wrapf(helper.ErrUnauthorized, err.Error())
 	}
 

@@ -53,6 +53,8 @@ type Validator interface {
 	Validate(r *Rule) error
 }
 
+var _ Validator = new(ValidatorDefault)
+
 type ValidatorDefault struct {
 	r validatorRegistry
 }

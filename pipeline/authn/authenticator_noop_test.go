@@ -21,11 +21,12 @@
 package authn_test
 
 import (
-	. "github.com/ory/oathkeeper/pipeline/authn"
+	"testing"
+
+	"github.com/spf13/viper"
+
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/internal"
-	"github.com/spf13/viper"
-	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -33,16 +34,18 @@ import (
 
 func TestAuthenticatorNoop(t *testing.T) {
 	conf := internal.NewConfigurationWithDefaults()
+	reg := internal.NewRegistry(conf)
 
-	a := NewAuthenticatorNoOp(conf)
+	a, err := reg.PipelineAuthenticator("noop")
+	require.NoError(t, err)
 	assert.Equal(t, "noop", a.GetID())
 
-	t.Run("case=authenticate", func(t *testing.T) {
+	t.Run("method=authenticate", func(t *testing.T) {
 		_, err := a.Authenticate(nil, nil, nil)
 		require.NoError(t, err)
 	})
 
-	t.Run("case=validate enabled/disabled", func(t *testing.T) {
+	t.Run("method=validate", func(t *testing.T) {
 		viper.Set(configuration.ViperKeyAuthenticatorNoopIsEnabled, true)
 		require.NoError(t, a.Validate())
 

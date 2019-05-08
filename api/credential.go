@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/ory/oathkeeper/credential"
+	"github.com/ory/oathkeeper/credentials"
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/x"
 
@@ -14,19 +14,19 @@ import (
 
 type credentialHandlerRegistry interface {
 	x.RegistryWriter
-	credential.FetcherRegistry
+	credentials.FetcherRegistry
 }
 
-type CredentialHandler struct {
+type CredentialsHandler struct {
 	c configuration.Provider
 	r credentialHandlerRegistry
 }
 
-func NewCredentialHandler(c configuration.Provider, r credentialHandlerRegistry) *CredentialHandler {
-	return &CredentialHandler{c: c, r: r}
+func NewCredentialHandler(c configuration.Provider, r credentialHandlerRegistry) *CredentialsHandler {
+	return &CredentialsHandler{c: c, r: r}
 }
 
-func (h *CredentialHandler) SetRoutes(r *x.RouterAPI) {
+func (h *CredentialsHandler) SetRoutes(r *x.RouterAPI) {
 	r.GET("/.well-known/jwks.json", h.wellKnown)
 }
 
@@ -44,7 +44,7 @@ func (h *CredentialHandler) SetRoutes(r *x.RouterAPI) {
 //     Responses:
 //       200: jsonWebKeySet
 //       500: genericError
-func (h *CredentialHandler) wellKnown(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+func (h *CredentialsHandler) wellKnown(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	sets, err := h.r.CredentialsFetcher().ResolveSets(r.Context(), []url.URL{
 		*h.c.MutatorIDTokenJWKSURL(),
 	})
