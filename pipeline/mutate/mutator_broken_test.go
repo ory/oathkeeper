@@ -18,20 +18,31 @@
  * @license  	   Apache-2.0
  */
 
-package mutate
+package mutate_test
 
 import (
 	"testing"
+
+	"github.com/ory/oathkeeper/pipeline/mutate"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func TestCredentialsIssuerBroken(t *testing.T) {
-	b := NewMutatorBroken()
-	assert.NotNil(t, b)
-	assert.NotEmpty(t, b.GetID())
+	a := mutate.NewMutatorBroken(false)
+	assert.Equal(t, "broken", a.GetID())
 
-	_, err := b.Mutate(nil, nil, nil, nil)
+	_, err := a.Mutate(nil, nil, nil, nil)
 	require.Error(t, err)
+
+	t.Run("method=new/case=should not be declared in registry", func(t *testing.T) {
+		_, err := a.Mutate(nil, nil, nil, nil)
+		require.Error(t, err)
+	})
+
+	t.Run("method=validate", func(t *testing.T) {
+		require.Error(t, mutate.NewMutatorBroken(false).Validate())
+		require.NoError(t, mutate.NewMutatorBroken(true).Validate())
+	})
 }

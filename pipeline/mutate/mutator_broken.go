@@ -50,7 +50,7 @@ func (a *MutatorBroken) Mutate(r *http.Request, session *authn.AuthenticationSes
 
 func (a *MutatorBroken) Validate() error {
 	if !a.enabled {
-		return errors.WithStack(authn.ErrAuthenticatorNotEnabled.WithReasonf("Mutator % is disabled per configuration.", a.GetID()))
+		return errors.WithStack(ErrMutatorNotEnabled.WithReasonf(`Mutator "%s" is disabled per configuration.`, a.GetID()))
 	}
 
 	return nil

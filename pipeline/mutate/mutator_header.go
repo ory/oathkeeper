@@ -14,7 +14,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-type CredentialsHeadersConfig struct {
+type MutatorHeaderConfig struct {
 	Headers map[string]string `json:"headers"`
 }
 
@@ -24,14 +24,15 @@ type MutatorHeader struct {
 }
 
 func NewMutatorHeader(c configuration.Provider) *MutatorHeader {
-	return &MutatorHeader{
-		c: c,
-		t: newTemplate("header"),
-	}
+	return &MutatorHeader{c: c, t: newTemplate("header")}
 }
 
 func (a *MutatorHeader) GetID() string {
 	return "header"
+}
+
+func (a *MutatorHeader) WithCache(t *template.Template) {
+	a.t = t
 }
 
 func (a *MutatorHeader) Mutate(r *http.Request, session *authn.AuthenticationSession, config json.RawMessage, rl pipeline.Rule) (http.Header, error) {
@@ -39,7 +40,7 @@ func (a *MutatorHeader) Mutate(r *http.Request, session *authn.AuthenticationSes
 		config = []byte("{}")
 	}
 
-	var cfg CredentialsHeadersConfig
+	var cfg MutatorHeaderConfig
 	d := json.NewDecoder(bytes.NewBuffer(config))
 	d.DisallowUnknownFields()
 	if err := d.Decode(&cfg); err != nil {
@@ -73,7 +74,7 @@ func (a *MutatorHeader) Mutate(r *http.Request, session *authn.AuthenticationSes
 
 func (a *MutatorHeader) Validate() error {
 	if !a.c.MutatorHeaderIsEnabled() {
-		return errors.WithStack(authn.ErrAuthenticatorNotEnabled.WithReasonf("Mutator % is disabled per configuration.", a.GetID()))
+		return errors.WithStack(ErrMutatorNotEnabled.WithReasonf(`Mutator "%s" is disabled per configuration.`, a.GetID()))
 	}
 
 	return nil

@@ -46,7 +46,7 @@ type ProviderAuthorizers interface {
 	AuthorizerDenyIsEnabled() bool
 
 	AuthorizerKetoEngineACPORYIsEnabled() bool
-	AuthorizerKetoEngineACPORYAuthorizedURL() *url.URL
+	AuthorizerKetoEngineACPORYBaseURL() *url.URL
 }
 
 type ProviderMutators interface {

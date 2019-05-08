@@ -254,7 +254,7 @@ func (r *RegistryMemory) prepareAuthz() {
 		interim := []authz.Authorizer{
 			authz.NewAuthorizerAllow(r.c),
 			authz.NewAuthorizerDeny(r.c),
-			authz.NewAuthorizerKetoWarden(r.c),
+			authz.NewAuthorizerKetoEngineACPORY(r.c),
 		}
 
 		r.authorizers = map[string]authz.Authorizer{}

@@ -19,19 +19,20 @@ type CredentialsCookiesConfig struct {
 }
 
 type MutatorCookie struct {
-	templates *template.Template
-	c         configuration.Provider
+	t *template.Template
+	c configuration.Provider
 }
 
 func NewMutatorCookie(c configuration.Provider) *MutatorCookie {
-	return &MutatorCookie{
-		c:         c,
-		templates: newTemplate("cookie"),
-	}
+	return &MutatorCookie{c: c, t: newTemplate("cookie")}
 }
 
 func (a *MutatorCookie) GetID() string {
 	return "cookie"
+}
+
+func (a *MutatorCookie) WithCache(t *template.Template) {
+	a.t = t
 }
 
 func (a *MutatorCookie) Mutate(r *http.Request, session *authn.AuthenticationSession, config json.RawMessage, rl pipeline.Rule) (http.Header, error) {
@@ -59,9 +60,9 @@ func (a *MutatorCookie) Mutate(r *http.Request, session *authn.AuthenticationSes
 		var err error
 
 		templateId := fmt.Sprintf("%s:%s", rl.GetID(), cookie)
-		tmpl = a.templates.Lookup(templateId)
+		tmpl = a.t.Lookup(templateId)
 		if tmpl == nil {
-			tmpl, err = a.templates.New(templateId).Parse(templateString)
+			tmpl, err = a.t.New(templateId).Parse(templateString)
 			if err != nil {
 				return nil, errors.Wrapf(err, `error parsing cookie template "%s" in rule "%s"`, templateString, rl.GetID())
 			}
@@ -95,7 +96,7 @@ func (a *MutatorCookie) Mutate(r *http.Request, session *authn.AuthenticationSes
 
 func (a *MutatorCookie) Validate() error {
 	if !a.c.MutatorCookieIsEnabled() {
-		return errors.WithStack(authn.ErrAuthenticatorNotEnabled.WithReasonf("Mutator % is disabled per configuration.", a.GetID()))
+		return errors.WithStack(ErrMutatorNotEnabled.WithReasonf(`Mutator "%s" is disabled per configuration.`, a.GetID()))
 	}
 
 	return nil

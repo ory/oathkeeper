@@ -11,8 +11,8 @@ const (
 
 	ViperKeyAuthorizerDenyIsEnabled = "authorizers.deny.enabled"
 
-	ViperKeyAuthorizerKetoEngineACPORYIsEnabled     = "authorizers.keto_engine_acp_ory.enabled"
-	ViperKeyAuthorizerKetoEngineACPORYAuthorizedURL = "authorizers.keto_engine_acp_ory.base_url"
+	ViperKeyAuthorizerKetoEngineACPORYIsEnabled = "authorizers.keto_engine_acp_ory.enabled"
+	ViperKeyAuthorizerKetoEngineACPORYBaseURL   = "authorizers.keto_engine_acp_ory.base_url"
 )
 
 func (v *ViperProvider) AuthorizerAllowIsEnabled() bool {
@@ -27,9 +27,9 @@ func (v *ViperProvider) AuthorizerKetoEngineACPORYIsEnabled() bool {
 	return viperx.GetBool(v.l, ViperKeyAuthorizerKetoEngineACPORYIsEnabled, false)
 }
 
-func (v *ViperProvider) AuthorizerKetoEngineACPORYAuthorizedURL() *url.URL {
+func (v *ViperProvider) AuthorizerKetoEngineACPORYBaseURL() *url.URL {
 	return v.getURL(
-		viperx.GetString(v.l, ViperKeyAuthorizerKetoEngineACPORYAuthorizedURL, "", "AUTHORIZER_KETO_URL"),
-		ViperKeyAuthorizerKetoEngineACPORYAuthorizedURL,
+		viperx.GetString(v.l, ViperKeyAuthorizerKetoEngineACPORYBaseURL, "", "AUTHORIZER_KETO_URL"),
+		ViperKeyAuthorizerKetoEngineACPORYBaseURL,
 	)
 }

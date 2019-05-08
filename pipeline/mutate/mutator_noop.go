@@ -47,7 +47,7 @@ func (a *MutatorNoop) Mutate(r *http.Request, session *authn.AuthenticationSessi
 
 func (a *MutatorNoop) Validate() error {
 	if !a.c.MutatorNoopIsEnabled() {
-		return errors.WithStack(authn.ErrAuthenticatorNotEnabled.WithReasonf("Mutator % is disabled per configuration.", a.GetID()))
+		return errors.WithStack(ErrMutatorNotEnabled.WithReasonf(`Mutator "%s" is disabled per configuration.`, a.GetID()))
 	}
 
 	return nil

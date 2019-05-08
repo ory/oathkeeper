@@ -18,62 +18,101 @@
  * @license  	   Apache-2.0
  */
 
-package mutate
+package mutate_test
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"net/url"
 	"strings"
 	"testing"
 	"time"
 
-	"github.com/ory/oathkeeper/pipeline/authn"
-
 	"github.com/dgrijalva/jwt-go"
-	"github.com/go-errors/errors"
-	"github.com/sirupsen/logrus"
+	"github.com/spf13/viper"
+
+	"github.com/ory/oathkeeper/credentials"
+	"github.com/ory/oathkeeper/driver/configuration"
+	"github.com/ory/oathkeeper/internal"
+	"github.com/ory/oathkeeper/pipeline/authn"
+	"github.com/ory/x/urlx"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-
-	"github.com/ory/oathkeeper/rsakey"
 )
 
-func TestCredentialsIssuerIDToken(t *testing.T) {
-	var keys = map[string]rsakey.Manager{
-		"hs256": rsakey.NewLocalHS256Manager([]byte("foobarbaz")),
-		"rs256": &rsakey.LocalRS256Manager{KeyStrength: 512},
-	}
+func TestMutatorIDToken(t *testing.T) {
+	conf := internal.NewConfigurationWithDefaults()
+	reg := internal.NewRegistry(conf)
 
-	for m, k := range keys {
-		t.Run(fmt.Sprintf("algo=%s", m), func(t *testing.T) {
-			b := NewMutatorIDToken(k, logrus.New(), time.Hour, "some-issuer")
+	a, err := reg.PipelineMutator("id_token")
+	require.NoError(t, err)
+	assert.Equal(t, "id_token", a.GetID())
 
-			assert.NotNil(t, b)
-			assert.NotEmpty(t, b.GetID())
+	viper.Set(configuration.ViperKeyMutatorIDTokenIssuerURL, "/foo/bar")
 
-			r := &http.Request{Header: http.Header{}}
-			s := &authn.AuthenticationSession{Subject: "foo"}
+	t.Run("method=mutate", func(t *testing.T) {
+		for k, tc := range []struct {
+			k   string
+			ttl time.Duration
+		}{
+			{k: "file://../../stub/jwks-hs.json"},
+			{k: "file://../../stub/jwks-rsa-multiple.json"},
+			{k: "file://../../stub/jwks-ecdsa.json"},
+		} {
+			t.Run(fmt.Sprintf("case=%d", k), func(t *testing.T) {
+				viper.Set(configuration.ViperKeyMutatorIDTokenJWKSURL, tc.k)
+				viper.Set(configuration.ViperKeyMutatorIDTokenTTL, tc.ttl)
 
-			header, err := b.Mutate(r, s, json.RawMessage([]byte(`{ "aud": ["foo", "bar"] }`)), nil)
-			require.NoError(t, err)
-			r.Header = header
+				r := &http.Request{Header: http.Header{}}
+				s := &authn.AuthenticationSession{Subject: "foo"}
 
-			generated := strings.Replace(r.Header.Get("Authorization"), "Bearer ", "", 1)
-			token, err := jwt.ParseWithClaims(generated, new(claims), func(token *jwt.Token) (interface{}, error) {
-				_, rsa := token.Method.(*jwt.SigningMethodRSA)
-				_, hmac := token.Method.(*jwt.SigningMethodHMAC)
-				if !rsa && !hmac {
-					return nil, errors.Errorf("Unexpected signing method: %v", token.Header["alg"])
+				header, err := a.Mutate(r, s, json.RawMessage([]byte(`{ "aud": ["foo", "bar"] }`)), nil)
+				require.NoError(t, err)
+				token := strings.Replace(header.Get("Authorization"), "Bearer ", "", 1)
+
+				result, err := reg.CredentialsVerifier().Verify(context.Background(), token, &credentials.ValidationContext{
+					Algorithms: []string{"RS256", "HS256", "ES256"},
+					Audiences:  []string{"foo", "bar"},
+					KeyURLs:    []url.URL{*urlx.ParseOrPanic(tc.k)},
+				})
+				require.NoError(t, err)
+
+				ttl := time.Minute // default from config is time.Minute
+				if tc.ttl > 0 {
+					ttl = tc.ttl
 				}
-
-				return k.PublicKey()
+				assert.Equal(t, "foo", fmt.Sprintf("%s", result.Claims.(jwt.MapClaims)["sub"]))
+				assert.GreaterOrEqual(t, time.Now().Add(ttl).Unix(), int64(result.Claims.(jwt.MapClaims)["exp"].(float64)))
 			})
-			require.NoError(t, err)
+		}
+	})
 
-			claims := token.Claims.(*claims)
-			assert.Equal(t, "foo", claims.Subject)
-			assert.Equal(t, []string{"foo", "bar"}, claims.Audience)
-		})
-	}
+	t.Run("method=validate", func(t *testing.T) {
+		for k, tc := range []struct {
+			e    bool
+			i    string
+			j    string
+			pass bool
+		}{
+			{e: false, pass: false},
+			{e: true, pass: false},
+			{e: true, i: "/foo", pass: false},
+			{e: true, j: "/foo", pass: false},
+			{e: true, i: "/foo", j: "/foo", pass: true},
+		} {
+			t.Run(fmt.Sprintf("case=%d", k), func(t *testing.T) {
+				viper.Set(configuration.ViperKeyMutatorIDTokenIsEnabled, tc.e)
+				viper.Set(configuration.ViperKeyMutatorIDTokenIssuerURL, tc.i)
+				viper.Set(configuration.ViperKeyMutatorIDTokenJWKSURL, tc.j)
+				if tc.pass {
+					require.NoError(t, a.Validate())
+				} else {
+					require.Error(t, a.Validate())
+				}
+			})
+		}
+	})
 }

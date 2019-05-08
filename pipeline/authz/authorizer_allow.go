@@ -49,7 +49,7 @@ func (a *AuthorizerAllow) Authorize(r *http.Request, session *authn.Authenticati
 
 func (a *AuthorizerAllow) Validate() error {
 	if !a.c.AuthorizerAllowIsEnabled() {
-		return errors.WithStack(authn.ErrAuthenticatorNotEnabled.WithReasonf("Authorizer % is disabled per configuration.", a.GetID()))
+		return errors.WithStack(ErrAuthorizerNotEnabled.WithReasonf(`Authorizer "%s" is disabled per configuration.`, a.GetID()))
 	}
 
 	return nil

@@ -154,7 +154,7 @@ func availableHandlerNames() ([]string, []string, []string) {
 		[]string{
 			new(authz.AuthorizerAllow).GetID(),
 			new(authz.AuthorizerDeny).GetID(),
-			new(authz.AuthorizerKetoWarden).GetID(),
+			new(authz.AuthorizerKetoEngineACPORY).GetID(),
 		},
 		[]string{
 			new(mutate.TransformerNoop).GetID(),
@@ -260,7 +260,7 @@ func handlerFactories(keyManager rsakey.Manager) ([]authn.Authenticator, []authz
 			logger.WithError(err).Fatalf("Value \"%s\" from environment variable \"AUTHORIZER_KETO_URL\" is not a valid URL.", u)
 		}
 
-		authorizers = append(authorizers, authz.NewAuthorizerKetoWarden(uu))
+		authorizers = append(authorizers, authz.NewAuthorizerKetoEngineACPORY(uu))
 	} else {
 		logger.Warn("Authorizer \"ory-keto\" is not configured and thus disabled.")
 	}

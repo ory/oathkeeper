@@ -18,20 +18,41 @@
  * @license  	   Apache-2.0
  */
 
-package mutate
+package mutate_test
 
 import (
 	"net/http"
 	"testing"
 
+	"github.com/spf13/viper"
+
+	"github.com/ory/oathkeeper/driver/configuration"
+	"github.com/ory/oathkeeper/internal"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
-func TestCredentialsIssuerNoOp(t *testing.T) {
-	assert.NotNil(t, NewMutatorNoop())
-	assert.NotEmpty(t, NewMutatorNoop().GetID())
+func TestMutatorNoop(t *testing.T) {
+	conf := internal.NewConfigurationWithDefaults()
+	reg := internal.NewRegistry(conf)
 
-	_, err := NewMutatorNoop().Mutate(&http.Request{Header: map[string][]string{}}, nil, nil, nil)
+	a, err := reg.PipelineMutator("noop")
 	require.NoError(t, err)
+	assert.Equal(t, "noop", a.GetID())
+
+	t.Run("method=mutate/case=passes always", func(t *testing.T) {
+		r := &http.Request{Header: http.Header{"foo": {"foo"}}}
+		headers, err := a.Mutate(r, nil, nil, nil)
+		require.NoError(t, err)
+		assert.EqualValues(t, r.Header, headers)
+	})
+
+	t.Run("method=validate", func(t *testing.T) {
+		viper.Set(configuration.ViperKeyMutatorNoopIsEnabled, true)
+		require.NoError(t, a.Validate())
+
+		viper.Set(configuration.ViperKeyMutatorNoopIsEnabled, false)
+		require.Error(t, a.Validate())
+	})
 }

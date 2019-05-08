@@ -18,7 +18,7 @@
  * @license  	   Apache-2.0
  */
 
-package authz
+package authz_test
 
 import (
 	"testing"
@@ -40,11 +40,11 @@ func TestAuthorizerDeny(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, "deny", a.GetID())
 
-	t.Run("case=always returns an error", func(t *testing.T) {
+	t.Run("method=authorize/case=always returns denied", func(t *testing.T) {
 		require.Error(t, a.Authorize(nil, nil, nil, nil))
 	})
 
-	t.Run("case=validate enabled/disabled", func(t *testing.T) {
+	t.Run("method=validate", func(t *testing.T) {
 		viper.Set(configuration.ViperKeyAuthorizerDenyIsEnabled, true)
 		require.NoError(t, a.Validate())
 

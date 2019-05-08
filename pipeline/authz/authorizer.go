@@ -16,7 +16,7 @@ var ErrAuthorizerNotEnabled = herodot.DefaultError{
 }
 
 type Authorizer interface {
-	Authorize(r *http.Request, session *authn.AuthenticationSession, config json.RawMessage, _ pipeline.Rule) error
+	Authorize(r *http.Request, session *authn.AuthenticationSession, config json.RawMessage, rule pipeline.Rule) error
 	GetID() string
 	Validate() error
 }

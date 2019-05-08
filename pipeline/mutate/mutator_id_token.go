@@ -49,14 +49,8 @@ type MutatorIDToken struct {
 	r MutatorIDTokenRegistry
 }
 
-func NewMutatorIDToken(
-	c configuration.Provider,
-	r MutatorIDTokenRegistry,
-) *MutatorIDToken {
-	return &MutatorIDToken{
-		r: r,
-		c: c,
-	}
+func NewMutatorIDToken(c configuration.Provider, r MutatorIDTokenRegistry) *MutatorIDToken {
+	return &MutatorIDToken{r: r, c: c}
 }
 
 func (a *MutatorIDToken) GetID() string {
@@ -110,15 +104,15 @@ func (a *MutatorIDToken) Mutate(r *http.Request, session *authn.AuthenticationSe
 
 func (a *MutatorIDToken) Validate() error {
 	if !a.c.MutatorIDTokenIsEnabled() {
-		return errors.WithStack(authn.ErrAuthenticatorNotEnabled.WithReasonf("Mutator % is disabled per configuration.", a.GetID()))
+		return errors.WithStack(ErrMutatorNotEnabled.WithReasonf(`Mutator "%s" is disabled per configuration.`, a.GetID()))
 	}
 
 	if a.c.MutatorIDTokenIssuerURL() == nil {
-		return errors.WithStack(authn.ErrAuthenticatorNotEnabled.WithReasonf(`Configuration for transformer % did not specify any values for configuration key "%s" and is thus disabled.`, a.GetID(), configuration.ViperKeyMutatorIDTokenIssuerURL))
+		return errors.WithStack(ErrMutatorNotEnabled.WithReasonf(`Configuration for mutator "%s" did not specify any values for configuration key "%s" and is thus disabled.`, a.GetID(), configuration.ViperKeyMutatorIDTokenIssuerURL))
 	}
 
 	if a.c.MutatorIDTokenJWKSURL() == nil {
-		return errors.WithStack(authn.ErrAuthenticatorNotEnabled.WithReasonf(`Configuration for transformer % did not specify any values for configuration key "%s" and is thus disabled.`, a.GetID(), configuration.ViperKeyMutatorIDTokenJWKSURL))
+		return errors.WithStack(ErrMutatorNotEnabled.WithReasonf(`Configuration for mutator "%s" did not specify any values for configuration key "%s" and is thus disabled.`, a.GetID(), configuration.ViperKeyMutatorIDTokenJWKSURL))
 	}
 
 	return nil

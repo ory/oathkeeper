@@ -42,50 +42,52 @@ import (
 	"github.com/ory/oathkeeper/helper"
 )
 
-type AuthorizerKetoWardenConfiguration struct {
+type AuthorizerKetoEngineACPORYConfiguration struct {
 	RequiredAction   string `json:"required_action" valid:",required"`
 	RequiredResource string `json:"required_resource" valid:",required"`
 	Subject          string `json:"subject"`
 	Flavor           string `json:"flavor"`
 }
 
-type AuthorizerKetoWarden struct {
+type AuthorizerKetoEngineACPORY struct {
 	c configuration.Provider
 
 	client         *http.Client
 	contextCreator authorizerKetoWardenContext
 }
 
-func NewAuthorizerKetoWarden(c configuration.Provider) *AuthorizerKetoWarden {
-	return &AuthorizerKetoWarden{
-		c:              c,
-		client:         httpx.NewResilientClientLatencyToleranceSmall(nil),
-		contextCreator: contextFromRequest,
+func NewAuthorizerKetoEngineACPORY(c configuration.Provider) *AuthorizerKetoEngineACPORY {
+	return &AuthorizerKetoEngineACPORY{
+		c:      c,
+		client: httpx.NewResilientClientLatencyToleranceSmall(nil),
+		contextCreator: func(r *http.Request) map[string]interface{} {
+			return map[string]interface{}{
+				"remoteIpAddress": realip.RealIP(r),
+				"requestedAt":     time.Now().UTC(),
+			}
+		},
 	}
 }
 
-func (a *AuthorizerKetoWarden) GetID() string {
+func (a *AuthorizerKetoEngineACPORY) GetID() string {
 	return "keto_engine_acp_ory"
 }
 
 type authorizerKetoWardenContext func(r *http.Request) map[string]interface{}
 
-func contextFromRequest(r *http.Request) map[string]interface{} {
-	return map[string]interface{}{
-		"remoteIpAddress": realip.RealIP(r),
-		"requestedAt":     time.Now().UTC(),
-	}
-}
-
-type ketoWardenInput struct {
+type AuthorizerKetoEngineACPORYRequestBody struct {
 	Action   string                 `json:"action"`
 	Context  map[string]interface{} `json:"context"`
 	Resource string                 `json:"resource"`
 	Subject  string                 `json:"subject"`
 }
 
-func (a *AuthorizerKetoWarden) Authorize(r *http.Request, session *authn.AuthenticationSession, config json.RawMessage, rl pipeline.Rule) error {
-	var cf AuthorizerKetoWardenConfiguration
+func (a *AuthorizerKetoEngineACPORY) WithContextCreator(f authorizerKetoWardenContext) {
+	a.contextCreator = f
+}
+
+func (a *AuthorizerKetoEngineACPORY) Authorize(r *http.Request, session *authn.AuthenticationSession, config json.RawMessage, rule pipeline.Rule) error {
+	var cf AuthorizerKetoEngineACPORYConfiguration
 
 	if len(config) == 0 {
 		config = []byte("{}")
@@ -103,14 +105,14 @@ func (a *AuthorizerKetoWarden) Authorize(r *http.Request, session *authn.Authent
 		return errors.New("Unable to validate keto warden configuration")
 	}
 
-	compiled, err := rl.CompileURL()
+	compiled, err := rule.CompileURL()
 	if err != nil {
 		return errors.WithStack(err)
 	}
 
 	subject := session.Subject
 	if cf.Subject != "" {
-		templateId := fmt.Sprintf("%s:%s", rl.GetID(), "subject")
+		templateId := fmt.Sprintf("%s:%s", rule.GetID(), "subject")
 		subject, err = a.ParseSubject(session, templateId, cf.Subject)
 		if err != nil {
 			return errors.WithStack(err)
@@ -123,7 +125,7 @@ func (a *AuthorizerKetoWarden) Authorize(r *http.Request, session *authn.Authent
 	}
 
 	var b bytes.Buffer
-	if err := json.NewEncoder(&b).Encode(&ketoWardenInput{
+	if err := json.NewEncoder(&b).Encode(&AuthorizerKetoEngineACPORYRequestBody{
 		Action:   compiled.ReplaceAllString(r.URL.String(), cf.RequiredAction),
 		Resource: compiled.ReplaceAllString(r.URL.String(), cf.RequiredResource),
 		Context:  a.contextCreator(r),
@@ -131,7 +133,7 @@ func (a *AuthorizerKetoWarden) Authorize(r *http.Request, session *authn.Authent
 	}); err != nil {
 		return errors.WithStack(err)
 	}
-	req, err := http.NewRequest("POST", urlx.AppendPaths(a.c.AuthorizerKetoEngineACPORYAuthorizedURL(), "/engines/acp/ory", flavor, "/allowed").String(), &b)
+	req, err := http.NewRequest("POST", urlx.AppendPaths(a.c.AuthorizerKetoEngineACPORYBaseURL(), "/engines/acp/ory", flavor, "/allowed").String(), &b)
 	if err != nil {
 		return errors.WithStack(err)
 	}
@@ -162,7 +164,7 @@ func (a *AuthorizerKetoWarden) Authorize(r *http.Request, session *authn.Authent
 	return nil
 }
 
-func (a *AuthorizerKetoWarden) ParseSubject(session *authn.AuthenticationSession, templateId, templateString string) (string, error) {
+func (a *AuthorizerKetoEngineACPORY) ParseSubject(session *authn.AuthenticationSession, templateId, templateString string) (string, error) {
 	tmplFn := template.New("rules").
 		Option("missingkey=zero").
 		Funcs(template.FuncMap{
@@ -187,13 +189,13 @@ func (a *AuthorizerKetoWarden) ParseSubject(session *authn.AuthenticationSession
 	return subject.String(), nil
 }
 
-func (a *AuthorizerKetoWarden) Validate() error {
+func (a *AuthorizerKetoEngineACPORY) Validate() error {
 	if !a.c.AuthorizerKetoEngineACPORYIsEnabled() {
-		return errors.WithStack(authn.ErrAuthenticatorNotEnabled.WithReasonf("Authorizer % is disabled per configuration.", a.GetID()))
+		return errors.WithStack(ErrAuthorizerNotEnabled.WithReasonf(`Authorizer "%s" is disabled per configuration.`, a.GetID()))
 	}
 
-	if a.c.AuthorizerKetoEngineACPORYAuthorizedURL() == nil {
-		return errors.WithStack(authn.ErrAuthenticatorNotEnabled.WithReasonf(`Configuration for authorizer % did not specify any values for configuration key "%s" and is thus disabled.`, a.GetID(), configuration.ViperKeyAuthorizerKetoEngineACPORYAuthorizedURL))
+	if a.c.AuthorizerKetoEngineACPORYBaseURL() == nil {
+		return errors.WithStack(ErrAuthorizerNotEnabled.WithReasonf(`Configuration for authorizer "%s" did not specify any values for configuration key "%s" and is thus disabled.`, a.GetID(), configuration.ViperKeyAuthorizerKetoEngineACPORYBaseURL))
 	}
 
 	return nil

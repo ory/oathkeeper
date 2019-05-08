@@ -208,7 +208,7 @@ OTHER CONTROLS
 		}
 
 		if u := viper.GetString("AUTHORIZER_KETO_URL"); len(u) > 0 {
-			authorizers = append(authorizers, authz.NewAuthorizerKetoWarden(urlx.ParseOrFatal(logger, u)))
+			authorizers = append(authorizers, authz.NewAuthorizerKetoEngineACPORY(urlx.ParseOrFatal(logger, u)))
 		}
 
 		authenticators, authorizers, credentialIssuers := handlerFactories(keyManager)
