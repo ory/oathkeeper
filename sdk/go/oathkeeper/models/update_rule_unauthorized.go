@@ -12,7 +12,7 @@ import (
 	"github.com/go-openapi/swag"
 )
 
-// UpdateRuleUnauthorized UpdateRuleUnauthorized UpdateRuleUnauthorized handles this case with default header values.
+// UpdateRuleUnauthorized UpdateRuleUnauthorized UpdateRuleUnauthorized UpdateRuleUnauthorized UpdateRuleUnauthorized handles this case with default header values.
 //
 // The standard error format
 // swagger:model UpdateRuleUnauthorized

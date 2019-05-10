@@ -21,22 +21,27 @@
 package cmd
 
 import (
-	"encoding/json"
-	"fmt"
-	"os"
+	"net/url"
+
+	"github.com/spf13/cobra"
+
+	"github.com/ory/oathkeeper/sdk/go/oathkeeper/client"
+	"github.com/ory/x/cmdx"
+	"github.com/ory/x/flagx"
 )
 
-func formatResponse(response interface{}) string {
-	out, err := json.MarshalIndent(response, "", "\t")
-	must(err, `Command failed because an error ("%s") occurred while prettifying output.`, err)
-	return string(out)
-}
-
-func must(err error, message string, args ...interface{}) {
-	if err == nil {
-		return
+func newClient(cmd *cobra.Command) *client.OryOathkeeper {
+	endpoint := flagx.MustGetString(cmd, "endpoint")
+	if endpoint == "" {
+		cmdx.Fatalf("Please specify the endpoint url using the --endpoint flag, for more information use `oathkeeper help rules`")
 	}
 
-	fmt.Fprintf(os.Stderr, message+"\n", args...)
-	os.Exit(1)
+	u, err := url.ParseRequestURI(endpoint)
+	cmdx.Must(err, `Unable to parse endpoint URL "%s": %s`, endpoint, err)
+
+	return client.NewHTTPClientWithConfig(nil, &client.TransportConfig{
+		Host:     u.Host,
+		BasePath: u.Path,
+		Schemes:  []string{u.Scheme},
+	})
 }

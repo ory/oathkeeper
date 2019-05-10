@@ -46,7 +46,7 @@ func NewRuleHandler(r ruleHandlerRegistry) *RuleHandler {
 	return &RuleHandler{r: r}
 }
 
-func (h *RuleHandler) SetRoutes(r *httprouter.Router) {
+func (h *RuleHandler) SetRoutes(r *x.RouterAPI) {
 	r.GET("/rules", h.listRules)
 	r.GET("/rules/:id", h.getRules)
 }

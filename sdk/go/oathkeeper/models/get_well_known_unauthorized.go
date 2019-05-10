@@ -12,7 +12,7 @@ import (
 	"github.com/go-openapi/swag"
 )
 
-// GetWellKnownUnauthorized GetWellKnownUnauthorized GetWellKnownUnauthorized handles this case with default header values.
+// GetWellKnownUnauthorized GetWellKnownUnauthorized GetWellKnownUnauthorized GetWellKnownUnauthorized GetWellKnownUnauthorized handles this case with default header values.
 //
 // The standard error format
 // swagger:model GetWellKnownUnauthorized

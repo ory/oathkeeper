@@ -4,6 +4,8 @@ import (
 	"net/url"
 	"time"
 
+	"github.com/sirupsen/logrus"
+
 	"github.com/rs/cors"
 	"golang.org/x/oauth2/clientcredentials"
 
@@ -17,6 +19,13 @@ type Provider interface {
 	ProviderAuthenticators
 	ProviderAuthorizers
 	ProviderMutators
+
+	ProxyReadTimeout() time.Duration
+	ProxyWriteTimeout() time.Duration
+	ProxyIdleTimeout() time.Duration
+
+	ProxyServeAddress() string
+	APIServeAddress() string
 }
 
 type ProviderAuthenticators interface {
@@ -60,4 +69,7 @@ type ProviderMutators interface {
 	MutatorIDTokenTTL() time.Duration
 
 	MutatorNoopIsEnabled() bool
+}
+
+func MustValidate(l logrus.FieldLogger, p Provider) {
 }

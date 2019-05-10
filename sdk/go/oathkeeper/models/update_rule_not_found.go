@@ -12,7 +12,7 @@ import (
 	"github.com/go-openapi/swag"
 )
 
-// UpdateRuleNotFound UpdateRuleNotFound UpdateRuleNotFound handles this case with default header values.
+// UpdateRuleNotFound UpdateRuleNotFound UpdateRuleNotFound UpdateRuleNotFound UpdateRuleNotFound handles this case with default header values.
 //
 // The standard error format
 // swagger:model UpdateRuleNotFound

@@ -12,7 +12,7 @@ import (
 	"github.com/go-openapi/swag"
 )
 
-// DeleteRuleInternalServerError DeleteRuleInternalServerError DeleteRuleInternalServerError handles this case with default header values.
+// DeleteRuleInternalServerError DeleteRuleInternalServerError DeleteRuleInternalServerError DeleteRuleInternalServerError DeleteRuleInternalServerError handles this case with default header values.
 //
 // The standard error format
 // swagger:model DeleteRuleInternalServerError

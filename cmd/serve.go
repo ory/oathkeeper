@@ -21,21 +21,33 @@
 package cmd
 
 import (
-	"fmt"
+	"github.com/ory/oathkeeper/cmd/server"
+
+	"github.com/ory/x/logrusx"
+	"github.com/ory/x/viperx"
 
 	"github.com/spf13/cobra"
 )
 
 var serveCmd = &cobra.Command{
-	Use: "serve",
-	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println(cmd.UsageString())
-	},
+	Use:   "serve",
+	Short: "Starts the HTTP/2 REST API and HTTP/2 Reverse Proxy",
+	Long: `Opens two ports for serving both the HTTP/2 Rest API and the HTTP/2 Reverse Proxy.
+
+## Configuration
+
+ORY Oathkeeper can be configured using environment variables as well as a configuration file. For more information
+on configuration options, open the configuration documentation:
+
+>> https://github.com/ory/oathkeeper/blob/` + Version + `/docs/config.yaml <<
+`,
+	Run: server.RunServe(Version, Commit, Date),
 }
 
 func init() {
 	RootCmd.AddCommand(serveCmd)
 
-	serveCmd.PersistentFlags().Bool("disable-telemetry", false, "Disable anonymized telemetry reports - for more information please visit https://www.ory.sh/docs/ecosystem/sqa")
-	serveCmd.PersistentFlags().Bool("sqa-opt-out", false, "Disable anonymized telemetry reports - for more information please visit https://www.ory.sh/docs/ecosystem/sqa")
+	disableTelemetryEnv := viperx.GetBool(logrusx.New(), "sqa.opt_out", false, "DISABLE_TELEMETRY")
+	serveCmd.PersistentFlags().Bool("disable-telemetry", disableTelemetryEnv, "Disable anonymized telemetry reports - for more information please visit https://www.ory.sh/docs/ecosystem/sqa")
+	serveCmd.PersistentFlags().Bool("sqa-opt-out", disableTelemetryEnv, "Disable anonymized telemetry reports - for more information please visit https://www.ory.sh/docs/ecosystem/sqa")
 }

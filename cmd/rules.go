@@ -37,5 +37,5 @@ var rulesCmd = &cobra.Command{
 
 func init() {
 	RootCmd.AddCommand(rulesCmd)
-	rulesCmd.PersistentFlags().StringP("endpoint", "e", "", "The endpoint URL of ORY Oathkeeper's management API (required)")
+	rulesCmd.PersistentFlags().StringP("endpoint", "e", "", "The endpoint URL of ORY Oathkeeper's management API")
 }

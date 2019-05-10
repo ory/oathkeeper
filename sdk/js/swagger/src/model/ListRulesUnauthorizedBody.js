@@ -42,7 +42,7 @@
 
   /**
    * Constructs a new <code>ListRulesUnauthorizedBody</code>.
-   * ListRulesUnauthorizedBody ListRulesUnauthorizedBody list rules unauthorized body
+   * ListRulesUnauthorizedBody ListRulesUnauthorizedBody ListRulesUnauthorizedBody ListRulesUnauthorizedBody list rules unauthorized body
    * @alias module:model/ListRulesUnauthorizedBody
    * @class
    */

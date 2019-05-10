@@ -3,6 +3,6 @@
 ## Properties
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**body** | [**Rule**](Rule.md) |  | [optional] 
+**body** | [**SwaggerRule**](SwaggerRule.md) |  | [optional] 
 
 

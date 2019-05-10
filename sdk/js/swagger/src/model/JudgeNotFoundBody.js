@@ -42,7 +42,7 @@
 
   /**
    * Constructs a new <code>JudgeNotFoundBody</code>.
-   * JudgeNotFoundBody judge not found body
+   * JudgeNotFoundBody JudgeNotFoundBody JudgeNotFoundBody judge not found body
    * @alias module:model/JudgeNotFoundBody
    * @class
    */

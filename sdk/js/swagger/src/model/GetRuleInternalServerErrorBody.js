@@ -42,7 +42,7 @@
 
   /**
    * Constructs a new <code>GetRuleInternalServerErrorBody</code>.
-   * GetRuleInternalServerErrorBody GetRuleInternalServerErrorBody get rule internal server error body
+   * GetRuleInternalServerErrorBody GetRuleInternalServerErrorBody GetRuleInternalServerErrorBody GetRuleInternalServerErrorBody get rule internal server error body
    * @alias module:model/GetRuleInternalServerErrorBody
    * @class
    */

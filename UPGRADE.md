@@ -29,6 +29,36 @@ before finalizing the upgrade process.
 
 ## v0.16.0+oryOS.12
 
+### envs
+
+* Removed:
+  * RULES_REFRESH_INTERVAL ->
+  * OATHKEEPER_API_URL ->
+* HOST -> serve.proxy.host, serve.api.host
+* PORT -> serve.proxy.port, serve.api.port
+
+#### TLS
+
+* `HTTPS_TLS_CERT_PATH` -> `serve.tls.cert.base64`
+* `HTTPS_TLS_KEY_PATH` -> `serve.tls.key.base64`
+* `HTTPS_TLS_CERT` -> `serve.tls.cert.path`
+* `HTTPS_TLS_KEY` -> `serve.tls.key.path`
+
+#### ID Token
+
+* CREDENTIALS_ISSUER_ID_TOKEN_JWK_REFRESH_INTERVAL -> Always 30s now
+* CREDENTIALS_ISSUER_ID_TOKEN_ALGORITHM -> No longer required
+* CREDENTIALS_ISSUER_ID_TOKEN_HS256_SECRET -> No longer supported
+* CREDENTIALS_ISSUER_ID_TOKEN_HYDRA_JWK_SET_ID -> No longer supported
+
+- CREDENTIALS_ISSUER_ID_TOKEN_HYDRA_CLIENT_ID -> No longer supported
+- CREDENTIALS_ISSUER_ID_TOKEN_HYDRA_CLIENT_SECRET -> No longer supported
+- CREDENTIALS_ISSUER_ID_TOKEN_HYDRA_ADMIN_URL -> No longer supported
+- CREDENTIALS_ISSUER_ID_TOKEN_HYDRA_PUBLIC_URL -> No longer supported
+- CREDENTIALS_ISSUER_ID_TOKEN_HYDRA_CLIENT_SCOPES -> No longer supported
+
+###
+
 scope is being transformed to scp always!!
 
 ### all env vars have been renamed but you can use older ones np
@@ -37,7 +67,7 @@ scope is being transformed to scp always!!
 
 ### id token
 
-jwks are now no longer fetched from hydra
+jwks are now no longer fetched from hydra, therefore deprecated:
 
 instead you can use `oathkeeper credentials generate [--alg <RS256>] [--bits <2048|4096>] <transformer_id_token>`
 

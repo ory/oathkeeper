@@ -11,7 +11,7 @@ import (
 	"github.com/go-openapi/swag"
 )
 
-// JudgeNotFoundBody JudgeNotFoundBody judge not found body
+// JudgeNotFoundBody JudgeNotFoundBody JudgeNotFoundBody JudgeNotFoundBody judge not found body
 // swagger:model JudgeNotFoundBody
 type JudgeNotFoundBody struct {
 

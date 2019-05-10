@@ -50,11 +50,18 @@ func (v *validatorNoop) Validate(*Rule) error {
 	return v.ret
 }
 
+type mockRepositoryRegistry struct{ v validatorNoop }
+
+func (r *mockRepositoryRegistry) RuleValidator() Validator {
+	return &r.v
+}
+
 func TestRepository(t *testing.T) {
 	for name, repo := range map[string]Repository{
-		"memory": NewRepositoryMemory(new(validatorNoop)),
+		"memory": NewRepositoryMemory(
+			new(mockRepositoryRegistry)),
 	} {
-		t.Run(fmt.Sprintf("repository=%s", name), func(t *testing.T) {
+		t.Run(fmt.Sprintf("repository=%s/case=valid rule", name), func(t *testing.T) {
 			var rules []Rule
 			for i := 0; i < 4; i++ {
 				var rule Rule
@@ -107,9 +114,9 @@ func TestRepository(t *testing.T) {
 	}
 
 	for name, repo := range map[string]Repository{
-		"memory": NewRepositoryMemory(&validatorNoop{ret: errors.New("")}),
+		"memory": NewRepositoryMemory(&mockRepositoryRegistry{v: validatorNoop{ret: errors.New("")}}),
 	} {
-		t.Run(fmt.Sprintf("repository=%s", name), func(t *testing.T) {
+		t.Run(fmt.Sprintf("repository=%s/case=invalid rule", name), func(t *testing.T) {
 			var rule Rule
 			require.NoError(t, faker.FakeData(&rule))
 			require.Error(t, repo.Set(context.Background(), []Rule{rule}))

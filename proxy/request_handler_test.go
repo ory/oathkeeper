@@ -18,49 +18,40 @@
  * @license  	   Apache-2.0
  */
 
-package proxy
+package proxy_test
 
 import (
 	"fmt"
 	"net/http"
-	"net/url"
 	"testing"
 
-	"github.com/ory/oathkeeper/pipeline/authn"
-	"github.com/ory/oathkeeper/pipeline/authz"
-	"github.com/ory/oathkeeper/pipeline/mutate"
+	"github.com/spf13/viper"
+
+	"github.com/ory/oathkeeper/driver/configuration"
+	"github.com/ory/oathkeeper/internal"
+	"github.com/ory/x/urlx"
 
 	"github.com/stretchr/testify/require"
 
 	"github.com/ory/oathkeeper/rule"
 )
 
-func mustGenerateURL(t *testing.T, u string) *url.URL {
-	up, err := url.Parse(u)
-	require.NoError(t, err)
-	return up
-}
-
-func newTestRequest(t *testing.T, u string) *http.Request {
-	p, err := url.Parse(u)
-	require.NoError(t, err)
-
-	return &http.Request{
-		URL: p,
-	}
+func newTestRequest(u string) *http.Request {
+	return &http.Request{URL: urlx.ParseOrPanic(u)}
 }
 
 func TestRequestHandler(t *testing.T) {
 	for k, tc := range []struct {
+		d         string
+		setup     func()
 		rule      rule.Rule
 		r         *http.Request
 		expectErr bool
-		j         *RequestHandler
 	}{
 		{
+			d:         "should fail because the rule is missing authn, authz, and mutator",
 			expectErr: true,
-			r:         newTestRequest(t, "http://localhost"),
-			j:         NewRequestHandler(nil, []authn.Authenticator{}, []authz.Authorizer{}, []mutate.Mutator{}),
+			r:         newTestRequest("http://localhost"),
 			rule: rule.Rule{
 				Authenticators: []rule.RuleHandler{},
 				Authorizer:     rule.RuleHandler{},
@@ -68,9 +59,14 @@ func TestRequestHandler(t *testing.T) {
 			},
 		},
 		{
+			d: "should fail because the rule is missing authn, authz, and mutator even when some pipelines are enabled",
+			setup: func() {
+				viper.Set(configuration.ViperKeyAuthenticatorNoopIsEnabled, true)
+				viper.Set(configuration.ViperKeyAuthorizerAllowIsEnabled, true)
+				viper.Set(configuration.ViperKeyMutatorNoopIsEnabled, true)
+			},
 			expectErr: true,
-			r:         newTestRequest(t, "http://localhost"),
-			j:         NewRequestHandler(nil, []authn.Authenticator{authn.NewAuthenticatorNoOp()}, []authz.Authorizer{authz.NewAuthorizerAllow()}, []mutate.Mutator{mutate.NewMutatorNoop()}),
+			r:         newTestRequest("http://localhost"),
 			rule: rule.Rule{
 				Authenticators: []rule.RuleHandler{},
 				Authorizer:     rule.RuleHandler{},
@@ -78,48 +74,151 @@ func TestRequestHandler(t *testing.T) {
 			},
 		},
 		{
+			d: "should pass",
+			setup: func() {
+				viper.Set(configuration.ViperKeyAuthenticatorNoopIsEnabled, true)
+				viper.Set(configuration.ViperKeyAuthorizerAllowIsEnabled, true)
+				viper.Set(configuration.ViperKeyMutatorNoopIsEnabled, true)
+			},
 			expectErr: false,
-			r:         newTestRequest(t, "http://localhost"),
-			j:         NewRequestHandler(nil, []authn.Authenticator{authn.NewAuthenticatorNoOp()}, []authz.Authorizer{authz.NewAuthorizerAllow()}, []mutate.Mutator{mutate.NewMutatorNoop()}),
+			r:         newTestRequest("http://localhost"),
 			rule: rule.Rule{
-				Authenticators: []rule.RuleHandler{{Handler: authn.NewAuthenticatorNoOp().GetID()}},
-				Authorizer:     rule.RuleHandler{Handler: authz.NewAuthorizerAllow().GetID()},
-				Mutator:        rule.RuleHandler{Handler: mutate.NewMutatorNoop().GetID()},
-			},
-		},
-		{
-			expectErr: true,
-			r:         newTestRequest(t, "http://localhost"),
-			j:         NewRequestHandler(nil, []authn.Authenticator{authn.NewAuthenticatorAnonymous("anonymous")}, []authz.Authorizer{}, []mutate.Mutator{}),
-			rule: rule.Rule{
-				Authenticators: []rule.RuleHandler{{Handler: authn.NewAuthenticatorAnonymous("").GetID()}},
-				Authorizer:     rule.RuleHandler{},
-				Mutator:        rule.RuleHandler{},
-			},
-		},
-		{
-			expectErr: true,
-			r:         newTestRequest(t, "http://localhost"),
-			j:         NewRequestHandler(nil, []authn.Authenticator{authn.NewAuthenticatorAnonymous("anonymous")}, []authz.Authorizer{authz.NewAuthorizerAllow()}, []mutate.Mutator{}),
-			rule: rule.Rule{
-				Authenticators: []rule.RuleHandler{{Handler: authn.NewAuthenticatorAnonymous("").GetID()}},
-				Authorizer:     rule.RuleHandler{Handler: "allow"},
-				Mutator:        rule.RuleHandler{},
-			},
-		},
-		{
-			expectErr: false,
-			r:         newTestRequest(t, "http://localhost"),
-			j:         NewRequestHandler(nil, []authn.Authenticator{authn.NewAuthenticatorAnonymous("anonymous")}, []authz.Authorizer{authz.NewAuthorizerAllow()}, []mutate.Mutator{mutate.NewMutatorNoop()}),
-			rule: rule.Rule{
-				Authenticators: []rule.RuleHandler{{Handler: authn.NewAuthenticatorAnonymous("").GetID()}},
+				Authenticators: []rule.RuleHandler{{Handler: "noop"}},
 				Authorizer:     rule.RuleHandler{Handler: "allow"},
 				Mutator:        rule.RuleHandler{Handler: "noop"},
 			},
 		},
+		{
+			d: "should fail when authn is set but not authz nor mutator",
+			setup: func() {
+				viper.Set(configuration.ViperKeyAuthenticatorAnonymousIsEnabled, true)
+				viper.Set(configuration.ViperKeyAuthorizerAllowIsEnabled, true)
+				viper.Set(configuration.ViperKeyMutatorNoopIsEnabled, true)
+			},
+			expectErr: true,
+			r:         newTestRequest("http://localhost"),
+			rule: rule.Rule{
+				Authenticators: []rule.RuleHandler{{Handler: "anonymous"}},
+				Authorizer:     rule.RuleHandler{},
+				Mutator:        rule.RuleHandler{},
+			},
+		},
+		{
+			d: "should fail when authn, authz is set but not mutator",
+			setup: func() {
+				viper.Set(configuration.ViperKeyAuthenticatorAnonymousIsEnabled, true)
+				viper.Set(configuration.ViperKeyAuthorizerAllowIsEnabled, true)
+				viper.Set(configuration.ViperKeyMutatorNoopIsEnabled, true)
+			},
+			expectErr: true,
+			r:         newTestRequest("http://localhost"),
+			rule: rule.Rule{
+				Authenticators: []rule.RuleHandler{{Handler: "anonymous"}},
+				Authorizer:     rule.RuleHandler{Handler: "allow"},
+				Mutator:        rule.RuleHandler{},
+			},
+		},
+		{
+			d: "should fail when authn is invalid because not enabled",
+			setup: func() {
+				viper.Set(configuration.ViperKeyAuthenticatorAnonymousIsEnabled, false)
+				viper.Set(configuration.ViperKeyAuthorizerAllowIsEnabled, true)
+				viper.Set(configuration.ViperKeyMutatorNoopIsEnabled, true)
+			},
+			expectErr: true,
+			r:         newTestRequest("http://localhost"),
+			rule: rule.Rule{
+				Authenticators: []rule.RuleHandler{{Handler: "anonymous"}},
+				Authorizer:     rule.RuleHandler{Handler: "allow"},
+				Mutator:        rule.RuleHandler{Handler: "noop"},
+			},
+		},
+		{
+			d: "should fail when authz is invalid because not enabled",
+			setup: func() {
+				viper.Set(configuration.ViperKeyAuthenticatorAnonymousIsEnabled, true)
+				viper.Set(configuration.ViperKeyAuthorizerAllowIsEnabled, false)
+				viper.Set(configuration.ViperKeyMutatorNoopIsEnabled, true)
+			},
+			expectErr: true,
+			r:         newTestRequest("http://localhost"),
+			rule: rule.Rule{
+				Authenticators: []rule.RuleHandler{{Handler: "anonymous"}},
+				Authorizer:     rule.RuleHandler{Handler: "allow"},
+				Mutator:        rule.RuleHandler{Handler: "noop"},
+			},
+		},
+		{
+			d: "should fail when mutator is invalid because not enabled",
+			setup: func() {
+				viper.Set(configuration.ViperKeyAuthenticatorAnonymousIsEnabled, true)
+				viper.Set(configuration.ViperKeyAuthorizerAllowIsEnabled, true)
+				viper.Set(configuration.ViperKeyMutatorNoopIsEnabled, false)
+			},
+			expectErr: true,
+			r:         newTestRequest("http://localhost"),
+			rule: rule.Rule{
+				Authenticators: []rule.RuleHandler{{Handler: "anonymous"}},
+				Authorizer:     rule.RuleHandler{Handler: "allow"},
+				Mutator:        rule.RuleHandler{Handler: "noop"},
+			},
+		},
+		{
+			d: "should fail when authn does not exist",
+			setup: func() {
+				viper.Set(configuration.ViperKeyAuthenticatorAnonymousIsEnabled, true)
+				viper.Set(configuration.ViperKeyAuthorizerAllowIsEnabled, true)
+				viper.Set(configuration.ViperKeyMutatorNoopIsEnabled, true)
+			},
+			expectErr: true,
+			r:         newTestRequest("http://localhost"),
+			rule: rule.Rule{
+				Authenticators: []rule.RuleHandler{{Handler: "invalid-id"}},
+				Authorizer:     rule.RuleHandler{Handler: "allow"},
+				Mutator:        rule.RuleHandler{Handler: "noop"},
+			},
+		},
+		{
+			d: "should fail when authz does not exist",
+			setup: func() {
+				viper.Set(configuration.ViperKeyAuthenticatorAnonymousIsEnabled, true)
+				viper.Set(configuration.ViperKeyAuthorizerAllowIsEnabled, true)
+				viper.Set(configuration.ViperKeyMutatorNoopIsEnabled, true)
+			},
+			expectErr: true,
+			r:         newTestRequest("http://localhost"),
+			rule: rule.Rule{
+				Authenticators: []rule.RuleHandler{{Handler: "anonymous"}},
+				Authorizer:     rule.RuleHandler{Handler: "invalid-id"},
+				Mutator:        rule.RuleHandler{Handler: "noop"},
+			},
+		},
+		{
+			d: "should fail when mutator does not exist",
+			setup: func() {
+				viper.Set(configuration.ViperKeyAuthenticatorAnonymousIsEnabled, true)
+				viper.Set(configuration.ViperKeyAuthorizerAllowIsEnabled, true)
+				viper.Set(configuration.ViperKeyMutatorNoopIsEnabled, true)
+			},
+			expectErr: true,
+			r:         newTestRequest("http://localhost"),
+			rule: rule.Rule{
+				Authenticators: []rule.RuleHandler{{Handler: "anonymous"}},
+				Authorizer:     rule.RuleHandler{Handler: "allow"},
+				Mutator:        rule.RuleHandler{Handler: "invalid-id"},
+			},
+		},
 	} {
 		t.Run(fmt.Sprintf("case=%d", k), func(t *testing.T) {
-			_, err := tc.j.HandleRequest(tc.r, &tc.rule)
+
+			conf := internal.NewConfigurationWithDefaults()
+			reg := internal.NewRegistry(conf)
+
+			if tc.setup != nil {
+				tc.setup()
+			}
+
+			_, err := reg.ProxyRequestHandler().HandleRequest(tc.r, &tc.rule)
 			if tc.expectErr {
 				require.Error(t, err)
 			} else {

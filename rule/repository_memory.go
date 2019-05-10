@@ -50,6 +50,13 @@ func NewRepositoryMemory(r repositoryMemoryRegistry) *RepositoryMemory {
 	}
 }
 
+// WithRules sets rules without validation. For testing only.
+func (m *RepositoryMemory) WithRules(rules []Rule) {
+	m.Lock()
+	m.rules = rules
+	m.Unlock()
+}
+
 func (m *RepositoryMemory) Count(ctx context.Context) (int, error) {
 	m.RLock()
 	defer m.RUnlock()

@@ -70,6 +70,7 @@
   }
 
   /**
+   * Version is the service's version.
    * @member {String} version
    */
   exports.prototype['version'] = undefined;

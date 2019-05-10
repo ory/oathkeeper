@@ -11,7 +11,7 @@ import (
 	"github.com/go-openapi/swag"
 )
 
-// UpdateRuleForbiddenBody UpdateRuleForbiddenBody UpdateRuleForbiddenBody update rule forbidden body
+// UpdateRuleForbiddenBody UpdateRuleForbiddenBody UpdateRuleForbiddenBody UpdateRuleForbiddenBody UpdateRuleForbiddenBody update rule forbidden body
 // swagger:model UpdateRuleForbiddenBody
 type UpdateRuleForbiddenBody struct {
 

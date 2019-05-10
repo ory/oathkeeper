@@ -11,7 +11,7 @@ import (
 	"github.com/go-openapi/swag"
 )
 
-// JudgeUnauthorizedBody JudgeUnauthorizedBody judge unauthorized body
+// JudgeUnauthorizedBody JudgeUnauthorizedBody JudgeUnauthorizedBody JudgeUnauthorizedBody judge unauthorized body
 // swagger:model JudgeUnauthorizedBody
 type JudgeUnauthorizedBody struct {
 

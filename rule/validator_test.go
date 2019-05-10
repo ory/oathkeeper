@@ -74,7 +74,7 @@ func TestValidateRule(t *testing.T) {
 				Upstream:       Upstream{URL: "https://www.ory.sh"},
 				Authenticators: []RuleHandler{{Handler: "foo"}},
 			},
-			expectErr: `Value "foo" of "authenticators[0]" is not in list of supported authenticators: [noop]`,
+			expectErr: `Value "foo" of "authenticators[0]" is not in list of supported authenticators: `,
 		},
 		{
 			setup: prep(false, false, false),
@@ -102,7 +102,7 @@ func TestValidateRule(t *testing.T) {
 				Authenticators: []RuleHandler{{Handler: "noop"}},
 				Authorizer:     RuleHandler{Handler: "foo"},
 			},
-			expectErr: `Value "foo" of "authorizer.handler" is not in list of supported authorizers: [allow]`,
+			expectErr: `Value "foo" of "authorizer.handler" is not in list of supported authorizers: `,
 		},
 		{
 			setup: prep(true, true, false),
@@ -123,7 +123,7 @@ func TestValidateRule(t *testing.T) {
 				Authorizer:     RuleHandler{Handler: "allow"},
 				Mutator:        RuleHandler{Handler: "foo"},
 			},
-			expectErr: `Value "foo" of "mutator.handler" is not in list of supported mutators: [noop]`,
+			expectErr: `Value "foo" of "mutator.handler" is not in list of supported mutators: `,
 		},
 		{
 			setup: prep(true, true, true),

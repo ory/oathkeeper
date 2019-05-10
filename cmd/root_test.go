@@ -27,14 +27,54 @@ import (
 	"testing"
 	"time"
 
+	"github.com/phayes/freeport"
+
 	"github.com/stretchr/testify/assert"
 )
 
+var apiPort, proxyPort int
+
+func freePort() (int, int) {
+	var err error
+	r := make([]int, 2)
+
+	if r[0], err = freeport.GetFreePort(); err != nil {
+		panic(err.Error())
+	}
+
+	tries := 0
+	for {
+		r[1], err = freeport.GetFreePort()
+		if r[0] != r[1] {
+			break
+		}
+		tries++
+		if tries > 10 {
+			panic("Unable to find free port")
+		}
+	}
+	return r[0], r[1]
+}
+
+func init() {
+	apiPort, proxyPort = freePort()
+
+	os.Setenv("SERVE_API_PORT", fmt.Sprintf("%d", apiPort))
+	os.Setenv("SERVE_PROXY_PORT", fmt.Sprintf("%d", proxyPort))
+}
+
+func ensureOpen(t *testing.T, port int) bool {
+	res, err := http.Get(fmt.Sprintf("http://localhost:%d", port))
+	if err != nil {
+		t.Logf("Network error while polling for server: %s", err)
+		return true
+	}
+	defer res.Body.Close()
+	return err != nil
+}
+
 func TestCommandLineInterface(t *testing.T) {
 	var osArgs = make([]string, len(os.Args))
-	os.Setenv("PORT", "4456")
-	os.Setenv("DATABASE_URL", "memory")
-	os.Setenv("CREDENTIALS_ISSUER_ID_TOKEN_HS256_SECRET", "dYmTueb6zg8TphfZbOUpOewd0gt7u0SH")
 	copy(osArgs, os.Args)
 
 	for _, c := range []struct {
@@ -43,22 +83,13 @@ func TestCommandLineInterface(t *testing.T) {
 		expectErr bool
 	}{
 		{
-			args: []string{"serve", "--disable-telemetry", "api"},
+			args: []string{"serve", "--disable-telemetry"},
 			wait: func() bool {
-				res, err := http.Get("http://localhost:4456")
-				if err != nil {
-					t.Logf("Network error while polling for server: %s", err)
-				} else {
-					defer res.Body.Close()
-				}
-				return err != nil
+				return ensureOpen(t, apiPort) && ensureOpen(t, proxyPort)
 			},
 		},
-		{args: []string{"rules", "--endpoint=http://127.0.0.1:4456/", "import", "../stub/rules.json"}},
-		{args: []string{"rules", "--endpoint=http://127.0.0.1:4456/", "list"}},
-		{args: []string{"rules", "--endpoint=http://127.0.0.1:4456/", "get", "test-rule-1"}},
-		{args: []string{"rules", "--endpoint=http://127.0.0.1:4456/", "get", "test-rule-2"}},
-		{args: []string{"rules", "--endpoint=http://127.0.0.1:4456/", "delete", "test-rule-1"}},
+		{args: []string{"rules", fmt.Sprintf("--endpoint=http://127.0.0.1:%d/", apiPort), "list"}},
+		{args: []string{"rules", fmt.Sprintf("--endpoint=http://127.0.0.1:%d/", apiPort), "get", "test-rule-1"}},
 	} {
 		RootCmd.SetArgs(c.args)
 

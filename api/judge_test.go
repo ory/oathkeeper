@@ -18,54 +18,59 @@
  * @license  	   Apache-2.0
  */
 
-package api
+package api_test
 
 import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
-	"strconv"
 	"testing"
 
-	"github.com/ory/oathkeeper/pipeline/authn"
-	"github.com/ory/oathkeeper/pipeline/authz"
-	"github.com/ory/oathkeeper/pipeline/mutate"
+	"github.com/spf13/viper"
+
+	"github.com/ory/oathkeeper/driver/configuration"
+
+	"github.com/urfave/negroni"
+
+	"github.com/ory/oathkeeper/internal"
 
 	"github.com/julienschmidt/httprouter"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/ory/oathkeeper/proxy"
 	"github.com/ory/oathkeeper/rule"
 )
 
 func TestJudge(t *testing.T) {
-	matcher := &rule.CachedMatcher{Rules: map[string]rule.Rule{}}
-	rh := proxy.NewRequestHandler(
-		nil,
-		[]authn.Authenticator{authn.NewAuthenticatorNoOp(), authn.NewAuthenticatorAnonymous("anonymous"), authn.NewAuthenticatorUnauthorized()},
-		[]authz.Authorizer{authz.NewAuthorizerAllow(), authz.NewAuthorizerDeny()},
-		[]mutate.Mutator{mutate.NewMutatorNoop(), mutate.NewMutatorBroken()},
-	)
+	conf := internal.NewConfigurationWithDefaults()
+	viper.Set(configuration.ViperKeyAuthenticatorNoopIsEnabled, true)
+	viper.Set(configuration.ViperKeyAuthenticatorUnauthorizedIsEnabled, true)
+	viper.Set(configuration.ViperKeyAuthenticatorAnonymousIsEnabled, true)
+	viper.Set(configuration.ViperKeyAuthorizerAllowIsEnabled, true)
+	viper.Set(configuration.ViperKeyAuthorizerDenyIsEnabled, true)
+	viper.Set(configuration.ViperKeyMutatorNoopIsEnabled, true)
+	reg := internal.NewRegistry(conf).WithBrokenPipelineMutator()
 
-	router := httprouter.New()
-	d := NewHandler(rh, nil, matcher, router)
+	d := reg.JudgeHandler()
 
-	ts := httptest.NewServer(d)
+	n := negroni.New(d)
+	n.UseHandler(httprouter.New())
+
+	ts := httptest.NewServer(n)
 	defer ts.Close()
 
 	ruleNoOpAuthenticator := rule.Rule{
 		Match:          rule.RuleMatch{Methods: []string{"GET"}, URL: ts.URL + "/authn-noop/<[0-9]+>"},
 		Authenticators: []rule.RuleHandler{{Handler: "noop"}},
-		Authorizer:     rule.RuleHandler{Handler: authz.NewAuthorizerAllow().GetID()},
-		Mutator:        rule.RuleHandler{Handler: mutate.NewMutatorNoop().GetID()},
+		Authorizer:     rule.RuleHandler{Handler: "allow"},
+		Mutator:        rule.RuleHandler{Handler: "noop"},
 		Upstream:       rule.Upstream{URL: ""},
 	}
 	ruleNoOpAuthenticatorModifyUpstream := rule.Rule{
 		Match:          rule.RuleMatch{Methods: []string{"GET"}, URL: ts.URL + "/strip-path/authn-noop/<[0-9]+>"},
 		Authenticators: []rule.RuleHandler{{Handler: "noop"}},
-		Authorizer:     rule.RuleHandler{Handler: authz.NewAuthorizerAllow().GetID()},
-		Mutator:        rule.RuleHandler{Handler: mutate.NewMutatorNoop().GetID()},
+		Authorizer:     rule.RuleHandler{Handler: "allow"},
+		Mutator:        rule.RuleHandler{Handler: "noop"},
 		Upstream:       rule.Upstream{URL: "", StripPath: "/strip-path/", PreserveHost: true},
 	}
 
@@ -124,7 +129,7 @@ func TestJudge(t *testing.T) {
 			code: http.StatusUnauthorized,
 		},
 		{
-			d:   "should fail because no credentials issuer was configured",
+			d:   "should fail because no mutator was configured",
 			url: ts.URL + "/judge" + "/authn-anon/authz-allow/cred-none/1234",
 			rules: []rule.Rule{{
 				Match:          rule.RuleMatch{Methods: []string{"GET"}, URL: ts.URL + "/authn-anon/authz-allow/cred-none/<[0-9]+>"},
@@ -164,13 +169,13 @@ func TestJudge(t *testing.T) {
 			url: ts.URL + "/judge" + "/authn-broken/authz-none/cred-none/1234",
 			rules: []rule.Rule{{
 				Match:          rule.RuleMatch{Methods: []string{"GET"}, URL: ts.URL + "/authn-broken/authz-none/cred-none/<[0-9]+>"},
-				Authenticators: []rule.RuleHandler{{Handler: "broken"}},
+				Authenticators: []rule.RuleHandler{{Handler: "unauthorized"}},
 				Upstream:       rule.Upstream{URL: ""},
 			}},
 			code: http.StatusUnauthorized,
 		},
 		{
-			d:   "should fail when credentials issuer fails",
+			d:   "should fail when mutator fails",
 			url: ts.URL + "/judge" + "/authn-anonymous/authz-allow/cred-broken/1234",
 			rules: []rule.Rule{{
 				Match:          rule.RuleMatch{Methods: []string{"GET"}, URL: ts.URL + "/authn-anonymous/authz-allow/cred-broken/<[0-9]+>"},
@@ -183,10 +188,7 @@ func TestJudge(t *testing.T) {
 		},
 	} {
 		t.Run(fmt.Sprintf("case=%d", k), func(t *testing.T) {
-			matcher.Rules = map[string]rule.Rule{}
-			for k, r := range tc.rules {
-				matcher.Rules[strconv.Itoa(k)] = r
-			}
+			reg.RuleRepository().(*rule.RepositoryMemory).WithRules(tc.rules)
 
 			req, err := http.NewRequest("GET", tc.url, nil)
 			require.NoError(t, err)

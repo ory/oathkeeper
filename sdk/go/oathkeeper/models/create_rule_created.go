@@ -12,7 +12,7 @@ import (
 	"github.com/go-openapi/swag"
 )
 
-// CreateRuleCreated CreateRuleCreated CreateRuleCreated handles this case with default header values.
+// CreateRuleCreated CreateRuleCreated CreateRuleCreated CreateRuleCreated CreateRuleCreated handles this case with default header values.
 //
 // A rule
 // swagger:model CreateRuleCreated

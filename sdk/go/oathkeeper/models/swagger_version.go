@@ -15,7 +15,7 @@ import (
 // swagger:model swaggerVersion
 type SwaggerVersion struct {
 
-	// version
+	// Version is the service's version.
 	Version string `json:"version,omitempty"`
 }
 

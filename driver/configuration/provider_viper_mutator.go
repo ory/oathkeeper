@@ -34,13 +34,13 @@ func (v *ViperProvider) MutatorIDTokenIsEnabled() bool {
 }
 func (v *ViperProvider) MutatorIDTokenIssuerURL() *url.URL {
 	return v.getURL(
-		viperx.GetString(v.l, ViperKeyMutatorIDTokenIssuerURL, "", "AUTHORIZER_KETO_URL"),
+		viperx.GetString(v.l, ViperKeyMutatorIDTokenIssuerURL, "", "CREDENTIALS_ISSUER_ID_TOKEN_ISSUER"),
 		ViperKeyMutatorIDTokenIssuerURL,
 	)
 }
 func (v *ViperProvider) MutatorIDTokenJWKSURL() *url.URL {
 	return v.getURL(
-		viperx.GetString(v.l, ViperKeyMutatorIDTokenJWKSURL, "", "AUTHORIZER_KETO_URL"),
+		viperx.GetString(v.l, ViperKeyMutatorIDTokenJWKSURL, ""),
 		ViperKeyMutatorIDTokenJWKSURL,
 	)
 }

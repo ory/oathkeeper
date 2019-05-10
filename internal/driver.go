@@ -21,7 +21,5 @@ func NewConfigurationWithDefaults() *configuration.ViperProvider {
 
 func NewRegistry(c *configuration.ViperProvider) *driver.RegistryMemory {
 	viper.Set("LOG_LEVEL", "debug")
-	r := driver.NewRegistryMemory().WithConfig(c)
-	_ = r.Init()
-	return r.(*driver.RegistryMemory)
+	return driver.NewRegistryMemory().WithConfig(c).(*driver.RegistryMemory)
 }

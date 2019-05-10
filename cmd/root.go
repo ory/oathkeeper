@@ -86,21 +86,6 @@ func initConfig() {
 		viper.AddConfigPath("$HOME")       // adding home directory as first search path
 	}
 
-	//viper.SetDefault("log.level", "info")
-	//viper.SetDefault("PORT", "4455")
-	//viper.SetDefault("RULES_REFRESH_INTERVAL", "5s")
-	//
-	//viper.SetDefault("CREDENTIALS_ISSUER_ID_TOKEN_JWK_REFRESH_INTERVAL", "5m")
-	//viper.SetDefault("CREDENTIALS_ISSUER_ID_TOKEN_HYDRA_JWK_SET_ID", "oathkeeper:id-token")
-	//viper.SetDefault("CREDENTIALS_ISSUER_ID_TOKEN_ALGORITHM", "HS256")
-	//
-	//viper.SetDefault("AUTHENTICATOR_ANONYMOUS_USERNAME", "anonymous")
-	//viper.SetDefault("CREDENTIALS_ISSUER_ID_TOKEN_LIFESPAN", "10m")
-	//viper.SetDefault("CREDENTIALS_ISSUER_ID_TOKEN_ISSUER", "http://localhost:"+viper.GetString("PORT"))
-	//
-	//viper.SetDefault("AUTHENTICATOR_OAUTH2_INTROSPECTION_SCOPE_STRATEGY", "EXACT")
-	//viper.SetDefault("AUTHENTICATOR_JWT_SCOPE_STRATEGY", "EXACT")
-
 	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 	viper.AutomaticEnv() // read in environment variables that match
 

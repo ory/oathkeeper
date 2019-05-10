@@ -36,11 +36,11 @@ type SwaggerRule struct {
 	// authorizer
 	Authorizer *SwaggerRuleHandler `json:"authorizer,omitempty"`
 
-	// credentials issuer
-	CredentialsIssuer *SwaggerRuleHandler `json:"credentials_issuer,omitempty"`
-
 	// match
 	Match *SwaggerRuleMatch `json:"match,omitempty"`
+
+	// mutator
+	Mutator *SwaggerRuleHandler `json:"mutator,omitempty"`
 
 	// upstream
 	Upstream *Upstream `json:"upstream,omitempty"`
@@ -58,11 +58,11 @@ func (m *SwaggerRule) Validate(formats strfmt.Registry) error {
 		res = append(res, err)
 	}
 
-	if err := m.validateCredentialsIssuer(formats); err != nil {
+	if err := m.validateMatch(formats); err != nil {
 		res = append(res, err)
 	}
 
-	if err := m.validateMatch(formats); err != nil {
+	if err := m.validateMutator(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -119,24 +119,6 @@ func (m *SwaggerRule) validateAuthorizer(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *SwaggerRule) validateCredentialsIssuer(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.CredentialsIssuer) { // not required
-		return nil
-	}
-
-	if m.CredentialsIssuer != nil {
-		if err := m.CredentialsIssuer.Validate(formats); err != nil {
-			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("credentials_issuer")
-			}
-			return err
-		}
-	}
-
-	return nil
-}
-
 func (m *SwaggerRule) validateMatch(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.Match) { // not required
@@ -147,6 +129,24 @@ func (m *SwaggerRule) validateMatch(formats strfmt.Registry) error {
 		if err := m.Match.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("match")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (m *SwaggerRule) validateMutator(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Mutator) { // not required
+		return nil
+	}
+
+	if m.Mutator != nil {
+		if err := m.Mutator.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("mutator")
 			}
 			return err
 		}

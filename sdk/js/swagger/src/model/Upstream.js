@@ -42,7 +42,7 @@
 
   /**
    * Constructs a new <code>Upstream</code>.
-   * Upstream Upstream upstream
+   * Upstream Upstream Upstream Upstream upstream
    * @alias module:model/Upstream
    * @class
    */

@@ -17,18 +17,18 @@
 (function(root, factory) {
   if (typeof define === 'function' && define.amd) {
     // AMD. Register as an anonymous module.
-    define(['ApiClient', 'model/InlineResponse401'], factory);
+    define(['ApiClient', 'model/InlineResponse500'], factory);
   } else if (typeof module === 'object' && module.exports) {
     // CommonJS-like environments that support module.exports, like Node.
-    module.exports = factory(require('../ApiClient'), require('../model/InlineResponse401'));
+    module.exports = factory(require('../ApiClient'), require('../model/InlineResponse500'));
   } else {
     // Browser globals (root is window)
     if (!root.OryOathkeeper) {
       root.OryOathkeeper = {};
     }
-    root.OryOathkeeper.JudgeApi = factory(root.OryOathkeeper.ApiClient, root.OryOathkeeper.InlineResponse401);
+    root.OryOathkeeper.JudgeApi = factory(root.OryOathkeeper.ApiClient, root.OryOathkeeper.InlineResponse500);
   }
-}(this, function(ApiClient, InlineResponse401) {
+}(this, function(ApiClient, InlineResponse500) {
   'use strict';
 
   /**

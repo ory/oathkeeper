@@ -96,7 +96,10 @@ Please follow the [installation](#installation) instruction and execute the foll
 ```javascript
 var OryOathkeeper = require('ory_oathkeeper');
 
-var api = new OryOathkeeper.DefaultApi()
+var api = new OryOathkeeper.ApiApi()
+
+var id = "id_example"; // {String} 
+
 
 var callback = function(error, data, response) {
   if (error) {
@@ -105,7 +108,7 @@ var callback = function(error, data, response) {
     console.log('API called successfully. Returned data: ' + data);
   }
 };
-api.getWellKnown(callback);
+api.getRule(id, callback);
 
 ```
 
@@ -115,16 +118,13 @@ All URIs are relative to *http://localhost*
 
 Class | Method | HTTP request | Description
 ------------ | ------------- | ------------- | -------------
-*OryOathkeeper.DefaultApi* | [**getWellKnown**](docs/DefaultApi.md#getWellKnown) | **GET** /.well-known/jwks.json | Returns well known keys
-*OryOathkeeper.HealthApi* | [**isInstanceAlive**](docs/HealthApi.md#isInstanceAlive) | **GET** /health/alive | Check the Alive Status
-*OryOathkeeper.HealthApi* | [**isInstanceReady**](docs/HealthApi.md#isInstanceReady) | **GET** /health/ready | Check the Readiness Status
+*OryOathkeeper.ApiApi* | [**getRule**](docs/ApiApi.md#getRule) | **GET** /rules/{id} | Retrieve a rule
+*OryOathkeeper.ApiApi* | [**getVersion**](docs/ApiApi.md#getVersion) | **GET** /version | Get service version
+*OryOathkeeper.ApiApi* | [**getWellKnownJSONWebKeys**](docs/ApiApi.md#getWellKnownJSONWebKeys) | **GET** /.well-known/jwks.json | Lists cryptographic keys
+*OryOathkeeper.ApiApi* | [**isInstanceAlive**](docs/ApiApi.md#isInstanceAlive) | **GET** /health/alive | Check alive status
+*OryOathkeeper.ApiApi* | [**isInstanceReady**](docs/ApiApi.md#isInstanceReady) | **GET** /health/ready | Check readiness status
+*OryOathkeeper.ApiApi* | [**listRules**](docs/ApiApi.md#listRules) | **GET** /rules | List all rules
 *OryOathkeeper.JudgeApi* | [**judge**](docs/JudgeApi.md#judge) | **GET** /judge | Judge if a request should be allowed or not
-*OryOathkeeper.RuleApi* | [**createRule**](docs/RuleApi.md#createRule) | **POST** /rules | Create a rule
-*OryOathkeeper.RuleApi* | [**deleteRule**](docs/RuleApi.md#deleteRule) | **DELETE** /rules/{id} | Delete a rule
-*OryOathkeeper.RuleApi* | [**getRule**](docs/RuleApi.md#getRule) | **GET** /rules/{id} | Retrieve a rule
-*OryOathkeeper.RuleApi* | [**listRules**](docs/RuleApi.md#listRules) | **GET** /rules | List all rules
-*OryOathkeeper.RuleApi* | [**updateRule**](docs/RuleApi.md#updateRule) | **PUT** /rules/{id} | Update a rule
-*OryOathkeeper.VersionApi* | [**getVersion**](docs/VersionApi.md#getVersion) | **GET** /version | Get the version of Oathkeeper
 
 
 ## Documentation for Models
@@ -159,13 +159,17 @@ Class | Method | HTTP request | Description
  - [OryOathkeeper.GetRuleUnauthorizedBody](docs/GetRuleUnauthorizedBody.md)
  - [OryOathkeeper.GetWellKnownForbidden](docs/GetWellKnownForbidden.md)
  - [OryOathkeeper.GetWellKnownForbiddenBody](docs/GetWellKnownForbiddenBody.md)
+ - [OryOathkeeper.GetWellKnownJSONWebKeysInternalServerError](docs/GetWellKnownJSONWebKeysInternalServerError.md)
+ - [OryOathkeeper.GetWellKnownJSONWebKeysInternalServerErrorBody](docs/GetWellKnownJSONWebKeysInternalServerErrorBody.md)
+ - [OryOathkeeper.GetWellKnownJSONWebKeysOK](docs/GetWellKnownJSONWebKeysOK.md)
+ - [OryOathkeeper.GetWellKnownJSONWebKeysReader](docs/GetWellKnownJSONWebKeysReader.md)
  - [OryOathkeeper.GetWellKnownOK](docs/GetWellKnownOK.md)
  - [OryOathkeeper.GetWellKnownReader](docs/GetWellKnownReader.md)
  - [OryOathkeeper.GetWellKnownUnauthorized](docs/GetWellKnownUnauthorized.md)
  - [OryOathkeeper.GetWellKnownUnauthorizedBody](docs/GetWellKnownUnauthorizedBody.md)
  - [OryOathkeeper.HealthNotReadyStatus](docs/HealthNotReadyStatus.md)
  - [OryOathkeeper.HealthStatus](docs/HealthStatus.md)
- - [OryOathkeeper.InlineResponse401](docs/InlineResponse401.md)
+ - [OryOathkeeper.InlineResponse500](docs/InlineResponse500.md)
  - [OryOathkeeper.IsInstanceAliveInternalServerError](docs/IsInstanceAliveInternalServerError.md)
  - [OryOathkeeper.IsInstanceAliveInternalServerErrorBody](docs/IsInstanceAliveInternalServerErrorBody.md)
  - [OryOathkeeper.IsInstanceAliveOK](docs/IsInstanceAliveOK.md)

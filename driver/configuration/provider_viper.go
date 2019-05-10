@@ -1,8 +1,12 @@
 package configuration
 
 import (
+	"fmt"
 	"net/url"
 	"strings"
+	"time"
+
+	"github.com/ory/x/viperx"
 
 	"github.com/rs/cors"
 	"github.com/sirupsen/logrus"
@@ -27,6 +31,34 @@ func (v *ViperProvider) CORSEnabled(iface string) bool {
 
 func (v *ViperProvider) CORSOptions(iface string) cors.Options {
 	return corsx.ParseOptions(v.l, "serve."+iface)
+}
+
+func (v *ViperProvider) ProxyReadTimeout() time.Duration {
+	return viperx.GetDuration(v.l, "serve.proxy.timeout.read", time.Second*5, "PROXY_SERVER_READ_TIMEOUT")
+}
+
+func (v *ViperProvider) ProxyWriteTimeout() time.Duration {
+	return viperx.GetDuration(v.l, "serve.proxy.timeout.write", time.Second*10, "PROXY_SERVER_WRITE_TIMEOUT")
+}
+
+func (v *ViperProvider) ProxyIdleTimeout() time.Duration {
+	return viperx.GetDuration(v.l, "serve.proxy.timeout.idle", time.Second*120, "PROXY_SERVER_IDLE_TIMEOUT")
+}
+
+func (v *ViperProvider) ProxyServeAddress() string {
+	return fmt.Sprintf(
+		"%s:%d",
+		viperx.GetString(v.l, "serve.proxy.host", ""),
+		viperx.GetInt(v.l, "serve.proxy.port", 4455),
+	)
+}
+
+func (v *ViperProvider) APIServeAddress() string {
+	return fmt.Sprintf(
+		"%s:%d",
+		viperx.GetString(v.l, "serve.api.host", ""),
+		viperx.GetInt(v.l, "serve.api.port", 4456),
+	)
 }
 
 func (v *ViperProvider) getURL(value string, key string) *url.URL {

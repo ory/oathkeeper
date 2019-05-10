@@ -24,7 +24,7 @@
   "paths": {
     "/.well-known/jwks.json": {
       "get": {
-        "description": "This endpoint returns public keys for validating the ID tokens issued by ORY Oathkeeper.",
+        "description": "This endpoint returns cryptographic keys that are required to, for example, verify signatures of ID Tokens.",
         "produces": [
           "application/json"
         ],
@@ -32,8 +32,11 @@
           "http",
           "https"
         ],
-        "summary": "Returns well known keys",
-        "operationId": "getWellKnown",
+        "tags": [
+          "api"
+        ],
+        "summary": "Lists cryptographic keys",
+        "operationId": "getWellKnownJSONWebKeys",
         "responses": {
           "200": {
             "description": "jsonWebKeySet",
@@ -41,10 +44,7 @@
               "$ref": "#/definitions/jsonWebKeySet"
             }
           },
-          "401": {
-            "$ref": "#/responses/genericError"
-          },
-          "403": {
+          "500": {
             "$ref": "#/responses/genericError"
           }
         }
@@ -52,11 +52,14 @@
     },
     "/health/alive": {
       "get": {
-        "description": "This endpoint returns a 200 status code when the HTTP server is up running.\nThis status does currently not include checks whether the database connection is working.\nThis endpoint does not require the `X-Forwarded-Proto` header when TLS termination is set.\n\nBe aware that if you are running multiple nodes of ORY Oathkeeper, the health status will never refer to the cluster state, only to a single instance.",
-        "tags": [
-          "health"
+        "description": "This endpoint returns a 200 status code when the HTTP server is up running.\nThis status does currently not include checks whether the database connection is working.\n\nIf the service supports TLS Edge Termination, this endpoint does not require the\n`X-Forwarded-Proto` header to be set.\n\nBe aware that if you are running multiple nodes of this service, the health status will never\nrefer to the cluster state, only to a single instance.",
+        "produces": [
+          "application/json"
         ],
-        "summary": "Check the Alive Status",
+        "tags": [
+          "api"
+        ],
+        "summary": "Check alive status",
         "operationId": "isInstanceAlive",
         "responses": {
           "200": {
@@ -73,11 +76,14 @@
     },
     "/health/ready": {
       "get": {
-        "description": "This endpoint returns a 200 status code when the HTTP server is up running and the environment dependencies (e.g.\nthe database) are responsive as well.\n\nThis status does currently not include checks whether the database connection is working.\nThis endpoint does not require the `X-Forwarded-Proto` header when TLS termination is set.\n\nBe aware that if you are running multiple nodes of ORY Oathkeeper, the health status will never refer to the cluster state, only to a single instance.",
-        "tags": [
-          "health"
+        "description": "This endpoint returns a 200 status code when the HTTP server is up running and the environment dependencies (e.g.\nthe database) are responsive as well.\n\nIf the service supports TLS Edge Termination, this endpoint does not require the\n`X-Forwarded-Proto` header to be set.\n\nBe aware that if you are running multiple nodes of this service, the health status will never\nrefer to the cluster state, only to a single instance.",
+        "produces": [
+          "application/json"
         ],
-        "summary": "Check the Readiness Status",
+        "tags": [
+          "api"
+        ],
+        "summary": "Check readiness status",
         "operationId": "isInstanceReady",
         "responses": {
           "200": {
@@ -140,7 +146,7 @@
           "https"
         ],
         "tags": [
-          "rule"
+          "api"
         ],
         "summary": "List all rules",
         "operationId": "listRules",
@@ -166,53 +172,6 @@
           "200": {
             "$ref": "#/responses/rules"
           },
-          "401": {
-            "$ref": "#/responses/genericError"
-          },
-          "403": {
-            "$ref": "#/responses/genericError"
-          },
-          "500": {
-            "$ref": "#/responses/genericError"
-          }
-        }
-      },
-      "post": {
-        "description": "This method allows creation of rules. If a rule id exists, you will receive an error.",
-        "consumes": [
-          "application/json"
-        ],
-        "produces": [
-          "application/json"
-        ],
-        "schemes": [
-          "http",
-          "https"
-        ],
-        "tags": [
-          "rule"
-        ],
-        "summary": "Create a rule",
-        "operationId": "createRule",
-        "parameters": [
-          {
-            "name": "Body",
-            "in": "body",
-            "schema": {
-              "$ref": "#/definitions/rule"
-            }
-          }
-        ],
-        "responses": {
-          "201": {
-            "$ref": "#/responses/rule"
-          },
-          "401": {
-            "$ref": "#/responses/genericError"
-          },
-          "403": {
-            "$ref": "#/responses/genericError"
-          },
           "500": {
             "$ref": "#/responses/genericError"
           }
@@ -233,7 +192,7 @@
           "https"
         ],
         "tags": [
-          "rule"
+          "api"
         ],
         "summary": "Retrieve a rule",
         "operationId": "getRule",
@@ -250,107 +209,6 @@
           "200": {
             "$ref": "#/responses/rule"
           },
-          "401": {
-            "$ref": "#/responses/genericError"
-          },
-          "403": {
-            "$ref": "#/responses/genericError"
-          },
-          "404": {
-            "$ref": "#/responses/genericError"
-          },
-          "500": {
-            "$ref": "#/responses/genericError"
-          }
-        }
-      },
-      "put": {
-        "description": "Use this method to update a rule. Keep in mind that you need to send the full rule payload as this endpoint does\nnot support patching.",
-        "consumes": [
-          "application/json"
-        ],
-        "produces": [
-          "application/json"
-        ],
-        "schemes": [
-          "http",
-          "https"
-        ],
-        "tags": [
-          "rule"
-        ],
-        "summary": "Update a rule",
-        "operationId": "updateRule",
-        "parameters": [
-          {
-            "type": "string",
-            "x-go-name": "ID",
-            "name": "id",
-            "in": "path",
-            "required": true
-          },
-          {
-            "name": "Body",
-            "in": "body",
-            "schema": {
-              "$ref": "#/definitions/rule"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "$ref": "#/responses/rule"
-          },
-          "401": {
-            "$ref": "#/responses/genericError"
-          },
-          "403": {
-            "$ref": "#/responses/genericError"
-          },
-          "404": {
-            "$ref": "#/responses/genericError"
-          },
-          "500": {
-            "$ref": "#/responses/genericError"
-          }
-        }
-      },
-      "delete": {
-        "description": "Use this endpoint to delete a rule.",
-        "consumes": [
-          "application/json"
-        ],
-        "produces": [
-          "application/json"
-        ],
-        "schemes": [
-          "http",
-          "https"
-        ],
-        "tags": [
-          "rule"
-        ],
-        "summary": "Delete a rule",
-        "operationId": "deleteRule",
-        "parameters": [
-          {
-            "type": "string",
-            "x-go-name": "ID",
-            "name": "id",
-            "in": "path",
-            "required": true
-          }
-        ],
-        "responses": {
-          "204": {
-            "$ref": "#/responses/emptyResponse"
-          },
-          "401": {
-            "$ref": "#/responses/genericError"
-          },
-          "403": {
-            "$ref": "#/responses/genericError"
-          },
           "404": {
             "$ref": "#/responses/genericError"
           },
@@ -362,11 +220,14 @@
     },
     "/version": {
       "get": {
-        "description": "This endpoint returns the version as `{ \"version\": \"VERSION\" }`. The version is only correct with the prebuilt binary and not custom builds.",
-        "tags": [
-          "version"
+        "description": "This endpoint returns the service version typically notated using semantic versioning.\n\nIf the service supports TLS Edge Termination, this endpoint does not require the\n`X-Forwarded-Proto` header to be set.\n\nBe aware that if you are running multiple nodes of this service, the health status will never\nrefer to the cluster state, only to a single instance.",
+        "produces": [
+          "application/json"
         ],
-        "summary": "Get the version of Oathkeeper",
+        "tags": [
+          "api"
+        ],
+        "summary": "Get service version",
         "operationId": "getVersion",
         "responses": {
           "200": {
@@ -383,7 +244,7 @@
     "CreateRuleCreated": {
       "description": "A rule",
       "type": "object",
-      "title": "CreateRuleCreated CreateRuleCreated handles this case with default header values.",
+      "title": "CreateRuleCreated CreateRuleCreated CreateRuleCreated CreateRuleCreated handles this case with default header values.",
       "properties": {
         "Payload": {
           "$ref": "#/definitions/swaggerRule"
@@ -394,7 +255,7 @@
     "CreateRuleForbidden": {
       "description": "The standard error format",
       "type": "object",
-      "title": "CreateRuleForbidden CreateRuleForbidden handles this case with default header values.",
+      "title": "CreateRuleForbidden CreateRuleForbidden CreateRuleForbidden CreateRuleForbidden handles this case with default header values.",
       "properties": {
         "Payload": {
           "$ref": "#/definitions/CreateRuleForbiddenBody"
@@ -403,7 +264,7 @@
       "x-go-package": "github.com/ory/oathkeeper/sdk/go/oathkeeper/models"
     },
     "CreateRuleForbiddenBody": {
-      "description": "CreateRuleForbiddenBody CreateRuleForbiddenBody create rule forbidden body",
+      "description": "CreateRuleForbiddenBody CreateRuleForbiddenBody CreateRuleForbiddenBody CreateRuleForbiddenBody create rule forbidden body",
       "type": "object",
       "properties": {
         "code": {
@@ -449,7 +310,7 @@
     "CreateRuleInternalServerError": {
       "description": "The standard error format",
       "type": "object",
-      "title": "CreateRuleInternalServerError CreateRuleInternalServerError handles this case with default header values.",
+      "title": "CreateRuleInternalServerError CreateRuleInternalServerError CreateRuleInternalServerError CreateRuleInternalServerError handles this case with default header values.",
       "properties": {
         "Payload": {
           "$ref": "#/definitions/CreateRuleInternalServerErrorBody"
@@ -458,7 +319,7 @@
       "x-go-package": "github.com/ory/oathkeeper/sdk/go/oathkeeper/models"
     },
     "CreateRuleInternalServerErrorBody": {
-      "description": "CreateRuleInternalServerErrorBody CreateRuleInternalServerErrorBody create rule internal server error body",
+      "description": "CreateRuleInternalServerErrorBody CreateRuleInternalServerErrorBody CreateRuleInternalServerErrorBody CreateRuleInternalServerErrorBody create rule internal server error body",
       "type": "object",
       "properties": {
         "code": {
@@ -503,13 +364,13 @@
     },
     "CreateRuleReader": {
       "type": "object",
-      "title": "CreateRuleReader CreateRuleReader is a Reader for the CreateRule structure.",
+      "title": "CreateRuleReader CreateRuleReader CreateRuleReader CreateRuleReader is a Reader for the CreateRule structure.",
       "x-go-package": "github.com/ory/oathkeeper/sdk/go/oathkeeper/models"
     },
     "CreateRuleUnauthorized": {
       "description": "The standard error format",
       "type": "object",
-      "title": "CreateRuleUnauthorized CreateRuleUnauthorized handles this case with default header values.",
+      "title": "CreateRuleUnauthorized CreateRuleUnauthorized CreateRuleUnauthorized CreateRuleUnauthorized handles this case with default header values.",
       "properties": {
         "Payload": {
           "$ref": "#/definitions/CreateRuleUnauthorizedBody"
@@ -518,7 +379,7 @@
       "x-go-package": "github.com/ory/oathkeeper/sdk/go/oathkeeper/models"
     },
     "CreateRuleUnauthorizedBody": {
-      "description": "CreateRuleUnauthorizedBody CreateRuleUnauthorizedBody create rule unauthorized body",
+      "description": "CreateRuleUnauthorizedBody CreateRuleUnauthorizedBody CreateRuleUnauthorizedBody CreateRuleUnauthorizedBody create rule unauthorized body",
       "type": "object",
       "properties": {
         "code": {
@@ -564,7 +425,7 @@
     "DeleteRuleForbidden": {
       "description": "The standard error format",
       "type": "object",
-      "title": "DeleteRuleForbidden DeleteRuleForbidden handles this case with default header values.",
+      "title": "DeleteRuleForbidden DeleteRuleForbidden DeleteRuleForbidden DeleteRuleForbidden handles this case with default header values.",
       "properties": {
         "Payload": {
           "$ref": "#/definitions/DeleteRuleForbiddenBody"
@@ -573,7 +434,7 @@
       "x-go-package": "github.com/ory/oathkeeper/sdk/go/oathkeeper/models"
     },
     "DeleteRuleForbiddenBody": {
-      "description": "DeleteRuleForbiddenBody DeleteRuleForbiddenBody delete rule forbidden body",
+      "description": "DeleteRuleForbiddenBody DeleteRuleForbiddenBody DeleteRuleForbiddenBody DeleteRuleForbiddenBody delete rule forbidden body",
       "type": "object",
       "properties": {
         "code": {
@@ -619,7 +480,7 @@
     "DeleteRuleInternalServerError": {
       "description": "The standard error format",
       "type": "object",
-      "title": "DeleteRuleInternalServerError DeleteRuleInternalServerError handles this case with default header values.",
+      "title": "DeleteRuleInternalServerError DeleteRuleInternalServerError DeleteRuleInternalServerError DeleteRuleInternalServerError handles this case with default header values.",
       "properties": {
         "Payload": {
           "$ref": "#/definitions/DeleteRuleInternalServerErrorBody"
@@ -628,7 +489,7 @@
       "x-go-package": "github.com/ory/oathkeeper/sdk/go/oathkeeper/models"
     },
     "DeleteRuleInternalServerErrorBody": {
-      "description": "DeleteRuleInternalServerErrorBody DeleteRuleInternalServerErrorBody delete rule internal server error body",
+      "description": "DeleteRuleInternalServerErrorBody DeleteRuleInternalServerErrorBody DeleteRuleInternalServerErrorBody DeleteRuleInternalServerErrorBody delete rule internal server error body",
       "type": "object",
       "properties": {
         "code": {
@@ -674,13 +535,13 @@
     "DeleteRuleNoContent": {
       "description": "An empty response",
       "type": "object",
-      "title": "DeleteRuleNoContent DeleteRuleNoContent handles this case with default header values.",
+      "title": "DeleteRuleNoContent DeleteRuleNoContent DeleteRuleNoContent DeleteRuleNoContent handles this case with default header values.",
       "x-go-package": "github.com/ory/oathkeeper/sdk/go/oathkeeper/models"
     },
     "DeleteRuleNotFound": {
       "description": "The standard error format",
       "type": "object",
-      "title": "DeleteRuleNotFound DeleteRuleNotFound handles this case with default header values.",
+      "title": "DeleteRuleNotFound DeleteRuleNotFound DeleteRuleNotFound DeleteRuleNotFound handles this case with default header values.",
       "properties": {
         "Payload": {
           "$ref": "#/definitions/DeleteRuleNotFoundBody"
@@ -689,7 +550,7 @@
       "x-go-package": "github.com/ory/oathkeeper/sdk/go/oathkeeper/models"
     },
     "DeleteRuleNotFoundBody": {
-      "description": "DeleteRuleNotFoundBody DeleteRuleNotFoundBody delete rule not found body",
+      "description": "DeleteRuleNotFoundBody DeleteRuleNotFoundBody DeleteRuleNotFoundBody DeleteRuleNotFoundBody delete rule not found body",
       "type": "object",
       "properties": {
         "code": {
@@ -734,13 +595,13 @@
     },
     "DeleteRuleReader": {
       "type": "object",
-      "title": "DeleteRuleReader DeleteRuleReader is a Reader for the DeleteRule structure.",
+      "title": "DeleteRuleReader DeleteRuleReader DeleteRuleReader DeleteRuleReader is a Reader for the DeleteRule structure.",
       "x-go-package": "github.com/ory/oathkeeper/sdk/go/oathkeeper/models"
     },
     "DeleteRuleUnauthorized": {
       "description": "The standard error format",
       "type": "object",
-      "title": "DeleteRuleUnauthorized DeleteRuleUnauthorized handles this case with default header values.",
+      "title": "DeleteRuleUnauthorized DeleteRuleUnauthorized DeleteRuleUnauthorized DeleteRuleUnauthorized handles this case with default header values.",
       "properties": {
         "Payload": {
           "$ref": "#/definitions/DeleteRuleUnauthorizedBody"
@@ -749,7 +610,7 @@
       "x-go-package": "github.com/ory/oathkeeper/sdk/go/oathkeeper/models"
     },
     "DeleteRuleUnauthorizedBody": {
-      "description": "DeleteRuleUnauthorizedBody DeleteRuleUnauthorizedBody delete rule unauthorized body",
+      "description": "DeleteRuleUnauthorizedBody DeleteRuleUnauthorizedBody DeleteRuleUnauthorizedBody DeleteRuleUnauthorizedBody delete rule unauthorized body",
       "type": "object",
       "properties": {
         "code": {
@@ -795,7 +656,7 @@
     "GetRuleForbidden": {
       "description": "The standard error format",
       "type": "object",
-      "title": "GetRuleForbidden GetRuleForbidden handles this case with default header values.",
+      "title": "GetRuleForbidden GetRuleForbidden GetRuleForbidden GetRuleForbidden handles this case with default header values.",
       "properties": {
         "Payload": {
           "$ref": "#/definitions/GetRuleForbiddenBody"
@@ -804,7 +665,7 @@
       "x-go-package": "github.com/ory/oathkeeper/sdk/go/oathkeeper/models"
     },
     "GetRuleForbiddenBody": {
-      "description": "GetRuleForbiddenBody GetRuleForbiddenBody get rule forbidden body",
+      "description": "GetRuleForbiddenBody GetRuleForbiddenBody GetRuleForbiddenBody GetRuleForbiddenBody get rule forbidden body",
       "type": "object",
       "properties": {
         "code": {
@@ -850,7 +711,7 @@
     "GetRuleInternalServerError": {
       "description": "The standard error format",
       "type": "object",
-      "title": "GetRuleInternalServerError GetRuleInternalServerError handles this case with default header values.",
+      "title": "GetRuleInternalServerError GetRuleInternalServerError GetRuleInternalServerError GetRuleInternalServerError handles this case with default header values.",
       "properties": {
         "Payload": {
           "$ref": "#/definitions/GetRuleInternalServerErrorBody"
@@ -859,7 +720,7 @@
       "x-go-package": "github.com/ory/oathkeeper/sdk/go/oathkeeper/models"
     },
     "GetRuleInternalServerErrorBody": {
-      "description": "GetRuleInternalServerErrorBody GetRuleInternalServerErrorBody get rule internal server error body",
+      "description": "GetRuleInternalServerErrorBody GetRuleInternalServerErrorBody GetRuleInternalServerErrorBody GetRuleInternalServerErrorBody get rule internal server error body",
       "type": "object",
       "properties": {
         "code": {
@@ -905,7 +766,7 @@
     "GetRuleNotFound": {
       "description": "The standard error format",
       "type": "object",
-      "title": "GetRuleNotFound GetRuleNotFound handles this case with default header values.",
+      "title": "GetRuleNotFound GetRuleNotFound GetRuleNotFound GetRuleNotFound handles this case with default header values.",
       "properties": {
         "Payload": {
           "$ref": "#/definitions/GetRuleNotFoundBody"
@@ -914,7 +775,7 @@
       "x-go-package": "github.com/ory/oathkeeper/sdk/go/oathkeeper/models"
     },
     "GetRuleNotFoundBody": {
-      "description": "GetRuleNotFoundBody GetRuleNotFoundBody get rule not found body",
+      "description": "GetRuleNotFoundBody GetRuleNotFoundBody GetRuleNotFoundBody GetRuleNotFoundBody get rule not found body",
       "type": "object",
       "properties": {
         "code": {
@@ -960,7 +821,7 @@
     "GetRuleOK": {
       "description": "A rule",
       "type": "object",
-      "title": "GetRuleOK GetRuleOK handles this case with default header values.",
+      "title": "GetRuleOK GetRuleOK GetRuleOK GetRuleOK handles this case with default header values.",
       "properties": {
         "Payload": {
           "$ref": "#/definitions/swaggerRule"
@@ -970,13 +831,13 @@
     },
     "GetRuleReader": {
       "type": "object",
-      "title": "GetRuleReader GetRuleReader is a Reader for the GetRule structure.",
+      "title": "GetRuleReader GetRuleReader GetRuleReader GetRuleReader is a Reader for the GetRule structure.",
       "x-go-package": "github.com/ory/oathkeeper/sdk/go/oathkeeper/models"
     },
     "GetRuleUnauthorized": {
       "description": "The standard error format",
       "type": "object",
-      "title": "GetRuleUnauthorized GetRuleUnauthorized handles this case with default header values.",
+      "title": "GetRuleUnauthorized GetRuleUnauthorized GetRuleUnauthorized GetRuleUnauthorized handles this case with default header values.",
       "properties": {
         "Payload": {
           "$ref": "#/definitions/GetRuleUnauthorizedBody"
@@ -985,7 +846,7 @@
       "x-go-package": "github.com/ory/oathkeeper/sdk/go/oathkeeper/models"
     },
     "GetRuleUnauthorizedBody": {
-      "description": "GetRuleUnauthorizedBody GetRuleUnauthorizedBody get rule unauthorized body",
+      "description": "GetRuleUnauthorizedBody GetRuleUnauthorizedBody GetRuleUnauthorizedBody GetRuleUnauthorizedBody get rule unauthorized body",
       "type": "object",
       "properties": {
         "code": {
@@ -1031,7 +892,7 @@
     "GetWellKnownForbidden": {
       "description": "The standard error format",
       "type": "object",
-      "title": "GetWellKnownForbidden GetWellKnownForbidden handles this case with default header values.",
+      "title": "GetWellKnownForbidden GetWellKnownForbidden GetWellKnownForbidden GetWellKnownForbidden handles this case with default header values.",
       "properties": {
         "Payload": {
           "$ref": "#/definitions/GetWellKnownForbiddenBody"
@@ -1040,7 +901,7 @@
       "x-go-package": "github.com/ory/oathkeeper/sdk/go/oathkeeper/models"
     },
     "GetWellKnownForbiddenBody": {
-      "description": "GetWellKnownForbiddenBody GetWellKnownForbiddenBody get well known forbidden body",
+      "description": "GetWellKnownForbiddenBody GetWellKnownForbiddenBody GetWellKnownForbiddenBody GetWellKnownForbiddenBody get well known forbidden body",
       "type": "object",
       "properties": {
         "code": {
@@ -1083,10 +944,81 @@
       },
       "x-go-package": "github.com/ory/oathkeeper/sdk/go/oathkeeper/models"
     },
+    "GetWellKnownJSONWebKeysInternalServerError": {
+      "description": "The standard error format",
+      "type": "object",
+      "title": "GetWellKnownJSONWebKeysInternalServerError handles this case with default header values.",
+      "properties": {
+        "Payload": {
+          "$ref": "#/definitions/GetWellKnownJSONWebKeysInternalServerErrorBody"
+        }
+      },
+      "x-go-package": "github.com/ory/oathkeeper/sdk/go/oathkeeper/client/api"
+    },
+    "GetWellKnownJSONWebKeysInternalServerErrorBody": {
+      "description": "GetWellKnownJSONWebKeysInternalServerErrorBody get well known JSON web keys internal server error body",
+      "type": "object",
+      "properties": {
+        "code": {
+          "description": "code",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "Code"
+        },
+        "details": {
+          "description": "details",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object"
+            }
+          },
+          "x-go-name": "Details"
+        },
+        "message": {
+          "description": "message",
+          "type": "string",
+          "x-go-name": "Message"
+        },
+        "reason": {
+          "description": "reason",
+          "type": "string",
+          "x-go-name": "Reason"
+        },
+        "request": {
+          "description": "request",
+          "type": "string",
+          "x-go-name": "Request"
+        },
+        "status": {
+          "description": "status",
+          "type": "string",
+          "x-go-name": "Status"
+        }
+      },
+      "x-go-package": "github.com/ory/oathkeeper/sdk/go/oathkeeper/client/api"
+    },
+    "GetWellKnownJSONWebKeysOK": {
+      "description": "jsonWebKeySet",
+      "type": "object",
+      "title": "GetWellKnownJSONWebKeysOK handles this case with default header values.",
+      "properties": {
+        "Payload": {
+          "$ref": "#/definitions/swaggerJSONWebKeySet"
+        }
+      },
+      "x-go-package": "github.com/ory/oathkeeper/sdk/go/oathkeeper/client/api"
+    },
+    "GetWellKnownJSONWebKeysReader": {
+      "type": "object",
+      "title": "GetWellKnownJSONWebKeysReader is a Reader for the GetWellKnownJSONWebKeys structure.",
+      "x-go-package": "github.com/ory/oathkeeper/sdk/go/oathkeeper/client/api"
+    },
     "GetWellKnownOK": {
       "description": "jsonWebKeySet",
       "type": "object",
-      "title": "GetWellKnownOK GetWellKnownOK handles this case with default header values.",
+      "title": "GetWellKnownOK GetWellKnownOK GetWellKnownOK GetWellKnownOK handles this case with default header values.",
       "properties": {
         "Payload": {
           "$ref": "#/definitions/swaggerJSONWebKeySet"
@@ -1096,13 +1028,13 @@
     },
     "GetWellKnownReader": {
       "type": "object",
-      "title": "GetWellKnownReader GetWellKnownReader is a Reader for the GetWellKnown structure.",
+      "title": "GetWellKnownReader GetWellKnownReader GetWellKnownReader GetWellKnownReader is a Reader for the GetWellKnown structure.",
       "x-go-package": "github.com/ory/oathkeeper/sdk/go/oathkeeper/models"
     },
     "GetWellKnownUnauthorized": {
       "description": "The standard error format",
       "type": "object",
-      "title": "GetWellKnownUnauthorized GetWellKnownUnauthorized handles this case with default header values.",
+      "title": "GetWellKnownUnauthorized GetWellKnownUnauthorized GetWellKnownUnauthorized GetWellKnownUnauthorized handles this case with default header values.",
       "properties": {
         "Payload": {
           "$ref": "#/definitions/GetWellKnownUnauthorizedBody"
@@ -1111,7 +1043,7 @@
       "x-go-package": "github.com/ory/oathkeeper/sdk/go/oathkeeper/models"
     },
     "GetWellKnownUnauthorizedBody": {
-      "description": "GetWellKnownUnauthorizedBody GetWellKnownUnauthorizedBody get well known unauthorized body",
+      "description": "GetWellKnownUnauthorizedBody GetWellKnownUnauthorizedBody GetWellKnownUnauthorizedBody GetWellKnownUnauthorizedBody get well known unauthorized body",
       "type": "object",
       "properties": {
         "code": {
@@ -1157,16 +1089,16 @@
     "IsInstanceAliveInternalServerError": {
       "description": "The standard error format",
       "type": "object",
-      "title": "IsInstanceAliveInternalServerError handles this case with default header values.",
+      "title": "IsInstanceAliveInternalServerError IsInstanceAliveInternalServerError IsInstanceAliveInternalServerError handles this case with default header values.",
       "properties": {
         "Payload": {
           "$ref": "#/definitions/IsInstanceAliveInternalServerErrorBody"
         }
       },
-      "x-go-package": "github.com/ory/oathkeeper/sdk/go/oathkeeper/client/health"
+      "x-go-package": "github.com/ory/oathkeeper/sdk/go/oathkeeper/models"
     },
     "IsInstanceAliveInternalServerErrorBody": {
-      "description": "IsInstanceAliveInternalServerErrorBody is instance alive internal server error body",
+      "description": "IsInstanceAliveInternalServerErrorBody IsInstanceAliveInternalServerErrorBody IsInstanceAliveInternalServerErrorBody is instance alive internal server error body",
       "type": "object",
       "properties": {
         "code": {
@@ -1207,37 +1139,37 @@
           "x-go-name": "Status"
         }
       },
-      "x-go-package": "github.com/ory/oathkeeper/sdk/go/oathkeeper/client/health"
+      "x-go-package": "github.com/ory/oathkeeper/sdk/go/oathkeeper/models"
     },
     "IsInstanceAliveOK": {
       "description": "healthStatus",
       "type": "object",
-      "title": "IsInstanceAliveOK handles this case with default header values.",
+      "title": "IsInstanceAliveOK IsInstanceAliveOK IsInstanceAliveOK handles this case with default header values.",
       "properties": {
         "Payload": {
           "$ref": "#/definitions/swaggerHealthStatus"
         }
       },
-      "x-go-package": "github.com/ory/oathkeeper/sdk/go/oathkeeper/client/health"
+      "x-go-package": "github.com/ory/oathkeeper/sdk/go/oathkeeper/models"
     },
     "IsInstanceAliveReader": {
       "type": "object",
-      "title": "IsInstanceAliveReader is a Reader for the IsInstanceAlive structure.",
-      "x-go-package": "github.com/ory/oathkeeper/sdk/go/oathkeeper/client/health"
+      "title": "IsInstanceAliveReader IsInstanceAliveReader IsInstanceAliveReader is a Reader for the IsInstanceAlive structure.",
+      "x-go-package": "github.com/ory/oathkeeper/sdk/go/oathkeeper/models"
     },
     "JudgeForbidden": {
       "description": "The standard error format",
       "type": "object",
-      "title": "JudgeForbidden handles this case with default header values.",
+      "title": "JudgeForbidden JudgeForbidden JudgeForbidden handles this case with default header values.",
       "properties": {
         "Payload": {
           "$ref": "#/definitions/JudgeForbiddenBody"
         }
       },
-      "x-go-package": "github.com/ory/oathkeeper/sdk/go/oathkeeper/client/judge"
+      "x-go-package": "github.com/ory/oathkeeper/sdk/go/oathkeeper/models"
     },
     "JudgeForbiddenBody": {
-      "description": "JudgeForbiddenBody judge forbidden body",
+      "description": "JudgeForbiddenBody JudgeForbiddenBody JudgeForbiddenBody judge forbidden body",
       "type": "object",
       "properties": {
         "code": {
@@ -1278,21 +1210,21 @@
           "x-go-name": "Status"
         }
       },
-      "x-go-package": "github.com/ory/oathkeeper/sdk/go/oathkeeper/client/judge"
+      "x-go-package": "github.com/ory/oathkeeper/sdk/go/oathkeeper/models"
     },
     "JudgeInternalServerError": {
       "description": "The standard error format",
       "type": "object",
-      "title": "JudgeInternalServerError handles this case with default header values.",
+      "title": "JudgeInternalServerError JudgeInternalServerError JudgeInternalServerError handles this case with default header values.",
       "properties": {
         "Payload": {
           "$ref": "#/definitions/JudgeInternalServerErrorBody"
         }
       },
-      "x-go-package": "github.com/ory/oathkeeper/sdk/go/oathkeeper/client/judge"
+      "x-go-package": "github.com/ory/oathkeeper/sdk/go/oathkeeper/models"
     },
     "JudgeInternalServerErrorBody": {
-      "description": "JudgeInternalServerErrorBody judge internal server error body",
+      "description": "JudgeInternalServerErrorBody JudgeInternalServerErrorBody JudgeInternalServerErrorBody judge internal server error body",
       "type": "object",
       "properties": {
         "code": {
@@ -1333,21 +1265,21 @@
           "x-go-name": "Status"
         }
       },
-      "x-go-package": "github.com/ory/oathkeeper/sdk/go/oathkeeper/client/judge"
+      "x-go-package": "github.com/ory/oathkeeper/sdk/go/oathkeeper/models"
     },
     "JudgeNotFound": {
       "description": "The standard error format",
       "type": "object",
-      "title": "JudgeNotFound handles this case with default header values.",
+      "title": "JudgeNotFound JudgeNotFound JudgeNotFound handles this case with default header values.",
       "properties": {
         "Payload": {
           "$ref": "#/definitions/JudgeNotFoundBody"
         }
       },
-      "x-go-package": "github.com/ory/oathkeeper/sdk/go/oathkeeper/client/judge"
+      "x-go-package": "github.com/ory/oathkeeper/sdk/go/oathkeeper/models"
     },
     "JudgeNotFoundBody": {
-      "description": "JudgeNotFoundBody judge not found body",
+      "description": "JudgeNotFoundBody JudgeNotFoundBody JudgeNotFoundBody judge not found body",
       "type": "object",
       "properties": {
         "code": {
@@ -1388,32 +1320,32 @@
           "x-go-name": "Status"
         }
       },
-      "x-go-package": "github.com/ory/oathkeeper/sdk/go/oathkeeper/client/judge"
+      "x-go-package": "github.com/ory/oathkeeper/sdk/go/oathkeeper/models"
     },
     "JudgeOK": {
       "description": "An empty response",
       "type": "object",
-      "title": "JudgeOK handles this case with default header values.",
-      "x-go-package": "github.com/ory/oathkeeper/sdk/go/oathkeeper/client/judge"
+      "title": "JudgeOK JudgeOK JudgeOK handles this case with default header values.",
+      "x-go-package": "github.com/ory/oathkeeper/sdk/go/oathkeeper/models"
     },
     "JudgeReader": {
       "type": "object",
-      "title": "JudgeReader is a Reader for the Judge structure.",
-      "x-go-package": "github.com/ory/oathkeeper/sdk/go/oathkeeper/client/judge"
+      "title": "JudgeReader JudgeReader JudgeReader is a Reader for the Judge structure.",
+      "x-go-package": "github.com/ory/oathkeeper/sdk/go/oathkeeper/models"
     },
     "JudgeUnauthorized": {
       "description": "The standard error format",
       "type": "object",
-      "title": "JudgeUnauthorized handles this case with default header values.",
+      "title": "JudgeUnauthorized JudgeUnauthorized JudgeUnauthorized handles this case with default header values.",
       "properties": {
         "Payload": {
           "$ref": "#/definitions/JudgeUnauthorizedBody"
         }
       },
-      "x-go-package": "github.com/ory/oathkeeper/sdk/go/oathkeeper/client/judge"
+      "x-go-package": "github.com/ory/oathkeeper/sdk/go/oathkeeper/models"
     },
     "JudgeUnauthorizedBody": {
-      "description": "JudgeUnauthorizedBody judge unauthorized body",
+      "description": "JudgeUnauthorizedBody JudgeUnauthorizedBody JudgeUnauthorizedBody judge unauthorized body",
       "type": "object",
       "properties": {
         "code": {
@@ -1454,12 +1386,12 @@
           "x-go-name": "Status"
         }
       },
-      "x-go-package": "github.com/ory/oathkeeper/sdk/go/oathkeeper/client/judge"
+      "x-go-package": "github.com/ory/oathkeeper/sdk/go/oathkeeper/models"
     },
     "ListRulesForbidden": {
       "description": "The standard error format",
       "type": "object",
-      "title": "ListRulesForbidden ListRulesForbidden handles this case with default header values.",
+      "title": "ListRulesForbidden ListRulesForbidden ListRulesForbidden ListRulesForbidden handles this case with default header values.",
       "properties": {
         "Payload": {
           "$ref": "#/definitions/ListRulesForbiddenBody"
@@ -1468,7 +1400,7 @@
       "x-go-package": "github.com/ory/oathkeeper/sdk/go/oathkeeper/models"
     },
     "ListRulesForbiddenBody": {
-      "description": "ListRulesForbiddenBody ListRulesForbiddenBody list rules forbidden body",
+      "description": "ListRulesForbiddenBody ListRulesForbiddenBody ListRulesForbiddenBody ListRulesForbiddenBody list rules forbidden body",
       "type": "object",
       "properties": {
         "code": {
@@ -1514,7 +1446,7 @@
     "ListRulesInternalServerError": {
       "description": "The standard error format",
       "type": "object",
-      "title": "ListRulesInternalServerError ListRulesInternalServerError handles this case with default header values.",
+      "title": "ListRulesInternalServerError ListRulesInternalServerError ListRulesInternalServerError ListRulesInternalServerError handles this case with default header values.",
       "properties": {
         "Payload": {
           "$ref": "#/definitions/ListRulesInternalServerErrorBody"
@@ -1523,7 +1455,7 @@
       "x-go-package": "github.com/ory/oathkeeper/sdk/go/oathkeeper/models"
     },
     "ListRulesInternalServerErrorBody": {
-      "description": "ListRulesInternalServerErrorBody ListRulesInternalServerErrorBody list rules internal server error body",
+      "description": "ListRulesInternalServerErrorBody ListRulesInternalServerErrorBody ListRulesInternalServerErrorBody ListRulesInternalServerErrorBody list rules internal server error body",
       "type": "object",
       "properties": {
         "code": {
@@ -1569,7 +1501,7 @@
     "ListRulesOK": {
       "description": "A list of rules",
       "type": "object",
-      "title": "ListRulesOK ListRulesOK handles this case with default header values.",
+      "title": "ListRulesOK ListRulesOK ListRulesOK ListRulesOK handles this case with default header values.",
       "properties": {
         "Payload": {
           "description": "payload",
@@ -1583,13 +1515,13 @@
     },
     "ListRulesReader": {
       "type": "object",
-      "title": "ListRulesReader ListRulesReader is a Reader for the ListRules structure.",
+      "title": "ListRulesReader ListRulesReader ListRulesReader ListRulesReader is a Reader for the ListRules structure.",
       "x-go-package": "github.com/ory/oathkeeper/sdk/go/oathkeeper/models"
     },
     "ListRulesUnauthorized": {
       "description": "The standard error format",
       "type": "object",
-      "title": "ListRulesUnauthorized ListRulesUnauthorized handles this case with default header values.",
+      "title": "ListRulesUnauthorized ListRulesUnauthorized ListRulesUnauthorized ListRulesUnauthorized handles this case with default header values.",
       "properties": {
         "Payload": {
           "$ref": "#/definitions/ListRulesUnauthorizedBody"
@@ -1598,7 +1530,7 @@
       "x-go-package": "github.com/ory/oathkeeper/sdk/go/oathkeeper/models"
     },
     "ListRulesUnauthorizedBody": {
-      "description": "ListRulesUnauthorizedBody ListRulesUnauthorizedBody list rules unauthorized body",
+      "description": "ListRulesUnauthorizedBody ListRulesUnauthorizedBody ListRulesUnauthorizedBody ListRulesUnauthorizedBody list rules unauthorized body",
       "type": "object",
       "properties": {
         "code": {
@@ -1644,7 +1576,7 @@
     "RawMessage": {
       "description": "It implements Marshaler and Unmarshaler and can\nbe used to delay JSON decoding or precompute a JSON encoding.",
       "type": "array",
-      "title": "RawMessage RawMessage is a raw encoded JSON value.",
+      "title": "RawMessage RawMessage RawMessage RawMessage is a raw encoded JSON value.",
       "items": {
         "type": "integer",
         "format": "uint8"
@@ -1652,7 +1584,7 @@
       "x-go-package": "github.com/ory/oathkeeper/sdk/go/oathkeeper/models"
     },
     "SwaggerCreateRuleParameters": {
-      "description": "SwaggerCreateRuleParameters swagger create rule parameters",
+      "description": "SwaggerCreateRuleParameters SwaggerCreateRuleParameters swagger create rule parameters",
       "type": "object",
       "properties": {
         "Body": {
@@ -1662,7 +1594,7 @@
       "x-go-package": "github.com/ory/oathkeeper/sdk/go/oathkeeper/models"
     },
     "SwaggerGetRuleParameters": {
-      "description": "SwaggerGetRuleParameters swagger get rule parameters",
+      "description": "SwaggerGetRuleParameters SwaggerGetRuleParameters swagger get rule parameters",
       "type": "object",
       "required": [
         "id"
@@ -1677,7 +1609,7 @@
       "x-go-package": "github.com/ory/oathkeeper/sdk/go/oathkeeper/models"
     },
     "SwaggerListRulesParameters": {
-      "description": "SwaggerListRulesParameters swagger list rules parameters",
+      "description": "SwaggerListRulesParameters SwaggerListRulesParameters swagger list rules parameters",
       "type": "object",
       "properties": {
         "limit": {
@@ -1696,7 +1628,7 @@
       "x-go-package": "github.com/ory/oathkeeper/sdk/go/oathkeeper/models"
     },
     "SwaggerRuleResponse": {
-      "description": "SwaggerRuleResponse A rule",
+      "description": "SwaggerRuleResponse SwaggerRuleResponse A rule",
       "type": "object",
       "properties": {
         "Body": {
@@ -1706,7 +1638,7 @@
       "x-go-package": "github.com/ory/oathkeeper/sdk/go/oathkeeper/models"
     },
     "SwaggerRulesResponse": {
-      "description": "SwaggerRulesResponse A list of rules",
+      "description": "SwaggerRulesResponse SwaggerRulesResponse A list of rules",
       "type": "object",
       "properties": {
         "Body": {
@@ -1720,7 +1652,7 @@
       "x-go-package": "github.com/ory/oathkeeper/sdk/go/oathkeeper/models"
     },
     "SwaggerUpdateRuleParameters": {
-      "description": "SwaggerUpdateRuleParameters swagger update rule parameters",
+      "description": "SwaggerUpdateRuleParameters SwaggerUpdateRuleParameters swagger update rule parameters",
       "type": "object",
       "required": [
         "id"
@@ -1740,7 +1672,7 @@
     "UpdateRuleForbidden": {
       "description": "The standard error format",
       "type": "object",
-      "title": "UpdateRuleForbidden UpdateRuleForbidden handles this case with default header values.",
+      "title": "UpdateRuleForbidden UpdateRuleForbidden UpdateRuleForbidden UpdateRuleForbidden handles this case with default header values.",
       "properties": {
         "Payload": {
           "$ref": "#/definitions/UpdateRuleForbiddenBody"
@@ -1749,7 +1681,7 @@
       "x-go-package": "github.com/ory/oathkeeper/sdk/go/oathkeeper/models"
     },
     "UpdateRuleForbiddenBody": {
-      "description": "UpdateRuleForbiddenBody UpdateRuleForbiddenBody update rule forbidden body",
+      "description": "UpdateRuleForbiddenBody UpdateRuleForbiddenBody UpdateRuleForbiddenBody UpdateRuleForbiddenBody update rule forbidden body",
       "type": "object",
       "properties": {
         "code": {
@@ -1795,7 +1727,7 @@
     "UpdateRuleInternalServerError": {
       "description": "The standard error format",
       "type": "object",
-      "title": "UpdateRuleInternalServerError UpdateRuleInternalServerError handles this case with default header values.",
+      "title": "UpdateRuleInternalServerError UpdateRuleInternalServerError UpdateRuleInternalServerError UpdateRuleInternalServerError handles this case with default header values.",
       "properties": {
         "Payload": {
           "$ref": "#/definitions/UpdateRuleInternalServerErrorBody"
@@ -1804,7 +1736,7 @@
       "x-go-package": "github.com/ory/oathkeeper/sdk/go/oathkeeper/models"
     },
     "UpdateRuleInternalServerErrorBody": {
-      "description": "UpdateRuleInternalServerErrorBody UpdateRuleInternalServerErrorBody update rule internal server error body",
+      "description": "UpdateRuleInternalServerErrorBody UpdateRuleInternalServerErrorBody UpdateRuleInternalServerErrorBody UpdateRuleInternalServerErrorBody update rule internal server error body",
       "type": "object",
       "properties": {
         "code": {
@@ -1850,7 +1782,7 @@
     "UpdateRuleNotFound": {
       "description": "The standard error format",
       "type": "object",
-      "title": "UpdateRuleNotFound UpdateRuleNotFound handles this case with default header values.",
+      "title": "UpdateRuleNotFound UpdateRuleNotFound UpdateRuleNotFound UpdateRuleNotFound handles this case with default header values.",
       "properties": {
         "Payload": {
           "$ref": "#/definitions/UpdateRuleNotFoundBody"
@@ -1859,7 +1791,7 @@
       "x-go-package": "github.com/ory/oathkeeper/sdk/go/oathkeeper/models"
     },
     "UpdateRuleNotFoundBody": {
-      "description": "UpdateRuleNotFoundBody UpdateRuleNotFoundBody update rule not found body",
+      "description": "UpdateRuleNotFoundBody UpdateRuleNotFoundBody UpdateRuleNotFoundBody UpdateRuleNotFoundBody update rule not found body",
       "type": "object",
       "properties": {
         "code": {
@@ -1905,7 +1837,7 @@
     "UpdateRuleOK": {
       "description": "A rule",
       "type": "object",
-      "title": "UpdateRuleOK UpdateRuleOK handles this case with default header values.",
+      "title": "UpdateRuleOK UpdateRuleOK UpdateRuleOK UpdateRuleOK handles this case with default header values.",
       "properties": {
         "Payload": {
           "$ref": "#/definitions/swaggerRule"
@@ -1915,13 +1847,13 @@
     },
     "UpdateRuleReader": {
       "type": "object",
-      "title": "UpdateRuleReader UpdateRuleReader is a Reader for the UpdateRule structure.",
+      "title": "UpdateRuleReader UpdateRuleReader UpdateRuleReader UpdateRuleReader is a Reader for the UpdateRule structure.",
       "x-go-package": "github.com/ory/oathkeeper/sdk/go/oathkeeper/models"
     },
     "UpdateRuleUnauthorized": {
       "description": "The standard error format",
       "type": "object",
-      "title": "UpdateRuleUnauthorized UpdateRuleUnauthorized handles this case with default header values.",
+      "title": "UpdateRuleUnauthorized UpdateRuleUnauthorized UpdateRuleUnauthorized UpdateRuleUnauthorized handles this case with default header values.",
       "properties": {
         "Payload": {
           "$ref": "#/definitions/UpdateRuleUnauthorizedBody"
@@ -1930,7 +1862,7 @@
       "x-go-package": "github.com/ory/oathkeeper/sdk/go/oathkeeper/models"
     },
     "UpdateRuleUnauthorizedBody": {
-      "description": "UpdateRuleUnauthorizedBody UpdateRuleUnauthorizedBody update rule unauthorized body",
+      "description": "UpdateRuleUnauthorizedBody UpdateRuleUnauthorizedBody UpdateRuleUnauthorizedBody UpdateRuleUnauthorizedBody update rule unauthorized body",
       "type": "object",
       "properties": {
         "code": {
@@ -1974,7 +1906,7 @@
       "x-go-package": "github.com/ory/oathkeeper/sdk/go/oathkeeper/models"
     },
     "Upstream": {
-      "description": "Upstream Upstream upstream",
+      "description": "Upstream Upstream Upstream Upstream upstream",
       "type": "object",
       "properties": {
         "preserve_host": {
@@ -2008,7 +1940,7 @@
         }
       },
       "x-go-name": "swaggerNotReadyStatus",
-      "x-go-package": "github.com/ory/oathkeeper/health"
+      "x-go-package": "github.com/ory/oathkeeper/vendor/github.com/ory/x/healthx"
     },
     "healthStatus": {
       "type": "object",
@@ -2020,7 +1952,7 @@
         }
       },
       "x-go-name": "swaggerHealthStatus",
-      "x-go-package": "github.com/ory/oathkeeper/health"
+      "x-go-package": "github.com/ory/oathkeeper/vendor/github.com/ory/x/healthx"
     },
     "jsonWebKey": {
       "type": "object",
@@ -2103,7 +2035,7 @@
         }
       },
       "x-go-name": "swaggerJSONWebKey",
-      "x-go-package": "github.com/ory/oathkeeper/rsakey"
+      "x-go-package": "github.com/ory/oathkeeper/api"
     },
     "jsonWebKeySet": {
       "type": "object",
@@ -2118,7 +2050,7 @@
         }
       },
       "x-go-name": "swaggerJSONWebKeySet",
-      "x-go-package": "github.com/ory/oathkeeper/rsakey"
+      "x-go-package": "github.com/ory/oathkeeper/api"
     },
     "rule": {
       "type": "object",
@@ -2135,9 +2067,6 @@
         "authorizer": {
           "$ref": "#/definitions/ruleHandler"
         },
-        "credentials_issuer": {
-          "$ref": "#/definitions/ruleHandler"
-        },
         "description": {
           "description": "Description is a human readable description of this rule.",
           "type": "string",
@@ -2151,12 +2080,15 @@
         "match": {
           "$ref": "#/definitions/ruleMatch"
         },
+        "mutator": {
+          "$ref": "#/definitions/ruleHandler"
+        },
         "upstream": {
           "$ref": "#/definitions/Upstream"
         }
       },
       "x-go-name": "swaggerRule",
-      "x-go-package": "github.com/ory/oathkeeper/rule"
+      "x-go-package": "github.com/ory/oathkeeper/api"
     },
     "ruleHandler": {
       "type": "object",
@@ -2173,7 +2105,7 @@
         }
       },
       "x-go-name": "swaggerRuleHandler",
-      "x-go-package": "github.com/ory/oathkeeper/rule"
+      "x-go-package": "github.com/ory/oathkeeper/api"
     },
     "ruleMatch": {
       "type": "object",
@@ -2193,16 +2125,7 @@
         }
       },
       "x-go-name": "swaggerRuleMatch",
-      "x-go-package": "github.com/ory/oathkeeper/rule"
-    },
-    "swaggerCreateRuleParameters": {
-      "type": "object",
-      "properties": {
-        "Body": {
-          "$ref": "#/definitions/rule"
-        }
-      },
-      "x-go-package": "github.com/ory/oathkeeper/rule"
+      "x-go-package": "github.com/ory/oathkeeper/api"
     },
     "swaggerGetRuleParameters": {
       "type": "object",
@@ -2216,7 +2139,7 @@
           "x-go-name": "ID"
         }
       },
-      "x-go-package": "github.com/ory/oathkeeper/rule"
+      "x-go-package": "github.com/ory/oathkeeper/api"
     },
     "swaggerHealthStatus": {
       "description": "SwaggerHealthStatus swagger health status",
@@ -2359,7 +2282,7 @@
           "x-go-name": "Offset"
         }
       },
-      "x-go-package": "github.com/ory/oathkeeper/rule"
+      "x-go-package": "github.com/ory/oathkeeper/api"
     },
     "swaggerNotReadyStatus": {
       "description": "SwaggerNotReadyStatus swagger not ready status",
@@ -2392,9 +2315,6 @@
         "authorizer": {
           "$ref": "#/definitions/swaggerRuleHandler"
         },
-        "credentials_issuer": {
-          "$ref": "#/definitions/swaggerRuleHandler"
-        },
         "description": {
           "description": "Description is a human readable description of this rule.",
           "type": "string",
@@ -2408,6 +2328,9 @@
         "match": {
           "$ref": "#/definitions/swaggerRuleMatch"
         },
+        "transformer": {
+          "$ref": "#/definitions/swaggerRuleHandler"
+        },
         "upstream": {
           "$ref": "#/definitions/Upstream"
         }
@@ -2420,7 +2343,9 @@
       "type": "object",
       "properties": {
         "config": {
-          "$ref": "#/definitions/RawMessage"
+          "description": "Config contains the configuration for the handler. Please read the user\nguide for a complete list of each handler's available settings.",
+          "type": "object",
+          "x-go-name": "Config"
         },
         "handler": {
           "description": "Handler identifies the implementation which will be used to handle this specific request. Please read the user\nguide for a complete list of available handlers.",
@@ -2460,7 +2385,7 @@
           "$ref": "#/definitions/rule"
         }
       },
-      "x-go-package": "github.com/ory/oathkeeper/rule"
+      "x-go-package": "github.com/ory/oathkeeper/api"
     },
     "swaggerRulesResponse": {
       "description": "A list of rules",
@@ -2474,31 +2399,14 @@
           }
         }
       },
-      "x-go-package": "github.com/ory/oathkeeper/rule"
-    },
-    "swaggerUpdateRuleParameters": {
-      "type": "object",
-      "required": [
-        "id"
-      ],
-      "properties": {
-        "Body": {
-          "$ref": "#/definitions/rule"
-        },
-        "id": {
-          "description": "in: path",
-          "type": "string",
-          "x-go-name": "ID"
-        }
-      },
-      "x-go-package": "github.com/ory/oathkeeper/rule"
+      "x-go-package": "github.com/ory/oathkeeper/api"
     },
     "swaggerVersion": {
       "description": "SwaggerVersion swagger version",
       "type": "object",
       "properties": {
         "version": {
-          "description": "version",
+          "description": "Version is the service's version.",
           "type": "string",
           "x-go-name": "Version"
         }
@@ -2510,12 +2418,13 @@
       "type": "object",
       "properties": {
         "version": {
+          "description": "Version is the service's version.",
           "type": "string",
           "x-go-name": "Version"
         }
       },
       "x-go-name": "swaggerVersion",
-      "x-go-package": "github.com/ory/oathkeeper/health"
+      "x-go-package": "github.com/ory/oathkeeper/vendor/github.com/ory/x/healthx"
     }
   },
   "responses": {

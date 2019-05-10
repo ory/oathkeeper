@@ -42,7 +42,7 @@
 
   /**
    * Constructs a new <code>UpdateRuleNotFoundBody</code>.
-   * UpdateRuleNotFoundBody UpdateRuleNotFoundBody update rule not found body
+   * UpdateRuleNotFoundBody UpdateRuleNotFoundBody UpdateRuleNotFoundBody UpdateRuleNotFoundBody update rule not found body
    * @alias module:model/UpdateRuleNotFoundBody
    * @class
    */

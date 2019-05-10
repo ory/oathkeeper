@@ -42,7 +42,7 @@
 
   /**
    * Constructs a new <code>GetWellKnownUnauthorizedBody</code>.
-   * GetWellKnownUnauthorizedBody GetWellKnownUnauthorizedBody get well known unauthorized body
+   * GetWellKnownUnauthorizedBody GetWellKnownUnauthorizedBody GetWellKnownUnauthorizedBody GetWellKnownUnauthorizedBody get well known unauthorized body
    * @alias module:model/GetWellKnownUnauthorizedBody
    * @class
    */

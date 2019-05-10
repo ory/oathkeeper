@@ -1,6 +1,7 @@
 package api_test
 
 import (
+	"crypto/rsa"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -34,6 +35,8 @@ func TestCredentialsHandler(t *testing.T) {
 	var j jose.JSONWebKeySet
 	require.NoError(t, json.NewDecoder(res.Body).Decode(&j))
 	assert.Len(t, j.Key("3e0edde4-12ad-425d-a783-135f46eac57e"), 1, "The public key should be broadcasted")
-	assert.Len(t, j.Key("f4190122-ae96-4c29-8b79-56024e459d80"), 0, "The private key must not be broadcasted")
-	assert.Len(t, j.Keys, 1, "There should not be any unexpected keys")
+	assert.Len(t, j.Key("f4190122-ae96-4c29-8b79-56024e459d80"), 1, "The public key generated from the private key should be broadcasted")
+	assert.IsType(t, new(rsa.PublicKey), j.Key("3e0edde4-12ad-425d-a783-135f46eac57e")[0].Key, "Ensure a public key")
+	assert.IsType(t, new(rsa.PublicKey), j.Key("f4190122-ae96-4c29-8b79-56024e459d80")[0].Key, "Ensure a public key")
+	assert.Len(t, j.Keys, 2, "There should not be any unexpected keys")
 }

@@ -48,6 +48,13 @@ type swaggerListRulesParameters struct {
 	Offset int `json:"offset"`
 }
 
+// swagger:parameters getRule
+type swaggerGetRuleParameters struct {
+	// in: path
+	// required: true
+	ID string `json:"id"`
+}
+
 // swagger:model ruleMatch
 type swaggerRuleMatch struct {
 	// An array of HTTP methods (e.g. GET, POST, PUT, DELETE, ...). When ORY Oathkeeper searches for rules
@@ -105,7 +112,7 @@ type swaggerRule struct {
 
 	// Mutator is a handler that transform the HTTP request. A common use case is generating a new set of credentials
 	// (e.g. JWT) which then will be forwarded to the upstream server.
-	Transformer swaggerRuleHandler `json:"transformer"`
+	Mutator swaggerRuleHandler `json:"mutator"`
 
 	// Upstream is the location of the server where requests matching this rule should be forwarded to.
 	Upstream *rule.Upstream `json:"upstream"`

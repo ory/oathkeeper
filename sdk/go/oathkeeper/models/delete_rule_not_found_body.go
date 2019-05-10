@@ -11,7 +11,7 @@ import (
 	"github.com/go-openapi/swag"
 )
 
-// DeleteRuleNotFoundBody DeleteRuleNotFoundBody DeleteRuleNotFoundBody delete rule not found body
+// DeleteRuleNotFoundBody DeleteRuleNotFoundBody DeleteRuleNotFoundBody DeleteRuleNotFoundBody DeleteRuleNotFoundBody delete rule not found body
 // swagger:model DeleteRuleNotFoundBody
 type DeleteRuleNotFoundBody struct {
 

@@ -25,10 +25,6 @@ import (
 
 	"github.com/ory/oathkeeper/x"
 
-	"github.com/julienschmidt/httprouter"
-	"github.com/sirupsen/logrus"
-
-	"github.com/ory/herodot"
 	"github.com/ory/oathkeeper/proxy"
 	"github.com/ory/oathkeeper/rule"
 )
@@ -39,30 +35,21 @@ const (
 
 type judgeHandlerRegistry interface {
 	x.RegistryWriter
+	x.RegistryLogger
+
+	RuleMatcher() rule.Matcher
+	ProxyRequestHandler() *proxy.RequestHandler
 }
 
 type JudgeHandler struct {
-	Logger         logrus.FieldLogger
-	RequestHandler *proxy.RequestHandler
-	Matcher        rule.Matcher
-	H              herodot.Writer
-	Router         *httprouter.Router
+	r judgeHandlerRegistry
 }
 
-func NewJudgeHandler(handler *proxy.RequestHandler, logger logrus.FieldLogger, matcher rule.Matcher, router *httprouter.Router) *JudgeHandler {
-	if logger == nil {
-		logger = logrus.New()
-	}
-	return &JudgeHandler{
-		Logger:         logger,
-		Matcher:        matcher,
-		RequestHandler: handler,
-		H:              herodot.NewNegotiationHandler(logger),
-		Router:         router,
-	}
+func NewJudgeHandler(r judgeHandlerRegistry) *JudgeHandler {
+	return &JudgeHandler{r: r}
 }
 
-func (h *JudgeHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (h *JudgeHandler) ServeHTTP(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
 	if len(r.URL.Path) >= len(JudgePath) && r.URL.Path[:len(JudgePath)] == JudgePath {
 		r.URL.Scheme = "http"
 		r.URL.Host = r.Host
@@ -73,7 +60,7 @@ func (h *JudgeHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 		h.judge(w, r)
 	} else {
-		h.Router.ServeHTTP(w, r)
+		next(w, r)
 	}
 }
 
@@ -94,27 +81,27 @@ func (h *JudgeHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 //       404: genericError
 //       500: genericError
 func (h *JudgeHandler) judge(w http.ResponseWriter, r *http.Request) {
-	rl, err := h.Matcher.Match(r.Context(), r.Method, r.URL)
+	rl, err := h.r.RuleMatcher().Match(r.Context(), r.Method, r.URL)
 	if err != nil {
-		h.Logger.WithError(err).
+		h.r.Logger().WithError(err).
 			WithField("granted", false).
 			WithField("access_url", r.URL.String()).
 			Warn("Access request denied")
-		h.H.WriteError(w, r, err)
+		h.r.Writer().WriteError(w, r, err)
 		return
 	}
 
-	headers, err := h.RequestHandler.HandleRequest(r, rl)
+	headers, err := h.r.ProxyRequestHandler().HandleRequest(r, rl)
 	if err != nil {
-		h.Logger.WithError(err).
+		h.r.Logger().WithError(err).
 			WithField("granted", false).
 			WithField("access_url", r.URL.String()).
 			Warn("Access request denied")
-		h.H.WriteError(w, r, err)
+		h.r.Writer().WriteError(w, r, err)
 		return
 	}
 
-	h.Logger.
+	h.r.Logger().
 		WithField("granted", true).
 		WithField("access_url", r.URL.String()).
 		Warn("Access request granted")

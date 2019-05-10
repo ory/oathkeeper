@@ -42,7 +42,7 @@
 
   /**
    * Constructs a new <code>GetRuleForbiddenBody</code>.
-   * GetRuleForbiddenBody GetRuleForbiddenBody get rule forbidden body
+   * GetRuleForbiddenBody GetRuleForbiddenBody GetRuleForbiddenBody GetRuleForbiddenBody get rule forbidden body
    * @alias module:model/GetRuleForbiddenBody
    * @class
    */

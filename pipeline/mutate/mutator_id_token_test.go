@@ -85,7 +85,7 @@ func TestMutatorIDToken(t *testing.T) {
 					ttl = tc.ttl
 				}
 				assert.Equal(t, "foo", fmt.Sprintf("%s", result.Claims.(jwt.MapClaims)["sub"]))
-				assert.GreaterOrEqual(t, time.Now().Add(ttl).Unix(), int64(result.Claims.(jwt.MapClaims)["exp"].(float64)))
+				assert.True(t, time.Now().Add(ttl).Unix() >= int64(result.Claims.(jwt.MapClaims)["exp"].(float64)))
 			})
 		}
 	})

@@ -4,6 +4,9 @@ import (
 	"sync"
 	"time"
 
+	"github.com/ory/oathkeeper/pipeline"
+	"github.com/ory/oathkeeper/proxy"
+
 	"github.com/ory/x/logrusx"
 
 	"github.com/pkg/errors"
@@ -38,15 +41,29 @@ type RegistryMemory struct {
 	credentialsVerifier credentials.Verifier
 	credentialsSigner   credentials.Signer
 	ruleValidator       rule.Validator
-	ruleRepository      rule.Repository
+	ruleRepository      *rule.RepositoryMemory
+	apiRuleHandler      *api.RuleHandler
+	apiJudgeHandler     *api.JudgeHandler
+	healthxHandler      *healthx.Handler
+
+	proxyRequestHandler *proxy.RequestHandler
+	proxyProxy          *proxy.Proxy
 
 	authenticators map[string]authn.Authenticator
 	authorizers    map[string]authz.Authorizer
 	mutators       map[string]mutate.Mutator
 }
 
-func (r *RegistryMemory) Init() error {
-	return nil
+func (r *RegistryMemory) ProxyRequestHandler() *proxy.RequestHandler {
+	if r.proxyRequestHandler == nil {
+		r.proxyRequestHandler = proxy.NewRequestHandler(r)
+	}
+	return r.proxyRequestHandler
+}
+
+func (r *RegistryMemory) RuleMatcher() rule.Matcher {
+	_ = r.RuleRepository() // make sure `r.ruleRepository` is set
+	return r.ruleRepository
 }
 
 func NewRegistryMemory() *RegistryMemory {
@@ -91,7 +108,10 @@ func (r *RegistryMemory) CredentialHandler() *api.CredentialsHandler {
 }
 
 func (r *RegistryMemory) HealthHandler() *healthx.Handler {
-	panic("implement me")
+	if r.healthxHandler == nil {
+		r.healthxHandler = healthx.NewHandler(r.Writer(), r.BuildVersion(), healthx.ReadyCheckers{})
+	}
+	return r.healthxHandler
 }
 
 func (r *RegistryMemory) RuleValidator() rule.Validator {
@@ -123,11 +143,17 @@ func (r *RegistryMemory) Logger() logrus.FieldLogger {
 }
 
 func (r *RegistryMemory) RuleHandler() *api.RuleHandler {
-	panic("implement me")
+	if r.apiRuleHandler == nil {
+		r.apiRuleHandler = api.NewRuleHandler(r)
+	}
+	return r.apiRuleHandler
 }
 
 func (r *RegistryMemory) JudgeHandler() *api.JudgeHandler {
-	panic("implement me")
+	if r.apiJudgeHandler == nil {
+		r.apiJudgeHandler = api.NewJudgeHandler(r)
+	}
+	return r.apiJudgeHandler
 }
 
 func (r *RegistryMemory) CredentialsFetcher() credentials.Fetcher {
@@ -173,7 +199,7 @@ func (r *RegistryMemory) PipelineAuthenticator(id string) (authn.Authenticator, 
 
 	a, ok := r.authenticators[id]
 	if !ok {
-		return nil, errors.WithStack(ErrPipelineHandlerNotFound)
+		return nil, errors.WithStack(pipeline.ErrPipelineHandlerNotFound)
 	}
 	return a, nil
 }
@@ -197,7 +223,7 @@ func (r *RegistryMemory) PipelineAuthorizer(id string) (authz.Authorizer, error)
 
 	a, ok := r.authorizers[id]
 	if !ok {
-		return nil, errors.WithStack(ErrPipelineHandlerNotFound)
+		return nil, errors.WithStack(pipeline.ErrPipelineHandlerNotFound)
 	}
 	return a, nil
 }
@@ -215,6 +241,14 @@ func (r *RegistryMemory) AvailablePipelineMutators() (available []string) {
 	return
 }
 
+func (r *RegistryMemory) Proxy() *proxy.Proxy {
+	if r.proxyProxy == nil {
+		r.proxyProxy = proxy.NewProxy(r)
+	}
+
+	return r.proxyProxy
+}
+
 func (r *RegistryMemory) PipelineMutator(id string) (mutate.Mutator, error) {
 	r.prepareMutators()
 	r.RLock()
@@ -222,9 +256,15 @@ func (r *RegistryMemory) PipelineMutator(id string) (mutate.Mutator, error) {
 
 	a, ok := r.mutators[id]
 	if !ok {
-		return nil, errors.WithStack(ErrPipelineHandlerNotFound)
+		return nil, errors.WithStack(pipeline.ErrPipelineHandlerNotFound)
 	}
 	return a, nil
+}
+
+func (r *RegistryMemory) WithBrokenPipelineMutator() *RegistryMemory {
+	r.prepareMutators()
+	r.mutators["broken"] = mutate.NewMutatorBroken(true)
+	return r
 }
 
 func (r *RegistryMemory) prepareAuthn() {

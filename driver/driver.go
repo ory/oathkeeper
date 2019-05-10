@@ -1,7 +1,7 @@
 package driver
 
 import (
-	"github.com/ory/hydra/driver/configuration"
+	"github.com/ory/oathkeeper/driver/configuration"
 )
 
 type Driver interface {

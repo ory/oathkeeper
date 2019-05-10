@@ -1,8 +1,9 @@
 package driver
 
 import (
-	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
+
+	"github.com/ory/oathkeeper/proxy"
 
 	"github.com/ory/oathkeeper/api"
 	"github.com/ory/oathkeeper/credentials"
@@ -15,13 +16,7 @@ import (
 	"github.com/ory/x/healthx"
 )
 
-var (
-	ErrPipelineHandlerNotFound = errors.New("requested pipeline handler does not exist")
-)
-
 type Registry interface {
-	Init() error
-
 	WithConfig(c configuration.Provider) Registry
 	WithLogger(l logrus.FieldLogger) Registry
 	WithBuildInfo(version, hash, date string) Registry
@@ -29,10 +24,13 @@ type Registry interface {
 	BuildDate() string
 	BuildHash() string
 
+	ProxyRequestHandler() *proxy.RequestHandler
 	HealthHandler() *healthx.Handler
 	RuleHandler() *api.RuleHandler
 	JudgeHandler() *api.JudgeHandler
 	CredentialHandler() *api.CredentialsHandler
+
+	Proxy() *proxy.Proxy
 
 	authn.Registry
 	authz.Registry
@@ -45,4 +43,8 @@ type Registry interface {
 
 	x.RegistryWriter
 	x.RegistryLogger
+}
+
+func NewRegistry(c configuration.Provider) Registry {
+	return NewRegistryMemory().WithConfig(c)
 }

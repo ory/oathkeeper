@@ -83,7 +83,7 @@ func TestMatcher(t *testing.T) {
 	}
 
 	for name, matcher := range map[string]m{
-		"memory": NewRepositoryMemory(new(validatorNoop)),
+		"memory": NewRepositoryMemory(new(mockRepositoryRegistry)),
 	} {
 		t.Run(fmt.Sprintf("matcher=%s", name), func(t *testing.T) {
 			t.Run("case=empty", func(t *testing.T) {

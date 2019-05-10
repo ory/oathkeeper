@@ -11,7 +11,7 @@ import (
 	"github.com/go-openapi/swag"
 )
 
-// UpdateRuleInternalServerErrorBody UpdateRuleInternalServerErrorBody UpdateRuleInternalServerErrorBody update rule internal server error body
+// UpdateRuleInternalServerErrorBody UpdateRuleInternalServerErrorBody UpdateRuleInternalServerErrorBody UpdateRuleInternalServerErrorBody UpdateRuleInternalServerErrorBody update rule internal server error body
 // swagger:model UpdateRuleInternalServerErrorBody
 type UpdateRuleInternalServerErrorBody struct {
 

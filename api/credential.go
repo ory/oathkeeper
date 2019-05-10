@@ -12,6 +12,10 @@ import (
 	"gopkg.in/square/go-jose.v2"
 )
 
+const (
+	CredentialsPath = "/.well-known/jwks.json"
+)
+
 type credentialHandlerRegistry interface {
 	x.RegistryWriter
 	credentials.FetcherRegistry
