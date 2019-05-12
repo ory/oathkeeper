@@ -24,6 +24,8 @@ type Provider interface {
 	ProxyWriteTimeout() time.Duration
 	ProxyIdleTimeout() time.Duration
 
+	RuleRepositoryURLs() []url.URL
+
 	ProxyServeAddress() string
 	APIServeAddress() string
 }
