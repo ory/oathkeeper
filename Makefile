@@ -5,9 +5,6 @@ SHELL=/bin/bash -o pipefail
 format:
 		goreturns -w -local github.com/ory $$(listx .)
 
-.PHONY: mocks
-mocks:
-
 .PHONY: gen
 		gen: mocks sdk
 

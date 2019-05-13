@@ -22,7 +22,6 @@ package rule
 
 import (
 	"context"
-	"github.com/ory/oathkeeper/driver/configuration"
 	"net/url"
 	"sync"
 

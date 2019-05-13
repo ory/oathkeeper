@@ -126,6 +126,9 @@ func RunServe(version, build, date string) func(cmd *cobra.Command, args []strin
 
 		logger := logrusx.New()
 		d := driver.NewDefaultDriver(logger, version, build, date, true)
+		if err := d.Registry().Init(); err != nil {
+			logger.WithError(err).Fatal("Unable to initialize.")
+		}
 
 		adminmw := negroni.New()
 		publicmw := negroni.New()

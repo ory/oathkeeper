@@ -42,10 +42,6 @@ jobs:
       - image: circleci/golang:1.12
         environment:
         - GO111MODULE=on
-      - image: oryd/hydra:v1.0.0-rc.3_oryOS.9
-        environment:
-        - DATABASE_URL=memory
-        command: "serve all --dangerous-force-http"
     working_directory: /go/src/github.com/ory/oathkeeper
     steps:
       - checkout

@@ -1,20 +1,18 @@
 package configuration
 
 import (
-	"bytes"
-	"encoding/json"
 	"fmt"
 	"net/url"
 	"strings"
 	"time"
 
-	"github.com/ory/x/viperx"
 	"github.com/rs/cors"
 	"github.com/sirupsen/logrus"
-	"github.com/spf13/viper"
 
 	"github.com/ory/fosite"
 	"github.com/ory/x/corsx"
+	"github.com/ory/x/urlx"
+	"github.com/ory/x/viperx"
 )
 
 var _ Provider = new(ViperProvider)
@@ -38,35 +36,14 @@ func NewViperProvider(l logrus.FieldLogger) *ViperProvider {
 	return &ViperProvider{l: l}
 }
 
-func (v *ViperProvider) AccessRuleRepositories() []AccessRuleRepository {
-	var w = func() []AccessRuleRepository {
-		v.l.Warnf(`All request will be disallowed because no access rule repositories have been defined or the configuration is invalid. To define one or more access rule repositories please configure key "%s"`, ViperKeyAccessRuleRepositories)
-		return []AccessRuleRepository{}
+func (v *ViperProvider) AccessRuleRepositories() []url.URL {
+	sources := viperx.GetStringSlice(v.l, ViperKeyAccessRuleRepositories, []string{})
+	repositories := make([]url.URL, len(sources))
+	for k, source := range sources {
+		repositories[k] = *urlx.ParseOrFatal(v.l, source)
 	}
 
-	// This makes me really angry. Really, really angry.
-	var simple []map[string]interface{}
-	if err := viper.UnmarshalKey(ViperKeyAccessRuleRepositories, &simple); err != nil {
-		v.l.WithError(err).Errorf(`Unable to decode configuration key "%s" to internal representation. Make sure that the configuration values are valid.`, ViperKeyAccessRuleRepositories)
-		return w()
-	}
-
-	var b bytes.Buffer
-	if err := json.NewEncoder(&b).Encode(simple); err != nil {
-		v.l.WithError(err).Errorf(`Unable to encode configuration key "%s" to internal representation. Make sure that the configuration values are valid.`, ViperKeyAccessRuleRepositories)
-		return w()
-	}
-
-	d := json.NewDecoder(&b)
-	d.DisallowUnknownFields()
-
-	var repos []AccessRuleRepository
-	if err := d.Decode(&repos); err != nil {
-		v.l.WithError(err).Errorf(`Unable to decode configuration key "%s" to internal representation. Make sure that the configuration values are valid.`, ViperKeyAccessRuleRepositories)
-		return w()
-	}
-
-	return repos
+	return repositories
 }
 
 func (v *ViperProvider) CORSEnabled(iface string) bool {

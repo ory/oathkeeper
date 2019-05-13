@@ -1,12 +1,9 @@
 package configuration
 
 import (
-	"bytes"
-	"encoding/json"
 	"net/url"
 	"time"
 
-	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 
 	"github.com/rs/cors"
@@ -14,69 +11,6 @@ import (
 
 	"github.com/ory/fosite"
 )
-
-type AccessRuleRepository struct {
-	URL   *url.URL
-	Watch bool
-	TTL   time.Duration
-}
-
-func (r *AccessRuleRepository) UnmarshalJSON(raw []byte) error {
-	var simple struct {
-		URL   string `json:"url"`
-		Watch bool   `json:"watch"`
-		TTL   string `json:"ttl"`
-	}
-	d := json.NewDecoder(bytes.NewBuffer(raw))
-	d.DisallowUnknownFields()
-	if err := d.Decode(&simple); err != nil {
-		return errors.WithStack(err)
-	}
-
-	u, err := url.ParseRequestURI(simple.URL)
-	if err != nil {
-		return errors.WithStack(err)
-	}
-
-	switch u.Scheme {
-	case "http":
-		fallthrough
-	case "https":
-		if len(simple.TTL) > 0 && !simple.Watch {
-			return errors.Errorf("access rule repository sets ttl but watch is disabled: %s", u.String())
-		}
-		if len(simple.TTL) == 0 && simple.Watch {
-			simple.TTL = "30s"
-		}
-	case "file":
-		if len(simple.TTL) > 0 && !simple.Watch {
-			return errors.Errorf("access rule repository sets ttl but watch is disabled: %s", u.String())
-		}
-	case "inline":
-		if simple.Watch {
-			return errors.Errorf("access rule repository url inline does not support enabling watch: %s", u.String())
-		}
-		if len(simple.TTL) > 0 {
-			return errors.Errorf("access rule repository url inline does not support enabling ttl: %s", u.String())
-		}
-	default:
-		return errors.Errorf("access rule repository uses invalid scheme: %s", u.String())
-	}
-
-	var ttl time.Duration
-	if len(simple.TTL) > 0 {
-		ttl, err = time.ParseDuration(simple.TTL)
-		if err != nil {
-			return errors.WithStack(err)
-		}
-	}
-
-	r.TTL = ttl
-	r.Watch = simple.Watch
-	r.URL = u
-
-	return nil
-}
 
 type Provider interface {
 	CORSEnabled(iface string) bool
@@ -90,7 +24,7 @@ type Provider interface {
 	ProxyWriteTimeout() time.Duration
 	ProxyIdleTimeout() time.Duration
 
-	AccessRuleRepositories() []AccessRuleRepository
+	AccessRuleRepositories() []url.URL
 
 	ProxyServeAddress() string
 	APIServeAddress() string

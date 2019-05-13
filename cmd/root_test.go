@@ -61,6 +61,7 @@ func init() {
 
 	os.Setenv("SERVE_API_PORT", fmt.Sprintf("%d", apiPort))
 	os.Setenv("SERVE_PROXY_PORT", fmt.Sprintf("%d", proxyPort))
+	os.Setenv("ACCESS_RULES_REPOSITORIES", "inline://W3siaWQiOiJ0ZXN0LXJ1bGUtNCIsInVwc3RyZWFtIjp7InByZXNlcnZlX2hvc3QiOnRydWUsInN0cmlwX3BhdGgiOiIvYXBpIiwidXJsIjoibXliYWNrZW5kLmNvbS9hcGkifSwibWF0Y2giOnsidXJsIjoibXlwcm94eS5jb20vYXBpIiwibWV0aG9kcyI6WyJHRVQiLCJQT1NUIl19LCJhdXRoZW50aWNhdG9ycyI6W3siaGFuZGxlciI6Im5vb3AifSx7ImhhbmRsZXIiOiJhbm9ueW1vdXMifV0sImF1dGhvcml6ZXIiOnsiaGFuZGxlciI6ImFsbG93In0sImNyZWRlbnRpYWxzX2lzc3VlciI6eyJoYW5kbGVyIjoibm9vcCJ9fV0=")
 }
 
 func ensureOpen(t *testing.T, port int) bool {
@@ -89,7 +90,7 @@ func TestCommandLineInterface(t *testing.T) {
 			},
 		},
 		{args: []string{"rules", fmt.Sprintf("--endpoint=http://127.0.0.1:%d/", apiPort), "list"}},
-		{args: []string{"rules", fmt.Sprintf("--endpoint=http://127.0.0.1:%d/", apiPort), "get", "test-rule-1"}},
+		{args: []string{"rules", fmt.Sprintf("--endpoint=http://127.0.0.1:%d/", apiPort), "get", "test-rule-4"}},
 	} {
 		RootCmd.SetArgs(c.args)
 

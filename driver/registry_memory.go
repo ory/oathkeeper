@@ -1,6 +1,7 @@
 package driver
 
 import (
+	"context"
 	"sync"
 	"time"
 
@@ -48,18 +49,31 @@ type RegistryMemory struct {
 
 	proxyRequestHandler *proxy.RequestHandler
 	proxyProxy          *proxy.Proxy
-	ruleFetcher *rule.Fetcher
+	ruleFetcher         rule.Fetcher
 
 	authenticators map[string]authn.Authenticator
 	authorizers    map[string]authz.Authorizer
 	mutators       map[string]mutate.Mutator
 }
 
-func (r *RegistryMemory) RuleFetcher() *rule.Fetcher {
-	if r.ruleFetcher == nil {
-		r.ruleFetcher = rule.NewFetcher(r.c, r)
+func (r *RegistryMemory) Init() error {
+	rules, err := r.RuleFetcher().Fetch()
+	if err != nil {
+		return err
 	}
-	return  r.ruleFetcher
+
+	if len(rules) == 0 {
+		r.Logger().Warn("No access rules have been configured, all requests will be denied.")
+	}
+
+	return r.RuleRepository().Set(context.Background(), rules)
+}
+
+func (r *RegistryMemory) RuleFetcher() rule.Fetcher {
+	if r.ruleFetcher == nil {
+		r.ruleFetcher = rule.NewFetcherDefault(r.c, r)
+	}
+	return r.ruleFetcher
 }
 
 func (r *RegistryMemory) ProxyRequestHandler() *proxy.RequestHandler {

@@ -2,7 +2,7 @@ package rule
 
 type Registry interface {
 	RuleValidator() Validator
-	RuleFetcher() *Fetcher
+	RuleFetcher() Fetcher
 	RuleRepository() Repository
 	RuleMatcher() Matcher
 }

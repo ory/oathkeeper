@@ -17,6 +17,8 @@ import (
 )
 
 type Registry interface {
+	Init() error
+
 	WithConfig(c configuration.Provider) Registry
 	WithLogger(l logrus.FieldLogger) Registry
 	WithBuildInfo(version, hash, date string) Registry
