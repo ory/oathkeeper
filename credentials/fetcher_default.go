@@ -91,7 +91,8 @@ func (s *FetcherDefault) ResolveSets(ctx context.Context, locations []url.URL) (
 }
 
 func (s *FetcherDefault) fetchParallel(ctx context.Context, locations []url.URL) {
-	ctx, _ = context.WithTimeout(ctx, s.cancelAfter)
+	ctx, cancel := context.WithTimeout(ctx, s.cancelAfter)
+	defer cancel()
 	errs := make(chan error)
 	done := make(chan struct{})
 
