@@ -61,7 +61,11 @@ func init() {
 
 	os.Setenv("SERVE_API_PORT", fmt.Sprintf("%d", apiPort))
 	os.Setenv("SERVE_PROXY_PORT", fmt.Sprintf("%d", proxyPort))
-	os.Setenv("ACCESS_RULES_REPOSITORIES", "inline://W3siaWQiOiJ0ZXN0LXJ1bGUtNCIsInVwc3RyZWFtIjp7InByZXNlcnZlX2hvc3QiOnRydWUsInN0cmlwX3BhdGgiOiIvYXBpIiwidXJsIjoibXliYWNrZW5kLmNvbS9hcGkifSwibWF0Y2giOnsidXJsIjoibXlwcm94eS5jb20vYXBpIiwibWV0aG9kcyI6WyJHRVQiLCJQT1NUIl19LCJhdXRoZW50aWNhdG9ycyI6W3siaGFuZGxlciI6Im5vb3AifSx7ImhhbmRsZXIiOiJhbm9ueW1vdXMifV0sImF1dGhvcml6ZXIiOnsiaGFuZGxlciI6ImFsbG93In0sImNyZWRlbnRpYWxzX2lzc3VlciI6eyJoYW5kbGVyIjoibm9vcCJ9fV0=")
+	os.Setenv("AUTHENTICATORS_NOOP_ENABLED", "1")
+	os.Setenv("AUTHENTICATORS_ANONYMOUS_ENABLED", "true")
+	os.Setenv("AUTHORIZERS_ALLOW_ENABLED", "true")
+	os.Setenv("MUTATORS_NOOP_ENABLED", "true")
+	os.Setenv("ACCESS_RULES_REPOSITORIES", "inline://W3siaWQiOiJ0ZXN0LXJ1bGUtNCIsInVwc3RyZWFtIjp7InByZXNlcnZlX2hvc3QiOnRydWUsInN0cmlwX3BhdGgiOiIvYXBpIiwidXJsIjoibXliYWNrZW5kLmNvbS9hcGkifSwibWF0Y2giOnsidXJsIjoibXlwcm94eS5jb20vYXBpIiwibWV0aG9kcyI6WyJHRVQiLCJQT1NUIl19LCJhdXRoZW50aWNhdG9ycyI6W3siaGFuZGxlciI6Im5vb3AifSx7ImhhbmRsZXIiOiJhbm9ueW1vdXMifV0sImF1dGhvcml6ZXIiOnsiaGFuZGxlciI6ImFsbG93In0sIm11dGF0b3IiOnsiaGFuZGxlciI6Im5vb3AifX1d")
 }
 
 func ensureOpen(t *testing.T, port int) bool {

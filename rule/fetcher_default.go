@@ -125,7 +125,9 @@ func (f *FetcherDefault) fetchFile(source string) ([]Rule, error) {
 
 func (f *FetcherDefault) decode(r io.Reader) ([]Rule, error) {
 	var ks []Rule
-	if err := json.NewDecoder(r).Decode(&ks); err != nil {
+	d := json.NewDecoder(r)
+	d.DisallowUnknownFields()
+	if err := d.Decode(&ks); err != nil {
 		return nil, errors.WithStack(err)
 	}
 	return ks, nil
