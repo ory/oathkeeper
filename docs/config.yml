@@ -230,6 +230,35 @@ serve:
         # Or from a base64 encoded (without padding) string:
         base64: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tXG5NSUlEWlRDQ0FrMmdBd0lCQWdJRVY1eE90REFOQmdr...
 
+# Defines configuration for access rules
+access_rules:
+  # Defines where access rules should be fetched from
+  repositories:
+    -
+      # The url points to the location of the access rule definition. If the URL Scheme is
+      # file://, the access rules (an array of access rules is expected) will be fetched from the local file system.
+      url: file://path/to/rules.json
+      # If watch is true, the repository will be watched for changes.
+      watch: true
+      # Watching the filesystem works using inotify. If the operating system does not support fsnotify you may
+      # set ttl which will scan the directory in the given interval. If possible, you should not set this for file sources.
+      # ttl: 5m
+    -
+      # The url points to the location of the access rule definition. If the URL Scheme is
+      # inline://, the access rules (an array of access rules is expected) are expected to be a base64 encoded (with padding!)
+      # JSON string (base64_encode(`[{"id":"foo-rule","authenticators":[....]}]`)):
+      url: inline://W3siaWQiOiJmb28tcnVsZSIsImF1dGhlbnRpY2F0b3JzIjpbXX1d
+      # This url scheme neither supports "watch" nor "ttl".
+
+    -
+      # The url points to the location of the access rule definition. If the URL Scheme is
+      # http:// or https, the access rules (an array of access rules is expected) will be fetched from the provided URL.
+      url: http://
+      # If watch is true, the repository will be watched for changes.
+      watch: true
+      # ttl sets the polling interval for refreshing the access rules. Defaults to 30s for this url.
+      ttl: 5s
+
 # All authenticators can be configured under this configuration key
 authenticators:
   # Configures the anonymous authenticator

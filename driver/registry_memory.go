@@ -48,10 +48,18 @@ type RegistryMemory struct {
 
 	proxyRequestHandler *proxy.RequestHandler
 	proxyProxy          *proxy.Proxy
+	ruleFetcher *rule.Fetcher
 
 	authenticators map[string]authn.Authenticator
 	authorizers    map[string]authz.Authorizer
 	mutators       map[string]mutate.Mutator
+}
+
+func (r *RegistryMemory) RuleFetcher() *rule.Fetcher {
+	if r.ruleFetcher == nil {
+		r.ruleFetcher = rule.NewFetcher(r.c, r)
+	}
+	return  r.ruleFetcher
 }
 
 func (r *RegistryMemory) ProxyRequestHandler() *proxy.RequestHandler {

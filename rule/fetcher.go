@@ -2,6 +2,7 @@ package rule
 
 import (
 	"bytes"
+	"context"
 	"encoding/base64"
 	"encoding/json"
 	"io"
@@ -12,92 +13,97 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/ory/x/httpx"
+
 	"github.com/ory/oathkeeper/driver/configuration"
+	"github.com/ory/oathkeeper/x"
 
 	"github.com/pkg/errors"
-	"gopkg.in/square/go-jose.v2"
 )
+
+type fetcherRegistry interface {
+	x.RegistryLogger
+	RuleRepository() Repository
+	RuleValidator() Validator
+}
 
 type Fetcher struct {
 	c  configuration.Provider
+	r  fetcherRegistry
 	hc *http.Client
 }
 
-func (f *Fetcher) Watch() error {
-	set := make(chan []Rule)
-	errs := make(chan error)
-	sources := f.c.RuleRepositoryURLs()
-	for _, source := range sources {
-		go f.discover(source, set, errs)
+func NewFetcher(
+	c configuration.Provider,
+	r fetcherRegistry,
+) *Fetcher {
+	return &Fetcher{
+		r: r, c: c,
+		hc: httpx.NewResilientClientLatencyToleranceHigh(nil),
 	}
+}
 
+
+
+func (f *Fetcher) Watch() error {
 	var rules []Rule
-	for i := 0; i < len(sources); i++ {
-		select {
-		case s := <-set:
-			for _, r := range s {
-				rules = append(rules, r)
+	for _, source := range f.c.RuleRepositoryURLs() {
+		interim, err := f.fetch(source)
+		if err != nil {
+			f.r.Logger().WithError(err).Errorf("Skipping access rules from repository because fetching failed: %s", source)
+			continue
+		}
+
+		for _, rule := range interim {
+			if err := f.r.RuleValidator().Validate(&rule); err != nil {
+				f.r.Logger().WithError(err).Errorf("Skipping access rule because validation failed: %s", rule.ID)
+				continue
 			}
-		case err := <-errs:
-			return err
+			rules = append(rules, rule)
 		}
 	}
 
-	return nil
+	return f.r.RuleRepository().Set(context.Background(), rules)
 }
 
-func (f *Fetcher) discover(
-	source url.URL,
-	set chan []Rule,
-	ec chan error,
-) {
-	if err := f.fetch(&source, set); err != nil {
-		ec <- err
-	}
-}
-
-func (f *Fetcher) fetch(source *url.URL, set chan []Rule) error {
+func (f *Fetcher) fetch(source url.URL) ([]Rule, error) {
 	switch source.Scheme {
 	case "http":
 		fallthrough
 	case "https":
-		if err := f.fetchRemote(source.String(), set); err != nil {
-			return err
-		}
+		return f.fetchRemote(source.String())
 	case "file":
 		p := strings.Replace(source.String(), "file://", "", 1)
 		if path.Ext(p) == ".json" {
-			return f.fetchFile(p, set)
+			return f.fetchFile(p)
 		}
 		return f.fetchDir(p)
 	case "inline":
 		src, err := base64.StdEncoding.DecodeString(strings.Replace(source.String(), "inline://", "", 1))
 		if err != nil {
-			return errors.Wrapf(err, "rule: ")
+			return nil, errors.Wrapf(err, "rule: ")
 		}
-		return f.decode(bytes.NewBuffer(src), set)
-		// do nothing...
-	default:
-		return errors.Errorf("rule: source url uses an unknown scheme: %s", source)
+		return f.decode(bytes.NewBuffer(src))
 	}
-	return nil
+	return nil, errors.Errorf("rule: source url uses an unknown scheme: %s", source)
 }
 
-func (f *Fetcher) fetchRemote(source string, set chan []Rule) error {
+func (f *Fetcher) fetchRemote(source string) ([]Rule, error) {
 	res, err := f.hc.Get(source)
 	if err != nil {
-		return errors.Wrapf(err, "rule: ")
+		return nil, errors.Wrapf(err, "rule: ")
 	}
 	defer res.Body.Close()
 	if res.StatusCode != http.StatusOK {
-		return errors.Errorf("rule: expected http response status code 200 but got %d when fetching: %s", source)
+		return nil, errors.Errorf("rule: expected http response status code 200 but got %d when fetching: %s", source)
 	}
 
-	return f.decode(res.Body, set)
+	return f.decode(res.Body)
 }
 
-func (f *Fetcher) fetchDir(source string) error {
-	return filepath.Walk(source, func(path string, info os.FileInfo, err error) error {
+func (f *Fetcher) fetchDir(source string) ([]Rule, error) {
+	var rules []Rule
+	if err := filepath.Walk(source, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return errors.Wrapf(err, "rule: ")
 		}
@@ -105,25 +111,34 @@ func (f *Fetcher) fetchDir(source string) error {
 			return nil
 		}
 
-		return f.fetchFile(path)
-	})
+		interim, err := f.fetchFile(path)
+		if err != nil {
+			return err
+		}
+
+		rules = append(rules, interim...)
+
+		return nil
+	}); err != nil {
+		return nil, err
+	}
+	return rules, nil
 }
 
-func (f *Fetcher) fetchFile(source string, set chan []Rule) error {
+func (f *Fetcher) fetchFile(source string) ([]Rule, error) {
 	fp, err := os.Open(source)
 	if err != nil {
-		return errors.Wrapf(err, "rule: ")
+		return nil, errors.Wrapf(err, "rule: ")
 	}
 	defer fp.Close()
 
-	return f.decode(fp, set)
+	return f.decode(fp)
 }
 
-func (f *Fetcher) decode(r io.Reader, set chan[]Rule) error {
+func (f *Fetcher) decode(r io.Reader) ([]Rule, error) {
 	var ks []Rule
 	if err := json.NewDecoder(r).Decode(&ks); err != nil {
-		return errors.Wrapf(err, "rule: ")
+		return nil, errors.Wrapf(err, "rule: ")
 	}
-	set <- &ks
-	return nil
+	return ks, nil
 }

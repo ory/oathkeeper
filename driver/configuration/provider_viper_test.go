@@ -1,13 +1,105 @@
 package configuration
 
 import (
+	"bytes"
 	"fmt"
 	"testing"
+	"time"
 
+	"github.com/ory/x/urlx"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
+
+func TestAccessRuleRepositories(t *testing.T) {
+	v := NewViperProvider(logrus.New())
+
+	for k, tc := range []struct {
+		in     string
+		expect []AccessRuleRepository
+	}{
+		// this should not return anything because ttl is used without watch
+		{
+			in: `
+access_rules:
+  repositories:
+    - url: "file://path/to/rules.json"
+      ttl: 60s
+`,
+			expect: []AccessRuleRepository{},
+		},
+		// this should not return anything because ttl is used without watch
+		{
+			in: `
+access_rules:
+  repositories:
+    - url: "http://host/path/rules.json"
+      ttl: 60s
+`,
+			expect: []AccessRuleRepository{},
+		},
+		// this should pass and set the default ttl for https when watch true
+		{
+			in: `
+access_rules:
+  repositories:
+    - url: "http://host/path/rules.json"
+      watch: true
+`,
+			expect: []AccessRuleRepository{{URL: urlx.ParseOrPanic("http://host/path/rules.json"), Watch: true, TTL: time.Second*30}},
+		},
+		// this should not return anything because inline is misconfigured (watch not supported)
+		{
+			in: `
+access_rules:
+  repositories:
+    - url: "inline://W10="
+      watch: true
+`,
+			expect: []AccessRuleRepository{},
+		},
+		// this should not return anything because inline is misconfigured (ttl not supported)
+		{
+			in: `
+access_rules:
+  repositories:
+    - url: "inline://W10="
+      ttl: 60s
+`,
+			expect: []AccessRuleRepository{},
+		},
+		// this should pass
+		{
+			in: `
+access_rules:
+  repositories:
+    - url: "file://path/to/rules.json"
+      watch: true
+      ttl: 60s
+    - url: "http://host/path/rules.json"
+      watch: true
+      ttl: 60s
+    - url: "inline://W10="
+`,
+			expect: []AccessRuleRepository{
+				{URL: urlx.ParseOrPanic("file://path/to/rules.json"), Watch: true, TTL: time.Minute},
+				{URL: urlx.ParseOrPanic("http://host/path/rules.json"), Watch: true, TTL: time.Minute},
+				{URL: urlx.ParseOrPanic("inline://W10=")},
+			},
+		},
+		{
+			in: ``,
+		},
+	} {
+		t.Run(fmt.Sprintf("case=%d", k), func(t *testing.T) {
+			viper.SetConfigType("yml")
+			require.NoError(t, viper.ReadConfig(bytes.NewBufferString(tc.in)))
+			assert.EqualValues(t, tc.expect, v.AccessRuleRepositories())
+		})
+	}
+}
 
 func TestToScopeStrategy(t *testing.T) {
 	v := NewViperProvider(logrus.New())
