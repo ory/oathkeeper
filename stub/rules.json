@@ -24,7 +24,7 @@
     "authorizer": {
       "handler": "allow"
     },
-    "credentials_issuer": {
+    "mutator": {
       "handler": "noop"
     }
   },
@@ -53,7 +53,7 @@
     "authorizer": {
       "handler": "deny"
     },
-    "credentials_issuer": {
+    "mutator": {
       "handler": "id_token"
     }
   },
@@ -82,7 +82,7 @@
     "authorizer": {
       "handler": "allow"
     },
-    "credentials_issuer": {
+    "mutator": {
       "handler": "id_token"
     }
   }
