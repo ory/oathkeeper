@@ -378,7 +378,7 @@ End of functions from https://github.com/client9/shlib
 EOF
 
 PROJECT_NAME="oathkeeper"
-OWNER=github.com/ory
+OWNER="ory"
 REPO="oathkeeper"
 BINARY=oathkeeper
 FORMAT=tar.gz
