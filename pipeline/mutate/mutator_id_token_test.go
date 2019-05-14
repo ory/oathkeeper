@@ -58,9 +58,9 @@ func TestMutatorIDToken(t *testing.T) {
 			k   string
 			ttl time.Duration
 		}{
-			{k: "file://../../stub/jwks-hs.json"},
-			{k: "file://../../stub/jwks-rsa-multiple.json"},
-			{k: "file://../../stub/jwks-ecdsa.json"},
+			{k: "file://../../test/stub/jwks-hs.json"},
+			{k: "file://../../test/stub/jwks-rsa-multiple.json"},
+			{k: "file://../../test/stub/jwks-ecdsa.json"},
 		} {
 			t.Run(fmt.Sprintf("case=%d", k), func(t *testing.T) {
 				viper.Set(configuration.ViperKeyMutatorIDTokenJWKSURL, tc.k)

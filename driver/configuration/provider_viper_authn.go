@@ -20,7 +20,7 @@ const (
 
 	// jwt
 	ViperKeyAuthenticatorJWTIsEnabled     = "authenticators.jwt.enabled"
-	ViperKeyAuthenticatorJWTJWKSURIs      = "authenticators.jwt.jwk_urls"
+	ViperKeyAuthenticatorJWTJWKSURIs      = "authenticators.jwt.jwks_urls"
 	ViperKeyAuthenticatorJWTScopeStrategy = "authenticators.jwt.scope_strategy"
 
 	// oauth2_client_credentials

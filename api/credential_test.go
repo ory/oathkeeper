@@ -19,7 +19,7 @@ import (
 
 func TestCredentialsHandler(t *testing.T) {
 	conf := internal.NewConfigurationWithDefaults()
-	viper.Set(configuration.ViperKeyMutatorIDTokenJWKSURL, "file://../stub/jwks-rsa-multiple.json")
+	viper.Set(configuration.ViperKeyMutatorIDTokenJWKSURL, "file://../test/stub/jwks-rsa-multiple.json")
 	r := internal.NewRegistry(conf)
 
 	router := x.NewAPIRouter()

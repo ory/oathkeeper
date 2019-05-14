@@ -118,7 +118,7 @@ func cert(daemon string, logger logrus.FieldLogger) []tls.Certificate {
 		logger.WithError(err).Fatalf("Unable to load HTTPS TLS Certificate")
 	}
 
-	logger.Info("TLS has not been configured for %s, skipping", daemon)
+	logger.Infof("TLS has not been configured for %s, skipping", daemon)
 	return nil
 }
 

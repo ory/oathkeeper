@@ -61,9 +61,9 @@ func TestFetcherDefault(t *testing.T) {
 		*urlx.ParseOrPanic(slowServer.URL),
 		*urlx.ParseOrPanic(fastServer.URL),
 		*urlx.ParseOrPanic(invalidServer.URL),
-		*urlx.ParseOrPanic("file://../stub/jwks-hs.json"),
-		*urlx.ParseOrPanic("file://../stub/jwks-rsa-single.json"),
-		*urlx.ParseOrPanic("file://../stub/jwks-rsa-multiple.json"),
+		*urlx.ParseOrPanic("file://../test/stub/jwks-hs.json"),
+		*urlx.ParseOrPanic("file://../test/stub/jwks-rsa-single.json"),
+		*urlx.ParseOrPanic("file://../test/stub/jwks-rsa-multiple.json"),
 	}
 
 	t.Run("name=should result in error because server times out", func(t *testing.T) {

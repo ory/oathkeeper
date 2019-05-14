@@ -47,7 +47,7 @@ func TestVerifierDefault(t *testing.T) {
 				Audiences:     []string{"aud-1", "aud-2"},
 				Issuers:       []string{"iss-1", "iss-2"},
 				Scope:         []string{"scope-1", "scope-2"},
-				KeyURLs:       []url.URL{*urlx.ParseOrPanic("file://../stub/jwks-hs.json")},
+				KeyURLs:       []url.URL{*urlx.ParseOrPanic("file://../test/stub/jwks-hs.json")},
 				ScopeStrategy: fosite.ExactScopeStrategy,
 			},
 			token: sign(jwt.MapClaims{
@@ -56,7 +56,7 @@ func TestVerifierDefault(t *testing.T) {
 				"aud":   []string{"aud-1", "aud-2"},
 				"iss":   "iss-2",
 				"scope": []string{"scope-3", "scope-2", "scope-1"},
-			}, "file://../stub/jwks-hs.json"),
+			}, "file://../test/stub/jwks-hs.json"),
 			expectClaims: jwt.MapClaims{
 				"sub": "sub",
 				"exp": float64(now.Add(time.Hour).Unix()),
@@ -72,7 +72,7 @@ func TestVerifierDefault(t *testing.T) {
 				Audiences:     []string{"aud-1", "aud-2"},
 				Issuers:       []string{"iss-1", "iss-2"},
 				Scope:         []string{"scope-1", "scope-2"},
-				KeyURLs:       []url.URL{*urlx.ParseOrPanic("file://../stub/jwks-hs.json")},
+				KeyURLs:       []url.URL{*urlx.ParseOrPanic("file://../test/stub/jwks-hs.json")},
 				ScopeStrategy: fosite.ExactScopeStrategy,
 			},
 			token: sign(jwt.MapClaims{
@@ -81,7 +81,7 @@ func TestVerifierDefault(t *testing.T) {
 				"aud":   []string{"aud-1", "aud-2"},
 				"iss":   "iss-2",
 				"scope": "scope-3 scope-2 scope-1",
-			}, "file://../stub/jwks-hs.json"),
+			}, "file://../test/stub/jwks-hs.json"),
 			expectClaims: jwt.MapClaims{
 				"sub": "sub",
 				"exp": float64(now.Add(time.Hour).Unix()),
@@ -97,7 +97,7 @@ func TestVerifierDefault(t *testing.T) {
 				Audiences:     []string{"aud-1", "aud-2"},
 				Issuers:       []string{"iss-1", "iss-2"},
 				Scope:         []string{"scope-1", "scope-2"},
-				KeyURLs:       []url.URL{*urlx.ParseOrPanic("file://../stub/jwks-hs.json")},
+				KeyURLs:       []url.URL{*urlx.ParseOrPanic("file://../test/stub/jwks-hs.json")},
 				ScopeStrategy: fosite.ExactScopeStrategy,
 			},
 			token: sign(jwt.MapClaims{
@@ -106,7 +106,7 @@ func TestVerifierDefault(t *testing.T) {
 				"aud": []string{"aud-1", "aud-2"},
 				"iss": "iss-2",
 				"scp": "scope-3 scope-2 scope-1",
-			}, "file://../stub/jwks-hs.json"),
+			}, "file://../test/stub/jwks-hs.json"),
 			expectClaims: jwt.MapClaims{
 				"sub": "sub",
 				"exp": float64(now.Add(time.Hour).Unix()),
@@ -122,7 +122,7 @@ func TestVerifierDefault(t *testing.T) {
 				Audiences:     []string{"aud-1", "aud-2"},
 				Issuers:       []string{"iss-1", "iss-2"},
 				Scope:         []string{"scope-1", "scope-2"},
-				KeyURLs:       []url.URL{*urlx.ParseOrPanic("file://../stub/jwks-hs.json")},
+				KeyURLs:       []url.URL{*urlx.ParseOrPanic("file://../test/stub/jwks-hs.json")},
 				ScopeStrategy: fosite.ExactScopeStrategy,
 			},
 			token: sign(jwt.MapClaims{
@@ -131,7 +131,7 @@ func TestVerifierDefault(t *testing.T) {
 				"aud":    []string{"aud-1", "aud-2"},
 				"iss":    "iss-2",
 				"scopes": "scope-3 scope-2 scope-1",
-			}, "file://../stub/jwks-hs.json"),
+			}, "file://../test/stub/jwks-hs.json"),
 			expectClaims: jwt.MapClaims{
 				"sub": "sub",
 				"exp": float64(now.Add(time.Hour).Unix()),
@@ -147,7 +147,7 @@ func TestVerifierDefault(t *testing.T) {
 				Audiences:  []string{"aud-1", "aud-2"},
 				Issuers:    []string{"iss-1", "iss-2"},
 				Scope:      []string{"scope-1", "scope-2"},
-				KeyURLs:    []url.URL{*urlx.ParseOrPanic("file://../stub/jwks-hs.json")},
+				KeyURLs:    []url.URL{*urlx.ParseOrPanic("file://../test/stub/jwks-hs.json")},
 			},
 			token: sign(jwt.MapClaims{
 				"sub":    "sub",
@@ -155,7 +155,7 @@ func TestVerifierDefault(t *testing.T) {
 				"aud":    []string{"aud-1", "aud-2"},
 				"iss":    "iss-2",
 				"scopes": "scope-3 scope-2 scope-1",
-			}, "file://../stub/jwks-hs.json"),
+			}, "file://../test/stub/jwks-hs.json"),
 			expectErr: true,
 		},
 		{
@@ -165,7 +165,7 @@ func TestVerifierDefault(t *testing.T) {
 				Audiences:     []string{"aud-1", "aud-2"},
 				Issuers:       []string{"iss-1", "iss-2"},
 				Scope:         []string{"scope-1", "scope-2"},
-				KeyURLs:       []url.URL{*urlx.ParseOrPanic("file://../stub/jwks-rsa-single.json")},
+				KeyURLs:       []url.URL{*urlx.ParseOrPanic("file://../test/stub/jwks-rsa-single.json")},
 				ScopeStrategy: fosite.ExactScopeStrategy,
 			},
 			token: sign(jwt.MapClaims{
@@ -174,7 +174,7 @@ func TestVerifierDefault(t *testing.T) {
 				"aud":   []string{"aud-1", "aud-2"},
 				"iss":   "iss-2",
 				"scope": "scope-3 scope-2 scope-1",
-			}, "file://../stub/jwks-rsa-single.json"),
+			}, "file://../test/stub/jwks-rsa-single.json"),
 			expectErr: true,
 		},
 		{
@@ -184,7 +184,7 @@ func TestVerifierDefault(t *testing.T) {
 				Audiences:     []string{"aud-1", "aud-2"},
 				Issuers:       []string{"iss-1", "iss-2"},
 				Scope:         []string{"scope-1", "scope-2"},
-				KeyURLs:       []url.URL{*urlx.ParseOrPanic("file://../stub/jwks-hs.json")},
+				KeyURLs:       []url.URL{*urlx.ParseOrPanic("file://../test/stub/jwks-hs.json")},
 				ScopeStrategy: fosite.ExactScopeStrategy,
 			},
 			token: sign(jwt.MapClaims{
@@ -193,7 +193,7 @@ func TestVerifierDefault(t *testing.T) {
 				"aud":   []string{"not-aud-1", "aud-2"},
 				"iss":   "iss-2",
 				"scope": "scope-3 scope-2 scope-1",
-			}, "file://../stub/jwks-hs.json"),
+			}, "file://../test/stub/jwks-hs.json"),
 			expectErr: true,
 		},
 		{
@@ -203,7 +203,7 @@ func TestVerifierDefault(t *testing.T) {
 				Audiences:     []string{"aud-1", "aud-2"},
 				Issuers:       []string{"iss-1", "iss-2"},
 				Scope:         []string{"scope-1", "scope-2"},
-				KeyURLs:       []url.URL{*urlx.ParseOrPanic("file://../stub/jwks-hs.json")},
+				KeyURLs:       []url.URL{*urlx.ParseOrPanic("file://../test/stub/jwks-hs.json")},
 				ScopeStrategy: fosite.ExactScopeStrategy,
 			},
 			token: sign(jwt.MapClaims{
@@ -212,7 +212,7 @@ func TestVerifierDefault(t *testing.T) {
 				"aud":   []string{"aud-1", "aud-2"},
 				"iss":   "not-iss-2",
 				"scope": "scope-3 scope-2 scope-1",
-			}, "file://../stub/jwks-hs.json"),
+			}, "file://../test/stub/jwks-hs.json"),
 			expectErr: true,
 		},
 		{
@@ -222,7 +222,7 @@ func TestVerifierDefault(t *testing.T) {
 				Audiences:     []string{"aud-1", "aud-2"},
 				Issuers:       []string{"iss-1", "iss-2"},
 				Scope:         []string{"scope-1", "scope-2"},
-				KeyURLs:       []url.URL{*urlx.ParseOrPanic("file://../stub/jwks-hs.json")},
+				KeyURLs:       []url.URL{*urlx.ParseOrPanic("file://../test/stub/jwks-hs.json")},
 				ScopeStrategy: fosite.ExactScopeStrategy,
 			},
 			token: sign(jwt.MapClaims{
@@ -231,7 +231,7 @@ func TestVerifierDefault(t *testing.T) {
 				"aud":   []string{"aud-1", "aud-2"},
 				"iss":   "iss-2",
 				"scope": "scope-3 not-scope-2 scope-1",
-			}, "file://../stub/jwks-hs.json"),
+			}, "file://../test/stub/jwks-hs.json"),
 			expectErr: true,
 		},
 		{
@@ -241,7 +241,7 @@ func TestVerifierDefault(t *testing.T) {
 				Audiences:     []string{"aud-1", "aud-2"},
 				Issuers:       []string{"iss-1", "iss-2"},
 				Scope:         []string{"scope-1", "scope-2"},
-				KeyURLs:       []url.URL{*urlx.ParseOrPanic("file://../stub/jwks-hs.json")},
+				KeyURLs:       []url.URL{*urlx.ParseOrPanic("file://../test/stub/jwks-hs.json")},
 				ScopeStrategy: fosite.ExactScopeStrategy,
 			},
 			token: sign(jwt.MapClaims{
@@ -250,7 +250,7 @@ func TestVerifierDefault(t *testing.T) {
 				"aud":   []string{"aud-1", "aud-2"},
 				"iss":   "iss-2",
 				"scope": "scope-3 scope-2 scope-1",
-			}, "file://../stub/jwks-hs.json"),
+			}, "file://../test/stub/jwks-hs.json"),
 			expectErr: true,
 		},
 		{
@@ -260,7 +260,7 @@ func TestVerifierDefault(t *testing.T) {
 				Audiences:     []string{"aud-1", "aud-2"},
 				Issuers:       []string{"iss-1", "iss-2"},
 				Scope:         []string{"scope-1", "scope-2"},
-				KeyURLs:       []url.URL{*urlx.ParseOrPanic("file://../stub/jwks-hs.json")},
+				KeyURLs:       []url.URL{*urlx.ParseOrPanic("file://../test/stub/jwks-hs.json")},
 				ScopeStrategy: fosite.ExactScopeStrategy,
 			},
 			token: sign(jwt.MapClaims{
@@ -270,7 +270,7 @@ func TestVerifierDefault(t *testing.T) {
 				"aud":   []string{"aud-1", "aud-2"},
 				"iss":   "iss-2",
 				"scope": "scope-3 scope-2 scope-1",
-			}, "file://../stub/jwks-hs.json"),
+			}, "file://../test/stub/jwks-hs.json"),
 			expectErr: true,
 		},
 		{
@@ -280,7 +280,7 @@ func TestVerifierDefault(t *testing.T) {
 				Audiences:     []string{"aud-1", "aud-2"},
 				Issuers:       []string{"iss-1", "iss-2"},
 				Scope:         []string{"scope-1", "scope-2"},
-				KeyURLs:       []url.URL{*urlx.ParseOrPanic("file://../stub/jwks-hs.json")},
+				KeyURLs:       []url.URL{*urlx.ParseOrPanic("file://../test/stub/jwks-hs.json")},
 				ScopeStrategy: fosite.ExactScopeStrategy,
 			},
 			token: sign(jwt.MapClaims{
@@ -290,7 +290,7 @@ func TestVerifierDefault(t *testing.T) {
 				"aud":   []string{"aud-1", "aud-2"},
 				"iss":   "iss-2",
 				"scope": "scope-3 scope-2 scope-1",
-			}, "file://../stub/jwks-hs.json"),
+			}, "file://../test/stub/jwks-hs.json"),
 			expectErr: true,
 		},
 	} {

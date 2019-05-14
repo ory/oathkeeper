@@ -43,10 +43,10 @@ import (
 
 func TestAuthenticatorJWT(t *testing.T) {
 	keys := []string{
-		"file://../../stub/jwks-hs.json",
-		"file://../../stub/jwks-rsa-multiple.json",
-		"file://../../stub/jwks-rsa-single.json",
-		"file://../../stub/jwks-ecdsa.json",
+		"file://../../test/stub/jwks-hs.json",
+		"file://../../test/stub/jwks-rsa-multiple.json",
+		"file://../../test/stub/jwks-rsa-single.json",
+		"file://../../test/stub/jwks-ecdsa.json",
 	}
 	conf := internal.NewConfigurationWithDefaults()
 	viper.Set(configuration.ViperKeyAuthenticatorJWTJWKSURIs, keys)

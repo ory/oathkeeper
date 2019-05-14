@@ -31,9 +31,9 @@ func TestSignerDefault(t *testing.T) {
 	signer := NewSignerDefault(newDefaultSignerMockRegistry())
 
 	for _, src := range []string{
-		"file://../stub/jwks-hs.json",
-		"file://../stub/jwks-rsa-multiple.json",
-		"file://../stub/jwks-rsa-single.json",
+		"file://../test/stub/jwks-hs.json",
+		"file://../test/stub/jwks-rsa-multiple.json",
+		"file://../test/stub/jwks-rsa-single.json",
 	} {
 		t.Run(fmt.Sprintf("src=%s", src), func(t *testing.T) {
 			token, err := signer.Sign(context.Background(), urlx.ParseOrPanic(src), jwt.MapClaims{"sub": "foo"})
