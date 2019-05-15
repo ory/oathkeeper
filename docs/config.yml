@@ -230,20 +230,20 @@ serve:
         # Or from a base64 encoded (without padding) string:
         base64: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tXG5NSUlEWlRDQ0FrMmdBd0lCQWdJRVY1eE90REFOQmdr...
 
-# Defines configuration for access rules
+# Configures Access Rules
 access_rules:
-  # Defines where access rules should be fetched from
+  # Locations (list of URLs) where access rules should be fetched from on boot.
+  # It is expected that the documents at those locations return a JSON Array containing ORY Oathkeeper Access Rules.
   repositories:
-    # The url points to the location of the access rule definition. If the URL Scheme is
-    # file://, the access rules (an array of access rules is expected) will be fetched from the local file system.
+    # If the URL Scheme is `file://`, the access rules (an array of access rules is expected) will be
+    # fetched from the local file system.
     - file://path/to/rules.json
-    # The url points to the location of the access rule definition. If the URL Scheme is
-    # inline://, the access rules (an array of access rules is expected) are expected to be a base64 encoded (with padding!)
-    # JSON string (base64_encode(`[{"id":"foo-rule","authenticators":[....]}]`)):
+    # If the URL Scheme is `inline://`, the access rules (an array of access rules is expected)
+    # are expected to be a base64 encoded (with padding!) JSON string (base64_encode(`[{"id":"foo-rule","authenticators":[....]}]`)):
     - inline://W3siaWQiOiJmb28tcnVsZSIsImF1dGhlbnRpY2F0b3JzIjpbXX1d
-    # The url points to the location of the access rule definition. If the URL Scheme is
-    # http:// or https, the access rules (an array of access rules is expected) will be fetched from the provided URL.
-    - http://
+    # If the URL Scheme is `http://` or `https://`, the access rules (an array of access rules is expected) will be
+    # fetched from the provided HTTP(s) location.
+    - https://path-to-my-rules/rules.json
 
 # All authenticators can be configured under this configuration key
 authenticators:
@@ -253,7 +253,7 @@ authenticators:
     enabled: true
 
     # Sets the anonymous username. Defaults to "anonymous". Common names include "guest", "anon", "anonymous", "unknown".
-    username: anonymous
+    subject: anonymous
 
   # Configures the jwt authenticator
   jwt:
@@ -266,6 +266,7 @@ authenticators:
     jwks_urls:
       - https://my-website.com/.well-known/jwks.json
       - https://my-other-website.com/.well-known/jwks.json
+      - file://path/to/local/jwks.json
 
     # Sets the strategy to be used to validate/match the scope. Supports "hierarchic", "exact", "wildcard", "none". Defaults
     # to "none".

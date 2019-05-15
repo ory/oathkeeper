@@ -13,7 +13,7 @@ import (
 const (
 	// anonymous
 	ViperKeyAuthenticatorAnonymousIsEnabled  = "authenticators.anonymous.enabled"
-	ViperKeyAuthenticatorAnonymousIdentifier = "authenticators.anonymous.username"
+	ViperKeyAuthenticatorAnonymousIdentifier = "authenticators.anonymous.subject"
 
 	// noop
 	ViperKeyAuthenticatorNoopIsEnabled = "authenticators.noop.enabled"
@@ -38,7 +38,7 @@ const (
 	ViperKeyAuthenticatorOAuth2TokenIntrospectionPreAuthorizationTokenURL     = "authenticators.oauth2_introspection.pre_authorization.token_url"
 
 	// unauthorized
-	ViperKeyAuthenticatorUnauthorizedIsEnabled = "authenticators.unauthorized"
+	ViperKeyAuthenticatorUnauthorizedIsEnabled = "authenticators.unauthorized.enabled"
 )
 
 func (v *ViperProvider) AuthenticatorAnonymousIsEnabled() bool {
