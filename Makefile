@@ -4,6 +4,7 @@ SHELL=/bin/bash -o pipefail
 .PHONY: format
 format:
 		goreturns -w -local github.com/ory $$(listx .)
+		npm run format:docs
 
 .PHONY: gen
 		gen: mocks sdk

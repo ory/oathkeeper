@@ -6,6 +6,7 @@
   "main": "sdk/js/swagger/src/index.js",
   "scripts": {
     "prettier": "prettier --single-quote --parser flow --no-semi --write \"sdk/js/**/*.js\"",
+    "format:docs": "prettier --write --print-width 80 --prose-wrap always \"{**/,./}*.md\"",
     "postinstall": "opencollective postinstall"
   },
   "browser": {
