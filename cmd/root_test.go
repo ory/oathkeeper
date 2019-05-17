@@ -95,6 +95,10 @@ func TestCommandLineInterface(t *testing.T) {
 		},
 		{args: []string{"rules", fmt.Sprintf("--endpoint=http://127.0.0.1:%d/", apiPort), "list"}},
 		{args: []string{"rules", fmt.Sprintf("--endpoint=http://127.0.0.1:%d/", apiPort), "get", "test-rule-4"}},
+		{args: []string{"credentials", "generate", "--alg", "RS256"}},
+		{args: []string{"credentials", "generate", "--alg", "ES256"}},
+		{args: []string{"credentials", "generate", "--alg", "HS256"}},
+		{args: []string{"credentials", "generate", "--alg", "RS512"}},
 	} {
 		RootCmd.SetArgs(c.args)
 

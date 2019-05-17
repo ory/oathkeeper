@@ -41,7 +41,7 @@ import (
 	"github.com/ory/oathkeeper/rule"
 )
 
-func TestJudge(t *testing.T) {
+func TestDecisionAPI(t *testing.T) {
 	conf := internal.NewConfigurationWithDefaults()
 	viper.Set(configuration.ViperKeyAuthenticatorNoopIsEnabled, true)
 	viper.Set(configuration.ViperKeyAuthenticatorUnauthorizedIsEnabled, true)
@@ -51,7 +51,7 @@ func TestJudge(t *testing.T) {
 	viper.Set(configuration.ViperKeyMutatorNoopIsEnabled, true)
 	reg := internal.NewRegistry(conf).WithBrokenPipelineMutator()
 
-	d := reg.JudgeHandler()
+	d := reg.DecisionHandler()
 
 	n := negroni.New(d)
 	n.UseHandler(httprouter.New())

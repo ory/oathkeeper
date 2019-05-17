@@ -75,7 +75,7 @@ func runAPI(d driver.Driver, n *negroni.Negroni, logger *logrus.Logger) func() {
 
 		n.With(
 			negronilogrus.NewMiddlewareFromLogger(logger, "oathkeeper-api"),
-			d.Registry().JudgeHandler(), // This needs to be the last entry, otherwise the judge API won't work
+			d.Registry().DecisionHandler(), // This needs to be the last entry, otherwise the judge API won't work
 		)
 		n.UseHandler(router)
 

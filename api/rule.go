@@ -77,6 +77,10 @@ func (h *RuleHandler) listRules(w http.ResponseWriter, r *http.Request, _ httpro
 		return
 	}
 
+	if rules == nil {
+		rules = make([]rule.Rule, 0)
+	}
+
 	h.r.Writer().Write(w, r, rules)
 }
 

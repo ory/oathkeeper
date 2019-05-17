@@ -29,6 +29,8 @@ before finalizing the upgrade process.
 
 ## v0.16.0+oryOS.12
 
+/judge -> /decision
+
 ### envs
 
 * Removed:

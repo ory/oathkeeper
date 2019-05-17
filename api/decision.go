@@ -30,10 +30,10 @@ import (
 )
 
 const (
-	JudgePath = "/judge"
+	DecisionPath = "/judge"
 )
 
-type judgeHandlerRegistry interface {
+type decisionHandlerRegistry interface {
 	x.RegistryWriter
 	x.RegistryLogger
 
@@ -41,22 +41,22 @@ type judgeHandlerRegistry interface {
 	ProxyRequestHandler() *proxy.RequestHandler
 }
 
-type JudgeHandler struct {
-	r judgeHandlerRegistry
+type DecisionHandler struct {
+	r decisionHandlerRegistry
 }
 
-func NewJudgeHandler(r judgeHandlerRegistry) *JudgeHandler {
-	return &JudgeHandler{r: r}
+func NewJudgeHandler(r decisionHandlerRegistry) *DecisionHandler {
+	return &DecisionHandler{r: r}
 }
 
-func (h *JudgeHandler) ServeHTTP(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
-	if len(r.URL.Path) >= len(JudgePath) && r.URL.Path[:len(JudgePath)] == JudgePath {
+func (h *DecisionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
+	if len(r.URL.Path) >= len(DecisionPath) && r.URL.Path[:len(DecisionPath)] == DecisionPath {
 		r.URL.Scheme = "http"
 		r.URL.Host = r.Host
 		if r.TLS != nil {
 			r.URL.Scheme = "https"
 		}
-		r.URL.Path = r.URL.Path[len(JudgePath):]
+		r.URL.Path = r.URL.Path[len(DecisionPath):]
 
 		h.judge(w, r)
 	} else {
@@ -64,9 +64,11 @@ func (h *JudgeHandler) ServeHTTP(w http.ResponseWriter, r *http.Request, next ht
 	}
 }
 
-// swagger:route GET /judge judge judge
+// swagger:route GET /decision api decide
 //
-// Judge if a request should be allowed or not
+// Access Control Decision API
+//
+// > This endpoint works with all HTTP Methods (GET, POST, PUT, ...) and matches every path prefixed with /decision.
 //
 // This endpoint mirrors the proxy capability of ORY Oathkeeper's proxy functionality but instead of forwarding the
 // request to the upstream server, returns 200 (request should be allowed), 401 (unauthorized), or 403 (forbidden)
@@ -80,7 +82,7 @@ func (h *JudgeHandler) ServeHTTP(w http.ResponseWriter, r *http.Request, next ht
 //       403: genericError
 //       404: genericError
 //       500: genericError
-func (h *JudgeHandler) judge(w http.ResponseWriter, r *http.Request) {
+func (h *DecisionHandler) judge(w http.ResponseWriter, r *http.Request) {
 	rl, err := h.r.RuleMatcher().Match(r.Context(), r.Method, r.URL)
 	if err != nil {
 		h.r.Logger().WithError(err).

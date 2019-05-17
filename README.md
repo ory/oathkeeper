@@ -16,7 +16,14 @@ secures applications in Zero-Trust networks.
 
 An Identity & Access Proxy is typically deployed in front of (think API Gateway) web-facing applications and is capable
 of authenticating and optionally authorizing access requests. The Access Control Decision API can be deployed alongside
-an existing API Gateway (Kong, Nginx, Envoy, ...).
+an existing API Gateway or reverse proxy. ORY Oathkeeper's Access Control Decision API works with:
+
+- [Ambassador](https://github.com/datawire/ambassador) via [auth service](https://www.getambassador.io/reference/services/auth-service).
+- [Envoy](https://www.envoyproxy.io) via the [External Authorization HTTP Filter](https://www.envoyproxy.io/docs/envoy/latest/configuration/http_filters/ext_authz_filter#config-http-filters-ext-authz)
+- AWS API Gateway via [Custom Authorizers](https://aws.amazon.com/de/blogs/compute/introducing-custom-authorizers-in-amazon-api-gateway/)
+- [Nginx](https://www.nginx.com) via [Authentication Based on Subrequest Result](https://docs.nginx.com/nginx/admin-guide/security-controls/configuring-subrequest-authentication/)
+
+among others.
 
 This service is stable, but under active development and may introduce breaking changes in future releases.
 Any breaking change will have extensive documentation and upgrade instructions.
@@ -119,11 +126,12 @@ Run `oathkeeper -h` or `oathkeeper help`.
 
 Developing with ORY Oathkeeper is as easy as:
 
-```
-go get -d -u github.com/ory/oathkeeper
-cd $GOPATH/src/github.com/ory/oathkeeper
-dep ensure
-go test ./...
+```shell
+$ cd ~
+$ go get -d -u github.com/ory/oathkeeper
+$ cd $GOPATH/src/github.com/ory/oathkeeper
+$ export GO111MODULE=on
+$ go test ./...
 ```
 
 ## Backers

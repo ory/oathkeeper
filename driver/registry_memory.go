@@ -44,7 +44,7 @@ type RegistryMemory struct {
 	ruleValidator       rule.Validator
 	ruleRepository      *rule.RepositoryMemory
 	apiRuleHandler      *api.RuleHandler
-	apiJudgeHandler     *api.JudgeHandler
+	apiJudgeHandler     *api.DecisionHandler
 	healthxHandler      *healthx.Handler
 
 	proxyRequestHandler *proxy.RequestHandler
@@ -171,7 +171,7 @@ func (r *RegistryMemory) RuleHandler() *api.RuleHandler {
 	return r.apiRuleHandler
 }
 
-func (r *RegistryMemory) JudgeHandler() *api.JudgeHandler {
+func (r *RegistryMemory) DecisionHandler() *api.DecisionHandler {
 	if r.apiJudgeHandler == nil {
 		r.apiJudgeHandler = api.NewJudgeHandler(r)
 	}

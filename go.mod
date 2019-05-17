@@ -6,6 +6,7 @@ require (
 	github.com/asaskevich/govalidator v0.0.0-20180720115003-f9ffefc3facf
 	github.com/auth0/go-jwt-middleware v0.0.0-20170425171159-5493cabe49f7
 	github.com/bxcodec/faker v2.0.1+incompatible
+	github.com/codegangsta/negroni v1.0.0 // indirect
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/go-errors/errors v1.0.1
 	github.com/go-openapi/analysis v0.19.0 // indirect
@@ -42,7 +43,7 @@ require (
 	github.com/ory/graceful v0.1.1
 	github.com/ory/herodot v0.6.2
 	github.com/ory/ladon v1.0.1
-	github.com/ory/x v0.0.59
+	github.com/ory/x v0.0.60
 	github.com/pborman/uuid v1.2.0
 	github.com/pelletier/go-toml v1.3.0 // indirect
 	github.com/phayes/freeport v0.0.0-20180830031419-95f893ade6f2

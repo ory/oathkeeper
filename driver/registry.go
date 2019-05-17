@@ -29,7 +29,7 @@ type Registry interface {
 	ProxyRequestHandler() *proxy.RequestHandler
 	HealthHandler() *healthx.Handler
 	RuleHandler() *api.RuleHandler
-	JudgeHandler() *api.JudgeHandler
+	DecisionHandler() *api.DecisionHandler
 	CredentialHandler() *api.CredentialsHandler
 
 	Proxy() *proxy.Proxy

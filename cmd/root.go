@@ -30,6 +30,8 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+
+	"github.com/ory/x/logrusx"
 )
 
 var cfgFile string
@@ -90,17 +92,11 @@ func initConfig() {
 	viper.AutomaticEnv() // read in environment variables that match
 
 	// If a config file is found, read it in.
-	if err := viper.ReadInConfig(); err == nil {
-		fmt.Println("Using config file:", viper.ConfigFileUsed())
+	configErr := viper.ReadInConfig()
+	logger = logrusx.New()
+	if configErr == nil {
+		logger.Debugf("Using config file: %s", viper.ConfigFileUsed())
 	}
-
-	logLevel, err := logrus.ParseLevel(viper.GetString("LOG_LEVEL"))
-	if err != nil {
-		logLevel = logrus.InfoLevel
-	}
-
-	logger = logrus.New()
-	logger.Level = logLevel
 }
 
 func absPathify(inPath string) string {

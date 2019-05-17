@@ -40,3 +40,9 @@ install-stable:
 .PHONY: install
 install:
 		GO111MODULE=on go install .
+
+.PHONY: docker
+docker:
+		CGO_ENABLED=0 GO111MODULE=on GOOS=linux GOARCH=amd64 go build
+		docker build -t oryd/oathkeeper:latest .
+		rm oathkeeper
