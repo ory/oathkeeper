@@ -33,6 +33,10 @@ import (
 	"github.com/ory/x/pagination"
 )
 
+const (
+	RulesPath = "/rules"
+)
+
 type RuleHandler struct {
 	r ruleHandlerRegistry
 }
@@ -47,8 +51,8 @@ func NewRuleHandler(r ruleHandlerRegistry) *RuleHandler {
 }
 
 func (h *RuleHandler) SetRoutes(r *x.RouterAPI) {
-	r.GET("/rules", h.listRules)
-	r.GET("/rules/:id", h.getRules)
+	r.GET(RulesPath, h.listRules)
+	r.GET(RulesPath+"/:id", h.getRules)
 }
 
 // swagger:route GET /rules api listRules

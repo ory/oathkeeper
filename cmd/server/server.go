@@ -1,13 +1,16 @@
 package server
 
 import (
+	"bytes"
 	"crypto/tls"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/http/httputil"
 	"sync"
 
 	negronilogrus "github.com/meatballhat/negroni-logrus"
+	"github.com/ory/x/healthx"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -17,13 +20,15 @@ import (
 	"github.com/ory/herodot"
 
 	"github.com/ory/graceful"
-	"github.com/ory/oathkeeper/api"
-	"github.com/ory/oathkeeper/driver"
-	"github.com/ory/oathkeeper/x"
 	"github.com/ory/x/corsx"
 	"github.com/ory/x/logrusx"
 	"github.com/ory/x/metricsx"
 	"github.com/ory/x/tlsx"
+
+	"github.com/ory/oathkeeper/api"
+	"github.com/ory/oathkeeper/driver"
+	"github.com/ory/oathkeeper/driver/configuration"
+	"github.com/ory/oathkeeper/x"
 )
 
 func runProxy(d driver.Driver, n *negroni.Negroni, logger *logrus.Logger) func() {
@@ -122,6 +127,26 @@ func cert(daemon string, logger logrus.FieldLogger) []tls.Certificate {
 	return nil
 }
 
+func clusterID(c configuration.Provider) string {
+	var id bytes.Buffer
+	if err := json.NewEncoder(&id).Encode(viper.AllSettings()); err != nil {
+		for _, repo := range append(
+			append(c.AccessRuleRepositories(), *c.MutatorIDTokenJWKSURL(), *c.MutatorIDTokenIssuerURL()),
+			c.AuthenticatorJWTJWKSURIs()...,
+		) {
+			_, _ = id.WriteString(repo.String())
+		}
+		_, _ = id.WriteString(c.ProxyServeAddress())
+		_, _ = id.WriteString(c.APIServeAddress())
+	}
+
+	return id.String()
+}
+
+func isDevelopment(c configuration.Provider) bool {
+	return len(c.AccessRuleRepositories()) == 0
+}
+
 func RunServe(version, build, date string) func(cmd *cobra.Command, args []string) {
 	return func(cmd *cobra.Command, args []string) {
 		fmt.Println(banner(version))
@@ -138,12 +163,17 @@ func RunServe(version, build, date string) func(cmd *cobra.Command, args []strin
 		metrics := metricsx.New(cmd, logger,
 			&metricsx.Options{
 				Service:       "ory-oathkeeper",
-				ClusterID:     metricsx.Hash(viper.GetString("DATABASE_URL")), // TODO
-				IsDevelopment: viper.GetString("DATABASE_URL") != "memory",    // TODO
+				ClusterID:     clusterID(d.Configuration()),
+				IsDevelopment: isDevelopment(d.Configuration()),
 				WriteKey:      "MSx9A6YQ1qodnkzEFOv22cxOmOCJXMFa",
 				WhitelistedPaths: []string{
 					"/",
 					api.CredentialsPath,
+					api.DecisionPath,
+					api.RulesPath,
+					healthx.VersionPath,
+					healthx.AliveCheckPath,
+					healthx.ReadyCheckPath,
 				},
 				BuildVersion: version,
 				BuildTime:    build,
@@ -155,7 +185,10 @@ func RunServe(version, build, date string) func(cmd *cobra.Command, args []strin
 		publicmw.Use(metrics)
 
 		var wg sync.WaitGroup
-		tasks := []func(){runAPI(d, adminmw, logger), runProxy(d, publicmw, logger)}
+		tasks := []func(){
+			runAPI(d, adminmw, logger),
+			runProxy(d, publicmw, logger),
+		}
 		wg.Add(len(tasks))
 		for _, t := range tasks {
 			go func(t func()) {
