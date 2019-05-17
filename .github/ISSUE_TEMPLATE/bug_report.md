@@ -1,24 +1,52 @@
 ---
 name: Bug report
 about: Create a report to help us improve
+
 ---
 
-**Describe the bug** A clear and concise description of what the bug is.
+**Describe the bug**
 
-**To Reproduce** Steps to reproduce the behavior:
+A clear and concise description of what the bug is.
 
-1. Run `some-command`
-2. Open ...
-3. See error
+**Reproducing the bug**
 
-**Expected behavior** A clear and concise description of what you expected to
-happen.
+Steps to reproduce the behavior:
 
-**Screenshots** If applicable, add screenshots to help explain your problem.
+<!--
+1. Run `docker run ....`
+2. Make API Request to with `curl ...`
+3. Request fails with response: `{"some": "error"}`
+-->
 
-**Version:**
+*Server logs*
 
-- Environment: [e.g. Docker, Kubernetes, ...]
-- Version [e.g. v1.0.0]
+<!--
+```
+log=error ....
+```
+-->
 
-**Additional context** Add any other context about the problem here.
+*Server configuration*
+
+<!--
+PLEASE OMIT SENSITIVE VALUES
+
+```yaml
+server:
+    admin:
+        port: 1234
+```
+-->
+
+**Expected behavior**
+
+A clear and concise description of what you expected to happen.
+
+**Environment**
+
+* Version: v1.2.3, git sha hash
+* Environment: Debian, Docker, ...
+
+**Additional context**
+
+Add any other context about the problem here.
