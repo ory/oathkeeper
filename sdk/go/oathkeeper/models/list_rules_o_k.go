@@ -14,7 +14,7 @@ import (
 	"github.com/go-openapi/swag"
 )
 
-// ListRulesOK ListRulesOK ListRulesOK handles this case with default header values.
+// ListRulesOK ListRulesOK ListRulesOK ListRulesOK ListRulesOK handles this case with default header values.
 //
 // A list of rules
 // swagger:model ListRulesOK

@@ -42,7 +42,7 @@
 
   /**
    * Constructs a new <code>GetRuleNotFoundBody</code>.
-   * GetRuleNotFoundBody GetRuleNotFoundBody get rule not found body
+   * GetRuleNotFoundBody GetRuleNotFoundBody GetRuleNotFoundBody GetRuleNotFoundBody get rule not found body
    * @alias module:model/GetRuleNotFoundBody
    * @class
    */

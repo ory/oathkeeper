@@ -42,7 +42,7 @@
 
   /**
    * Constructs a new <code>CreateRuleForbiddenBody</code>.
-   * CreateRuleForbiddenBody CreateRuleForbiddenBody create rule forbidden body
+   * CreateRuleForbiddenBody CreateRuleForbiddenBody CreateRuleForbiddenBody CreateRuleForbiddenBody create rule forbidden body
    * @alias module:model/CreateRuleForbiddenBody
    * @class
    */

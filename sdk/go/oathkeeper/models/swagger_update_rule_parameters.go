@@ -13,8 +13,8 @@ import (
 	"github.com/go-openapi/validate"
 )
 
-// SwaggerUpdateRuleParameters swagger update rule parameters
-// swagger:model swaggerUpdateRuleParameters
+// SwaggerUpdateRuleParameters SwaggerUpdateRuleParameters SwaggerUpdateRuleParameters swagger update rule parameters
+// swagger:model SwaggerUpdateRuleParameters
 type SwaggerUpdateRuleParameters struct {
 
 	// body

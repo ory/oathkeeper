@@ -5,10 +5,11 @@ package cmd
 import (
 	_ "github.com/go-swagger/go-swagger/cmd/swagger"
 	_ "github.com/mattn/goveralls"
-	_ "github.com/mitchellh/gox"
-	_ "github.com/tcnksm/ghr"
+	_ "github.com/sqs/goreturns"
 	_ "golang.org/x/tools/cmd/cover"
-	_ "golang.org/x/tools/cmd/goimports"
+
+	_ "github.com/sqs/goreturns"
 
 	_ "github.com/ory/go-acc"
+	_ "github.com/ory/x/tools/listx"
 )

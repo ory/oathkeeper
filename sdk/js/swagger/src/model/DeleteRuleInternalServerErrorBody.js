@@ -42,7 +42,7 @@
 
   /**
    * Constructs a new <code>DeleteRuleInternalServerErrorBody</code>.
-   * DeleteRuleInternalServerErrorBody DeleteRuleInternalServerErrorBody delete rule internal server error body
+   * DeleteRuleInternalServerErrorBody DeleteRuleInternalServerErrorBody DeleteRuleInternalServerErrorBody DeleteRuleInternalServerErrorBody delete rule internal server error body
    * @alias module:model/DeleteRuleInternalServerErrorBody
    * @class
    */

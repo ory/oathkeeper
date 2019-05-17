@@ -1,8 +1,7 @@
 # OryOathkeeper.DeleteRuleInternalServerError
 
 ## Properties
-Name | Type | Description | Notes
------------- | ------------- | ------------- | -------------
-**payload** | [**DeleteRuleInternalServerErrorBody**](DeleteRuleInternalServerErrorBody.md) |  | [optional] 
 
-
+| Name        | Type                                                                          | Description | Notes      |
+| ----------- | ----------------------------------------------------------------------------- | ----------- | ---------- |
+| **payload** | [**DeleteRuleInternalServerErrorBody**](DeleteRuleInternalServerErrorBody.md) |             | [optional] |

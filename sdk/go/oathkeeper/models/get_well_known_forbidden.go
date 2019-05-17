@@ -12,7 +12,7 @@ import (
 	"github.com/go-openapi/swag"
 )
 
-// GetWellKnownForbidden GetWellKnownForbidden GetWellKnownForbidden handles this case with default header values.
+// GetWellKnownForbidden GetWellKnownForbidden GetWellKnownForbidden GetWellKnownForbidden GetWellKnownForbidden handles this case with default header values.
 //
 // The standard error format
 // swagger:model GetWellKnownForbidden

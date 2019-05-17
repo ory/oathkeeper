@@ -21,66 +21,42 @@
 package rule
 
 import (
-	"net/http/httptest"
+	"context"
+	"fmt"
 	"net/url"
 	"testing"
 
-	"github.com/julienschmidt/httprouter"
-	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-
-	"github.com/ory/herodot"
 )
 
 var testRules = []Rule{
 	{
-		ID: "foo1",
-		Match: RuleMatch{
-			URL:     "https://localhost:1234/<foo|bar>",
-			Methods: []string{"POST"},
-		},
-		Description:       "Create users rule",
-		Authorizer:        RuleHandler{Handler: "allow", Config: []byte(`{"type":"any"}`)},
-		Authenticators:    []RuleHandler{{Handler: "anonymous", Config: []byte(`{"name":"anonymous1"}`)}},
-		CredentialsIssuer: RuleHandler{Handler: "id_token", Config: []byte(`{"issuer":"anything"}`)},
-		Upstream: Upstream{
-			URL:          "http://localhost:1235/",
-			StripPath:    "/bar",
-			PreserveHost: true,
-		},
+		ID:             "foo1",
+		Match:          RuleMatch{URL: "https://localhost:1234/<foo|bar>", Methods: []string{"POST"}},
+		Description:    "Create users rule",
+		Authorizer:     RuleHandler{Handler: "allow", Config: []byte(`{"type":"any"}`)},
+		Authenticators: []RuleHandler{{Handler: "anonymous", Config: []byte(`{"name":"anonymous1"}`)}},
+		Mutator:        RuleHandler{Handler: "id_token", Config: []byte(`{"issuer":"anything"}`)},
+		Upstream:       Upstream{URL: "http://localhost:1235/", StripPath: "/bar", PreserveHost: true},
 	},
 	{
-		ID: "foo2",
-		Match: RuleMatch{
-			URL:     "https://localhost:34/<baz|bar>",
-			Methods: []string{"GET"},
-		},
-		Description:       "Get users rule",
-		Authorizer:        RuleHandler{Handler: "deny", Config: []byte(`{"type":"any"}`)},
-		Authenticators:    []RuleHandler{{Handler: "oauth2_introspection", Config: []byte(`{"name":"anonymous1"}`)}},
-		CredentialsIssuer: RuleHandler{Handler: "id_token", Config: []byte(`{"issuer":"anything"}`)},
-		Upstream: Upstream{
-			URL:          "http://localhost:333/",
-			StripPath:    "/foo",
-			PreserveHost: false,
-		},
+		ID:             "foo2",
+		Match:          RuleMatch{URL: "https://localhost:34/<baz|bar>", Methods: []string{"GET"}},
+		Description:    "Get users rule",
+		Authorizer:     RuleHandler{Handler: "deny", Config: []byte(`{"type":"any"}`)},
+		Authenticators: []RuleHandler{{Handler: "oauth2_introspection", Config: []byte(`{"name":"anonymous1"}`)}},
+		Mutator:        RuleHandler{Handler: "id_token", Config: []byte(`{"issuer":"anything"}`)},
+		Upstream:       Upstream{URL: "http://localhost:333/", StripPath: "/foo", PreserveHost: false},
 	},
 	{
-		ID: "foo3",
-		Match: RuleMatch{
-			URL:     "https://localhost:343/<baz|bar>",
-			Methods: []string{"GET"},
-		},
-		Description:       "Get users rule",
-		Authorizer:        RuleHandler{Handler: "deny"},
-		Authenticators:    []RuleHandler{{Handler: "oauth2_introspection"}},
-		CredentialsIssuer: RuleHandler{Handler: "id_token"},
-		Upstream: Upstream{
-			URL:          "http://localhost:3333/",
-			StripPath:    "/foo",
-			PreserveHost: false,
-		},
+		ID:             "foo3",
+		Match:          RuleMatch{URL: "https://localhost:343/<baz|bar>", Methods: []string{"GET"}},
+		Description:    "Get users rule",
+		Authorizer:     RuleHandler{Handler: "deny"},
+		Authenticators: []RuleHandler{{Handler: "oauth2_introspection"}},
+		Mutator:        RuleHandler{Handler: "id_token"},
+		Upstream:       Upstream{URL: "http://localhost:3333/", StripPath: "/foo", PreserveHost: false},
 	},
 }
 
@@ -91,25 +67,13 @@ func mustParseURL(t *testing.T, u string) *url.URL {
 }
 
 func TestMatcher(t *testing.T) {
-	manager := NewMemoryManager()
-	handler := &Handler{
-		H: herodot.NewJSONWriter(logrus.New()),
-		M: manager,
-	}
-	router := httprouter.New()
-	handler.SetRoutes(router)
-	server := httptest.NewServer(router)
-
-	u, err := url.ParseRequestURI(server.URL)
-	require.NoError(t, err)
-
-	matchers := map[string]Matcher{
-		"memory": NewCachedMatcher(manager),
-		"http":   NewHTTPMatcher(u),
+	type m interface {
+		Matcher
+		Repository
 	}
 
 	var testMatcher = func(t *testing.T, matcher Matcher, method string, url string, expectErr bool, expect *Rule) {
-		r, err := matcher.MatchRule(method, mustParseURL(t, url))
+		r, err := matcher.Match(context.Background(), method, mustParseURL(t, url))
 		if expectErr {
 			require.Error(t, err)
 		} else {
@@ -118,36 +82,31 @@ func TestMatcher(t *testing.T) {
 		}
 	}
 
-	for name, matcher := range matchers {
-		t.Run("matcher="+name+"/case=empty", func(t *testing.T) {
-			require.NoError(t, matcher.Refresh())
-			testMatcher(t, matcher, "GET", "https://localhost:34/baz", true, nil)
-			testMatcher(t, matcher, "POST", "https://localhost:1234/foo", true, nil)
-			testMatcher(t, matcher, "DELETE", "https://localhost:1234/foo", true, nil)
-		})
-	}
+	for name, matcher := range map[string]m{
+		"memory": NewRepositoryMemory(new(mockRepositoryRegistry)),
+	} {
+		t.Run(fmt.Sprintf("matcher=%s", name), func(t *testing.T) {
+			t.Run("case=empty", func(t *testing.T) {
+				testMatcher(t, matcher, "GET", "https://localhost:34/baz", true, nil)
+				testMatcher(t, matcher, "POST", "https://localhost:1234/foo", true, nil)
+				testMatcher(t, matcher, "DELETE", "https://localhost:1234/foo", true, nil)
+			})
 
-	for _, tr := range testRules {
-		require.NoError(t, manager.CreateRule(&tr))
-	}
+			require.NoError(t, matcher.Set(context.Background(), testRules))
 
-	for name, matcher := range matchers {
-		t.Run("matcher="+name+"/case=created", func(t *testing.T) {
-			require.NoError(t, matcher.Refresh())
-			testMatcher(t, matcher, "GET", "https://localhost:34/baz", false, &testRules[1])
-			testMatcher(t, matcher, "POST", "https://localhost:1234/foo", false, &testRules[0])
-			testMatcher(t, matcher, "DELETE", "https://localhost:1234/foo", true, nil)
-		})
-	}
+			t.Run("case=created", func(t *testing.T) {
+				testMatcher(t, matcher, "GET", "https://localhost:34/baz", false, &testRules[1])
+				testMatcher(t, matcher, "POST", "https://localhost:1234/foo", false, &testRules[0])
+				testMatcher(t, matcher, "DELETE", "https://localhost:1234/foo", true, nil)
+			})
 
-	require.NoError(t, manager.DeleteRule(testRules[0].ID))
+			require.NoError(t, matcher.Set(context.Background(), testRules[1:]))
 
-	for name, matcher := range matchers {
-		t.Run("matcher="+name+"/case=updated", func(t *testing.T) {
-			require.NoError(t, matcher.Refresh())
-			testMatcher(t, matcher, "GET", "https://localhost:34/baz", false, &testRules[1])
-			testMatcher(t, matcher, "POST", "https://localhost:1234/foo", true, nil)
-			testMatcher(t, matcher, "DELETE", "https://localhost:1234/foo", true, nil)
+			t.Run("case=updated", func(t *testing.T) {
+				testMatcher(t, matcher, "GET", "https://localhost:34/baz", false, &testRules[1])
+				testMatcher(t, matcher, "POST", "https://localhost:1234/foo", true, nil)
+				testMatcher(t, matcher, "DELETE", "https://localhost:1234/foo", true, nil)
+			})
 		})
 	}
 }

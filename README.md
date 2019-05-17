@@ -10,21 +10,23 @@
     <a href="https://opencollective.com/ory">Support this project!</a>
 </h4>
 
-ORY Oathkeeper is an Identity & Access Proxy (IAP) that authorizes HTTP requests based on sets of rules. The BeyondCorp
-Model is designed by [Google](https://cloud.google.com/beyondcorp/) and secures applications in Zero-Trust networks.
+ORY Oathkeeper is an Identity & Access Proxy (IAP) and Access Control Decision API that authorizes HTTP requests
+based on sets of Access Rules. The BeyondCorp Model is designed by [Google](https://cloud.google.com/beyondcorp/) and
+secures applications in Zero-Trust networks.
+
 An Identity & Access Proxy is typically deployed in front of (think API Gateway) web-facing applications and is capable
-of authenticating and optionally authorizing access requests.
+of authenticating and optionally authorizing access requests. The Access Control Decision API can be deployed alongside
+an existing API Gateway or reverse proxy. ORY Oathkeeper's Access Control Decision API works with:
 
-While the full feature set of the BeyondCorp Whitepaper is not yet implemented, the goal of this project is to achieve this in the future.
+- [Ambassador](https://github.com/datawire/ambassador) via [auth service](https://www.getambassador.io/reference/services/auth-service).
+- [Envoy](https://www.envoyproxy.io) via the [External Authorization HTTP Filter](https://www.envoyproxy.io/docs/envoy/latest/configuration/http_filters/ext_authz_filter#config-http-filters-ext-authz)
+- AWS API Gateway via [Custom Authorizers](https://aws.amazon.com/de/blogs/compute/introducing-custom-authorizers-in-amazon-api-gateway/)
+- [Nginx](https://www.nginx.com) via [Authentication Based on Subrequest Result](https://docs.nginx.com/nginx/admin-guide/security-controls/configuring-subrequest-authentication/)
 
-ORY Oathkeeper is a reverse proxy which evaluates incoming HTTP requests based on a set of rules that are defined
-by administrative users. ORY Oathkeeper is thus capable of:
+among others.
 
-* Identifying the user and providing the user session to API backends (authentication).
-* Restricting access to certain resources based on a set of rules (authorization).
-* Transforms access credentials (e.g. OAuth2 Access Tokens, SAML Assertions, ...) to a format (e.g. JSON Web Token, Plaintext, Basic Authorization, ...) consumable by your API services.
-
-This service is stable, but under active development and may introduce breaking changes in future releases. Any breaking change will have extensive documentation and upgrade instructions.
+This service is stable, but under active development and may introduce breaking changes in future releases.
+Any breaking change will have extensive documentation and upgrade instructions.
 
 [![CircleCI](https://circleci.com/gh/ory/oathkeeper.svg?style=shield&circle-token=eb458bf636326d41674141b6bbfa475a39c9db1e)](https://circleci.com/gh/ory/oathkeeper)
 [![Coverage Status](https://coveralls.io/repos/github/ory/oathkeeper/badge.svg?branch=master)](https://coveralls.io/github/ory/oathkeeper?branch=master)
@@ -37,9 +39,6 @@ This service is stable, but under active development and may introduce breaking 
 
 
 - [Installation](#installation)
-  - [Download binaries](#download-binaries)
-  - [Using Docker](#using-docker)
-  - [Building from source](#building-from-source)
 - [Ecosystem](#ecosystem)
   - [ORY Security Console: Administrative User Interface](#ory-security-console-administrative-user-interface)
   - [ORY Hydra: OAuth2 & OpenID Connect Server](#ory-hydra-oauth2--openid-connect-server)
@@ -63,46 +62,6 @@ This service is stable, but under active development and may introduce breaking 
 
 Head over to the [ORY Developer Documentation](https://www.ory.sh/docs/oathkeeper/install) to learn how to install ORY
 Oathkeeper on Linux, macOS, Windows, and Docker and how to build ORY Oathkeeper from source.
-
-### Download binaries
-
-The client and server **binaries are downloadable at [releases](https://github.com/ory/oathkeeper/releases)**.
-There is currently no installer available. You have to add the ORY Oathkeeper binary to the PATH environment variable yourself or put
-the binary in a location that is already in your path (`/usr/bin`, ...).
-If you do not understand what that all of this means, ask in our [chat channel](https://www.ory.sh/chat). We are happy to help.
-
-### Using Docker
-
-**Starting the host** is easiest with docker. The host process handles HTTP requests and is backed by a database.
-Read how to install docker on [Linux](https://docs.docker.com/linux/), [OSX](https://docs.docker.com/mac/) or
-[Windows](https://docs.docker.com/windows/). ORY Oathkeeper is available on [Docker Hub](https://hub.docker.com/r/oryd/oathkeeper/).
-
-You can use ORY Oathkeeper without a database, but be aware that restarting, scaling
-or stopping the container will **lose all data**:
-
-```
-$ docker run -e "DATABASE_URL=memory" -d --name my-oathkeeper -p 4455:4455 -p 4456:4456 oryd/oathkeeper serve api
-ec91228cb105db315553499c81918258f52cee9636ea2a4821bdb8226872f54b
-```
-
-### Building from source
-
-If you wish to compile ORY Oathkeeper yourself, you need to install and set up [Go 1.11+](https://golang.org/).
-
-The following commands will check out the latest release tag of ORY Oathkeeper and compile it and set up flags so that `oathkeeper version`
-works as expected. Please note that this will only work with a linux shell like bash or sh.
-
-```
-go get -d -u github.com/ory/oathkeeper
-cd $(go env GOPATH)/src/github.com/ory/oathkeeper
-OATHKEEPER_LATEST=$(git describe --abbrev=0 --tags)
-git checkout $OATHKEEPER_LATEST
-GO111MODULE=on go install \
-    -ldflags "-X github.com/ory/oathkeeper/cmd.Version=$OATHKEEPER_LATEST -X github.com/ory/oathkeeper/cmd.BuildTime=`TZ=UTC date -u '+%Y-%m-%dT%H:%M:%SZ'` -X github.com/ory/oathkeeper/cmd.GitHash=`git rev-parse HEAD`" \
-    github.com/ory/oathkeeper
-git checkout master
-$GOPATH/bin/oathkeeper help
-```
 
 ## Ecosystem
 
@@ -167,17 +126,12 @@ Run `oathkeeper -h` or `oathkeeper help`.
 
 Developing with ORY Oathkeeper is as easy as:
 
-```
-go get -d -u github.com/ory/oathkeeper
-cd $GOPATH/src/github.com/ory/oathkeeper
-dep ensure
-go test ./...
-```
-
-Then run it with in-memory database:
-
-```
-DATABASE_URL=memory go run main.go serve all
+```shell
+$ cd ~
+$ go get -d -u github.com/ory/oathkeeper
+$ cd $GOPATH/src/github.com/ory/oathkeeper
+$ export GO111MODULE=on
+$ go test ./...
 ```
 
 ## Backers

@@ -74,9 +74,6 @@
       if (data.hasOwnProperty('authorizer')) {
         obj['authorizer'] = SwaggerRuleHandler.constructFromObject(data['authorizer']);
       }
-      if (data.hasOwnProperty('credentials_issuer')) {
-        obj['credentials_issuer'] = SwaggerRuleHandler.constructFromObject(data['credentials_issuer']);
-      }
       if (data.hasOwnProperty('description')) {
         obj['description'] = ApiClient.convertToType(data['description'], 'String');
       }
@@ -85,6 +82,9 @@
       }
       if (data.hasOwnProperty('match')) {
         obj['match'] = SwaggerRuleMatch.constructFromObject(data['match']);
+      }
+      if (data.hasOwnProperty('transformer')) {
+        obj['transformer'] = SwaggerRuleHandler.constructFromObject(data['transformer']);
       }
       if (data.hasOwnProperty('upstream')) {
         obj['upstream'] = Upstream.constructFromObject(data['upstream']);
@@ -103,10 +103,6 @@
    */
   exports.prototype['authorizer'] = undefined;
   /**
-   * @member {module:model/SwaggerRuleHandler} credentials_issuer
-   */
-  exports.prototype['credentials_issuer'] = undefined;
-  /**
    * Description is a human readable description of this rule.
    * @member {String} description
    */
@@ -120,6 +116,10 @@
    * @member {module:model/SwaggerRuleMatch} match
    */
   exports.prototype['match'] = undefined;
+  /**
+   * @member {module:model/SwaggerRuleHandler} transformer
+   */
+  exports.prototype['transformer'] = undefined;
   /**
    * @member {module:model/Upstream} upstream
    */

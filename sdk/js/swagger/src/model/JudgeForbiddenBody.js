@@ -42,7 +42,7 @@
 
   /**
    * Constructs a new <code>JudgeForbiddenBody</code>.
-   * JudgeForbiddenBody judge forbidden body
+   * JudgeForbiddenBody JudgeForbiddenBody JudgeForbiddenBody judge forbidden body
    * @alias module:model/JudgeForbiddenBody
    * @class
    */

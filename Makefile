@@ -1,11 +1,10 @@
 SHELL=/bin/bash -o pipefail
 
+# Formats the code
 .PHONY: format
 format:
 		goreturns -w -local github.com/ory $$(listx .)
-
-.PHONY: mocks
-mocks:
+		npm run format:docs
 
 .PHONY: gen
 		gen: mocks sdk
@@ -42,3 +41,9 @@ install-stable:
 .PHONY: install
 install:
 		GO111MODULE=on go install .
+
+.PHONY: docker
+docker:
+		CGO_ENABLED=0 GO111MODULE=on GOOS=linux GOARCH=amd64 go build
+		docker build -t oryd/oathkeeper:latest .
+		rm oathkeeper

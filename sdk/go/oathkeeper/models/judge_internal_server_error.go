@@ -12,7 +12,7 @@ import (
 	"github.com/go-openapi/swag"
 )
 
-// JudgeInternalServerError JudgeInternalServerError handles this case with default header values.
+// JudgeInternalServerError JudgeInternalServerError JudgeInternalServerError JudgeInternalServerError handles this case with default header values.
 //
 // The standard error format
 // swagger:model JudgeInternalServerError

@@ -42,7 +42,7 @@
 
   /**
    * Constructs a new <code>DeleteRuleNotFoundBody</code>.
-   * DeleteRuleNotFoundBody DeleteRuleNotFoundBody delete rule not found body
+   * DeleteRuleNotFoundBody DeleteRuleNotFoundBody DeleteRuleNotFoundBody DeleteRuleNotFoundBody delete rule not found body
    * @alias module:model/DeleteRuleNotFoundBody
    * @class
    */

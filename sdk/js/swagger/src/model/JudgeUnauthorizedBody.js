@@ -42,7 +42,7 @@
 
   /**
    * Constructs a new <code>JudgeUnauthorizedBody</code>.
-   * JudgeUnauthorizedBody judge unauthorized body
+   * JudgeUnauthorizedBody JudgeUnauthorizedBody JudgeUnauthorizedBody judge unauthorized body
    * @alias module:model/JudgeUnauthorizedBody
    * @class
    */

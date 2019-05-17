@@ -11,7 +11,7 @@ import (
 	"github.com/go-openapi/swag"
 )
 
-// JudgeInternalServerErrorBody JudgeInternalServerErrorBody judge internal server error body
+// JudgeInternalServerErrorBody JudgeInternalServerErrorBody JudgeInternalServerErrorBody JudgeInternalServerErrorBody judge internal server error body
 // swagger:model JudgeInternalServerErrorBody
 type JudgeInternalServerErrorBody struct {
 

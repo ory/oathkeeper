@@ -25,30 +25,25 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/ory/oathkeeper/sdk/go/oathkeeper/client/rule"
+	"github.com/ory/oathkeeper/sdk/go/oathkeeper/client/api"
 	"github.com/ory/x/cmdx"
 )
 
 // getCmd represents the get command
 var getCmd = &cobra.Command{
 	Use:   "get <id>",
-	Short: "Fetch a rule",
+	Short: "Get access rule",
 	Long: `Usage example:
 
 	oathkeeper rules --endpoint=http://localhost:4456/ get rule-1
 `,
 	Run: func(cmd *cobra.Command, args []string) {
-		endpoint, _ := cmd.Flags().GetString("endpoint")
-		if endpoint == "" {
-			fatalf("Please specify the endpoint url using the --endpoint flag, for more information use `oathkeeper help rules`")
-		} else if len(args) != 1 {
-			fatalf("Please specify the rule id, for more information use `oathkeeper help rules get`")
-		}
-
+		cmdx.ExactArgs(cmd, args, 1)
 		client := newClient(cmd)
-		r, err := client.Rule.GetRule(rule.NewGetRuleParams().WithID(args[0]))
+
+		r, err := client.API.GetRule(api.NewGetRuleParams().WithID(args[0]))
 		cmdx.Must(err, "%s", err)
-		fmt.Println(formatResponse(r))
+		fmt.Println(cmdx.FormatResponse(r.Payload))
 	},
 }
 

@@ -11,11 +11,8 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	"github.com/ory/oathkeeper/sdk/go/oathkeeper/client/health"
+	"github.com/ory/oathkeeper/sdk/go/oathkeeper/client/api"
 	"github.com/ory/oathkeeper/sdk/go/oathkeeper/client/judge"
-	"github.com/ory/oathkeeper/sdk/go/oathkeeper/client/operations"
-	"github.com/ory/oathkeeper/sdk/go/oathkeeper/client/rule"
-	"github.com/ory/oathkeeper/sdk/go/oathkeeper/client/version"
 )
 
 // Default ory oathkeeper HTTP client.
@@ -61,15 +58,9 @@ func New(transport runtime.ClientTransport, formats strfmt.Registry) *OryOathkee
 	cli := new(OryOathkeeper)
 	cli.Transport = transport
 
-	cli.Health = health.New(transport, formats)
+	cli.API = api.New(transport, formats)
 
 	cli.Judge = judge.New(transport, formats)
-
-	cli.Operations = operations.New(transport, formats)
-
-	cli.Rule = rule.New(transport, formats)
-
-	cli.Version = version.New(transport, formats)
 
 	return cli
 }
@@ -115,15 +106,9 @@ func (cfg *TransportConfig) WithSchemes(schemes []string) *TransportConfig {
 
 // OryOathkeeper is a client for ory oathkeeper
 type OryOathkeeper struct {
-	Health *health.Client
+	API *api.Client
 
 	Judge *judge.Client
-
-	Operations *operations.Client
-
-	Rule *rule.Client
-
-	Version *version.Client
 
 	Transport runtime.ClientTransport
 }
@@ -132,14 +117,8 @@ type OryOathkeeper struct {
 func (c *OryOathkeeper) SetTransport(transport runtime.ClientTransport) {
 	c.Transport = transport
 
-	c.Health.SetTransport(transport)
+	c.API.SetTransport(transport)
 
 	c.Judge.SetTransport(transport)
-
-	c.Operations.SetTransport(transport)
-
-	c.Rule.SetTransport(transport)
-
-	c.Version.SetTransport(transport)
 
 }

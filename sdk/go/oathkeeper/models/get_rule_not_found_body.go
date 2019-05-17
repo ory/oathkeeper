@@ -11,7 +11,7 @@ import (
 	"github.com/go-openapi/swag"
 )
 
-// GetRuleNotFoundBody GetRuleNotFoundBody GetRuleNotFoundBody get rule not found body
+// GetRuleNotFoundBody GetRuleNotFoundBody GetRuleNotFoundBody GetRuleNotFoundBody GetRuleNotFoundBody get rule not found body
 // swagger:model GetRuleNotFoundBody
 type GetRuleNotFoundBody struct {
 

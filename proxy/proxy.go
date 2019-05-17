@@ -27,32 +27,27 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
+	"github.com/ory/oathkeeper/x"
 
-	"github.com/ory/herodot"
-	"github.com/ory/oathkeeper/rsakey"
+	"github.com/pkg/errors"
+
 	"github.com/ory/oathkeeper/rule"
 )
 
-func NewProxy(handler *RequestHandler, logger logrus.FieldLogger, matcher rule.Matcher) *Proxy {
-	if logger == nil {
-		logger = logrus.New()
-	}
-	return &Proxy{
-		Logger:         logger,
-		Matcher:        matcher,
-		RequestHandler: handler,
-		H:              herodot.NewNegotiationHandler(logger),
-	}
+type proxyRegistry interface {
+	x.RegistryLogger
+	x.RegistryWriter
+
+	ProxyRequestHandler() *RequestHandler
+	RuleMatcher() rule.Matcher
+}
+
+func NewProxy(r proxyRegistry) *Proxy {
+	return &Proxy{r: r}
 }
 
 type Proxy struct {
-	Logger         logrus.FieldLogger
-	RequestHandler *RequestHandler
-	KeyManager     rsakey.Manager
-	Matcher        rule.Matcher
-	H              herodot.Writer
+	r proxyRegistry
 }
 
 type key int
@@ -63,12 +58,12 @@ func (d *Proxy) RoundTrip(r *http.Request) (*http.Response, error) {
 	rw := NewSimpleResponseWriter()
 
 	if err, ok := r.Context().Value(director).(error); ok && err != nil {
-		d.Logger.WithError(err).
+		d.r.Logger().WithError(err).
 			WithField("granted", false).
 			WithField("access_url", r.URL.String()).
 			Warn("Access request denied")
 
-		d.H.WriteError(rw, r, err)
+		d.r.Writer().WriteError(rw, r, err)
 
 		return &http.Response{
 			StatusCode: rw.code,
@@ -78,14 +73,14 @@ func (d *Proxy) RoundTrip(r *http.Request) (*http.Response, error) {
 	} else if err == nil {
 		res, err := http.DefaultTransport.RoundTrip(r)
 		if err != nil {
-			d.Logger.
+			d.r.Logger().
 				WithError(errors.WithStack(err)).
 				WithField("granted", false).
 				WithField("access_url", r.URL.String()).
 				Warn("Access request denied because roundtrip failed")
 			// don't need to return because covered in next line
 		} else {
-			d.Logger.
+			d.r.Logger().
 				WithField("granted", true).
 				WithField("access_url", r.URL.String()).
 				Warn("Access request granted")
@@ -95,13 +90,13 @@ func (d *Proxy) RoundTrip(r *http.Request) (*http.Response, error) {
 	}
 
 	err := errors.New("Unable to type assert context")
-	d.Logger.
+	d.r.Logger().
 		WithError(err).
 		WithField("granted", false).
 		WithField("access_url", r.URL.String()).
 		Warn("Unable to type assert context")
 
-	d.H.Write(rw, r, err)
+	d.r.Writer().Write(rw, r, err)
 
 	return &http.Response{
 		StatusCode: rw.code,
@@ -112,13 +107,13 @@ func (d *Proxy) RoundTrip(r *http.Request) (*http.Response, error) {
 
 func (d *Proxy) Director(r *http.Request) {
 	EnrichRequestedURL(r)
-	rl, err := d.Matcher.MatchRule(r.Method, r.URL)
+	rl, err := d.r.RuleMatcher().Match(r.Context(), r.Method, r.URL)
 	if err != nil {
 		*r = *r.WithContext(context.WithValue(r.Context(), director, err))
 		return
 	}
 
-	headers, err := d.RequestHandler.HandleRequest(r, rl)
+	headers, err := d.r.ProxyRequestHandler().HandleRequest(r, rl)
 	if err != nil {
 		*r = *r.WithContext(context.WithValue(r.Context(), director, err))
 		return
@@ -128,7 +123,7 @@ func (d *Proxy) Director(r *http.Request) {
 		r.Header.Set(h, headers.Get(h))
 	}
 
-	if err := configureBackendURL(r, rl); err != nil {
+	if err := ConfigureBackendURL(r, rl); err != nil {
 		*r = *r.WithContext(context.WithValue(r.Context(), director, err))
 		return
 	}
@@ -147,7 +142,7 @@ func EnrichRequestedURL(r *http.Request) {
 	}
 }
 
-func configureBackendURL(r *http.Request, rl *rule.Rule) error {
+func ConfigureBackendURL(r *http.Request, rl *rule.Rule) error {
 	if rl.Upstream.URL == "" {
 		return errors.Errorf("Unable to forward the request because matched rule does not define an upstream URL")
 	}

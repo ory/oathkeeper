@@ -42,7 +42,7 @@
 
   /**
    * Constructs a new <code>GetWellKnownForbiddenBody</code>.
-   * GetWellKnownForbiddenBody GetWellKnownForbiddenBody get well known forbidden body
+   * GetWellKnownForbiddenBody GetWellKnownForbiddenBody GetWellKnownForbiddenBody GetWellKnownForbiddenBody get well known forbidden body
    * @alias module:model/GetWellKnownForbiddenBody
    * @class
    */

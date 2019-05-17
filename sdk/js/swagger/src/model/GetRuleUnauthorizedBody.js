@@ -42,7 +42,7 @@
 
   /**
    * Constructs a new <code>GetRuleUnauthorizedBody</code>.
-   * GetRuleUnauthorizedBody GetRuleUnauthorizedBody get rule unauthorized body
+   * GetRuleUnauthorizedBody GetRuleUnauthorizedBody GetRuleUnauthorizedBody GetRuleUnauthorizedBody get rule unauthorized body
    * @alias module:model/GetRuleUnauthorizedBody
    * @class
    */

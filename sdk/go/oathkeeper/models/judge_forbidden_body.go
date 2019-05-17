@@ -11,7 +11,7 @@ import (
 	"github.com/go-openapi/swag"
 )
 
-// JudgeForbiddenBody JudgeForbiddenBody judge forbidden body
+// JudgeForbiddenBody JudgeForbiddenBody JudgeForbiddenBody JudgeForbiddenBody judge forbidden body
 // swagger:model JudgeForbiddenBody
 type JudgeForbiddenBody struct {
 

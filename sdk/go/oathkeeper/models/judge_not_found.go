@@ -12,7 +12,7 @@ import (
 	"github.com/go-openapi/swag"
 )
 
-// JudgeNotFound JudgeNotFound handles this case with default header values.
+// JudgeNotFound JudgeNotFound JudgeNotFound JudgeNotFound handles this case with default header values.
 //
 // The standard error format
 // swagger:model JudgeNotFound

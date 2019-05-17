@@ -42,7 +42,7 @@
 
   /**
    * Constructs a new <code>JudgeInternalServerErrorBody</code>.
-   * JudgeInternalServerErrorBody judge internal server error body
+   * JudgeInternalServerErrorBody JudgeInternalServerErrorBody JudgeInternalServerErrorBody judge internal server error body
    * @alias module:model/JudgeInternalServerErrorBody
    * @class
    */

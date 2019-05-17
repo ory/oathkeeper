@@ -1,0 +1,25 @@
+[
+  {
+    "id": "jwt-rule",
+    "upstream": {
+      "url": "http://127.0.0.1:6662"
+    },
+    "match": {
+      "url": "http://127.0.0.1:6660/jwt",
+      "methods": [
+        "GET"
+      ]
+    },
+    "authenticators": [
+      {
+        "handler": "jwt"
+      }
+    ],
+    "authorizer": {
+      "handler": "allow"
+    },
+    "mutator": {
+      "handler": "id_token"
+    }
+  }
+]

@@ -12,7 +12,7 @@ import (
 	"github.com/go-openapi/swag"
 )
 
-// JudgeUnauthorized JudgeUnauthorized handles this case with default header values.
+// JudgeUnauthorized JudgeUnauthorized JudgeUnauthorized JudgeUnauthorized handles this case with default header values.
 //
 // The standard error format
 // swagger:model JudgeUnauthorized

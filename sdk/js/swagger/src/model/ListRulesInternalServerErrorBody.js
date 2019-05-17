@@ -42,7 +42,7 @@
 
   /**
    * Constructs a new <code>ListRulesInternalServerErrorBody</code>.
-   * ListRulesInternalServerErrorBody ListRulesInternalServerErrorBody list rules internal server error body
+   * ListRulesInternalServerErrorBody ListRulesInternalServerErrorBody ListRulesInternalServerErrorBody ListRulesInternalServerErrorBody list rules internal server error body
    * @alias module:model/ListRulesInternalServerErrorBody
    * @class
    */

@@ -23,10 +23,15 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"path/filepath"
+	"runtime"
+	"strings"
 
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+
+	"github.com/ory/x/logrusx"
 )
 
 var cfgFile string
@@ -61,7 +66,7 @@ func init() {
 	// Cobra supports Persistent Flags, which, if defined here,
 	// will be global for your application.
 
-	// RootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.oathkeeper.yaml)")
+	RootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.oathkeeper.yaml)")
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
 	RootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
@@ -69,39 +74,59 @@ func init() {
 
 // initConfig reads in config file and ENV variables if set.
 func initConfig() {
-	if cfgFile != "" { // enable ability to specify config file via flag
+	if cfgFile != "" {
+		// enable ability to specify config file via flag
 		viper.SetConfigFile(cfgFile)
+	} else {
+		path := absPathify("$HOME")
+		if _, err := os.Stat(filepath.Join(path, ".oathkeeper.yml")); err != nil {
+			_, _ = os.Create(filepath.Join(path, ".oathkeeper.yml"))
+		}
+
+		viper.SetConfigType("yaml")
+		viper.SetConfigName(".oathkeeper") // name of config file (without extension)
+		viper.AddConfigPath("$HOME")       // adding home directory as first search path
 	}
 
-	viper.SetConfigName(".oathkeeper") // name of config file (without extension)
-	viper.AddConfigPath("$HOME")       // adding home directory as first search path
-	viper.AutomaticEnv()               // read in environment variables that match
-
-	viper.SetDefault("LOG_LEVEL", "info")
-	viper.SetDefault("PORT", "4455")
-	viper.SetDefault("RULES_REFRESH_INTERVAL", "5s")
-
-	viper.SetDefault("CREDENTIALS_ISSUER_ID_TOKEN_JWK_REFRESH_INTERVAL", "5m")
-	viper.SetDefault("CREDENTIALS_ISSUER_ID_TOKEN_HYDRA_JWK_SET_ID", "oathkeeper:id-token")
-	viper.SetDefault("CREDENTIALS_ISSUER_ID_TOKEN_ALGORITHM", "HS256")
-
-	viper.SetDefault("AUTHENTICATOR_ANONYMOUS_USERNAME", "anonymous")
-	viper.SetDefault("CREDENTIALS_ISSUER_ID_TOKEN_LIFESPAN", "10m")
-	viper.SetDefault("CREDENTIALS_ISSUER_ID_TOKEN_ISSUER", "http://localhost:"+viper.GetString("PORT"))
-
-	viper.SetDefault("AUTHENTICATOR_OAUTH2_INTROSPECTION_SCOPE_STRATEGY", "EXACT")
-	viper.SetDefault("AUTHENTICATOR_JWT_SCOPE_STRATEGY", "EXACT")
+	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
+	viper.AutomaticEnv() // read in environment variables that match
 
 	// If a config file is found, read it in.
-	if err := viper.ReadInConfig(); err == nil {
-		fmt.Println("Using config file:", viper.ConfigFileUsed())
+	configErr := viper.ReadInConfig()
+	logger = logrusx.New()
+	if configErr == nil {
+		logger.Debugf("Using config file: %s", viper.ConfigFileUsed())
+	}
+}
+
+func absPathify(inPath string) string {
+	if strings.HasPrefix(inPath, "$HOME") {
+		inPath = userHomeDir() + inPath[5:]
 	}
 
-	logLevel, err := logrus.ParseLevel(viper.GetString("LOG_LEVEL"))
-	if err != nil {
-		logLevel = logrus.InfoLevel
+	if strings.HasPrefix(inPath, "$") {
+		end := strings.Index(inPath, string(os.PathSeparator))
+		inPath = os.Getenv(inPath[1:end]) + inPath[end:]
 	}
 
-	logger = logrus.New()
-	logger.Level = logLevel
+	if filepath.IsAbs(inPath) {
+		return filepath.Clean(inPath)
+	}
+
+	p, err := filepath.Abs(inPath)
+	if err == nil {
+		return filepath.Clean(p)
+	}
+	return ""
+}
+
+func userHomeDir() string {
+	if runtime.GOOS == "windows" {
+		home := os.Getenv("HOMEDRIVE") + os.Getenv("HOMEPATH")
+		if home == "" {
+			home = os.Getenv("USERPROFILE")
+		}
+		return home
+	}
+	return os.Getenv("HOME")
 }
