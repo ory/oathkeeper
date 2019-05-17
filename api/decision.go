@@ -30,7 +30,7 @@ import (
 )
 
 const (
-	DecisionPath = "/judge"
+	DecisionPath = "/decisions"
 )
 
 type decisionHandlerRegistry interface {
@@ -58,13 +58,13 @@ func (h *DecisionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request, next
 		}
 		r.URL.Path = r.URL.Path[len(DecisionPath):]
 
-		h.judge(w, r)
+		h.decisions(w, r)
 	} else {
 		next(w, r)
 	}
 }
 
-// swagger:route GET /decision api decide
+// swagger:route GET /decisions api decisions
 //
 // Access Control Decision API
 //
@@ -82,7 +82,7 @@ func (h *DecisionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request, next
 //       403: genericError
 //       404: genericError
 //       500: genericError
-func (h *DecisionHandler) judge(w http.ResponseWriter, r *http.Request) {
+func (h *DecisionHandler) decisions(w http.ResponseWriter, r *http.Request) {
 	rl, err := h.r.RuleMatcher().Match(r.Context(), r.Method, r.URL)
 	if err != nil {
 		h.r.Logger().WithError(err).

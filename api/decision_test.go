@@ -85,19 +85,19 @@ func TestDecisionAPI(t *testing.T) {
 	}{
 		{
 			d:     "should fail because url does not exist in rule set",
-			url:   ts.URL + "/judge" + "/invalid",
+			url:   ts.URL + "/decisions" + "/invalid",
 			rules: []rule.Rule{},
 			code:  http.StatusNotFound,
 		},
 		{
 			d:     "should fail because url does exist but is matched by two rules",
-			url:   ts.URL + "/judge" + "/authn-noop/1234",
+			url:   ts.URL + "/decisions" + "/authn-noop/1234",
 			rules: []rule.Rule{ruleNoOpAuthenticator, ruleNoOpAuthenticator},
 			code:  http.StatusInternalServerError,
 		},
 		{
 			d:     "should pass",
-			url:   ts.URL + "/judge" + "/authn-noop/1234",
+			url:   ts.URL + "/decisions" + "/authn-noop/1234",
 			rules: []rule.Rule{ruleNoOpAuthenticator},
 			code:  http.StatusOK,
 			transform: func(r *http.Request) {
@@ -107,7 +107,7 @@ func TestDecisionAPI(t *testing.T) {
 		},
 		{
 			d:     "should pass",
-			url:   ts.URL + "/judge" + "/strip-path/authn-noop/1234",
+			url:   ts.URL + "/decisions" + "/strip-path/authn-noop/1234",
 			rules: []rule.Rule{ruleNoOpAuthenticatorModifyUpstream},
 			code:  http.StatusOK,
 			transform: func(r *http.Request) {
@@ -117,7 +117,7 @@ func TestDecisionAPI(t *testing.T) {
 		},
 		{
 			d:   "should fail because no authorizer was configured",
-			url: ts.URL + "/judge" + "/authn-anon/authz-none/cred-none/1234",
+			url: ts.URL + "/decisions" + "/authn-anon/authz-none/cred-none/1234",
 			rules: []rule.Rule{{
 				Match:          rule.RuleMatch{Methods: []string{"GET"}, URL: ts.URL + "/authn-anon/authz-none/cred-none/<[0-9]+>"},
 				Authenticators: []rule.RuleHandler{{Handler: "anonymous"}},
@@ -130,7 +130,7 @@ func TestDecisionAPI(t *testing.T) {
 		},
 		{
 			d:   "should fail because no mutator was configured",
-			url: ts.URL + "/judge" + "/authn-anon/authz-allow/cred-none/1234",
+			url: ts.URL + "/decisions" + "/authn-anon/authz-allow/cred-none/1234",
 			rules: []rule.Rule{{
 				Match:          rule.RuleMatch{Methods: []string{"GET"}, URL: ts.URL + "/authn-anon/authz-allow/cred-none/<[0-9]+>"},
 				Authenticators: []rule.RuleHandler{{Handler: "anonymous"}},
@@ -141,7 +141,7 @@ func TestDecisionAPI(t *testing.T) {
 		},
 		{
 			d:   "should pass with anonymous and everything else set to noop",
-			url: ts.URL + "/judge" + "/authn-anon/authz-allow/cred-noop/1234",
+			url: ts.URL + "/decisions" + "/authn-anon/authz-allow/cred-noop/1234",
 			rules: []rule.Rule{{
 				Match:          rule.RuleMatch{Methods: []string{"GET"}, URL: ts.URL + "/authn-anon/authz-allow/cred-noop/<[0-9]+>"},
 				Authenticators: []rule.RuleHandler{{Handler: "anonymous"}},
@@ -154,7 +154,7 @@ func TestDecisionAPI(t *testing.T) {
 		},
 		{
 			d:   "should fail when authorizer fails",
-			url: ts.URL + "/judge" + "/authn-anon/authz-deny/cred-noop/1234",
+			url: ts.URL + "/decisions" + "/authn-anon/authz-deny/cred-noop/1234",
 			rules: []rule.Rule{{
 				Match:          rule.RuleMatch{Methods: []string{"GET"}, URL: ts.URL + "/authn-anon/authz-deny/cred-noop/<[0-9]+>"},
 				Authenticators: []rule.RuleHandler{{Handler: "anonymous"}},
@@ -166,7 +166,7 @@ func TestDecisionAPI(t *testing.T) {
 		},
 		{
 			d:   "should fail when authenticator fails",
-			url: ts.URL + "/judge" + "/authn-broken/authz-none/cred-none/1234",
+			url: ts.URL + "/decisions" + "/authn-broken/authz-none/cred-none/1234",
 			rules: []rule.Rule{{
 				Match:          rule.RuleMatch{Methods: []string{"GET"}, URL: ts.URL + "/authn-broken/authz-none/cred-none/<[0-9]+>"},
 				Authenticators: []rule.RuleHandler{{Handler: "unauthorized"}},
@@ -176,7 +176,7 @@ func TestDecisionAPI(t *testing.T) {
 		},
 		{
 			d:   "should fail when mutator fails",
-			url: ts.URL + "/judge" + "/authn-anonymous/authz-allow/cred-broken/1234",
+			url: ts.URL + "/decisions" + "/authn-anonymous/authz-allow/cred-broken/1234",
 			rules: []rule.Rule{{
 				Match:          rule.RuleMatch{Methods: []string{"GET"}, URL: ts.URL + "/authn-anonymous/authz-allow/cred-broken/<[0-9]+>"},
 				Authenticators: []rule.RuleHandler{{Handler: "anonymous"}},

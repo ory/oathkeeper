@@ -27,84 +27,141 @@ before finalizing the upgrade process.
 
 ## master
 
-## v0.16.0+oryOS.12
+## v0.16.0-beta.1+oryOS.12
 
-/judge -> /decision
+ORY Oathkeeper was changed according to discussion [177](https://github.com/ory/oathkeeper/issues/177). Several issues
+have been resolved that could not be resolved before due to design decisions. We strongly encourage you to re-read the
+[documentation](https://www.ory.sh/docs/oathkeeper/) but to give you a short overview of the most important changes:
 
-### envs
+1. Commands `oathkeeper serve api` and `oathkeeper serve proxy` have been deprecated of `oathkeeper serve` which exposes
+    two ports (reverse proxy, API).
+1. ORY Oathkeeper can now be configured from a file and configuration keys where updated. Where appropriate, environment
+    variables from previous versions still work. Please check out [./docs/config.yml](./docs/config.yml) for a fully annotated configuration file as several environment
+                                                 variables changed, for example (not exclusive): `HTTPS_TLS_CERT_PATH`, `HTTPS_TLS_KEY_PATH`, `HTTPS_TLS_CERT`, `HTTPS_TLS_KEY`.
+1. The Judge API (`/judge`) was renamed to Access Control Decision API (`/decisions`)
+1. The need for a database was completely removed. Also, ORY Oathkeeper no longer runs as two separate processes but instead
+as one process that opens two ports (one proxy, one API).
+1. For consistency, JWT claims `scope`, `scp`, `scopes` will always be transformed to `scp` (string[]) in the `jwt`
+authenticator.
+1. ORY Oathkeeper no longer requires a database. Instead, cryptographic keys, access rules, and other configuration
+items are loaded from the file system, environment variables, or HTTP(s) locations.
+1. Credential Issuers are now called `mutators` as they mutate the HTTP Request (Headers) for upstream services.
+1. All authentication, authorization and mutation handlers are disabled by default and must be enabled and configured explicitly.
 
-* Removed:
-  * RULES_REFRESH_INTERVAL ->
-  * OATHKEEPER_API_URL ->
-* HOST -> serve.proxy.host, serve.api.host
-* PORT -> serve.proxy.port, serve.api.port
+### Access Rule Changes
 
-#### TLS
-
-* `HTTPS_TLS_CERT_PATH` -> `serve.tls.cert.base64`
-* `HTTPS_TLS_KEY_PATH` -> `serve.tls.key.base64`
-* `HTTPS_TLS_CERT` -> `serve.tls.cert.path`
-* `HTTPS_TLS_KEY` -> `serve.tls.key.path`
-
-#### ID Token
-
-* CREDENTIALS_ISSUER_ID_TOKEN_JWK_REFRESH_INTERVAL -> Always 30s now
-* CREDENTIALS_ISSUER_ID_TOKEN_ALGORITHM -> No longer required
-* CREDENTIALS_ISSUER_ID_TOKEN_HS256_SECRET -> No longer supported
-* CREDENTIALS_ISSUER_ID_TOKEN_HYDRA_JWK_SET_ID -> No longer supported
-
-- CREDENTIALS_ISSUER_ID_TOKEN_HYDRA_CLIENT_ID -> No longer supported
-- CREDENTIALS_ISSUER_ID_TOKEN_HYDRA_CLIENT_SECRET -> No longer supported
-- CREDENTIALS_ISSUER_ID_TOKEN_HYDRA_ADMIN_URL -> No longer supported
-- CREDENTIALS_ISSUER_ID_TOKEN_HYDRA_PUBLIC_URL -> No longer supported
-- CREDENTIALS_ISSUER_ID_TOKEN_HYDRA_CLIENT_SCOPES -> No longer supported
-
-###
-
-scope is being transformed to scp always!!
-
-### all env vars have been renamed but you can use older ones np
-
-### everything is disabled by default you must enable it explicitly
-
-### id token
-
-jwks are now no longer fetched from hydra, therefore deprecated:
-
-instead you can use `oathkeeper credentials generate [--alg <RS256>] [--bits <2048|4096>] <transformer_id_token>`
+As already noted, `credentials_issuer` was renamed to `mutator`. If you have existing rules, please update them as follows:
 
 ```
-jwk-keygen --use sig --alg RS256 --bits 4096
+[
+  {
+    "id": "jwt-rule",
+    "upstream": {
+      "url": "http://127.0.0.1:6662"
+    },
+    "match": {
+      "url": "http://127.0.0.1:6660/jwt",
+      "methods": [
+        "GET"
+      ]
+    },
+    "authenticators": [
+      {
+        "handler": "jwt"
+      }
+    ],
+    "authorizer": {
+      "handler": "allow"
+    },
+-   "credentials_issuer": {
++   "mutator": {
+      "handler": "id_token"
+    }
+  }
+]
 ```
 
-### renamed
+### Mutators (formerly credentials issuers)
 
-cookies -> cookie
-headers -> header
-credentials issuer -> mutator
+#### `id_token` works stand-alone
 
-### new
+The ID Token Mutator has completely been reworked. It no longer requires ORY Hydra for RS256 algorithms but instead
+loads the required cryptographic keys from the file system, environment variables, or a remote HTTP/HTTPS location.
 
-* new unauthorized authorizer
+To make development easy, ORY Oathkeeper ships a CLI command that allows you to quickly create such a cryptographic
+key:
 
-### Rule changes
+```shell
+$ oathkeeper credentials generate --alg <RS256|ES256|HS256|RS512|...>
+```
 
-Credential Issuer -> (Request) Transformer
+#### `headers` -> `header`
 
-### RSA key
+The ID of the Header Mutator has been updated from `headers` to `header`. Please apply a patch similar to the listed one
+to your access rules:
 
-* should no be imported from file/env
+```
+[
+  {
+    "id": "jwt-rule",
+    "upstream": {
+      "url": "http://127.0.0.1:6662"
+    },
+    "match": {
+      "url": "http://127.0.0.1:6660/jwt",
+      "methods": [
+        "GET"
+      ]
+    },
+    "authenticators": [
+      {
+        "handler": "jwt"
+      }
+    ],
+    "authorizer": {
+      "handler": "allow"
+    },
+   "mutator": {
+-      "handler": "headers"
++      "handler": "header"
+    }
+  }
+]
+```
 
-* should still work with hydra though
+#### `cookies` -> `cookie`
 
-### Serve Changes
+The ID of the Cookie Mutator has been updated from `cookies` to `cookie`. Please apply a patch similar to the listed one
+to your access rules:
 
-* serve api -> stays the same
-* serve proxy -> expose 2 ports, one proxy on api for health check, metrics and so on
-
-### SQL Store Deprecation
-
-SQL -> in memory / from disk
+```
+[
+  {
+    "id": "jwt-rule",
+    "upstream": {
+      "url": "http://127.0.0.1:6662"
+    },
+    "match": {
+      "url": "http://127.0.0.1:6660/jwt",
+      "methods": [
+        "GET"
+      ]
+    },
+    "authenticators": [
+      {
+        "handler": "jwt"
+      }
+    ],
+    "authorizer": {
+      "handler": "allow"
+    },
+   "mutator": {
+-      "handler": "cookies"
++      "handler": "cookie"
+    }
+  }
+]
+```
 
 ## v0.15.0+oryOS.11
 
