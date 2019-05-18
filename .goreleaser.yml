@@ -8,13 +8,14 @@ env:
 before:
   hooks:
     - go mod download
+    - cp ./.releaser/LICENSE.txt ./LICENSE.txt
 
 builds:
   -
     flags:
       - -a
     ldflags:
-      - -s -w -X github.com/ory/oathkeeper/cmd.Version={{.Tag}} -X github.com/ory/oathkeeper/cmd.Commit={{.FullCommit}} -X github.com/ory/oathkeeper/cmd.Date={{.Date}}
+      - -s -w -X github.com/ory/oathkeeper/cmd.Version={{.Env.RELEASE_NAME}} -X github.com/ory/oathkeeper/cmd.Commit={{.FullCommit}} -X github.com/ory/oathkeeper/cmd.Date={{.Date}}
     binary: oathkeeper
     env:
       - CGO_ENABLED=0
@@ -33,7 +34,7 @@ builds:
       - windows
       - darwin
 
-archive:
+archives:
   -
     replacements:
       darwin: macOS
