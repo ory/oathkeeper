@@ -45,6 +45,10 @@ jobs:
     working_directory: /go/src/github.com/ory/oathkeeper
     steps:
       - checkout
+      - run:
+          command: |
+            ./.circleci/release_name.bash
+            source $BASH_ENV
       - run: go mod download
       - run: go install github.com/ory/go-acc github.com/mattn/goveralls
       - run: go-acc -o coverage.txt ./... -- -failfast -timeout=20m
