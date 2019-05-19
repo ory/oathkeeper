@@ -52,7 +52,7 @@ overview of the most important changes:
    API).
 1. ORY Oathkeeper can now be configured from a file and configuration keys where
    updated. Where appropriate, environment variables from previous versions
-   still work. Please check out [./docs/config.yml](./docs/config.yml) for a
+   still work. Please check out [./docs/config.yml](docs/config.yaml) for a
    fully annotated configuration file as several environment variables changed,
    for example (not exclusive): `HTTPS_TLS_CERT_PATH`, `HTTPS_TLS_KEY_PATH`,
    `HTTPS_TLS_CERT`, `HTTPS_TLS_KEY`.
