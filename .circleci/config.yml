@@ -135,7 +135,7 @@ workflows:
           filters:
             tags:
               only: /.*/
-      - release-docs:
+      - docs:
           filters:
             branches:
               only: master
