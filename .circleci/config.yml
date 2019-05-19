@@ -78,7 +78,7 @@ jobs:
 
   docs:
     docker:
-      - image: alpine/git:1.0.4
+      - image: circleci/golang:1.12
     working_directory: /go/src/github.com/ory/oathkeeper
     steps:
       - checkout
