@@ -8,11 +8,12 @@ import (
 	"testing"
 
 	"github.com/julienschmidt/httprouter"
-	"github.com/ory/hive-cloud/hive/auth"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/ory/hive-cloud/hive/auth"
 
 	"github.com/ory/herodot"
 	"github.com/ory/hive-cloud/hive/identity"
@@ -71,12 +72,12 @@ func TestAuthenticatorHive(t *testing.T) {
 			{
 				sh: func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 					writer.Write(w, r, &session.Session{
-						SID:      "1-session-id",
+						SID: "1-session-id",
 					})
 				},
 				cv: "1-session-id",
 				expectSession: &session.Session{
-					SID:      "1-session-id",
+					SID: "1-session-id",
 				},
 			},
 			{
@@ -87,7 +88,7 @@ func TestAuthenticatorHive(t *testing.T) {
 				},
 				cv: "1-session-id",
 				expectSession: &session.Session{
-					SID:      "1-session-id",
+					SID: "1-session-id",
 				},
 			},
 		} {

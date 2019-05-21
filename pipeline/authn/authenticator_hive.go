@@ -8,12 +8,13 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/hashicorp/golang-lru"
+	lru "github.com/hashicorp/golang-lru"
+	"github.com/pkg/errors"
+
 	"github.com/ory/herodot"
 	"github.com/ory/hive-cloud/hive/auth"
 	"github.com/ory/x/httpx"
 	"github.com/ory/x/urlx"
-	"github.com/pkg/errors"
 
 	"github.com/ory/hive-cloud/hive/session"
 

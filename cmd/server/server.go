@@ -10,12 +10,13 @@ import (
 	"sync"
 
 	negronilogrus "github.com/meatballhat/negroni-logrus"
-	"github.com/ory/x/healthx"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/urfave/negroni"
+
+	"github.com/ory/x/healthx"
 
 	"github.com/ory/herodot"
 

@@ -95,7 +95,6 @@ func TestProxy(t *testing.T) {
 	ts := httptest.NewServer(&httputil.ReverseProxy{Director: d.Director, Transport: d})
 	defer ts.Close()
 
-
 	viper.Set(configuration.ViperKeyAuthenticatorNoopIsEnabled, true)
 	viper.Set(configuration.ViperKeyAuthenticatorUnauthorizedIsEnabled, true)
 	viper.Set(configuration.ViperKeyAuthenticatorAnonymousIsEnabled, true)
@@ -250,11 +249,11 @@ func TestProxy(t *testing.T) {
 			d:   "should force a redirect",
 			url: ts.URL + "/authn-redirect/1234",
 			rules: []rule.Rule{{
-				Match:             rule.RuleMatch{Methods: []string{"GET"}, URL: ts.URL + "/authn-redirect/<[0-9]+>"},
-				Authenticators:    []rule.RuleHandler{{Handler: "redirect"}},
-				Authorizer:        rule.RuleHandler{Handler: "allow"},
-				Mutator: rule.RuleHandler{Handler: "noop"},
-				Upstream:          rule.Upstream{URL: backend.URL},
+				Match:          rule.RuleMatch{Methods: []string{"GET"}, URL: ts.URL + "/authn-redirect/<[0-9]+>"},
+				Authenticators: []rule.RuleHandler{{Handler: "redirect"}},
+				Authorizer:     rule.RuleHandler{Handler: "allow"},
+				Mutator:        rule.RuleHandler{Handler: "noop"},
+				Upstream:       rule.Upstream{URL: backend.URL},
 			}},
 			code: http.StatusOK,
 			messages: []string{
@@ -265,11 +264,11 @@ func TestProxy(t *testing.T) {
 			d:   "should force a response",
 			url: ts.URL + "/authn-response/1234",
 			rules: []rule.Rule{{
-				Match:             rule.RuleMatch{Methods: []string{"GET"}, URL: ts.URL + "/authn-response/<[0-9]+>"},
-				Authenticators:    []rule.RuleHandler{{Handler: "response"}},
-				Authorizer:        rule.RuleHandler{Handler: "allow"},
-				Mutator: rule.RuleHandler{Handler: "noop"},
-				Upstream:          rule.Upstream{URL: backend.URL},
+				Match:          rule.RuleMatch{Methods: []string{"GET"}, URL: ts.URL + "/authn-response/<[0-9]+>"},
+				Authenticators: []rule.RuleHandler{{Handler: "response"}},
+				Authorizer:     rule.RuleHandler{Handler: "allow"},
+				Mutator:        rule.RuleHandler{Handler: "noop"},
+				Upstream:       rule.Upstream{URL: backend.URL},
 			}},
 			code: http.StatusOK,
 			messages: []string{
