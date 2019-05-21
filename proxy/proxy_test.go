@@ -32,10 +32,13 @@ import (
 
 	"github.com/spf13/viper"
 
+	"github.com/ory/x/urlx"
+
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/internal"
+	"github.com/ory/oathkeeper/pipeline/authn"
+	"github.com/ory/oathkeeper/pipeline/mutate"
 	"github.com/ory/oathkeeper/proxy"
-	"github.com/ory/x/urlx"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -43,46 +46,55 @@ import (
 	"github.com/ory/oathkeeper/rule"
 )
 
-//type jurorDenyAll struct{}
+// type jurorDenyAll struct{}
 //
-//func (j *jurorDenyAll) GetID() string {
-//	return "pass_through_deny"
-//}
+// func (j *jurorDenyAll) GetID() string {
+// 	return "pass_through_deny"
+// }
 //
-//func (j jurorDenyAll) Try(r *http.Request, rl *rule.Rule, u *url.URL) (*Session, error) {
-//	return nil, errors.WithStack(helper.ErrUnauthorized)
-//}
+// func (j jurorDenyAll) Try(r *http.Request, rl *rule.Rule, u *url.URL) (*Session, error) {
+// 	return nil, errors.WithStack(helper.ErrUnauthorized)
+// }
 //
-//type jurorAcceptAll struct{}
+// type jurorAcceptAll struct{}
 //
-//func (j *jurorAcceptAll) GetID() string {
-//	return "pass_through_accept"
-//}
+// func (j *jurorAcceptAll) GetID() string {
+// 	return "pass_through_accept"
+// }
 //
-//func (j jurorAcceptAll) Try(r *http.Request, rl *rule.Rule, u *url.URL) (*Session, error) {
-//	return &Session{
-//		Subject:   "",
-//		Anonymous: true,
-//		ClientID:  "",
-//		Disabled:  true,
-//	}, nil
-//}
+// func (j jurorAcceptAll) Try(r *http.Request, rl *rule.Rule, u *url.URL) (*Session, error) {
+// 	return &Session{
+// 		Subject:   "",
+// 		Anonymous: true,
+// 		ClientID:  "",
+// 		Disabled:  true,
+// 	}, nil
+// }
 
 func TestProxy(t *testing.T) {
 	backend := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		//assert.NotEmpty(t, helper.BearerTokenFromRequest(r))
+		// assert.NotEmpty(t, helper.BearerTokenFromRequest(r))
 		fmt.Fprint(w, "authorization="+r.Header.Get("Authorization")+"\n")
 		fmt.Fprint(w, "host="+r.Host+"\n")
 		fmt.Fprint(w, "url="+r.URL.String())
 	}))
 	defer backend.Close()
 
+	redirectTS := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte("redirected"))
+	}))
+	defer redirectTS.Close()
+
 	conf := internal.NewConfigurationWithDefaults()
-	reg := internal.NewRegistry(conf).WithBrokenPipelineMutator()
+	reg := internal.NewRegistry(conf).
+		WithMutator("broken", mutate.NewMutatorBroken(true)).
+		WithAuthenticator("redirect", authn.NewAuthenticatorForcedResponse(redirectTS.URL)).
+		WithAuthenticator("response", authn.NewAuthenticatorForcedResponse(""))
 
 	d := reg.Proxy()
 	ts := httptest.NewServer(&httputil.ReverseProxy{Director: d.Director, Transport: d})
 	defer ts.Close()
+
 
 	viper.Set(configuration.ViperKeyAuthenticatorNoopIsEnabled, true)
 	viper.Set(configuration.ViperKeyAuthenticatorUnauthorizedIsEnabled, true)
@@ -106,10 +118,10 @@ func TestProxy(t *testing.T) {
 		Upstream:       rule.Upstream{URL: backend.URL, StripPath: "/strip-path/", PreserveHost: true},
 	}
 
-	//acceptRuleStripHost := rule.Rule{MatchesMethods: []string{"GET"}, MatchesURLCompiled: mustCompileRegex(t, proxy.URL+"/users/<[0-9]+>"), Mode: "pass_through_accept", Upstream: rule.Upstream{URLParsed: u, StripPath: "/users/", PreserveHost: true}}
-	//acceptRuleStripHostWithoutTrailing := rule.Rule{MatchesMethods: []string{"GET"}, MatchesURLCompiled: mustCompileRegex(t, proxy.URL+"/users/<[0-9]+>"), Mode: "pass_through_accept", Upstream: rule.Upstream{URLParsed: u, StripPath: "/users", PreserveHost: true}}
-	//acceptRuleStripHostWithoutTrailing2 := rule.Rule{MatchesMethods: []string{"GET"}, MatchesURLCompiled: mustCompileRegex(t, proxy.URL+"/users/<[0-9]+>"), Mode: "pass_through_accept", Upstream: rule.Upstream{URLParsed: u, StripPath: "users", PreserveHost: true}}
-	//denyRule := rule.Rule{MatchesMethods: []string{"GET"}, MatchesURLCompiled: mustCompileRegex(t, proxy.URL+"/users/<[0-9]+>"), Mode: "pass_through_deny", Upstream: rule.Upstream{URLParsed: u}}
+	// acceptRuleStripHost := rule.Rule{MatchesMethods: []string{"GET"}, MatchesURLCompiled: mustCompileRegex(t, proxy.URL+"/users/<[0-9]+>"), Mode: "pass_through_accept", Upstream: rule.Upstream{URLParsed: u, StripPath: "/users/", PreserveHost: true}}
+	// acceptRuleStripHostWithoutTrailing := rule.Rule{MatchesMethods: []string{"GET"}, MatchesURLCompiled: mustCompileRegex(t, proxy.URL+"/users/<[0-9]+>"), Mode: "pass_through_accept", Upstream: rule.Upstream{URLParsed: u, StripPath: "/users", PreserveHost: true}}
+	// acceptRuleStripHostWithoutTrailing2 := rule.Rule{MatchesMethods: []string{"GET"}, MatchesURLCompiled: mustCompileRegex(t, proxy.URL+"/users/<[0-9]+>"), Mode: "pass_through_accept", Upstream: rule.Upstream{URLParsed: u, StripPath: "users", PreserveHost: true}}
+	// denyRule := rule.Rule{MatchesMethods: []string{"GET"}, MatchesURLCompiled: mustCompileRegex(t, proxy.URL+"/users/<[0-9]+>"), Mode: "pass_through_deny", Upstream: rule.Upstream{URLParsed: u}}
 
 	for k, tc := range []struct {
 		url       string
@@ -234,6 +246,36 @@ func TestProxy(t *testing.T) {
 			}},
 			code: http.StatusInternalServerError,
 		},
+		{
+			d:   "should force a redirect",
+			url: ts.URL + "/authn-redirect/1234",
+			rules: []rule.Rule{{
+				Match:             rule.RuleMatch{Methods: []string{"GET"}, URL: ts.URL + "/authn-redirect/<[0-9]+>"},
+				Authenticators:    []rule.RuleHandler{{Handler: "redirect"}},
+				Authorizer:        rule.RuleHandler{Handler: "allow"},
+				Mutator: rule.RuleHandler{Handler: "noop"},
+				Upstream:          rule.Upstream{URL: backend.URL},
+			}},
+			code: http.StatusOK,
+			messages: []string{
+				"redirected",
+			},
+		},
+		{
+			d:   "should force a response",
+			url: ts.URL + "/authn-response/1234",
+			rules: []rule.Rule{{
+				Match:             rule.RuleMatch{Methods: []string{"GET"}, URL: ts.URL + "/authn-response/<[0-9]+>"},
+				Authenticators:    []rule.RuleHandler{{Handler: "response"}},
+				Authorizer:        rule.RuleHandler{Handler: "allow"},
+				Mutator: rule.RuleHandler{Handler: "noop"},
+				Upstream:          rule.Upstream{URL: backend.URL},
+			}},
+			code: http.StatusOK,
+			messages: []string{
+				"response",
+			},
+		},
 	} {
 		t.Run(fmt.Sprintf("case=%d/description=%s", k, tc.d), func(t *testing.T) {
 			reg.RuleRepository().(*rule.RepositoryMemory).WithRules(tc.rules)
@@ -327,53 +369,53 @@ func TestConfigureBackendURL(t *testing.T) {
 	}
 }
 
-//func panicCompileRegex(pattern string) *regexp.Regexp {
-//	exp, err := regexp.Compile(pattern)
-//	if err != nil {
-//		panic(err.Error())
-//	}
-//	return exp
-//}
+// func panicCompileRegex(pattern string) *regexp.Regexp {
+// 	exp, err := regexp.Compile(pattern)
+// 	if err != nil {
+// 		panic(err.Error())
+// 	}
+// 	return exp
+// }
 
 //
-//func BenchmarkDirector(b *testing.B) {
-//	backend := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-//		fmt.Fprint(w, "authorization="+r.Header.Get("Authorization"))
-//		fmt.Fprint(w, "host="+r.Header.Get("Host"))
-//		fmt.Fprint(w, "url="+r.URL.String())
-//		fmt.Fprint(w, "path="+r.URL.Path)
-//	}))
-//	defer backend.Close()
+// func BenchmarkDirector(b *testing.B) {
+// 	backend := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+// 		fmt.Fprint(w, "authorization="+r.Header.Get("Authorization"))
+// 		fmt.Fprint(w, "host="+r.Header.Get("Host"))
+// 		fmt.Fprint(w, "url="+r.URL.String())
+// 		fmt.Fprint(w, "path="+r.URL.Path)
+// 	}))
+// 	defer backend.Close()
 //
-//	logger := logrus.New()
-//	logger.Level = logrus.WarnLevel
-//	u, _ := url.Parse(backend.URL)
-//	d := NewProxy(nil, logger, &rsakey.LocalManager{KeyStrength: 512})
+// 	logger := logrus.New()
+// 	logger.Level = logrus.WarnLevel
+// 	u, _ := url.Parse(backend.URL)
+// 	d := NewProxy(nil, logger, &rsakey.LocalManager{KeyStrength: 512})
 //
-//	p := httptest.NewServer(&httputil.ReverseProxy{Director: d.Director, Transport: d})
-//	defer p.Close()
+// 	p := httptest.NewServer(&httputil.ReverseProxy{Director: d.Director, Transport: d})
+// 	defer p.Close()
 //
-//	jt := &JurorPassThrough{L: logrus.New()}
-//	matcher := &rule.CachedMatcher{Rules: map[string]rule.Rule{
-//		"A": {MatchesMethods: []string{"GET"}, MatchesURLCompiled: panicCompileRegex(p.URL + "/users"), Mode: jt.GetID(), Upstream: rule.Upstream{URLParsed: u}},
-//		"B": {MatchesMethods: []string{"GET"}, MatchesURLCompiled: panicCompileRegex(p.URL + "/users/<[0-9]+>"), Mode: jt.GetID(), Upstream: rule.Upstream{URLParsed: u}},
-//		"C": {MatchesMethods: []string{"GET"}, MatchesURLCompiled: panicCompileRegex(p.URL + "/<[0-9]+>"), Mode: jt.GetID(), Upstream: rule.Upstream{URLParsed: u}},
-//		"D": {MatchesMethods: []string{"GET"}, MatchesURLCompiled: panicCompileRegex(p.URL + "/other/<.+>"), Mode: jt.GetID(), Upstream: rule.Upstream{URLParsed: u}},
-//	}}
-//	d.Judge = NewRequestHandler(logger, matcher, "", []Juror{jt})
+// 	jt := &JurorPassThrough{L: logrus.New()}
+// 	matcher := &rule.CachedMatcher{Rules: map[string]rule.Rule{
+// 		"A": {MatchesMethods: []string{"GET"}, MatchesURLCompiled: panicCompileRegex(p.URL + "/users"), Mode: jt.GetID(), Upstream: rule.Upstream{URLParsed: u}},
+// 		"B": {MatchesMethods: []string{"GET"}, MatchesURLCompiled: panicCompileRegex(p.URL + "/users/<[0-9]+>"), Mode: jt.GetID(), Upstream: rule.Upstream{URLParsed: u}},
+// 		"C": {MatchesMethods: []string{"GET"}, MatchesURLCompiled: panicCompileRegex(p.URL + "/<[0-9]+>"), Mode: jt.GetID(), Upstream: rule.Upstream{URLParsed: u}},
+// 		"D": {MatchesMethods: []string{"GET"}, MatchesURLCompiled: panicCompileRegex(p.URL + "/other/<.+>"), Mode: jt.GetID(), Upstream: rule.Upstream{URLParsed: u}},
+// 	}}
+// 	d.Judge = NewRequestHandler(logger, matcher, "", []Juror{jt})
 //
-//	req, _ := http.NewRequest("GET", p.URL+"/users", nil)
+// 	req, _ := http.NewRequest("GET", p.URL+"/users", nil)
 //
-//	b.Run("case=fetch_user_endpoint", func(b *testing.B) {
-//		for n := 0; n < b.N; n++ {
-//			res, err := http.DefaultClient.Do(req)
-//			if err != nil {
-//				b.FailNow()
-//			}
+// 	b.Run("case=fetch_user_endpoint", func(b *testing.B) {
+// 		for n := 0; n < b.N; n++ {
+// 			res, err := http.DefaultClient.Do(req)
+// 			if err != nil {
+// 				b.FailNow()
+// 			}
 //
-//			if res.StatusCode != http.StatusOK {
-//				b.FailNow()
-//			}
-//		}
-//	})
-//}
+// 			if res.StatusCode != http.StatusOK {
+// 				b.FailNow()
+// 			}
+// 		}
+// 	})
+// }

@@ -49,6 +49,10 @@ type ProviderAuthenticators interface {
 	AuthenticatorOAuth2TokenIntrospectionPreAuthorization() *clientcredentials.Config
 
 	AuthenticatorUnauthorizedIsEnabled() bool
+
+	AuthenticatorHiveIsEnabled() bool
+	AuthenticatorHivePublicURL() *url.URL
+	AuthenticatorHiveAdminURL() *url.URL
 }
 
 type ProviderAuthorizers interface {

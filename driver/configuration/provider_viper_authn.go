@@ -39,6 +39,11 @@ const (
 
 	// unauthorized
 	ViperKeyAuthenticatorUnauthorizedIsEnabled = "authenticators.unauthorized.enabled"
+
+	// hive
+	ViperKeyAuthenticatorHiveIsEnabled = "authenticators.hive.enabled"
+	ViperKeyAuthenticatorHiveAdminURL  = "authenticators.hive.admin_url"
+	ViperKeyAuthenticatorHivePublicURL = "authenticators.hive.public_url"
 )
 
 func (v *ViperProvider) AuthenticatorAnonymousIsEnabled() bool {
@@ -50,7 +55,6 @@ func (v *ViperProvider) AuthenticatorAnonymousIdentifier() string {
 
 func (v *ViperProvider) AuthenticatorNoopIsEnabled() bool {
 	return viperx.GetBool(v.l, ViperKeyAuthenticatorNoopIsEnabled, false)
-
 }
 
 func (v *ViperProvider) AuthenticatorJWTIsEnabled() bool {
@@ -138,4 +142,16 @@ func (v *ViperProvider) AuthenticatorOAuth2TokenIntrospectionPreAuthorization() 
 
 func (v *ViperProvider) AuthenticatorUnauthorizedIsEnabled() bool {
 	return viperx.GetBool(v.l, ViperKeyAuthenticatorUnauthorizedIsEnabled, false)
+}
+
+func (v *ViperProvider) AuthenticatorHiveIsEnabled() bool {
+	return viperx.GetBool(v.l, ViperKeyAuthenticatorHiveIsEnabled, false)
+}
+
+func (v *ViperProvider) AuthenticatorHiveAdminURL() *url.URL {
+	return v.getURL(viperx.GetString(v.l, ViperKeyAuthenticatorHiveAdminURL, ""), ViperKeyAuthenticatorHiveAdminURL)
+}
+
+func (v *ViperProvider) AuthenticatorHivePublicURL() *url.URL {
+	return v.getURL(viperx.GetString(v.l, ViperKeyAuthenticatorHivePublicURL, ""), ViperKeyAuthenticatorHivePublicURL)
 }

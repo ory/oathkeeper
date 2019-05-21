@@ -27,6 +27,7 @@ import (
 	"net/url"
 	"testing"
 
+	"github.com/ory/oathkeeper/pipeline/mutate"
 	"github.com/ory/oathkeeper/x"
 
 	"github.com/ory/oathkeeper/internal"
@@ -41,7 +42,7 @@ import (
 
 func TestHandler(t *testing.T) {
 	conf := internal.NewConfigurationWithDefaults()
-	reg := internal.NewRegistry(conf).WithBrokenPipelineMutator()
+	reg := internal.NewRegistry(conf).WithMutator("broken", mutate.NewMutatorBroken(true))
 
 	router := x.NewAPIRouter()
 	reg.RuleHandler().SetRoutes(router)

@@ -29,6 +29,7 @@ import (
 	"github.com/spf13/viper"
 
 	"github.com/ory/oathkeeper/driver/configuration"
+	"github.com/ory/oathkeeper/pipeline/mutate"
 
 	"github.com/urfave/negroni"
 
@@ -49,7 +50,7 @@ func TestDecisionAPI(t *testing.T) {
 	viper.Set(configuration.ViperKeyAuthorizerAllowIsEnabled, true)
 	viper.Set(configuration.ViperKeyAuthorizerDenyIsEnabled, true)
 	viper.Set(configuration.ViperKeyMutatorNoopIsEnabled, true)
-	reg := internal.NewRegistry(conf).WithBrokenPipelineMutator()
+	reg := internal.NewRegistry(conf).WithMutator("broken", mutate.NewMutatorBroken(true))
 
 	d := reg.DecisionHandler()
 

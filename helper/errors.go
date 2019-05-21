@@ -27,6 +27,11 @@ import (
 )
 
 var (
+	ErrForceResponse = &herodot.DefaultError{
+		ErrorField:  "Broke out of context to force HTTP response",
+		CodeField:   0,
+		StatusField: "",
+	}
 	ErrForbidden = &herodot.DefaultError{
 		ErrorField:  "Access credentials are not sufficient to access this resource",
 		CodeField:   http.StatusForbidden,

@@ -27,6 +27,10 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/ory/herodot"
+
+	"github.com/ory/oathkeeper/helper"
+	"github.com/ory/oathkeeper/pipeline"
 	"github.com/ory/oathkeeper/x"
 
 	"github.com/pkg/errors"
@@ -50,14 +54,19 @@ type Proxy struct {
 	r proxyRegistry
 }
 
-type key int
-
-const director key = 0
-
 func (d *Proxy) RoundTrip(r *http.Request) (*http.Response, error) {
-	rw := NewSimpleResponseWriter()
+	rw := x.NewSimpleResponseWriter()
+	if err, ok := r.Context().Value(pipeline.Director).(error); ok && err.Error() == helper.ErrForceResponse.Error() {
+		d.r.Logger().WithError(err).
+			WithField("granted", false).
+			WithField("access_url", r.URL.String()).
+			Warn("Access request denied and a response (e.g. redirect) was forced")
 
-	if err, ok := r.Context().Value(director).(error); ok && err != nil {
+		if res, ok := r.Context().Value(pipeline.DirectorForcedResponse).(*http.Response); ok && res != nil {
+			return res, nil
+		}
+		return nil, herodot.ErrInternalServerError.WithReason("ErrForceResponse was used without including a response - a fatal error in the codebase")
+	} else if ok && err != nil {
 		d.r.Logger().WithError(err).
 			WithField("granted", false).
 			WithField("access_url", r.URL.String()).
@@ -66,9 +75,9 @@ func (d *Proxy) RoundTrip(r *http.Request) (*http.Response, error) {
 		d.r.Writer().WriteError(rw, r, err)
 
 		return &http.Response{
-			StatusCode: rw.code,
-			Body:       ioutil.NopCloser(rw.buffer),
-			Header:     rw.header,
+			StatusCode: rw.StatusCode,
+			Body:       ioutil.NopCloser(rw.Buffer),
+			Header:     rw.Header(),
 		}, nil
 	} else if err == nil {
 		res, err := http.DefaultTransport.RoundTrip(r)
@@ -99,9 +108,9 @@ func (d *Proxy) RoundTrip(r *http.Request) (*http.Response, error) {
 	d.r.Writer().Write(rw, r, err)
 
 	return &http.Response{
-		StatusCode: rw.code,
-		Body:       ioutil.NopCloser(rw.buffer),
-		Header:     rw.header,
+		StatusCode: rw.StatusCode,
+		Body:       ioutil.NopCloser(rw.Buffer),
+		Header:     rw.Header(),
 	}, nil
 }
 
@@ -109,13 +118,13 @@ func (d *Proxy) Director(r *http.Request) {
 	EnrichRequestedURL(r)
 	rl, err := d.r.RuleMatcher().Match(r.Context(), r.Method, r.URL)
 	if err != nil {
-		*r = *r.WithContext(context.WithValue(r.Context(), director, err))
+		*r = *r.WithContext(context.WithValue(r.Context(), pipeline.Director, err))
 		return
 	}
 
 	headers, err := d.r.ProxyRequestHandler().HandleRequest(r, rl)
 	if err != nil {
-		*r = *r.WithContext(context.WithValue(r.Context(), director, err))
+		*r = *r.WithContext(context.WithValue(r.Context(), pipeline.Director, err))
 		return
 	}
 
@@ -124,12 +133,12 @@ func (d *Proxy) Director(r *http.Request) {
 	}
 
 	if err := ConfigureBackendURL(r, rl); err != nil {
-		*r = *r.WithContext(context.WithValue(r.Context(), director, err))
+		*r = *r.WithContext(context.WithValue(r.Context(), pipeline.Director, err))
 		return
 	}
 
 	var en error // need to set it to error but with nil value
-	*r = *r.WithContext(context.WithValue(r.Context(), director, en))
+	*r = *r.WithContext(context.WithValue(r.Context(), pipeline.Director, en))
 }
 
 // EnrichRequestedURL sets Scheme and Host values in a URL passed down by a http server. Per default, the URL

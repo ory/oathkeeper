@@ -283,9 +283,27 @@ func (r *RegistryMemory) PipelineMutator(id string) (mutate.Mutator, error) {
 	return a, nil
 }
 
-func (r *RegistryMemory) WithBrokenPipelineMutator() *RegistryMemory {
+func (r *RegistryMemory) WithMutator(id string, m mutate.Mutator) *RegistryMemory {
 	r.prepareMutators()
-	r.mutators["broken"] = mutate.NewMutatorBroken(true)
+	r.Lock()
+	r.mutators[id] = m
+	r.Unlock()
+	return r
+}
+
+func (r *RegistryMemory) WithAuthenticator(id string, a authn.Authenticator) *RegistryMemory {
+	r.prepareAuthn()
+	r.Lock()
+	r.authenticators[id] = a
+	r.Unlock()
+	return r
+}
+
+func (r *RegistryMemory) WithAuthorizer(id string, a authz.Authorizer) *RegistryMemory {
+	r.prepareAuthz()
+	r.Lock()
+	r.authorizers[id] = a
+	r.Unlock()
 	return r
 }
 
@@ -300,6 +318,7 @@ func (r *RegistryMemory) prepareAuthn() {
 			authn.NewAuthenticatorOAuth2ClientCredentials(r.c),
 			authn.NewAuthenticatorOAuth2Introspection(r.c),
 			authn.NewAuthenticatorUnauthorized(r.c),
+			authn.NewAuthenticatorHive(r.c),
 		}
 
 		r.authenticators = map[string]authn.Authenticator{}

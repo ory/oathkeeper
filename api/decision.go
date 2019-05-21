@@ -23,6 +23,9 @@ package api
 import (
 	"net/http"
 
+	"github.com/pkg/errors"
+
+	"github.com/ory/oathkeeper/helper"
 	"github.com/ory/oathkeeper/x"
 
 	"github.com/ory/oathkeeper/proxy"
@@ -95,6 +98,11 @@ func (h *DecisionHandler) decisions(w http.ResponseWriter, r *http.Request) {
 
 	headers, err := h.r.ProxyRequestHandler().HandleRequest(r, rl)
 	if err != nil {
+		if errors.Cause(err).Error() == helper.ErrForceResponse.Error() {
+			panic("Not implemented")
+			return
+		}
+
 		h.r.Logger().WithError(err).
 			WithField("granted", false).
 			WithField("access_url", r.URL.String()).

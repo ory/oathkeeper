@@ -26,8 +26,8 @@ require (
 	github.com/golang/protobuf v1.3.1 // indirect
 	github.com/gorilla/handlers v1.4.0 // indirect
 	github.com/gorilla/mux v1.7.1 // indirect
-	github.com/hashicorp/golang-lru v0.5.1 // indirect
-	github.com/inconshreveable/mousetrap v1.0.0 // indirect
+	github.com/gorilla/schema v1.0.2 // indirect
+	github.com/hashicorp/golang-lru v0.5.1
 	github.com/jessevdk/go-flags v1.4.0 // indirect
 	github.com/julienschmidt/httprouter v1.2.0
 	github.com/konsorten/go-windows-terminal-sequences v1.0.2 // indirect
@@ -42,6 +42,7 @@ require (
 	github.com/ory/go-convenience v0.1.0
 	github.com/ory/graceful v0.1.1
 	github.com/ory/herodot v0.6.2
+	github.com/ory/hive-cloud/hive v0.0.0-00010101000000-000000000000
 	github.com/ory/ladon v1.0.1
 	github.com/ory/x v0.0.60
 	github.com/pborman/uuid v1.2.0
@@ -74,3 +75,6 @@ require (
 
 // Fix for https://github.com/golang/lint/issues/436
 replace github.com/golang/lint => github.com/golang/lint v0.0.0-20190227174305-8f45f776aaf1
+
+// FIXME REMOVE ME
+replace github.com/ory/hive-cloud/hive => ../hive-cloud/hive

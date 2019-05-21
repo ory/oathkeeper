@@ -18,34 +18,34 @@
  * @license  	   Apache-2.0
  */
 
-package proxy
+package x
 
 import (
 	"bytes"
 	"net/http"
 )
 
-type simpleResponseWriter struct {
-	header http.Header
-	code   int
-	buffer *bytes.Buffer
+type SimpleResponseWriter struct {
+	HTTPHeader http.Header
+	StatusCode int
+	Buffer     *bytes.Buffer
 }
 
-func NewSimpleResponseWriter() *simpleResponseWriter {
-	return &simpleResponseWriter{
-		header: http.Header{},
-		buffer: new(bytes.Buffer),
+func NewSimpleResponseWriter() *SimpleResponseWriter {
+	return &SimpleResponseWriter{
+		HTTPHeader: http.Header{},
+		Buffer:     new(bytes.Buffer),
 	}
 }
 
-func (r *simpleResponseWriter) Header() http.Header {
-	return r.header
+func (r *SimpleResponseWriter) Header() http.Header {
+	return r.HTTPHeader
 }
 
-func (r *simpleResponseWriter) Write(b []byte) (int, error) {
-	return r.buffer.Write(b)
+func (r *SimpleResponseWriter) Write(b []byte) (int, error) {
+	return r.Buffer.Write(b)
 }
 
-func (r *simpleResponseWriter) WriteHeader(statusCode int) {
-	r.code = statusCode
+func (r *SimpleResponseWriter) WriteHeader(statusCode int) {
+	r.StatusCode = statusCode
 }
