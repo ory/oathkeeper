@@ -62,8 +62,7 @@ require (
 	github.com/toqueteos/webbrowser v1.1.0 // indirect
 	github.com/urfave/negroni v1.0.0
 	go.opencensus.io v0.20.0 // indirect
-	golang.org/x/crypto v0.0.0-20190404164418-38d8ce5564a5
-	golang.org/x/net v0.0.0-20190404232315-eb5bcb51f2a3 // indirect
+	golang.org/x/crypto v0.0.0-20190513172903-22d7a77e9e5f
 	golang.org/x/oauth2 v0.0.0-20190402181905-9f3314589c9a
 	golang.org/x/time v0.0.0-20190308202827-9d24e82272b4 // indirect
 	golang.org/x/tools v0.0.0-20190404132500-923d25813098

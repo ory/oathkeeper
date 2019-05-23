@@ -128,7 +128,7 @@ func (a *AuthenticatorHive) FindSession(c *http.Cookie) (*session.Session, error
 		}
 	}
 
-	req, err := http.NewRequest("GET", urlx.AppendPaths(a.c.AuthenticatorHiveAdminURL(), session.SessionMePath).String(), nil)
+	req, err := http.NewRequest("GET", urlx.AppendPaths(a.c.AuthenticatorHivePublicURL(), session.SessionMePath).String(), nil)
 	if err != nil {
 		return nil, errors.WithStack(herodot.ErrInternalServerError.WithDebug(err.Error()))
 	}
