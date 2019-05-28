@@ -54,18 +54,41 @@ var tokenValid = func() string {
 func main() {
 	res, body := requestWithJWT(tokenValid)
 	if res.StatusCode != 200 {
-		panic("expected 200: " + body)
+		panic("proxy: expected 200: " + body)
 	}
 
 	res, body = requestWithJWT("not.valid.token")
 	if res.StatusCode != 403 {
-		panic("expected 401: " + body)
+		panic("proxy: expected 401: " + body)
+	}
+
+	res, body = decisionWithJWT(tokenValid)
+	if res.StatusCode != 200 {
+		panic("decision: expected 200: " + body)
+	}
+
+	res, body = decisionWithJWT("not.valid.token")
+	if res.StatusCode != 403 {
+		panic("decision: expected 401: " + body)
 	}
 }
 
 func requestWithJWT(token string) (*http.Response, string) {
 	pu := urlx.ParseOrPanic(os.Getenv("OATHKEEPER_PROXY"))
 	req, err := http.NewRequest("GET", urlx.AppendPaths(pu, "/jwt").String(), nil)
+	cmdx.Must(err, "%s", err)
+	req.Header.Set("Authorization", "Bearer "+token)
+	res, err := http.DefaultClient.Do(req)
+	cmdx.Must(err, "%s", err)
+	defer res.Body.Close()
+	body, err := ioutil.ReadAll(res.Body)
+	cmdx.Must(err, "%s", err)
+	return res, string(body)
+}
+
+func decisionWithJWT(token string) (*http.Response, string) {
+	pu := urlx.ParseOrPanic(os.Getenv("OATHKEEPER_API"))
+	req, err := http.NewRequest("GET", urlx.AppendPaths(pu, "decisions", "jwt").String(), nil)
 	cmdx.Must(err, "%s", err)
 	req.Header.Set("Authorization", "Bearer "+token)
 	res, err := http.DefaultClient.Do(req)
