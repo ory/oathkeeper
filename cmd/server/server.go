@@ -10,12 +10,13 @@ import (
 	"sync"
 
 	negronilogrus "github.com/meatballhat/negroni-logrus"
-	"github.com/ory/x/healthx"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/urfave/negroni"
+
+	"github.com/ory/x/healthx"
 
 	"github.com/ory/herodot"
 
@@ -78,10 +79,9 @@ func runAPI(d driver.Driver, n *negroni.Negroni, logger *logrus.Logger) func() {
 		d.Registry().HealthHandler().SetRoutes(router.Router, true)
 		d.Registry().CredentialHandler().SetRoutes(router)
 
-		n.With(
-			negronilogrus.NewMiddlewareFromLogger(logger, "oathkeeper-api"),
-			d.Registry().DecisionHandler(), // This needs to be the last entry, otherwise the judge API won't work
-		)
+		n.Use(negronilogrus.NewMiddlewareFromLogger(logger, "oathkeeper-api"))
+		n.Use(d.Registry().DecisionHandler()) // This needs to be the last entry, otherwise the judge API won't work
+
 		n.UseHandler(router)
 
 		h := corsx.Initialize(n, logger, "serve.api")
