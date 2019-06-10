@@ -18,6 +18,11 @@ const (
 	// noop
 	ViperKeyAuthenticatorNoopIsEnabled = "authenticators.noop.enabled"
 
+	// cookie session
+	ViperKeyAuthenticatorCookieSessionIsEnabled       = "authenticators.cookie_session.enabled"
+	ViperKeyAuthenticatorCookieSessionCheckSessionURL = "authenticators.cookie_session.check_session_url"
+	ViperKeyAuthenticatorCookieSessionOnly            = "authenticators.cookie_session.only"
+
 	// jwt
 	ViperKeyAuthenticatorJWTIsEnabled     = "authenticators.jwt.enabled"
 	ViperKeyAuthenticatorJWTJWKSURIs      = "authenticators.jwt.jwks_urls"
@@ -51,6 +56,18 @@ func (v *ViperProvider) AuthenticatorAnonymousIdentifier() string {
 func (v *ViperProvider) AuthenticatorNoopIsEnabled() bool {
 	return viperx.GetBool(v.l, ViperKeyAuthenticatorNoopIsEnabled, false)
 
+}
+
+func (v *ViperProvider) AuthenticatorCookieSessionIsEnabled() bool {
+	return viperx.GetBool(v.l, ViperKeyAuthenticatorCookieSessionIsEnabled, false)
+}
+
+func (v *ViperProvider) AuthenticatorCookieSessionCheckSessionURL() string {
+	return viperx.GetString(v.l, ViperKeyAuthenticatorCookieSessionCheckSessionURL, "")
+}
+
+func (v *ViperProvider) AuthenticatorCookieSessionOnly() []string {
+	return viperx.GetStringSlice(v.l, ViperKeyAuthenticatorCookieSessionOnly, []string{})
 }
 
 func (v *ViperProvider) AuthenticatorJWTIsEnabled() bool {
