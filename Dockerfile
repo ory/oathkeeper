@@ -10,4 +10,7 @@ FROM scratch
 COPY --from=0 /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 COPY oathkeeper /usr/bin/oathkeeper
 
+USER 1000
+
 ENTRYPOINT ["oathkeeper"]
+CMD ["serve"]
