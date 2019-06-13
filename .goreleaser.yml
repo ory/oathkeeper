@@ -8,7 +8,6 @@ env:
 before:
   hooks:
     - go mod download
-    - cp ./.releaser/LICENSE.txt ./LICENSE.txt
 
 builds:
   -
@@ -45,8 +44,6 @@ archives:
     format_overrides:
       - goos: windows
         format: zip
-    files:
-      -  LICENSE.txt
 
 snapshot:
   name_template: "{{ .Tag }}-next"
@@ -79,8 +76,6 @@ dockers:
       - "oryd/oathkeeper:v{{ .Major }}.{{ .Minor }}.{{ .Patch }}"
       - "oryd/oathkeeper:{{ .Env.DOCKER_SHORT_TAG }}"
       - "oryd/oathkeeper:latest"
-    extra_files:
-      - .releaser/LICENSE.txt
 
 release:
   prerelease: auto

@@ -9,6 +9,5 @@ FROM scratch
 
 COPY --from=0 /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 COPY oathkeeper /usr/bin/oathkeeper
-COPY .releaser/LICENSE.txt /LICENSE.txt
 
 ENTRYPOINT ["oathkeeper"]
