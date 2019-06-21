@@ -240,7 +240,7 @@ func TestAuthenticatorOAuth2Introspection(t *testing.T) {
 				expectErr: false,
 			},
 		} {
-			t.Run(fmt.Sprintf("case=%d", k), func(t *testing.T) {
+			t.Run(fmt.Sprintf("case=%d/description=%s", k, tc.d), func(t *testing.T) {
 				router := httprouter.New()
 				if tc.setup != nil {
 					tc.setup(t, router)
