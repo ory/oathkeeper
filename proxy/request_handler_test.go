@@ -209,7 +209,7 @@ func TestRequestHandler(t *testing.T) {
 			},
 		},
 	} {
-		t.Run(fmt.Sprintf("case=%d", k), func(t *testing.T) {
+		t.Run(fmt.Sprintf("case=%d/description=%s", k, tc.d), func(t *testing.T) {
 
 			conf := internal.NewConfigurationWithDefaults()
 			reg := internal.NewRegistry(conf)

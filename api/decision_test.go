@@ -188,7 +188,7 @@ func TestDecisionAPI(t *testing.T) {
 			code: http.StatusInternalServerError,
 		},
 	} {
-		t.Run(fmt.Sprintf("case=%d", k), func(t *testing.T) {
+		t.Run(fmt.Sprintf("case=%d/description=%s", k, tc.d), func(t *testing.T) {
 			reg.RuleRepository().(*rule.RepositoryMemory).WithRules(tc.rules)
 
 			req, err := http.NewRequest("GET", tc.url, nil)

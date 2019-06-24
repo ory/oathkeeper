@@ -79,10 +79,9 @@ func runAPI(d driver.Driver, n *negroni.Negroni, logger *logrus.Logger) func() {
 		d.Registry().HealthHandler().SetRoutes(router.Router, true)
 		d.Registry().CredentialHandler().SetRoutes(router)
 
-		n.With(
-			negronilogrus.NewMiddlewareFromLogger(logger, "oathkeeper-api"),
-			d.Registry().DecisionHandler(), // This needs to be the last entry, otherwise the judge API won't work
-		)
+		n.Use(negronilogrus.NewMiddlewareFromLogger(logger, "oathkeeper-api"))
+		n.Use(d.Registry().DecisionHandler()) // This needs to be the last entry, otherwise the judge API won't work
+
 		n.UseHandler(router)
 
 		h := corsx.Initialize(n, logger, "serve.api")
