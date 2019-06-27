@@ -51,8 +51,8 @@ type ProviderAuthenticators interface {
 	AuthenticatorUnauthorizedIsEnabled() bool
 
 	AuthenticatorHiveIsEnabled() bool
-	AuthenticatorHivePublicURL() *url.URL
-	AuthenticatorHiveAdminURL() *url.URL
+	AuthenticatorHiveLoginURL() *url.URL
+	AuthenticatorHiveSessionCheckURL() *url.URL
 }
 
 type ProviderAuthorizers interface {

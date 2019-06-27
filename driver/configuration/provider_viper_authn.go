@@ -41,9 +41,9 @@ const (
 	ViperKeyAuthenticatorUnauthorizedIsEnabled = "authenticators.unauthorized.enabled"
 
 	// hive
-	ViperKeyAuthenticatorHiveIsEnabled = "authenticators.hive.enabled"
-	ViperKeyAuthenticatorHiveAdminURL  = "authenticators.hive.admin_url"
-	ViperKeyAuthenticatorHivePublicURL = "authenticators.hive.public_url"
+	ViperKeyAuthenticatorHiveIsEnabled       = "authenticators.hive.enabled"
+	ViperKeyAuthenticatorHiveSessionCheckURL = "authenticators.hive.session_check_url"
+	ViperKeyAuthenticatorHiveLoginURL        = "authenticators.hive.login_url"
 )
 
 func (v *ViperProvider) AuthenticatorAnonymousIsEnabled() bool {
@@ -148,10 +148,10 @@ func (v *ViperProvider) AuthenticatorHiveIsEnabled() bool {
 	return viperx.GetBool(v.l, ViperKeyAuthenticatorHiveIsEnabled, false)
 }
 
-func (v *ViperProvider) AuthenticatorHiveAdminURL() *url.URL {
-	return v.getURL(viperx.GetString(v.l, ViperKeyAuthenticatorHiveAdminURL, ""), ViperKeyAuthenticatorHiveAdminURL)
+func (v *ViperProvider) AuthenticatorHiveSessionCheckURL() *url.URL {
+	return v.getURL(viperx.GetString(v.l, ViperKeyAuthenticatorHiveSessionCheckURL, ""), ViperKeyAuthenticatorHiveSessionCheckURL)
 }
 
-func (v *ViperProvider) AuthenticatorHivePublicURL() *url.URL {
-	return v.getURL(viperx.GetString(v.l, ViperKeyAuthenticatorHivePublicURL, ""), ViperKeyAuthenticatorHivePublicURL)
+func (v *ViperProvider) AuthenticatorHiveLoginURL() *url.URL {
+	return v.getURL(viperx.GetString(v.l, ViperKeyAuthenticatorHiveLoginURL, ""), ViperKeyAuthenticatorHiveLoginURL)
 }

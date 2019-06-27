@@ -513,6 +513,8 @@ github.com/ory/go-acc v0.0.0-20181118080137-ddc355013f90 h1:Bpk3eqc3rbJT2mE+uS9E
 github.com/ory/go-acc v0.0.0-20181118080137-ddc355013f90/go.mod h1:sxnvPCxChFuSmTJGj8FdMupeq1BezCiEpDjTUXQ4hf4=
 github.com/ory/go-convenience v0.1.0 h1:zouLKfF2GoSGnJwGq+PE/nJAE6dj2Zj5QlTgmMTsTS8=
 github.com/ory/go-convenience v0.1.0/go.mod h1:uEY/a60PL5c12nYz4V5cHY03IBmwIAEm8TWB0yn9KNs=
+github.com/ory/gojsonschema v1.1.1-0.20190423132807-354ad34c2300 h1:ERn8Twg8w07fXRw841WyI0aSPhebeaZ15ITFQxTMSFk=
+github.com/ory/gojsonschema v1.1.1-0.20190423132807-354ad34c2300/go.mod h1:1+0FDTlCvwdzj7lPX1vkMiKRhk6lnHyX8/YAP6ku1FI=
 github.com/ory/graceful v0.1.1 h1:zx+8tDObLPrG+7Tc8jKYlXsqWnLtOQA1IZ/FAAKHMXU=
 github.com/ory/graceful v0.1.1/go.mod h1:zqu70l95WrKHF4AZ6tXHvAqAvpY6M7g6ttaAVcMm7KU=
 github.com/ory/herodot v0.5.1/go.mod h1:3BOneqcyBsVybCPAJoi92KN2BpJHcmDqAMcAAaJiJow=
@@ -526,6 +528,9 @@ github.com/ory/sqlcon v0.0.7/go.mod h1:oOyCmOJWAs8F0bnGmmIvGA9/4K1JqVL0D9JgvAaVc
 github.com/ory/x v0.0.37/go.mod h1:wY34Yfy/lRklrrVbChZHqOQxhbSHH2a6bSJ6o3YFKY8=
 github.com/ory/x v0.0.60 h1:XChxJoCiWaq8aW41RlEmorY3Dsee/wMLvyj1zsOj/KE=
 github.com/ory/x v0.0.60/go.mod h1:da8VE+hIbNK87ppdGvzRFpOgozsT0yKYm82MC/0eGaY=
+github.com/ory/x v0.0.62/go.mod h1:da8VE+hIbNK87ppdGvzRFpOgozsT0yKYm82MC/0eGaY=
+github.com/ory/x v0.0.64 h1:JR3ziuq0bNUujdTH+Gdb6+p2PwaEyvvRHS9/JnPCmI0=
+github.com/ory/x v0.0.64/go.mod h1:da8VE+hIbNK87ppdGvzRFpOgozsT0yKYm82MC/0eGaY=
 github.com/parnurzeal/gorequest v0.2.15/go.mod h1:3Kh2QUMJoqw3icWAecsyzkpY7UzRfDhbRdTjtNwNiUE=
 github.com/pborman/uuid v1.2.0 h1:J7Q5mO4ysT1dv8hyrUGHb9+ooztCXu1D8MY8DZYsu3g=
 github.com/pborman/uuid v1.2.0/go.mod h1:X/NO0urCmaxf9VXbdlT7C2Yzkj2IKimNn4k+gtPdI/k=
@@ -642,6 +647,10 @@ github.com/stretchr/testify v1.2.2/go.mod h1:a8OnRcib4nhh0OaRAV+Yts87kKdq0PP7pXf
 github.com/stretchr/testify v1.3.0 h1:TivCn/peBQ7UY8ooIcPgZFpTNSz0Q2U6UrFlUfqbe0Q=
 github.com/stretchr/testify v1.3.0/go.mod h1:M5WIy9Dh21IEIfnGCwXGc5bZfKNJtfHm1UVUgZn+9EI=
 github.com/tarm/serial v0.0.0-20180830185346-98f6abe2eb07/go.mod h1:kDXzergiv9cbyO7IOYJZWg1U88JhDg3PB6klq9Hg2pA=
+github.com/tidwall/gjson v1.2.1/go.mod h1:c/nTNbUr0E0OrXEhq1pwa8iEgc2DOt4ZZqAt1HtCkPA=
+github.com/tidwall/match v1.0.1/go.mod h1:LujAq0jyVjBy028G1WhWfIzbpQfMO8bBZ6Tyb0+pL9E=
+github.com/tidwall/pretty v0.0.0-20190325153808-1166b9ac2b65/go.mod h1:XNkn88O1ChpSDQmQeStsy+sBenx6DDtFZJxhVysOjyk=
+github.com/tidwall/sjson v1.0.4/go.mod h1:bURseu1nuBkFpIES5cz6zBtjmYeOQmEESshn7VpF15Y=
 github.com/tomasen/realip v0.0.0-20180522021738-f0c99a92ddce h1:fb190+cK2Xz/dvi9Hv8eCYJYvIGUTN2/KLq1pT6CjEc=
 github.com/tomasen/realip v0.0.0-20180522021738-f0c99a92ddce/go.mod h1:o8v6yHRoik09Xen7gje4m9ERNah1d1PPsVq1VEx9vE4=
 github.com/toqueteos/webbrowser v1.1.0 h1:Prj1okiysRgHPoe3B1bOIVxcv+UuSt525BDQmR5W0x0=

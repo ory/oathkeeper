@@ -13,8 +13,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/ory/hive-cloud/hive/auth"
-
 	"github.com/ory/herodot"
 	"github.com/ory/hive-cloud/hive/identity"
 	"github.com/ory/hive-cloud/hive/session"
@@ -31,10 +29,10 @@ func TestAuthenticatorHive(t *testing.T) {
 	var sessionHandler func(w http.ResponseWriter, r *http.Request, _ httprouter.Params)
 
 	h := httprouter.New()
-	h.GET(session.SessionMePath, func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	h.GET("/session", func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		sessionHandler(w, r, ps)
 	})
-	h.GET(auth.BrowserSignInPath, func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+	h.GET("/login", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 		_, _ = fmt.Fprint(w, "login")
 	})
 	ts := httptest.NewServer(h)
@@ -42,8 +40,8 @@ func TestAuthenticatorHive(t *testing.T) {
 
 	conf := internal.NewConfigurationWithDefaults()
 	viper.Set(configuration.ViperKeyAuthenticatorHiveIsEnabled, true)
-	viper.Set(configuration.ViperKeyAuthenticatorHiveAdminURL, ts.URL)
-	viper.Set(configuration.ViperKeyAuthenticatorHivePublicURL, ts.URL)
+	viper.Set(configuration.ViperKeyAuthenticatorHiveSessionCheckURL, ts.URL + "/session")
+	viper.Set(configuration.ViperKeyAuthenticatorHiveLoginURL, ts.URL + "/login")
 	reg := internal.NewRegistry(conf)
 	pa, _ := reg.PipelineAuthenticator("hive")
 	a := pa.(*authn.AuthenticatorHive)
@@ -165,18 +163,18 @@ func TestAuthenticatorHive(t *testing.T) {
 		require.Error(t, a.Validate())
 
 		viper.Set(configuration.ViperKeyAuthenticatorHiveIsEnabled, true)
-		viper.Set(configuration.ViperKeyAuthenticatorHivePublicURL, "")
-		viper.Set(configuration.ViperKeyAuthenticatorHiveAdminURL, "http://localhost/")
+		viper.Set(configuration.ViperKeyAuthenticatorHiveLoginURL, "")
+		viper.Set(configuration.ViperKeyAuthenticatorHiveSessionCheckURL, "http://localhost/")
 		require.Error(t, a.Validate())
 
 		viper.Set(configuration.ViperKeyAuthenticatorHiveIsEnabled, true)
-		viper.Set(configuration.ViperKeyAuthenticatorHivePublicURL, "http://localhost/")
-		viper.Set(configuration.ViperKeyAuthenticatorHiveAdminURL, "")
+		viper.Set(configuration.ViperKeyAuthenticatorHiveLoginURL, "http://localhost/")
+		viper.Set(configuration.ViperKeyAuthenticatorHiveSessionCheckURL, "")
 		require.Error(t, a.Validate())
 
 		viper.Set(configuration.ViperKeyAuthenticatorHiveIsEnabled, true)
-		viper.Set(configuration.ViperKeyAuthenticatorHivePublicURL, "http://localhost/")
-		viper.Set(configuration.ViperKeyAuthenticatorHiveAdminURL, "http://localhost/")
+		viper.Set(configuration.ViperKeyAuthenticatorHiveLoginURL, "http://localhost/")
+		viper.Set(configuration.ViperKeyAuthenticatorHiveSessionCheckURL, "http://localhost/")
 		require.NoError(t, a.Validate())
 	})
 }

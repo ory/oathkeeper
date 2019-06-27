@@ -44,7 +44,7 @@ require (
 	github.com/ory/herodot v0.6.2
 	github.com/ory/hive-cloud/hive v0.0.0-00010101000000-000000000000
 	github.com/ory/ladon v1.0.1
-	github.com/ory/x v0.0.60
+	github.com/ory/x v0.0.64
 	github.com/pborman/uuid v1.2.0
 	github.com/pelletier/go-toml v1.3.0 // indirect
 	github.com/phayes/freeport v0.0.0-20180830031419-95f893ade6f2
@@ -77,3 +77,7 @@ replace github.com/golang/lint => github.com/golang/lint v0.0.0-20190227174305-8
 
 // FIXME REMOVE ME
 replace github.com/ory/hive-cloud/hive => ../hive-cloud/hive
+
+replace github.com/ory/x => ../x
+
+replace github.com/ory/gojsonschema => ../gojsonschema

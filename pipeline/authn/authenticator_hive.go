@@ -12,11 +12,8 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/ory/herodot"
-	"github.com/ory/hive-cloud/hive/auth"
-	"github.com/ory/x/httpx"
-	"github.com/ory/x/urlx"
-
 	"github.com/ory/hive-cloud/hive/session"
+	"github.com/ory/x/httpx"
 
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/helper"
@@ -61,12 +58,12 @@ func (a *AuthenticatorHive) Validate() error {
 		return errors.WithStack(ErrAuthenticatorNotEnabled.WithReasonf(`Authenticator "%s" is disabled per configuration.`, a.GetID()))
 	}
 
-	if a.c.AuthenticatorHiveAdminURL() == nil {
-		return errors.WithStack(ErrAuthenticatorNotEnabled.WithReasonf(`Configuration for authenticator "%s" did not specify any values for configuration key "%s" and is thus disabled.`, a.GetID(), configuration.ViperKeyAuthenticatorHiveAdminURL))
+	if a.c.AuthenticatorHiveSessionCheckURL() == nil {
+		return errors.WithStack(ErrAuthenticatorNotEnabled.WithReasonf(`Configuration for authenticator "%s" did not specify any values for configuration key "%s" and is thus disabled.`, a.GetID(), configuration.ViperKeyAuthenticatorHiveSessionCheckURL))
 	}
 
-	if a.c.AuthenticatorHivePublicURL() == nil {
-		return errors.WithStack(ErrAuthenticatorNotEnabled.WithReasonf(`Configuration for authenticator "%s" did not specify any values for configuration key "%s" and is thus disabled.`, a.GetID(), configuration.ViperKeyAuthenticatorHivePublicURL))
+	if a.c.AuthenticatorHiveLoginURL() == nil {
+		return errors.WithStack(ErrAuthenticatorNotEnabled.WithReasonf(`Configuration for authenticator "%s" did not specify any values for configuration key "%s" and is thus disabled.`, a.GetID(), configuration.ViperKeyAuthenticatorHiveLoginURL))
 	}
 
 	return nil
@@ -128,7 +125,7 @@ func (a *AuthenticatorHive) FindSession(c *http.Cookie) (*session.Session, error
 		}
 	}
 
-	req, err := http.NewRequest("GET", urlx.AppendPaths(a.c.AuthenticatorHivePublicURL(), session.SessionMePath).String(), nil)
+	req, err := http.NewRequest("GET", a.c.AuthenticatorHiveSessionCheckURL().String(), nil)
 	if err != nil {
 		return nil, errors.WithStack(herodot.ErrInternalServerError.WithDebug(err.Error()))
 	}
@@ -164,7 +161,7 @@ func (a *AuthenticatorHive) handleUnauthorized(r *http.Request, cf *authenticato
 	if err := json.NewEncoder(&b).Encode(&struct {
 		RedirectTo string `json:"redirect_to"`
 	}{
-		RedirectTo: urlx.AppendPaths(a.c.AuthenticatorHivePublicURL(), auth.BrowserSignInPath).String(),
+		RedirectTo: a.c.AuthenticatorHiveLoginURL().String(),
 	}); err != nil {
 		return errors.WithStack(herodot.ErrInternalServerError.WithDebug(err.Error()))
 	}
@@ -179,7 +176,7 @@ func (a *AuthenticatorHive) handleUnauthorized(r *http.Request, cf *authenticato
 		return errors.WithStack(helper.ErrForceResponse)
 	case "redirect":
 		rw := x.NewSimpleResponseWriter()
-		http.Redirect(rw, r, urlx.AppendPaths(a.c.AuthenticatorHivePublicURL(), auth.BrowserSignInPath).String(), http.StatusFound)
+		http.Redirect(rw, r, a.c.AuthenticatorHiveLoginURL().String(), http.StatusFound)
 		*r = *r.WithContext(context.WithValue(r.Context(), pipeline.DirectorForcedResponse, &http.Response{
 			StatusCode: rw.StatusCode,
 			Body:       ioutil.NopCloser(new(bytes.Buffer)),
@@ -200,7 +197,7 @@ func (a *AuthenticatorHive) handleUnauthorized(r *http.Request, cf *authenticato
 			return errors.WithStack(helper.ErrForceResponse)
 		}
 
-		http.Redirect(rw, r, urlx.AppendPaths(a.c.AuthenticatorHivePublicURL(), auth.BrowserSignInPath).String(), http.StatusFound)
+		http.Redirect(rw, r, a.c.AuthenticatorHiveLoginURL().String(), http.StatusFound)
 		*r = *r.WithContext(context.WithValue(r.Context(), pipeline.DirectorForcedResponse, &http.Response{
 			StatusCode: rw.StatusCode,
 			Body:       ioutil.NopCloser(new(bytes.Buffer)),
