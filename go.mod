@@ -8,6 +8,7 @@ require (
 	github.com/bxcodec/faker v2.0.1+incompatible
 	github.com/codegangsta/negroni v1.0.0 // indirect
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
+	github.com/ghodss/yaml v1.0.0
 	github.com/go-errors/errors v1.0.1
 	github.com/go-openapi/analysis v0.19.0 // indirect
 	github.com/go-openapi/errors v0.19.0

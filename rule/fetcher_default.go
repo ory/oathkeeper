@@ -5,6 +5,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 	"os"
@@ -12,11 +13,11 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/ory/x/httpx"
-
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/x"
+	"github.com/ory/x/httpx"
 
+	"github.com/ghodss/yaml"
 	"github.com/pkg/errors"
 )
 
@@ -62,7 +63,7 @@ func (f *FetcherDefault) fetch(source url.URL) ([]Rule, error) {
 		return f.fetchRemote(source.String())
 	case "file":
 		p := strings.Replace(source.String(), "file://", "", 1)
-		if path.Ext(p) == ".json" {
+		if path.Ext(p) == ".json" || path.Ext(p) == ".yaml" || path.Ext(p) == ".yml" {
 			return f.fetchFile(p)
 		}
 		return f.fetchDir(p)
@@ -124,11 +125,25 @@ func (f *FetcherDefault) fetchFile(source string) ([]Rule, error) {
 }
 
 func (f *FetcherDefault) decode(r io.Reader) ([]Rule, error) {
-	var ks []Rule
-	d := json.NewDecoder(r)
-	d.DisallowUnknownFields()
-	if err := d.Decode(&ks); err != nil {
+	b, err := ioutil.ReadAll(r)
+	if err != nil {
 		return nil, errors.WithStack(err)
 	}
+
+	var ks []Rule
+
+	if json.Valid(b) {
+		d := json.NewDecoder(bytes.NewReader(b))
+		d.DisallowUnknownFields()
+		if err := d.Decode(&ks); err != nil {
+			return nil, errors.WithStack(err)
+		}
+		return ks, nil
+	}
+
+	if err := yaml.Unmarshal(b, &ks); err != nil {
+		return nil, errors.WithStack(err)
+	}
+
 	return ks, nil
 }
