@@ -147,7 +147,7 @@ func (a *AuthorizerKetoEngineACPORY) Authorize(r *http.Request, session *authn.A
 	if res.StatusCode == http.StatusForbidden {
 		return errors.WithStack(helper.ErrForbidden)
 	} else if res.StatusCode != http.StatusOK {
-		return errors.Errorf("expected status code %d but got %d", http.StatusOK, res.StatusCode)
+		return errors.Errorf("Expected status code %d but got %d", http.StatusOK, res.StatusCode)
 	}
 
 	var result struct {

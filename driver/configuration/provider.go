@@ -58,6 +58,9 @@ type ProviderAuthorizers interface {
 
 	AuthorizerKetoEngineACPORYIsEnabled() bool
 	AuthorizerKetoEngineACPORYBaseURL() *url.URL
+
+	AuthorizerOPAEngineIsEnabled() bool
+	AuthorizerOPAEngineBaseURL() *url.URL
 }
 
 type ProviderMutators interface {
