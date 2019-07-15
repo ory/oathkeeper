@@ -42,14 +42,13 @@ require (
 	github.com/ory/herodot v0.6.2
 	github.com/ory/ladon v1.0.1
 	github.com/ory/viper v1.5.3
-	github.com/ory/x v0.0.60
+	github.com/ory/x v0.0.65
 	github.com/pborman/uuid v1.2.0
 	github.com/phayes/freeport v0.0.0-20180830031419-95f893ade6f2
 	github.com/pkg/errors v0.8.1
 	github.com/rs/cors v1.6.0
 	github.com/sirupsen/logrus v1.4.2
 	github.com/spf13/cobra v0.0.5
-	github.com/spf13/viper v1.4.0
 	github.com/sqs/goreturns v0.0.0-20181028201513-538ac6014518
 	github.com/square/go-jose v2.3.1+incompatible
 	github.com/stretchr/testify v1.3.0
@@ -64,7 +63,3 @@ require (
 
 // Fix for https://github.com/golang/lint/issues/436
 replace github.com/golang/lint => github.com/golang/lint v0.0.0-20190227174305-8f45f776aaf1
-
-replace github.com/ory/x => ../x
-
-replace github.com/ory/viper => ../viper
