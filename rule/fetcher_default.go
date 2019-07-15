@@ -16,6 +16,7 @@ import (
 	"sync"
 
 	"github.com/fsnotify/fsnotify"
+
 	"github.com/ory/x/urlx"
 
 	"github.com/ory/viper"
