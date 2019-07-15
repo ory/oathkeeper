@@ -20,6 +20,8 @@
 
 package rule
 
+import "context"
+
 type Fetcher interface {
-	Watch() error
+	Watch(ctx context.Context) error
 }

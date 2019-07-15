@@ -16,6 +16,7 @@ import (
 	"sync"
 
 	"github.com/fsnotify/fsnotify"
+	"github.com/ory/x/urlx"
 
 	"github.com/ory/viper"
 	"github.com/ory/x/httpx"
@@ -53,7 +54,7 @@ type FetcherDefault struct {
 	r  fetcherRegistry
 	hc *http.Client
 
-	cache map[url.URL][]Rule
+	cache map[string][]Rule
 
 	watching []url.URL
 
@@ -68,11 +69,11 @@ func NewFetcherDefault(
 		r:     r,
 		c:     c,
 		hc:    httpx.NewResilientClientLatencyToleranceHigh(nil),
-		cache: map[url.URL][]Rule{},
+		cache: map[string][]Rule{},
 	}
 }
 
-func (f *FetcherDefault) configUpdate(watcher *fsnotify.Watcher, replace []url.URL, events chan event) error {
+func (f *FetcherDefault) configUpdate(ctx context.Context, watcher *fsnotify.Watcher, replace []url.URL, events chan event) error {
 	var updateWatcher = func(sources []url.URL, cb func(source string) error) error {
 		for _, source := range sources {
 			if source.Scheme == "file" {
@@ -95,9 +96,11 @@ func (f *FetcherDefault) configUpdate(watcher *fsnotify.Watcher, replace []url.U
 	f.lock.Lock()
 	oldSources := make([]url.URL, 0, len(f.cache))
 	for k := range f.cache {
-		oldSources = append(oldSources, k)
+		oldSources = append(oldSources,
+			*urlx.ParseOrPanic(k), // This is always valid  because only we set the cache.
+		)
 	}
-	f.cache = make(map[url.URL][]Rule)
+	f.cache = make(map[string][]Rule)
 	f.lock.Unlock()
 
 	if err := updateWatcher(oldSources, watcher.Remove); err != nil {
@@ -108,6 +111,11 @@ func (f *FetcherDefault) configUpdate(watcher *fsnotify.Watcher, replace []url.U
 		return err
 	}
 
+	if len(replace) == 0 {
+		if err := f.r.RuleRepository().Set(ctx, []Rule{}); err != nil {
+			return err
+		}
+	}
 	for _, source := range replace {
 		go func(s url.URL) {
 			events <- event{et: eventFileChanged, path: s, source: "config_update"}
@@ -117,6 +125,15 @@ func (f *FetcherDefault) configUpdate(watcher *fsnotify.Watcher, replace []url.U
 }
 
 func (f *FetcherDefault) sourceUpdate(e event) ([]Rule, error) {
+	if e.path.Scheme == "file" {
+		u, err := url.Parse("file://" + filepath.Clean(strings.TrimPrefix(e.path.String(), "file://")))
+		if err != nil {
+			return nil, err
+		}
+
+		e.path = *u
+	}
+
 	rules, err := f.fetch(e.path)
 	if err != nil {
 		return nil, err
@@ -125,7 +142,7 @@ func (f *FetcherDefault) sourceUpdate(e event) ([]Rule, error) {
 	f.lock.Lock()
 	defer f.lock.Unlock()
 
-	f.cache[e.path] = rules
+	f.cache[e.path.String()] = rules
 
 	var total []Rule
 	for _, items := range f.cache {
@@ -135,7 +152,7 @@ func (f *FetcherDefault) sourceUpdate(e event) ([]Rule, error) {
 	return total, nil
 }
 
-func (f *FetcherDefault) Watch() error {
+func (f *FetcherDefault) Watch(ctx context.Context) error {
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
 		return err
@@ -144,10 +161,10 @@ func (f *FetcherDefault) Watch() error {
 
 	events := make(chan event)
 	defer close(events)
-	return f.watch(watcher, events)
+	return f.watch(ctx, watcher, events)
 }
 
-func (f *FetcherDefault) watch(watcher *fsnotify.Watcher, events chan event) error {
+func (f *FetcherDefault) watch(ctx context.Context, watcher *fsnotify.Watcher, events chan event) error {
 	viperx.AddWatcher(func(e fsnotify.Event) {
 		if !viper.HasChanged(configuration.ViperKeyAccessRuleRepositories) {
 			return
@@ -206,7 +223,7 @@ func (f *FetcherDefault) watch(watcher *fsnotify.Watcher, events chan event) err
 					WithField("event", "config_change").
 					WithField("source", e.source).
 					Debugf("Access rule watcher received an update.")
-				if err := f.configUpdate(watcher, f.c.AccessRuleRepositories(), events); err != nil {
+				if err := f.configUpdate(ctx, watcher, f.c.AccessRuleRepositories(), events); err != nil {
 					return err
 				}
 			case eventFileChanged:
@@ -222,7 +239,7 @@ func (f *FetcherDefault) watch(watcher *fsnotify.Watcher, events chan event) err
 					continue
 				}
 
-				if err := f.r.RuleRepository().Set(context.Background(), rules); err != nil {
+				if err := f.r.RuleRepository().Set(ctx, rules); err != nil {
 					return errors.Wrapf(err, "unable to reset access rule repository")
 				}
 			}

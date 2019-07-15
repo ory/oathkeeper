@@ -1,6 +1,7 @@
 package driver
 
 import (
+	"context"
 	"sync"
 	"time"
 
@@ -60,7 +61,7 @@ type RegistryMemory struct {
 
 func (r *RegistryMemory) Init() {
 	go func() {
-		if err := r.RuleFetcher().Watch(); err != nil {
+		if err := r.RuleFetcher().Watch(context.Background()); err != nil {
 			r.Logger().WithError(err).Fatal("Access rule watcher terminated with an error.")
 		}
 	}()

@@ -1,6 +1,6 @@
 [
   {
-    "id": "test-rule-1",
+    "id": "test-rule-2",
     "upstream": {
       "url": "https://httpbin.org/anything/"
     },

@@ -9,8 +9,6 @@ waitport() {
 cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
 killall oathkeeper || true
-killall okapi || true
-killall okclient || true
 
 export OATHKEEPER_PROXY=http://127.0.0.1:6060
 export OATHKEEPER_API=http://127.0.0.1:6061
@@ -20,7 +18,7 @@ go install github.com/ory/oathkeeper
 
 cp config.1.yaml config.yaml
 
-oathkeeper --config ./config.yaml serve >> ./oathkeeper.log 2>&1 &
+LOG_LEVEL=debug oathkeeper --config ./config.yaml serve >> ./oathkeeper.log 2>&1 &
 
 waitport 6060
 waitport 6061
@@ -49,13 +47,13 @@ cp config.5.yaml config.yaml; sleep 1
 [[ $(curl --silent --output /dev/null -f ${OATHKEEPER_PROXY}/other-rules -w '%{http_code}') -ne 200 ]] && exit 1
 
 echo "Make changes to other rule -> should 403"
-cp rules.3.1.json rules.3.json; sleep 1
+cp rules.3.2.json rules.3.json; sleep 1
 [[ $(curl --silent --output /dev/null -f ${OATHKEEPER_PROXY}/rules -w '%{http_code}') -ne 200 ]] && exit 1
-[[ $(curl --silent --output /dev/null -f ${OATHKEEPER_PROXY}/other-rules -w '%{http_code}') -ne 402 ]] && exit 1
+[[ $(curl --silent --output /dev/null -f ${OATHKEEPER_PROXY}/other-rules -w '%{http_code}') -ne 403 ]] && exit 1
 
 echo "Remove all configs -> all 404"
 cp config.6.yaml config.yaml; sleep 1
 [[ $(curl --silent --output /dev/null -f ${OATHKEEPER_PROXY}/rules -w '%{http_code}') -ne 404 ]] && exit 1
 [[ $(curl --silent --output /dev/null -f ${OATHKEEPER_PROXY}/other-rules -w '%{http_code}') -ne 404 ]] && exit 1
 
-kill %1 || true
+# kill %1 || true

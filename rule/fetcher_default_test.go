@@ -41,7 +41,7 @@ func TestFetcherWatchConfig(t *testing.T) {
 	r := internal.NewRegistry(conf)
 
 	go func() {
-		require.NoError(t, r.RuleFetcher().Watch())
+		require.NoError(t, r.RuleFetcher().Watch(context.TODO()))
 	}()
 
 	for k, tc := range []struct {
@@ -79,6 +79,12 @@ access_rules:
   - file://../test/stub/rules.yaml
 `,
 			expectIDs: []string{"test-rule-1-yaml"},
+		},
+		{
+			config: `
+access_rules:
+  repositories:
+`,
 		},
 	} {
 		t.Run(fmt.Sprintf("case=%d", k), func(t *testing.T) {
@@ -120,7 +126,7 @@ access_rules:
 	r := internal.NewRegistry(conf)
 
 	go func() {
-		require.NoError(t, r.RuleFetcher().Watch())
+		require.NoError(t, r.RuleFetcher().Watch(context.TODO()))
 	}()
 
 	for k, tc := range []struct {
@@ -129,7 +135,8 @@ access_rules:
 	}{
 		{content: "[]"},
 		{content: `[{"id":"1"}]`, expectIDs: []string{"1"}},
-		{content: `[{"id":"2"}]`, expectIDs: []string{"2"}},
+		{content: `[{"id":"1"},{"id":"2"}]`, expectIDs: []string{"1", "2"}},
+		{content: `[{"id":"2"},{"id":"3"}]`, expectIDs: []string{"2", "3"}},
 	} {
 		t.Run(fmt.Sprintf("case=%d", k), func(t *testing.T) {
 			require.NoError(t, ioutil.WriteFile(repository, []byte(tc.content), 0666))
