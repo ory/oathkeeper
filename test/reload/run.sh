@@ -56,4 +56,5 @@ cp config.6.yaml config.yaml; sleep 1
 [[ $(curl --silent --output /dev/null -f ${OATHKEEPER_PROXY}/rules -w '%{http_code}') -ne 404 ]] && exit 1
 [[ $(curl --silent --output /dev/null -f ${OATHKEEPER_PROXY}/other-rules -w '%{http_code}') -ne 404 ]] && exit 1
 
-# kill %1 || true
+kill %1 || true
+exit 0
