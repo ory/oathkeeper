@@ -28,6 +28,8 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/ory/oathkeeper/helper"
+	"github.com/ory/oathkeeper/x"
+
 	"github.com/ory/x/pagination"
 )
 
@@ -35,6 +37,7 @@ var _ Repository = new(RepositoryMemory)
 
 type repositoryMemoryRegistry interface {
 	RuleValidator() Validator
+	x.RegistryLogger
 }
 
 type RepositoryMemory struct {
@@ -88,14 +91,13 @@ func (m *RepositoryMemory) Get(ctx context.Context, id string) (*Rule, error) {
 func (m *RepositoryMemory) Set(ctx context.Context, rules []Rule) error {
 	for _, check := range rules {
 		if err := m.r.RuleValidator().Validate(&check); err != nil {
-			return err
+			m.r.Logger().WithError(err).Errorf("A rule uses a malformed configuration and all URLs matching this rule will not work. You should resolve this issue now.")
 		}
 	}
 
 	m.Lock()
 	m.rules = rules
 	m.Unlock()
-
 	return nil
 }
 

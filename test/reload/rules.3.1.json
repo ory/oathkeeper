@@ -2,21 +2,15 @@
   {
     "id": "test-rule-1",
     "upstream": {
-      "preserve_host": true,
-      "strip_path": "/api",
-      "url": "mybackend.com/api"
+      "url": "https://httpbin.org/anything/"
     },
     "match": {
-      "url": "myproxy.com/api",
+      "url": "http://127.0.0.1:6060/other-rules",
       "methods": [
-        "GET",
-        "POST"
+        "GET"
       ]
     },
     "authenticators": [
-      {
-        "handler": "noop"
-      },
       {
         "handler": "anonymous"
       }

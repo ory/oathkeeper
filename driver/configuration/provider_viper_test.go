@@ -5,8 +5,9 @@ import (
 	"testing"
 
 	"github.com/sirupsen/logrus"
-	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/ory/viper"
 )
 
 func TestToScopeStrategy(t *testing.T) {

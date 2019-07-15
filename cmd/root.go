@@ -23,18 +23,15 @@ package cmd
 import (
 	"fmt"
 	"os"
-	"path/filepath"
-	"runtime"
-	"strings"
 
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
+
+	"github.com/ory/viper"
+	"github.com/ory/x/viperx"
 
 	"github.com/ory/x/logrusx"
 )
-
-var cfgFile string
 
 var (
 	Version = "master"
@@ -60,73 +57,21 @@ func Execute() {
 var logger *logrus.Logger
 
 func init() {
-	cobra.OnInitialize(initConfig)
+	cobra.OnInitialize(func() {
+		viperx.InitializeConfig("oathkeeper", "", nil)
 
-	// Here you will define your flags and configuration settings.
-	// Cobra supports Persistent Flags, which, if defined here,
-	// will be global for your application.
+		logger = logrusx.New()
+		viperx.WatchConfig(logger, &viperx.WatchOptions{
+			Immutables: []string{"serve", "profiling", "log"},
+			OnImmutableChange: func(immutable string) {
+				logger.
+					WithField("key", immutable).
+					WithField("value", fmt.Sprintf("%v", viper.Get(immutable))).
+					Fatal("A configuration value marked as immutable has changed, shutting down.")
 
-	RootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.oathkeeper.yaml)")
-	// Cobra also supports local flags, which will only run
-	// when this action is called directly.
-	RootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
-}
+			},
+		})
+	})
 
-// initConfig reads in config file and ENV variables if set.
-func initConfig() {
-	if cfgFile != "" {
-		// enable ability to specify config file via flag
-		viper.SetConfigFile(cfgFile)
-	} else {
-		path := absPathify("$HOME")
-		if _, err := os.Stat(filepath.Join(path, ".oathkeeper.yml")); err != nil {
-			_, _ = os.Create(filepath.Join(path, ".oathkeeper.yml"))
-		}
-
-		viper.SetConfigType("yaml")
-		viper.SetConfigName(".oathkeeper") // name of config file (without extension)
-		viper.AddConfigPath("$HOME")       // adding home directory as first search path
-	}
-
-	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
-	viper.AutomaticEnv() // read in environment variables that match
-
-	// If a config file is found, read it in.
-	configErr := viper.ReadInConfig()
-	logger = logrusx.New()
-	if configErr == nil {
-		logger.Debugf("Using config file: %s", viper.ConfigFileUsed())
-	}
-}
-
-func absPathify(inPath string) string {
-	if strings.HasPrefix(inPath, "$HOME") {
-		inPath = userHomeDir() + inPath[5:]
-	}
-
-	if strings.HasPrefix(inPath, "$") {
-		end := strings.Index(inPath, string(os.PathSeparator))
-		inPath = os.Getenv(inPath[1:end]) + inPath[end:]
-	}
-
-	if filepath.IsAbs(inPath) {
-		return filepath.Clean(inPath)
-	}
-
-	p, err := filepath.Abs(inPath)
-	if err == nil {
-		return filepath.Clean(p)
-	}
-	return ""
-}
-
-func userHomeDir() string {
-	if runtime.GOOS == "windows" {
-		home := os.Getenv("HOMEDRIVE") + os.Getenv("HOMEPATH")
-		if home == "" {
-			home = os.Getenv("USERPROFILE")
-		}
-		return home
-	}
-	return os.Getenv("HOME")
+	viperx.RegisterConfigFlag(RootCmd, "oathkeeper")
 }

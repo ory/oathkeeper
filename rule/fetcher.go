@@ -21,5 +21,5 @@
 package rule
 
 type Fetcher interface {
-	Fetch() ([]Rule, error)
+	Watch() error
 }

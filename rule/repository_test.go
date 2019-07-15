@@ -27,6 +27,7 @@ import (
 
 	"github.com/bxcodec/faker"
 	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
 
 	_ "github.com/go-sql-driver/mysql"
 	_ "github.com/lib/pq"
@@ -50,10 +51,17 @@ func (v *validatorNoop) Validate(*Rule) error {
 	return v.ret
 }
 
-type mockRepositoryRegistry struct{ v validatorNoop }
+type mockRepositoryRegistry struct {
+	v            validatorNoop
+	loggerCalled int
+}
 
 func (r *mockRepositoryRegistry) RuleValidator() Validator {
 	return &r.v
+}
+func (r *mockRepositoryRegistry) Logger() logrus.FieldLogger {
+	r.loggerCalled++
+	return logrus.New()
 }
 
 func TestRepository(t *testing.T) {
@@ -77,7 +85,7 @@ func TestRepository(t *testing.T) {
 			inserted := make([]Rule, len(rules))
 			copy(inserted, rules)
 			inserted = inserted[:len(inserted)-1] // insert all elements but the last
-			require.NoError(t, repo.Set(context.Background(), inserted))
+			repo.Set(context.Background(), inserted)
 
 			for _, expect := range inserted {
 				got, err := repo.Get(context.Background(), expect.ID)
@@ -92,7 +100,7 @@ func TestRepository(t *testing.T) {
 			updated := make([]Rule, len(rules))
 			copy(updated, rules)
 			updated = append(updated[:len(updated)-2], updated[len(updated)-1]) // insert all elements (including last) except before last
-			require.NoError(t, repo.Set(context.Background(), updated))
+			repo.Set(context.Background(), updated)
 
 			count, err = repo.Count(context.Background())
 			require.NoError(t, err)
@@ -113,13 +121,16 @@ func TestRepository(t *testing.T) {
 		})
 	}
 
+	var index int
+	mr := &mockRepositoryRegistry{v: validatorNoop{ret: errors.New("")}}
 	for name, repo := range map[string]Repository{
-		"memory": NewRepositoryMemory(&mockRepositoryRegistry{v: validatorNoop{ret: errors.New("")}}),
+		"memory": NewRepositoryMemory(mr),
 	} {
 		t.Run(fmt.Sprintf("repository=%s/case=invalid rule", name), func(t *testing.T) {
 			var rule Rule
 			require.NoError(t, faker.FakeData(&rule))
-			require.Error(t, repo.Set(context.Background(), []Rule{rule}))
+			require.NoError(t, repo.Set(context.Background(), []Rule{rule}))
+			assert.Equal(t, index+1, mr.loggerCalled)
 		})
 	}
 }
