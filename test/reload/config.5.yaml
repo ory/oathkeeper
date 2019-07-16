@@ -1,0 +1,26 @@
+serve:
+  api:
+    port: 6061
+  proxy:
+    port: 6060
+
+access_rules:
+  repositories:
+    - file://./rules.1.json
+    - file://./rules.3.json
+
+authenticators:
+  noop:
+    enabled: true
+  anonymous:
+    enabled: true
+
+authorizers:
+  allow:
+    enabled: true
+  deny:
+    enabled: true
+
+mutators:
+  noop:
+    enabled: true

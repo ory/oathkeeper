@@ -1,7 +1,7 @@
 package internal
 
 import (
-	"github.com/spf13/viper"
+	"github.com/ory/viper"
 
 	"github.com/ory/oathkeeper/driver"
 	"github.com/ory/oathkeeper/driver/configuration"

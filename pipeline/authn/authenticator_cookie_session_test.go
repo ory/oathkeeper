@@ -12,11 +12,12 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/ory/oathkeeper/internal"
-	. "github.com/ory/oathkeeper/pipeline/authn"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/ory/oathkeeper/internal"
+	. "github.com/ory/oathkeeper/pipeline/authn"
 )
 
 func TestAuthenticatorCookieSession(t *testing.T) {

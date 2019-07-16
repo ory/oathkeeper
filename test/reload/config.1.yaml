@@ -1,0 +1,24 @@
+serve:
+  api:
+    port: 6061
+  proxy:
+    port: 6060
+
+access_rules:
+  repositories:
+
+authenticators:
+  noop:
+    enabled: true
+  anonymous:
+    enabled: true
+
+authorizers:
+  allow:
+    enabled: true
+  deny:
+    enabled: true
+
+mutators:
+  noop:
+    enabled: true

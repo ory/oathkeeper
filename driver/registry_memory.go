@@ -14,6 +14,8 @@ import (
 	"github.com/sirupsen/logrus"
 
 	"github.com/ory/herodot"
+	"github.com/ory/x/healthx"
+
 	"github.com/ory/oathkeeper/api"
 	"github.com/ory/oathkeeper/credentials"
 	"github.com/ory/oathkeeper/driver/configuration"
@@ -21,7 +23,6 @@ import (
 	"github.com/ory/oathkeeper/pipeline/authz"
 	"github.com/ory/oathkeeper/pipeline/mutate"
 	"github.com/ory/oathkeeper/rule"
-	"github.com/ory/x/healthx"
 )
 
 var _ Registry = new(RegistryMemory)
@@ -54,19 +55,17 @@ type RegistryMemory struct {
 	authenticators map[string]authn.Authenticator
 	authorizers    map[string]authz.Authorizer
 	mutators       map[string]mutate.Mutator
+
+	ruleRepositoryLock sync.Mutex
 }
 
-func (r *RegistryMemory) Init() error {
-	rules, err := r.RuleFetcher().Fetch()
-	if err != nil {
-		return err
-	}
-
-	if len(rules) == 0 {
-		r.Logger().Warn("No access rules have been configured, all requests will be denied.")
-	}
-
-	return r.RuleRepository().Set(context.Background(), rules)
+func (r *RegistryMemory) Init() {
+	go func() {
+		if err := r.RuleFetcher().Watch(context.Background()); err != nil {
+			r.Logger().WithError(err).Fatal("Access rule watcher terminated with an error.")
+		}
+	}()
+	_ = r.RuleRepository()
 }
 
 func (r *RegistryMemory) RuleFetcher() rule.Fetcher {

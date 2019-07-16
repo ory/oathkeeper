@@ -1,4 +1,4 @@
-- id: test-rule-1
+- id: test-rule-1-yaml
   upstream:
     preserve_host: true
     strip_path: /api
