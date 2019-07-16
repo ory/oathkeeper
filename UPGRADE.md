@@ -8,7 +8,9 @@ before finalizing the upgrade process.
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
+
 - [master](#master)
+- [v0.17.0-beta.1+oryOS.12](#v0170-beta1oryos12)
 - [v0.16.0-beta.1+oryOS.12](#v0160-beta1oryos12)
   - [Access Rule Changes](#access-rule-changes)
   - [Mutators (formerly credentials issuers)](#mutators-formerly-credentials-issuers)
@@ -36,6 +38,11 @@ before finalizing the upgrade process.
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 ## master
+
+## v0.17.0-beta.1+oryOS.12
+
+ORY Oathkeeper now watches configuration files and access rules repositories on the local disk for changes. This does currently
+not work for remote sources (http/https). Additionally, access rules can now be written in YAML (expected file extensions are `yaml` and `yml`).
 
 ## v0.16.0-beta.1+oryOS.12
 
