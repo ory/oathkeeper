@@ -67,7 +67,7 @@ func init() {
 				logger.
 					WithField("key", immutable).
 					WithField("value", fmt.Sprintf("%v", viper.Get(immutable))).
-					Fatal("A configuration value marked as immutable has changed, shutting down.")
+					Error("A configuration value marked as immutable has changed. This change can not be applied and was reverted. To reload the values please restart ORY Oathkeeper.")
 
 			},
 		})
