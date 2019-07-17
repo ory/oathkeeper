@@ -29,12 +29,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func version() string {
-	if Version != "" {
-
-	}
-}
-
 var serveCmd = &cobra.Command{
 	Use:   "serve",
 	Short: "Starts the HTTP/2 REST API and HTTP/2 Reverse Proxy",
