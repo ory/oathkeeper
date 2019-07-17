@@ -166,14 +166,16 @@ func (f *FetcherDefault) Watch(ctx context.Context) error {
 }
 
 func (f *FetcherDefault) watch(ctx context.Context, watcher *fsnotify.Watcher, events chan event) error {
-	viperx.AddWatcher(func(e fsnotify.Event) {
+	viperx.AddWatcher(func(e fsnotify.Event) error {
 		if !viper.HasChanged(configuration.ViperKeyAccessRuleRepositories) {
-			return
+			return nil
 		}
 
 		go func() {
 			events <- event{et: eventRepositoryConfigChange, source: "viper_watcher"}
 		}()
+
+		return nil
 	})
 
 	go func() {

@@ -29,6 +29,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+func version() string {
+	if Version != "" {
+
+	}
+}
+
 var serveCmd = &cobra.Command{
 	Use:   "serve",
 	Short: "Starts the HTTP/2 REST API and HTTP/2 Reverse Proxy",
@@ -39,7 +45,7 @@ var serveCmd = &cobra.Command{
 ORY Oathkeeper can be configured using environment variables as well as a configuration file. For more information
 on configuration options, open the configuration documentation:
 
->> https://github.com/ory/oathkeeper/blob/` + Version + `/docs/config.yaml <<
+>> https://www.ory.sh/docs/oathkeeper/configuration <<
 `,
 	Run: server.RunServe(Version, Commit, Date),
 }

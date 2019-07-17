@@ -62,8 +62,12 @@ func (v *ViperProvider) AuthenticatorCookieSessionIsEnabled() bool {
 	return viperx.GetBool(v.l, ViperKeyAuthenticatorCookieSessionIsEnabled, false)
 }
 
-func (v *ViperProvider) AuthenticatorCookieSessionCheckSessionURL() string {
-	return viperx.GetString(v.l, ViperKeyAuthenticatorCookieSessionCheckSessionURL, "")
+func (v *ViperProvider) AuthenticatorCookieSessionCheckSessionURL() *url.URL {
+	return v.getURL(
+		viperx.GetString(v.l, ViperKeyAuthenticatorCookieSessionCheckSessionURL, ""),
+		ViperKeyAuthenticatorCookieSessionCheckSessionURL,
+	)
+
 }
 
 func (v *ViperProvider) AuthenticatorCookieSessionOnly() []string {
