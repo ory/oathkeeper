@@ -41,7 +41,7 @@ func (a *AuthenticatorCookieSession) Validate() error {
 		return errors.WithStack(ErrAuthenticatorNotEnabled.WithReasonf(`Authenticator "%s" is disabled per configuration.`, a.GetID()))
 	}
 
-	if a.c.AuthenticatorCookieSessionCheckSessionURL() == "" {
+	if a.c.AuthenticatorCookieSessionCheckSessionURL().String() == "" {
 		return errors.WithStack(ErrAuthenticatorNotEnabled.WithReasonf(
 			`Configuration for authenticator "%s" did not specify any values for configuration key "%s" and is thus disabled.`,
 			a.GetID(),
@@ -73,7 +73,7 @@ func (a *AuthenticatorCookieSession) Authenticate(r *http.Request, config json.R
 
 	origin := cf.CheckSessionURL
 	if origin == "" {
-		origin = a.c.AuthenticatorCookieSessionCheckSessionURL()
+		origin = a.c.AuthenticatorCookieSessionCheckSessionURL().String()
 	}
 
 	body, err := forwardRequestToSessionStore(r, origin)

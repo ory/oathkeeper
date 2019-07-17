@@ -22,6 +22,7 @@ require (
 	github.com/go-sql-driver/mysql v1.4.1
 	github.com/go-swagger/go-swagger v0.19.0
 	github.com/go-swagger/scan-repo-boundary v0.0.0-20180623220736-973b3573c013 // indirect
+	github.com/gobuffalo/packr/v2 v2.0.0-rc.15
 	github.com/golang/gddo v0.0.0-20190312205958-5a2505f3dbf0 // indirect
 	github.com/golang/mock v1.3.1
 	github.com/google/uuid v1.1.1
@@ -38,11 +39,12 @@ require (
 	github.com/ory/fosite v0.29.2
 	github.com/ory/go-acc v0.0.0-20181118080137-ddc355013f90
 	github.com/ory/go-convenience v0.1.0
+	github.com/ory/gojsonschema v0.0.0-20190717132251-f184856edacf
 	github.com/ory/graceful v0.1.1
 	github.com/ory/herodot v0.6.2
 	github.com/ory/ladon v1.0.1
-	github.com/ory/viper v1.5.3
-	github.com/ory/x v0.0.65
+	github.com/ory/viper v1.5.6
+	github.com/ory/x v0.0.66
 	github.com/pborman/uuid v1.2.0
 	github.com/phayes/freeport v0.0.0-20180830031419-95f893ade6f2
 	github.com/pkg/errors v0.8.1

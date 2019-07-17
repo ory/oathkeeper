@@ -37,7 +37,7 @@ type ProviderAuthenticators interface {
 	AuthenticatorNoopIsEnabled() bool
 
 	AuthenticatorCookieSessionIsEnabled() bool
-	AuthenticatorCookieSessionCheckSessionURL() string
+	AuthenticatorCookieSessionCheckSessionURL() *url.URL
 	AuthenticatorCookieSessionOnly() []string
 
 	AuthenticatorJWTIsEnabled() bool

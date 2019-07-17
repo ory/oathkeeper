@@ -87,9 +87,8 @@ jobs:
       - run: git config --global user.name "ORY Continuous Integration"
       - run: "git clone https://arekkas:$DOCS_TOKEN_PUSH@github.com/ory/docs.git ../docs"
       - run: "cp ./docs/api.swagger.json ../docs/apis/oathkeeper.json"
-      - run: ./scripts/run-configuration.sh
-      - run: "cp configuration.md ../docs/docs/oathkeeper/configuration.md"
-      - run: "(cd ../docs && git add -A && git commit -a -m \"Updates ORY Oathkeeper Swagger definitions\" && git push origin) || exit 0"
+      - run: "cp ./.schemas/config.schema.json ../docs/schemas/oathkeeper.config.schema.json"
+      - run: "(cd ../docs && git add -A && git commit -a -m \"Update ORY Oathkeeper Swagger and JSON Schemas\" && git push origin) || exit 0"
 
   release-changelog:
     docker:

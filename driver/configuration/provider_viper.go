@@ -9,6 +9,8 @@ import (
 	"github.com/rs/cors"
 	"github.com/sirupsen/logrus"
 
+	"github.com/ory/viper"
+
 	"github.com/ory/fosite"
 	"github.com/ory/x/corsx"
 	"github.com/ory/x/urlx"
@@ -27,6 +29,52 @@ const (
 	ViperKeyAPIServeAddressPort    = "serve.api.port"
 	ViperKeyAccessRuleRepositories = "access_rules.repositories"
 )
+
+func BindEnvs() {
+	if err := viper.BindEnv(
+		ViperKeyProxyReadTimeout,
+		ViperKeyProxyWriteTimeout,
+		ViperKeyProxyIdleTimeout,
+		ViperKeyProxyServeAddressHost,
+		ViperKeyProxyServeAddressPort,
+		ViperKeyAPIServeAddressHost,
+		ViperKeyAPIServeAddressPort,
+		ViperKeyAccessRuleRepositories,
+		ViperKeyAuthenticatorAnonymousIsEnabled,
+		ViperKeyAuthenticatorAnonymousIdentifier,
+		ViperKeyAuthenticatorNoopIsEnabled,
+		ViperKeyAuthenticatorCookieSessionIsEnabled,
+		ViperKeyAuthenticatorCookieSessionCheckSessionURL,
+		ViperKeyAuthenticatorCookieSessionOnly,
+		ViperKeyAuthenticatorJWTIsEnabled,
+		ViperKeyAuthenticatorJWTJWKSURIs,
+		ViperKeyAuthenticatorJWTScopeStrategy,
+		ViperKeyAuthenticatorOAuth2ClientCredentialsIsEnabled,
+		ViperKeyAuthenticatorClientCredentialsTokenURL,
+		ViperKeyAuthenticatorOAuth2TokenIntrospectionIsEnabled,
+		ViperKeyAuthenticatorOAuth2TokenIntrospectionScopeStrategy,
+		ViperKeyAuthenticatorOAuth2TokenIntrospectionIntrospectionURL,
+		ViperKeyAuthenticatorOAuth2TokenIntrospectionPreAuthorizationEnabled,
+		ViperKeyAuthenticatorOAuth2TokenIntrospectionPreAuthorizationClientID,
+		ViperKeyAuthenticatorOAuth2TokenIntrospectionPreAuthorizationClientSecret,
+		ViperKeyAuthenticatorOAuth2TokenIntrospectionPreAuthorizationScope,
+		ViperKeyAuthenticatorOAuth2TokenIntrospectionPreAuthorizationTokenURL,
+		ViperKeyAuthenticatorUnauthorizedIsEnabled,
+		ViperKeyAuthorizerAllowIsEnabled,
+		ViperKeyAuthorizerDenyIsEnabled,
+		ViperKeyAuthorizerKetoEngineACPORYIsEnabled,
+		ViperKeyAuthorizerKetoEngineACPORYBaseURL,
+		ViperKeyMutatorCookieIsEnabled,
+		ViperKeyMutatorHeaderIsEnabled,
+		ViperKeyMutatorNoopIsEnabled,
+		ViperKeyMutatorIDTokenIsEnabled,
+		ViperKeyMutatorIDTokenIssuerURL,
+		ViperKeyMutatorIDTokenJWKSURL,
+		ViperKeyMutatorIDTokenTTL,
+	); err != nil {
+		panic(err.Error())
+	}
+}
 
 type ViperProvider struct {
 	l logrus.FieldLogger

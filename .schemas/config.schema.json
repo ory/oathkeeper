@@ -1,0 +1,504 @@
+{
+  "$id": "https://raw.githubusercontent.com/ory/oathkeeper/master/config.schema.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "ORY Oathkeeper Configuration",
+  "type": "object",
+  "definitions": {
+    "scopeStrategy": {
+      "title": "Scope Strategy",
+      "type": "string",
+      "enum": [
+        "hierarchic",
+        "exact",
+        "wildcard",
+        "none"
+      ],
+      "default": "none",
+      "description": "Sets the strategy validation algorithm."
+    }
+  },
+  "properties": {
+    "serve": {
+      "title": "HTTP(s)",
+      "additionalProperties": false,
+      "type": "object",
+      "properties": {
+        "api": {
+          "type": "object",
+          "title": "HTTP REST API",
+          "additionalProperties": false,
+          "properties": {
+            "port": {
+              "type": "number",
+              "default": 4456,
+              "title": "Port",
+              "description": "The port to listen on."
+            },
+            "host": {
+              "type": "string",
+              "default": "",
+              "examples": [
+                "localhost",
+                "127.0.0.1"
+              ],
+              "title": "Host",
+              "description": "The network interface to listen on."
+            },
+            "cors": {
+              "$ref": "https://raw.githubusercontent.com/ory/x/master/.schemas/corsx/viper.schema.json#"
+            },
+            "tls": {
+              "$ref": "https://raw.githubusercontent.com/ory/x/master/.schemas/tlsx/viper.schema.json#"
+            }
+          }
+        },
+        "proxy": {
+          "type": "object",
+          "title": "HTTP Reverse Proxy",
+          "additionalProperties": false,
+          "properties": {
+            "port": {
+              "type": "number",
+              "default": 4455,
+              "title": "Port",
+              "description": "The port to listen on."
+            },
+            "host": {
+              "type": "string",
+              "default": "",
+              "examples": [
+                "localhost",
+                "127.0.0.1"
+              ],
+              "title": "Host",
+              "description": "The network interface to listen on."
+            },
+            "timeout": {
+              "title": "HTTP Timeouts",
+              "description": "Control the reverse proxy's HTTP timeouts.",
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "read": {
+                  "title": "HTTP Read Timeout",
+                  "type": "string",
+                  "default": "5s",
+                  "pattern": "^[0-9]+(ns|us|ms|s|m|h)$",
+                  "description": "The maximum duration for reading the entire request, including the body.",
+                  "examples": [
+                    "5s",
+                    "5m",
+                    "5h"
+                  ]
+                },
+                "write": {
+                  "title": "HTTP Write Timeout",
+                  "type": "string",
+                  "default": "120s",
+                  "pattern": "^[0-9]+(ns|us|ms|s|m|h)$",
+                  "description": "The maximum duration before timing out writes of the response. Increase this parameter to prevent unexpected closing a client connection if an upstream request is responding slowly.",
+                  "examples": [
+                    "5s",
+                    "5m",
+                    "5h"
+                  ]
+                },
+                "idle": {
+                  "title": "HTTP Idle Timeout",
+                  "type": "string",
+                  "default": "120s",
+                  "pattern": "^[0-9]+(ns|us|ms|s|m|h)$",
+                  "description": " The maximum amount of time to wait for any action of a request session, reading data or writing the response.",
+                  "examples": [
+                    "5s",
+                    "5m",
+                    "5h"
+                  ]
+                }
+              }
+            },
+            "cors": {
+              "$ref": "https://raw.githubusercontent.com/ory/x/master/.schemas/corsx/viper.schema.json#"
+            },
+            "tls": {
+              "$ref": "https://raw.githubusercontent.com/ory/x/master/.schemas/tlsx/viper.schema.json#"
+            }
+          }
+        }
+      }
+    },
+    "access_rules": {
+      "title": "Access Rules",
+      "type": "object",
+      "description": "Configure access rules. All sub-keys support configuration reloading without restarting.",
+      "additionalProperties": false,
+      "properties": {
+        "repositories": {
+          "title": "Repositories",
+          "description": "Locations (list of URLs) where access rules should be fetched from on boot. It is expected that the documents at those locations return a JSON or YAML Array containing ORY Oathkeeper Access Rules:\n\n- If the URL Scheme is `file://`, the access rules (an array of access rules is expected) will be fetched from the local file system.\n- If the URL Scheme is `inline://`, the access rules (an array of access rules is expected) are expected to be a base64 encoded (with padding!) JSON/YAML string (base64_encode(`[{\"id\":\"foo-rule\",\"authenticators\":[....]}]`)).\n- If the URL Scheme is `http://` or `https://`, the access rules (an array of access rules is expected) will be fetched from the provided HTTP(s) location.",
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uri"
+          },
+          "examples": [
+            "[\"file://path/to/rules.json\",\"inline://W3siaWQiOiJmb28tcnVsZSIsImF1dGhlbnRpY2F0b3JzIjpbXX1d\",\"https://path-to-my-rules/rules.json\"]"
+          ]
+        }
+      }
+    },
+    "authenticators": {
+      "title": "Authenticators",
+      "type": "object",
+      "description": "For more information on authenticators head over to: https://www.ory.sh/docs/oathkeeper/pipeline/authn",
+      "additionalProperties": false,
+      "properties": {
+        "anonymous": {
+          "type": "object",
+          "title": "Anonymous",
+          "description": "The [`anonymous` authenticator](https://www.ory.sh/docs/oathkeeper/pipeline/authn#anonymous).",
+          "additionalProperties": false,
+          "properties": {
+            "enabled": {
+              "title": "Enabled",
+              "type": "boolean"
+            },
+            "subject": {
+              "type": "string",
+              "title": "Anonymous Subject",
+              "examples": [
+                "guest",
+                "anon",
+                "anonymous",
+                "unknown"
+              ],
+              "default": "anonymous",
+              "description": "Sets the anonymous username."
+            }
+          }
+        },
+        "noop": {
+          "type": "object",
+          "title": "No Operation (noop)",
+          "description": "The [`noop` authenticator](https://www.ory.sh/docs/oathkeeper/pipeline/authn#noop).",
+          "additionalProperties": false,
+          "properties": {
+            "enabled": {
+              "title": "Enabled",
+              "type": "boolean"
+            }
+          }
+        },
+        "unauthorized": {
+          "type": "object",
+          "title": "Unauthorized",
+          "description": "The [`unauthorized` authenticator](https://www.ory.sh/docs/oathkeeper/pipeline/authn#unauthorized).",
+          "additionalProperties": false,
+          "properties": {
+            "enabled": {
+              "title": "Enabled",
+              "type": "boolean"
+            }
+          }
+        },
+        "cookie_session": {
+          "type": "object",
+          "title": "Cookie Session",
+          "description": "The [`cookie_session` authenticator](https://www.ory.sh/docs/oathkeeper/pipeline/authn#cookie_session).",
+          "additionalProperties": false,
+          "properties": {
+            "enabled": {
+              "title": "Enabled",
+              "type": "boolean"
+            },
+            "check_session_url": {
+              "title": "Session Check URL",
+              "type": "string",
+              "format": "uri",
+              "description": "The origin to proxy requests to. If the response is a 200 with body `{ \"subject\": \"...\", \"extra\": {} }`. The request will pass the subject through successfully, otherwise it will be marked as unauthorized.\n\n>If this authenticator is enabled, this value is required.",
+              "examples": [
+                "https://session-store-host"
+              ]
+            },
+            "only": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "title": "Only Cookies",
+              "description": "A list of possible cookies to look for on incoming requests, and will fallthrough to the next authenticator if none of the passed cookies are set on the request."
+            }
+          }
+        },
+        "jwt": {
+          "type": "object",
+          "title": "JSON Web Token (jwt)",
+          "description": "The [`jwt` authenticator](https://www.ory.sh/docs/oathkeeper/pipeline/authn#jwt).",
+          "additionalProperties": false,
+          "properties": {
+            "enabled": {
+              "title": "Enabled",
+              "type": "boolean"
+            },
+            "jwks_urls": {
+              "title": "JSON Web Key URLs",
+              "type": "array",
+              "items": {
+                "type": "string",
+                "format": "uri"
+              },
+              "description": "URLs where ORY Oathkeeper can retrieve JSON Web Keys from for validating the JSON Web Token. Usually something like \"https://my-keys.com/.well-known/jwks.json\". The response of that endpoint must return a JSON Web Key Set (JWKS).\n\n>If this authenticator is enabled, this value is required.",
+              "examples": [
+                "https://my-website.com/.well-known/jwks.json",
+                "https://my-other-website.com/.well-known/jwks.json",
+                "file://path/to/local/jwks.json"
+              ]
+            },
+            "scope_strategy": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/scopeStrategy"
+                }
+              ]
+            }
+          }
+        },
+        "oauth2_client_credentials": {
+          "type": "object",
+          "title": "OAuth 2.0 Client Credentials",
+          "description": "The [`oauth2_client_credentials` authenticator](https://www.ory.sh/docs/oathkeeper/pipeline/authn#oauth2_client_credentials).",
+          "additionalProperties": false,
+          "properties": {
+            "enabled": {
+              "title": "Enabled",
+              "type": "boolean"
+            },
+            "token_url": {
+              "type": "string",
+              "description": "The OAuth 2.0 Token Endpoint that will be used to validate the client credentials.\n\n>If this authenticator is enabled, this value is required.",
+              "format": "uri",
+              "examples": [
+                "https://my-website.com/oauth2/token"
+              ]
+            }
+          }
+        },
+        "oauth2_introspection": {
+          "type": "object",
+          "title": "OAuth 2.0 Token Introspection",
+          "description": "The [`oauth2_introspection` authenticator](https://www.ory.sh/docs/oathkeeper/pipeline/authn#oauth2_introspection).",
+          "additionalProperties": false,
+          "properties": {
+            "enabled": {
+              "title": "Enabled",
+              "type": "boolean"
+            },
+            "introspection_url": {
+              "type": "string",
+              "format": "uri",
+              "examples": [
+                "https://my-website.com/oauth2/introspection"
+              ],
+              "title": "OAuth 2.0 Introspection URL",
+              "description": "The OAuth 2.0 Token Introspection endpoint URL.\n\n>If this authenticator is enabled, this value is required."
+            },
+            "scope_strategy": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/scopeStrategy"
+                }
+              ]
+            },
+            "pre_authorization": {
+              "title": "Pre-Authorization",
+              "description": "Enable pre-authorization in cases where the OAuth 2.0 Token Introspection endpoint is protected by OAuth 2.0 Bearer Tokens that can be retrieved using the OAuth 2.0 Client Credentials grant.",
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "enabled": {
+                  "title": "Enabled",
+                  "type": "boolean"
+                },
+                "client_id": {
+                  "type": "string",
+                  "title": "OAuth 2.0 Client ID",
+                  "description": "The OAuth 2.0 Client ID to be used for the OAuth 2.0 Client Credentials Grant.\n\n>If pre-authorization is enabled, this value is required."
+                },
+                "client_secret": {
+                  "type": "string",
+                  "title": "OAuth 2.0 Client Secret",
+                  "description": "The OAuth 2.0 Client Secret to be used for the OAuth 2.0 Client Credentials Grant.\n\n>If pre-authorization is enabled, this value is required."
+                },
+                "token_url": {
+                  "type": "string",
+                  "format": "uri",
+                  "title": "OAuth 2.0 Token URL",
+                  "description": "The OAuth 2.0 Token Endpoint where the OAuth 2.0 Client Credentials Grant will be performed.\n\n>If pre-authorization is enabled, this value is required."
+                },
+                "scope": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "title": "OAuth 2.0 Scope",
+                  "description": "The OAuth 2.0 Scope to be requested during the OAuth 2.0 Client Credentials Grant.",
+                  "examples": [
+                    [
+                      "[\"foo\", \"bar\"]"
+                    ]
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "authorizers": {
+      "title": "Authorizers",
+      "type": "object",
+      "description": "For more information on authorizers head over to: https://www.ory.sh/docs/oathkeeper/pipeline/authz",
+      "additionalProperties": false,
+      "properties": {
+        "allow": {
+          "title": "Allow",
+          "description": "The [`allow` authorizer](https://www.ory.sh/docs/oathkeeper/pipeline/authz#allow).",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "enabled": {
+              "title": "Enabled",
+              "type": "boolean"
+            }
+          }
+        },
+        "deny": {
+          "title": "Deny",
+          "description": "The [`deny` authorizer](https://www.ory.sh/docs/oathkeeper/pipeline/authz#allow).",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "enabled": {
+              "title": "Enabled",
+              "type": "boolean"
+            }
+          }
+        },
+        "keto_engine_acp_ory": {
+          "title": "ORY Keto Access Control Policies Engine",
+          "description": "The [`keto_engine_acp_ory` authorizer](https://www.ory.sh/docs/oathkeeper/pipeline/authz#keto_engine_acp_ory).",
+          "additionalProperties": false,
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "title": "Enabled",
+              "type": "boolean"
+            },
+            "base_url": {
+              "title": "Base URL",
+              "type": "string",
+              "format": "uri",
+              "description": "The base URL of ORY Keto.\n\n>If this authorizer is enabled, this value is required.",
+              "examples": [
+                "http://my-keto/"
+              ]
+            }
+          }
+        }
+      }
+    },
+    "mutators": {
+      "title": "Mutators",
+      "type": "object",
+      "description": "For more information on mutators head over to: https://www.ory.sh/docs/oathkeeper/pipeline/mutator",
+      "additionalProperties": false,
+      "properties": {
+        "noop": {
+          "type": "object",
+          "title": "No Operation (noop)",
+          "description": "The [`noop` mutator](https://www.ory.sh/docs/oathkeeper/pipeline/mutator#noop).",
+          "additionalProperties": false,
+          "properties": {
+            "enabled": {
+              "title": "Enabled",
+              "type": "boolean"
+            }
+          }
+        },
+        "cookie": {
+          "type": "object",
+          "title": "HTTP Cookie",
+          "description": "The [`cookie` mutator](https://www.ory.sh/docs/oathkeeper/pipeline/mutator#cookie).",
+          "additionalProperties": false,
+          "properties": {
+            "enabled": {
+              "title": "Enabled",
+              "type": "boolean"
+            }
+          }
+        },
+        "header": {
+          "type": "object",
+          "title": "HTTP Header",
+          "description": "The [`header` mutator](https://www.ory.sh/docs/oathkeeper/pipeline/mutator#header).",
+          "additionalProperties": false,
+          "properties": {
+            "enabled": {
+              "title": "Enabled",
+              "type": "boolean"
+            }
+          }
+        },
+        "id_token": {
+          "type": "object",
+          "title": "ID Token (JSON Web Token)",
+          "description": "The [`header` mutator](https://www.ory.sh/docs/oathkeeper/pipeline/mutator#header).",
+          "additionalProperties": false,
+          "properties": {
+            "enabled": {
+              "title": "Enabled",
+              "type": "boolean"
+            },
+            "issuer_url": {
+              "type": "string",
+              "format": "uri",
+              "title": "Issuer URL",
+              "description": "Sets the \"iss\" value of the ID Token.\n\n>If this mutator is enabled, this value is required."
+            },
+            "jwks_url": {
+              "type": "string",
+              "format": "uri",
+              "title": "JSON Web Key URL",
+              "description": "Sets the URL where keys should be fetched from. Supports remote locations (http, https) as well as local filesystem paths.\n\n>If this mutator is enabled, this value is required.",
+              "examples": [
+                "https://fetch-keys/from/this/location.json",
+                "file:///from/this/absolute/location.json",
+                "file://../from/this/relative/location.json"
+              ]
+            },
+            "ttl": {
+              "type": "string",
+              "title": "Expire After",
+              "description": "Sets the time-to-live of the JSON Web Token.",
+              "pattern": "^[0-9]+(ns|us|ms|s|m|h)$",
+              "default": "1m",
+              "examples": [
+                "1h",
+                "1m",
+                "30s"
+              ]
+            }
+          }
+        }
+      }
+    },
+    "log": {
+      "$ref": "https://raw.githubusercontent.com/ory/x/master/.schemas/logrusx/viper.schema.json#"
+    },
+    "profiling": {
+      "$ref": "https://raw.githubusercontent.com/ory/x/master/.schemas/profilingx/viper.schema.json#"
+    }
+  },
+  "required": [],
+  "additionalProperties": false
+}
