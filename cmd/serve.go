@@ -39,7 +39,7 @@ var serveCmd = &cobra.Command{
 ORY Oathkeeper can be configured using environment variables as well as a configuration file. For more information
 on configuration options, open the configuration documentation:
 
->> https://github.com/ory/oathkeeper/blob/` + Version + `/docs/config.yaml <<
+>> https://github.com/ory/oathkeeper/blob/` + Version + `/docs/.oathkeeper.yaml <<
 `,
 	Run: server.RunServe(Version, Commit, Date),
 }

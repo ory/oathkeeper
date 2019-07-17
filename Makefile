@@ -33,17 +33,23 @@ sdk:
 install-stable:
 		OATHKEEPER_LATEST=$$(git describe --abbrev=0 --tags)
 		git checkout $$OATHKEEPER_LATEST
+		packr2
 		GO111MODULE=on go install \
 				-ldflags "-X github.com/ory/oathkeeper/cmd.Version=$$OATHKEEPER_LATEST -X github.com/ory/oathkeeper/cmd.Date=`TZ=UTC date -u '+%Y-%m-%dT%H:%M:%SZ'` -X github.com/ory/oathkeeper/cmd.Commit=`git rev-parse HEAD`" \
 				.
+		packr2 clean
 		git checkout master
 
 .PHONY: install
 install:
+		packr2 || (GO111MODULE=on go install github.com/gobuffalo/packr/v2/packr2 && packr2)
 		GO111MODULE=on go install .
+		packr2 clean
 
 .PHONY: docker
 docker:
+		packr2 || (GO111MODULE=on go install github.com/gobuffalo/packr/v2/packr2 && packr2)
 		CGO_ENABLED=0 GO111MODULE=on GOOS=linux GOARCH=amd64 go build
+		packr2 clean
 		docker build -t oryd/oathkeeper:latest .
 		rm oathkeeper
