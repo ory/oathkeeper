@@ -12,6 +12,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"reflect"
 	"strings"
 	"sync"
 
@@ -166,8 +167,12 @@ func (f *FetcherDefault) Watch(ctx context.Context) error {
 }
 
 func (f *FetcherDefault) watch(ctx context.Context, watcher *fsnotify.Watcher, events chan event) error {
+	var pc map[string]interface{}
+
 	viperx.AddWatcher(func(e fsnotify.Event) error {
-		if !viper.HasChanged(configuration.ViperKeyAccessRuleRepositories) {
+		if reflect.DeepEqual(pc, viper.Get(configuration.ViperKeyAccessRuleRepositories)) {
+			f.r.Logger().
+				Debug("Not reloading access rule repositories because configuration value has not changed.")
 			return nil
 		}
 
