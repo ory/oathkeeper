@@ -71,7 +71,7 @@
                 "127.0.0.1"
               ],
               "title": "Host",
-              "description": "The network interface to listen on."
+              "description": "The network interface to listen on. Leave empty to listen on all interfaces."
             },
             "timeout": {
               "title": "HTTP Timeouts",
@@ -129,8 +129,8 @@
     },
     "access_rules": {
       "title": "Access Rules",
-      "type": "object",
       "description": "Configure access rules. All sub-keys support configuration reloading without restarting.",
+      "type": "object",
       "additionalProperties": false,
       "properties": {
         "repositories": {
@@ -255,11 +255,7 @@
               ]
             },
             "scope_strategy": {
-              "allOf": [
-                {
-                  "$ref": "#/definitions/scopeStrategy"
-                }
-              ]
+              "$ref": "#/definitions/scopeStrategy"
             }
           }
         },
@@ -303,11 +299,7 @@
               "description": "The OAuth 2.0 Token Introspection endpoint URL.\n\n>If this authenticator is enabled, this value is required."
             },
             "scope_strategy": {
-              "allOf": [
-                {
-                  "$ref": "#/definitions/scopeStrategy"
-                }
-              ]
+              "$ref": "#/definitions/scopeStrategy"
             },
             "pre_authorization": {
               "title": "Pre-Authorization",
