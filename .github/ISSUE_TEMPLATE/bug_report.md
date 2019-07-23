@@ -1,6 +1,7 @@
 ---
 name: Bug report
 about: Create a report to help us improve
+
 ---
 
 **Describe the bug**
@@ -17,7 +18,7 @@ Steps to reproduce the behavior:
 3. Request fails with response: `{"some": "error"}`
 -->
 
-_Server logs_
+*Server logs*
 
 <!--
 ```
@@ -25,7 +26,7 @@ log=error ....
 ```
 -->
 
-_Server configuration_
+*Server configuration*
 
 <!--
 PLEASE OMIT SENSITIVE VALUES
@@ -43,8 +44,8 @@ A clear and concise description of what you expected to happen.
 
 **Environment**
 
-- Version: v1.2.3, git sha hash
-- Environment: Debian, Docker, ...
+* Version: v1.2.3, git sha hash
+* Environment: Debian, Docker, ...
 
 **Additional context**
 
