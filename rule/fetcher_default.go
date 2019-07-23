@@ -61,6 +61,7 @@ type FetcherDefault struct {
 	watching []url.URL
 
 	lock sync.Mutex
+	wg   sync.WaitGroup
 }
 
 func NewFetcherDefault(
@@ -119,9 +120,7 @@ func (f *FetcherDefault) configUpdate(ctx context.Context, watcher *fsnotify.Wat
 		}
 	}
 	for _, source := range replace {
-		go func(s url.URL) {
-			events <- event{et: eventFileChanged, path: s, source: "config_update"}
-		}(source)
+		f.enqueueEvent(events, event{et: eventFileChanged, path: source, source: "config_update"})
 	}
 	return nil
 }
@@ -162,8 +161,13 @@ func (f *FetcherDefault) Watch(ctx context.Context) error {
 	defer watcher.Close()
 
 	events := make(chan event)
-	defer close(events)
-	return f.watch(ctx, watcher, events)
+	err = f.watch(ctx, watcher, events)
+
+	// Close the channel only when all child goroutines exit
+	f.wg.Wait()
+	close(events)
+
+	return err
 }
 
 func (f *FetcherDefault) watch(ctx context.Context, watcher *fsnotify.Watcher, events chan event) error {
@@ -176,16 +180,12 @@ func (f *FetcherDefault) watch(ctx context.Context, watcher *fsnotify.Watcher, e
 			return nil
 		}
 
-		go func() {
-			events <- event{et: eventRepositoryConfigChange, source: "viper_watcher"}
-		}()
+		f.enqueueEvent(events, event{et: eventRepositoryConfigChange, source: "viper_watcher"})
 
 		return nil
 	})
 
-	go func() {
-		events <- event{et: eventRepositoryConfigChange, source: "entrypoint"}
-	}()
+	f.enqueueEvent(events, event{et: eventRepositoryConfigChange, source: "entrypoint"})
 
 	for {
 		select {
@@ -199,9 +199,7 @@ func (f *FetcherDefault) watch(ctx context.Context, watcher *fsnotify.Watcher, e
 				f.r.Logger().
 					Debugf("Detected that a access rule repository file has been removed, reloading config.")
 				// If a file was removed it's likely that the config changed as well - reload!
-				go func() {
-					events <- event{et: eventRepositoryConfigChange, source: "fsnotify_remove"}
-				}()
+				f.enqueueEvent(events, event{et: eventRepositoryConfigChange, source: "fsnotify_remove"})
 				continue
 			}
 
@@ -216,9 +214,7 @@ func (f *FetcherDefault) watch(ctx context.Context, watcher *fsnotify.Watcher, e
 				WithField("op", e.Op.String()).
 				Debugf("Detected access rule repository file change.")
 
-			go func() {
-				events <- event{et: eventFileChanged, path: *source, source: "fsnotify_update"}
-			}()
+			f.enqueueEvent(events, event{et: eventFileChanged, path: *source, source: "fsnotify_update"})
 		case e, ok := <-events:
 			if !ok {
 				// channel was closed
@@ -253,6 +249,15 @@ func (f *FetcherDefault) watch(ctx context.Context, watcher *fsnotify.Watcher, e
 			}
 		}
 	}
+}
+
+func (f *FetcherDefault) enqueueEvent(events chan event, evt event) {
+	f.wg.Add(1)
+	go func() {
+		defer f.wg.Done()
+
+		events <- evt
+	}()
 }
 
 func (f *FetcherDefault) fetch(source url.URL) ([]Rule, error) {
