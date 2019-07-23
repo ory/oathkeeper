@@ -20,6 +20,8 @@
 
 package rule
 
+import "context"
+
 type Fetcher interface {
-	Fetch() ([]Rule, error)
+	Watch(ctx context.Context) error
 }

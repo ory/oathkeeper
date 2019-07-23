@@ -1,0 +1,17 @@
+- id: test-rule-1-yaml
+  upstream:
+    preserve_host: true
+    strip_path: /api
+    url: mybackend.com/api
+  match:
+    url: myproxy.com/api
+    methods:
+      - GET
+      - POST
+  authenticators:
+    - handler: noop
+    - handler: anonymous
+  authorizer:
+    handler: allow
+  mutator:
+    handler: noop

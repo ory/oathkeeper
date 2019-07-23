@@ -8,7 +8,9 @@ before finalizing the upgrade process.
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
+
 - [master](#master)
+- [v0.17.0-beta.1+oryOS.12](#v0170-beta1oryos12)
 - [v0.16.0-beta.1+oryOS.12](#v0160-beta1oryos12)
   - [Access Rule Changes](#access-rule-changes)
   - [Mutators (formerly credentials issuers)](#mutators-formerly-credentials-issuers)
@@ -37,6 +39,13 @@ before finalizing the upgrade process.
 
 ## master
 
+## v0.17.0-beta.1+oryOS.12
+
+ORY Oathkeeper now watches configuration files and access rules repositories on
+the local disk for changes. This does currently not work for remote sources
+(http/https). Additionally, access rules can now be written in YAML (expected
+file extensions are `yaml` and `yml`).
+
 ## v0.16.0-beta.1+oryOS.12
 
 ORY Oathkeeper was changed according to discussion
@@ -51,7 +60,7 @@ overview of the most important changes:
    API).
 1. ORY Oathkeeper can now be configured from a file and configuration keys where
    updated. Where appropriate, environment variables from previous versions
-   still work. Please check out [./docs/config.yml](docs/config.yaml) for a
+   still work. Please check out [./docs/config.yml](docs/.oathkeeper.yaml) for a
    fully annotated configuration file as several environment variables changed,
    for example (not exclusive): `HTTPS_TLS_CERT_PATH`, `HTTPS_TLS_KEY_PATH`,
    `HTTPS_TLS_CERT`, `HTTPS_TLS_KEY`.

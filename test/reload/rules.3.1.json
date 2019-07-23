@@ -1,0 +1,25 @@
+[
+  {
+    "id": "test-rule-2",
+    "upstream": {
+      "url": "https://httpbin.org/anything/"
+    },
+    "match": {
+      "url": "http://127.0.0.1:6060/other-rules",
+      "methods": [
+        "GET"
+      ]
+    },
+    "authenticators": [
+      {
+        "handler": "anonymous"
+      }
+    ],
+    "authorizer": {
+      "handler": "allow"
+    },
+    "mutator": {
+      "handler": "noop"
+    }
+  }
+]

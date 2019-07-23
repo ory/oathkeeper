@@ -26,7 +26,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/spf13/viper"
+	"github.com/ory/viper"
 
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/pipeline/mutate"

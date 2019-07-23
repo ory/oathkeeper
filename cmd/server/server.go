@@ -13,12 +13,11 @@ import (
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 	"github.com/urfave/negroni"
 
-	"github.com/ory/x/healthx"
+	"github.com/ory/viper"
 
-	"github.com/ory/herodot"
+	"github.com/ory/x/healthx"
 
 	"github.com/ory/graceful"
 	"github.com/ory/x/corsx"
@@ -62,7 +61,7 @@ func runProxy(d driver.Driver, n *negroni.Negroni, logger *logrus.Logger) func()
 				logger.Printf("Listening on https://%s", addr)
 				return server.ListenAndServeTLS("", "")
 			}
-			logger.Printf("Listening on http://%s", addr)
+			logger.Infof("Listening on http://%s", addr)
 			return server.ListenAndServe()
 		}, server.Shutdown); err != nil {
 			logger.Fatalf("Unable to gracefully shutdown HTTP(s) server because %v", err)
@@ -98,7 +97,7 @@ func runAPI(d driver.Driver, n *negroni.Negroni, logger *logrus.Logger) func() {
 				logger.Printf("Listening on https://%s", addr)
 				return server.ListenAndServeTLS("", "")
 			}
-			logger.Printf("Listening on http://%s", addr)
+			logger.Infof("Listening on http://%s", addr)
 			return server.ListenAndServe()
 		}, server.Shutdown); err != nil {
 			logger.Fatalf("Unable to gracefully shutdown HTTP(s) server because %v", err)
@@ -153,9 +152,7 @@ func RunServe(version, build, date string) func(cmd *cobra.Command, args []strin
 
 		logger := logrusx.New()
 		d := driver.NewDefaultDriver(logger, version, build, date, true)
-		if err := d.Registry().Init(); err != nil {
-			herodot.DefaultErrorLogger(logger, err).Fatal("Unable to initialize.")
-		}
+		d.Registry().Init()
 
 		adminmw := negroni.New()
 		publicmw := negroni.New()

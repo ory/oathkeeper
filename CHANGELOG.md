@@ -4,6 +4,9 @@
 
 - [Change Log](#change-log)
   - [Unreleased](#unreleased)
+  - [v0.17.1-beta.1 (2019-07-23)](#v0171-beta1-2019-07-23)
+  - [v0.17.0-beta.1 (2019-07-18)](#v0170-beta1-2019-07-18)
+  - [v0.16.0-beta.5 (2019-06-28)](#v0160-beta5-2019-06-28)
   - [v0.16.0-beta.4 (2019-05-28)](#v0160-beta4-2019-05-28)
   - [v0.16.0-beta.3 (2019-05-19)](#v0160-beta3-2019-05-19)
   - [v0.15.2 (2019-05-04)](#v0152-2019-05-04)
@@ -67,11 +70,51 @@
 
 ## [Unreleased](https://github.com/ory/oathkeeper/tree/HEAD)
 
-[Full Changelog](https://github.com/ory/oathkeeper/compare/v0.16.0-beta.4...HEAD)
+[Full Changelog](https://github.com/ory/oathkeeper/compare/v0.17.1-beta.1...HEAD)
 
 **Closed issues:**
 
+- Panic on rolling update in Kubernetes [\#224](https://github.com/ory/oathkeeper/issues/224)
+
+## [v0.17.1-beta.1](https://github.com/ory/oathkeeper/tree/v0.17.1-beta.1) (2019-07-23)
+[Full Changelog](https://github.com/ory/oathkeeper/compare/v0.17.0-beta.1...v0.17.1-beta.1)
+
+**Merged pull requests:**
+
+- Fix panic on send on closed channel [\#225](https://github.com/ory/oathkeeper/pull/225) ([hypnoglow](https://github.com/hypnoglow))
+
+## [v0.17.0-beta.1](https://github.com/ory/oathkeeper/tree/v0.17.0-beta.1) (2019-07-18)
+[Full Changelog](https://github.com/ory/oathkeeper/compare/v0.16.0-beta.5...v0.17.0-beta.1)
+
+**Implemented enhancements:**
+
+- Add file watcher for access rules [\#216](https://github.com/ory/oathkeeper/issues/216)
+- Add file watcher for config file [\#215](https://github.com/ory/oathkeeper/issues/215)
+
+**Merged pull requests:**
+
+- ci: Automate schema confiugration sync [\#222](https://github.com/ory/oathkeeper/pull/222) ([aeneasr](https://github.com/aeneasr))
+- Validate Configuration with JSON Schema [\#220](https://github.com/ory/oathkeeper/pull/220) ([aeneasr](https://github.com/aeneasr))
+- cmd: Do not fatal when immutable value is changed [\#218](https://github.com/ory/oathkeeper/pull/218) ([aeneasr](https://github.com/aeneasr))
+- Watch configuration and access rule changes [\#217](https://github.com/ory/oathkeeper/pull/217) ([aeneasr](https://github.com/aeneasr))
+- Add support for rules in YAML format [\#213](https://github.com/ory/oathkeeper/pull/213) ([hypnoglow](https://github.com/hypnoglow))
+
+## [v0.16.0-beta.5](https://github.com/ory/oathkeeper/tree/v0.16.0-beta.5) (2019-06-28)
+[Full Changelog](https://github.com/ory/oathkeeper/compare/v0.16.0-beta.4...v0.16.0-beta.5)
+
+**Closed issues:**
+
+- Unable to build docker image on linux [\#207](https://github.com/ory/oathkeeper/issues/207)
 - Always return 404 when used with Ambassador Auth Service [\#199](https://github.com/ory/oathkeeper/issues/199)
+
+**Merged pull requests:**
+
+- Add description into the name of subtest [\#212](https://github.com/ory/oathkeeper/pull/212) ([minchao](https://github.com/minchao))
+- Add cookie session authenticator [\#211](https://github.com/ory/oathkeeper/pull/211) ([alexdavid](https://github.com/alexdavid))
+- ci: Update golangci install script [\#210](https://github.com/ory/oathkeeper/pull/210) ([aeneasr](https://github.com/aeneasr))
+- docker: Use non-root user in image [\#209](https://github.com/ory/oathkeeper/pull/209) ([aeneasr](https://github.com/aeneasr))
+- Remove binary license [\#208](https://github.com/ory/oathkeeper/pull/208) ([aeneasr](https://github.com/aeneasr))
+- Update config.yaml [\#204](https://github.com/ory/oathkeeper/pull/204) ([haf](https://github.com/haf))
 
 ## [v0.16.0-beta.4](https://github.com/ory/oathkeeper/tree/v0.16.0-beta.4) (2019-05-28)
 [Full Changelog](https://github.com/ory/oathkeeper/compare/v0.16.0-beta.3...v0.16.0-beta.4)

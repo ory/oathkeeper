@@ -23,24 +23,27 @@ package cmd
 import (
 	"fmt"
 	"os"
-	"path/filepath"
-	"runtime"
-	"strings"
 
+	"github.com/fsnotify/fsnotify"
+	"github.com/gobuffalo/packr/v2"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
+
+	"github.com/ory/gojsonschema"
+
+	"github.com/ory/viper"
+	"github.com/ory/x/viperx"
 
 	"github.com/ory/x/logrusx"
 )
-
-var cfgFile string
 
 var (
 	Version = "master"
 	Date    = "undefined"
 	Commit  = "undefined"
 )
+
+var schemas = packr.New("schemas", "../.schemas")
 
 // RootCmd represents the base command when called without any subcommands
 var RootCmd = &cobra.Command{
@@ -60,73 +63,42 @@ func Execute() {
 var logger *logrus.Logger
 
 func init() {
-	cobra.OnInitialize(initConfig)
+	schema, err := schemas.Find("config.schema.json")
+	if err != nil {
+		panic(err)
+	}
 
-	// Here you will define your flags and configuration settings.
-	// Cobra supports Persistent Flags, which, if defined here,
-	// will be global for your application.
+	cobra.OnInitialize(func() {
+		viperx.InitializeConfig("oathkeeper", "", nil)
 
-	RootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.oathkeeper.yaml)")
-	// Cobra also supports local flags, which will only run
-	// when this action is called directly.
-	RootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
-}
+		logger = logrusx.New()
 
-// initConfig reads in config file and ENV variables if set.
-func initConfig() {
-	if cfgFile != "" {
-		// enable ability to specify config file via flag
-		viper.SetConfigFile(cfgFile)
-	} else {
-		path := absPathify("$HOME")
-		if _, err := os.Stat(filepath.Join(path, ".oathkeeper.yml")); err != nil {
-			_, _ = os.Create(filepath.Join(path, ".oathkeeper.yml"))
+		if err := viperx.Validate(gojsonschema.NewBytesLoader(schema)); err != nil {
+			viperx.LoggerWithValidationErrorFields(logger, err).
+				WithError(err).
+				Fatal("The configuration is invalid and could not be loaded.")
 		}
 
-		viper.SetConfigType("yaml")
-		viper.SetConfigName(".oathkeeper") // name of config file (without extension)
-		viper.AddConfigPath("$HOME")       // adding home directory as first search path
-	}
+		viperx.AddWatcher(func(event fsnotify.Event) error {
+			if err := viperx.Validate(gojsonschema.NewBytesLoader(schema)); err != nil {
+				viperx.LoggerWithValidationErrorFields(logger, err).
+					WithError(err).
+					Error("The changed configuration is invalid and could not be loaded. Rolling back to the last working configuration revision. Please address the validation errors before restarting ORY Oathkeeper.")
+				return viperx.ErrRollbackConfigurationChanges
+			}
+			return nil
+		})
 
-	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
-	viper.AutomaticEnv() // read in environment variables that match
+		viperx.WatchConfig(logger, &viperx.WatchOptions{
+			Immutables: []string{"serve", "profiling", "log"},
+			OnImmutableChange: func(key string) {
+				logger.
+					WithField("key", key).
+					WithField("reset_to", fmt.Sprintf("%v", viper.Get(key))).
+					Error("A configuration value marked as immutable has changed. Rolling back to the last working configuration revision. To reload the values please restart ORY Oathkeeper.")
+			},
+		})
+	})
 
-	// If a config file is found, read it in.
-	configErr := viper.ReadInConfig()
-	logger = logrusx.New()
-	if configErr == nil {
-		logger.Debugf("Using config file: %s", viper.ConfigFileUsed())
-	}
-}
-
-func absPathify(inPath string) string {
-	if strings.HasPrefix(inPath, "$HOME") {
-		inPath = userHomeDir() + inPath[5:]
-	}
-
-	if strings.HasPrefix(inPath, "$") {
-		end := strings.Index(inPath, string(os.PathSeparator))
-		inPath = os.Getenv(inPath[1:end]) + inPath[end:]
-	}
-
-	if filepath.IsAbs(inPath) {
-		return filepath.Clean(inPath)
-	}
-
-	p, err := filepath.Abs(inPath)
-	if err == nil {
-		return filepath.Clean(p)
-	}
-	return ""
-}
-
-func userHomeDir() string {
-	if runtime.GOOS == "windows" {
-		home := os.Getenv("HOMEDRIVE") + os.Getenv("HOMEPATH")
-		if home == "" {
-			home = os.Getenv("USERPROFILE")
-		}
-		return home
-	}
-	return os.Getenv("HOME")
+	viperx.RegisterConfigFlag(RootCmd, "oathkeeper")
 }
