@@ -3,6 +3,8 @@
 **Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
 
 - [Change Log](#change-log)
+  - [Unreleased](#unreleased)
+  - [v0.17.1-beta.1 (2019-07-23)](#v0171-beta1-2019-07-23)
   - [v0.17.0-beta.1 (2019-07-18)](#v0170-beta1-2019-07-18)
   - [v0.16.0-beta.5 (2019-06-28)](#v0160-beta5-2019-06-28)
   - [v0.16.0-beta.4 (2019-05-28)](#v0160-beta4-2019-05-28)
@@ -65,6 +67,21 @@
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 # Change Log
+
+## [Unreleased](https://github.com/ory/oathkeeper/tree/HEAD)
+
+[Full Changelog](https://github.com/ory/oathkeeper/compare/v0.17.1-beta.1...HEAD)
+
+**Closed issues:**
+
+- Panic on rolling update in Kubernetes [\#224](https://github.com/ory/oathkeeper/issues/224)
+
+## [v0.17.1-beta.1](https://github.com/ory/oathkeeper/tree/v0.17.1-beta.1) (2019-07-23)
+[Full Changelog](https://github.com/ory/oathkeeper/compare/v0.17.0-beta.1...v0.17.1-beta.1)
+
+**Merged pull requests:**
+
+- Fix panic on send on closed channel [\#225](https://github.com/ory/oathkeeper/pull/225) ([hypnoglow](https://github.com/hypnoglow))
 
 ## [v0.17.0-beta.1](https://github.com/ory/oathkeeper/tree/v0.17.0-beta.1) (2019-07-18)
 [Full Changelog](https://github.com/ory/oathkeeper/compare/v0.16.0-beta.5...v0.17.0-beta.1)
