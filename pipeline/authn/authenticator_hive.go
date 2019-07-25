@@ -12,7 +12,7 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/ory/herodot"
-	"github.com/ory/hive-cloud/hive/session"
+	"github.com/ory/hive/session"
 	"github.com/ory/x/httpx"
 
 	"github.com/ory/oathkeeper/driver/configuration"

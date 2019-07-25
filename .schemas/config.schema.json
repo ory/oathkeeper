@@ -189,6 +189,26 @@
             }
           }
         },
+        "hive": {
+          "type": "object",
+          "title": "ORY Hive (hive)",
+          "description": "The [`hive` authenticator](https://www.ory.sh/docs/oathkeeper/pipeline/authn#hive).",
+          "additionalProperties": false,
+          "properties": {
+            "enabled": {
+              "title": "Enabled",
+              "type": "boolean"
+            },
+            "session_check_url": {
+              "type": "string",
+              "format": "uri"
+            },
+            "login_url": {
+              "type": "string",
+              "format": "uri"
+            }
+          }
+        },
         "unauthorized": {
           "type": "object",
           "title": "Unauthorized",
