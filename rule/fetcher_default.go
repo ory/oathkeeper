@@ -197,7 +197,7 @@ func (f *FetcherDefault) watch(ctx context.Context, watcher *fsnotify.Watcher, e
 
 			if e.Op&fsnotify.Remove == fsnotify.Remove {
 				f.r.Logger().
-					Debugf("Detected that a access rule repository file has been removed, reloading config.")
+					Debugf("Detected that an access rule repository file has been removed, reloading config.")
 				// If a file was removed it's likely that the config changed as well - reload!
 				f.enqueueEvent(events, event{et: eventRepositoryConfigChange, source: "fsnotify_remove"})
 				continue

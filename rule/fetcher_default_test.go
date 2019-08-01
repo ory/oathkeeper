@@ -163,7 +163,7 @@ func TestFetcherWatchRepositoryFromKubernetesConfigMap(t *testing.T) {
 	viper.Reset()
 
 	// Set up temp dir and file to watch
-	watchDir, err := ioutil.TempDir("", "")
+	watchDir, err := ioutil.TempDir("", uuid.New().String())
 	require.NoError(t, err)
 	watchFile := path.Join(watchDir, "access-rules.json")
 
@@ -174,7 +174,7 @@ func TestFetcherWatchRepositoryFromKubernetesConfigMap(t *testing.T) {
 
 	// This emulates a config map update
 	var configMapUpdate = func(t *testing.T, data string, cleanup func(t *testing.T)) func(t *testing.T) {
-		dir, err := ioutil.TempDir("", "")
+		dir, err := ioutil.TempDir("", uuid.New().String())
 		require.NoError(t, err)
 
 		location := path.Join(dir, uuid.New().String()+".json")
@@ -185,9 +185,12 @@ func TestFetcherWatchRepositoryFromKubernetesConfigMap(t *testing.T) {
 		}
 		require.NoError(t, os.Symlink(location, watchFile))
 
+		t.Logf("Created symlink from %s to %s", location, watchFile)
+
 		return func(t *testing.T) {
+			t.Logf("Removing symlink source: %s", location)
 			require.NoError(t, os.Remove(location))
-			require.NoError(t, os.RemoveAll(dir))
+			t.Logf("Removing symlink: %s", location)
 			require.NoError(t, os.Remove(watchFile))
 		}
 	}
@@ -198,19 +201,11 @@ func TestFetcherWatchRepositoryFromKubernetesConfigMap(t *testing.T) {
 
 	var cleanup func(t *testing.T)
 
-	for k, tc := range []struct {
-		content   string
-		expectIDs []string
-	}{
-		{content: "[]"},
-		{content: `[{"id":"1"}]`, expectIDs: []string{"1"}},
-		{content: `[{"id":"1"},{"id":"2"}]`, expectIDs: []string{"1", "2"}},
-		{content: `[{"id":"2"},{"id":"3"}]`, expectIDs: []string{"2", "3"}},
-	} {
-		t.Run(fmt.Sprintf("case=%d", k), func(t *testing.T) {
-			cleanup = configMapUpdate(t, tc.content, cleanup)
+	for i := 0; i < 50; i++ {
+		t.Run(fmt.Sprintf("case=%d", i), func(t *testing.T) {
+			cleanup = configMapUpdate(t, fmt.Sprintf(`[{"id":"%d"}]`, i), cleanup)
 
-			time.Sleep(time.Millisecond * 100)
+			time.Sleep(time.Millisecond * 50) // give it a bit of time to reload everything
 
 			rules, err := r.RuleRepository().List(context.Background(), 500, 0)
 			require.NoError(t, err)
@@ -220,10 +215,8 @@ func TestFetcherWatchRepositoryFromKubernetesConfigMap(t *testing.T) {
 				ids[k] = r.ID
 			}
 
-			require.Len(t, ids, len(tc.expectIDs))
-			for _, id := range tc.expectIDs {
-				assert.True(t, stringslice.Has(ids, id), "\nexpected: %v\nactual: %v", tc.expectIDs, ids)
-			}
+			require.Len(t, rules, 1)
+			require.Equal(t, fmt.Sprintf("%d", i), rules[0].ID)
 		})
 	}
 }
