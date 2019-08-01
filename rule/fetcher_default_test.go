@@ -20,6 +20,7 @@ import (
 	"github.com/ory/x/stringslice"
 	"github.com/ory/x/viperx"
 
+	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/internal"
 )
 
@@ -141,6 +142,75 @@ access_rules:
 		t.Run(fmt.Sprintf("case=%d", k), func(t *testing.T) {
 			require.NoError(t, ioutil.WriteFile(repository, []byte(tc.content), 0666))
 			time.Sleep(time.Millisecond * 500)
+
+			rules, err := r.RuleRepository().List(context.Background(), 500, 0)
+			require.NoError(t, err)
+
+			ids := make([]string, len(rules))
+			for k, r := range rules {
+				ids[k] = r.ID
+			}
+
+			require.Len(t, ids, len(tc.expectIDs))
+			for _, id := range tc.expectIDs {
+				assert.True(t, stringslice.Has(ids, id), "\nexpected: %v\nactual: %v", tc.expectIDs, ids)
+			}
+		})
+	}
+}
+
+func TestFetcherWatchRepositoryFromKubernetesConfigMap(t *testing.T) {
+	viper.Reset()
+
+	// Set up temp dir and file to watch
+	watchDir, err := ioutil.TempDir("", "")
+	require.NoError(t, err)
+	watchFile := path.Join(watchDir, "access-rules.json")
+
+	// Configure watcher
+	viper.Set(configuration.ViperKeyAccessRuleRepositories, []string{"file://"+watchFile})
+	conf := internal.NewConfigurationWithDefaults()
+	r := internal.NewRegistry(conf)
+
+	// This emulates a config map update
+	var configMapUpdate = func(t *testing.T, data string, cleanup func(t *testing.T)) func(t *testing.T) {
+		dir, err := ioutil.TempDir("", "")
+		require.NoError(t, err)
+
+		location := path.Join(dir, uuid.New().String()+".json")
+		require.NoError(t, ioutil.WriteFile(location, []byte(data), 0640))
+
+		if cleanup != nil {
+			cleanup(t)
+		}
+		require.NoError(t, os.Symlink(location, watchFile))
+
+		return func(t *testing.T) {
+			require.NoError(t, os.Remove(location))
+			require.NoError(t, os.RemoveAll(dir))
+			require.NoError(t, os.Remove(watchFile))
+		}
+	}
+
+	go func() {
+		require.NoError(t, r.RuleFetcher().Watch(context.TODO()))
+	}()
+
+	var cleanup func(t *testing.T)
+
+	for k, tc := range []struct {
+		content   string
+		expectIDs []string
+	}{
+		{content: "[]"},
+		{content: `[{"id":"1"}]`, expectIDs: []string{"1"}},
+		{content: `[{"id":"1"},{"id":"2"}]`, expectIDs: []string{"1", "2"}},
+		{content: `[{"id":"2"},{"id":"3"}]`, expectIDs: []string{"2", "3"}},
+	} {
+		t.Run(fmt.Sprintf("case=%d", k), func(t *testing.T) {
+			cleanup = configMapUpdate(t, tc.content, cleanup)
+
+			time.Sleep(time.Millisecond * 100)
 
 			rules, err := r.RuleRepository().List(context.Background(), 500, 0)
 			require.NoError(t, err)
