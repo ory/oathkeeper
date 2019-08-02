@@ -213,28 +213,6 @@ func (f *FetcherDefault) watch(ctx context.Context, watcher *fsnotify.Watcher, e
 				WithField("op", e.Op.String()).
 				Debugf("Detected file change in directory containing access rules. Triggering a reload.")
 
-			// if e.Op&fsnotify.Remove == fsnotify.Remove {
-			// 	f.r.Logger().
-			// 		WithField("path", e.Name).
-			// 		WithField("op", e.Op.String()).
-			// 		Debugf("Detected that an access rule repository file has been removed, re-initializing inotify watcher.")
-			//
-			// 	This is a workaround for kubernetes configmap changes
-			// _ = watcher.Remove(e.Name)
-			// _ = watcher.Add(e.Name)
-
-			// If a file was removed it's likely that the config changed as well - reload!
-			// f.enqueueEvent(events, event{et: eventRepositoryConfigChange, source: "fsnotify_remove"})
-			// continue
-			// }
-
-			// source, err := url.Parse("file://" + e.Name)
-			// if err != nil {
-			// 	return errors.Wrapf(err, "unable to parse file: %s", e.Name)
-			// }
-
-			// f.enqueueEvent(events, event{et: eventFileChanged, path: *source, source: "fsnotify_update"})
-
 			f.enqueueEvent(events, event{et: eventRepositoryConfigChange, source: "fsnotify"})
 		case e, ok := <-events:
 			if !ok {
