@@ -207,6 +207,21 @@ func (f *FetcherDefault) watch(ctx context.Context, watcher *fsnotify.Watcher, e
 				return nil
 			}
 
+			_, changedFile := filepath.Split(e.Name)
+			var changed bool
+			for _, u := range f.c.AccessRuleRepositories() {
+				if u.Scheme == "file" {
+					if _, repo := filepath.Split(u.String()); repo == changedFile {
+						changed = true
+						break
+					}
+				}
+			}
+
+			if !changed {
+				continue
+			}
+
 			f.r.Logger().
 				WithField("event", "fsnotify").
 				WithField("file", e.Name).
