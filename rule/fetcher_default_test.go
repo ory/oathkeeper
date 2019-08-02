@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"os/exec"
 	"path"
 	"path/filepath"
 	"testing"
@@ -168,52 +169,45 @@ func TestFetcherWatchRepositoryFromKubernetesConfigMap(t *testing.T) {
 	watchFile := path.Join(watchDir, "access-rules.json")
 
 	// Configure watcher
-	viper.Set(configuration.ViperKeyAccessRuleRepositories, []string{"file://"+watchFile})
+	viper.Set(configuration.ViperKeyAccessRuleRepositories, []string{"file://" + watchFile})
 	conf := internal.NewConfigurationWithDefaults()
 	r := internal.NewRegistry(conf)
 
 	// This emulates a config map update
-	var configMapUpdate = func(t *testing.T, data string, cleanup func(t *testing.T)) func(t *testing.T) {
-		dir, err := ioutil.TempDir("", uuid.New().String())
-		require.NoError(t, err)
+	// drwxr-xr-x    2 root     root          4096 Aug  1 07:42 ..2019_08_01_07_42_33.068812649
+	// lrwxrwxrwx    1 root     root            31 Aug  1 07:42 ..data -> ..2019_08_01_07_42_33.068812649
+	// lrwxrwxrwx    1 root     root            24 Aug  1 07:42 access-rules.json -> ..data/access-rules.json
+	var configMapUpdate = func(t *testing.T, data string) {
 
-		location := path.Join(dir, uuid.New().String()+".json")
-		require.NoError(t, ioutil.WriteFile(location, []byte(data), 0640))
+		// this is the equivalent of /etc/rules/..2019_08_01_07_42_33.068812649
+		dir := path.Join(watchDir, ".."+uuid.New().String())
+		require.NoError(t, os.Mkdir(dir, 0777))
 
-		if cleanup != nil {
-			cleanup(t)
-		}
-		require.NoError(t, os.Symlink(location, watchFile))
+		fp := path.Join(dir, "access-rules.json")
+		require.NoError(t, ioutil.WriteFile(fp, []byte(data), 0640))
 
-		t.Logf("Created symlink from %s to %s", location, watchFile)
+		// this is the symlink: ..data -> ..2019_08_01_07_42_33.068812649
+		require.NoError(t, exec.Command("ln", "-sfn", dir, path.Join(watchDir, "..data")).Run())
 
-		return func(t *testing.T) {
-			t.Logf("Removing symlink source: %s", location)
-			require.NoError(t, os.Remove(location))
-			t.Logf("Removing symlink: %s", location)
-			require.NoError(t, os.Remove(watchFile))
-		}
+		// symlink equivalent: access-rules.json -> ..data/access-rules.json
+		require.NoError(t, exec.Command("ln", "-sfn", path.Join(watchDir, "..data", "access-rules.json"), watchFile).Run())
+
+		t.Logf("Created access rule file at: file://%s", fp)
+		t.Logf("Created symbolink link at: file://%s", fp)
 	}
 
 	go func() {
 		require.NoError(t, r.RuleFetcher().Watch(context.TODO()))
 	}()
 
-	var cleanup func(t *testing.T)
-
-	for i := 0; i < 50; i++ {
+	for i := 0; i < 10; i++ {
 		t.Run(fmt.Sprintf("case=%d", i), func(t *testing.T) {
-			cleanup = configMapUpdate(t, fmt.Sprintf(`[{"id":"%d"}]`, i), cleanup)
+			configMapUpdate(t, fmt.Sprintf(`[{"id":"%d"}]`, i))
 
-			time.Sleep(time.Millisecond * 50) // give it a bit of time to reload everything
+			time.Sleep(time.Millisecond * 10) // give it a bit of time to reload everything
 
 			rules, err := r.RuleRepository().List(context.Background(), 500, 0)
 			require.NoError(t, err)
-
-			ids := make([]string, len(rules))
-			for k, r := range rules {
-				ids[k] = r.ID
-			}
 
 			require.Len(t, rules, 1)
 			require.Equal(t, fmt.Sprintf("%d", i), rules[0].ID)
