@@ -17,6 +17,7 @@ import (
 	"sync"
 
 	"github.com/fsnotify/fsnotify"
+
 	"github.com/ory/x/stringslice"
 
 	"github.com/ory/viper"
@@ -85,7 +86,6 @@ func (f *FetcherDefault) configUpdate(ctx context.Context, watcher *fsnotify.Wat
 		}
 	}
 	directoriesToWatch = stringslice.Unique(directoriesToWatch)
-
 
 	var updateWatcher = func(sources []string, cb func(source string) error) error {
 		for _, source := range sources {
