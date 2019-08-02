@@ -11,7 +11,7 @@ import (
 func ResetViper() {
 	viper.Set(configuration.ViperKeyMutatorIDTokenJWKSURL, nil)
 
-	viper.Set("LOG_LEVEL", "debug")
+	viper.Set("log.level", "debug")
 }
 
 func NewConfigurationWithDefaults() *configuration.ViperProvider {

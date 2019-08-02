@@ -18,7 +18,7 @@ import (
 
 	"github.com/fsnotify/fsnotify"
 
-	"github.com/ory/x/urlx"
+	"github.com/ory/x/stringslice"
 
 	"github.com/ory/viper"
 	"github.com/ory/x/httpx"
@@ -58,7 +58,7 @@ type FetcherDefault struct {
 
 	cache map[string][]Rule
 
-	watching []url.URL
+	directoriesBeingWatched []string
 
 	lock sync.Mutex
 	wg   sync.WaitGroup
@@ -77,19 +77,27 @@ func NewFetcherDefault(
 }
 
 func (f *FetcherDefault) configUpdate(ctx context.Context, watcher *fsnotify.Watcher, replace []url.URL, events chan event) error {
-	var updateWatcher = func(sources []url.URL, cb func(source string) error) error {
+	var directoriesToWatch []string
+	for _, fileToWatch := range replace {
+		if fileToWatch.Scheme == "file" {
+			p := strings.Replace(fileToWatch.String(), "file://", "", 1)
+			directoryToWatch, _ := filepath.Split(p)
+			directoriesToWatch = append(directoriesToWatch, directoryToWatch)
+		}
+	}
+	directoriesToWatch = stringslice.Unique(directoriesToWatch)
+
+	var updateWatcher = func(sources []string, cb func(source string) error) error {
 		for _, source := range sources {
-			if source.Scheme == "file" {
-				if err := cb(strings.Replace(source.String(), "file://", "", 1)); err != nil {
-					if os.IsNotExist(err) {
-						f.r.Logger().WithError(err).WithField("file", source.String()).Errorf("Not watching config file for changes because it does not exist. Check the configuration or restart the service if the issue persists.")
-					} else if os.IsPermission(err) {
-						f.r.Logger().WithError(err).WithField("file", source.String()).Errorf("Not watching config file for changes because permission is denied. Check the configuration or restart the service if the issue persists.")
-					} else if strings.Contains(err.Error(), "non-existent kevent") {
-						// ignore this error because it is fired when removing a source that does not have a watcher which can happen and is negligible
-					} else {
-						return errors.Wrapf(err, "unable to modify file watcher for file: %s", source.String())
-					}
+			if err := cb(source); err != nil {
+				if os.IsNotExist(err) {
+					f.r.Logger().WithError(err).WithField("file", source).Error("Not watching config file for changes because it does not exist. Check the configuration or restart the service if the issue persists.")
+				} else if os.IsPermission(err) {
+					f.r.Logger().WithError(err).WithField("file", source).Error("Not watching config file for changes because permission is denied. Check the configuration or restart the service if the issue persists.")
+				} else if strings.Contains(err.Error(), "non-existent kevent") {
+					// ignore this error because it is fired when removing a source that does not have a watcher which can happen and is negligible
+				} else {
+					return errors.Wrapf(err, "unable to modify file watcher for file: %s", source)
 				}
 			}
 		}
@@ -97,31 +105,35 @@ func (f *FetcherDefault) configUpdate(ctx context.Context, watcher *fsnotify.Wat
 	}
 
 	f.lock.Lock()
-	oldSources := make([]url.URL, 0, len(f.cache))
-	for k := range f.cache {
-		oldSources = append(oldSources,
-			*urlx.ParseOrPanic(k), // This is always valid  because only we set the cache.
-		)
+
+	// First we remove all the directories being watched
+	if err := updateWatcher(f.directoriesBeingWatched, watcher.Remove); err != nil {
+		f.r.Logger().WithError(err).Error("Unable to modify (remove) file watcher. If the issue persists, restart the service.")
 	}
+
+	f.directoriesBeingWatched = directoriesToWatch
+
+	// Next we (re-) add all the directories to watch
+	if err := updateWatcher(directoriesToWatch, watcher.Add); err != nil {
+		f.r.Logger().WithError(err).Error("Unable to modify (add) file watcher. If the issue persists, restart the service.")
+	}
+
+	// And we need to reset the rule cache
 	f.cache = make(map[string][]Rule)
 	f.lock.Unlock()
 
-	if err := updateWatcher(oldSources, watcher.Remove); err != nil {
-		return err
-	}
-
-	if err := updateWatcher(replace, watcher.Add); err != nil {
-		return err
-	}
-
+	// If there are no more sources to watch we reset the rule repository as a whole
 	if len(replace) == 0 {
 		if err := f.r.RuleRepository().Set(ctx, []Rule{}); err != nil {
 			return err
 		}
 	}
+
+	// Let's fetch all of the repos
 	for _, source := range replace {
 		f.enqueueEvent(events, event{et: eventFileChanged, path: source, source: "config_update"})
 	}
+
 	return nil
 }
 
@@ -195,26 +207,28 @@ func (f *FetcherDefault) watch(ctx context.Context, watcher *fsnotify.Watcher, e
 				return nil
 			}
 
-			if e.Op&fsnotify.Remove == fsnotify.Remove {
-				f.r.Logger().
-					Debugf("Detected that a access rule repository file has been removed, reloading config.")
-				// If a file was removed it's likely that the config changed as well - reload!
-				f.enqueueEvent(events, event{et: eventRepositoryConfigChange, source: "fsnotify_remove"})
-				continue
+			_, changedFile := filepath.Split(e.Name)
+			var changed bool
+			for _, u := range f.c.AccessRuleRepositories() {
+				if u.Scheme == "file" {
+					if _, repo := filepath.Split(u.String()); repo == changedFile {
+						changed = true
+						break
+					}
+				}
 			}
 
-			source, err := url.Parse("file://" + e.Name)
-			if err != nil {
-				return errors.Wrapf(err, "unable to parse file: %s", e.Name)
+			if !changed {
+				continue
 			}
 
 			f.r.Logger().
 				WithField("event", "fsnotify").
-				WithField("file", source.String()).
+				WithField("file", e.Name).
 				WithField("op", e.Op.String()).
-				Debugf("Detected access rule repository file change.")
+				Debugf("Detected file change in directory containing access rules. Triggering a reload.")
 
-			f.enqueueEvent(events, event{et: eventFileChanged, path: *source, source: "fsnotify_update"})
+			f.enqueueEvent(events, event{et: eventRepositoryConfigChange, source: "fsnotify"})
 		case e, ok := <-events:
 			if !ok {
 				// channel was closed
@@ -239,7 +253,9 @@ func (f *FetcherDefault) watch(ctx context.Context, watcher *fsnotify.Watcher, e
 
 				rules, err := f.sourceUpdate(e)
 				if err != nil {
-					f.r.Logger().WithError(err).WithField("file", e.path.String()).Error("Unable to update access rules from given location, changes will be ignored. Check the configuration or restart the service if the issue persists.")
+					f.r.Logger().WithError(err).
+						WithField("file", e.path.String()).
+						Error("Unable to update access rules from given location, changes will be ignored. Check the configuration or restart the service if the issue persists.")
 					continue
 				}
 
@@ -261,6 +277,10 @@ func (f *FetcherDefault) enqueueEvent(events chan event, evt event) {
 }
 
 func (f *FetcherDefault) fetch(source url.URL) ([]Rule, error) {
+	f.r.Logger().
+		WithField("location", source.String()).
+		Debugf("Fetching access rules from given location because something changed.")
+
 	switch source.Scheme {
 	case "http":
 		fallthrough
