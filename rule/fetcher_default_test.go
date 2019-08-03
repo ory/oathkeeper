@@ -177,7 +177,18 @@ func TestFetcherWatchRepositoryFromKubernetesConfigMap(t *testing.T) {
 	// drwxr-xr-x    2 root     root          4096 Aug  1 07:42 ..2019_08_01_07_42_33.068812649
 	// lrwxrwxrwx    1 root     root            31 Aug  1 07:42 ..data -> ..2019_08_01_07_42_33.068812649
 	// lrwxrwxrwx    1 root     root            24 Aug  1 07:42 access-rules.json -> ..data/access-rules.json
-	var configMapUpdate = func(t *testing.T, data string) {
+
+	// time="2019-08-02T14:32:28Z" level=debug msg="Access rule watcher received an update." event=config_change source=entrypoint
+	// time="2019-08-02T14:32:28Z" level=debug msg="Access rule watcher received an update." event=repository_change file="file:///etc/rules/access-rules.json" source=config_update
+	// time="2019-08-02T14:32:28Z" level=debug msg="Fetching access rules from given location because something changed." location="file:///etc/rules/access-rules.json"
+
+	// time="2019-08-02T14:33:33Z" level=debug msg="Detected file change in a watching directory." event=fsnotify file=/etc/rules/..2019_08_02_14_33_33.108628482 op=CREATE
+	// time="2019-08-02T14:33:33Z" level=debug msg="Detected file change in a watching directory." event=fsnotify file=/etc/rules/..2019_08_02_14_33_33.108628482 op=CHMOD
+	// time="2019-08-02T14:33:33Z" level=debug msg="Detected file change in a watching directory." event=fsnotify file=/etc/rules/..data_tmp op=RENAME
+	// time="2019-08-02T14:33:33Z" level=debug msg="Detected file change in a watching directory." event=fsnotify file=/etc/rules/..data op=CREATE
+	// time="2019-08-02T14:33:33Z" level=debug msg="Detected file change in a watching directory." event=fsnotify file=/etc/rules/..2019_08_02_14_32_23.285779182 op=REMOVE
+
+	var configMapUpdate = func(t *testing.T, data string, cleanup func()) func() {
 
 		// this is the equivalent of /etc/rules/..2019_08_01_07_42_33.068812649
 		dir := path.Join(watchDir, ".."+uuid.New().String())
@@ -187,14 +198,26 @@ func TestFetcherWatchRepositoryFromKubernetesConfigMap(t *testing.T) {
 		require.NoError(t, ioutil.WriteFile(fp, []byte(data), 0640))
 
 		// this is the symlink: ..data -> ..2019_08_01_07_42_33.068812649
+		_ = os.Rename(path.Join(watchDir, "..data"), path.Join(watchDir, "..data_tmp"))
 		require.NoError(t, exec.Command("ln", "-sfn", dir, path.Join(watchDir, "..data")).Run())
+		if cleanup != nil {
+			cleanup()
+		}
 
 		// symlink equivalent: access-rules.json -> ..data/access-rules.json
 		require.NoError(t, exec.Command("ln", "-sfn", path.Join(watchDir, "..data", "access-rules.json"), watchFile).Run())
 
 		t.Logf("Created access rule file at: file://%s", fp)
-		t.Logf("Created symbolink link at: file://%s", fp)
+		t.Logf("Created symbolink link at: file://%s", path.Join(watchDir, "..data"))
+
+		return func() {
+			if err := os.RemoveAll(dir); err != nil {
+				panic(err)
+			}
+		}
 	}
+
+	var cleanup func()
 
 	go func() {
 		require.NoError(t, r.RuleFetcher().Watch(context.TODO()))
@@ -202,9 +225,9 @@ func TestFetcherWatchRepositoryFromKubernetesConfigMap(t *testing.T) {
 
 	for i := 0; i < 10; i++ {
 		t.Run(fmt.Sprintf("case=%d", i), func(t *testing.T) {
-			configMapUpdate(t, fmt.Sprintf(`[{"id":"%d"}]`, i))
+			cleanup = configMapUpdate(t, fmt.Sprintf(`[{"id":"%d"}]`, i), cleanup)
 
-			time.Sleep(time.Millisecond * 10) // give it a bit of time to reload everything
+			time.Sleep(time.Millisecond * 100) // give it a bit of time to reload everything
 
 			rules, err := r.RuleRepository().List(context.Background(), 500, 0)
 			require.NoError(t, err)

@@ -59,6 +59,7 @@ type FetcherDefault struct {
 	cache map[string][]Rule
 
 	directoriesBeingWatched []string
+	filesBeingWatched       []string
 
 	lock sync.Mutex
 	wg   sync.WaitGroup
@@ -78,9 +79,11 @@ func NewFetcherDefault(
 
 func (f *FetcherDefault) configUpdate(ctx context.Context, watcher *fsnotify.Watcher, replace []url.URL, events chan event) error {
 	var directoriesToWatch []string
+	var filesBeingWatched []string
 	for _, fileToWatch := range replace {
 		if fileToWatch.Scheme == "file" {
-			p := strings.Replace(fileToWatch.String(), "file://", "", 1)
+			p := filepath.Clean(strings.Replace(fileToWatch.String(), "file://", "", 1))
+			filesBeingWatched = append(filesBeingWatched, p)
 			directoryToWatch, _ := filepath.Split(p)
 			directoriesToWatch = append(directoriesToWatch, directoryToWatch)
 		}
@@ -112,6 +115,7 @@ func (f *FetcherDefault) configUpdate(ctx context.Context, watcher *fsnotify.Wat
 	}
 
 	f.directoriesBeingWatched = directoriesToWatch
+	f.filesBeingWatched = filesBeingWatched
 
 	// Next we (re-) add all the directories to watch
 	if err := updateWatcher(directoriesToWatch, watcher.Add); err != nil {
@@ -207,15 +211,20 @@ func (f *FetcherDefault) watch(ctx context.Context, watcher *fsnotify.Watcher, e
 				return nil
 			}
 
-			_, changedFile := filepath.Split(e.Name)
+			clean := filepath.Clean(e.Name)
+
+			f.lock.Lock()
 			var changed bool
-			for _, u := range f.c.AccessRuleRepositories() {
-				if u.Scheme == "file" {
-					if _, repo := filepath.Split(u.String()); repo == changedFile {
-						changed = true
-						break
-					}
+			for _, watching := range f.filesBeingWatched {
+				if filepath.Clean(watching) == clean {
+					changed = true
 				}
+			}
+			f.lock.Unlock()
+
+			if strings.Contains(clean, "..") && (e.Op&fsnotify.Remove == fsnotify.Remove || e.Op&fsnotify.Rename == fsnotify.Rename) {
+				// This covers the k8s AtomicWriter
+				changed = true
 			}
 
 			if !changed {
