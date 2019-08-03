@@ -229,7 +229,7 @@ func TestFetcherWatchRepositoryFromKubernetesConfigMap(t *testing.T) {
 		t.Run(fmt.Sprintf("case=%d", i), func(t *testing.T) {
 			cleanup = configMapUpdate(t, fmt.Sprintf(`[{"id":"%d"}]`, i), cleanup)
 
-			time.Sleep(time.Millisecond * 10) // give it a bit of time to reload everything
+			time.Sleep(time.Millisecond * 100) // give it a bit of time to reload everything
 
 			rules, err := r.RuleRepository().List(context.Background(), 500, 0)
 			require.NoError(t, err)
