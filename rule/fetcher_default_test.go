@@ -178,9 +178,6 @@ func TestFetcherWatchRepositoryFromKubernetesConfigMap(t *testing.T) {
 	// lrwxrwxrwx    1 root     root            31 Aug  1 07:42 ..data -> ..2019_08_01_07_42_33.068812649
 	// lrwxrwxrwx    1 root     root            24 Aug  1 07:42 access-rules.json -> ..data/access-rules.json
 
-	// symlink equivalent: access-rules.json -> ..data/access-rules.json
-	require.NoError(t, exec.Command("ln", "-sfn", path.Join(watchDir, "..data", "access-rules.json"), watchFile).Run())
-
 	// time="2019-08-02T14:32:28Z" level=debug msg="Access rule watcher received an update." event=config_change source=entrypoint
 	// time="2019-08-02T14:32:28Z" level=debug msg="Access rule watcher received an update." event=repository_change file="file:///etc/rules/access-rules.json" source=config_update
 	// time="2019-08-02T14:32:28Z" level=debug msg="Fetching access rules from given location because something changed." location="file:///etc/rules/access-rules.json"
@@ -206,11 +203,12 @@ func TestFetcherWatchRepositoryFromKubernetesConfigMap(t *testing.T) {
 		if cleanup != nil {
 			cleanup()
 		}
-		sym, _ := filepath.EvalSymlinks(watchFile)
+
+		// symlink equivalent: access-rules.json -> ..data/access-rules.json
+		require.NoError(t, exec.Command("ln", "-sfn", path.Join(watchDir, "..data", "access-rules.json"), watchFile).Run())
 
 		t.Logf("Created access rule file at: file://%s", fp)
 		t.Logf("Created symbolink link at: file://%s", path.Join(watchDir, "..data"))
-		t.Logf("Symlink eval: %s %s", watchFile, sym)
 
 		return func() {
 			if err := os.RemoveAll(dir); err != nil {
