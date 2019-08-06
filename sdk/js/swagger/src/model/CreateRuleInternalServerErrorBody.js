@@ -42,7 +42,7 @@
 
   /**
    * Constructs a new <code>CreateRuleInternalServerErrorBody</code>.
-   * CreateRuleInternalServerErrorBody CreateRuleInternalServerErrorBody CreateRuleInternalServerErrorBody CreateRuleInternalServerErrorBody create rule internal server error body
+   * CreateRuleInternalServerErrorBody CreateRuleInternalServerErrorBody CreateRuleInternalServerErrorBody CreateRuleInternalServerErrorBody CreateRuleInternalServerErrorBody CreateRuleInternalServerErrorBody CreateRuleInternalServerErrorBody create rule internal server error body
    * @alias module:model/CreateRuleInternalServerErrorBody
    * @class
    */

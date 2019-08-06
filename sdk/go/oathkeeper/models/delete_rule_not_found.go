@@ -12,7 +12,7 @@ import (
 	"github.com/go-openapi/swag"
 )
 
-// DeleteRuleNotFound DeleteRuleNotFound DeleteRuleNotFound DeleteRuleNotFound DeleteRuleNotFound handles this case with default header values.
+// DeleteRuleNotFound DeleteRuleNotFound DeleteRuleNotFound DeleteRuleNotFound DeleteRuleNotFound DeleteRuleNotFound DeleteRuleNotFound DeleteRuleNotFound handles this case with default header values.
 //
 // The standard error format
 // swagger:model DeleteRuleNotFound

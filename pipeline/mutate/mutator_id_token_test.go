@@ -70,9 +70,9 @@ func TestMutatorIDToken(t *testing.T) {
 				r := &http.Request{Header: http.Header{}}
 				s := &authn.AuthenticationSession{Subject: "foo"}
 
-				header, err := a.Mutate(r, s, json.RawMessage([]byte(`{ "aud": ["foo", "bar"] }`)), nil)
+				err := a.Mutate(r, s, json.RawMessage([]byte(`{ "aud": ["foo", "bar"] }`)), nil)
 				require.NoError(t, err)
-				token := strings.Replace(header.Get("Authorization"), "Bearer ", "", 1)
+				token := strings.Replace(s.Header.Get("Authorization"), "Bearer ", "", 1)
 
 				result, err := reg.CredentialsVerifier().Verify(context.Background(), token, &credentials.ValidationContext{
 					Algorithms: []string{"RS256", "HS256", "ES256"},

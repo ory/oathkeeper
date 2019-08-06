@@ -57,7 +57,7 @@ func (a *MutatorIDToken) GetID() string {
 	return "id_token"
 }
 
-func (a *MutatorIDToken) Mutate(r *http.Request, session *authn.AuthenticationSession, config json.RawMessage, _ pipeline.Rule) (http.Header, error) {
+func (a *MutatorIDToken) Mutate(r *http.Request, session *authn.AuthenticationSession, config json.RawMessage, _ pipeline.Rule) error {
 	if len(config) == 0 {
 		config = []byte("{}")
 	}
@@ -66,7 +66,7 @@ func (a *MutatorIDToken) Mutate(r *http.Request, session *authn.AuthenticationSe
 	d := json.NewDecoder(bytes.NewBuffer(config))
 	d.DisallowUnknownFields()
 	if err := d.Decode(&cc); err != nil {
-		return nil, errors.WithStack(err)
+		return errors.WithStack(err)
 	}
 
 	now := time.Now().UTC()
@@ -94,12 +94,11 @@ func (a *MutatorIDToken) Mutate(r *http.Request, session *authn.AuthenticationSe
 		claims,
 	)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	headers := http.Header{}
-	headers.Set("Authorization", "Bearer "+signed)
-	return headers, nil
+	session.SetHeader("Authorization", "Bearer "+signed)
+	return nil
 }
 
 func (a *MutatorIDToken) Validate() error {

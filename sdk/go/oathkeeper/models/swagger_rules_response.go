@@ -14,8 +14,8 @@ import (
 	"github.com/go-openapi/swag"
 )
 
-// SwaggerRulesResponse A list of rules
-// swagger:model swaggerRulesResponse
+// SwaggerRulesResponse SwaggerRulesResponse A list of rules
+// swagger:model SwaggerRulesResponse
 type SwaggerRulesResponse struct {
 
 	// in: body

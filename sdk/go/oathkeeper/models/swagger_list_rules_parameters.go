@@ -11,8 +11,8 @@ import (
 	"github.com/go-openapi/swag"
 )
 
-// SwaggerListRulesParameters swagger list rules parameters
-// swagger:model swaggerListRulesParameters
+// SwaggerListRulesParameters SwaggerListRulesParameters swagger list rules parameters
+// swagger:model SwaggerListRulesParameters
 type SwaggerListRulesParameters struct {
 
 	// The maximum amount of rules returned.

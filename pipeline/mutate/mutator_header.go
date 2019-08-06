@@ -35,7 +35,7 @@ func (a *MutatorHeader) WithCache(t *template.Template) {
 	a.t = t
 }
 
-func (a *MutatorHeader) Mutate(r *http.Request, session *authn.AuthenticationSession, config json.RawMessage, rl pipeline.Rule) (http.Header, error) {
+func (a *MutatorHeader) Mutate(r *http.Request, session *authn.AuthenticationSession, config json.RawMessage, rl pipeline.Rule) error {
 	if len(config) == 0 {
 		config = []byte("{}")
 	}
@@ -44,10 +44,9 @@ func (a *MutatorHeader) Mutate(r *http.Request, session *authn.AuthenticationSes
 	d := json.NewDecoder(bytes.NewBuffer(config))
 	d.DisallowUnknownFields()
 	if err := d.Decode(&cfg); err != nil {
-		return nil, errors.WithStack(err)
+		return errors.WithStack(err)
 	}
 
-	headers := http.Header{}
 	for hdr, templateString := range cfg.Headers {
 		var tmpl *template.Template
 		var err error
@@ -57,19 +56,19 @@ func (a *MutatorHeader) Mutate(r *http.Request, session *authn.AuthenticationSes
 		if tmpl == nil {
 			tmpl, err = a.t.New(templateId).Parse(templateString)
 			if err != nil {
-				return nil, errors.Wrapf(err, `error parsing headers template "%s" in rule "%s"`, templateString, rl.GetID())
+				return errors.Wrapf(err, `error parsing headers template "%s" in rule "%s"`, templateString, rl.GetID())
 			}
 		}
 
 		headerValue := bytes.Buffer{}
 		err = tmpl.Execute(&headerValue, session)
 		if err != nil {
-			return nil, errors.Wrapf(err, `error executing headers template "%s" in rule "%s"`, templateString, rl.GetID())
+			return errors.Wrapf(err, `error executing headers template "%s" in rule "%s"`, templateString, rl.GetID())
 		}
-		headers.Set(hdr, headerValue.String())
+		session.SetHeader(hdr, headerValue.String())
 	}
 
-	return headers, nil
+	return nil
 }
 
 func (a *MutatorHeader) Validate() error {

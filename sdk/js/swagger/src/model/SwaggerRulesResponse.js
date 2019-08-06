@@ -17,18 +17,18 @@
 (function(root, factory) {
   if (typeof define === 'function' && define.amd) {
     // AMD. Register as an anonymous module.
-    define(['ApiClient', 'model/Rule'], factory);
+    define(['ApiClient', 'model/SwaggerRule'], factory);
   } else if (typeof module === 'object' && module.exports) {
     // CommonJS-like environments that support module.exports, like Node.
-    module.exports = factory(require('../ApiClient'), require('./Rule'));
+    module.exports = factory(require('../ApiClient'), require('./SwaggerRule'));
   } else {
     // Browser globals (root is window)
     if (!root.OryOathkeeper) {
       root.OryOathkeeper = {};
     }
-    root.OryOathkeeper.SwaggerRulesResponse = factory(root.OryOathkeeper.ApiClient, root.OryOathkeeper.Rule);
+    root.OryOathkeeper.SwaggerRulesResponse = factory(root.OryOathkeeper.ApiClient, root.OryOathkeeper.SwaggerRule);
   }
-}(this, function(ApiClient, Rule) {
+}(this, function(ApiClient, SwaggerRule) {
   'use strict';
 
 
@@ -42,7 +42,7 @@
 
   /**
    * Constructs a new <code>SwaggerRulesResponse</code>.
-   * A list of rules
+   * SwaggerRulesResponse A list of rules
    * @alias module:model/SwaggerRulesResponse
    * @class
    */
@@ -64,7 +64,7 @@
       obj = obj || new exports();
 
       if (data.hasOwnProperty('Body')) {
-        obj['Body'] = ApiClient.convertToType(data['Body'], [Rule]);
+        obj['Body'] = ApiClient.convertToType(data['Body'], [SwaggerRule]);
       }
     }
     return obj;
@@ -72,7 +72,7 @@
 
   /**
    * in: body type: array
-   * @member {Array.<module:model/Rule>} Body
+   * @member {Array.<module:model/SwaggerRule>} Body
    */
   exports.prototype['Body'] = undefined;
 

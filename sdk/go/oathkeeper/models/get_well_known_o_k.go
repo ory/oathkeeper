@@ -12,7 +12,7 @@ import (
 	"github.com/go-openapi/swag"
 )
 
-// GetWellKnownOK GetWellKnownOK GetWellKnownOK GetWellKnownOK GetWellKnownOK handles this case with default header values.
+// GetWellKnownOK GetWellKnownOK GetWellKnownOK GetWellKnownOK GetWellKnownOK GetWellKnownOK GetWellKnownOK GetWellKnownOK handles this case with default header values.
 //
 // jsonWebKeySet
 // swagger:model GetWellKnownOK

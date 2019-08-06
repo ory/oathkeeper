@@ -12,7 +12,7 @@ import (
 	"github.com/go-openapi/swag"
 )
 
-// ListRulesForbidden ListRulesForbidden ListRulesForbidden ListRulesForbidden ListRulesForbidden handles this case with default header values.
+// ListRulesForbidden ListRulesForbidden ListRulesForbidden ListRulesForbidden ListRulesForbidden ListRulesForbidden ListRulesForbidden ListRulesForbidden handles this case with default header values.
 //
 // The standard error format
 // swagger:model ListRulesForbidden

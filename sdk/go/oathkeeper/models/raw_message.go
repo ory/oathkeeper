@@ -9,7 +9,7 @@ import (
 	strfmt "github.com/go-openapi/strfmt"
 )
 
-// RawMessage RawMessage RawMessage RawMessage RawMessage is a raw encoded JSON value.
+// RawMessage RawMessage RawMessage RawMessage RawMessage RawMessage RawMessage RawMessage is a raw encoded JSON value.
 //
 // It implements Marshaler and Unmarshaler and can
 // be used to delay JSON decoding or precompute a JSON encoding.

@@ -95,17 +95,24 @@ func (v *ValidatorDefault) validateAuthorizer(r *Rule) error {
 	return auth.Validate()
 }
 
-func (v *ValidatorDefault) validateMutator(r *Rule) error {
-	if r.Mutator.Handler == "" {
-		return errors.WithStack(herodot.ErrInternalServerError.WithReason(`Value of "mutator.handler" can not be empty.`))
+func (v *ValidatorDefault) validateMutators(r *Rule) error {
+	if len(r.Mutators) == 0 {
+		return errors.WithStack(herodot.ErrInternalServerError.WithReason(`Value of "mutators" must be set and can not be an empty array.`))
 	}
 
-	mutator, err := v.r.PipelineMutator(r.Mutator.Handler)
-	if err != nil {
-		return herodot.ErrInternalServerError.WithReasonf(`Value "%s" of "mutator.handler" is not in list of supported mutators: %v`, r.Mutator.Handler, v.r.AvailablePipelineMutators()).WithTrace(err).WithDebug(err.Error())
+	for k, m := range r.Mutators {
+		mutator, err := v.r.PipelineMutator(m.Handler)
+		if err != nil {
+			return herodot.ErrInternalServerError.WithReasonf(`Value "%s" of "mutators[%d]" is not in list of supported mutators: %v`, m.Handler, k,
+				v.r.AvailablePipelineMutators()).WithTrace(err).WithDebug(err.Error())
+		}
+
+		if err := mutator.Validate(); err != nil {
+			return err
+		}
 	}
 
-	return mutator.Validate()
+	return nil
 }
 
 func (v *ValidatorDefault) Validate(r *Rule) error {
@@ -133,7 +140,7 @@ func (v *ValidatorDefault) Validate(r *Rule) error {
 		return err
 	}
 
-	if err := v.validateMutator(r); err != nil {
+	if err := v.validateMutators(r); err != nil {
 		return err
 	}
 

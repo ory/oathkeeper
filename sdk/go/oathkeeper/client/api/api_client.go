@@ -25,6 +25,40 @@ type Client struct {
 }
 
 /*
+Decisions accesses control decision API
+
+> This endpoint works with all HTTP Methods (GET, POST, PUT, ...) and matches every path prefixed with /decision.
+
+This endpoint mirrors the proxy capability of ORY Oathkeeper's proxy functionality but instead of forwarding the
+request to the upstream server, returns 200 (request should be allowed), 401 (unauthorized), or 403 (forbidden)
+status codes. This endpoint can be used to integrate with other API Proxies like Ambassador, Kong, Envoy, and many more.
+*/
+func (a *Client) Decisions(params *DecisionsParams) (*DecisionsOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewDecisionsParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "decisions",
+		Method:             "GET",
+		PathPattern:        "/decisions",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &DecisionsReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*DecisionsOK), nil
+
+}
+
+/*
 GetRule retrieves a rule
 
 Use this method to retrieve a rule from the storage. If it does not exist you will receive a 404 error.

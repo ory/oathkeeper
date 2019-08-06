@@ -11,7 +11,7 @@ import (
 	"github.com/go-openapi/swag"
 )
 
-// DeleteRuleInternalServerErrorBody DeleteRuleInternalServerErrorBody DeleteRuleInternalServerErrorBody DeleteRuleInternalServerErrorBody DeleteRuleInternalServerErrorBody delete rule internal server error body
+// DeleteRuleInternalServerErrorBody DeleteRuleInternalServerErrorBody DeleteRuleInternalServerErrorBody DeleteRuleInternalServerErrorBody DeleteRuleInternalServerErrorBody DeleteRuleInternalServerErrorBody DeleteRuleInternalServerErrorBody DeleteRuleInternalServerErrorBody delete rule internal server error body
 // swagger:model DeleteRuleInternalServerErrorBody
 type DeleteRuleInternalServerErrorBody struct {
 

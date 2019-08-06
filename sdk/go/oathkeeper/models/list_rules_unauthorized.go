@@ -12,7 +12,7 @@ import (
 	"github.com/go-openapi/swag"
 )
 
-// ListRulesUnauthorized ListRulesUnauthorized ListRulesUnauthorized ListRulesUnauthorized ListRulesUnauthorized handles this case with default header values.
+// ListRulesUnauthorized ListRulesUnauthorized ListRulesUnauthorized ListRulesUnauthorized ListRulesUnauthorized ListRulesUnauthorized ListRulesUnauthorized ListRulesUnauthorized handles this case with default header values.
 //
 // The standard error format
 // swagger:model ListRulesUnauthorized

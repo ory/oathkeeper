@@ -36,7 +36,7 @@ var ErrMutatorNotEnabled = herodot.DefaultError{
 }
 
 type Mutator interface {
-	Mutate(r *http.Request, session *authn.AuthenticationSession, config json.RawMessage, _ pipeline.Rule) (http.Header, error)
+	Mutate(r *http.Request, session *authn.AuthenticationSession, config json.RawMessage, _ pipeline.Rule) error
 	GetID() string
 	Validate() error
 }

@@ -11,7 +11,7 @@ import (
 	"github.com/go-openapi/swag"
 )
 
-// DeleteRuleForbiddenBody DeleteRuleForbiddenBody DeleteRuleForbiddenBody DeleteRuleForbiddenBody DeleteRuleForbiddenBody delete rule forbidden body
+// DeleteRuleForbiddenBody DeleteRuleForbiddenBody DeleteRuleForbiddenBody DeleteRuleForbiddenBody DeleteRuleForbiddenBody DeleteRuleForbiddenBody DeleteRuleForbiddenBody DeleteRuleForbiddenBody delete rule forbidden body
 // swagger:model DeleteRuleForbiddenBody
 type DeleteRuleForbiddenBody struct {
 

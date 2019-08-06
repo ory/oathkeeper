@@ -12,7 +12,7 @@ import (
 	"github.com/go-openapi/swag"
 )
 
-// SwaggerCreateRuleParameters SwaggerCreateRuleParameters SwaggerCreateRuleParameters swagger create rule parameters
+// SwaggerCreateRuleParameters SwaggerCreateRuleParameters SwaggerCreateRuleParameters SwaggerCreateRuleParameters SwaggerCreateRuleParameters SwaggerCreateRuleParameters swagger create rule parameters
 // swagger:model SwaggerCreateRuleParameters
 type SwaggerCreateRuleParameters struct {
 

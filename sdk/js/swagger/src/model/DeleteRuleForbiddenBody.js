@@ -42,7 +42,7 @@
 
   /**
    * Constructs a new <code>DeleteRuleForbiddenBody</code>.
-   * DeleteRuleForbiddenBody DeleteRuleForbiddenBody DeleteRuleForbiddenBody DeleteRuleForbiddenBody delete rule forbidden body
+   * DeleteRuleForbiddenBody DeleteRuleForbiddenBody DeleteRuleForbiddenBody DeleteRuleForbiddenBody DeleteRuleForbiddenBody DeleteRuleForbiddenBody DeleteRuleForbiddenBody delete rule forbidden body
    * @alias module:model/DeleteRuleForbiddenBody
    * @class
    */
