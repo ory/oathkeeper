@@ -123,6 +123,23 @@ func TestCredentialsIssuerHeaders(t *testing.T) {
 				Match:   http.Header{},
 				Err:     errors.New(`json: unknown field "bar"`),
 			},
+			"Advanced template with sprig function": {
+				Session: &authn.AuthenticationSession{
+					Subject: "foo",
+					Extra: map[string]interface{}{
+						"example.com/some-claims": []string{"Foo", "Bar"},
+					},
+				},
+				Rule: &rule.Rule{ID: "test-rule9"},
+				Config: json.RawMessage([]byte(`{"headers":{
+					"Example-Claims": "{{- (index .Extra \"example.com/some-claims\") | join \",\" -}}"
+				}}`)),
+				Request: &http.Request{Header: http.Header{}},
+				Match: http.Header{
+					"Example-Claims": []string{"Foo,Bar"},
+				},
+				Err: nil,
+			},
 		}
 
 		t.Run("cache=disabled", func(t *testing.T) {
