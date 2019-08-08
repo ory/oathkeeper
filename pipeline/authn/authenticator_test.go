@@ -2,9 +2,10 @@ package authn_test
 
 import (
 	"fmt"
+	"testing"
+
 	"github.com/ory/oathkeeper/pipeline/authn"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 const (
@@ -15,7 +16,7 @@ const (
 func TestSetHeader(t *testing.T) {
 
 	assert := assert.New(t)
-	for k, tc := range [] struct {
+	for k, tc := range []struct {
 		a    *authn.AuthenticationSession
 		desc string
 	}{

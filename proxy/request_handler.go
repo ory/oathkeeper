@@ -202,5 +202,3 @@ func (d *RequestHandler) HandleRequest(r *http.Request, rl *rule.Rule) (http.Hea
 
 	return session.Header, nil
 }
-
-

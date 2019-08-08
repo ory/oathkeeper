@@ -21,9 +21,10 @@
 package mutate_test
 
 import (
-	"github.com/ory/oathkeeper/pipeline/authn"
 	"net/http"
 	"testing"
+
+	"github.com/ory/oathkeeper/pipeline/authn"
 
 	"github.com/ory/viper"
 

@@ -26,7 +26,7 @@ type Authenticator interface {
 type AuthenticationSession struct {
 	Subject string
 	Extra   map[string]interface{}
-	Header http.Header
+	Header  http.Header
 }
 
 func (a *AuthenticationSession) SetHeader(key, val string) {
