@@ -75,6 +75,8 @@ type ProviderMutators interface {
 	MutatorIDTokenTTL() time.Duration
 
 	MutatorNoopIsEnabled() bool
+
+	MutatorEnhancerIsEnabled() bool
 }
 
 func MustValidate(l logrus.FieldLogger, p Provider) {

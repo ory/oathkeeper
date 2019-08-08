@@ -24,6 +24,6 @@ type Authenticator interface {
 }
 
 type AuthenticationSession struct {
-	Subject string
-	Extra   map[string]interface{}
+	Subject string                 `json:"subject"`
+	Extra   map[string]interface{} `json:"extra"`
 }
