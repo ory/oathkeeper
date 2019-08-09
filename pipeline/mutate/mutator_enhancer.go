@@ -21,9 +21,11 @@
 package mutate
 
 import (
+	"bytes"
 	"encoding/json"
 	"github.com/ory/x/httpx"
 	"net/http"
+	"net/url"
 
 	"github.com/pkg/errors"
 
@@ -32,14 +34,23 @@ import (
 	"github.com/ory/oathkeeper/pipeline/authn"
 )
 
-var ErrMalformedResponseFromUpstreamAPI = errors.New("The call to an external API returned an invalid JSON object")
-var ErrMissingAPIURL = errors.New("Missing URL in mutator configuration")
-var ErrInvalidAPIURL = errors.New("Invalid URL in mutator configuration")
-var ErrNon200ResponseFromAPI = errors.New("The call to an external API returned a non-200 HTTP response")
+var ErrMalformedResponseFromUpstreamAPI = "The call to an external API returned an invalid JSON object"
+var ErrMissingAPIURL = "Missing URL in mutator configuration"
+var ErrInvalidAPIURL = "Invalid URL in mutator configuration"
+var ErrNon200ResponseFromAPI = "The call to an external API returned a non-200 HTTP response"
 
 type MutatorEnhancer struct {
 	c      configuration.Provider
 	client *http.Client
+}
+
+type externalAPIConfig struct {
+	Url string `json:"url"`
+	// TODO: add retry config
+}
+
+type MutatorEnhancerConfig struct {
+	Api externalAPIConfig `json:"api"`
 }
 
 func NewMutatorEnhancer(c configuration.Provider) *MutatorEnhancer {
@@ -51,6 +62,54 @@ func (a *MutatorEnhancer) GetID() string {
 }
 
 func (a *MutatorEnhancer) Mutate(r *http.Request, session *authn.AuthenticationSession, config json.RawMessage, _ pipeline.Rule) (http.Header, error) {
+	if len(config) == 0 {
+		config = []byte("{}")
+	}
+	var cfg MutatorEnhancerConfig
+	d := json.NewDecoder(bytes.NewBuffer(config))
+	d.DisallowUnknownFields()
+	if err := d.Decode(&cfg); err != nil {
+		return nil, errors.WithStack(err)
+	}
+
+	var b bytes.Buffer
+	err := json.NewEncoder(&b).Encode(session)
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+
+	if cfg.Api.Url == "" {
+		return nil, errors.New(ErrMissingAPIURL)
+	} else if _, err := url.ParseRequestURI(cfg.Api.Url); err != nil {
+		return nil, errors.New(ErrInvalidAPIURL)
+	}
+	req, err := http.NewRequest("POST", cfg.Api.Url, &b)
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+	for key, values := range r.Header {
+		for _, value := range values {
+			req.Header.Add(key, value)
+		}
+	}
+
+	res, err := a.client.Do(req)
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+	if res.StatusCode != http.StatusOK {
+		return nil, errors.New(ErrNon200ResponseFromAPI)
+	}
+	sessionFromUpstream := authn.AuthenticationSession{}
+	err = json.NewDecoder(res.Body).Decode(&sessionFromUpstream)
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+	if sessionFromUpstream.Extra == nil || sessionFromUpstream.Subject != session.Subject { // TODO: should API be able to modify subject?
+		return nil, errors.New(ErrMalformedResponseFromUpstreamAPI)
+	}
+	*session = sessionFromUpstream
+
 	return nil, nil
 }
 

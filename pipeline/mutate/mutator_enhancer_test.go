@@ -2,6 +2,7 @@ package mutate_test
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/julienschmidt/httprouter"
 	"github.com/ory/oathkeeper/pipeline/authn"
@@ -54,8 +55,6 @@ func defaultRouterSetup(actions ...func(a *authn.AuthenticationSession)) func(t 
 			w.WriteHeader(http.StatusOK)
 			_, err = w.Write(jsonData)
 			require.NoError(t, err)
-			// TODO: Debug only
-			t.Logf("json response from API: %s", string(jsonData))
 		})
 	}
 }
@@ -78,13 +77,10 @@ func TestMutatorEnhancer(t *testing.T) {
 		sampleKey := "foo"
 		sampleValue := "bar"
 		complexValueKey := "complex"
-		sampleComplexValue := struct {
-			foo string
-			oof int
-			bar float32
-			rab bool
-		}{"hello", 7, 3.14, true}
-
+		sampleComplexValue := map[string]interface{}{
+			"foo": "hello",
+			"bar": 3.14,
+		}
 		var testMap = map[string]struct {
 			Setup   func(*testing.T, *httprouter.Router)
 			Session *authn.AuthenticationSession
@@ -143,9 +139,20 @@ func TestMutatorEnhancer(t *testing.T) {
 				Config:  defaultConfigForMutator(),
 				Request: &http.Request{},
 				Match:   newAuthenticationSession(),
-				Err:     mutate.ErrMalformedResponseFromUpstreamAPI,
+				Err:     errors.New(mutate.ErrMalformedResponseFromUpstreamAPI),
 			},
 			"Missing API URL": {
+				Setup:   defaultRouterSetup(),
+				Session: newAuthenticationSession(),
+				Rule:    &rule.Rule{ID: "test-rule"},
+				Config: func(s *httptest.Server) json.RawMessage {
+					return []byte(`{"api": {}}`)
+				},
+				Request: &http.Request{},
+				Match:   newAuthenticationSession(),
+				Err:     errors.New(mutate.ErrMissingAPIURL),
+			},
+			"Improper Config": {
 				Setup:   defaultRouterSetup(),
 				Session: newAuthenticationSession(),
 				Rule:    &rule.Rule{ID: "test-rule"},
@@ -154,12 +161,12 @@ func TestMutatorEnhancer(t *testing.T) {
 				},
 				Request: &http.Request{},
 				Match:   newAuthenticationSession(),
-				Err:     mutate.ErrMissingAPIURL,
+				Err:     errors.New(`json: unknown field "foo"`),
 			},
-			"Server Error": {
+			"Not Found": {
 				Setup: func(t *testing.T, router *httprouter.Router) {
 					router.POST("/", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-						w.WriteHeader(http.StatusInternalServerError)
+						w.WriteHeader(http.StatusNotFound)
 					})
 				},
 				Session: newAuthenticationSession(),
@@ -167,7 +174,7 @@ func TestMutatorEnhancer(t *testing.T) {
 				Config:  defaultConfigForMutator(),
 				Request: &http.Request{},
 				Match:   newAuthenticationSession(),
-				Err:     mutate.ErrNon200ResponseFromAPI,
+				Err:     errors.New(mutate.ErrNon200ResponseFromAPI),
 			},
 			"Wrong API URL": {
 				Setup:   defaultRouterSetup(),
@@ -178,7 +185,7 @@ func TestMutatorEnhancer(t *testing.T) {
 				},
 				Request: &http.Request{},
 				Match:   newAuthenticationSession(),
-				Err:     mutate.ErrInvalidAPIURL,
+				Err:     errors.New(mutate.ErrInvalidAPIURL),
 			},
 		}
 		t.Run("caching=off", func(t *testing.T) {
