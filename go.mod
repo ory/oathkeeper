@@ -1,6 +1,8 @@
 module github.com/ory/oathkeeper
 
 require (
+	github.com/Masterminds/goutils v1.1.0 // indirect
+	github.com/Masterminds/sprig v2.20.0+incompatible
 	github.com/Microsoft/go-winio v0.4.12 // indirect
 	github.com/asaskevich/govalidator v0.0.0-20180720115003-f9ffefc3facf
 	github.com/auth0/go-jwt-middleware v0.0.0-20170425171159-5493cabe49f7
@@ -28,6 +30,8 @@ require (
 	github.com/google/uuid v1.1.1
 	github.com/gorilla/handlers v1.4.0 // indirect
 	github.com/gorilla/mux v1.7.1 // indirect
+	github.com/huandu/xstrings v1.2.0 // indirect
+	github.com/imdario/mergo v0.3.7 // indirect
 	github.com/jessevdk/go-flags v1.4.0 // indirect
 	github.com/julienschmidt/httprouter v1.2.0
 	github.com/lib/pq v1.0.0

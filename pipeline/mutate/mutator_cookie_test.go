@@ -135,6 +135,26 @@ func TestCredentialsIssuerCookies(t *testing.T) {
 				},
 				Err: nil,
 			},
+			"Advanced template with sprig function": {
+				Session: &authn.AuthenticationSession{
+					Subject: "foo",
+					Extra: map[string]interface{}{
+						"example.com/some-claims": []string{"Foo", "Bar"},
+					},
+				},
+				Rule: &rule.Rule{ID: "test-rule9"},
+				Config: json.RawMessage([]byte(`{"cookies":{
+					"example-claims": "{{- (index .Extra \"example.com/some-claims\") | join \",\" -}}"
+				}}`)),
+				Request: &http.Request{Header: http.Header{}},
+				Match: []*http.Cookie{
+					{
+						Name:  "example-claims",
+						Value: "Foo,Bar",
+					},
+				},
+				Err: nil,
+			},
 		}
 
 		t.Run("caching=off", func(t *testing.T) {

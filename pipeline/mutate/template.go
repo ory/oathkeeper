@@ -3,6 +3,8 @@ package mutate
 import (
 	"fmt"
 	"text/template"
+
+	"github.com/Masterminds/sprig"
 )
 
 func newTemplate(id string) *template.Template {
@@ -16,5 +18,6 @@ func newTemplate(id string) *template.Template {
 				}
 				return fmt.Sprintf("%v", i)
 			},
-		})
+		}).
+		Funcs(sprig.TxtFuncMap())
 }
