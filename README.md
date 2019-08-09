@@ -47,6 +47,7 @@ documentation and upgrade instructions.
 
 
 - [Installation](#installation)
+- [Who's using it?](#whos-using-it)
 - [Ecosystem](#ecosystem)
   - [ORY Security Console: Administrative User Interface](#ory-security-console-administrative-user-interface)
   - [ORY Hydra: OAuth2 & OpenID Connect Server](#ory-hydra-oauth2--openid-connect-server)
@@ -72,6 +73,12 @@ Head over to the
 [ORY Developer Documentation](https://www.ory.sh/docs/oathkeeper/install) to
 learn how to install ORY Oathkeeper on Linux, macOS, Windows, and Docker and how
 to build ORY Oathkeeper from source.
+
+## Who's using it?
+
+<!-- BEGIN ADOPTERS -->
+
+<!-- END ADOPTERS -->
 
 ## Ecosystem
 
