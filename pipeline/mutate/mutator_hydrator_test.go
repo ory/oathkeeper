@@ -110,13 +110,13 @@ func configWithRetriesForMutator(numberOfRetries, retriesDelayInMilliseconds int
 	}
 }
 
-func TestMutatorEnhancer(t *testing.T) {
+func TestMutatorHydrator(t *testing.T) {
 	conf := internal.NewConfigurationWithDefaults()
 	reg := internal.NewRegistry(conf)
 
-	a, err := reg.PipelineMutator("enhancer")
+	a, err := reg.PipelineMutator("Hydrator")
 	require.NoError(t, err)
-	assert.Equal(t, "enhancer", a.GetID())
+	assert.Equal(t, "Hydrator", a.GetID())
 
 	t.Run("method=mutate", func(t *testing.T) {
 		sampleKey := "foo"
@@ -333,7 +333,7 @@ func TestMutatorEnhancer(t *testing.T) {
 			{enabled: true, shouldPass: true},
 		} {
 			t.Run(fmt.Sprintf("case=%d", k), func(t *testing.T) {
-				viper.Set(configuration.ViperKeyMutatorEnhancerIsEnabled, testCase.enabled)
+				viper.Set(configuration.ViperKeyMutatorHydratorIsEnabled, testCase.enabled)
 
 				if testCase.shouldPass {
 					require.NoError(t, a.Validate())

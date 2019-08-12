@@ -76,7 +76,7 @@ type ProviderMutators interface {
 
 	MutatorNoopIsEnabled() bool
 
-	MutatorEnhancerIsEnabled() bool
+	MutatorHydratorIsEnabled() bool
 }
 
 func MustValidate(l logrus.FieldLogger, p Provider) {

@@ -441,6 +441,18 @@
             }
           }
         },
+        "hydrator": {
+          "type": "object",
+          "title": "Hydrator",
+          "description": "The [`hydrator` mutator](https://www.ory.sh/docs/oathkeeper/pipeline/mutator#hydrator).",
+          "additionalProperties": false,
+          "properties": {
+            "enabled": {
+              "title": "Enabled",
+              "type": "boolean"
+            }
+          }
+        },
         "id_token": {
           "type": "object",
           "title": "ID Token (JSON Web Token)",

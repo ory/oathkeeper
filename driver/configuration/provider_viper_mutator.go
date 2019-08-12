@@ -14,7 +14,7 @@ const (
 
 	ViperKeyMutatorNoopIsEnabled = "mutators.noop.enabled"
 
-	ViperKeyMutatorEnhancerIsEnabled = "mutators.enhancer.enabled"
+	ViperKeyMutatorHydratorIsEnabled = "mutators.Hydrator.enabled"
 
 	ViperKeyMutatorIDTokenIsEnabled = "mutators.id_token.enabled"
 	ViperKeyMutatorIDTokenIssuerURL = "mutators.id_token.issuer_url"
@@ -54,6 +54,6 @@ func (v *ViperProvider) MutatorNoopIsEnabled() bool {
 	return viperx.GetBool(v.l, ViperKeyMutatorNoopIsEnabled, false)
 }
 
-func (v *ViperProvider) MutatorEnhancerIsEnabled() bool {
-	return viperx.GetBool(v.l, ViperKeyMutatorEnhancerIsEnabled, false)
+func (v *ViperProvider) MutatorHydratorIsEnabled() bool {
+	return viperx.GetBool(v.l, ViperKeyMutatorHydratorIsEnabled, false)
 }

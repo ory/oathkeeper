@@ -47,7 +47,7 @@ const (
 	defaultDelayInMilliseconds          = 100
 )
 
-type MutatorEnhancer struct {
+type MutatorHydrator struct {
 	c      configuration.Provider
 	client *http.Client
 }
@@ -72,23 +72,23 @@ type externalAPIConfig struct {
 	Retry *RetryConfig    `json:"retry,omitempty"`
 }
 
-type MutatorEnhancerConfig struct {
+type MutatorHydratorConfig struct {
 	Api externalAPIConfig `json:"api"`
 }
 
-func NewMutatorEnhancer(c configuration.Provider) *MutatorEnhancer {
-	return &MutatorEnhancer{c: c, client: httpx.NewResilientClientLatencyToleranceSmall(nil)}
+func NewMutatorHydrator(c configuration.Provider) *MutatorHydrator {
+	return &MutatorHydrator{c: c, client: httpx.NewResilientClientLatencyToleranceSmall(nil)}
 }
 
-func (a *MutatorEnhancer) GetID() string {
-	return "enhancer"
+func (a *MutatorHydrator) GetID() string {
+	return "Hydrator"
 }
 
-func (a *MutatorEnhancer) Mutate(r *http.Request, session *authn.AuthenticationSession, config json.RawMessage, _ pipeline.Rule) (http.Header, error) {
+func (a *MutatorHydrator) Mutate(r *http.Request, session *authn.AuthenticationSession, config json.RawMessage, _ pipeline.Rule) (http.Header, error) {
 	if len(config) == 0 {
 		config = []byte("{}")
 	}
-	var cfg MutatorEnhancerConfig
+	var cfg MutatorHydratorConfig
 	d := json.NewDecoder(bytes.NewBuffer(config))
 	d.DisallowUnknownFields()
 	if err := d.Decode(&cfg); err != nil {
@@ -160,8 +160,8 @@ func (a *MutatorEnhancer) Mutate(r *http.Request, session *authn.AuthenticationS
 	return nil, nil
 }
 
-func (a *MutatorEnhancer) Validate() error {
-	if !a.c.MutatorEnhancerIsEnabled() {
+func (a *MutatorHydrator) Validate() error {
+	if !a.c.MutatorHydratorIsEnabled() {
 		return errors.WithStack(ErrMutatorNotEnabled.WithReasonf(`Mutator "%s" is disabled per configuration.`, a.GetID()))
 	}
 	return nil
