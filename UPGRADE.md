@@ -38,6 +38,50 @@ before finalizing the upgrade process.
 
 ## master
 
+## v0.18.0-beta.1+oryOS.12
+
+### Mutators
+1. ORY Oathkeeper now supports multiple mutators. Mutations are performed in the provided order and must all succeed in order for the HTTP request to be forwarded.
+2. The `mutator` property was renamed to `mutators` to reflect its true nature (see previous item).
+
+### Access Rule Changes
+
+As already noted, the `mutator` property was renamed to `mutators` and now represents a list of mutation handlers. If you have
+existing rules, please update them as follows:
+
+```
+[
+  {
+    "id": "jwt-rule",
+    "upstream": {
+      "url": "http://127.0.0.1:6662"
+    },
+    "match": {
+      "url": "http://127.0.0.1:<6660|6661>/jwt",
+      "methods": [
+        "GET"
+      ]
+    },
+    "authenticators": [
+      {
+        "handler": "jwt"
+      }
+    ],
+    "authorizer": {
+      "handler": "allow"
+    },
+-   "mutator": {
+-     "handler": "id_token"
+-   }
++   "mutators": [
++     {
++       "handler": "id_token"
++     }
++   ]
+  }
+]
+```
+
 ## v0.17.0-beta.1+oryOS.12
 
 ORY Oathkeeper now watches configuration files and access rules repositories on

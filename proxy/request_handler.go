@@ -194,7 +194,7 @@ func (d *RequestHandler) HandleRequest(r *http.Request, rl *rule.Rule) (http.Hea
 				WithField("access_url", r.URL.String()).
 				WithField("authorization_handler", m.Handler).
 				WithField("reason_id", "mutation_handler_error").
-				Warn("The authorization handler encountered an error")
+				Warn("The mutation handler encountered an error")
 			return nil, err
 		}
 
