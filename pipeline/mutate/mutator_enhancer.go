@@ -55,10 +55,15 @@ type Authentication struct {
 	Basic BasicAuthn `json:"basic"`
 }
 
+type RetryConfig struct {
+	Number         int `json:"number"`
+	DelayInSeconds int `json:"delayInSeconds"`
+}
+
 type externalAPIConfig struct {
 	Url   string          `json:"url"`
 	Authn *Authentication `json:"authn,omitempty"`
-	// TODO: add retry config
+	Retry RetryConfig     `json:"retry"`
 }
 
 type MutatorEnhancerConfig struct {

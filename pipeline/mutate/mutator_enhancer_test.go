@@ -77,6 +77,21 @@ func withBasicAuth(f routerSetupFunction, user, password string) routerSetupFunc
 	}
 }
 
+func withInitialErrors(f routerSetupFunction, numberOfErrorResponses, httpStatusCode int) routerSetupFunction {
+	return func(t *testing.T) http.Handler {
+		counter := 0
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if counter < numberOfErrorResponses {
+				w.WriteHeader(httpStatusCode)
+				counter++
+				return
+			}
+			h := f(t)
+			h.ServeHTTP(w, r)
+		})
+	}
+}
+
 func defaultConfigForMutator() func(*httptest.Server) json.RawMessage {
 	return func(s *httptest.Server) json.RawMessage {
 		return []byte(fmt.Sprintf(`{"api": {"url": "%s"}}`, s.URL))
@@ -86,6 +101,12 @@ func defaultConfigForMutator() func(*httptest.Server) json.RawMessage {
 func configWithBasicAuthnForMutator(user, password string) func(*httptest.Server) json.RawMessage {
 	return func(s *httptest.Server) json.RawMessage {
 		return []byte(fmt.Sprintf(`{"api": {"url": "%s", "authn": {"basic": {"username": "%s", "password": "%s"}}}}`, s.URL, user, password))
+	}
+}
+
+func configWithRetriesForMutator(numberOfRetries, retriesDelayInSeconds int) func(*httptest.Server) json.RawMessage {
+	return func(s *httptest.Server) json.RawMessage {
+		return []byte(fmt.Sprintf(`{"api": {"url": "%s", "retry": {"number": %d, "delayInSeconds": %d}}}`, s.URL, numberOfRetries, retriesDelayInSeconds))
 	}
 }
 
@@ -244,6 +265,15 @@ func TestMutatorEnhancer(t *testing.T) {
 				Request: &http.Request{},
 				Match:   newAuthenticationSession(),
 				Err:     errors.New(mutate.ErrNoCredentialsProvided),
+			},
+			"Third Time Lucky": {
+				Setup:   withInitialErrors(defaultRouterSetup(setExtra(sampleKey, sampleValue)), 2, http.StatusInternalServerError),
+				Session: newAuthenticationSession(),
+				Rule:    &rule.Rule{ID: "test-rule"},
+				Config:  configWithRetriesForMutator(3, 1),
+				Request: &http.Request{},
+				Match:   newAuthenticationSession(setExtra(sampleKey, sampleValue)),
+				Err:     nil,
 			},
 		}
 		t.Run("caching=off", func(t *testing.T) {
