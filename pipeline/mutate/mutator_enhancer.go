@@ -56,8 +56,8 @@ type Authentication struct {
 }
 
 type externalAPIConfig struct {
-	Url   string         `json:"url"`
-	Authn Authentication `json:"authn"`
+	Url   string          `json:"url"`
+	Authn *Authentication `json:"authn,omitempty"`
 	// TODO: add retry config
 }
 
@@ -104,12 +104,25 @@ func (a *MutatorEnhancer) Mutate(r *http.Request, session *authn.AuthenticationS
 			req.Header.Add(key, value)
 		}
 	}
+	if cfg.Api.Authn != nil {
+		credentials := cfg.Api.Authn.Basic
+		req.SetBasicAuth(credentials.Username, credentials.Password)
+	}
 
 	res, err := a.client.Do(req)
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
-	if res.StatusCode != http.StatusOK {
+	switch res.StatusCode {
+	case http.StatusOK:
+		break
+	case http.StatusUnauthorized:
+		if cfg.Api.Authn != nil {
+			return nil, errors.New(ErrInvalidCredentials)
+		} else {
+			return nil, errors.New(ErrNoCredentialsProvided)
+		}
+	default:
 		return nil, errors.New(ErrNon200ResponseFromAPI)
 	}
 	sessionFromUpstream := authn.AuthenticationSession{}
