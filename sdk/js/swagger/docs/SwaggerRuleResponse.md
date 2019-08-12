@@ -1,7 +1,8 @@
 # OryOathkeeper.SwaggerRuleResponse
 
 ## Properties
+Name | Type | Description | Notes
+------------ | ------------- | ------------- | -------------
+**body** | [**SwaggerRule**](SwaggerRule.md) |  | [optional] 
 
-| Name     | Type                | Description | Notes      |
-| -------- | ------------------- | ----------- | ---------- |
-| **body** | [**Rule**](Rule.md) |             | [optional] |
+

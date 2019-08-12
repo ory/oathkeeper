@@ -41,8 +41,9 @@ func (a *MutatorNoop) GetID() string {
 	return "noop"
 }
 
-func (a *MutatorNoop) Mutate(r *http.Request, session *authn.AuthenticationSession, config json.RawMessage, _ pipeline.Rule) (http.Header, error) {
-	return r.Header, nil
+func (a *MutatorNoop) Mutate(r *http.Request, session *authn.AuthenticationSession, config json.RawMessage, _ pipeline.Rule) error {
+	session.Header = r.Header
+	return nil
 }
 
 func (a *MutatorNoop) Validate() error {

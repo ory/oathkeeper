@@ -12,7 +12,7 @@ import (
 	"github.com/go-openapi/swag"
 )
 
-// CreateRuleInternalServerError CreateRuleInternalServerError CreateRuleInternalServerError CreateRuleInternalServerError CreateRuleInternalServerError handles this case with default header values.
+// CreateRuleInternalServerError CreateRuleInternalServerError CreateRuleInternalServerError CreateRuleInternalServerError CreateRuleInternalServerError CreateRuleInternalServerError CreateRuleInternalServerError CreateRuleInternalServerError handles this case with default header values.
 //
 // The standard error format
 // swagger:model CreateRuleInternalServerError

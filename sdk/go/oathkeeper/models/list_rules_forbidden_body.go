@@ -11,7 +11,7 @@ import (
 	"github.com/go-openapi/swag"
 )
 
-// ListRulesForbiddenBody ListRulesForbiddenBody ListRulesForbiddenBody ListRulesForbiddenBody ListRulesForbiddenBody list rules forbidden body
+// ListRulesForbiddenBody ListRulesForbiddenBody ListRulesForbiddenBody ListRulesForbiddenBody ListRulesForbiddenBody ListRulesForbiddenBody ListRulesForbiddenBody ListRulesForbiddenBody list rules forbidden body
 // swagger:model ListRulesForbiddenBody
 type ListRulesForbiddenBody struct {
 

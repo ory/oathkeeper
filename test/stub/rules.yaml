@@ -13,5 +13,5 @@
     - handler: anonymous
   authorizer:
     handler: allow
-  mutator:
-    handler: noop
+  mutators:
+    - handler: noop

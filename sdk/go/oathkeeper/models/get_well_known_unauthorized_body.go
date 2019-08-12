@@ -11,7 +11,7 @@ import (
 	"github.com/go-openapi/swag"
 )
 
-// GetWellKnownUnauthorizedBody GetWellKnownUnauthorizedBody GetWellKnownUnauthorizedBody GetWellKnownUnauthorizedBody GetWellKnownUnauthorizedBody get well known unauthorized body
+// GetWellKnownUnauthorizedBody GetWellKnownUnauthorizedBody GetWellKnownUnauthorizedBody GetWellKnownUnauthorizedBody GetWellKnownUnauthorizedBody GetWellKnownUnauthorizedBody GetWellKnownUnauthorizedBody GetWellKnownUnauthorizedBody get well known unauthorized body
 // swagger:model GetWellKnownUnauthorizedBody
 type GetWellKnownUnauthorizedBody struct {
 

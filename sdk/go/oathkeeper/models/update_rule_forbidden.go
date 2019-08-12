@@ -12,7 +12,7 @@ import (
 	"github.com/go-openapi/swag"
 )
 
-// UpdateRuleForbidden UpdateRuleForbidden UpdateRuleForbidden UpdateRuleForbidden UpdateRuleForbidden handles this case with default header values.
+// UpdateRuleForbidden UpdateRuleForbidden UpdateRuleForbidden UpdateRuleForbidden UpdateRuleForbidden UpdateRuleForbidden UpdateRuleForbidden UpdateRuleForbidden handles this case with default header values.
 //
 // The standard error format
 // swagger:model UpdateRuleForbidden

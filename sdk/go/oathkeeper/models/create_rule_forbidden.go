@@ -12,7 +12,7 @@ import (
 	"github.com/go-openapi/swag"
 )
 
-// CreateRuleForbidden CreateRuleForbidden CreateRuleForbidden CreateRuleForbidden CreateRuleForbidden handles this case with default header values.
+// CreateRuleForbidden CreateRuleForbidden CreateRuleForbidden CreateRuleForbidden CreateRuleForbidden CreateRuleForbidden CreateRuleForbidden CreateRuleForbidden handles this case with default header values.
 //
 // The standard error format
 // swagger:model CreateRuleForbidden

@@ -156,31 +156,49 @@ func (d *RequestHandler) HandleRequest(r *http.Request, rl *rule.Rule) (http.Hea
 		return nil, err
 	}
 
-	sh, err := d.r.PipelineMutator(rl.Mutator.Handler)
-	if err != nil {
+	if len(rl.Mutators) == 0 {
+		err = errors.New("No mutation handler was set in the rule")
 		d.r.Logger().WithError(err).
 			WithField("granted", false).
 			WithField("access_url", r.URL.String()).
-			WithField("session_handler", rl.Mutator.Handler).
-			WithField("reason_id", "unknown_mutation_handler").
-			Warn("Unknown mutator requested")
+			WithField("reason_id", "mutation_handler_missing").
+			Warn("No mutation handler was set in the rule")
 		return nil, err
 	}
 
-	if err := sh.Validate(); err != nil {
-		d.r.Logger().WithError(err).
-			WithField("granted", false).
-			WithField("access_url", r.URL.String()).
-			WithField("authorization_handler", rl.Mutator.Handler).
-			WithField("reason_id", "invalid_mutation_handler").
-			Warn("Invalid mutator requested")
-		return nil, err
+	for _, m := range rl.Mutators {
+		sh, err := d.r.PipelineMutator(m.Handler)
+		if err != nil {
+			d.r.Logger().WithError(err).
+				WithField("granted", false).
+				WithField("access_url", r.URL.String()).
+				WithField("session_handler", m.Handler).
+				WithField("reason_id", "unknown_mutation_handler").
+				Warn("Unknown mutator requested")
+			return nil, err
+		}
+
+		if err := sh.Validate(); err != nil {
+			d.r.Logger().WithError(err).
+				WithField("granted", false).
+				WithField("access_url", r.URL.String()).
+				WithField("authorization_handler", m.Handler).
+				WithField("reason_id", "invalid_mutation_handler").
+				Warn("Invalid mutator requested")
+			return nil, err
+		}
+
+		if err := sh.Mutate(r, session, m.Config, rl); err != nil {
+			d.r.Logger().WithError(err).
+				WithField("granted", false).
+				WithField("access_url", r.URL.String()).
+				WithField("authorization_handler", m.Handler).
+				WithField("reason_id", "mutation_handler_error").
+				Warn("The mutation handler encountered an error")
+			return nil, err
+		}
+
 	}
 
-	headers, err := sh.Mutate(r, session, rl.Mutator.Config, rl)
-	if err != nil {
-		return nil, err
-	}
-
-	return headers, nil
+	return session.Header, nil
 }

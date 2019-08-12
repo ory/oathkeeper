@@ -18,8 +18,10 @@
     "authorizer": {
       "handler": "allow"
     },
-    "mutator": {
-      "handler": "id_token"
-    }
+    "mutators": [
+      {
+        "handler": "id_token"
+      }
+    ]
   }
 ]

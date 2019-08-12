@@ -42,6 +42,7 @@
 
   /**
    * Constructs a new <code>SwaggerListRulesParameters</code>.
+   * SwaggerListRulesParameters swagger list rules parameters
    * @alias module:model/SwaggerListRulesParameters
    * @class
    */

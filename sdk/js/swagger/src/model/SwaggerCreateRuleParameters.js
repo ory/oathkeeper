@@ -42,7 +42,7 @@
 
   /**
    * Constructs a new <code>SwaggerCreateRuleParameters</code>.
-   * SwaggerCreateRuleParameters SwaggerCreateRuleParameters swagger create rule parameters
+   * SwaggerCreateRuleParameters SwaggerCreateRuleParameters SwaggerCreateRuleParameters SwaggerCreateRuleParameters SwaggerCreateRuleParameters swagger create rule parameters
    * @alias module:model/SwaggerCreateRuleParameters
    * @class
    */

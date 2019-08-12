@@ -11,7 +11,7 @@ import (
 	"github.com/go-openapi/swag"
 )
 
-// UpdateRuleNotFoundBody UpdateRuleNotFoundBody UpdateRuleNotFoundBody UpdateRuleNotFoundBody UpdateRuleNotFoundBody update rule not found body
+// UpdateRuleNotFoundBody UpdateRuleNotFoundBody UpdateRuleNotFoundBody UpdateRuleNotFoundBody UpdateRuleNotFoundBody UpdateRuleNotFoundBody UpdateRuleNotFoundBody UpdateRuleNotFoundBody update rule not found body
 // swagger:model UpdateRuleNotFoundBody
 type UpdateRuleNotFoundBody struct {
 

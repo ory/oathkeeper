@@ -12,7 +12,7 @@ import (
 	"github.com/go-openapi/swag"
 )
 
-// GetRuleOK GetRuleOK GetRuleOK GetRuleOK GetRuleOK handles this case with default header values.
+// GetRuleOK GetRuleOK GetRuleOK handles this case with default header values.
 //
 // A rule
 // swagger:model GetRuleOK

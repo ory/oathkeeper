@@ -11,7 +11,7 @@ import (
 	"github.com/go-openapi/swag"
 )
 
-// GetWellKnownJSONWebKeysInternalServerErrorBody GetWellKnownJSONWebKeysInternalServerErrorBody get well known JSON web keys internal server error body
+// GetWellKnownJSONWebKeysInternalServerErrorBody GetWellKnownJSONWebKeysInternalServerErrorBody GetWellKnownJSONWebKeysInternalServerErrorBody get well known JSON web keys internal server error body
 // swagger:model GetWellKnownJSONWebKeysInternalServerErrorBody
 type GetWellKnownJSONWebKeysInternalServerErrorBody struct {
 

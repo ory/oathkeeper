@@ -14,6 +14,8 @@ import (
 	"github.com/pkg/errors"
 )
 
+const cookieHeader = "Cookie"
+
 type CredentialsCookiesConfig struct {
 	Cookies map[string]string `json:"cookies"`
 }
@@ -35,7 +37,7 @@ func (a *MutatorCookie) WithCache(t *template.Template) {
 	a.t = t
 }
 
-func (a *MutatorCookie) Mutate(r *http.Request, session *authn.AuthenticationSession, config json.RawMessage, rl pipeline.Rule) (http.Header, error) {
+func (a *MutatorCookie) Mutate(r *http.Request, session *authn.AuthenticationSession, config json.RawMessage, rl pipeline.Rule) error {
 	if len(config) == 0 {
 		config = []byte("{}")
 	}
@@ -52,7 +54,7 @@ func (a *MutatorCookie) Mutate(r *http.Request, session *authn.AuthenticationSes
 	d := json.NewDecoder(bytes.NewBuffer(config))
 	d.DisallowUnknownFields()
 	if err := d.Decode(&cfg); err != nil {
-		return nil, errors.WithStack(err)
+		return errors.WithStack(err)
 	}
 
 	for cookie, templateString := range cfg.Cookies {
@@ -64,14 +66,14 @@ func (a *MutatorCookie) Mutate(r *http.Request, session *authn.AuthenticationSes
 		if tmpl == nil {
 			tmpl, err = a.t.New(templateId).Parse(templateString)
 			if err != nil {
-				return nil, errors.Wrapf(err, `error parsing cookie template "%s" in rule "%s"`, templateString, rl.GetID())
+				return errors.Wrapf(err, `error parsing cookie template "%s" in rule "%s"`, templateString, rl.GetID())
 			}
 		}
 
 		cookieValue := bytes.Buffer{}
 		err = tmpl.Execute(&cookieValue, session)
 		if err != nil {
-			return nil, errors.Wrapf(err, `error executing cookie template "%s" in rule "%s"`, templateString, rl.GetID())
+			return errors.Wrapf(err, `error executing cookie template "%s" in rule "%s"`, templateString, rl.GetID())
 		}
 
 		req.AddCookie(&http.Cookie{
@@ -91,7 +93,9 @@ func (a *MutatorCookie) Mutate(r *http.Request, session *authn.AuthenticationSes
 		}
 	}
 
-	return req.Header, nil
+	session.SetHeader(cookieHeader, req.Header.Get(cookieHeader))
+
+	return nil
 }
 
 func (a *MutatorCookie) Validate() error {

@@ -1,7 +1,8 @@
 # OryOathkeeper.CreateRuleInternalServerError
 
 ## Properties
+Name | Type | Description | Notes
+------------ | ------------- | ------------- | -------------
+**payload** | [**CreateRuleInternalServerErrorBody**](CreateRuleInternalServerErrorBody.md) |  | [optional] 
 
-| Name        | Type                                                                          | Description | Notes      |
-| ----------- | ----------------------------------------------------------------------------- | ----------- | ---------- |
-| **payload** | [**CreateRuleInternalServerErrorBody**](CreateRuleInternalServerErrorBody.md) |             | [optional] |
+

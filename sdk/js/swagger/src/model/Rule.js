@@ -83,8 +83,8 @@
       if (data.hasOwnProperty('match')) {
         obj['match'] = RuleMatch.constructFromObject(data['match']);
       }
-      if (data.hasOwnProperty('mutator')) {
-        obj['mutator'] = RuleHandler.constructFromObject(data['mutator']);
+      if (data.hasOwnProperty('mutators')) {
+        obj['mutators'] = ApiClient.convertToType(data['mutators'], [RuleHandler]);
       }
       if (data.hasOwnProperty('upstream')) {
         obj['upstream'] = Upstream.constructFromObject(data['upstream']);
@@ -117,9 +117,10 @@
    */
   exports.prototype['match'] = undefined;
   /**
-   * @member {module:model/RuleHandler} mutator
+   * Mutators is a list of mutation handlers that transform the HTTP request. A common use case is generating a new set of credentials (e.g. JWT) which then will be forwarded to the upstream server.  Mutations are performed iteratively from index 0 to n and should all succeed in order for the HTTP request to be forwarded.
+   * @member {Array.<module:model/RuleHandler>} mutators
    */
-  exports.prototype['mutator'] = undefined;
+  exports.prototype['mutators'] = undefined;
   /**
    * @member {module:model/Upstream} upstream
    */

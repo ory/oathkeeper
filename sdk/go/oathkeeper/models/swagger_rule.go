@@ -33,14 +33,17 @@ type SwaggerRule struct {
 	// You will need this ID later on to update or delete the rule.
 	ID string `json:"id,omitempty"`
 
+	// Mutators is a list of mutation handlers that transform the HTTP request. A common use case is generating a new set
+	// of credentials (e.g. JWT) which then will be forwarded to the upstream server.
+	//
+	// Mutations are performed iteratively from index 0 to n and should all succeed in order for the HTTP request to be forwarded.
+	Mutators []*SwaggerRuleHandler `json:"mutators"`
+
 	// authorizer
 	Authorizer *SwaggerRuleHandler `json:"authorizer,omitempty"`
 
 	// match
 	Match *SwaggerRuleMatch `json:"match,omitempty"`
-
-	// mutator
-	Mutator *SwaggerRuleHandler `json:"mutator,omitempty"`
 
 	// upstream
 	Upstream *Upstream `json:"upstream,omitempty"`
@@ -54,15 +57,15 @@ func (m *SwaggerRule) Validate(formats strfmt.Registry) error {
 		res = append(res, err)
 	}
 
+	if err := m.validateMutators(formats); err != nil {
+		res = append(res, err)
+	}
+
 	if err := m.validateAuthorizer(formats); err != nil {
 		res = append(res, err)
 	}
 
 	if err := m.validateMatch(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if err := m.validateMutator(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -101,6 +104,31 @@ func (m *SwaggerRule) validateAuthenticators(formats strfmt.Registry) error {
 	return nil
 }
 
+func (m *SwaggerRule) validateMutators(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Mutators) { // not required
+		return nil
+	}
+
+	for i := 0; i < len(m.Mutators); i++ {
+		if swag.IsZero(m.Mutators[i]) { // not required
+			continue
+		}
+
+		if m.Mutators[i] != nil {
+			if err := m.Mutators[i].Validate(formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("mutators" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
+	}
+
+	return nil
+}
+
 func (m *SwaggerRule) validateAuthorizer(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.Authorizer) { // not required
@@ -129,24 +157,6 @@ func (m *SwaggerRule) validateMatch(formats strfmt.Registry) error {
 		if err := m.Match.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("match")
-			}
-			return err
-		}
-	}
-
-	return nil
-}
-
-func (m *SwaggerRule) validateMutator(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.Mutator) { // not required
-		return nil
-	}
-
-	if m.Mutator != nil {
-		if err := m.Mutator.Validate(formats); err != nil {
-			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("mutator")
 			}
 			return err
 		}

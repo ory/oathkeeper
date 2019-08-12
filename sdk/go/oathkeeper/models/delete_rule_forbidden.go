@@ -12,7 +12,7 @@ import (
 	"github.com/go-openapi/swag"
 )
 
-// DeleteRuleForbidden DeleteRuleForbidden DeleteRuleForbidden DeleteRuleForbidden DeleteRuleForbidden handles this case with default header values.
+// DeleteRuleForbidden DeleteRuleForbidden DeleteRuleForbidden DeleteRuleForbidden DeleteRuleForbidden DeleteRuleForbidden DeleteRuleForbidden DeleteRuleForbidden handles this case with default header values.
 //
 // The standard error format
 // swagger:model DeleteRuleForbidden

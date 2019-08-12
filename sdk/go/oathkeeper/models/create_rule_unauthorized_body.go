@@ -11,7 +11,7 @@ import (
 	"github.com/go-openapi/swag"
 )
 
-// CreateRuleUnauthorizedBody CreateRuleUnauthorizedBody CreateRuleUnauthorizedBody CreateRuleUnauthorizedBody CreateRuleUnauthorizedBody create rule unauthorized body
+// CreateRuleUnauthorizedBody CreateRuleUnauthorizedBody CreateRuleUnauthorizedBody CreateRuleUnauthorizedBody CreateRuleUnauthorizedBody CreateRuleUnauthorizedBody CreateRuleUnauthorizedBody CreateRuleUnauthorizedBody create rule unauthorized body
 // swagger:model CreateRuleUnauthorizedBody
 type CreateRuleUnauthorizedBody struct {
 

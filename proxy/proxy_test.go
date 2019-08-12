@@ -95,14 +95,14 @@ func TestProxy(t *testing.T) {
 		Match:          rule.RuleMatch{Methods: []string{"GET"}, URL: ts.URL + "/authn-noop/<[0-9]+>"},
 		Authenticators: []rule.RuleHandler{{Handler: "noop"}},
 		Authorizer:     rule.RuleHandler{Handler: "allow"},
-		Mutator:        rule.RuleHandler{Handler: "noop"},
+		Mutators:       []rule.RuleHandler{{Handler: "noop"}},
 		Upstream:       rule.Upstream{URL: backend.URL},
 	}
 	ruleNoOpAuthenticatorModifyUpstream := rule.Rule{
 		Match:          rule.RuleMatch{Methods: []string{"GET"}, URL: ts.URL + "/strip-path/authn-noop/<[0-9]+>"},
 		Authenticators: []rule.RuleHandler{{Handler: "noop"}},
 		Authorizer:     rule.RuleHandler{Handler: "allow"},
-		Mutator:        rule.RuleHandler{Handler: "noop"},
+		Mutators:       []rule.RuleHandler{{Handler: "noop"}},
 		Upstream:       rule.Upstream{URL: backend.URL, StripPath: "/strip-path/", PreserveHost: true},
 	}
 
@@ -190,7 +190,7 @@ func TestProxy(t *testing.T) {
 				Match:          rule.RuleMatch{Methods: []string{"GET"}, URL: ts.URL + "/authn-anon/authz-allow/cred-noop/<[0-9]+>"},
 				Authenticators: []rule.RuleHandler{{Handler: "anonymous"}},
 				Authorizer:     rule.RuleHandler{Handler: "allow"},
-				Mutator:        rule.RuleHandler{Handler: "noop"},
+				Mutators:       []rule.RuleHandler{{Handler: "noop"}},
 				Upstream:       rule.Upstream{URL: backend.URL},
 			}},
 			code: http.StatusOK,
@@ -207,7 +207,7 @@ func TestProxy(t *testing.T) {
 				Match:          rule.RuleMatch{Methods: []string{"GET"}, URL: ts.URL + "/authn-anon/authz-deny/cred-noop/<[0-9]+>"},
 				Authenticators: []rule.RuleHandler{{Handler: "anonymous"}},
 				Authorizer:     rule.RuleHandler{Handler: "deny"},
-				Mutator:        rule.RuleHandler{Handler: "noop"},
+				Mutators:       []rule.RuleHandler{{Handler: "noop"}},
 				Upstream:       rule.Upstream{URL: backend.URL},
 			}},
 			code: http.StatusForbidden,
@@ -223,13 +223,36 @@ func TestProxy(t *testing.T) {
 			code: http.StatusUnauthorized,
 		},
 		{
+			d:   "should fail because no mutator was configured",
+			url: ts.URL + "/authn-anon/authz-deny/cred-noop/1234",
+			rules: []rule.Rule{{
+				Match:          rule.RuleMatch{Methods: []string{"GET"}, URL: ts.URL + "/authn-anon/authz-deny/cred-noop/<[0-9]+>"},
+				Authenticators: []rule.RuleHandler{{Handler: "anonymous"}},
+				Authorizer:     rule.RuleHandler{Handler: "allow"},
+				Upstream:       rule.Upstream{URL: backend.URL},
+			}},
+			code: http.StatusInternalServerError,
+		},
+		{
+			d:   "should fail when one of the mutators fails",
+			url: ts.URL + "/authn-anon/authz-deny/cred-noop/1234",
+			rules: []rule.Rule{{
+				Match:          rule.RuleMatch{Methods: []string{"GET"}, URL: ts.URL + "/authn-anon/authz-deny/cred-noop/<[0-9]+>"},
+				Authenticators: []rule.RuleHandler{{Handler: "anonymous"}},
+				Authorizer:     rule.RuleHandler{Handler: "allow"},
+				Mutators:       []rule.RuleHandler{{Handler: "noop"}, {Handler: "broken"}},
+				Upstream:       rule.Upstream{URL: backend.URL},
+			}},
+			code: http.StatusInternalServerError,
+		},
+		{
 			d:   "should fail when credentials issuer fails",
 			url: ts.URL + "/authn-anonymous/authz-allow/cred-broken/1234",
 			rules: []rule.Rule{{
 				Match:          rule.RuleMatch{Methods: []string{"GET"}, URL: ts.URL + "/authn-anonymous/authz-allow/cred-broken/<[0-9]+>"},
 				Authenticators: []rule.RuleHandler{{Handler: "anonymous"}},
 				Authorizer:     rule.RuleHandler{Handler: "allow"},
-				Mutator:        rule.RuleHandler{Handler: "broken"},
+				Mutators:       []rule.RuleHandler{{Handler: "broken"}},
 				Upstream:       rule.Upstream{URL: backend.URL},
 			}},
 			code: http.StatusInternalServerError,
