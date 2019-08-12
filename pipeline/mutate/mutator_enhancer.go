@@ -38,14 +38,26 @@ var ErrMalformedResponseFromUpstreamAPI = "The call to an external API returned 
 var ErrMissingAPIURL = "Missing URL in mutator configuration"
 var ErrInvalidAPIURL = "Invalid URL in mutator configuration"
 var ErrNon200ResponseFromAPI = "The call to an external API returned a non-200 HTTP response"
+var ErrInvalidCredentials = "Invalid credentials were provided in mutator configuration"
+var ErrNoCredentialsProvided = "No credentials were provided in mutator configuration"
 
 type MutatorEnhancer struct {
 	c      configuration.Provider
 	client *http.Client
 }
 
+type BasicAuthn struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
+}
+
+type Authentication struct {
+	Basic BasicAuthn `json:"basic"`
+}
+
 type externalAPIConfig struct {
-	Url string `json:"url"`
+	Url   string         `json:"url"`
+	Authn Authentication `json:"authn"`
 	// TODO: add retry config
 }
 

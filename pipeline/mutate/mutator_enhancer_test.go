@@ -39,8 +39,11 @@ func newAuthenticationSession(modifications ...func(a *authn.AuthenticationSessi
 	return &a
 }
 
-func defaultRouterSetup(actions ...func(a *authn.AuthenticationSession)) func(t *testing.T, router *httprouter.Router) {
-	return func(t *testing.T, router *httprouter.Router) {
+type routerSetupFunction func(t *testing.T) http.Handler
+
+func defaultRouterSetup(actions ...func(a *authn.AuthenticationSession)) routerSetupFunction {
+	return func(t *testing.T) http.Handler {
+		router := httprouter.New()
 		router.POST("/", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 			body, err := ioutil.ReadAll(r.Body)
 			require.NoError(t, err)
@@ -56,12 +59,33 @@ func defaultRouterSetup(actions ...func(a *authn.AuthenticationSession)) func(t 
 			_, err = w.Write(jsonData)
 			require.NoError(t, err)
 		})
+		return router
+	}
+}
+
+func withBasicAuth(f routerSetupFunction, user, password string) routerSetupFunction {
+	return func(t *testing.T) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			u, p, ok := r.BasicAuth()
+			if !ok || u != user || p != password {
+				w.WriteHeader(http.StatusUnauthorized)
+				return
+			}
+			h := f(t)
+			h.ServeHTTP(w, r)
+		})
 	}
 }
 
 func defaultConfigForMutator() func(*httptest.Server) json.RawMessage {
 	return func(s *httptest.Server) json.RawMessage {
 		return []byte(fmt.Sprintf(`{"api": {"url": "%s"}}`, s.URL))
+	}
+}
+
+func configWithBasicAuthnForMutator(user, password string) func(*httptest.Server) json.RawMessage {
+	return func(s *httptest.Server) json.RawMessage {
+		return []byte(fmt.Sprintf(`{"api": {"url": "%s", "authn": {"basic": {"username": "%s", "password": "%s"}}}}`, s.URL, user, password))
 	}
 }
 
@@ -81,8 +105,11 @@ func TestMutatorEnhancer(t *testing.T) {
 			"foo": "hello",
 			"bar": 3.14,
 		}
+		sampleUserId := "user"
+		sampleValidPassword := "passwd1"
+		sampleNotValidPassword := "passwd7"
 		var testMap = map[string]struct {
-			Setup   func(*testing.T, *httprouter.Router)
+			Setup   func(*testing.T) http.Handler
 			Session *authn.AuthenticationSession
 			Rule    *rule.Rule
 			Config  func(*httptest.Server) json.RawMessage
@@ -127,12 +154,14 @@ func TestMutatorEnhancer(t *testing.T) {
 				Err:     nil,
 			},
 			"Empty Response": {
-				Setup: func(t *testing.T, router *httprouter.Router) {
+				Setup: func(t *testing.T) http.Handler {
+					router := httprouter.New()
 					router.POST("/", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 						w.WriteHeader(http.StatusOK)
 						_, err = w.Write([]byte(`{}`))
 						require.NoError(t, err)
 					})
+					return router
 				},
 				Session: newAuthenticationSession(),
 				Rule:    &rule.Rule{ID: "test-rule"},
@@ -164,10 +193,12 @@ func TestMutatorEnhancer(t *testing.T) {
 				Err:     errors.New(`json: unknown field "foo"`),
 			},
 			"Not Found": {
-				Setup: func(t *testing.T, router *httprouter.Router) {
+				Setup: func(t *testing.T) http.Handler {
+					router := httprouter.New()
 					router.POST("/", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 						w.WriteHeader(http.StatusNotFound)
 					})
+					return router
 				},
 				Session: newAuthenticationSession(),
 				Rule:    &rule.Rule{ID: "test-rule"},
@@ -187,14 +218,41 @@ func TestMutatorEnhancer(t *testing.T) {
 				Match:   newAuthenticationSession(),
 				Err:     errors.New(mutate.ErrInvalidAPIURL),
 			},
+			"Successful Basic Authentication": {
+				Setup:   withBasicAuth(defaultRouterSetup(setExtra(sampleKey, sampleValue)), sampleUserId, sampleValidPassword),
+				Session: newAuthenticationSession(),
+				Rule:    &rule.Rule{ID: "test-rule"},
+				Config:  configWithBasicAuthnForMutator(sampleUserId, sampleValidPassword),
+				Request: &http.Request{},
+				Match:   newAuthenticationSession(setExtra(sampleKey, sampleValue)),
+				Err:     nil,
+			},
+			"Invalid Basic Credentials": {
+				Setup:   withBasicAuth(defaultRouterSetup(setExtra(sampleKey, sampleValue)), sampleUserId, sampleValidPassword),
+				Session: newAuthenticationSession(),
+				Rule:    &rule.Rule{ID: "test-rule"},
+				Config:  configWithBasicAuthnForMutator(sampleUserId, sampleNotValidPassword),
+				Request: &http.Request{},
+				Match:   newAuthenticationSession(),
+				Err:     errors.New(mutate.ErrInvalidCredentials),
+			},
+			"No Basic Credentials": {
+				Setup:   withBasicAuth(defaultRouterSetup(setExtra(sampleKey, sampleValue)), sampleUserId, sampleValidPassword),
+				Session: newAuthenticationSession(),
+				Rule:    &rule.Rule{ID: "test-rule"},
+				Config:  defaultConfigForMutator(),
+				Request: &http.Request{},
+				Match:   newAuthenticationSession(),
+				Err:     errors.New(mutate.ErrNoCredentialsProvided),
+			},
 		}
 		t.Run("caching=off", func(t *testing.T) {
 			for testName, specs := range testMap {
 				t.Run(testName, func(t *testing.T) {
-					router := httprouter.New()
+					var router http.Handler
 					var ts *httptest.Server
 					if specs.Setup != nil {
-						specs.Setup(t, router)
+						router = specs.Setup(t)
 					}
 					ts = httptest.NewServer(router)
 					defer ts.Close()
