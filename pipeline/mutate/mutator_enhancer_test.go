@@ -104,9 +104,9 @@ func configWithBasicAuthnForMutator(user, password string) func(*httptest.Server
 	}
 }
 
-func configWithRetriesForMutator(numberOfRetries, retriesDelayInSeconds int) func(*httptest.Server) json.RawMessage {
+func configWithRetriesForMutator(numberOfRetries, retriesDelayInMilliseconds int) func(*httptest.Server) json.RawMessage {
 	return func(s *httptest.Server) json.RawMessage {
-		return []byte(fmt.Sprintf(`{"api": {"url": "%s", "retry": {"number": %d, "delayInSeconds": %d}}}`, s.URL, numberOfRetries, retriesDelayInSeconds))
+		return []byte(fmt.Sprintf(`{"api": {"url": "%s", "retry": {"number": %d, "delayInMilliseconds": %d}}}`, s.URL, numberOfRetries, retriesDelayInMilliseconds))
 	}
 }
 
@@ -270,7 +270,7 @@ func TestMutatorEnhancer(t *testing.T) {
 				Setup:   withInitialErrors(defaultRouterSetup(setExtra(sampleKey, sampleValue)), 2, http.StatusInternalServerError),
 				Session: newAuthenticationSession(),
 				Rule:    &rule.Rule{ID: "test-rule"},
-				Config:  configWithRetriesForMutator(3, 1),
+				Config:  configWithRetriesForMutator(3, 100),
 				Request: &http.Request{},
 				Match:   newAuthenticationSession(setExtra(sampleKey, sampleValue)),
 				Err:     nil,

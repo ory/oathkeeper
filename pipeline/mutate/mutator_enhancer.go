@@ -23,9 +23,11 @@ package mutate
 import (
 	"bytes"
 	"encoding/json"
+	"github.com/cenkalti/backoff"
 	"github.com/ory/x/httpx"
 	"net/http"
 	"net/url"
+	"time"
 
 	"github.com/pkg/errors"
 
@@ -34,12 +36,16 @@ import (
 	"github.com/ory/oathkeeper/pipeline/authn"
 )
 
-var ErrMalformedResponseFromUpstreamAPI = "The call to an external API returned an invalid JSON object"
-var ErrMissingAPIURL = "Missing URL in mutator configuration"
-var ErrInvalidAPIURL = "Invalid URL in mutator configuration"
-var ErrNon200ResponseFromAPI = "The call to an external API returned a non-200 HTTP response"
-var ErrInvalidCredentials = "Invalid credentials were provided in mutator configuration"
-var ErrNoCredentialsProvided = "No credentials were provided in mutator configuration"
+const (
+	ErrMalformedResponseFromUpstreamAPI = "The call to an external API returned an invalid JSON object"
+	ErrMissingAPIURL                    = "Missing URL in mutator configuration"
+	ErrInvalidAPIURL                    = "Invalid URL in mutator configuration"
+	ErrNon200ResponseFromAPI            = "The call to an external API returned a non-200 HTTP response"
+	ErrInvalidCredentials               = "Invalid credentials were provided in mutator configuration"
+	ErrNoCredentialsProvided            = "No credentials were provided in mutator configuration"
+	defaultNumberOfRetries              = 3
+	defaultDelayInMilliseconds          = 100
+)
 
 type MutatorEnhancer struct {
 	c      configuration.Provider
@@ -56,14 +62,14 @@ type Authentication struct {
 }
 
 type RetryConfig struct {
-	Number         int `json:"number"`
-	DelayInSeconds int `json:"delayInSeconds"`
+	NumberOfRetries     int `json:"number"`
+	DelayInMilliseconds int `json:"delayInMilliseconds"`
 }
 
 type externalAPIConfig struct {
 	Url   string          `json:"url"`
 	Authn *Authentication `json:"authn,omitempty"`
-	Retry RetryConfig     `json:"retry"`
+	Retry *RetryConfig    `json:"retry,omitempty"`
 }
 
 type MutatorEnhancerConfig struct {
@@ -114,22 +120,33 @@ func (a *MutatorEnhancer) Mutate(r *http.Request, session *authn.AuthenticationS
 		req.SetBasicAuth(credentials.Username, credentials.Password)
 	}
 
-	res, err := a.client.Do(req)
-	if err != nil {
-		return nil, errors.WithStack(err)
+	retryConfig := RetryConfig{defaultNumberOfRetries, defaultDelayInMilliseconds}
+	if cfg.Api.Retry != nil {
+		retryConfig = *cfg.Api.Retry
 	}
-	switch res.StatusCode {
-	case http.StatusOK:
-		break
-	case http.StatusUnauthorized:
-		if cfg.Api.Authn != nil {
-			return nil, errors.New(ErrInvalidCredentials)
-		} else {
-			return nil, errors.New(ErrNoCredentialsProvided)
+	var res *http.Response
+	err = backoff.Retry(func() error {
+		res, err = a.client.Do(req)
+		if err != nil {
+			return errors.WithStack(err)
 		}
-	default:
-		return nil, errors.New(ErrNon200ResponseFromAPI)
+		switch res.StatusCode {
+		case http.StatusOK:
+			return nil
+		case http.StatusUnauthorized:
+			if cfg.Api.Authn != nil {
+				return errors.New(ErrInvalidCredentials)
+			} else {
+				return errors.New(ErrNoCredentialsProvided)
+			}
+		default:
+			return errors.New(ErrNon200ResponseFromAPI)
+		}
+	}, backoff.WithMaxRetries(backoff.NewConstantBackOff(time.Millisecond*time.Duration(retryConfig.DelayInMilliseconds)), uint64(retryConfig.NumberOfRetries)))
+	if err != nil {
+		return nil, err
 	}
+
 	sessionFromUpstream := authn.AuthenticationSession{}
 	err = json.NewDecoder(res.Body).Decode(&sessionFromUpstream)
 	if err != nil {
