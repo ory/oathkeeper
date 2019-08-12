@@ -309,7 +309,7 @@ func TestMutatorHydrator(t *testing.T) {
 				ts = httptest.NewServer(router)
 				defer ts.Close()
 
-				_, err := a.Mutate(specs.Request, specs.Session, specs.Config(ts), specs.Rule)
+				err := a.Mutate(specs.Request, specs.Session, specs.Config(ts), specs.Rule)
 				if specs.Err == nil {
 					// Issuer must run without error
 					require.NoError(t, err)

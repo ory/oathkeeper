@@ -84,7 +84,7 @@ func (a *MutatorHydrator) GetID() string {
 	return "Hydrator"
 }
 
-func (a *MutatorHydrator) Mutate(r *http.Request, session *authn.AuthenticationSession, config json.RawMessage, _ pipeline.Rule) (http.Header, error) {
+func (a *MutatorHydrator) Mutate(r *http.Request, session *authn.AuthenticationSession, config json.RawMessage, _ pipeline.Rule) error {
 	if len(config) == 0 {
 		config = []byte("{}")
 	}
@@ -92,23 +92,23 @@ func (a *MutatorHydrator) Mutate(r *http.Request, session *authn.AuthenticationS
 	d := json.NewDecoder(bytes.NewBuffer(config))
 	d.DisallowUnknownFields()
 	if err := d.Decode(&cfg); err != nil {
-		return nil, errors.WithStack(err)
+		return errors.WithStack(err)
 	}
 
 	var b bytes.Buffer
 	err := json.NewEncoder(&b).Encode(session)
 	if err != nil {
-		return nil, errors.WithStack(err)
+		return errors.WithStack(err)
 	}
 
 	if cfg.Api.Url == "" {
-		return nil, errors.New(ErrMissingAPIURL)
+		return errors.New(ErrMissingAPIURL)
 	} else if _, err := url.ParseRequestURI(cfg.Api.Url); err != nil {
-		return nil, errors.New(ErrInvalidAPIURL)
+		return errors.New(ErrInvalidAPIURL)
 	}
 	req, err := http.NewRequest("POST", cfg.Api.Url, &b)
 	if err != nil {
-		return nil, errors.WithStack(err)
+		return errors.WithStack(err)
 	}
 	for key, values := range r.Header {
 		for _, value := range values {
@@ -144,20 +144,20 @@ func (a *MutatorHydrator) Mutate(r *http.Request, session *authn.AuthenticationS
 		}
 	}, backoff.WithMaxRetries(backoff.NewConstantBackOff(time.Millisecond*time.Duration(retryConfig.DelayInMilliseconds)), uint64(retryConfig.NumberOfRetries)))
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	sessionFromUpstream := authn.AuthenticationSession{}
 	err = json.NewDecoder(res.Body).Decode(&sessionFromUpstream)
 	if err != nil {
-		return nil, errors.WithStack(err)
+		return errors.WithStack(err)
 	}
 	if sessionFromUpstream.Extra == nil || sessionFromUpstream.Subject != session.Subject {
-		return nil, errors.New(ErrMalformedResponseFromUpstreamAPI)
+		return errors.New(ErrMalformedResponseFromUpstreamAPI)
 	}
 	*session = sessionFromUpstream
 
-	return nil, nil
+	return nil
 }
 
 func (a *MutatorHydrator) Validate() error {
