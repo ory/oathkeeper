@@ -152,7 +152,7 @@ func (a *MutatorEnhancer) Mutate(r *http.Request, session *authn.AuthenticationS
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
-	if sessionFromUpstream.Extra == nil || sessionFromUpstream.Subject != session.Subject { // TODO: should API be able to modify subject?
+	if sessionFromUpstream.Extra == nil || sessionFromUpstream.Subject != session.Subject {
 		return nil, errors.New(ErrMalformedResponseFromUpstreamAPI)
 	}
 	*session = sessionFromUpstream

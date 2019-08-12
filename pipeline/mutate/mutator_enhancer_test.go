@@ -266,6 +266,28 @@ func TestMutatorEnhancer(t *testing.T) {
 				Match:   newAuthenticationSession(),
 				Err:     errors.New(mutate.ErrNoCredentialsProvided),
 			},
+			"Should Replace Authn Header": {
+				Setup: func(t *testing.T) http.Handler {
+					router := httprouter.New()
+					router.POST("/", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+						authnHeaders := r.Header["Authentication"]
+						assert.Equal(t, len(authnHeaders), 1)
+						user, passwd, ok := r.BasicAuth()
+						assert.True(t, ok)
+						assert.Equal(t, user, sampleUserId)
+						assert.Equal(t, passwd, sampleValidPassword)
+						h := defaultRouterSetup(setExtra(sampleKey, sampleValue))(t)
+						h.ServeHTTP(w, r)
+					})
+					return router
+				},
+				Session: newAuthenticationSession(),
+				Rule:    &rule.Rule{ID: "test-rule"},
+				Config:  configWithBasicAuthnForMutator(sampleUserId, sampleValidPassword),
+				Request: &http.Request{Header: http.Header{"Authentication": []string{"Bearer sample"}}},
+				Match:   newAuthenticationSession(setExtra(sampleKey, sampleValue)),
+				Err:     nil,
+			},
 			"Third Time Lucky": {
 				Setup:   withInitialErrors(defaultRouterSetup(setExtra(sampleKey, sampleValue)), 2, http.StatusInternalServerError),
 				Session: newAuthenticationSession(),
@@ -276,30 +298,29 @@ func TestMutatorEnhancer(t *testing.T) {
 				Err:     nil,
 			},
 		}
-		t.Run("caching=off", func(t *testing.T) {
-			for testName, specs := range testMap {
-				t.Run(testName, func(t *testing.T) {
-					var router http.Handler
-					var ts *httptest.Server
-					if specs.Setup != nil {
-						router = specs.Setup(t)
-					}
-					ts = httptest.NewServer(router)
-					defer ts.Close()
 
-					_, err := a.Mutate(specs.Request, specs.Session, specs.Config(ts), specs.Rule)
-					if specs.Err == nil {
-						// Issuer must run without error
-						require.NoError(t, err)
-					} else {
-						assert.EqualError(t, err, specs.Err.Error())
-					}
+		for testName, specs := range testMap {
+			t.Run(testName, func(t *testing.T) {
+				var router http.Handler
+				var ts *httptest.Server
+				if specs.Setup != nil {
+					router = specs.Setup(t)
+				}
+				ts = httptest.NewServer(router)
+				defer ts.Close()
 
-					assert.Equal(t, specs.Match, specs.Session)
-				})
-			}
-		})
-		// TODO: add tests with caching
+				_, err := a.Mutate(specs.Request, specs.Session, specs.Config(ts), specs.Rule)
+				if specs.Err == nil {
+					// Issuer must run without error
+					require.NoError(t, err)
+				} else {
+					assert.EqualError(t, err, specs.Err.Error())
+				}
+
+				assert.Equal(t, specs.Match, specs.Session)
+			})
+		}
+
 	})
 
 	t.Run("method=validate", func(t *testing.T) {
