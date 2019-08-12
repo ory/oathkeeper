@@ -23,11 +23,13 @@ package mutate
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/cenkalti/backoff"
-	"github.com/ory/x/httpx"
 	"net/http"
 	"net/url"
 	"time"
+
+	"github.com/cenkalti/backoff"
+
+	"github.com/ory/x/httpx"
 
 	"github.com/pkg/errors"
 

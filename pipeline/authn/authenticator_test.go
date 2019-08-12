@@ -4,8 +4,9 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/ory/oathkeeper/pipeline/authn"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/ory/oathkeeper/pipeline/authn"
 )
 
 const (
