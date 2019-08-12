@@ -12,7 +12,6 @@ import (
 	strfmt "github.com/go-openapi/strfmt"
 
 	"github.com/ory/oathkeeper/sdk/go/oathkeeper/client/api"
-	"github.com/ory/oathkeeper/sdk/go/oathkeeper/client/judge"
 )
 
 // Default ory oathkeeper HTTP client.
@@ -60,8 +59,6 @@ func New(transport runtime.ClientTransport, formats strfmt.Registry) *OryOathkee
 
 	cli.API = api.New(transport, formats)
 
-	cli.Judge = judge.New(transport, formats)
-
 	return cli
 }
 
@@ -108,8 +105,6 @@ func (cfg *TransportConfig) WithSchemes(schemes []string) *TransportConfig {
 type OryOathkeeper struct {
 	API *api.Client
 
-	Judge *judge.Client
-
 	Transport runtime.ClientTransport
 }
 
@@ -118,7 +113,5 @@ func (c *OryOathkeeper) SetTransport(transport runtime.ClientTransport) {
 	c.Transport = transport
 
 	c.API.SetTransport(transport)
-
-	c.Judge.SetTransport(transport)
 
 }

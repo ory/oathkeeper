@@ -112,7 +112,7 @@ func TestValidateRule(t *testing.T) {
 				Authenticators: []RuleHandler{{Handler: "noop"}},
 				Authorizer:     RuleHandler{Handler: "allow"},
 			},
-			expectErr: `Value of "mutator.handler" can not be empty.`,
+			expectErr: `Value of "mutators" must be set and can not be an empty array.`,
 		},
 		{
 			setup: prep(true, true, true),
@@ -121,9 +121,9 @@ func TestValidateRule(t *testing.T) {
 				Upstream:       Upstream{URL: "https://www.ory.sh"},
 				Authenticators: []RuleHandler{{Handler: "noop"}},
 				Authorizer:     RuleHandler{Handler: "allow"},
-				Mutator:        RuleHandler{Handler: "foo"},
+				Mutators:       []RuleHandler{{Handler: "foo"}},
 			},
-			expectErr: `Value "foo" of "mutator.handler" is not in list of supported mutators: `,
+			expectErr: `Value "foo" of "mutators[0]" is not in list of supported mutators: `,
 		},
 		{
 			setup: prep(true, true, true),
@@ -132,8 +132,19 @@ func TestValidateRule(t *testing.T) {
 				Upstream:       Upstream{URL: "https://www.ory.sh"},
 				Authenticators: []RuleHandler{{Handler: "noop"}},
 				Authorizer:     RuleHandler{Handler: "allow"},
-				Mutator:        RuleHandler{Handler: "noop"},
+				Mutators:       []RuleHandler{{Handler: "noop"}},
 			},
+		},
+		{
+			setup: prep(true, true, false),
+			r: &Rule{
+				Match:          RuleMatch{URL: "https://www.ory.sh", Methods: []string{"POST"}},
+				Upstream:       Upstream{URL: "https://www.ory.sh"},
+				Authenticators: []RuleHandler{{Handler: "noop"}},
+				Authorizer:     RuleHandler{Handler: "allow"},
+				Mutators:       []RuleHandler{{Handler: "noop"}},
+			},
+			expectErr: `Mutator "noop" is disabled per configuration.`,
 		},
 	} {
 		t.Run(fmt.Sprintf("case=%d", k), func(t *testing.T) {

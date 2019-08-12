@@ -1,7 +1,8 @@
 # OryOathkeeper.UpdateRuleInternalServerError
 
 ## Properties
+Name | Type | Description | Notes
+------------ | ------------- | ------------- | -------------
+**payload** | [**UpdateRuleInternalServerErrorBody**](UpdateRuleInternalServerErrorBody.md) |  | [optional] 
 
-| Name        | Type                                                                          | Description | Notes      |
-| ----------- | ----------------------------------------------------------------------------- | ----------- | ---------- |
-| **payload** | [**UpdateRuleInternalServerErrorBody**](UpdateRuleInternalServerErrorBody.md) |             | [optional] |
+

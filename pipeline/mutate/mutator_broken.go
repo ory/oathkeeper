@@ -44,8 +44,8 @@ func (a *MutatorBroken) GetID() string {
 	return "broken"
 }
 
-func (a *MutatorBroken) Mutate(r *http.Request, session *authn.AuthenticationSession, config json.RawMessage, _ pipeline.Rule) (http.Header, error) {
-	return nil, errors.New("forced denial of credentials")
+func (a *MutatorBroken) Mutate(r *http.Request, session *authn.AuthenticationSession, config json.RawMessage, _ pipeline.Rule) error {
+	return errors.New("forced denial of credentials")
 }
 
 func (a *MutatorBroken) Validate() error {

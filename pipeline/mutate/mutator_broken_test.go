@@ -33,11 +33,11 @@ func TestCredentialsIssuerBroken(t *testing.T) {
 	a := mutate.NewMutatorBroken(false)
 	assert.Equal(t, "broken", a.GetID())
 
-	_, err := a.Mutate(nil, nil, nil, nil)
+	err := a.Mutate(nil, nil, nil, nil)
 	require.Error(t, err)
 
 	t.Run("method=new/case=should not be declared in registry", func(t *testing.T) {
-		_, err := a.Mutate(nil, nil, nil, nil)
+		err := a.Mutate(nil, nil, nil, nil)
 		require.Error(t, err)
 	})
 

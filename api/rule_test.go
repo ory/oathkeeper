@@ -66,7 +66,7 @@ func TestHandler(t *testing.T) {
 			Description:    "Create users rule",
 			Authorizer:     rule.RuleHandler{Handler: "allow", Config: json.RawMessage(`{"type":"any"}`)},
 			Authenticators: []rule.RuleHandler{{Handler: "anonymous", Config: json.RawMessage(`{"name":"anonymous1"}`)}},
-			Mutator:        rule.RuleHandler{Handler: "id_token", Config: json.RawMessage(`{"issuer":"anything"}`)},
+			Mutators:       []rule.RuleHandler{{Handler: "id_token", Config: json.RawMessage(`{"issuer":"anything"}`)}},
 			Upstream: rule.Upstream{
 				URL:          "http://localhost:1235/",
 				StripPath:    "/bar",
@@ -82,7 +82,7 @@ func TestHandler(t *testing.T) {
 			Description:    "Get users rule",
 			Authorizer:     rule.RuleHandler{Handler: "deny", Config: json.RawMessage(`{"type":"any"}`)},
 			Authenticators: []rule.RuleHandler{{Handler: "oauth2_introspection", Config: json.RawMessage(`{"name":"anonymous1"}`)}},
-			Mutator:        rule.RuleHandler{Handler: "id_token", Config: json.RawMessage(`{"issuer":"anything"}`)},
+			Mutators:       []rule.RuleHandler{{Handler: "id_token", Config: json.RawMessage(`{"issuer":"anything"}`)}, {Handler: "headers", Config: json.RawMessage(`{"headers":{"X-User":"user"}}`)}},
 			Upstream: rule.Upstream{
 				URL:          "http://localhost:333/",
 				StripPath:    "/foo",

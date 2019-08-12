@@ -42,6 +42,7 @@
 
   /**
    * Constructs a new <code>SwaggerGetRuleParameters</code>.
+   * SwaggerGetRuleParameters swagger get rule parameters
    * @alias module:model/SwaggerGetRuleParameters
    * @class
    * @param id {String} in: path

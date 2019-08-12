@@ -42,7 +42,7 @@
 
   /**
    * Constructs a new <code>SwaggerUpdateRuleParameters</code>.
-   * SwaggerUpdateRuleParameters SwaggerUpdateRuleParameters swagger update rule parameters
+   * SwaggerUpdateRuleParameters SwaggerUpdateRuleParameters SwaggerUpdateRuleParameters SwaggerUpdateRuleParameters SwaggerUpdateRuleParameters swagger update rule parameters
    * @alias module:model/SwaggerUpdateRuleParameters
    * @class
    * @param id {String} in: path

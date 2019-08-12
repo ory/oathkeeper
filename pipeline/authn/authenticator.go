@@ -26,4 +26,12 @@ type Authenticator interface {
 type AuthenticationSession struct {
 	Subject string                 `json:"subject"`
 	Extra   map[string]interface{} `json:"extra"`
+	Header  http.Header            `json:"header"`
+}
+
+func (a *AuthenticationSession) SetHeader(key, val string) {
+	if a.Header == nil {
+		a.Header = map[string][]string{}
+	}
+	a.Header.Set(key, val)
 }

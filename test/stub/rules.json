@@ -24,9 +24,11 @@
     "authorizer": {
       "handler": "allow"
     },
-    "mutator": {
-      "handler": "noop"
-    }
+    "mutators": [
+      {
+        "handler": "noop"
+      }
+    ]
   },
   {
     "id": "test-rule-2",
@@ -53,9 +55,19 @@
     "authorizer": {
       "handler": "deny"
     },
-    "mutator": {
-      "handler": "id_token"
-    }
+    "mutators": [
+      {
+        "handler": "id_token"
+      },
+      {
+        "handler": "headers",
+        "config": {
+          "headers": {
+            "X-User": "{{ print .Subject }}"
+          }
+        }
+      }
+    ]
   },
   {
     "id": "test-rule-3",
@@ -82,8 +94,10 @@
     "authorizer": {
       "handler": "allow"
     },
-    "mutator": {
-      "handler": "id_token"
-    }
+    "mutators": [
+      {
+        "handler": "id_token"
+      }
+    ]
   }
 ]

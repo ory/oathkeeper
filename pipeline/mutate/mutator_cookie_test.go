@@ -160,7 +160,7 @@ func TestCredentialsIssuerCookies(t *testing.T) {
 		t.Run("caching=off", func(t *testing.T) {
 			for testName, specs := range testMap {
 				t.Run(testName, func(t *testing.T) {
-					header, err := a.Mutate(specs.Request, specs.Session, specs.Config, specs.Rule)
+					err := a.Mutate(specs.Request, specs.Session, specs.Config, specs.Rule)
 					if specs.Err == nil {
 						// Issuer must run without error
 						require.NoError(t, err)
@@ -168,7 +168,7 @@ func TestCredentialsIssuerCookies(t *testing.T) {
 						assert.EqualError(t, err, specs.Err.Error())
 					}
 
-					specs.Request.Header = header
+					specs.Request.Header = specs.Session.Header
 					assert.Equal(t, serializeCookies(specs.Match), serializeCookies(specs.Request.Cookies()))
 				})
 			}
@@ -192,7 +192,7 @@ func TestCredentialsIssuerCookies(t *testing.T) {
 
 				a.(*MutatorCookie).WithCache(cache)
 
-				header, err := a.Mutate(specs.Request, specs.Session, specs.Config, specs.Rule)
+				err := a.Mutate(specs.Request, specs.Session, specs.Config, specs.Rule)
 				if specs.Err == nil {
 					// Issuer must run without error
 					require.NoError(t, err)
@@ -200,7 +200,7 @@ func TestCredentialsIssuerCookies(t *testing.T) {
 					assert.EqualError(t, err, specs.Err.Error())
 				}
 
-				specs.Request.Header = header
+				specs.Request.Header = specs.Session.Header
 				assert.Equal(t, serializeCookies(overrideCookies), serializeCookies(specs.Request.Cookies()))
 			}
 		})

@@ -42,7 +42,7 @@
 
   /**
    * Constructs a new <code>GetWellKnownJSONWebKeysInternalServerErrorBody</code>.
-   * GetWellKnownJSONWebKeysInternalServerErrorBody get well known JSON web keys internal server error body
+   * GetWellKnownJSONWebKeysInternalServerErrorBody GetWellKnownJSONWebKeysInternalServerErrorBody get well known JSON web keys internal server error body
    * @alias module:model/GetWellKnownJSONWebKeysInternalServerErrorBody
    * @class
    */

@@ -12,7 +12,7 @@ import (
 	"github.com/go-openapi/swag"
 )
 
-// DeleteRuleUnauthorized DeleteRuleUnauthorized DeleteRuleUnauthorized DeleteRuleUnauthorized DeleteRuleUnauthorized handles this case with default header values.
+// DeleteRuleUnauthorized DeleteRuleUnauthorized DeleteRuleUnauthorized DeleteRuleUnauthorized DeleteRuleUnauthorized DeleteRuleUnauthorized DeleteRuleUnauthorized DeleteRuleUnauthorized handles this case with default header values.
 //
 // The standard error format
 // swagger:model DeleteRuleUnauthorized

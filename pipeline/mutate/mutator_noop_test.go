@@ -24,6 +24,8 @@ import (
 	"net/http"
 	"testing"
 
+	"github.com/ory/oathkeeper/pipeline/authn"
+
 	"github.com/ory/viper"
 
 	"github.com/ory/oathkeeper/driver/configuration"
@@ -43,9 +45,10 @@ func TestMutatorNoop(t *testing.T) {
 
 	t.Run("method=mutate/case=passes always", func(t *testing.T) {
 		r := &http.Request{Header: http.Header{"foo": {"foo"}}}
-		headers, err := a.Mutate(r, nil, nil, nil)
+		s := &authn.AuthenticationSession{}
+		err := a.Mutate(r, s, nil, nil)
 		require.NoError(t, err)
-		assert.EqualValues(t, r.Header, headers)
+		assert.EqualValues(t, r.Header, s.Header)
 	})
 
 	t.Run("method=validate", func(t *testing.T) {

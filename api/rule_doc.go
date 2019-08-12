@@ -110,9 +110,11 @@ type swaggerRule struct {
 	// making the request.
 	Authorizer swaggerRuleHandler `json:"authorizer"`
 
-	// Mutator is a handler that transform the HTTP request. A common use case is generating a new set of credentials
-	// (e.g. JWT) which then will be forwarded to the upstream server.
-	Mutator swaggerRuleHandler `json:"mutator"`
+	// Mutators is a list of mutation handlers that transform the HTTP request. A common use case is generating a new set
+	// of credentials (e.g. JWT) which then will be forwarded to the upstream server.
+	//
+	// Mutations are performed iteratively from index 0 to n and should all succeed in order for the HTTP request to be forwarded.
+	Mutators []swaggerRuleHandler `json:"mutators"`
 
 	// Upstream is the location of the server where requests matching this rule should be forwarded to.
 	Upstream *rule.Upstream `json:"upstream"`

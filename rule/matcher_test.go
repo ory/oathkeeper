@@ -37,7 +37,7 @@ var testRules = []Rule{
 		Description:    "Create users rule",
 		Authorizer:     RuleHandler{Handler: "allow", Config: []byte(`{"type":"any"}`)},
 		Authenticators: []RuleHandler{{Handler: "anonymous", Config: []byte(`{"name":"anonymous1"}`)}},
-		Mutator:        RuleHandler{Handler: "id_token", Config: []byte(`{"issuer":"anything"}`)},
+		Mutators:       []RuleHandler{{Handler: "id_token", Config: []byte(`{"issuer":"anything"}`)}},
 		Upstream:       Upstream{URL: "http://localhost:1235/", StripPath: "/bar", PreserveHost: true},
 	},
 	{
@@ -46,7 +46,7 @@ var testRules = []Rule{
 		Description:    "Get users rule",
 		Authorizer:     RuleHandler{Handler: "deny", Config: []byte(`{"type":"any"}`)},
 		Authenticators: []RuleHandler{{Handler: "oauth2_introspection", Config: []byte(`{"name":"anonymous1"}`)}},
-		Mutator:        RuleHandler{Handler: "id_token", Config: []byte(`{"issuer":"anything"}`)},
+		Mutators:       []RuleHandler{{Handler: "id_token", Config: []byte(`{"issuer":"anything"}`)}},
 		Upstream:       Upstream{URL: "http://localhost:333/", StripPath: "/foo", PreserveHost: false},
 	},
 	{
@@ -55,7 +55,7 @@ var testRules = []Rule{
 		Description:    "Get users rule",
 		Authorizer:     RuleHandler{Handler: "deny"},
 		Authenticators: []RuleHandler{{Handler: "oauth2_introspection"}},
-		Mutator:        RuleHandler{Handler: "id_token"},
+		Mutators:       []RuleHandler{{Handler: "id_token"}},
 		Upstream:       Upstream{URL: "http://localhost:3333/", StripPath: "/foo", PreserveHost: false},
 	},
 }

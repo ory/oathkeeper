@@ -145,7 +145,7 @@ func TestCredentialsIssuerHeaders(t *testing.T) {
 		t.Run("cache=disabled", func(t *testing.T) {
 			for testName, specs := range testMap {
 				t.Run(testName, func(t *testing.T) {
-					header, err := a.Mutate(specs.Request, specs.Session, specs.Config, specs.Rule)
+					err := a.Mutate(specs.Request, specs.Session, specs.Config, specs.Rule)
 					if specs.Err == nil {
 						// Issuer must run without error
 						require.NoError(t, err)
@@ -153,8 +153,8 @@ func TestCredentialsIssuerHeaders(t *testing.T) {
 						assert.Error(t, err, specs.Err.Error())
 					}
 
-					specs.Request.Header = header
-					if header == nil {
+					specs.Request.Header = specs.Session.Header
+					if specs.Session.Header == nil {
 						specs.Request.Header = http.Header{}
 					}
 
@@ -182,7 +182,7 @@ func TestCredentialsIssuerHeaders(t *testing.T) {
 
 				a.(*MutatorHeader).WithCache(cache)
 
-				header, err := a.Mutate(specs.Request, specs.Session, specs.Config, specs.Rule)
+				err := a.Mutate(specs.Request, specs.Session, specs.Config, specs.Rule)
 				if specs.Err == nil {
 					// Issuer must run without error
 					require.NoError(t, err)
@@ -190,8 +190,8 @@ func TestCredentialsIssuerHeaders(t *testing.T) {
 					assert.Error(t, err, specs.Err.Error())
 				}
 
-				specs.Request.Header = header
-				if header == nil {
+				specs.Request.Header = specs.Session.Header
+				if specs.Session.Header == nil {
 					specs.Request.Header = http.Header{}
 				}
 

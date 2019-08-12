@@ -42,7 +42,7 @@
 
   /**
    * Constructs a new <code>ListRulesForbiddenBody</code>.
-   * ListRulesForbiddenBody ListRulesForbiddenBody ListRulesForbiddenBody ListRulesForbiddenBody list rules forbidden body
+   * ListRulesForbiddenBody ListRulesForbiddenBody ListRulesForbiddenBody ListRulesForbiddenBody ListRulesForbiddenBody ListRulesForbiddenBody ListRulesForbiddenBody list rules forbidden body
    * @alias module:model/ListRulesForbiddenBody
    * @class
    */

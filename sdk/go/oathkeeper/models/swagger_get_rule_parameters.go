@@ -13,8 +13,8 @@ import (
 	"github.com/go-openapi/validate"
 )
 
-// SwaggerGetRuleParameters swagger get rule parameters
-// swagger:model swaggerGetRuleParameters
+// SwaggerGetRuleParameters SwaggerGetRuleParameters swagger get rule parameters
+// swagger:model SwaggerGetRuleParameters
 type SwaggerGetRuleParameters struct {
 
 	// in: path
