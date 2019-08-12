@@ -456,7 +456,7 @@
         "id_token": {
           "type": "object",
           "title": "ID Token (JSON Web Token)",
-          "description": "The [`header` mutator](https://www.ory.sh/docs/oathkeeper/pipeline/mutator#header).",
+          "description": "The [`id_token` mutator](https://www.ory.sh/docs/oathkeeper/pipeline/mutator#id_token).",
           "additionalProperties": false,
           "properties": {
             "enabled": {
