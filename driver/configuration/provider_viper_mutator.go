@@ -14,7 +14,7 @@ const (
 
 	ViperKeyMutatorNoopIsEnabled = "mutators.noop.enabled"
 
-	ViperKeyMutatorHydratorIsEnabled = "mutators.Hydrator.enabled"
+	ViperKeyMutatorHydratorIsEnabled = "mutators.hydrator.enabled"
 
 	ViperKeyMutatorIDTokenIsEnabled = "mutators.id_token.enabled"
 	ViperKeyMutatorIDTokenIssuerURL = "mutators.id_token.issuer_url"
