@@ -44,6 +44,33 @@ before finalizing the upgrade process.
 1. ORY Oathkeeper now supports multiple mutators. Mutations are performed in the provided order and must all succeed in order for the HTTP request to be forwarded.
 2. The `mutator` property was renamed to `mutators` to reflect its true nature (see previous item).
 
+#### id_token mutator
+
+The id_token mutator now allows to specify custom claims via the `claims` field of the mutator's `config` field. The keys represent names of claims and the values are strings which will be parsed by the Go [text/template](https://golang.org/pkg/text/template/) package for value substitution, receiving the `AuthenticationSession` struct. You must now specify
+the audience of the ID token directly via the `aud` claim. If you use `id_token` mutators with defined audience, please update them as follows:
+
+deprecated config:
+```json
+{
+  "handler": "id_token",
+  "config": {
+    "aud": ["https://my-backend-service/some/endpoint"]
+  }
+}
+```
+
+new config:
+```json
+{
+  "handler": "id_token",
+  "config": {
+    "claims": {
+      "aud": ["https://my-backend-service/some/endpoint"]
+    }
+  }
+}
+```
+
 ### Access Rule Changes
 
 As already noted, the `mutator` property was renamed to `mutators` and now represents a list of mutation handlers. If you have
