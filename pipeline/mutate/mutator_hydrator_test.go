@@ -33,6 +33,12 @@ func setExtra(key string, value interface{}) func(a *authn.AuthenticationSession
 	}
 }
 
+func setSubject(subject string) func(a *authn.AuthenticationSession) {
+	return func(a *authn.AuthenticationSession) {
+		a.Subject = subject
+	}
+}
+
 func newAuthenticationSession(modifications ...func(a *authn.AuthenticationSession)) *authn.AuthenticationSession {
 	a := authn.AuthenticationSession{}
 	for _, f := range modifications {
@@ -116,11 +122,12 @@ func TestMutatorHydrator(t *testing.T) {
 	conf := internal.NewConfigurationWithDefaults()
 	reg := internal.NewRegistry(conf)
 
-	a, err := reg.PipelineMutator("Hydrator")
+	a, err := reg.PipelineMutator("hydrator")
 	require.NoError(t, err)
-	assert.Equal(t, "Hydrator", a.GetID())
+	assert.Equal(t, "hydrator", a.GetID())
 
 	t.Run("method=mutate", func(t *testing.T) {
+		sampleSubject := "sub"
 		sampleKey := "foo"
 		sampleValue := "bar"
 		complexValueKey := "complex"
@@ -176,6 +183,15 @@ func TestMutatorHydrator(t *testing.T) {
 				Match:   newAuthenticationSession(setExtra(sampleKey, sampleValue)),
 				Err:     nil,
 			},
+			"No Extra Before And After": {
+				Setup:   defaultRouterSetup(),
+				Session: newAuthenticationSession(setSubject(sampleSubject)),
+				Rule:    &rule.Rule{ID: "test-rule"},
+				Config:  defaultConfigForMutator(),
+				Request: &http.Request{},
+				Match:   newAuthenticationSession(setSubject(sampleSubject)),
+				Err:     nil,
+			},
 			"Empty Response": {
 				Setup: func(t *testing.T) http.Handler {
 					router := httprouter.New()
@@ -186,11 +202,11 @@ func TestMutatorHydrator(t *testing.T) {
 					})
 					return router
 				},
-				Session: newAuthenticationSession(),
+				Session: newAuthenticationSession(setSubject(sampleSubject)),
 				Rule:    &rule.Rule{ID: "test-rule"},
 				Config:  defaultConfigForMutator(),
 				Request: &http.Request{},
-				Match:   newAuthenticationSession(),
+				Match:   newAuthenticationSession(setSubject(sampleSubject)),
 				Err:     errors.New(mutate.ErrMalformedResponseFromUpstreamAPI),
 			},
 			"Missing API URL": {

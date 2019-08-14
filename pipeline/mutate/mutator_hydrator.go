@@ -47,6 +47,8 @@ const (
 	ErrNoCredentialsProvided            = "No credentials were provided in mutator configuration"
 	defaultNumberOfRetries              = 3
 	defaultDelayInMilliseconds          = 100
+	contentTypeHeaderKey                = "Content-Type"
+	contentTypeJSONHeaderValue          = "application/json"
 )
 
 type MutatorHydrator struct {
@@ -83,7 +85,7 @@ func NewMutatorHydrator(c configuration.Provider) *MutatorHydrator {
 }
 
 func (a *MutatorHydrator) GetID() string {
-	return "Hydrator"
+	return "hydrator"
 }
 
 func (a *MutatorHydrator) Mutate(r *http.Request, session *authn.AuthenticationSession, config json.RawMessage, _ pipeline.Rule) error {
@@ -121,6 +123,7 @@ func (a *MutatorHydrator) Mutate(r *http.Request, session *authn.AuthenticationS
 		credentials := cfg.Api.Authn.Basic
 		req.SetBasicAuth(credentials.Username, credentials.Password)
 	}
+	req.Header.Set(contentTypeHeaderKey, contentTypeJSONHeaderValue)
 
 	retryConfig := RetryConfig{defaultNumberOfRetries, defaultDelayInMilliseconds}
 	if cfg.Api.Retry != nil {
@@ -154,7 +157,7 @@ func (a *MutatorHydrator) Mutate(r *http.Request, session *authn.AuthenticationS
 	if err != nil {
 		return errors.WithStack(err)
 	}
-	if sessionFromUpstream.Extra == nil || sessionFromUpstream.Subject != session.Subject {
+	if sessionFromUpstream.Subject != session.Subject {
 		return errors.New(ErrMalformedResponseFromUpstreamAPI)
 	}
 	*session = sessionFromUpstream
