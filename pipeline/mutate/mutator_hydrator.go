@@ -23,10 +23,11 @@ package mutate
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/ory/oathkeeper/pipeline/authn"
 	"net/http"
 	"net/url"
 	"time"
+
+	"github.com/ory/oathkeeper/pipeline/authn"
 
 	"github.com/cenkalti/backoff"
 
