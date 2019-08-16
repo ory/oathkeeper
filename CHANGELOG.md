@@ -3,6 +3,7 @@
 **Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
 
 - [Change Log](#change-log)
+  - [v0.17.5-beta.1 (2019-08-16)](#v0175-beta1-2019-08-16)
   - [v0.17.4-beta.1 (2019-08-09)](#v0174-beta1-2019-08-09)
   - [v0.17.3-beta.1 (2019-08-03)](#v0173-beta1-2019-08-03)
   - [v0.17.2-beta.1 (2019-08-02)](#v0172-beta1-2019-08-02)
@@ -69,6 +70,18 @@
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 # Change Log
+
+## [v0.17.5-beta.1](https://github.com/ory/oathkeeper/tree/v0.17.5-beta.1) (2019-08-16)
+[Full Changelog](https://github.com/ory/oathkeeper/compare/v0.17.4-beta.1...v0.17.5-beta.1)
+
+**Merged pull requests:**
+
+- Add mutator for modifying authenticationSession with external API [\#240](https://github.com/ory/oathkeeper/pull/240) ([kubadz](https://github.com/kubadz))
+- docs: Updates issue and pull request templates [\#239](https://github.com/ory/oathkeeper/pull/239) ([aeneasr](https://github.com/aeneasr))
+- docs: Updates issue and pull request templates [\#238](https://github.com/ory/oathkeeper/pull/238) ([aeneasr](https://github.com/aeneasr))
+- docs: Updates issue and pull request templates [\#237](https://github.com/ory/oathkeeper/pull/237) ([aeneasr](https://github.com/aeneasr))
+- doc: Add adopters placeholder [\#236](https://github.com/ory/oathkeeper/pull/236) ([aeneasr](https://github.com/aeneasr))
+- support multiple mutators [\#233](https://github.com/ory/oathkeeper/pull/233) ([jakkab](https://github.com/jakkab))
 
 ## [v0.17.4-beta.1](https://github.com/ory/oathkeeper/tree/v0.17.4-beta.1) (2019-08-09)
 [Full Changelog](https://github.com/ory/oathkeeper/compare/v0.17.3-beta.1...v0.17.4-beta.1)
