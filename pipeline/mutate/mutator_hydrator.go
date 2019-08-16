@@ -23,6 +23,7 @@ package mutate
 import (
 	"bytes"
 	"encoding/json"
+	"github.com/ory/oathkeeper/pipeline/authn"
 	"net/http"
 	"net/url"
 	"time"
@@ -35,7 +36,6 @@ import (
 
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/pipeline"
-	"github.com/ory/oathkeeper/pipeline/authn"
 )
 
 const (
@@ -56,13 +56,13 @@ type MutatorHydrator struct {
 	client *http.Client
 }
 
-type BasicAuthn struct {
+type BasicAuth struct {
 	Username string `json:"username"`
 	Password string `json:"password"`
 }
 
-type Authentication struct {
-	Basic BasicAuthn `json:"basic"`
+type Auth struct {
+	Basic BasicAuth `json:"basic"`
 }
 
 type RetryConfig struct {
@@ -71,9 +71,9 @@ type RetryConfig struct {
 }
 
 type externalAPIConfig struct {
-	Url   string          `json:"url"`
-	Authn *Authentication `json:"authn,omitempty"`
-	Retry *RetryConfig    `json:"retry,omitempty"`
+	Url   string       `json:"url"`
+	Auth  *Auth        `json:"auth,omitempty"`
+	Retry *RetryConfig `json:"retry,omitempty"`
 }
 
 type MutatorHydratorConfig struct {
@@ -119,8 +119,8 @@ func (a *MutatorHydrator) Mutate(r *http.Request, session *authn.AuthenticationS
 			req.Header.Add(key, value)
 		}
 	}
-	if cfg.Api.Authn != nil {
-		credentials := cfg.Api.Authn.Basic
+	if cfg.Api.Auth != nil {
+		credentials := cfg.Api.Auth.Basic
 		req.SetBasicAuth(credentials.Username, credentials.Password)
 	}
 	req.Header.Set(contentTypeHeaderKey, contentTypeJSONHeaderValue)
@@ -139,7 +139,7 @@ func (a *MutatorHydrator) Mutate(r *http.Request, session *authn.AuthenticationS
 		case http.StatusOK:
 			return nil
 		case http.StatusUnauthorized:
-			if cfg.Api.Authn != nil {
+			if cfg.Api.Auth != nil {
 				return errors.New(ErrInvalidCredentials)
 			} else {
 				return errors.New(ErrNoCredentialsProvided)

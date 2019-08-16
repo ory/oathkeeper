@@ -108,7 +108,7 @@ func defaultConfigForMutator() func(*httptest.Server) json.RawMessage {
 
 func configWithBasicAuthnForMutator(user, password string) func(*httptest.Server) json.RawMessage {
 	return func(s *httptest.Server) json.RawMessage {
-		return []byte(fmt.Sprintf(`{"api": {"url": "%s", "authn": {"basic": {"username": "%s", "password": "%s"}}}}`, s.URL, user, password))
+		return []byte(fmt.Sprintf(`{"api": {"url": "%s", "auth": {"basic": {"username": "%s", "password": "%s"}}}}`, s.URL, user, password))
 	}
 }
 
