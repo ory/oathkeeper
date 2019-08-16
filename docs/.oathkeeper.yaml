@@ -211,6 +211,11 @@ mutators:
     # Set enabled to true if the mutator should be enabled and false to disable the mutator. Defaults to false.
     enabled: true
 
+  # Configures the hydrator mutator
+  hydrator:
+    # Set enabled to true if the mutator should be enabled and false to disable the mutator. Defaults to false.
+    enabled: true
+
   # Configures the id_token mutator
   id_token:
     # Set enabled to true if the mutator should be enabled and false to disable the mutator. Defaults to false.

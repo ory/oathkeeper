@@ -67,6 +67,7 @@ func BindEnvs() {
 		ViperKeyMutatorCookieIsEnabled,
 		ViperKeyMutatorHeaderIsEnabled,
 		ViperKeyMutatorNoopIsEnabled,
+		ViperKeyMutatorHydratorIsEnabled,
 		ViperKeyMutatorIDTokenIsEnabled,
 		ViperKeyMutatorIDTokenIssuerURL,
 		ViperKeyMutatorIDTokenJWKSURL,
