@@ -218,7 +218,7 @@ func TestRequestHandler(t *testing.T) {
 				tc.setup()
 			}
 
-			_, err := reg.ProxyRequestHandler().HandleRequest(tc.r, &tc.rule)
+			_, _, err := reg.ProxyRequestHandler().HandleRequest(tc.r, &tc.rule)
 			if tc.expectErr {
 				require.Error(t, err)
 			} else {

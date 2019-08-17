@@ -51,7 +51,7 @@ func NewRequestHandler(r requestHandlerRegistry) *RequestHandler {
 	return &RequestHandler{r: r}
 }
 
-func (d *RequestHandler) HandleRequest(r *http.Request, rl *rule.Rule) (http.Header, error) {
+func (d *RequestHandler) HandleRequest(r *http.Request, rl *rule.Rule) (http.Header, string, error) {
 	var err error
 	var session *authn.AuthenticationSession
 	var found bool
@@ -63,7 +63,7 @@ func (d *RequestHandler) HandleRequest(r *http.Request, rl *rule.Rule) (http.Hea
 			WithField("access_url", r.URL.String()).
 			WithField("reason_id", "authentication_handler_missing").
 			Warn("No authentication handler was set in the rule")
-		return nil, err
+		return nil, "", err
 	}
 
 	for _, a := range rl.Authenticators {
@@ -75,7 +75,7 @@ func (d *RequestHandler) HandleRequest(r *http.Request, rl *rule.Rule) (http.Hea
 				WithField("authentication_handler", a.Handler).
 				WithField("reason_id", "unknown_authentication_handler").
 				Warn("Unknown authentication handler requested")
-			return nil, err
+			return nil, "", err
 		}
 
 		if err := anh.Validate(); err != nil {
@@ -85,7 +85,7 @@ func (d *RequestHandler) HandleRequest(r *http.Request, rl *rule.Rule) (http.Hea
 				WithField("authentication_handler", a.Handler).
 				WithField("reason_id", "invalid_authentication_handler").
 				Warn("Unable to validate use of authentication handler")
-			return nil, err
+			return nil, "", err
 		}
 
 		session, err = anh.Authenticate(r, a.Config, rl)
@@ -105,7 +105,7 @@ func (d *RequestHandler) HandleRequest(r *http.Request, rl *rule.Rule) (http.Hea
 					WithField("authentication_handler", a.Handler).
 					WithField("reason_id", "authentication_handler_error").
 					Warn("The authentication handler encountered an error")
-				return nil, err
+				return nil, "", err
 			}
 		} else {
 			// The first authenticator that matches must return the session
@@ -121,7 +121,7 @@ func (d *RequestHandler) HandleRequest(r *http.Request, rl *rule.Rule) (http.Hea
 			WithField("access_url", r.URL.String()).
 			WithField("reason_id", "authentication_handler_no_match").
 			Warn("No authentication handler was responsible for handling the authentication request")
-		return nil, err
+		return nil, "", err
 	}
 
 	azh, err := d.r.PipelineAuthorizer(rl.Authorizer.Handler)
@@ -132,7 +132,7 @@ func (d *RequestHandler) HandleRequest(r *http.Request, rl *rule.Rule) (http.Hea
 			WithField("authorization_handler", rl.Authorizer.Handler).
 			WithField("reason_id", "unknown_authorization_handler").
 			Warn("Unknown authentication handler requested")
-		return nil, err
+		return nil, session.Subject, err
 	}
 
 	if err := azh.Validate(); err != nil {
@@ -142,7 +142,7 @@ func (d *RequestHandler) HandleRequest(r *http.Request, rl *rule.Rule) (http.Hea
 			WithField("authorization_handler", rl.Authorizer.Handler).
 			WithField("reason_id", "invalid_authorization_handler").
 			Warn("Unable to validate use of authorization handler")
-		return nil, err
+		return nil, session.Subject, err
 	}
 
 	if err := azh.Authorize(r, session, rl.Authorizer.Config, rl); err != nil {
@@ -153,7 +153,7 @@ func (d *RequestHandler) HandleRequest(r *http.Request, rl *rule.Rule) (http.Hea
 			WithField("authorization_handler", rl.Authorizer.Handler).
 			WithField("reason_id", "authorization_handler_error").
 			Warn("The authorization handler encountered an error")
-		return nil, err
+		return nil, session.Subject, err
 	}
 
 	if len(rl.Mutators) == 0 {
@@ -163,7 +163,7 @@ func (d *RequestHandler) HandleRequest(r *http.Request, rl *rule.Rule) (http.Hea
 			WithField("access_url", r.URL.String()).
 			WithField("reason_id", "mutation_handler_missing").
 			Warn("No mutation handler was set in the rule")
-		return nil, err
+		return nil, session.Subject, err
 	}
 
 	for _, m := range rl.Mutators {
@@ -175,7 +175,7 @@ func (d *RequestHandler) HandleRequest(r *http.Request, rl *rule.Rule) (http.Hea
 				WithField("session_handler", m.Handler).
 				WithField("reason_id", "unknown_mutation_handler").
 				Warn("Unknown mutator requested")
-			return nil, err
+			return nil, session.Subject, err
 		}
 
 		if err := sh.Validate(); err != nil {
@@ -185,7 +185,7 @@ func (d *RequestHandler) HandleRequest(r *http.Request, rl *rule.Rule) (http.Hea
 				WithField("authorization_handler", m.Handler).
 				WithField("reason_id", "invalid_mutation_handler").
 				Warn("Invalid mutator requested")
-			return nil, err
+			return nil, session.Subject, err
 		}
 
 		if err := sh.Mutate(r, session, m.Config, rl); err != nil {
@@ -195,10 +195,10 @@ func (d *RequestHandler) HandleRequest(r *http.Request, rl *rule.Rule) (http.Hea
 				WithField("authorization_handler", m.Handler).
 				WithField("reason_id", "mutation_handler_error").
 				Warn("The mutation handler encountered an error")
-			return nil, err
+			return nil, session.Subject, err
 		}
 
 	}
 
-	return session.Header, nil
+	return session.Header, session.Subject, nil
 }

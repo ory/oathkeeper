@@ -53,14 +53,19 @@ type Proxy struct {
 type key int
 
 const director key = 0
+const subjectKey key = 1
 
 func (d *Proxy) RoundTrip(r *http.Request) (*http.Response, error) {
 	rw := NewSimpleResponseWriter()
+
+	subject, _ := r.Context().Value(subjectKey).(string)
 
 	if err, ok := r.Context().Value(director).(error); ok && err != nil {
 		d.r.Logger().WithError(err).
 			WithField("granted", false).
 			WithField("access_url", r.URL.String()).
+			WithField("method", r.Method).
+			WithField("subject", subject).
 			Warn("Access request denied")
 
 		d.r.Writer().WriteError(rw, r, err)
@@ -77,12 +82,16 @@ func (d *Proxy) RoundTrip(r *http.Request) (*http.Response, error) {
 				WithError(errors.WithStack(err)).
 				WithField("granted", false).
 				WithField("access_url", r.URL.String()).
+				WithField("method", r.Method).
+				WithField("subject", subject).
 				Warn("Access request denied because roundtrip failed")
 			// don't need to return because covered in next line
 		} else {
 			d.r.Logger().
 				WithField("granted", true).
 				WithField("access_url", r.URL.String()).
+				WithField("method", r.Method).
+				WithField("subject", subject).
 				Warn("Access request granted")
 		}
 
@@ -94,6 +103,8 @@ func (d *Proxy) RoundTrip(r *http.Request) (*http.Response, error) {
 		WithError(err).
 		WithField("granted", false).
 		WithField("access_url", r.URL.String()).
+		WithField("method", r.Method).
+		WithField("subject", subject).
 		Warn("Unable to type assert context")
 
 	d.r.Writer().Write(rw, r, err)
@@ -113,11 +124,13 @@ func (d *Proxy) Director(r *http.Request) {
 		return
 	}
 
-	headers, err := d.r.ProxyRequestHandler().HandleRequest(r, rl)
+	headers, subject, err := d.r.ProxyRequestHandler().HandleRequest(r, rl)
 	if err != nil {
 		*r = *r.WithContext(context.WithValue(r.Context(), director, err))
 		return
 	}
+
+	*r = *r.WithContext(context.WithValue(r.Context(), subjectKey, subject))
 
 	for h := range headers {
 		r.Header.Set(h, headers.Get(h))

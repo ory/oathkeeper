@@ -88,16 +88,20 @@ func (h *DecisionHandler) decisions(w http.ResponseWriter, r *http.Request) {
 		h.r.Logger().WithError(err).
 			WithField("granted", false).
 			WithField("access_url", r.URL.String()).
+			WithField("method", r.Method).
+			WithField("subject", "").
 			Warn("Access request denied")
 		h.r.Writer().WriteError(w, r, err)
 		return
 	}
 
-	headers, err := h.r.ProxyRequestHandler().HandleRequest(r, rl)
+	headers, subject, err := h.r.ProxyRequestHandler().HandleRequest(r, rl)
 	if err != nil {
 		h.r.Logger().WithError(err).
 			WithField("granted", false).
 			WithField("access_url", r.URL.String()).
+			WithField("method", r.Method).
+			WithField("subject", subject).
 			Warn("Access request denied")
 		h.r.Writer().WriteError(w, r, err)
 		return
@@ -106,6 +110,8 @@ func (h *DecisionHandler) decisions(w http.ResponseWriter, r *http.Request) {
 	h.r.Logger().
 		WithField("granted", true).
 		WithField("access_url", r.URL.String()).
+		WithField("method", r.Method).
+		WithField("subject", subject).
 		Warn("Access request granted")
 
 	for k := range headers {
