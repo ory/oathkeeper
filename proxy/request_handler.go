@@ -131,7 +131,7 @@ func (d *RequestHandler) HandleRequest(r *http.Request, rl *rule.Rule) (http.Hea
 			WithField("access_url", r.URL.String()).
 			WithField("authorization_handler", rl.Authorizer.Handler).
 			WithField("reason_id", "unknown_authorization_handler").
-			Warn("Unknown authentication handler requested")
+			Warn("Unknown authorization handler requested")
 		return nil, session.Subject, err
 	}
 
