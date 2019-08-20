@@ -44,7 +44,7 @@ require (
 	github.com/ory/hive v0.0.0-00010101000000-000000000000
 	github.com/ory/ladon v1.0.1
 	github.com/ory/viper v1.5.6
-	github.com/ory/x v0.0.66
+	github.com/ory/x v0.0.72
 	github.com/pborman/uuid v1.2.0
 	github.com/phayes/freeport v0.0.0-20180830031419-95f893ade6f2
 	github.com/pkg/errors v0.8.1

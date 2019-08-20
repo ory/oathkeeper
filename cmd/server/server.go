@@ -10,6 +10,7 @@ import (
 	"sync"
 
 	negronilogrus "github.com/meatballhat/negroni-logrus"
+	"github.com/ory/x/reqlog"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -40,7 +41,7 @@ func runProxy(d driver.Driver, n *negroni.Negroni, logger *logrus.Logger) func()
 			Transport: proxy,
 		}
 
-		n.Use(negronilogrus.NewMiddlewareFromLogger(logger, "oathkeeper-proxy"))
+		n.Use(reqlog.NewMiddlewareFromLogger(logger, "oathkeeper-proxy").ExcludePaths(healthx.ReadyCheckPath, healthx.AliveCheckPath))
 		n.UseHandler(handler)
 
 		h := corsx.Initialize(n, logger, "serve.proxy")
