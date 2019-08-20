@@ -162,6 +162,10 @@ func TestViperProvider(t *testing.T) {
 			assert.True(t, p.MutatorHeaderIsEnabled())
 		})
 
+		t.Run("mutator=hydrator", func(t *testing.T) {
+			assert.True(t, p.MutatorHydratorIsEnabled())
+		})
+
 		t.Run("mutator=id_token", func(t *testing.T) {
 			assert.True(t, p.MutatorIDTokenIsEnabled())
 			assert.EqualValues(t, urlx.ParseOrPanic("https://my-oathkeeper/"), p.MutatorIDTokenIssuerURL())

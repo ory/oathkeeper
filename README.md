@@ -157,7 +157,7 @@ that your company deserves a spot here, reach out to
             <td>Adopter *</td>
             <td>Arduino</td>
             <td align="center"><img height="32px" src="./docs/adopters/arduino.svg" alt="Arduino"></td>
-            <td><a href="https://www.arduino.cc/">segment.com</a></td>
+            <td><a href="https://www.arduino.cc/">arduino.cc</a></td>
         </tr>
     </tdbody>
 </table>
