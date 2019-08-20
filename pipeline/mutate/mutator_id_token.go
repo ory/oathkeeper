@@ -22,7 +22,9 @@ package mutate
 
 import (
 	"bytes"
+	"crypto/sha256"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"text/template"
 	"time"
@@ -31,12 +33,13 @@ import (
 
 	"github.com/dgrijalva/jwt-go"
 
+	"github.com/pborman/uuid"
+	"github.com/pkg/errors"
+
 	"github.com/ory/oathkeeper/credentials"
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/pipeline"
 	"github.com/ory/oathkeeper/pipeline/authn"
-	"github.com/pborman/uuid"
-	"github.com/pkg/errors"
 )
 
 type MutatorIDTokenRegistry interface {
@@ -50,7 +53,11 @@ type MutatorIDToken struct {
 }
 
 type CredentialsIDTokenConfig struct {
-	Claims jwt.MapClaims `json:"claims"`
+	Claims string `json:"claims"`
+}
+
+func (c *CredentialsIDTokenConfig) ClaimsTemplateID() string {
+	return fmt.Sprintf("%x", sha256.Sum256([]byte(c.Claims)))
 }
 
 func NewMutatorIDToken(c configuration.Provider, r MutatorIDTokenRegistry) *MutatorIDToken {
@@ -67,30 +74,33 @@ func (a *MutatorIDToken) WithCache(t *template.Template) {
 
 func (a *MutatorIDToken) Mutate(r *http.Request, session *authn.AuthenticationSession, config json.RawMessage, rl pipeline.Rule) error {
 	var claims = jwt.MapClaims{}
-	if len(config) != 0 {
+	if len(config) == 0 {
+		config = json.RawMessage("{}")
+	}
 
-		var err error
+	var c CredentialsIDTokenConfig
+	if err := jsonx.NewStrictDecoder(bytes.NewBuffer(config)).Decode(&c); err != nil {
+		return errors.WithStack(err)
+	}
 
-		templateID := rl.GetID()
-		tmpl := a.t.Lookup(templateID)
-		if tmpl == nil {
-			tmpl, err = a.t.New(templateID).Parse(string(config))
+	if len(c.Claims) > 0 {
+		t := a.t.Lookup(c.ClaimsTemplateID())
+		if t == nil {
+			var err error
+			t, err = a.t.New(c.ClaimsTemplateID()).Parse(c.Claims)
 			if err != nil {
 				return errors.Wrapf(err, `error parsing claims template in rule "%s"`, rl.GetID())
 			}
 		}
 
-		b := bytes.Buffer{}
-		if err := tmpl.Execute(&b, session); err != nil {
+		var b bytes.Buffer
+		if err := t.Execute(&b, session); err != nil {
 			return errors.Wrapf(err, `error executing claims template in rule "%s"`, rl.GetID())
 		}
 
-		var cc CredentialsIDTokenConfig
-		if err := jsonx.NewStrictDecoder(bytes.NewBuffer(b.Bytes())).Decode(&cc); err != nil {
+		if err := json.NewDecoder(&b).Decode(&claims); err != nil {
 			return errors.WithStack(err)
 		}
-
-		claims = cc.Claims
 	}
 
 	now := time.Now().UTC()

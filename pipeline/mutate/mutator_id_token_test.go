@@ -39,12 +39,13 @@ import (
 
 	"github.com/ory/viper"
 
+	"github.com/ory/x/urlx"
+
 	"github.com/ory/oathkeeper/credentials"
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/internal"
 	"github.com/ory/oathkeeper/pipeline/authn"
 	. "github.com/ory/oathkeeper/pipeline/mutate"
-	"github.com/ory/x/urlx"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -79,28 +80,28 @@ func TestMutatorIDToken(t *testing.T) {
 				{
 					Rule:    &rule.Rule{ID: "test-rule1"},
 					Session: &authn.AuthenticationSession{Subject: "foo"},
-					Config:  json.RawMessage([]byte(`{"claims": {"custom-claim": "{{ print .Subject }}", "aud": ["foo", "bar"]}}`)),
+					Config:  json.RawMessage([]byte(`{"claims": "{\"custom-claim\": \"{{ print .Subject }}\", \"aud\": [\"foo\", \"bar\"]}"}`)),
 					Match:   jwt.MapClaims{"custom-claim": "foo"},
 					K:       "file://../../test/stub/jwks-hs.json",
 				},
 				{
 					Rule:    &rule.Rule{ID: "test-rule2"},
 					Session: &authn.AuthenticationSession{Subject: "foo", Extra: map[string]interface{}{"abc": "value1"}},
-					Config:  json.RawMessage([]byte(`{"claims": {"custom-claim": "{{ print .Extra.abc }}", "aud": ["foo", "bar"]}}`)),
+					Config:  json.RawMessage([]byte(`{"claims": "{\"custom-claim\": \"{{ print .Extra.abc }}\", \"aud\": [\"foo\", \"bar\"]}"}`)),
 					Match:   jwt.MapClaims{"custom-claim": "value1"},
 					K:       "file://../../test/stub/jwks-rsa-multiple.json",
 				},
 				{
 					Rule:    &rule.Rule{ID: "test-rule3"},
 					Session: &authn.AuthenticationSession{Subject: "foo", Extra: map[string]interface{}{"abc": "value1", "def": "value2"}},
-					Config:  json.RawMessage([]byte(`{"claims": {"custom-claim": "{{ print .Extra.abc }}/{{ print .Extra.def }}", "aud": ["foo", "bar"]}}`)),
+					Config:  json.RawMessage([]byte(`{"claims": "{\"custom-claim\": \"{{ print .Extra.abc }}/{{ print .Extra.def }}\", \"aud\": [\"foo\", \"bar\"]}"}`)),
 					Match:   jwt.MapClaims{"custom-claim": "value1/value2"},
 					K:       "file://../../test/stub/jwks-ecdsa.json",
 				},
 				{
 					Rule:    &rule.Rule{ID: "test-rule4"},
 					Session: &authn.AuthenticationSession{Subject: "foo", Extra: map[string]interface{}{"abc": "value1", "def": "value2"}},
-					Config:  json.RawMessage([]byte(`{"claims": {"custom-claim": "{{ print .Extra.abc }}", "custom-claim2": "{{ print .Extra.def }}", "aud": ["foo", "bar"]}}`)),
+					Config:  json.RawMessage([]byte(`{"claims": "{\"custom-claim\": \"{{ print .Extra.abc }}\", \"custom-claim2\": \"{{ print .Extra.def }}\", \"aud\": [\"foo\", \"bar\"]}"}`)),
 					Match:   jwt.MapClaims{"custom-claim": "value1", "custom-claim2": "value2"},
 					K:       "file://../../test/stub/jwks-ecdsa.json",
 				},
@@ -115,7 +116,7 @@ func TestMutatorIDToken(t *testing.T) {
 				{
 					Rule:    &rule.Rule{ID: "test-rule6"},
 					Session: &authn.AuthenticationSession{Subject: "foo", Extra: map[string]interface{}{}},
-					Config:  json.RawMessage([]byte(`{"claims": {"custom-claim": "{{ print .Extra.def }}", "aud": ["foo", "bar"]}}`)),
+					Config:  json.RawMessage([]byte(`{"claims": "{\"custom-claim\": \"{{ print .Extra.def }}\", \"aud\": [\"foo\", \"bar\"]}"}`)),
 					Match:   jwt.MapClaims{"custom-claim": ""},
 					K:       "file://../../test/stub/jwks-rsa-multiple.json",
 				},
@@ -131,25 +132,25 @@ func TestMutatorIDToken(t *testing.T) {
 							},
 						},
 					},
-					Config: json.RawMessage([]byte(`{"claims": {
-						"custom-claim": "{{ print .Extra.nested.int }}",
-						"custom-claim2": "{{ print .Extra.nested.float64 }}",
-						"custom-claim3": "{{ print .Extra.nested.bool }}",
-						"aud": ["foo", "bar"]}}`)),
-					Match: jwt.MapClaims{"custom-claim": "10", "custom-claim2": "3.14159", "custom-claim3": "true"},
-					K:     "file://../../test/stub/jwks-ecdsa.json",
+					Config: json.RawMessage([]byte(`{"claims": "{\"custom-claim\": {{ print .Extra.nested.int }},\"custom-claim2\": {{ print .Extra.nested.float64 }},\"custom-claim3\": {{ print .Extra.nested.bool }},\"aud\": [\"foo\", \"bar\"]}"}`)),
+					Match: jwt.MapClaims{
+						"custom-claim":  float64(10), // the json decoder always converts to float64
+						"custom-claim2": 3.14159,
+						"custom-claim3": true,
+					},
+					K: "file://../../test/stub/jwks-ecdsa.json",
 				},
 				{
 					Rule:    &rule.Rule{ID: "test-rule8"},
 					Session: &authn.AuthenticationSession{Subject: "foo", Extra: map[string]interface{}{"example.com/some-claims": []string{"Foo", "Bar"}}},
-					Config:  json.RawMessage([]byte(`{"claims":{"custom-claim": "{{- (index .Extra "example.com/some-claims") | join "," -}}", "aud": ["foo", "bar"]}}`)),
+					Config:  json.RawMessage([]byte(`{"claims":"{\"custom-claim\": \"{{- (index .Extra \"example.com/some-claims\") | join \",\" -}}\", \"aud\": [\"foo\", \"bar\"]}"}`)),
 					Match:   jwt.MapClaims{"custom-claim": "Foo,Bar"},
 					K:       "file://../../test/stub/jwks-hs.json",
 				},
 				{
 					Rule:    &rule.Rule{ID: "test-rule9"},
 					Session: &authn.AuthenticationSession{Subject: "foo", Extra: map[string]interface{}{"malicious": "evil"}},
-					Config:  json.RawMessage([]byte(`{"claims": {"iss": "{{ print .Extra.malicious }}", "aud": ["foo", "bar"]}}`)),
+					Config:  json.RawMessage([]byte(`{"claims": "{\"iss\": \"{{ print .Extra.malicious }}\", \"aud\": [\"foo\", \"bar\"]}"}`)),
 					Match:   jwt.MapClaims{},
 					K:       "file://../../test/stub/jwks-ecdsa.json",
 				},
@@ -171,7 +172,7 @@ func TestMutatorIDToken(t *testing.T) {
 							Audiences:  []string{"foo", "bar"},
 							KeyURLs:    []url.URL{*urlx.ParseOrPanic(tc.K)},
 						})
-						require.NoError(t, err)
+						require.NoError(t, err, "token: %s", token)
 
 						ttl := time.Minute // default from config is time.Minute
 						if tc.Ttl > 0 {
@@ -182,7 +183,7 @@ func TestMutatorIDToken(t *testing.T) {
 						assert.True(t, time.Now().Add(ttl).Unix() >= int64(result.Claims.(jwt.MapClaims)["exp"].(float64)))
 
 						for key, val := range tc.Match {
-							assert.Equal(t, val, fmt.Sprintf("%s", result.Claims.(jwt.MapClaims)[key]))
+							assert.Equal(t, val, result.Claims.(jwt.MapClaims)[key])
 						}
 
 					} else {
@@ -197,7 +198,7 @@ func TestMutatorIDToken(t *testing.T) {
 			tc := testCase{
 				Rule:    &rule.Rule{ID: "test-rule"},
 				Session: &authn.AuthenticationSession{Subject: "foo", Extra: map[string]interface{}{"abc": "value1", "def": "value2"}},
-				Config:  json.RawMessage([]byte(`{"claims": {"custom-claim": "{{ print .Extra.abc }}/{{ print .Extra.def }}", "aud": ["foo", "bar"]}}`)),
+				Config:  json.RawMessage([]byte(`{"claims": "{\"custom-claim\": \"{{ print .Extra.abc }}/{{ print .Extra.def }}\", \"aud\": [\"foo\", \"bar\"]}"}`)),
 				K:       "file://../../test/stub/jwks-ecdsa.json",
 			}
 
@@ -209,8 +210,7 @@ func TestMutatorIDToken(t *testing.T) {
 			var cfg CredentialsIDTokenConfig
 			require.NoError(t, json.NewDecoder(bytes.NewBuffer(tc.Config)).Decode(&cfg))
 
-			templateId := tc.Rule.ID
-			_, err := cache.New(templateId).Parse(`{"claims": {"custom-claim": "override", "aud": ["override"]}}`)
+			_, err := cache.New(cfg.ClaimsTemplateID()).Parse(`{"custom-claim": "override", "aud": ["override"]}`)
 			require.NoError(t, err)
 
 			a.(*MutatorIDToken).WithCache(cache)
@@ -225,7 +225,7 @@ func TestMutatorIDToken(t *testing.T) {
 				Audiences:  []string{"override"},
 				KeyURLs:    []url.URL{*urlx.ParseOrPanic(tc.K)},
 			})
-			require.NoError(t, err)
+			require.NoError(t, err, "token: %s (%s) %v", token, cfg.ClaimsTemplateID(), cache.Lookup(cfg.ClaimsTemplateID()))
 
 			ttl := time.Minute // default from config is time.Minute
 			if tc.Ttl > 0 {

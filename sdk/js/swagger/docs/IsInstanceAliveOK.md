@@ -1,8 +1,7 @@
 # OryOathkeeper.IsInstanceAliveOK
 
 ## Properties
-Name | Type | Description | Notes
------------- | ------------- | ------------- | -------------
-**payload** | [**SwaggerHealthStatus**](SwaggerHealthStatus.md) |  | [optional] 
 
-
+| Name        | Type                                              | Description | Notes      |
+| ----------- | ------------------------------------------------- | ----------- | ---------- |
+| **payload** | [**SwaggerHealthStatus**](SwaggerHealthStatus.md) |             | [optional] |
