@@ -40,16 +40,17 @@ before finalizing the upgrade process.
 
 ## v0.18.0-beta.1+oryOS.12
 
-### Mutators
-1. ORY Oathkeeper now supports multiple mutators. Mutations are performed in the provided order and must all succeed in order for the HTTP request to be forwarded.
-2. The `mutator` property was renamed to `mutators` to reflect its true nature (see previous item).
+### Access Rule Mutators
 
-### Access Rule Changes
+1. ORY Oathkeeper now supports multiple mutators. Mutations are performed in the
+   provided order and must all succeed in order for the HTTP request to be
+   forwarded.
+2. The `mutator` property was renamed to `mutators` to reflect its true nature
+   (see previous item).
+   
+If you have existing rules, please update them as follows:
 
-As already noted, the `mutator` property was renamed to `mutators` and now represents a list of mutation handlers. If you have
-existing rules, please update them as follows:
-
-```
+```patch
 [
   {
     "id": "jwt-rule",
@@ -80,6 +81,29 @@ existing rules, please update them as follows:
 +   ]
   }
 ]
+```
+
+#### `id_token` mutator now renders go templates
+
+The `id_token` mutator is now capable of rendering custom claims using Go
+[text/template](https://golang.org/pkg/text/template/) receiving the
+`AuthenticationSession` struct as its parameters.
+
+To enable this change, the `aud` config was removed and the `claims` config was introduced.
+The `claims` field is a raw string representing a Go template.
+
+To upgrade existing rules, apply patches similar to this one:
+
+deprecated config:
+
+```patch
+{
+  "handler": "id_token",
+  "config": {
+-    "aud": ["https://my-backend-service/some/endpoint"]
++    "claims": "{\"aud\": [\"https://my-backend-service/some/endpoint\"]}"
+  }
+}
 ```
 
 ## v0.17.0-beta.1+oryOS.12

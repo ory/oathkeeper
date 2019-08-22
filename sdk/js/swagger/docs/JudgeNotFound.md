@@ -1,8 +1,7 @@
 # OryOathkeeper.JudgeNotFound
 
 ## Properties
-Name | Type | Description | Notes
------------- | ------------- | ------------- | -------------
-**payload** | [**JudgeNotFoundBody**](JudgeNotFoundBody.md) |  | [optional] 
 
-
+| Name        | Type                                          | Description | Notes      |
+| ----------- | --------------------------------------------- | ----------- | ---------- |
+| **payload** | [**JudgeNotFoundBody**](JudgeNotFoundBody.md) |             | [optional] |

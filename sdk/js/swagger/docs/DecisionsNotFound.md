@@ -1,8 +1,7 @@
 # OryOathkeeper.DecisionsNotFound
 
 ## Properties
-Name | Type | Description | Notes
------------- | ------------- | ------------- | -------------
-**payload** | [**DecisionsNotFoundBody**](DecisionsNotFoundBody.md) |  | [optional] 
 
-
+| Name        | Type                                                  | Description | Notes      |
+| ----------- | ----------------------------------------------------- | ----------- | ---------- |
+| **payload** | [**DecisionsNotFoundBody**](DecisionsNotFoundBody.md) |             | [optional] |

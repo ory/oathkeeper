@@ -22,65 +22,88 @@ package mutate
 
 import (
 	"bytes"
+	"crypto/sha256"
 	"encoding/json"
+	"fmt"
 	"net/http"
+	"text/template"
 	"time"
+
+	"github.com/ory/x/jsonx"
+
+	"github.com/dgrijalva/jwt-go"
+
+	"github.com/pborman/uuid"
+	"github.com/pkg/errors"
 
 	"github.com/ory/oathkeeper/credentials"
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/pipeline"
 	"github.com/ory/oathkeeper/pipeline/authn"
-
-	"github.com/dgrijalva/jwt-go"
-	"github.com/pborman/uuid"
-	"github.com/pkg/errors"
 )
 
 type MutatorIDTokenRegistry interface {
 	credentials.SignerRegistry
 }
 
-type CredentialsIDTokenConfig struct {
-	Audience []string `json:"aud"`
-}
-
 type MutatorIDToken struct {
 	c configuration.Provider
 	r MutatorIDTokenRegistry
+	t *template.Template
+}
+
+type CredentialsIDTokenConfig struct {
+	Claims string `json:"claims"`
+}
+
+func (c *CredentialsIDTokenConfig) ClaimsTemplateID() string {
+	return fmt.Sprintf("%x", sha256.Sum256([]byte(c.Claims)))
 }
 
 func NewMutatorIDToken(c configuration.Provider, r MutatorIDTokenRegistry) *MutatorIDToken {
-	return &MutatorIDToken{r: r, c: c}
+	return &MutatorIDToken{r: r, c: c, t: newTemplate("id_token")}
 }
 
 func (a *MutatorIDToken) GetID() string {
 	return "id_token"
 }
 
-func (a *MutatorIDToken) Mutate(r *http.Request, session *authn.AuthenticationSession, config json.RawMessage, _ pipeline.Rule) error {
+func (a *MutatorIDToken) WithCache(t *template.Template) {
+	a.t = t
+}
+
+func (a *MutatorIDToken) Mutate(r *http.Request, session *authn.AuthenticationSession, config json.RawMessage, rl pipeline.Rule) error {
+	var claims = jwt.MapClaims{}
 	if len(config) == 0 {
-		config = []byte("{}")
+		config = json.RawMessage("{}")
 	}
 
-	var cc CredentialsIDTokenConfig
-	d := json.NewDecoder(bytes.NewBuffer(config))
-	d.DisallowUnknownFields()
-	if err := d.Decode(&cc); err != nil {
+	var c CredentialsIDTokenConfig
+	if err := jsonx.NewStrictDecoder(bytes.NewBuffer(config)).Decode(&c); err != nil {
 		return errors.WithStack(err)
 	}
 
-	now := time.Now().UTC()
-	claims := jwt.MapClaims{}
-	if session.Extra != nil {
-		for k, v := range session.Extra {
-			claims[k] = v
+	if len(c.Claims) > 0 {
+		t := a.t.Lookup(c.ClaimsTemplateID())
+		if t == nil {
+			var err error
+			t, err = a.t.New(c.ClaimsTemplateID()).Parse(c.Claims)
+			if err != nil {
+				return errors.Wrapf(err, `error parsing claims template in rule "%s"`, rl.GetID())
+			}
+		}
+
+		var b bytes.Buffer
+		if err := t.Execute(&b, session); err != nil {
+			return errors.Wrapf(err, `error executing claims template in rule "%s"`, rl.GetID())
+		}
+
+		if err := json.NewDecoder(&b).Decode(&claims); err != nil {
+			return errors.WithStack(err)
 		}
 	}
 
-	if len(cc.Audience) > 0 {
-		claims["aud"] = cc.Audience
-	}
-
+	now := time.Now().UTC()
 	claims["exp"] = now.Add(a.c.MutatorIDTokenTTL()).Unix()
 	claims["jti"] = uuid.New()
 	claims["iat"] = now.Unix()
