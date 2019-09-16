@@ -164,6 +164,32 @@ func TestAuthorizerKetoWarden(t *testing.T) {
 			session:   &authn.AuthenticationSession{Extra: map[string]interface{}{"name": "peter"}},
 			expectErr: false,
 		},
+		{
+			config: []byte(`{ "required_action": "action:$1:$2", "required_resource": "resource:$1:$2", "subject": "{{ .Extra.name }}" }`),
+			rule: &rule.Rule{
+				Match: rule.RuleMatch{
+					Methods: []string{"POST"},
+					URL:     "https://localhost/api/users/<[0-9]+>/<[a-z]+>",
+				},
+			},
+			r: &http.Request{URL: urlx.ParseOrPanic("https://localhost/api/users/1234/abcde?limit=10")},
+			setup: func(t *testing.T) *httptest.Server {
+				return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+					var ki AuthorizerKetoEngineACPORYRequestBody
+					require.NoError(t, json.NewDecoder(r.Body).Decode(&ki))
+					assert.EqualValues(t, AuthorizerKetoEngineACPORYRequestBody{
+						Action:   "action:1234:abcde",
+						Resource: "resource:1234:abcde",
+						Context:  map[string]interface{}{},
+						Subject:  "peter",
+					}, ki)
+					assert.Contains(t, r.URL.Path, "regex")
+					w.Write([]byte(`{"allowed":true}`))
+				}))
+			},
+			session:   &authn.AuthenticationSession{Extra: map[string]interface{}{"name": "peter"}},
+			expectErr: false,
+		},
 	} {
 		t.Run(fmt.Sprintf("case=%d", k), func(t *testing.T) {
 			c := gomock.NewController(t)
