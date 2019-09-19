@@ -166,7 +166,7 @@
       "additionalProperties": false,
       "properties": {
         "anonymous": {
-          "oneOf": [
+          "anyOf": [
             {
               "title": "Anonymous",
               "description": "The [`anonymous` authenticator](https://www.ory.sh/docs/oathkeeper/pipeline/authn#anonymous).",
@@ -201,7 +201,7 @@
           ]
         },
         "noop": {
-          "oneOf": [
+          "anyOf": [
             {
               "title": "No Operation (noop)",
               "description": "The [`noop` authenticator](https://www.ory.sh/docs/oathkeeper/pipeline/authn#noop).",
@@ -236,7 +236,7 @@
           ]
         },
         "unauthorized": {
-          "oneOf": [
+          "anyOf": [
             {
               "title": "Unauthorized",
               "description": "The [`unauthorized` authenticator](https://www.ory.sh/docs/oathkeeper/pipeline/authn#unauthorized).",
@@ -271,7 +271,7 @@
           ]
         },
         "cookie_session": {
-          "oneOf": [
+          "anyOf": [
             {
               "title": "Cookie Session",
               "description": "The [`cookie_session` authenticator](https://www.ory.sh/docs/oathkeeper/pipeline/authn#cookie_session).",
@@ -306,7 +306,7 @@
           ]
         },
         "jwt": {
-          "oneOf": [
+          "anyOf": [
             {
               "title": "JSON Web Token (jwt)",
               "description": "The [`jwt` authenticator](https://www.ory.sh/docs/oathkeeper/pipeline/authn#jwt).",
@@ -341,7 +341,7 @@
           ]
         },
         "oauth2_client_credentials": {
-          "oneOf": [
+          "anyOf": [
             {
               "title": "OAuth 2.0 Client Credentials",
               "description": "The [`oauth2_client_credentials` authenticator](https://www.ory.sh/docs/oathkeeper/pipeline/authn#oauth2_client_credentials).",
@@ -376,7 +376,7 @@
           ]
         },
         "oauth2_introspection": {
-          "oneOf": [
+          "anyOf": [
             {
               "title": "OAuth 2.0 Token Introspection",
               "description": "The [`oauth2_introspection` authenticator](https://www.ory.sh/docs/oathkeeper/pipeline/authn#oauth2_introspection).",
@@ -419,7 +419,7 @@
       "additionalProperties": false,
       "properties": {
         "allow": {
-          "oneOf": [
+          "anyOf": [
             {
               "title": "Allow",
               "description": "The [`allow` authorizer](https://www.ory.sh/docs/oathkeeper/pipeline/authz#allow).",
@@ -455,7 +455,7 @@
           ]
         },
         "deny": {
-          "oneOf": [
+          "anyOf": [
             {
               "title": "Deny",
               "description": "The [`deny` authorizer](https://www.ory.sh/docs/oathkeeper/pipeline/authz#allow).",
@@ -490,7 +490,7 @@
           ]
         },
         "keto_engine_acp_ory": {
-          "oneOf": [
+          "anyOf": [
             {
               "title": "ORY Keto Access Control Policies Engine",
               "description": "The [`keto_engine_acp_ory` authorizer](https://www.ory.sh/docs/oathkeeper/pipeline/authz#keto_engine_acp_ory).",
@@ -533,7 +533,7 @@
       "additionalProperties": false,
       "properties": {
         "noop": {
-          "oneOf": [
+          "anyOf": [
             {
               "title": "No Operation (noop)",
               "description": "The [`noop` mutator](https://www.ory.sh/docs/oathkeeper/pipeline/mutator#noop).",
@@ -568,7 +568,7 @@
           ]
         },
         "cookie": {
-          "oneOf": [
+          "anyOf": [
             {
               "title": "HTTP Cookie",
               "description": "The [`cookie` mutator](https://www.ory.sh/docs/oathkeeper/pipeline/mutator#cookie).",
@@ -601,7 +601,7 @@
           ]
         },
         "header": {
-          "oneOf": [
+          "anyOf": [
             {
               "title": "HTTP Header",
               "description": "The [`header` mutator](https://www.ory.sh/docs/oathkeeper/pipeline/mutator#header).",
@@ -634,7 +634,7 @@
           ]
         },
         "hydrator": {
-          "oneOf": [
+          "anyOf": [
             {
               "title": "Hydrator",
               "description": "The [`hydrator` mutator](https://www.ory.sh/docs/oathkeeper/pipeline/mutator#hydrator).",
@@ -667,7 +667,7 @@
           ]
         },
         "id_token": {
-          "oneOf": [
+          "anyOf": [
             {
               "title": "ID Token (JSON Web Token)",
               "description": "The [`id_token` mutator](https://www.ory.sh/docs/oathkeeper/pipeline/mutator#id_token).",
