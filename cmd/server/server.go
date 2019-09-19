@@ -129,10 +129,7 @@ func cert(daemon string, logger logrus.FieldLogger) []tls.Certificate {
 func clusterID(c configuration.Provider) string {
 	var id bytes.Buffer
 	if err := json.NewEncoder(&id).Encode(viper.AllSettings()); err != nil {
-		for _, repo := range append(
-			append(c.AccessRuleRepositories(), *c.MutatorIDTokenJWKSURL(), *c.MutatorIDTokenIssuerURL()),
-			c.AuthenticatorJWTJWKSURIs()...,
-		) {
+		for _, repo := range c.AccessRuleRepositories() {
 			_, _ = id.WriteString(repo.String())
 		}
 		_, _ = id.WriteString(c.ProxyServeAddress())
