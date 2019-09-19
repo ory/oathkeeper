@@ -189,7 +189,7 @@
               "properties": {
                 "enabled": {
                   "title": "Enabled",
-                  "const": true,
+                  "enum": [true],
                   "default": false,
                   "description": "En-/disables this component."
                 },
@@ -224,7 +224,7 @@
               "properties": {
                 "enabled": {
                   "title": "Enabled",
-                  "const": true,
+                  "enum": [true],
                   "default": false,
                   "description": "En-/disables this component."
                 },
@@ -259,7 +259,7 @@
               "properties": {
                 "enabled": {
                   "title": "Enabled",
-                  "const": true,
+                  "enum": [true],
                   "default": false,
                   "description": "En-/disables this component."
                 },
@@ -294,7 +294,7 @@
               "properties": {
                 "enabled": {
                   "title": "Enabled",
-                  "const": true,
+                  "enum": [true],
                   "default": false,
                   "description": "En-/disables this component."
                 },
@@ -329,7 +329,7 @@
               "properties": {
                 "enabled": {
                   "title": "Enabled",
-                  "const": true,
+                  "enum": [true],
                   "default": false,
                   "description": "En-/disables this component."
                 },
@@ -364,7 +364,7 @@
               "properties": {
                 "enabled": {
                   "title": "Enabled",
-                  "const": true,
+                  "enum": [true],
                   "default": false,
                   "description": "En-/disables this component."
                 },
@@ -399,7 +399,7 @@
               "properties": {
                 "enabled": {
                   "title": "Enabled",
-                  "const": true,
+                  "enum": [true],
                   "default": false,
                   "description": "En-/disables this component."
                 },
@@ -443,7 +443,7 @@
               "properties": {
                 "enabled": {
                   "title": "Enabled",
-                  "const": true,
+                  "enum": [true],
                   "default": false,
                   "description": "En-/disables this component."
                 },
@@ -478,7 +478,7 @@
               "properties": {
                 "enabled": {
                   "title": "Enabled",
-                  "const": true,
+                  "enum": [true],
                   "default": false,
                   "description": "En-/disables this component."
                 },
@@ -513,7 +513,7 @@
               "properties": {
                 "enabled": {
                   "title": "Enabled",
-                  "const": true,
+                  "enum": [true],
                   "default": false,
                   "description": "En-/disables this component."
                 },
@@ -556,7 +556,7 @@
               "properties": {
                 "enabled": {
                   "title": "Enabled",
-                  "const": true,
+                  "enum": [true],
                   "default": false,
                   "description": "En-/disables this component."
                 },
@@ -589,7 +589,7 @@
               "properties": {
                 "enabled": {
                   "title": "Enabled",
-                  "const": true,
+                  "enum": [true],
                   "default": false,
                   "description": "En-/disables this component."
                 },
@@ -622,7 +622,7 @@
               "properties": {
                 "enabled": {
                   "title": "Enabled",
-                  "const": true,
+                  "enum": [true],
                   "default": false,
                   "description": "En-/disables this component."
                 },
@@ -655,7 +655,7 @@
               "properties": {
                 "enabled": {
                   "title": "Enabled",
-                  "const": true,
+                  "enum": [true],
                   "default": false,
                   "description": "En-/disables this component."
                 },
@@ -667,9 +667,6 @@
           ]
         },
         "id_token": {
-          "type": "object",
-          "title": "ID Token (JSON Web Token)",
-          "description": "The [`id_token` mutator](https://www.ory.sh/docs/oathkeeper/pipeline/mutator#id_token).",
           "oneOf": [
             {
               "title": "ID Token (JSON Web Token)",
@@ -691,7 +688,7 @@
               "properties": {
                 "enabled": {
                   "title": "Enabled",
-                  "const": true,
+                  "enum": [true],
                   "default": false,
                   "description": "En-/disables this component."
                 },

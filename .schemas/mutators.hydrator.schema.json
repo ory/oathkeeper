@@ -6,7 +6,7 @@
   "properties": {
     "api": {
       "required": [
-        "uri"
+        "url"
       ],
       "type": "object",
       "properties": {

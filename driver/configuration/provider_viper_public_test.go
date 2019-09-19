@@ -33,7 +33,12 @@ func TestPipelineConfig(t *testing.T) {
 		logrus.New(),
 	)
 
-	require.NoError(t, viperx.Validate(gojsonschema.NewReferenceLoader("file://../../.schemas/config.schema.json")))
+	err := viperx.Validate(gojsonschema.NewReferenceLoader("file://../../.schemas/config.schema.json"))
+	if err != nil {
+		viperx.LoggerWithValidationErrorFields(logrus.New(), err).Error("unable to validate")
+	}
+	require.NoError(t, err)
+
 	p := NewViperProvider(logrus.New())
 
 	t.Run("case=should fail when invalid value is used in override", func(t *testing.T) {
