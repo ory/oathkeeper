@@ -166,14 +166,23 @@
       "additionalProperties": false,
       "properties": {
         "anonymous": {
-          "type": "object",
-          "title": "Anonymous",
-          "description": "The [`anonymous` authenticator](https://www.ory.sh/docs/oathkeeper/pipeline/authn#anonymous).",
           "oneOf": [
             {
-              "$ref": "#/definitions/disabled"
+              "title": "Anonymous",
+              "description": "The [`anonymous` authenticator](https://www.ory.sh/docs/oathkeeper/pipeline/authn#anonymous).",
+              "type": "object",
+              "properties": {
+                "enabled": {
+                  "title": "Enabled",
+                  "const": false,
+                  "default": false,
+                  "description": "En-/disables this component."
+                }
+              }
             },
             {
+              "title": "Anonymous",
+              "description": "The [`anonymous` authenticator](https://www.ory.sh/docs/oathkeeper/pipeline/authn#anonymous).",
               "type": "object",
               "additionalProperties": false,
               "required": ["config"],
@@ -192,14 +201,23 @@
           ]
         },
         "noop": {
-          "type": "object",
-          "title": "No Operation (noop)",
-          "description": "The [`noop` authenticator](https://www.ory.sh/docs/oathkeeper/pipeline/authn#noop).",
           "oneOf": [
             {
-              "$ref": "#/definitions/disabled"
+              "title": "No Operation (noop)",
+              "description": "The [`noop` authenticator](https://www.ory.sh/docs/oathkeeper/pipeline/authn#noop).",
+              "type": "object",
+              "properties": {
+                "enabled": {
+                  "title": "Enabled",
+                  "const": false,
+                  "default": false,
+                  "description": "En-/disables this component."
+                }
+              }
             },
             {
+              "title": "No Operation (noop)",
+              "description": "The [`noop` authenticator](https://www.ory.sh/docs/oathkeeper/pipeline/authn#noop).",
               "type": "object",
               "additionalProperties": false,
               "required": ["config"],
@@ -218,14 +236,23 @@
           ]
         },
         "unauthorized": {
-          "type": "object",
-          "title": "Unauthorized",
-          "description": "The [`unauthorized` authenticator](https://www.ory.sh/docs/oathkeeper/pipeline/authn#unauthorized).",
           "oneOf": [
             {
-              "$ref": "#/definitions/disabled"
+              "title": "Unauthorized",
+              "description": "The [`unauthorized` authenticator](https://www.ory.sh/docs/oathkeeper/pipeline/authn#unauthorized).",
+              "type": "object",
+              "properties": {
+                "enabled": {
+                  "title": "Enabled",
+                  "const": false,
+                  "default": false,
+                  "description": "En-/disables this component."
+                }
+              }
             },
             {
+              "title": "Unauthorized",
+              "description": "The [`unauthorized` authenticator](https://www.ory.sh/docs/oathkeeper/pipeline/authn#unauthorized).",
               "type": "object",
               "additionalProperties": false,
               "required": ["config"],
@@ -244,14 +271,23 @@
           ]
         },
         "cookie_session": {
-          "type": "object",
-          "title": "Cookie Session",
-          "description": "The [`cookie_session` authenticator](https://www.ory.sh/docs/oathkeeper/pipeline/authn#cookie_session).",
           "oneOf": [
             {
-              "$ref": "#/definitions/disabled"
+              "title": "Cookie Session",
+              "description": "The [`cookie_session` authenticator](https://www.ory.sh/docs/oathkeeper/pipeline/authn#cookie_session).",
+              "type": "object",
+              "properties": {
+                "enabled": {
+                  "title": "Enabled",
+                  "const": false,
+                  "default": false,
+                  "description": "En-/disables this component."
+                }
+              }
             },
             {
+              "title": "Cookie Session",
+              "description": "The [`cookie_session` authenticator](https://www.ory.sh/docs/oathkeeper/pipeline/authn#cookie_session).",
               "type": "object",
               "additionalProperties": false,
               "required": ["config"],
@@ -270,14 +306,23 @@
           ]
         },
         "jwt": {
-          "type": "object",
-          "title": "JSON Web Token (jwt)",
-          "description": "The [`jwt` authenticator](https://www.ory.sh/docs/oathkeeper/pipeline/authn#jwt).",
           "oneOf": [
             {
-              "$ref": "#/definitions/disabled"
+              "title": "JSON Web Token (jwt)",
+              "description": "The [`jwt` authenticator](https://www.ory.sh/docs/oathkeeper/pipeline/authn#jwt).",
+              "type": "object",
+              "properties": {
+                "enabled": {
+                  "title": "Enabled",
+                  "const": false,
+                  "default": false,
+                  "description": "En-/disables this component."
+                }
+              }
             },
             {
+              "title": "JSON Web Token (jwt)",
+              "description": "The [`jwt` authenticator](https://www.ory.sh/docs/oathkeeper/pipeline/authn#jwt).",
               "type": "object",
               "additionalProperties": false,
               "required": ["config"],
@@ -296,14 +341,23 @@
           ]
         },
         "oauth2_client_credentials": {
-          "type": "object",
-          "title": "OAuth 2.0 Client Credentials",
-          "description": "The [`oauth2_client_credentials` authenticator](https://www.ory.sh/docs/oathkeeper/pipeline/authn#oauth2_client_credentials).",
           "oneOf": [
             {
-              "$ref": "#/definitions/disabled"
+              "title": "OAuth 2.0 Client Credentials",
+              "description": "The [`oauth2_client_credentials` authenticator](https://www.ory.sh/docs/oathkeeper/pipeline/authn#oauth2_client_credentials).",
+              "type": "object",
+              "properties": {
+                "enabled": {
+                  "title": "Enabled",
+                  "const": false,
+                  "default": false,
+                  "description": "En-/disables this component."
+                }
+              }
             },
             {
+              "title": "OAuth 2.0 Client Credentials",
+              "description": "The [`oauth2_client_credentials` authenticator](https://www.ory.sh/docs/oathkeeper/pipeline/authn#oauth2_client_credentials).",
               "type": "object",
               "additionalProperties": false,
               "required": ["config"],
@@ -322,14 +376,23 @@
           ]
         },
         "oauth2_introspection": {
-          "type": "object",
-          "title": "OAuth 2.0 Token Introspection",
-          "description": "The [`oauth2_introspection` authenticator](https://www.ory.sh/docs/oathkeeper/pipeline/authn#oauth2_introspection).",
           "oneOf": [
             {
-              "$ref": "#/definitions/disabled"
+              "title": "OAuth 2.0 Token Introspection",
+              "description": "The [`oauth2_introspection` authenticator](https://www.ory.sh/docs/oathkeeper/pipeline/authn#oauth2_introspection).",
+              "type": "object",
+              "properties": {
+                "enabled": {
+                  "title": "Enabled",
+                  "const": false,
+                  "default": false,
+                  "description": "En-/disables this component."
+                }
+              }
             },
             {
+              "title": "OAuth 2.0 Token Introspection",
+              "description": "The [`oauth2_introspection` authenticator](https://www.ory.sh/docs/oathkeeper/pipeline/authn#oauth2_introspection).",
               "type": "object",
               "additionalProperties": false,
               "required": ["config"],
@@ -356,14 +419,24 @@
       "additionalProperties": false,
       "properties": {
         "allow": {
-          "title": "Allow",
-          "description": "The [`allow` authorizer](https://www.ory.sh/docs/oathkeeper/pipeline/authz#allow).",
-          "type": "object",
           "oneOf": [
             {
-              "$ref": "#/definitions/disabled"
+              "title": "Allow",
+              "description": "The [`allow` authorizer](https://www.ory.sh/docs/oathkeeper/pipeline/authz#allow).",
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "enabled": {
+                  "title": "Enabled",
+                  "const": false,
+                  "default": false,
+                  "description": "En-/disables this component."
+                }
+              }
             },
             {
+              "title": "Allow",
+              "description": "The [`allow` authorizer](https://www.ory.sh/docs/oathkeeper/pipeline/authz#allow).",
               "type": "object",
               "additionalProperties": false,
               "required": ["config"],
@@ -382,14 +455,23 @@
           ]
         },
         "deny": {
-          "title": "Deny",
-          "description": "The [`deny` authorizer](https://www.ory.sh/docs/oathkeeper/pipeline/authz#allow).",
-          "type": "object",
           "oneOf": [
             {
-              "$ref": "#/definitions/disabled"
+              "title": "Deny",
+              "description": "The [`deny` authorizer](https://www.ory.sh/docs/oathkeeper/pipeline/authz#allow).",
+              "type": "object",
+              "properties": {
+                "enabled": {
+                  "title": "Enabled",
+                  "const": false,
+                  "default": false,
+                  "description": "En-/disables this component."
+                }
+              }
             },
             {
+              "title": "Deny",
+              "description": "The [`deny` authorizer](https://www.ory.sh/docs/oathkeeper/pipeline/authz#allow).",
               "type": "object",
               "additionalProperties": false,
               "required": ["config"],
@@ -408,13 +490,23 @@
           ]
         },
         "keto_engine_acp_ory": {
-          "title": "ORY Keto Access Control Policies Engine",
-          "description": "The [`keto_engine_acp_ory` authorizer](https://www.ory.sh/docs/oathkeeper/pipeline/authz#keto_engine_acp_ory).",
           "oneOf": [
             {
-              "$ref": "#/definitions/disabled"
+              "title": "ORY Keto Access Control Policies Engine",
+              "description": "The [`keto_engine_acp_ory` authorizer](https://www.ory.sh/docs/oathkeeper/pipeline/authz#keto_engine_acp_ory).",
+              "type": "object",
+              "properties": {
+                "enabled": {
+                  "title": "Enabled",
+                  "const": false,
+                  "default": false,
+                  "description": "En-/disables this component."
+                }
+              }
             },
             {
+              "title": "ORY Keto Access Control Policies Engine",
+              "description": "The [`keto_engine_acp_ory` authorizer](https://www.ory.sh/docs/oathkeeper/pipeline/authz#keto_engine_acp_ory).",
               "type": "object",
               "additionalProperties": false,
               "required": ["config"],
@@ -441,14 +533,23 @@
       "additionalProperties": false,
       "properties": {
         "noop": {
-          "type": "object",
-          "title": "No Operation (noop)",
-          "description": "The [`noop` mutator](https://www.ory.sh/docs/oathkeeper/pipeline/mutator#noop).",
           "oneOf": [
             {
-              "$ref": "#/definitions/disabled"
+              "title": "No Operation (noop)",
+              "description": "The [`noop` mutator](https://www.ory.sh/docs/oathkeeper/pipeline/mutator#noop).",
+              "type": "object",
+              "properties": {
+                "enabled": {
+                  "title": "Enabled",
+                  "const": false,
+                  "default": false,
+                  "description": "En-/disables this component."
+                }
+              }
             },
             {
+              "title": "No Operation (noop)",
+              "description": "The [`noop` mutator](https://www.ory.sh/docs/oathkeeper/pipeline/mutator#noop).",
               "type": "object",
               "additionalProperties": false,
               "required": ["config"],
@@ -467,12 +568,19 @@
           ]
         },
         "cookie": {
-          "type": "object",
-          "title": "HTTP Cookie",
-          "description": "The [`cookie` mutator](https://www.ory.sh/docs/oathkeeper/pipeline/mutator#cookie).",
           "oneOf": [
             {
-              "$ref": "#/definitions/disabled"
+              "title": "HTTP Cookie",
+              "description": "The [`cookie` mutator](https://www.ory.sh/docs/oathkeeper/pipeline/mutator#cookie).",
+              "type": "object",
+              "properties": {
+                "enabled": {
+                  "title": "Enabled",
+                  "const": false,
+                  "default": false,
+                  "description": "En-/disables this component."
+                }
+              }
             },
             {
               "type": "object",
@@ -493,12 +601,19 @@
           ]
         },
         "header": {
-          "type": "object",
-          "title": "HTTP Header",
-          "description": "The [`header` mutator](https://www.ory.sh/docs/oathkeeper/pipeline/mutator#header).",
           "oneOf": [
             {
-              "$ref": "#/definitions/disabled"
+              "title": "HTTP Header",
+              "description": "The [`header` mutator](https://www.ory.sh/docs/oathkeeper/pipeline/mutator#header).",
+              "type": "object",
+              "properties": {
+                "enabled": {
+                  "title": "Enabled",
+                  "const": false,
+                  "default": false,
+                  "description": "En-/disables this component."
+                }
+              }
             },
             {
               "type": "object",
@@ -519,12 +634,19 @@
           ]
         },
         "hydrator": {
-          "type": "object",
-          "title": "Hydrator",
-          "description": "The [`hydrator` mutator](https://www.ory.sh/docs/oathkeeper/pipeline/mutator#hydrator).",
           "oneOf": [
             {
-              "$ref": "#/definitions/disabled"
+              "title": "Hydrator",
+              "description": "The [`hydrator` mutator](https://www.ory.sh/docs/oathkeeper/pipeline/mutator#hydrator).",
+              "type": "object",
+              "properties": {
+                "enabled": {
+                  "title": "Enabled",
+                  "const": false,
+                  "default": false,
+                  "description": "En-/disables this component."
+                }
+              }
             },
             {
               "type": "object",
@@ -550,7 +672,17 @@
           "description": "The [`id_token` mutator](https://www.ory.sh/docs/oathkeeper/pipeline/mutator#id_token).",
           "oneOf": [
             {
-              "$ref": "#/definitions/disabled"
+              "title": "ID Token (JSON Web Token)",
+              "description": "The [`id_token` mutator](https://www.ory.sh/docs/oathkeeper/pipeline/mutator#id_token).",
+              "type": "object",
+              "properties": {
+                "enabled": {
+                  "title": "Enabled",
+                  "const": false,
+                  "default": false,
+                  "description": "En-/disables this component."
+                }
+              }
             },
             {
               "type": "object",
