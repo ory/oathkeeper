@@ -96,7 +96,7 @@ func (a *AuthenticatorJWT) Authenticate(r *http.Request, config json.RawMessage,
 		ScopeStrategy: a.c.AuthenticatorJWTScopeStrategy(),
 	})
 	if err != nil {
-		return nil, helper.ErrForbidden.WithReason(err.Error()).WithTrace(err)
+		return nil, helper.ErrUnauthorized.WithReason(err.Error()).WithTrace(err)
 	}
 
 	claims, ok := pt.Claims.(jwt.MapClaims)

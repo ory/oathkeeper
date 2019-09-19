@@ -32,6 +32,7 @@ import (
 
 	"github.com/ory/viper"
 
+	"github.com/ory/herodot"
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/internal"
 	. "github.com/ory/oathkeeper/pipeline/authn"
@@ -72,6 +73,7 @@ func TestAuthenticatorJWT(t *testing.T) {
 			r          *http.Request
 			config     string
 			expectErr  bool
+			expectCode int
 			expectSess *AuthenticationSession
 		}{
 			{
@@ -182,8 +184,9 @@ func TestAuthenticatorJWT(t *testing.T) {
 					"exp": now.Add(time.Hour).Unix(),
 					"nbf": now.Add(time.Hour).Unix(),
 				})}}},
-				config:    `{}`,
-				expectErr: true,
+				config:     `{}`,
+				expectErr:  true,
+				expectCode: 401,
 			},
 			{
 				d: "should fail because JWT iat is in future",
@@ -192,8 +195,9 @@ func TestAuthenticatorJWT(t *testing.T) {
 					"exp": now.Add(time.Hour).Unix(),
 					"iat": now.Add(time.Hour).Unix(),
 				})}}},
-				config:    `{}`,
-				expectErr: true,
+				config:     `{}`,
+				expectErr:  true,
+				expectCode: 401,
 			},
 			{
 				d: "should pass because JWT is missing scope",
@@ -231,8 +235,9 @@ func TestAuthenticatorJWT(t *testing.T) {
 					"sub": "sub",
 					"exp": now.Add(-time.Hour).Unix(),
 				})}}},
-				config:    `{}`,
-				expectErr: true,
+				config:     `{}`,
+				expectErr:  true,
+				expectCode: 401,
 			},
 		} {
 			t.Run(fmt.Sprintf("case=%d/description=%s", k, tc.d), func(t *testing.T) {
@@ -242,6 +247,9 @@ func TestAuthenticatorJWT(t *testing.T) {
 
 				session, err := a.Authenticate(tc.r, json.RawMessage([]byte(tc.config)), nil)
 				if tc.expectErr {
+					if tc.expectCode != 0 {
+						assert.Equal(t, tc.expectCode, herodot.ToDefaultError(err, "").StatusCode(), "Status code mismatch")
+					}
 					require.Error(t, err)
 				} else {
 					require.NoError(t, err, "%#v", errors.Cause(err))
