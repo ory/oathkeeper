@@ -25,6 +25,8 @@ import (
 	"net/http"
 
 	"github.com/ory/herodot"
+	"github.com/pkg/errors"
+
 	"github.com/ory/oathkeeper/pipeline"
 	"github.com/ory/oathkeeper/pipeline/authn"
 )
@@ -35,8 +37,19 @@ var ErrMutatorNotEnabled = herodot.DefaultError{
 	StatusField: http.StatusText(http.StatusInternalServerError),
 }
 
+func NewErrMutatorNotEnabled(a Mutator) *herodot.DefaultError {
+	return ErrMutatorNotEnabled.WithTrace(errors.New("")).WithReasonf(`Mutator "%s" is disabled per configuration.`, a.GetID())
+}
+
+func NewErrAuthorizerMisconfigured(a Mutator, err error) *herodot.DefaultError {
+	return ErrMutatorNotEnabled.WithTrace(err).WithReasonf(
+		`Configuration for mutator "%s" could not be validated: %s`,
+		a.GetID(),
+		err,
+	)
+}
 type Mutator interface {
 	Mutate(r *http.Request, session *authn.AuthenticationSession, config json.RawMessage, _ pipeline.Rule) error
 	GetID() string
-	Validate() error
+	Validate(config json.RawMessage) error
 }

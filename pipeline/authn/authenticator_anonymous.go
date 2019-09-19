@@ -14,28 +14,48 @@ type AuthenticatorAnonymous struct {
 	c configuration.Provider
 }
 
+type AuthenticatorAnonymousConfiguration struct {
+	Subject string `json:"subject"`
+}
+
 func NewAuthenticatorAnonymous(c configuration.Provider) *AuthenticatorAnonymous {
 	return &AuthenticatorAnonymous{
 		c: c,
 	}
 }
 
-func (a *AuthenticatorAnonymous) Validate() error {
-	if !a.c.AuthenticatorAnonymousIsEnabled() {
-		return errors.WithStack(ErrAuthenticatorNotEnabled.WithReasonf(`Authenticator "%s" is disabled per configuration.`, a.GetID()))
+func (a *AuthenticatorAnonymous) Validate(config json.RawMessage) error {
+	if !a.c.AuthenticatorIsEnabled(a.GetID()) {
+		return NewErrAuthenticatorNotEnabled(a)
 	}
 
-	return nil
+	_, err := a.config(config)
+	return err
 }
 
 func (a *AuthenticatorAnonymous) GetID() string {
 	return "anonymous"
 }
 
+func (a *AuthenticatorAnonymous) config(config json.RawMessage) (*AuthenticatorAnonymousConfiguration, error) {
+	var c AuthenticatorAnonymousConfiguration
+	if err := a.c.AuthenticatorConfig(a.GetID(), config, &c); err != nil {
+		return nil, NewErrAuthenticatorMisconfigured(a, err)
+	}
+
+	return &c, nil
+}
+
+
 func (a *AuthenticatorAnonymous) Authenticate(r *http.Request, config json.RawMessage, _ pipeline.Rule) (*AuthenticationSession, error) {
 	if len(r.Header.Get("Authorization")) != 0 {
 		return nil, errors.WithStack(ErrAuthenticatorNotResponsible)
 	}
 
-	return &AuthenticationSession{Subject: a.c.AuthenticatorAnonymousIdentifier()}, nil
+	cf, err := a.config(config)
+	if err != nil {
+		return nil, err
+	}
+
+	return &AuthenticationSession{Subject: cf.Subject}, nil
 }

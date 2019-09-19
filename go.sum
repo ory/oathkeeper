@@ -265,7 +265,6 @@ github.com/gobuffalo/packr v1.20.0/go.mod h1:JDytk1t2gP+my1ig7iI4NcVaXr886+N0ecU
 github.com/gobuffalo/packr v1.21.0/go.mod h1:H00jGfj1qFKxscFJSw8wcL4hpQtPe1PfU2wa6sg/SR0=
 github.com/gobuffalo/packr v1.22.0 h1:/YVd/GRGsu0QuoCJtlcWSVllobs4q3Xvx3nqxTvPyN0=
 github.com/gobuffalo/packr v1.22.0/go.mod h1:Qr3Wtxr3+HuQEwWqlLnNW4t1oTvK+7Gc/Rnoi/lDFvA=
-github.com/gobuffalo/packr v1.30.1 h1:hu1fuVR3fXEZR7rXNW3h8rqSML8EVAf6KNm0NKO/wKg=
 github.com/gobuffalo/packr/v2 v2.0.0-rc.8/go.mod h1:y60QCdzwuMwO2R49fdQhsjCPv7tLQFR0ayzxxla9zes=
 github.com/gobuffalo/packr/v2 v2.0.0-rc.9/go.mod h1:fQqADRfZpEsgkc7c/K7aMew3n4aF1Kji7+lIZeR98Fc=
 github.com/gobuffalo/packr/v2 v2.0.0-rc.10/go.mod h1:4CWWn4I5T3v4c1OsJ55HbHlUEKNWMITG5iIkdr4Px4w=
@@ -275,7 +274,6 @@ github.com/gobuffalo/packr/v2 v2.0.0-rc.13/go.mod h1:2Mp7GhBFMdJlOK8vGfl7SYtfMP3
 github.com/gobuffalo/packr/v2 v2.0.0-rc.14/go.mod h1:06otbrNvDKO1eNQ3b8hst+1010UooI2MFg+B2Ze4MV8=
 github.com/gobuffalo/packr/v2 v2.0.0-rc.15 h1:vSmYcMO6CtuNQvMSbEJeIJlaeZzz2zoxGLTy8HrDh80=
 github.com/gobuffalo/packr/v2 v2.0.0-rc.15/go.mod h1:IMe7H2nJvcKXSF90y4X1rjYIRlNMJYCxEhssBXNZwWs=
-github.com/gobuffalo/packr/v2 v2.5.2 h1:4EvjeIpQLZuRIljwnidYgbRXbr1yIzVRrESiLjqKj6s=
 github.com/gobuffalo/plush v3.7.16+incompatible/go.mod h1:rQ4zdtUUyZNqULlc6bqd5scsPfLKfT0+TGMChgduDvI=
 github.com/gobuffalo/plush v3.7.20+incompatible/go.mod h1:rQ4zdtUUyZNqULlc6bqd5scsPfLKfT0+TGMChgduDvI=
 github.com/gobuffalo/plush v3.7.21+incompatible/go.mod h1:rQ4zdtUUyZNqULlc6bqd5scsPfLKfT0+TGMChgduDvI=
@@ -505,8 +503,12 @@ github.com/ory/go-acc v0.0.0-20181118080137-ddc355013f90 h1:Bpk3eqc3rbJT2mE+uS9E
 github.com/ory/go-acc v0.0.0-20181118080137-ddc355013f90/go.mod h1:sxnvPCxChFuSmTJGj8FdMupeq1BezCiEpDjTUXQ4hf4=
 github.com/ory/go-convenience v0.1.0 h1:zouLKfF2GoSGnJwGq+PE/nJAE6dj2Zj5QlTgmMTsTS8=
 github.com/ory/go-convenience v0.1.0/go.mod h1:uEY/a60PL5c12nYz4V5cHY03IBmwIAEm8TWB0yn9KNs=
+github.com/ory/gojsonreference v0.0.0-20190720135523-6b606c2d8ee8 h1:e2S2FmxqSbhFyVNP24HncpRY+X1qAZmtE3nZ0gJKR4Q=
+github.com/ory/gojsonreference v0.0.0-20190720135523-6b606c2d8ee8/go.mod h1:wsH1C4nIeeQClDtD5AH7kF1uTS6zWyqfjVDTmB0Em7A=
 github.com/ory/gojsonschema v0.0.0-20190717132251-f184856edacf h1:4u2kqhTpMYabxKmTYyJasLXFozkGVvbb6+AdMnWadwg=
 github.com/ory/gojsonschema v0.0.0-20190717132251-f184856edacf/go.mod h1:ypRRv2Fg8r46Xc3bGggOPzwzJFN2CiW7roiJN5k/p4w=
+github.com/ory/gojsonschema v0.0.0-20190919112458-f254ca73d5e9 h1:5mdqEcBBKVJUZaWQjca4LmP/6Yq8I4g6YaDStvrqCO0=
+github.com/ory/gojsonschema v0.0.0-20190919112458-f254ca73d5e9/go.mod h1:BNZpdJgB74KOLSsWFvzw6roXg1I6O51WO8roMmW+T7Y=
 github.com/ory/graceful v0.1.1 h1:zx+8tDObLPrG+7Tc8jKYlXsqWnLtOQA1IZ/FAAKHMXU=
 github.com/ory/graceful v0.1.1/go.mod h1:zqu70l95WrKHF4AZ6tXHvAqAvpY6M7g6ttaAVcMm7KU=
 github.com/ory/herodot v0.5.1/go.mod h1:3BOneqcyBsVybCPAJoi92KN2BpJHcmDqAMcAAaJiJow=

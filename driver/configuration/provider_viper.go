@@ -1,11 +1,16 @@
 package configuration
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"net/url"
 	"strings"
 	"time"
 
+	"github.com/imdario/mergo"
+	"github.com/ory/gojsonschema"
+	"github.com/pkg/errors"
 	"github.com/rs/cors"
 	"github.com/sirupsen/logrus"
 
@@ -40,30 +45,7 @@ func BindEnvs() {
 		ViperKeyAPIServeAddressHost,
 		ViperKeyAPIServeAddressPort,
 		ViperKeyAccessRuleRepositories,
-		ViperKeyAuthenticatorAnonymousIsEnabled,
-		ViperKeyAuthenticatorAnonymousIdentifier,
-		ViperKeyAuthenticatorNoopIsEnabled,
-		ViperKeyAuthenticatorCookieSessionIsEnabled,
-		ViperKeyAuthenticatorCookieSessionCheckSessionURL,
-		ViperKeyAuthenticatorCookieSessionOnly,
-		ViperKeyAuthenticatorJWTIsEnabled,
-		ViperKeyAuthenticatorJWTJWKSURIs,
-		ViperKeyAuthenticatorJWTScopeStrategy,
-		ViperKeyAuthenticatorOAuth2ClientCredentialsIsEnabled,
-		ViperKeyAuthenticatorClientCredentialsTokenURL,
-		ViperKeyAuthenticatorOAuth2TokenIntrospectionIsEnabled,
-		ViperKeyAuthenticatorOAuth2TokenIntrospectionScopeStrategy,
-		ViperKeyAuthenticatorOAuth2TokenIntrospectionIntrospectionURL,
-		ViperKeyAuthenticatorOAuth2TokenIntrospectionPreAuthorizationEnabled,
-		ViperKeyAuthenticatorOAuth2TokenIntrospectionPreAuthorizationClientID,
-		ViperKeyAuthenticatorOAuth2TokenIntrospectionPreAuthorizationClientSecret,
-		ViperKeyAuthenticatorOAuth2TokenIntrospectionPreAuthorizationScope,
-		ViperKeyAuthenticatorOAuth2TokenIntrospectionPreAuthorizationTokenURL,
-		ViperKeyAuthenticatorUnauthorizedIsEnabled,
-		ViperKeyAuthorizerAllowIsEnabled,
-		ViperKeyAuthorizerDenyIsEnabled,
-		ViperKeyAuthorizerKetoEngineACPORYIsEnabled,
-		ViperKeyAuthorizerKetoEngineACPORYBaseURL,
+
 		ViperKeyMutatorCookieIsEnabled,
 		ViperKeyMutatorHeaderIsEnabled,
 		ViperKeyMutatorNoopIsEnabled,
@@ -131,6 +113,19 @@ func (v *ViperProvider) APIServeAddress() string {
 	)
 }
 
+func (v *ViperProvider) ParseURLs(sources []string) ([]url.URL, error) {
+	r := make([]url.URL, len(sources))
+	for k, u := range sources {
+		p, err := url.Parse(u)
+		if err != nil {
+			return nil, err
+		}
+		r[k] = *p
+	}
+
+	return r, nil
+}
+
 func (v *ViperProvider) getURL(value string, key string) *url.URL {
 	u, err := url.ParseRequestURI(value)
 	if err != nil {
@@ -141,7 +136,7 @@ func (v *ViperProvider) getURL(value string, key string) *url.URL {
 	return u
 }
 
-func (v *ViperProvider) toScopeStrategy(value string, key string) fosite.ScopeStrategy {
+func (v *ViperProvider) ToScopeStrategy(value string, key string) fosite.ScopeStrategy {
 	switch strings.ToLower(value) {
 	case "hierarchic":
 		return fosite.HierarchicScopeStrategy
@@ -155,4 +150,79 @@ func (v *ViperProvider) toScopeStrategy(value string, key string) fosite.ScopeSt
 		v.l.Errorf(`Configuration key "%s" declares unknown scope strategy "%s", only "hierarchic", "exact", "wildcard", "none" are supported. Falling back to strategy "none".`, key, value)
 		return nil
 	}
+}
+
+func (v *ViperProvider) pipelineIsEnabled(prefix, id string) bool {
+	return viperx.GetBool(v.l, fmt.Sprintf("%s.%s.enabled", prefix, id), false)
+}
+
+func (v *ViperProvider) pipelineConfig(prefix, id string, override json.RawMessage, dest interface{}) error {
+	config := viper.GetStringMap(fmt.Sprintf("%s.%s", prefix, id))
+	if len(config) == 0 {
+		return nil
+	}
+
+	if len(override) != 0 {
+		var overrideMap map[string]interface{}
+		if err := json.Unmarshal(override, overrideMap); err != nil {
+			return errors.WithStack(err)
+		}
+
+		if err := mergo.Merge(config, overrideMap, mergo.WithOverride); err != nil {
+			return errors.WithStack(err)
+		}
+	}
+
+	var b bytes.Buffer
+	if err := json.NewEncoder(&b).Encode(
+		viper.GetStringMap(fmt.Sprintf("%s.%s", prefix, id)),
+	); err != nil {
+		return errors.WithStack(err)
+	}
+
+	schema, err := schemas.Find(fmt.Sprintf("%s.%s.schema.json", prefix, id))
+	if err != nil {
+		return errors.WithStack(err)
+	}
+
+	if result, err := gojsonschema.Validate(
+		gojsonschema.NewBytesLoader(schema),
+		gojsonschema.NewBytesLoader(b.Bytes()),
+	); err != nil {
+		return errors.WithStack(err)
+	} else if !result.Valid() {
+		return errors.WithStack(result.Errors())
+	}
+
+	if dest == nil {
+		return nil
+	}
+
+	dec := json.NewDecoder(&b)
+	dec.DisallowUnknownFields()
+	return errors.WithStack(dec.Decode(dest))
+}
+
+func (v *ViperProvider) AuthenticatorIsEnabled(id string) bool {
+	return v.pipelineIsEnabled("authenticators", id)
+}
+
+func (v *ViperProvider) AuthenticatorConfig(id string, override json.RawMessage, dest interface{}) error {
+	return v.pipelineConfig("authenticators", id, override, dest)
+}
+
+func (v *ViperProvider) AuthorizerIsEnabled(id string) bool {
+	return v.pipelineIsEnabled("authorizers", id)
+}
+
+func (v *ViperProvider) AuthorizerConfig(id string, override json.RawMessage, dest interface{}) error {
+	return v.pipelineConfig("authorizers", id, override, dest)
+}
+
+func (v *ViperProvider) MutatorIsEnabled(id string) bool {
+	return v.pipelineIsEnabled("mutators", id)
+}
+
+func (v *ViperProvider) MutatorConfig(id string, override json.RawMessage, dest interface{}) error {
+	return v.pipelineConfig("mutators", id, override, dest)
 }

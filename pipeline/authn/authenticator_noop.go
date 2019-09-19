@@ -4,8 +4,6 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/pkg/errors"
-
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/pipeline"
 )
@@ -22,11 +20,14 @@ func (a *AuthenticatorNoOp) GetID() string {
 	return "noop"
 }
 
-func (a *AuthenticatorNoOp) Validate() error {
-	if !a.c.AuthenticatorNoopIsEnabled() {
-		return errors.WithStack(ErrAuthenticatorNotEnabled.WithReasonf(`Authenticator "%s" is disabled per configuration.`, a.GetID()))
+func (a *AuthenticatorNoOp) Validate(config json.RawMessage) error {
+	if !a.c.AuthenticatorIsEnabled(a.GetID()) {
+		return NewErrAuthenticatorNotEnabled(a)
 	}
 
+	if err := a.c.AuthenticatorConfig(a.GetID(), config, nil); err != nil {
+		return NewErrAuthenticatorMisconfigured(a, err)
+	}
 	return nil
 }
 

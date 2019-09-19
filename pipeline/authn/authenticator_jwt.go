@@ -10,6 +10,7 @@ import (
 
 	"github.com/ory/go-convenience/jwtx"
 	"github.com/ory/herodot"
+
 	"github.com/ory/oathkeeper/credentials"
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/helper"
@@ -21,18 +22,12 @@ type AuthenticatorJWTRegistry interface {
 }
 
 type AuthenticatorOAuth2JWTConfiguration struct {
-	// An array of OAuth 2.0 scopes that are required when accessing an endpoint protected by this handler.
-	// If the token used in the Authorization header did not request that specific scope, the request is denied.
-	Scope []string `json:"required_scope"`
-
-	// An array of audiences that are required when accessing an endpoint protected by this handler.
-	// If the token used in the Authorization header is not intended for any of the requested audiences, the request is denied.
-	Audience []string `json:"target_audience"`
-
-	// The token must have been issued by one of the issuers listed in this array.
-	Issuers []string `json:"trusted_issuers"`
-
+	Scope             []string `json:"required_scope"`
+	Audience          []string `json:"target_audience"`
+	Issuers           []string `json:"trusted_issuers"`
 	AllowedAlgorithms []string `json:"allowed_algorithms"`
+	JWKSURLs          []string `json:"jwks_urls"`
+	ScopeStrategy     string   `json:"scope_strategy"`
 }
 
 type AuthenticatorJWT struct {
@@ -54,16 +49,22 @@ func (a *AuthenticatorJWT) GetID() string {
 	return "jwt"
 }
 
-func (a *AuthenticatorJWT) Validate() error {
-	if !a.c.AuthenticatorJWTIsEnabled() {
-		return errors.WithStack(ErrAuthenticatorNotEnabled.WithReasonf(`Authenticator "%s" is disabled per configuration.`, a.GetID()))
+func (a *AuthenticatorJWT) Validate(config json.RawMessage) error {
+	if !a.c.AuthenticatorIsEnabled(a.GetID()) {
+		return NewErrAuthenticatorNotEnabled(a)
 	}
 
-	if len(a.c.AuthenticatorJWTJWKSURIs()) == 0 {
-		return errors.WithStack(ErrAuthenticatorNotEnabled.WithReasonf(`Configuration for authenticator "%s" did not specify any values for configuration key "%s" and is thus disabled.`, a.GetID(), configuration.ViperKeyAuthenticatorJWTJWKSURIs))
+	_, err := a.config(config)
+	return err
+}
+
+func (a *AuthenticatorJWT) config(config json.RawMessage) (*AuthenticatorCookieSessionConfiguration, error) {
+	var c AuthenticatorCookieSessionConfiguration
+	if err := a.c.AuthenticatorConfig(a.GetID(), config, &c); err != nil {
+		return nil, NewErrAuthenticatorMisconfigured(a, err)
 	}
 
-	return nil
+	return &c, nil
 }
 
 func (a *AuthenticatorJWT) Authenticate(r *http.Request, config json.RawMessage, _ pipeline.Rule) (*AuthenticationSession, error) {
@@ -87,13 +88,18 @@ func (a *AuthenticatorJWT) Authenticate(r *http.Request, config json.RawMessage,
 		cf.AllowedAlgorithms = []string{"RS256"}
 	}
 
+	jwksu, err := a.c.ParseURLs(cf.JWKSURLs)
+	if err != nil {
+		return nil, err
+	}
+
 	pt, err := a.r.CredentialsVerifier().Verify(r.Context(), token, &credentials.ValidationContext{
 		Algorithms:    cf.AllowedAlgorithms,
-		KeyURLs:       a.c.AuthenticatorJWTJWKSURIs(),
+		KeyURLs:       jwksu,
 		Scope:         cf.Scope,
 		Issuers:       cf.Issuers,
 		Audiences:     cf.Audience,
-		ScopeStrategy: a.c.AuthenticatorJWTScopeStrategy(),
+		ScopeStrategy: a.c.ToScopeStrategy(cf.ScopeStrategy, "authenticators.jwt.config.scope_strategy"),
 	})
 	if err != nil {
 		return nil, helper.ErrForbidden.WithReason(err.Error()).WithTrace(err)

@@ -26,6 +26,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"net/url"
 	"text/template"
 	"time"
 
@@ -53,7 +54,10 @@ type MutatorIDToken struct {
 }
 
 type CredentialsIDTokenConfig struct {
-	Claims string `json:"claims"`
+	Claims    string `json:"claims"`
+	IssuerURL string `json:"issuer_url"`
+	JWKSURL   string `json:"jwks_url"`
+	TTL       int    `json:"ttl"`
 }
 
 func (c *CredentialsIDTokenConfig) ClaimsTemplateID() string {
@@ -74,13 +78,9 @@ func (a *MutatorIDToken) WithCache(t *template.Template) {
 
 func (a *MutatorIDToken) Mutate(r *http.Request, session *authn.AuthenticationSession, config json.RawMessage, rl pipeline.Rule) error {
 	var claims = jwt.MapClaims{}
-	if len(config) == 0 {
-		config = json.RawMessage("{}")
-	}
-
-	var c CredentialsIDTokenConfig
-	if err := jsonx.NewStrictDecoder(bytes.NewBuffer(config)).Decode(&c); err != nil {
-		return errors.WithStack(err)
+	c, err := a.config(config)
+	if err != nil {
+		return err
 	}
 
 	if len(c.Claims) > 0 {
@@ -104,16 +104,21 @@ func (a *MutatorIDToken) Mutate(r *http.Request, session *authn.AuthenticationSe
 	}
 
 	now := time.Now().UTC()
-	claims["exp"] = now.Add(a.c.MutatorIDTokenTTL()).Unix()
+	claims["exp"] = now.Add(c.TTL).Unix()
 	claims["jti"] = uuid.New()
 	claims["iat"] = now.Unix()
-	claims["iss"] = a.c.MutatorIDTokenIssuerURL().String()
+	claims["iss"] = c.IssuerURL
 	claims["nbf"] = now.Unix()
 	claims["sub"] = session.Subject
 
+	jwks, err := url.Parse(c.JWKSURL)
+	if err != nil {
+		return errors.WithStack(err)
+	}
+
 	signed, err := a.r.CredentialsSigner().Sign(
 		r.Context(),
-		a.c.MutatorIDTokenJWKSURL(),
+		jwks,
 		claims,
 	)
 	if err != nil {
@@ -124,18 +129,20 @@ func (a *MutatorIDToken) Mutate(r *http.Request, session *authn.AuthenticationSe
 	return nil
 }
 
-func (a *MutatorIDToken) Validate() error {
-	if !a.c.MutatorIDTokenIsEnabled() {
-		return errors.WithStack(ErrMutatorNotEnabled.WithReasonf(`Mutator "%s" is disabled per configuration.`, a.GetID()))
+func (a *MutatorIDToken) Validate(config json.RawMessage) error {
+	if !a.c.MutatorIsEnabled(a.GetID()) {
+		return NewErrMutatorNotEnabled(a)
 	}
 
-	if a.c.MutatorIDTokenIssuerURL() == nil {
-		return errors.WithStack(ErrMutatorNotEnabled.WithReasonf(`Configuration for mutator "%s" did not specify any values for configuration key "%s" and is thus disabled.`, a.GetID(), configuration.ViperKeyMutatorIDTokenIssuerURL))
+	_, err := a.config(config)
+	return err
+}
+
+func (a *MutatorIDToken) config(config json.RawMessage) (*CredentialsIDTokenConfig, error) {
+	var c CredentialsIDTokenConfig
+	if err := a.c.AuthorizerConfig(a.GetID(), config, &c); err != nil {
+		return nil, NewErrAuthorizerMisconfigured(a, err)
 	}
 
-	if a.c.MutatorIDTokenJWKSURL() == nil {
-		return errors.WithStack(ErrMutatorNotEnabled.WithReasonf(`Configuration for mutator "%s" did not specify any values for configuration key "%s" and is thus disabled.`, a.GetID(), configuration.ViperKeyMutatorIDTokenJWKSURL))
-	}
-
-	return nil
+	return &c, nil
 }

@@ -10,25 +10,31 @@ import (
 	"strings"
 
 	"github.com/pkg/errors"
+	"golang.org/x/oauth2/clientcredentials"
 
 	"github.com/ory/go-convenience/stringslice"
+	"github.com/ory/x/httpx"
+
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/helper"
 	"github.com/ory/oathkeeper/pipeline"
-	"github.com/ory/x/httpx"
 )
 
 type AuthenticatorOAuth2IntrospectionConfiguration struct {
-	// An array of OAuth 2.0 scopes that are required when accessing an endpoint protected by this handler.
-	// If the token used in the Authorization header did not request that specific scope, the request is denied.
 	Scopes []string `json:"required_scope"`
-
-	// An array of audiences that are required when accessing an endpoint protected by this handler.
-	// If the token used in the Authorization header is not intended for any of the requested audiences, the request is denied.
 	Audience []string `json:"target_audience"`
-
-	// The token must have been issued by one of the issuers listed in this array.
 	Issuers []string `json:"trusted_issuers"`
+	PreAuth *AuthenticatorOAuth2IntrospectionPreAuthConfiguration `json:"pre_authorization"`
+	ScopeStrategy    string `json:"scope_strategy"`
+	IntrospectionURL string `json:"introspection_url"`
+}
+
+type AuthenticatorOAuth2IntrospectionPreAuthConfiguration struct {
+	Enabled      bool     `json:"enabled"`
+	ClientID     string   `json:"client_id"`
+	ClientSecret string   `json:"client_secret"`
+	Scope        []string `json:"scope"`
+	TokenURL     string   `json:"token_url"`
 }
 
 type AuthenticatorOAuth2Introspection struct {
@@ -39,10 +45,6 @@ type AuthenticatorOAuth2Introspection struct {
 
 func NewAuthenticatorOAuth2Introspection(c configuration.Provider) *AuthenticatorOAuth2Introspection {
 	var rt http.RoundTripper
-	if conf := c.AuthenticatorOAuth2TokenIntrospectionPreAuthorization(); conf != nil {
-		rt = conf.Client(context.Background()).Transport
-	}
-
 	return &AuthenticatorOAuth2Introspection{c: c, client: httpx.NewResilientClientLatencyToleranceSmall(rt)}
 }
 
@@ -82,7 +84,7 @@ func (a *AuthenticatorOAuth2Introspection) Authenticate(r *http.Request, config 
 	}
 
 	body := url.Values{"token": {token}, "scope": {strings.Join(cf.Scopes, " ")}}
-	resp, err := a.client.Post(a.c.AuthenticatorOAuth2TokenIntrospectionIntrospectionURL().String(), "application/x-www-form-urlencoded", strings.NewReader(body.Encode()))
+	resp, err := a.client.Post(cf.IntrospectionURL, "application/x-www-form-urlencoded", strings.NewReader(body.Encode()))
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
@@ -116,9 +118,9 @@ func (a *AuthenticatorOAuth2Introspection) Authenticate(r *http.Request, config 
 		}
 	}
 
-	if a.c.AuthenticatorOAuth2TokenIntrospectionScopeStrategy() != nil {
+	if ss := a.c.ToScopeStrategy(cf.ScopeStrategy, "authenticators.oauth2_introspection.scope_strategy"); ss != nil {
 		for _, scope := range cf.Scopes {
-			if !a.c.AuthenticatorOAuth2TokenIntrospectionScopeStrategy()(strings.Split(i.Scope, " "), scope) {
+			if !ss(strings.Split(i.Scope, " "), scope) {
 				return nil, errors.WithStack(helper.ErrForbidden.WithReason(fmt.Sprintf("Scope %s was not granted", scope)))
 			}
 		}
@@ -138,14 +140,33 @@ func (a *AuthenticatorOAuth2Introspection) Authenticate(r *http.Request, config 
 	}, nil
 }
 
-func (a *AuthenticatorOAuth2Introspection) Validate() error {
-	if !a.c.AuthenticatorOAuth2TokenIntrospectionIsEnabled() {
-		return errors.WithStack(ErrAuthenticatorNotEnabled.WithReasonf(`Authenticator "%s" is disabled per configuration.`, a.GetID()))
+func (a *AuthenticatorOAuth2Introspection) Validate(config json.RawMessage) error {
+	if !a.c.AuthenticatorIsEnabled(a.GetID()) {
+		return NewErrAuthenticatorNotEnabled(a)
 	}
 
-	if a.c.AuthenticatorOAuth2TokenIntrospectionIntrospectionURL() == nil {
-		return errors.WithStack(ErrAuthenticatorNotEnabled.WithReasonf(`Configuration for authenticator "%s" did not specify any values for configuration key "%s" and is thus disabled.`, a.GetID(), configuration.ViperKeyAuthenticatorOAuth2TokenIntrospectionIntrospectionURL))
+	_, err := a.config(config)
+	return err
+}
+
+func (a *AuthenticatorOAuth2Introspection) config(config json.RawMessage) (*AuthenticatorOAuth2IntrospectionConfiguration, error) {
+	var c AuthenticatorOAuth2IntrospectionConfiguration
+	if err := a.c.AuthenticatorConfig(a.GetID(), config, &c); err != nil {
+		return nil, NewErrAuthenticatorMisconfigured(a, err)
 	}
 
-	return nil
+	if c.PreAuth != nil && c.PreAuth.Enabled {
+		a.client = httpx.NewResilientClientLatencyToleranceSmall(
+			(&clientcredentials.Config{
+				ClientID:     c.PreAuth.ClientID,
+				ClientSecret: c.PreAuth.ClientSecret,
+				Scopes:       c.PreAuth.Scope,
+				TokenURL:     c.PreAuth.TokenURL,
+			}).
+				Client(context.Background()).
+				Transport,
+		)
+	}
+
+	return &c, nil
 }

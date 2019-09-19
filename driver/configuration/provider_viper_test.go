@@ -178,11 +178,11 @@ func TestViperProvider(t *testing.T) {
 func TestToScopeStrategy(t *testing.T) {
 	v := NewViperProvider(logrus.New())
 
-	assert.True(t, v.toScopeStrategy("exact", "foo")([]string{"foo"}, "foo"))
-	assert.True(t, v.toScopeStrategy("hierarchic", "foo")([]string{"foo"}, "foo.bar"))
-	assert.True(t, v.toScopeStrategy("wildcard", "foo")([]string{"foo.*"}, "foo.bar"))
-	assert.Nil(t, v.toScopeStrategy("none", "foo"))
-	assert.Nil(t, v.toScopeStrategy("whatever", "foo"))
+	assert.True(t, v.ToScopeStrategy("exact", "foo")([]string{"foo"}, "foo"))
+	assert.True(t, v.ToScopeStrategy("hierarchic", "foo")([]string{"foo"}, "foo.bar"))
+	assert.True(t, v.ToScopeStrategy("wildcard", "foo")([]string{"foo.*"}, "foo.bar"))
+	assert.Nil(t, v.ToScopeStrategy("none", "foo"))
+	assert.Nil(t, v.ToScopeStrategy("whatever", "foo"))
 }
 
 func TestAuthenticatorOAuth2TokenIntrospectionPreAuthorization(t *testing.T) {
