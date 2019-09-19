@@ -50,7 +50,7 @@ func (h *CredentialsHandler) SetRoutes(r *x.RouterAPI) {
 //       500: genericError
 func (h *CredentialsHandler) wellKnown(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	sets, err := h.r.CredentialsFetcher().ResolveSets(r.Context(), []url.URL{
-		*h.c.MutatorIDTokenJWKSURL(),
+		// *h.c.MutatorIDTokenJWKSURL(),
 	})
 	if err != nil {
 		h.r.Writer().WriteError(w, r, err)

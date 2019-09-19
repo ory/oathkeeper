@@ -135,7 +135,7 @@ func (d *RequestHandler) HandleRequest(r *http.Request, rl *rule.Rule) (http.Hea
 		return nil, err
 	}
 
-	if err := azh.Validate(a.Config); err != nil {
+	if err := azh.Validate(rl.Authorizer.Config); err != nil {
 		d.r.Logger().WithError(err).
 			WithField("granted", false).
 			WithField("access_url", r.URL.String()).
@@ -178,7 +178,7 @@ func (d *RequestHandler) HandleRequest(r *http.Request, rl *rule.Rule) (http.Hea
 			return nil, err
 		}
 
-		if err := sh.Validate(a.Config); err != nil {
+		if err := sh.Validate(m.Config); err != nil {
 			d.r.Logger().WithError(err).
 				WithField("granted", false).
 				WithField("access_url", r.URL.String()).
