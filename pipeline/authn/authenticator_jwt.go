@@ -54,12 +54,12 @@ func (a *AuthenticatorJWT) Validate(config json.RawMessage) error {
 		return NewErrAuthenticatorNotEnabled(a)
 	}
 
-	_, err := a.config(config)
+	_, err := a.Config(config)
 	return err
 }
 
-func (a *AuthenticatorJWT) config(config json.RawMessage) (*AuthenticatorCookieSessionConfiguration, error) {
-	var c AuthenticatorCookieSessionConfiguration
+func (a *AuthenticatorJWT) Config(config json.RawMessage) (*AuthenticatorOAuth2JWTConfiguration, error) {
+	var c AuthenticatorOAuth2JWTConfiguration
 	if err := a.c.AuthenticatorConfig(a.GetID(), config, &c); err != nil {
 		return nil, NewErrAuthenticatorMisconfigured(a, err)
 	}
@@ -99,7 +99,7 @@ func (a *AuthenticatorJWT) Authenticate(r *http.Request, config json.RawMessage,
 		Scope:         cf.Scope,
 		Issuers:       cf.Issuers,
 		Audiences:     cf.Audience,
-		ScopeStrategy: a.c.ToScopeStrategy(cf.ScopeStrategy, "authenticators.jwt.config.scope_strategy"),
+		ScopeStrategy: a.c.ToScopeStrategy(cf.ScopeStrategy, "authenticators.jwt.Config.scope_strategy"),
 	})
 	if err != nil {
 		return nil, helper.ErrForbidden.WithReason(err.Error()).WithTrace(err)

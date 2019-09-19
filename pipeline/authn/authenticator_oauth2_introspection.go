@@ -145,11 +145,11 @@ func (a *AuthenticatorOAuth2Introspection) Validate(config json.RawMessage) erro
 		return NewErrAuthenticatorNotEnabled(a)
 	}
 
-	_, err := a.config(config)
+	_, err := a.Config(config)
 	return err
 }
 
-func (a *AuthenticatorOAuth2Introspection) config(config json.RawMessage) (*AuthenticatorOAuth2IntrospectionConfiguration, error) {
+func (a *AuthenticatorOAuth2Introspection) Config(config json.RawMessage) (*AuthenticatorOAuth2IntrospectionConfiguration, error) {
 	var c AuthenticatorOAuth2IntrospectionConfiguration
 	if err := a.c.AuthenticatorConfig(a.GetID(), config, &c); err != nil {
 		return nil, NewErrAuthenticatorMisconfigured(a, err)

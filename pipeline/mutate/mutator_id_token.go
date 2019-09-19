@@ -30,8 +30,6 @@ import (
 	"text/template"
 	"time"
 
-	"github.com/ory/x/jsonx"
-
 	"github.com/dgrijalva/jwt-go"
 
 	"github.com/pborman/uuid"
@@ -54,10 +52,10 @@ type MutatorIDToken struct {
 }
 
 type CredentialsIDTokenConfig struct {
-	Claims    string `json:"claims"`
-	IssuerURL string `json:"issuer_url"`
-	JWKSURL   string `json:"jwks_url"`
-	TTL       int    `json:"ttl"`
+	Claims    string        `json:"claims"`
+	IssuerURL string        `json:"issuer_url"`
+	JWKSURL   string        `json:"jwks_url"`
+	TTL       string `json:"ttl"`
 }
 
 func (c *CredentialsIDTokenConfig) ClaimsTemplateID() string {
@@ -78,7 +76,7 @@ func (a *MutatorIDToken) WithCache(t *template.Template) {
 
 func (a *MutatorIDToken) Mutate(r *http.Request, session *authn.AuthenticationSession, config json.RawMessage, rl pipeline.Rule) error {
 	var claims = jwt.MapClaims{}
-	c, err := a.config(config)
+	c, err := a.Config(config)
 	if err != nil {
 		return err
 	}
@@ -103,8 +101,17 @@ func (a *MutatorIDToken) Mutate(r *http.Request, session *authn.AuthenticationSe
 		}
 	}
 
+	if c.TTL == "" {
+		c.TTL = "1m"
+	}
+
+	ttl, err := time.ParseDuration(c.TTL)
+	if err != nil {
+		return errors.WithStack(err)
+	}
+
 	now := time.Now().UTC()
-	claims["exp"] = now.Add(c.TTL).Unix()
+	claims["exp"] = now.Add(ttl).Unix()
 	claims["jti"] = uuid.New()
 	claims["iat"] = now.Unix()
 	claims["iss"] = c.IssuerURL
@@ -134,11 +141,11 @@ func (a *MutatorIDToken) Validate(config json.RawMessage) error {
 		return NewErrMutatorNotEnabled(a)
 	}
 
-	_, err := a.config(config)
+	_, err := a.Config(config)
 	return err
 }
 
-func (a *MutatorIDToken) config(config json.RawMessage) (*CredentialsIDTokenConfig, error) {
+func (a *MutatorIDToken) Config(config json.RawMessage) (*CredentialsIDTokenConfig, error) {
 	var c CredentialsIDTokenConfig
 	if err := a.c.AuthorizerConfig(a.GetID(), config, &c); err != nil {
 		return nil, NewErrAuthorizerMisconfigured(a, err)

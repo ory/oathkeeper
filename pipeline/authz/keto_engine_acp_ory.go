@@ -25,6 +25,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"net/url"
 	"text/template"
 	"time"
 
@@ -88,7 +89,7 @@ func (a *AuthorizerKetoEngineACPORY) WithContextCreator(f authorizerKetoWardenCo
 }
 
 func (a *AuthorizerKetoEngineACPORY) Authorize(r *http.Request, session *authn.AuthenticationSession, config json.RawMessage, rule pipeline.Rule) error {
-	cf, err := a.config(config)
+	cf, err := a.Config(config)
 	if err != nil {
 		return err
 	}
@@ -122,7 +123,13 @@ func (a *AuthorizerKetoEngineACPORY) Authorize(r *http.Request, session *authn.A
 	}); err != nil {
 		return errors.WithStack(err)
 	}
-	req, err := http.NewRequest("POST", urlx.AppendPaths(cf.BaseURL, "/engines/acp/ory", flavor, "/allowed").String(), &b)
+
+	baseURL, err := url.ParseRequestURI(cf.BaseURL)
+	if err != nil {
+		return errors.WithStack(err)
+	}
+
+	req, err := http.NewRequest("POST", urlx.AppendPaths(baseURL, "/engines/acp/ory", flavor, "/allowed").String(), &b)
 	if err != nil {
 		return errors.WithStack(err)
 	}
@@ -183,11 +190,11 @@ func (a *AuthorizerKetoEngineACPORY) Validate(config json.RawMessage) error {
 		return NewErrAuthorizerNotEnabled(a)
 	}
 
-	_, err := a.config(config)
+	_, err := a.Config(config)
 	return err
 }
 
-func (a *AuthorizerKetoEngineACPORY) config(config json.RawMessage) (*AuthorizerKetoEngineACPORYConfiguration, error) {
+func (a *AuthorizerKetoEngineACPORY) Config(config json.RawMessage) (*AuthorizerKetoEngineACPORYConfiguration, error) {
 	var c AuthorizerKetoEngineACPORYConfiguration
 	if err := a.c.AuthorizerConfig(a.GetID(), config, &c); err != nil {
 		return nil, NewErrAuthorizerMisconfigured(a, err)

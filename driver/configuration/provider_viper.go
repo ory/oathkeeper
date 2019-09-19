@@ -45,15 +45,6 @@ func BindEnvs() {
 		ViperKeyAPIServeAddressHost,
 		ViperKeyAPIServeAddressPort,
 		ViperKeyAccessRuleRepositories,
-
-		ViperKeyMutatorCookieIsEnabled,
-		ViperKeyMutatorHeaderIsEnabled,
-		ViperKeyMutatorNoopIsEnabled,
-		ViperKeyMutatorHydratorIsEnabled,
-		ViperKeyMutatorIDTokenIsEnabled,
-		ViperKeyMutatorIDTokenIssuerURL,
-		ViperKeyMutatorIDTokenJWKSURL,
-		ViperKeyMutatorIDTokenTTL,
 	); err != nil {
 		panic(err.Error())
 	}
@@ -156,7 +147,7 @@ func (v *ViperProvider) pipelineIsEnabled(prefix, id string) bool {
 	return viperx.GetBool(v.l, fmt.Sprintf("%s.%s.enabled", prefix, id), false)
 }
 
-func (v *ViperProvider) pipelineConfig(prefix, id string, override json.RawMessage, dest interface{}) error {
+func (v *ViperProvider) PipelineConfig(prefix, id string, override json.RawMessage, dest interface{}) error {
 	config := viper.GetStringMap(fmt.Sprintf("%s.%s", prefix, id))
 	if len(config) == 0 {
 		return nil
@@ -174,9 +165,7 @@ func (v *ViperProvider) pipelineConfig(prefix, id string, override json.RawMessa
 	}
 
 	var b bytes.Buffer
-	if err := json.NewEncoder(&b).Encode(
-		viper.GetStringMap(fmt.Sprintf("%s.%s", prefix, id)),
-	); err != nil {
+	if err := json.NewEncoder(&b).Encode(config); err != nil {
 		return errors.WithStack(err)
 	}
 
@@ -208,7 +197,7 @@ func (v *ViperProvider) AuthenticatorIsEnabled(id string) bool {
 }
 
 func (v *ViperProvider) AuthenticatorConfig(id string, override json.RawMessage, dest interface{}) error {
-	return v.pipelineConfig("authenticators", id, override, dest)
+	return v.PipelineConfig("authenticators", id, override, dest)
 }
 
 func (v *ViperProvider) AuthorizerIsEnabled(id string) bool {
@@ -216,7 +205,7 @@ func (v *ViperProvider) AuthorizerIsEnabled(id string) bool {
 }
 
 func (v *ViperProvider) AuthorizerConfig(id string, override json.RawMessage, dest interface{}) error {
-	return v.pipelineConfig("authorizers", id, override, dest)
+	return v.PipelineConfig("authorizers", id, override, dest)
 }
 
 func (v *ViperProvider) MutatorIsEnabled(id string) bool {
@@ -224,5 +213,5 @@ func (v *ViperProvider) MutatorIsEnabled(id string) bool {
 }
 
 func (v *ViperProvider) MutatorConfig(id string, override json.RawMessage, dest interface{}) error {
-	return v.pipelineConfig("mutators", id, override, dest)
+	return v.PipelineConfig("mutators", id, override, dest)
 }

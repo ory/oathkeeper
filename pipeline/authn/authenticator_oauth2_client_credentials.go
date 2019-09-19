@@ -41,11 +41,11 @@ func (a *AuthenticatorOAuth2ClientCredentials) Validate(config json.RawMessage) 
 		return NewErrAuthenticatorNotEnabled(a)
 	}
 
-	_, err := a.config(config)
+	_, err := a.Config(config)
 	return err
 }
 
-func (a *AuthenticatorOAuth2ClientCredentials) config(config json.RawMessage) (*AuthenticatorOAuth2Configuration, error) {
+func (a *AuthenticatorOAuth2ClientCredentials) Config(config json.RawMessage) (*AuthenticatorOAuth2Configuration, error) {
 	var c AuthenticatorOAuth2Configuration
 	if err := a.c.AuthenticatorConfig(a.GetID(), config, &c); err != nil {
 		return nil, NewErrAuthenticatorMisconfigured(a, err)

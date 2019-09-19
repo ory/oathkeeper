@@ -29,7 +29,7 @@ func (a *AuthenticatorAnonymous) Validate(config json.RawMessage) error {
 		return NewErrAuthenticatorNotEnabled(a)
 	}
 
-	_, err := a.config(config)
+	_, err := a.Config(config)
 	return err
 }
 
@@ -37,7 +37,7 @@ func (a *AuthenticatorAnonymous) GetID() string {
 	return "anonymous"
 }
 
-func (a *AuthenticatorAnonymous) config(config json.RawMessage) (*AuthenticatorAnonymousConfiguration, error) {
+func (a *AuthenticatorAnonymous) Config(config json.RawMessage) (*AuthenticatorAnonymousConfiguration, error) {
 	var c AuthenticatorAnonymousConfiguration
 	if err := a.c.AuthenticatorConfig(a.GetID(), config, &c); err != nil {
 		return nil, NewErrAuthenticatorMisconfigured(a, err)
@@ -52,7 +52,7 @@ func (a *AuthenticatorAnonymous) Authenticate(r *http.Request, config json.RawMe
 		return nil, errors.WithStack(ErrAuthenticatorNotResponsible)
 	}
 
-	cf, err := a.config(config)
+	cf, err := a.Config(config)
 	if err != nil {
 		return nil, err
 	}

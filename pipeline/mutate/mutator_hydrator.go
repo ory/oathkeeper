@@ -62,19 +62,19 @@ type BasicAuth struct {
 	Password string `json:"password"`
 }
 
-type Auth struct {
+type auth struct {
 	Basic BasicAuth `json:"basic"`
 }
 
-type RetryConfig struct {
-	NumberOfRetries     int `json:"number"`
+type retryConfig struct {
+	NumberOfRetries     int `json:"number_of_retries"`
 	DelayInMilliseconds int `json:"delay_in_milliseconds"`
 }
 
 type externalAPIConfig struct {
-	Url   string       `json:"url"`
-	Auth  *Auth        `json:"auth"`
-	Retry *RetryConfig `json:"retry"`
+	URL   string       `json:"url"`
+	Auth  *auth        `json:"auth"`
+	Retry *retryConfig `json:"retry"`
 }
 
 type MutatorHydratorConfig struct {
@@ -90,7 +90,7 @@ func (a *MutatorHydrator) GetID() string {
 }
 
 func (a *MutatorHydrator) Mutate(r *http.Request, session *authn.AuthenticationSession, config json.RawMessage, _ pipeline.Rule) error {
-	cfg, err := a.config(config)
+	cfg, err := a.Config(config)
 	if err != nil {
 		return err
 	}
@@ -100,12 +100,12 @@ func (a *MutatorHydrator) Mutate(r *http.Request, session *authn.AuthenticationS
 		return errors.WithStack(err)
 	}
 
-	if cfg.Api.Url == "" {
+	if cfg.Api.URL == "" {
 		return errors.New(ErrMissingAPIURL)
-	} else if _, err := url.ParseRequestURI(cfg.Api.Url); err != nil {
+	} else if _, err := url.ParseRequestURI(cfg.Api.URL); err != nil {
 		return errors.New(ErrInvalidAPIURL)
 	}
-	req, err := http.NewRequest("POST", cfg.Api.Url, &b)
+	req, err := http.NewRequest("POST", cfg.Api.URL, &b)
 	if err != nil {
 		return errors.WithStack(err)
 	}
@@ -120,7 +120,7 @@ func (a *MutatorHydrator) Mutate(r *http.Request, session *authn.AuthenticationS
 	}
 	req.Header.Set(contentTypeHeaderKey, contentTypeJSONHeaderValue)
 
-	retryConfig := RetryConfig{defaultNumberOfRetries, defaultDelayInMilliseconds}
+	retryConfig := retryConfig{defaultNumberOfRetries, defaultDelayInMilliseconds}
 	if cfg.Api.Retry != nil {
 		retryConfig = *cfg.Api.Retry
 	}
@@ -165,11 +165,11 @@ func (a *MutatorHydrator)  Validate(config json.RawMessage) error {
 		return NewErrMutatorNotEnabled(a)
 	}
 
-	_, err := a.config(config)
+	_, err := a.Config(config)
 	return err
 }
 
-func (a *MutatorHydrator) config(config json.RawMessage) (*MutatorHydratorConfig, error) {
+func (a *MutatorHydrator) Config(config json.RawMessage) (*MutatorHydratorConfig, error) {
 	var c MutatorHydratorConfig
 	if err := a.c.AuthorizerConfig(a.GetID(), config, &c); err != nil {
 		return nil, NewErrAuthorizerMisconfigured(a, err)

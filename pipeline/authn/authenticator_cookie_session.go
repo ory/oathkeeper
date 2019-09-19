@@ -40,11 +40,11 @@ func (a *AuthenticatorCookieSession) Validate(config json.RawMessage) error {
 		return NewErrAuthenticatorNotEnabled(a)
 	}
 
-	_, err := a.config(config)
+	_, err := a.Config(config)
 	return err
 }
 
-func (a *AuthenticatorCookieSession) config(config json.RawMessage) (*AuthenticatorCookieSessionConfiguration, error) {
+func (a *AuthenticatorCookieSession) Config(config json.RawMessage) (*AuthenticatorCookieSessionConfiguration, error) {
 	var c AuthenticatorCookieSessionConfiguration
 	if err := a.c.AuthenticatorConfig(a.GetID(), config, &c); err != nil {
 		return nil, NewErrAuthenticatorMisconfigured(a, err)
@@ -54,7 +54,7 @@ func (a *AuthenticatorCookieSession) config(config json.RawMessage) (*Authentica
 }
 
 func (a *AuthenticatorCookieSession) Authenticate(r *http.Request, config json.RawMessage, _ pipeline.Rule) (*AuthenticationSession, error) {
-	cf, err := a.config(config)
+	cf, err := a.Config(config)
 	if err != nil {
 		return nil,err
 	}

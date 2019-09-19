@@ -1,5 +1,5 @@
 {
-  "$id": "https://raw.githubusercontent.com/ory/oathkeeper/master/.schemas/authenticators.deny.schema.json",
+  "$id": "https://raw.githubusercontent.com/ory/oathkeeper/fix-255/.schemas/authorizers.deny.schema.json",
   "$schema": "http://json-schema.org/draft-07/schema#",
   "type": "object",
   "title": "Deny Authorizer Configuration",
