@@ -58,7 +58,7 @@ func main() {
 	}
 
 	res, body = requestWithJWT("not.valid.token")
-	if res.StatusCode != 403 {
+	if res.StatusCode != 401 {
 		panic("proxy: expected 401: " + body)
 	}
 
@@ -68,7 +68,7 @@ func main() {
 	}
 
 	res, body = decisionWithJWT("not.valid.token")
-	if res.StatusCode != 403 {
+	if res.StatusCode != 401 {
 		panic("decision: expected 401: " + body)
 	}
 }
