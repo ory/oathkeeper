@@ -3,6 +3,7 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "type": "object",
   "title": "NoOp Mutator Configuration",
+  "description": "This section is optional when the mutator is disabled.",
   "properties": {
   },
   "additionalProperties": false

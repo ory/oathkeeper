@@ -3,6 +3,7 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "type": "object",
   "title": "JWT Authenticator Configuration",
+  "description": "This section is optional when the authenticator is disabled.",
   "properties": {
     "required_scope": {
       "type": "array",

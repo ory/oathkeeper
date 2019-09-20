@@ -42,9 +42,9 @@ func TestPipelineConfig(t *testing.T) {
 	p := NewViperProvider(logrus.New())
 
 	t.Run("case=should fail when invalid value is used in override", func(t *testing.T) {
-		require.NoError(t, p.PipelineConfig("mutators", "hydrator", json.RawMessage(`{"not-api":"invalid"}`), nil))
-		require.NoError(t, p.PipelineConfig("mutators", "hydrator", json.RawMessage(`{"api":{"this-key-does-not-exist":true}}`), nil))
-		require.NoError(t, p.PipelineConfig("mutators", "hydrator", json.RawMessage(`{"api":{"url":"not-a-url"}}`), nil))
+		require.Error(t, p.PipelineConfig("mutators", "hydrator", json.RawMessage(`{"not-api":"invalid"}`), nil))
+		require.Error(t, p.PipelineConfig("mutators", "hydrator", json.RawMessage(`{"api":{"this-key-does-not-exist":true}}`), nil))
+		require.Error(t, p.PipelineConfig("mutators", "hydrator", json.RawMessage(`{"api":{"url":"not-a-url"}}`), nil))
 	})
 
 	t.Run("case=should pass and override values", func(t *testing.T) {

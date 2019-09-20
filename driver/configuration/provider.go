@@ -12,7 +12,7 @@ import (
 	"github.com/rs/cors"
 )
 
-var schemas = packr.New("schemas", "../.schemas")
+var schemas = packr.New("schemas", "../../.schemas")
 
 type Provider interface {
 	CORSEnabled(iface string) bool

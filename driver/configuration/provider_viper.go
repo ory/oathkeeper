@@ -148,20 +148,30 @@ func (v *ViperProvider) pipelineIsEnabled(prefix, id string) bool {
 }
 
 func (v *ViperProvider) PipelineConfig(prefix, id string, override json.RawMessage, dest interface{}) error {
-	config := viper.GetStringMap(fmt.Sprintf("%s.%s", prefix, id))
+	config := viper.GetStringMap(fmt.Sprintf("%s.%s.config", prefix, id))
 	if len(config) == 0 {
 		return nil
 	}
 
 	if len(override) != 0 {
 		var overrideMap map[string]interface{}
-		if err := json.Unmarshal(override, overrideMap); err != nil {
+		if err := json.Unmarshal(override, &overrideMap); err != nil {
 			return errors.WithStack(err)
 		}
 
-		if err := mergo.Merge(config, overrideMap, mergo.WithOverride); err != nil {
+		// we need to create a copy for config otherwise merge will override the viper values
+		tc := make(map[string]interface{})
+		for k, v := range config {
+			tc[k] = v
+		}
+
+		if err := mergo.Merge(&tc, &overrideMap, mergo.WithOverride); err != nil {
 			return errors.WithStack(err)
 		}
+
+		config = tc
+
+		fmt.Printf("\n\n%+v\n\n", config)
 	}
 
 	var b bytes.Buffer
