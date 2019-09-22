@@ -147,8 +147,8 @@ func (a *MutatorIDToken) Validate(config json.RawMessage) error {
 
 func (a *MutatorIDToken) Config(config json.RawMessage) (*CredentialsIDTokenConfig, error) {
 	var c CredentialsIDTokenConfig
-	if err := a.c.AuthorizerConfig(a.GetID(), config, &c); err != nil {
-		return nil, NewErrAuthorizerMisconfigured(a, err)
+	if err := a.c.MutatorConfig(a.GetID(), config, &c); err != nil {
+		return nil, NewErrMutatorMisconfigured(a, err)
 	}
 
 	return &c, nil

@@ -50,7 +50,7 @@ func (a *MutatorNoop) Validate(config json.RawMessage) error {
 	}
 
 	if err := a.c.MutatorConfig(a.GetID(), config, nil); err != nil {
-		return NewErrAuthorizerMisconfigured(a, err)
+		return NewErrMutatorMisconfigured(a, err)
 	}
 	return nil
 }

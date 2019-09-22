@@ -4,6 +4,7 @@
   "type": "object",
   "title": "Header Mutator Configuration",
   "description": "This section is optional when the mutator is disabled.",
+  "required": ["headers"],
   "properties": {
     "headers": {
       "type": "object",

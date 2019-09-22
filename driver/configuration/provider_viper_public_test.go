@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/url"
-	"reflect"
 	"testing"
 
 	"github.com/rs/cors"
@@ -42,9 +41,15 @@ func TestPipelineConfig(t *testing.T) {
 	p := NewViperProvider(logrus.New())
 
 	t.Run("case=should fail when invalid value is used in override", func(t *testing.T) {
-		require.Error(t, p.PipelineConfig("mutators", "hydrator", json.RawMessage(`{"not-api":"invalid"}`), nil))
-		require.Error(t, p.PipelineConfig("mutators", "hydrator", json.RawMessage(`{"api":{"this-key-does-not-exist":true}}`), nil))
-		require.Error(t, p.PipelineConfig("mutators", "hydrator", json.RawMessage(`{"api":{"url":"not-a-url"}}`), nil))
+		res := json.RawMessage{}
+		require.Error(t, p.PipelineConfig("mutators", "hydrator", json.RawMessage(`{"not-api":"invalid"}`), &res))
+		assert.JSONEq(t, `{"api":{"url":"https://some-url/"},"not-api":"invalid"}`, string(res))
+
+		require.Error(t, p.PipelineConfig("mutators", "hydrator", json.RawMessage(`{"api":{"this-key-does-not-exist":true}}`), &res))
+		assert.JSONEq(t, `{"api":{"url":"https://some-url/","this-key-does-not-exist":true}}`, string(res))
+
+		require.Error(t, p.PipelineConfig("mutators", "hydrator", json.RawMessage(`{"api":{"url":"not-a-url"}}`), &res))
+		assert.JSONEq(t, `{"api":{"url":"not-a-url"}}`, string(res))
 	})
 
 	t.Run("case=should pass and override values", func(t *testing.T) {
@@ -52,8 +57,8 @@ func TestPipelineConfig(t *testing.T) {
 		require.NoError(t, p.PipelineConfig("mutators", "hydrator", json.RawMessage(``), &dec))
 		assert.Equal(t, "https://some-url/", dec.Api.URL)
 
-		require.NoError(t, p.PipelineConfig("mutators", "hydrator", json.RawMessage(`{"api":{"url":"http://override-url/foo","retry":{"number":15}}}`), &dec))
-		assert.Equal(t, "https://override-url/foo", dec.Api.URL)
+		require.NoError(t, p.PipelineConfig("mutators", "hydrator", json.RawMessage(`{"api":{"url":"http://override-url/foo","retry":{"number_of_retries":15}}}`), &dec))
+		assert.Equal(t, "http://override-url/foo", dec.Api.URL)
 		assert.Equal(t, 15, dec.Api.Retry.NumberOfRetries)
 	})
 }
@@ -67,7 +72,10 @@ func TestViperProvider(t *testing.T) {
 		logrus.New(),
 	)
 
-	require.NoError(t, viperx.Validate(gojsonschema.NewReferenceLoader("file://../../.schemas/config.schema.json")))
+	err := viperx.Validate(gojsonschema.NewReferenceLoader("file://../../.schemas/config.schema.json"))
+	if err != nil {
+		viperx.LoggerWithValidationErrorFields(logrus.New(), err).Error("unable to validate")
+	}
 	p := NewViperProvider(logrus.New())
 
 	t.Run("group=serve", func(t *testing.T) {
@@ -159,7 +167,7 @@ func TestViperProvider(t *testing.T) {
 			config, err := a.Config(nil)
 			require.NoError(t, err)
 
-			assert.Equal(t, "wildcard", reflect.ValueOf(config.ScopeStrategy).Pointer())
+			assert.Equal(t, "wildcard", config.ScopeStrategy)
 			assert.Equal(t, []string{
 				"https://my-website.com/.well-known/jwks.json",
 				"https://my-other-website.com/.well-known/jwks.json",
@@ -191,6 +199,7 @@ func TestViperProvider(t *testing.T) {
 				ClientSecret: "some_secret",
 				TokenURL:     "https://my-website.com/oauth2/token",
 				Scope:        []string{"foo", "bar"},
+				Enabled:      true,
 			}, config.PreAuth)
 		})
 
@@ -278,6 +287,8 @@ func TestToScopeStrategy(t *testing.T) {
 func TestAuthenticatorOAuth2TokenIntrospectionPreAuthorization(t *testing.T) {
 	viper.Reset()
 	v := NewViperProvider(logrus.New())
+	viper.Set("authenticators.oauth2_introspection.enabled", true)
+	viper.Set("authenticators.oauth2_introspection.config.introspection_url", "http://some-url/")
 
 	for k, tc := range []struct {
 		enabled bool
@@ -299,14 +310,14 @@ func TestAuthenticatorOAuth2TokenIntrospectionPreAuthorization(t *testing.T) {
 		t.Run(fmt.Sprintf("case=%d", k), func(t *testing.T) {
 			a := authn.NewAuthenticatorOAuth2Introspection(v)
 
-			config, err := a.Config(json.RawMessage(`{
+			config, err := a.Config(json.RawMessage(fmt.Sprintf(`{
 	"pre_authorization": {
 		"enabled": %v,
 		"client_id": "%v",
 		"client_secret": "%v",
 		"token_url": "%v"
 	}
-}`))
+}`, tc.enabled, tc.id, tc.secret, tc.turl)))
 
 			if tc.err {
 				assert.Error(t, err, "%+v", config)

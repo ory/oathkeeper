@@ -171,8 +171,8 @@ func (a *MutatorHydrator)  Validate(config json.RawMessage) error {
 
 func (a *MutatorHydrator) Config(config json.RawMessage) (*MutatorHydratorConfig, error) {
 	var c MutatorHydratorConfig
-	if err := a.c.AuthorizerConfig(a.GetID(), config, &c); err != nil {
-		return nil, NewErrAuthorizerMisconfigured(a, err)
+	if err := a.c.MutatorConfig(a.GetID(), config, &c); err != nil {
+		return nil, NewErrMutatorMisconfigured(a, err)
 	}
 
 	return &c, nil

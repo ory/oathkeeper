@@ -21,6 +21,7 @@
 package authn_test
 
 import (
+	"encoding/json"
 	"net/http"
 	"testing"
 
@@ -35,7 +36,7 @@ import (
 
 func TestAuthenticatorAnonymous(t *testing.T) {
 	conf := internal.NewConfigurationWithDefaults()
-	viper.Set(configuration.ViperKeyAuthenticatorAnonymousIdentifier, "anon")
+	// viper.Set(configuration.ViperKeyAuthenticatorAnonymousIdentifier, "anon")
 	reg := internal.NewRegistry(conf)
 
 	a, err := reg.PipelineAuthenticator("anonymous")
@@ -43,21 +44,21 @@ func TestAuthenticatorAnonymous(t *testing.T) {
 	assert.Equal(t, "anonymous", a.GetID())
 
 	t.Run("method=authenticate/case=is anonymous user", func(t *testing.T) {
-		session, err := a.Authenticate(&http.Request{Header: http.Header{}}, nil, nil)
+		session, err := a.Authenticate(&http.Request{Header: http.Header{}}, json.RawMessage(`{"subject":"anon"}`), nil)
 		require.NoError(t, err)
 		assert.Equal(t, "anon", session.Subject)
 	})
 
 	t.Run("method=authenticate/case=has credentials", func(t *testing.T) {
-		_, err := a.Authenticate(&http.Request{Header: http.Header{"Authorization": {"foo"}}}, nil, nil)
+		_, err := a.Authenticate(&http.Request{Header: http.Header{"Authorization": {"foo"}}}, json.RawMessage(`{"subject":"anon"}`), nil)
 		require.Error(t, err)
 	})
 
 	t.Run("method=validate", func(t *testing.T) {
 		viper.Set(configuration.ViperKeyAuthenticatorAnonymousIsEnabled, true)
-		require.NoError(t, a.Validate())
+		require.NoError(t, a.Validate(json.RawMessage(`{"subject":"foo"}`)))
 
 		viper.Set(configuration.ViperKeyAuthenticatorAnonymousIsEnabled, false)
-		require.Error(t, a.Validate())
+		require.Error(t, a.Validate(json.RawMessage(`{"subject":"foo"}`)))
 	})
 }

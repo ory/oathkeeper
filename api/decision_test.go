@@ -28,10 +28,9 @@ import (
 
 	"github.com/ory/viper"
 
-	"github.com/ory/oathkeeper/driver/configuration"
-
 	"github.com/urfave/negroni"
 
+	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/internal"
 
 	"github.com/julienschmidt/httprouter"

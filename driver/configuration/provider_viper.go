@@ -10,6 +10,7 @@ import (
 
 	"github.com/imdario/mergo"
 	"github.com/ory/gojsonschema"
+	"github.com/ory/x/jsonx"
 	"github.com/pkg/errors"
 	"github.com/rs/cors"
 	"github.com/sirupsen/logrus"
@@ -20,6 +21,8 @@ import (
 	"github.com/ory/x/corsx"
 	"github.com/ory/x/urlx"
 	"github.com/ory/x/viperx"
+
+	"github.com/ory/oathkeeper/x"
 )
 
 var _ Provider = new(ViperProvider)
@@ -33,6 +36,53 @@ const (
 	ViperKeyAPIServeAddressHost    = "serve.api.host"
 	ViperKeyAPIServeAddressPort    = "serve.api.port"
 	ViperKeyAccessRuleRepositories = "access_rules.repositories"
+)
+
+// Authorizers
+const (
+	ViperKeyAuthorizerAllowIsEnabled = "authorizers.allow.enabled"
+
+	ViperKeyAuthorizerDenyIsEnabled = "authorizers.deny.enabled"
+
+	ViperKeyAuthorizerKetoEngineACPORYIsEnabled = "authorizers.keto_engine_acp_ory.enabled"
+)
+
+// Mutators
+const (
+	ViperKeyMutatorCookieIsEnabled = "mutators.cookie.enabled"
+
+	ViperKeyMutatorHeaderIsEnabled = "mutators.header.enabled"
+
+	ViperKeyMutatorNoopIsEnabled = "mutators.noop.enabled"
+
+	ViperKeyMutatorHydratorIsEnabled = "mutators.hydrator.enabled"
+
+	ViperKeyMutatorIDTokenIsEnabled = "mutators.id_token.enabled"
+	ViperKeyMutatorIDTokenJWKSURL   = "mutators.id_token.jwks_url"
+)
+
+// Authenticators
+const (
+	// anonymous
+	ViperKeyAuthenticatorAnonymousIsEnabled  = "authenticators.anonymous.enabled"
+
+	// noop
+	ViperKeyAuthenticatorNoopIsEnabled = "authenticators.noop.enabled"
+
+	// cookie session
+	ViperKeyAuthenticatorCookieSessionIsEnabled       = "authenticators.cookie_session.enabled"
+
+	// jwt
+	ViperKeyAuthenticatorJWTIsEnabled     = "authenticators.jwt.enabled"
+
+	// oauth2_client_credentials
+	ViperKeyAuthenticatorOAuth2ClientCredentialsIsEnabled = "authenticators.oauth2_client_credentials.enabled"
+
+	// oauth2_token_introspection
+	ViperKeyAuthenticatorOAuth2TokenIntrospectionIsEnabled                    = "authenticators.oauth2_introspection.enabled"
+
+	// unauthorized
+	ViperKeyAuthenticatorUnauthorizedIsEnabled = "authenticators.unauthorized.enabled"
 )
 
 func BindEnvs() {
@@ -148,9 +198,10 @@ func (v *ViperProvider) pipelineIsEnabled(prefix, id string) bool {
 }
 
 func (v *ViperProvider) PipelineConfig(prefix, id string, override json.RawMessage, dest interface{}) error {
-	config := viper.GetStringMap(fmt.Sprintf("%s.%s.config", prefix, id))
-	if len(config) == 0 {
-		return nil
+	// we need to create a copy for config otherwise we will accidentally override values
+	config, err := x.Deepcopy(viper.GetStringMap(fmt.Sprintf("%s.%s.config", prefix, id)))
+	if err != nil {
+		return errors.WithStack(err)
 	}
 
 	if len(override) != 0 {
@@ -159,24 +210,20 @@ func (v *ViperProvider) PipelineConfig(prefix, id string, override json.RawMessa
 			return errors.WithStack(err)
 		}
 
-		// we need to create a copy for config otherwise merge will override the viper values
-		tc := make(map[string]interface{})
-		for k, v := range config {
-			tc[k] = v
-		}
-
-		if err := mergo.Merge(&tc, &overrideMap, mergo.WithOverride); err != nil {
+		if err := mergo.Merge(&config, &overrideMap, mergo.WithOverride); err != nil {
 			return errors.WithStack(err)
 		}
-
-		config = tc
-
-		fmt.Printf("\n\n%+v\n\n", config)
 	}
 
-	var b bytes.Buffer
-	if err := json.NewEncoder(&b).Encode(config); err != nil {
+	marshalled, err := json.Marshal(config)
+	if err != nil {
 		return errors.WithStack(err)
+	}
+
+	if dest != nil {
+		if err := jsonx.NewStrictDecoder(bytes.NewBuffer(marshalled)).Decode(dest); err != nil {
+			return errors.WithStack(err)
+		}
 	}
 
 	schema, err := schemas.Find(fmt.Sprintf("%s.%s.schema.json", prefix, id))
@@ -186,20 +233,14 @@ func (v *ViperProvider) PipelineConfig(prefix, id string, override json.RawMessa
 
 	if result, err := gojsonschema.Validate(
 		gojsonschema.NewBytesLoader(schema),
-		gojsonschema.NewBytesLoader(b.Bytes()),
+		gojsonschema.NewBytesLoader(marshalled),
 	); err != nil {
 		return errors.WithStack(err)
 	} else if !result.Valid() {
 		return errors.WithStack(result.Errors())
 	}
 
-	if dest == nil {
-		return nil
-	}
-
-	dec := json.NewDecoder(&b)
-	dec.DisallowUnknownFields()
-	return errors.WithStack(dec.Decode(dest))
+	return nil
 }
 
 func (v *ViperProvider) AuthenticatorIsEnabled(id string) bool {

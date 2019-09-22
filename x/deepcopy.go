@@ -18,31 +18,26 @@
  * @license  	   Apache-2.0
  */
 
-package mutate_test
+package x
 
 import (
-	"testing"
-
-	"github.com/ory/oathkeeper/pipeline/mutate"
-
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
+	"bytes"
+	"encoding/json"
 )
 
-func TestCredentialsIssuerBroken(t *testing.T) {
-	a := mutate.NewMutatorBroken(false)
-	assert.Equal(t, "broken", a.GetID())
-
-	err := a.Mutate(nil, nil, nil, nil)
-	require.Error(t, err)
-
-	t.Run("method=new/case=should not be declared in registry", func(t *testing.T) {
-		err := a.Mutate(nil, nil, nil, nil)
-		require.Error(t, err)
-	})
-
-	t.Run("method=validate", func(t *testing.T) {
-		require.Error(t, mutate.NewMutatorBroken(false).Validate(nil))
-		require.NoError(t, mutate.NewMutatorBroken(true).Validate(nil))
-	})
+// Deepcopy performs a deep copy of the given map m.
+func Deepcopy(m map[string]interface{}) (map[string]interface{}, error) {
+	var buf bytes.Buffer
+	enc := json.NewEncoder(&buf)
+	dec := json.NewDecoder(&buf)
+	err := enc.Encode(m)
+	if err != nil {
+		return nil, err
+	}
+	var copy map[string]interface{}
+	err = dec.Decode(&copy)
+	if err != nil {
+		return nil, err
+	}
+	return copy, nil
 }

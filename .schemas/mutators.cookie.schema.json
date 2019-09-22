@@ -4,6 +4,7 @@
   "type": "object",
   "title": "Cookie Mutator Configuration",
   "description": "This section is optional when the mutator is disabled.",
+  "required": ["cookies"],
   "properties": {
     "cookies": {
       "type": "object",

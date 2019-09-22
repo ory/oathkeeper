@@ -103,8 +103,8 @@ func (a *MutatorCookie) Validate(config json.RawMessage) error {
 
 func (a *MutatorCookie) config(config json.RawMessage) (*CredentialsCookiesConfig, error) {
 	var c CredentialsCookiesConfig
-	if err := a.c.AuthorizerConfig(a.GetID(), config, &c); err != nil {
-		return nil, NewErrAuthorizerMisconfigured(a, err)
+	if err := a.c.MutatorConfig(a.GetID(), config, &c); err != nil {
+		return nil, NewErrMutatorMisconfigured(a, err)
 	}
 
 	return &c, nil

@@ -76,8 +76,8 @@ func (a *MutatorHeader)  Validate(config json.RawMessage) error {
 
 func (a *MutatorHeader) config(config json.RawMessage) (*MutatorHeaderConfig, error) {
 	var c MutatorHeaderConfig
-	if err := a.c.AuthorizerConfig(a.GetID(), config, &c); err != nil {
-		return nil, NewErrAuthorizerMisconfigured(a, err)
+	if err := a.c.MutatorConfig(a.GetID(), config, &c); err != nil {
+		return nil, NewErrMutatorMisconfigured(a, err)
 	}
 
 	return &c, nil

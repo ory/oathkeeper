@@ -41,7 +41,7 @@ func NewErrMutatorNotEnabled(a Mutator) *herodot.DefaultError {
 	return ErrMutatorNotEnabled.WithTrace(errors.New("")).WithReasonf(`Mutator "%s" is disabled per configuration.`, a.GetID())
 }
 
-func NewErrAuthorizerMisconfigured(a Mutator, err error) *herodot.DefaultError {
+func NewErrMutatorMisconfigured(a Mutator, err error) *herodot.DefaultError {
 	return ErrMutatorNotEnabled.WithTrace(err).WithReasonf(
 		`Configuration for mutator "%s" could not be validated: %s`,
 		a.GetID(),

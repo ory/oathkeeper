@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/ory/x/stringsx"
+
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/pipeline"
 
@@ -57,5 +59,7 @@ func (a *AuthenticatorAnonymous) Authenticate(r *http.Request, config json.RawMe
 		return nil, err
 	}
 
-	return &AuthenticationSession{Subject: cf.Subject}, nil
+	return &AuthenticationSession{
+		Subject: stringsx.Coalesce(cf.Subject, "anonymous"),
+	}, nil
 }

@@ -42,7 +42,7 @@
           "type": "object",
           "additionalProperties": false,
           "properties": {
-            "number": {
+            "number_of_retries": {
               "type": "number",
               "minimum": 0,
               "default": 100

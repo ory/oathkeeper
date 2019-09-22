@@ -4,13 +4,13 @@
   "type": "object",
   "title": "ID Token Mutator Configuration",
   "description": "This section is optional when the mutator is disabled.",
+  "required": ["jwks_url","issuer_url"],
   "properties": {
     "claims": {
       "type": "string"
     },
     "issuer_url": {
       "type": "string",
-      "format": "uri",
       "title": "Issuer URL",
       "description": "Sets the \"iss\" value of the ID Token.\n\n>If this mutator is enabled, this value is required."
     },

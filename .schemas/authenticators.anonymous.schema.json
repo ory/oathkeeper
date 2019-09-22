@@ -18,8 +18,5 @@
       "description": "Sets the anonymous username."
     }
   },
-  "required": [
-    "subject"
-  ],
   "additionalProperties": false
 }

@@ -209,14 +209,24 @@ authorizers:
     config:
       # REQUIRED IF ENABLED - The base URL of ORY Keto, typically something like http(s)://<host>[:<port>]/
       base_url: http://my-keto/
-
+      required_action: unknown
+      required_resource: unknown
 
 # All mutators can be configured under this configuration key
 mutators:
+  header:
+    enabled: true
+    config:
+      headers:
+        foo: bar
+
   # Configures the cookie mutator
   cookie:
     # Set enabled to true if the mutator should be enabled and false to disable the mutator. Defaults to false.
     enabled: true
+    config:
+      cookies:
+        foo: bar
 
   # Configures the hydrator mutator
   hydrator:
