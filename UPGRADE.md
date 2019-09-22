@@ -47,7 +47,7 @@ before finalizing the upgrade process.
    forwarded.
 2. The `mutator` property was renamed to `mutators` to reflect its true nature
    (see previous item).
-   
+
 If you have existing rules, please update them as follows:
 
 ```patch
@@ -89,8 +89,8 @@ The `id_token` mutator is now capable of rendering custom claims using Go
 [text/template](https://golang.org/pkg/text/template/) receiving the
 `AuthenticationSession` struct as its parameters.
 
-To enable this change, the `aud` config was removed and the `claims` config was introduced.
-The `claims` field is a raw string representing a Go template.
+To enable this change, the `aud` config was removed and the `claims` config was
+introduced. The `claims` field is a raw string representing a Go template.
 
 To upgrade existing rules, apply patches similar to this one:
 

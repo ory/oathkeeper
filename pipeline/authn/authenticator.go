@@ -4,8 +4,9 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/ory/herodot"
 	"github.com/pkg/errors"
+
+	"github.com/ory/herodot"
 
 	"github.com/ory/oathkeeper/pipeline"
 )

@@ -28,8 +28,9 @@ import (
 	"net/url"
 	"testing"
 
-	"github.com/ory/viper"
 	"github.com/tidwall/sjson"
+
+	"github.com/ory/viper"
 
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/internal"
@@ -200,14 +201,14 @@ func TestAuthorizerKetoWarden(t *testing.T) {
 			if tc.setup != nil {
 				ts := tc.setup(t)
 				defer ts.Close()
-				baseURL= ts.URL
+				baseURL = ts.URL
 			}
 
 			a.(*AuthorizerKetoEngineACPORY).WithContextCreator(func(r *http.Request) map[string]interface{} {
 				return map[string]interface{}{}
 			})
 
-			tc.config, _  = sjson.SetBytes(tc.config, "base_url", baseURL)
+			tc.config, _ = sjson.SetBytes(tc.config, "base_url", baseURL)
 			err := a.Authorize(tc.r, tc.session, tc.config, tc.rule)
 			if tc.expectErr {
 				require.Error(t, err)

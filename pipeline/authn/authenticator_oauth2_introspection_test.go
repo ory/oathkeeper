@@ -23,10 +23,11 @@ package authn_test
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/tidwall/sjson"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/tidwall/sjson"
 
 	"github.com/ory/viper"
 

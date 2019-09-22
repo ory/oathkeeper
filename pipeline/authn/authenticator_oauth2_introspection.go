@@ -21,12 +21,12 @@ import (
 )
 
 type AuthenticatorOAuth2IntrospectionConfiguration struct {
-	Scopes []string `json:"required_scope"`
-	Audience []string `json:"target_audience"`
-	Issuers []string `json:"trusted_issuers"`
-	PreAuth *AuthenticatorOAuth2IntrospectionPreAuthConfiguration `json:"pre_authorization"`
-	ScopeStrategy    string `json:"scope_strategy"`
-	IntrospectionURL string `json:"introspection_url"`
+	Scopes           []string                                              `json:"required_scope"`
+	Audience         []string                                              `json:"target_audience"`
+	Issuers          []string                                              `json:"trusted_issuers"`
+	PreAuth          *AuthenticatorOAuth2IntrospectionPreAuthConfiguration `json:"pre_authorization"`
+	ScopeStrategy    string                                                `json:"scope_strategy"`
+	IntrospectionURL string                                                `json:"introspection_url"`
 }
 
 type AuthenticatorOAuth2IntrospectionPreAuthConfiguration struct {

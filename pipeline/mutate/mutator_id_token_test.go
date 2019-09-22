@@ -257,7 +257,7 @@ func TestMutatorIDToken(t *testing.T) {
 				viper.Set(configuration.ViperKeyMutatorIDTokenIsEnabled, tc.e)
 				// viper.Set(configuration.ViperKeyMutatorIDTokenIssuerURL, tc.i)
 				// viper.Set(configuration.ViperKeyMutatorIDTokenJWKSURL, tc.j)
-				err := a.Validate(json.RawMessage(`{"issuer_url":"`+tc.i+`", "jwks_url": "`+tc.j+`"}`))
+				err := a.Validate(json.RawMessage(`{"issuer_url":"` + tc.i + `", "jwks_url": "` + tc.j + `"}`))
 				if tc.pass {
 					require.NoError(t, err)
 				} else {

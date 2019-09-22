@@ -52,9 +52,9 @@ type MutatorIDToken struct {
 }
 
 type CredentialsIDTokenConfig struct {
-	Claims    string        `json:"claims"`
-	IssuerURL string        `json:"issuer_url"`
-	JWKSURL   string        `json:"jwks_url"`
+	Claims    string `json:"claims"`
+	IssuerURL string `json:"issuer_url"`
+	JWKSURL   string `json:"jwks_url"`
 	TTL       string `json:"ttl"`
 }
 

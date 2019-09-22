@@ -20,8 +20,8 @@ import (
 )
 
 type AuthenticatorOAuth2Configuration struct {
-	Scopes []string `json:"required_scope"`
-	TokenURL string `json:"token_url"`
+	Scopes   []string `json:"required_scope"`
+	TokenURL string   `json:"token_url"`
 }
 
 type AuthenticatorOAuth2ClientCredentials struct {

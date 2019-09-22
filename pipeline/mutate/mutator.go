@@ -24,8 +24,9 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/ory/herodot"
 	"github.com/pkg/errors"
+
+	"github.com/ory/herodot"
 
 	"github.com/ory/oathkeeper/pipeline"
 	"github.com/ory/oathkeeper/pipeline/authn"
@@ -48,6 +49,7 @@ func NewErrMutatorMisconfigured(a Mutator, err error) *herodot.DefaultError {
 		err,
 	)
 }
+
 type Mutator interface {
 	Mutate(r *http.Request, session *authn.AuthenticationSession, config json.RawMessage, _ pipeline.Rule) error
 	GetID() string

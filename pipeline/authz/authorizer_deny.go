@@ -49,7 +49,7 @@ func (a *AuthorizerDeny) Authorize(r *http.Request, session *authn.Authenticatio
 	return errors.WithStack(helper.ErrForbidden)
 }
 
-func (a *AuthorizerDeny)  Validate(config json.RawMessage) error {
+func (a *AuthorizerDeny) Validate(config json.RawMessage) error {
 	if !a.c.AuthorizerIsEnabled(a.GetID()) {
 		return NewErrAuthorizerNotEnabled(a)
 	}

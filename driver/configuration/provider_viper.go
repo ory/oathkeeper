@@ -9,11 +9,12 @@ import (
 	"time"
 
 	"github.com/imdario/mergo"
-	"github.com/ory/gojsonschema"
-	"github.com/ory/x/jsonx"
 	"github.com/pkg/errors"
 	"github.com/rs/cors"
 	"github.com/sirupsen/logrus"
+
+	"github.com/ory/gojsonschema"
+	"github.com/ory/x/jsonx"
 
 	"github.com/ory/viper"
 
@@ -64,22 +65,22 @@ const (
 // Authenticators
 const (
 	// anonymous
-	ViperKeyAuthenticatorAnonymousIsEnabled  = "authenticators.anonymous.enabled"
+	ViperKeyAuthenticatorAnonymousIsEnabled = "authenticators.anonymous.enabled"
 
 	// noop
 	ViperKeyAuthenticatorNoopIsEnabled = "authenticators.noop.enabled"
 
 	// cookie session
-	ViperKeyAuthenticatorCookieSessionIsEnabled       = "authenticators.cookie_session.enabled"
+	ViperKeyAuthenticatorCookieSessionIsEnabled = "authenticators.cookie_session.enabled"
 
 	// jwt
-	ViperKeyAuthenticatorJWTIsEnabled     = "authenticators.jwt.enabled"
+	ViperKeyAuthenticatorJWTIsEnabled = "authenticators.jwt.enabled"
 
 	// oauth2_client_credentials
 	ViperKeyAuthenticatorOAuth2ClientCredentialsIsEnabled = "authenticators.oauth2_client_credentials.enabled"
 
 	// oauth2_token_introspection
-	ViperKeyAuthenticatorOAuth2TokenIntrospectionIsEnabled                    = "authenticators.oauth2_introspection.enabled"
+	ViperKeyAuthenticatorOAuth2TokenIntrospectionIsEnabled = "authenticators.oauth2_introspection.enabled"
 
 	// unauthorized
 	ViperKeyAuthenticatorUnauthorizedIsEnabled = "authenticators.unauthorized.enabled"

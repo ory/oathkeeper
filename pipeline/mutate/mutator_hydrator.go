@@ -160,7 +160,7 @@ func (a *MutatorHydrator) Mutate(r *http.Request, session *authn.AuthenticationS
 	return nil
 }
 
-func (a *MutatorHydrator)  Validate(config json.RawMessage) error {
+func (a *MutatorHydrator) Validate(config json.RawMessage) error {
 	if !a.c.MutatorIsEnabled(a.GetID()) {
 		return NewErrMutatorNotEnabled(a)
 	}

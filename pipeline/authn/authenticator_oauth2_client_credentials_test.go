@@ -78,18 +78,18 @@ func TestAuthenticatorOAuth2ClientCredentials(t *testing.T) {
 		{
 			r:         &http.Request{Header: http.Header{}},
 			expectErr: authn.ErrAuthenticatorNotResponsible,
-			config: json.RawMessage(`{"token_url":""}`),
+			config:    json.RawMessage(`{"token_url":""}`),
 		},
 		{
-			r: authInvalid,
+			r:         authInvalid,
 			expectErr: helper.ErrUnauthorized,
-			config: json.RawMessage(`{"token_url":"`+ts.URL+"/oauth2/token"+`"}`),
+			config:    json.RawMessage(`{"token_url":"` + ts.URL + "/oauth2/token" + `"}`),
 		},
 		{
 			r:             authOk,
 			expectErr:     nil,
 			expectSession: &authn.AuthenticationSession{Subject: "client"},
-			config: json.RawMessage(`{"token_url":"`+ts.URL+"/oauth2/token"+`"}`),
+			config:        json.RawMessage(`{"token_url":"` + ts.URL + "/oauth2/token" + `"}`),
 		},
 	} {
 		t.Run(fmt.Sprintf("method=authenticate/case=%d", k), func(t *testing.T) {

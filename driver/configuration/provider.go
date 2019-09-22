@@ -6,8 +6,9 @@ import (
 	"time"
 
 	"github.com/gobuffalo/packr/v2"
-	"github.com/ory/fosite"
 	"github.com/sirupsen/logrus"
+
+	"github.com/ory/fosite"
 
 	"github.com/rs/cors"
 )

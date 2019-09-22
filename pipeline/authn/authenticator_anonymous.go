@@ -48,7 +48,6 @@ func (a *AuthenticatorAnonymous) Config(config json.RawMessage) (*AuthenticatorA
 	return &c, nil
 }
 
-
 func (a *AuthenticatorAnonymous) Authenticate(r *http.Request, config json.RawMessage, _ pipeline.Rule) (*AuthenticationSession, error) {
 	if len(r.Header.Get("Authorization")) != 0 {
 		return nil, errors.WithStack(ErrAuthenticatorNotResponsible)

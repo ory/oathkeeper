@@ -56,7 +56,7 @@ func (a *AuthenticatorCookieSession) Config(config json.RawMessage) (*Authentica
 func (a *AuthenticatorCookieSession) Authenticate(r *http.Request, config json.RawMessage, _ pipeline.Rule) (*AuthenticationSession, error) {
 	cf, err := a.Config(config)
 	if err != nil {
-		return nil,err
+		return nil, err
 	}
 
 	if !cookieSessionResponsible(r, cf.Only) {

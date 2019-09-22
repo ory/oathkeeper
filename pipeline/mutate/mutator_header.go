@@ -65,7 +65,7 @@ func (a *MutatorHeader) Mutate(r *http.Request, session *authn.AuthenticationSes
 	return nil
 }
 
-func (a *MutatorHeader)  Validate(config json.RawMessage) error {
+func (a *MutatorHeader) Validate(config json.RawMessage) error {
 	if !a.c.MutatorIsEnabled(a.GetID()) {
 		return NewErrMutatorNotEnabled(a)
 	}
