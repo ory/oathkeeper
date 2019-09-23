@@ -5,8 +5,9 @@ access_rules:
 mutators:
   id_token:
     enabled: true
-    issuer_url: https://my-oathkeeper/
-    jwks_url: file://./jwks-idt.json
+    config:
+      issuer_url: https://my-oathkeeper/
+     jwks_url: file://./jwks-idt.json
 
 authorizers:
   allow:
@@ -15,9 +16,10 @@ authorizers:
 authenticators:
   jwt:
     enabled: true
-    jwks_urls:
-      - file://./jwks-authn.json
-    scope_strategy: none
+    config:
+      jwks_urls:
+        - file://./jwks-authn.json
+      scope_strategy: none
 
 serve:
   proxy:

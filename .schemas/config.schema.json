@@ -1,5 +1,5 @@
 {
-  "$id": "https://raw.githubusercontent.com/ory/oathkeeper/fix-255/.schemas/config.schema.json",
+  "$id": "https://raw.githubusercontent.com/ory/oathkeeper/master/.schemas/config.schema.json",
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "ORY Oathkeeper Configuration",
   "type": "object",
@@ -175,7 +175,7 @@
             "$ref": "#/definitions/handlerSwitch"
           },
           "config": {
-            "$ref": "https://raw.githubusercontent.com/ory/oathkeeper/fix-255/.schemas/authenticators.anonymous.schema.json#"
+            "$ref": "https://raw.githubusercontent.com/ory/oathkeeper/master/.schemas/authenticators.anonymous.schema.json#"
           }
         },
         "noop": {
@@ -185,7 +185,7 @@
             "$ref": "#/definitions/handlerSwitch"
           },
           "config": {
-            "$ref": "https://raw.githubusercontent.com/ory/oathkeeper/fix-255/.schemas/authenticators.noop.schema.json#"
+            "$ref": "https://raw.githubusercontent.com/ory/oathkeeper/master/.schemas/authenticators.noop.schema.json#"
           }
         },
         "unauthorized": {
@@ -195,7 +195,7 @@
             "$ref": "#/definitions/handlerSwitch"
           },
           "config": {
-            "$ref": "https://raw.githubusercontent.com/ory/oathkeeper/fix-255/.schemas/authenticators.unauthorized.schema.json#"
+            "$ref": "https://raw.githubusercontent.com/ory/oathkeeper/master/.schemas/authenticators.unauthorized.schema.json#"
           }
         },
         "cookie_session": {
@@ -205,7 +205,7 @@
             "$ref": "#/definitions/handlerSwitch"
           },
           "config": {
-            "$ref": "https://raw.githubusercontent.com/ory/oathkeeper/fix-255/.schemas/authenticators.cookie_session.schema.json#"
+            "$ref": "https://raw.githubusercontent.com/ory/oathkeeper/master/.schemas/authenticators.cookie_session.schema.json#"
           },
           "anyOf": [
             {
@@ -234,7 +234,7 @@
             "$ref": "#/definitions/handlerSwitch"
           },
           "config": {
-            "$ref": "https://raw.githubusercontent.com/ory/oathkeeper/fix-255/.schemas/authenticators.jwt.schema.json#"
+            "$ref": "https://raw.githubusercontent.com/ory/oathkeeper/master/.schemas/authenticators.jwt.schema.json#"
           },
           "anyOf": [
             {
@@ -263,7 +263,7 @@
             "$ref": "#/definitions/handlerSwitch"
           },
           "config": {
-            "$ref": "https://raw.githubusercontent.com/ory/oathkeeper/fix-255/.schemas/authenticators.oauth2_client_credentials.schema.json#"
+            "$ref": "https://raw.githubusercontent.com/ory/oathkeeper/master/.schemas/authenticators.oauth2_client_credentials.schema.json#"
           },
           "anyOf": [
             {
@@ -292,7 +292,7 @@
             "$ref": "#/definitions/handlerSwitch"
           },
           "config": {
-            "$ref": "https://raw.githubusercontent.com/ory/oathkeeper/fix-255/.schemas/authenticators.oauth2_introspection.schema.json#"
+            "$ref": "https://raw.githubusercontent.com/ory/oathkeeper/master/.schemas/authenticators.oauth2_introspection.schema.json#"
           },
           "anyOf": [
             {
@@ -329,7 +329,7 @@
             "$ref": "#/definitions/handlerSwitch"
           },
           "config": {
-            "$ref": "https://raw.githubusercontent.com/ory/oathkeeper/fix-255/.schemas/authorizers.allow.schema.json#"
+            "$ref": "https://raw.githubusercontent.com/ory/oathkeeper/master/.schemas/authorizers.allow.schema.json#"
           }
         },
         "deny": {
@@ -339,7 +339,7 @@
             "$ref": "#/definitions/handlerSwitch"
           },
           "config": {
-            "$ref": "https://raw.githubusercontent.com/ory/oathkeeper/fix-255/.schemas/authorizers.deny.schema.json#"
+            "$ref": "https://raw.githubusercontent.com/ory/oathkeeper/master/.schemas/authorizers.deny.schema.json#"
           }
         },
         "keto_engine_acp_ory": {
@@ -349,7 +349,7 @@
             "$ref": "#/definitions/handlerSwitch"
           },
           "config": {
-            "$ref": "https://raw.githubusercontent.com/ory/oathkeeper/fix-255/.schemas/authorizers.keto_engine_acp_ory.schema.json#"
+            "$ref": "https://raw.githubusercontent.com/ory/oathkeeper/master/.schemas/authorizers.keto_engine_acp_ory.schema.json#"
           },
           "anyOf": [
             {
@@ -386,7 +386,7 @@
             "$ref": "#/definitions/handlerSwitch"
           },
           "config": {
-            "$ref": "https://raw.githubusercontent.com/ory/oathkeeper/fix-255/.schemas/mutators.noop.schema.json#"
+            "$ref": "https://raw.githubusercontent.com/ory/oathkeeper/master/.schemas/mutators.noop.schema.json#"
           }
         },
         "cookie": {
@@ -396,7 +396,7 @@
             "$ref": "#/definitions/handlerSwitch"
           },
           "config": {
-            "$ref": "https://raw.githubusercontent.com/ory/oathkeeper/fix-255/.schemas/mutators.cookie.schema.json#"
+            "$ref": "https://raw.githubusercontent.com/ory/oathkeeper/master/.schemas/mutators.cookie.schema.json#"
           },
           "anyOf": [
             {
@@ -425,7 +425,7 @@
             "$ref": "#/definitions/handlerSwitch"
           },
           "config": {
-            "$ref": "https://raw.githubusercontent.com/ory/oathkeeper/fix-255/.schemas/mutators.header.schema.json#"
+            "$ref": "https://raw.githubusercontent.com/ory/oathkeeper/master/.schemas/mutators.header.schema.json#"
           },
           "anyOf": [
             {
@@ -454,7 +454,7 @@
             "$ref": "#/definitions/handlerSwitch"
           },
           "config": {
-            "$ref": "https://raw.githubusercontent.com/ory/oathkeeper/fix-255/.schemas/mutators.hydrator.schema.json#"
+            "$ref": "https://raw.githubusercontent.com/ory/oathkeeper/master/.schemas/mutators.hydrator.schema.json#"
           },
           "anyOf": [
             {
@@ -483,7 +483,7 @@
             "$ref": "#/definitions/handlerSwitch"
           },
           "config": {
-            "$ref": "https://raw.githubusercontent.com/ory/oathkeeper/fix-255/.schemas/mutators,id_token.schema.json#"
+            "$ref": "https://raw.githubusercontent.com/ory/oathkeeper/master/.schemas/mutators,id_token.schema.json#"
           },
           "anyOf": [
             {
