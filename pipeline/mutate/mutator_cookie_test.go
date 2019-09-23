@@ -54,7 +54,7 @@ func TestCredentialsIssuerCookies(t *testing.T) {
 				Config:  json.RawMessage([]byte(`{"bar": "baz"}`)),
 				Request: &http.Request{Header: http.Header{}},
 				Match:   []*http.Cookie{},
-				Err:     errors.New(`json: unknown field "bar"`),
+				Err:     errors.New(`mutator matching this route is misconfigured or disabled`),
 			},
 			"Complex Subject": {
 				Session: &authn.AuthenticationSession{Subject: "foo"},
@@ -207,10 +207,10 @@ func TestCredentialsIssuerCookies(t *testing.T) {
 
 		t.Run("method=validate", func(t *testing.T) {
 			viper.Set(configuration.ViperKeyMutatorCookieIsEnabled, true)
-			require.NoError(t, a.Validate())
+			require.Error(t, a.Validate(json.RawMessage(`{}`)))
 
 			viper.Set(configuration.ViperKeyMutatorCookieIsEnabled, false)
-			require.Error(t, a.Validate())
+			require.Error(t, a.Validate(json.RawMessage(`{"cookies":{}}`)))
 		})
 	})
 }

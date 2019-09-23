@@ -62,19 +62,19 @@ type BasicAuth struct {
 	Password string `json:"password"`
 }
 
-type Auth struct {
+type auth struct {
 	Basic BasicAuth `json:"basic"`
 }
 
-type RetryConfig struct {
-	NumberOfRetries     int `json:"number"`
-	DelayInMilliseconds int `json:"delayInMilliseconds"`
+type retryConfig struct {
+	NumberOfRetries     int `json:"number_of_retries"`
+	DelayInMilliseconds int `json:"delay_in_milliseconds"`
 }
 
 type externalAPIConfig struct {
-	Url   string       `json:"url"`
-	Auth  *Auth        `json:"auth,omitempty"`
-	Retry *RetryConfig `json:"retry,omitempty"`
+	URL   string       `json:"url"`
+	Auth  *auth        `json:"auth"`
+	Retry *retryConfig `json:"retry"`
 }
 
 type MutatorHydratorConfig struct {
@@ -90,28 +90,22 @@ func (a *MutatorHydrator) GetID() string {
 }
 
 func (a *MutatorHydrator) Mutate(r *http.Request, session *authn.AuthenticationSession, config json.RawMessage, _ pipeline.Rule) error {
-	if len(config) == 0 {
-		config = []byte("{}")
-	}
-	var cfg MutatorHydratorConfig
-	d := json.NewDecoder(bytes.NewBuffer(config))
-	d.DisallowUnknownFields()
-	if err := d.Decode(&cfg); err != nil {
-		return errors.WithStack(err)
+	cfg, err := a.Config(config)
+	if err != nil {
+		return err
 	}
 
 	var b bytes.Buffer
-	err := json.NewEncoder(&b).Encode(session)
-	if err != nil {
+	if err := json.NewEncoder(&b).Encode(session); err != nil {
 		return errors.WithStack(err)
 	}
 
-	if cfg.Api.Url == "" {
+	if cfg.Api.URL == "" {
 		return errors.New(ErrMissingAPIURL)
-	} else if _, err := url.ParseRequestURI(cfg.Api.Url); err != nil {
+	} else if _, err := url.ParseRequestURI(cfg.Api.URL); err != nil {
 		return errors.New(ErrInvalidAPIURL)
 	}
-	req, err := http.NewRequest("POST", cfg.Api.Url, &b)
+	req, err := http.NewRequest("POST", cfg.Api.URL, &b)
 	if err != nil {
 		return errors.WithStack(err)
 	}
@@ -126,7 +120,7 @@ func (a *MutatorHydrator) Mutate(r *http.Request, session *authn.AuthenticationS
 	}
 	req.Header.Set(contentTypeHeaderKey, contentTypeJSONHeaderValue)
 
-	retryConfig := RetryConfig{defaultNumberOfRetries, defaultDelayInMilliseconds}
+	retryConfig := retryConfig{defaultNumberOfRetries, defaultDelayInMilliseconds}
 	if cfg.Api.Retry != nil {
 		retryConfig = *cfg.Api.Retry
 	}
@@ -166,9 +160,20 @@ func (a *MutatorHydrator) Mutate(r *http.Request, session *authn.AuthenticationS
 	return nil
 }
 
-func (a *MutatorHydrator) Validate() error {
-	if !a.c.MutatorHydratorIsEnabled() {
-		return errors.WithStack(ErrMutatorNotEnabled.WithReasonf(`Mutator "%s" is disabled per configuration.`, a.GetID()))
+func (a *MutatorHydrator) Validate(config json.RawMessage) error {
+	if !a.c.MutatorIsEnabled(a.GetID()) {
+		return NewErrMutatorNotEnabled(a)
 	}
-	return nil
+
+	_, err := a.Config(config)
+	return err
+}
+
+func (a *MutatorHydrator) Config(config json.RawMessage) (*MutatorHydratorConfig, error) {
+	var c MutatorHydratorConfig
+	if err := a.c.MutatorConfig(a.GetID(), config, &c); err != nil {
+		return nil, NewErrMutatorMisconfigured(a, err)
+	}
+
+	return &c, nil
 }

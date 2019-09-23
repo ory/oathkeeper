@@ -114,7 +114,7 @@ func configWithBasicAuthnForMutator(user, password string) func(*httptest.Server
 
 func configWithRetriesForMutator(numberOfRetries, retriesDelayInMilliseconds int) func(*httptest.Server) json.RawMessage {
 	return func(s *httptest.Server) json.RawMessage {
-		return []byte(fmt.Sprintf(`{"api": {"url": "%s", "retry": {"number": %d, "delayInMilliseconds": %d}}}`, s.URL, numberOfRetries, retriesDelayInMilliseconds))
+		return []byte(fmt.Sprintf(`{"api": {"url": "%s", "retry": {"number_of_retries": %d, "delay_in_milliseconds": %d}}}`, s.URL, numberOfRetries, retriesDelayInMilliseconds))
 	}
 }
 
@@ -218,7 +218,7 @@ func TestMutatorHydrator(t *testing.T) {
 				},
 				Request: &http.Request{},
 				Match:   newAuthenticationSession(),
-				Err:     errors.New(mutate.ErrMissingAPIURL),
+				Err:     errors.New("mutator matching this route is misconfigured or disabled"),
 			},
 			"Improper Config": {
 				Setup:   defaultRouterSetup(),
@@ -229,7 +229,7 @@ func TestMutatorHydrator(t *testing.T) {
 				},
 				Request: &http.Request{},
 				Match:   newAuthenticationSession(),
-				Err:     errors.New(`json: unknown field "foo"`),
+				Err:     errors.New("mutator matching this route is misconfigured or disabled"),
 			},
 			"Not Found": {
 				Setup: func(t *testing.T) http.Handler {
@@ -244,7 +244,7 @@ func TestMutatorHydrator(t *testing.T) {
 				Config:  defaultConfigForMutator(),
 				Request: &http.Request{},
 				Match:   newAuthenticationSession(),
-				Err:     errors.New(mutate.ErrNon200ResponseFromAPI),
+				Err:     errors.New("The call to an external API returned a non-200 HTTP response"),
 			},
 			"Wrong API URL": {
 				Setup:   defaultRouterSetup(),
@@ -255,7 +255,7 @@ func TestMutatorHydrator(t *testing.T) {
 				},
 				Request: &http.Request{},
 				Match:   newAuthenticationSession(),
-				Err:     errors.New(mutate.ErrInvalidAPIURL),
+				Err:     errors.New("mutator matching this route is misconfigured or disabled"),
 			},
 			"Successful Basic Authentication": {
 				Setup:   withBasicAuth(defaultRouterSetup(setExtra(sampleKey, sampleValue)), sampleUserId, sampleValidPassword),
@@ -348,15 +348,16 @@ func TestMutatorHydrator(t *testing.T) {
 			shouldPass bool
 		}{
 			{enabled: false, shouldPass: false},
-			{enabled: true, shouldPass: true},
+			{enabled: true, shouldPass: true, apiUrl: "http://api/bar"},
 		} {
 			t.Run(fmt.Sprintf("case=%d", k), func(t *testing.T) {
 				viper.Set(configuration.ViperKeyMutatorHydratorIsEnabled, testCase.enabled)
 
+				err := a.Validate(json.RawMessage(`{"api":{"url":"` + testCase.apiUrl + `"}}`))
 				if testCase.shouldPass {
-					require.NoError(t, a.Validate())
+					require.NoError(t, err)
 				} else {
-					require.Error(t, a.Validate())
+					require.Error(t, err)
 				}
 			})
 		}

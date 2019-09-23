@@ -32,10 +32,11 @@ import (
 
 	"github.com/ory/viper"
 
+	"github.com/ory/x/urlx"
+
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/internal"
 	"github.com/ory/oathkeeper/proxy"
-	"github.com/ory/x/urlx"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -43,34 +44,34 @@ import (
 	"github.com/ory/oathkeeper/rule"
 )
 
-//type jurorDenyAll struct{}
+// type jurorDenyAll struct{}
 //
-//func (j *jurorDenyAll) GetID() string {
+// func (j *jurorDenyAll) GetID() string {
 //	return "pass_through_deny"
-//}
+// }
 //
-//func (j jurorDenyAll) Try(r *http.Request, rl *rule.Rule, u *url.URL) (*Session, error) {
+// func (j jurorDenyAll) Try(r *http.Request, rl *rule.Rule, u *url.URL) (*Session, error) {
 //	return nil, errors.WithStack(helper.ErrUnauthorized)
-//}
+// }
 //
-//type jurorAcceptAll struct{}
+// type jurorAcceptAll struct{}
 //
-//func (j *jurorAcceptAll) GetID() string {
+// func (j *jurorAcceptAll) GetID() string {
 //	return "pass_through_accept"
-//}
+// }
 //
-//func (j jurorAcceptAll) Try(r *http.Request, rl *rule.Rule, u *url.URL) (*Session, error) {
+// func (j jurorAcceptAll) Try(r *http.Request, rl *rule.Rule, u *url.URL) (*Session, error) {
 //	return &Session{
 //		Subject:   "",
 //		Anonymous: true,
 //		ClientID:  "",
 //		Disabled:  true,
 //	}, nil
-//}
+// }
 
 func TestProxy(t *testing.T) {
 	backend := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		//assert.NotEmpty(t, helper.BearerTokenFromRequest(r))
+		// assert.NotEmpty(t, helper.BearerTokenFromRequest(r))
 		fmt.Fprint(w, "authorization="+r.Header.Get("Authorization")+"\n")
 		fmt.Fprint(w, "host="+r.Host+"\n")
 		fmt.Fprint(w, "url="+r.URL.String())
@@ -106,10 +107,10 @@ func TestProxy(t *testing.T) {
 		Upstream:       rule.Upstream{URL: backend.URL, StripPath: "/strip-path/", PreserveHost: true},
 	}
 
-	//acceptRuleStripHost := rule.Rule{MatchesMethods: []string{"GET"}, MatchesURLCompiled: mustCompileRegex(t, proxy.URL+"/users/<[0-9]+>"), Mode: "pass_through_accept", Upstream: rule.Upstream{URLParsed: u, StripPath: "/users/", PreserveHost: true}}
-	//acceptRuleStripHostWithoutTrailing := rule.Rule{MatchesMethods: []string{"GET"}, MatchesURLCompiled: mustCompileRegex(t, proxy.URL+"/users/<[0-9]+>"), Mode: "pass_through_accept", Upstream: rule.Upstream{URLParsed: u, StripPath: "/users", PreserveHost: true}}
-	//acceptRuleStripHostWithoutTrailing2 := rule.Rule{MatchesMethods: []string{"GET"}, MatchesURLCompiled: mustCompileRegex(t, proxy.URL+"/users/<[0-9]+>"), Mode: "pass_through_accept", Upstream: rule.Upstream{URLParsed: u, StripPath: "users", PreserveHost: true}}
-	//denyRule := rule.Rule{MatchesMethods: []string{"GET"}, MatchesURLCompiled: mustCompileRegex(t, proxy.URL+"/users/<[0-9]+>"), Mode: "pass_through_deny", Upstream: rule.Upstream{URLParsed: u}}
+	// acceptRuleStripHost := rule.Rule{MatchesMethods: []string{"GET"}, MatchesURLCompiled: mustCompileRegex(t, proxy.URL+"/users/<[0-9]+>"), Mode: "pass_through_accept", Upstream: rule.Upstream{URLParsed: u, StripPath: "/users/", PreserveHost: true}}
+	// acceptRuleStripHostWithoutTrailing := rule.Rule{MatchesMethods: []string{"GET"}, MatchesURLCompiled: mustCompileRegex(t, proxy.URL+"/users/<[0-9]+>"), Mode: "pass_through_accept", Upstream: rule.Upstream{URLParsed: u, StripPath: "/users", PreserveHost: true}}
+	// acceptRuleStripHostWithoutTrailing2 := rule.Rule{MatchesMethods: []string{"GET"}, MatchesURLCompiled: mustCompileRegex(t, proxy.URL+"/users/<[0-9]+>"), Mode: "pass_through_accept", Upstream: rule.Upstream{URLParsed: u, StripPath: "users", PreserveHost: true}}
+	// denyRule := rule.Rule{MatchesMethods: []string{"GET"}, MatchesURLCompiled: mustCompileRegex(t, proxy.URL+"/users/<[0-9]+>"), Mode: "pass_through_deny", Upstream: rule.Upstream{URLParsed: u}}
 
 	for k, tc := range []struct {
 		url       string
@@ -274,7 +275,7 @@ func TestProxy(t *testing.T) {
 			require.NoError(t, res.Body.Close())
 			require.NoError(t, err)
 
-			assert.Equal(t, tc.code, res.StatusCode)
+			assert.Equal(t, tc.code, res.StatusCode, "%s", res.Body)
 			for _, m := range tc.messages {
 				assert.True(t, strings.Contains(string(greeting), m), `Value "%s" not found in message:
 %s
@@ -350,16 +351,16 @@ func TestConfigureBackendURL(t *testing.T) {
 	}
 }
 
-//func panicCompileRegex(pattern string) *regexp.Regexp {
+// func panicCompileRegex(pattern string) *regexp.Regexp {
 //	exp, err := regexp.Compile(pattern)
 //	if err != nil {
 //		panic(err.Error())
 //	}
 //	return exp
-//}
+// }
 
 //
-//func BenchmarkDirector(b *testing.B) {
+// func BenchmarkDirector(b *testing.B) {
 //	backend := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 //		fmt.Fprint(w, "authorization="+r.Header.Get("Authorization"))
 //		fmt.Fprint(w, "host="+r.Header.Get("Host"))
@@ -399,4 +400,4 @@ func TestConfigureBackendURL(t *testing.T) {
 //			}
 //		}
 //	})
-//}
+// }

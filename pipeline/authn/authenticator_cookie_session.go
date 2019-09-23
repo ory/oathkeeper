@@ -1,7 +1,6 @@
 package authn
 
 import (
-	"bytes"
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
@@ -36,46 +35,35 @@ func (a *AuthenticatorCookieSession) GetID() string {
 	return "cookie_session"
 }
 
-func (a *AuthenticatorCookieSession) Validate() error {
-	if !a.c.AuthenticatorCookieSessionIsEnabled() {
-		return errors.WithStack(ErrAuthenticatorNotEnabled.WithReasonf(`Authenticator "%s" is disabled per configuration.`, a.GetID()))
+func (a *AuthenticatorCookieSession) Validate(config json.RawMessage) error {
+	if !a.c.AuthenticatorIsEnabled(a.GetID()) {
+		return NewErrAuthenticatorNotEnabled(a)
 	}
 
-	if a.c.AuthenticatorCookieSessionCheckSessionURL().String() == "" {
-		return errors.WithStack(ErrAuthenticatorNotEnabled.WithReasonf(
-			`Configuration for authenticator "%s" did not specify any values for configuration key "%s" and is thus disabled.`,
-			a.GetID(),
-			configuration.ViperKeyAuthenticatorCookieSessionCheckSessionURL,
-		))
+	_, err := a.Config(config)
+	return err
+}
+
+func (a *AuthenticatorCookieSession) Config(config json.RawMessage) (*AuthenticatorCookieSessionConfiguration, error) {
+	var c AuthenticatorCookieSessionConfiguration
+	if err := a.c.AuthenticatorConfig(a.GetID(), config, &c); err != nil {
+		return nil, NewErrAuthenticatorMisconfigured(a, err)
 	}
 
-	return nil
+	return &c, nil
 }
 
 func (a *AuthenticatorCookieSession) Authenticate(r *http.Request, config json.RawMessage, _ pipeline.Rule) (*AuthenticationSession, error) {
-	var cf AuthenticatorCookieSessionConfiguration
-	if len(config) == 0 {
-		config = []byte("{}")
-	}
-	d := json.NewDecoder(bytes.NewBuffer(config))
-	d.DisallowUnknownFields()
-	if err := d.Decode(&cf); err != nil {
-		return nil, errors.WithStack(err)
+	cf, err := a.Config(config)
+	if err != nil {
+		return nil, err
 	}
 
-	only := cf.Only
-	if len(only) == 0 {
-		only = a.c.AuthenticatorCookieSessionOnly()
-	}
-	if !cookieSessionResponsible(r, only) {
+	if !cookieSessionResponsible(r, cf.Only) {
 		return nil, errors.WithStack(ErrAuthenticatorNotResponsible)
 	}
 
 	origin := cf.CheckSessionURL
-	if origin == "" {
-		origin = a.c.AuthenticatorCookieSessionCheckSessionURL().String()
-	}
-
 	body, err := forwardRequestToSessionStore(r, origin)
 	if err != nil {
 		return nil, helper.ErrForbidden.WithReason(err.Error()).WithTrace(err)

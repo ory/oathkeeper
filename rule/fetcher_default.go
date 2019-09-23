@@ -128,6 +128,7 @@ func (f *FetcherDefault) configUpdate(ctx context.Context, watcher *fsnotify.Wat
 
 	// If there are no more sources to watch we reset the rule repository as a whole
 	if len(replace) == 0 {
+		f.r.Logger().WithField("repos", viper.AllSettings()).Warn("No access rule repositories have been defined in the updated config.")
 		if err := f.r.RuleRepository().Set(ctx, []Rule{}); err != nil {
 			return err
 		}
@@ -241,6 +242,7 @@ func (f *FetcherDefault) watch(ctx context.Context, watcher *fsnotify.Watcher, e
 		case e, ok := <-events:
 			if !ok {
 				// channel was closed
+				f.r.Logger().Debug("The events channel was closed")
 				return nil
 			}
 
@@ -249,7 +251,7 @@ func (f *FetcherDefault) watch(ctx context.Context, watcher *fsnotify.Watcher, e
 				f.r.Logger().
 					WithField("event", "config_change").
 					WithField("source", e.source).
-					Debugf("Access rule watcher received an update.")
+					Debugf("Viper detected a configuration change, reloading config.")
 				if err := f.configUpdate(ctx, watcher, f.c.AccessRuleRepositories(), events); err != nil {
 					return err
 				}
@@ -258,7 +260,7 @@ func (f *FetcherDefault) watch(ctx context.Context, watcher *fsnotify.Watcher, e
 					WithField("event", "repository_change").
 					WithField("source", e.source).
 					WithField("file", e.path.String()).
-					Debugf("Access rule watcher received an update.")
+					Debugf("One or more access rule repositories changed, reloading access rules.")
 
 				rules, err := f.sourceUpdate(e)
 				if err != nil {

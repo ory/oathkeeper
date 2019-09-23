@@ -40,11 +40,14 @@ func NewAuthenticatorUnauthorized(c configuration.Provider) *AuthenticatorUnauth
 	return &AuthenticatorUnauthorized{c: c}
 }
 
-func (a *AuthenticatorUnauthorized) Validate() error {
-	if !a.c.AuthenticatorUnauthorizedIsEnabled() {
-		return errors.WithStack(ErrAuthenticatorNotEnabled.WithReasonf(`Authenticator "%s" is disabled per configuration.`, a.GetID()))
+func (a *AuthenticatorUnauthorized) Validate(config json.RawMessage) error {
+	if !a.c.AuthenticatorIsEnabled(a.GetID()) {
+		return NewErrAuthenticatorNotEnabled(a)
 	}
 
+	if err := a.c.AuthenticatorConfig(a.GetID(), config, nil); err != nil {
+		return NewErrAuthenticatorMisconfigured(a, err)
+	}
 	return nil
 }
 

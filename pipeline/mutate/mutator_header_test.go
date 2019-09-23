@@ -202,9 +202,9 @@ func TestCredentialsIssuerHeaders(t *testing.T) {
 
 	t.Run("method=validate", func(t *testing.T) {
 		viper.Set(configuration.ViperKeyMutatorHeaderIsEnabled, true)
-		require.NoError(t, a.Validate())
+		require.NoError(t, a.Validate(json.RawMessage(`{"headers":{}}`)))
 
 		viper.Set(configuration.ViperKeyMutatorHeaderIsEnabled, false)
-		require.Error(t, a.Validate())
+		require.Error(t, a.Validate(json.RawMessage(`{"headers":{}}`)))
 	})
 }

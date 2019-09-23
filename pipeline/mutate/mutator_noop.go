@@ -24,8 +24,6 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/pkg/errors"
-
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/pipeline"
 	"github.com/ory/oathkeeper/pipeline/authn"
@@ -46,10 +44,13 @@ func (a *MutatorNoop) Mutate(r *http.Request, session *authn.AuthenticationSessi
 	return nil
 }
 
-func (a *MutatorNoop) Validate() error {
-	if !a.c.MutatorNoopIsEnabled() {
-		return errors.WithStack(ErrMutatorNotEnabled.WithReasonf(`Mutator "%s" is disabled per configuration.`, a.GetID()))
+func (a *MutatorNoop) Validate(config json.RawMessage) error {
+	if !a.c.MutatorIsEnabled(a.GetID()) {
+		return NewErrMutatorNotEnabled(a)
 	}
 
+	if err := a.c.MutatorConfig(a.GetID(), config, nil); err != nil {
+		return NewErrMutatorMisconfigured(a, err)
+	}
 	return nil
 }

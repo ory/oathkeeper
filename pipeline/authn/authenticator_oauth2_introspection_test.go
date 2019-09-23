@@ -27,6 +27,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/tidwall/sjson"
+
 	"github.com/ory/viper"
 
 	"github.com/ory/oathkeeper/driver/configuration"
@@ -248,8 +250,8 @@ func TestAuthenticatorOAuth2Introspection(t *testing.T) {
 				ts := httptest.NewServer(router)
 				defer ts.Close()
 
-				viper.Set(configuration.ViperKeyAuthenticatorOAuth2TokenIntrospectionIntrospectionURL, ts.URL+"/oauth2/introspect")
-				viper.Set(configuration.ViperKeyAuthenticatorOAuth2TokenIntrospectionScopeStrategy, "exact")
+				tc.config, _ = sjson.SetBytes(tc.config, "introspection_url", ts.URL+"/oauth2/introspect")
+				tc.config, _ = sjson.SetBytes(tc.config, "scope_strategy", "exact")
 				sess, err := a.Authenticate(tc.r, tc.config, nil)
 				if tc.expectErr {
 					require.Error(t, err)
@@ -266,19 +268,15 @@ func TestAuthenticatorOAuth2Introspection(t *testing.T) {
 
 	t.Run("method=validate", func(t *testing.T) {
 		viper.Set(configuration.ViperKeyAuthenticatorOAuth2TokenIntrospectionIsEnabled, false)
-		viper.Set(configuration.ViperKeyAuthenticatorOAuth2TokenIntrospectionIntrospectionURL, "")
-		require.Error(t, a.Validate())
+		require.Error(t, a.Validate(json.RawMessage(`{"introspection_url":""}`)))
 
 		viper.Set(configuration.ViperKeyAuthenticatorOAuth2TokenIntrospectionIsEnabled, true)
-		viper.Set(configuration.ViperKeyAuthenticatorOAuth2TokenIntrospectionIntrospectionURL, "")
-		require.Error(t, a.Validate())
+		require.Error(t, a.Validate(json.RawMessage(`{"introspection_url":""}`)))
 
 		viper.Set(configuration.ViperKeyAuthenticatorOAuth2TokenIntrospectionIsEnabled, false)
-		viper.Set(configuration.ViperKeyAuthenticatorOAuth2TokenIntrospectionIntrospectionURL, "/oauth2/token")
-		require.Error(t, a.Validate())
+		require.Error(t, a.Validate(json.RawMessage(`{"introspection_url":"/oauth2/token"}`)))
 
 		viper.Set(configuration.ViperKeyAuthenticatorOAuth2TokenIntrospectionIsEnabled, true)
-		viper.Set(configuration.ViperKeyAuthenticatorOAuth2TokenIntrospectionIntrospectionURL, "/oauth2/token")
-		require.NoError(t, a.Validate())
+		require.Error(t, a.Validate(json.RawMessage(`{"introspection_url":"/oauth2/token"}`)))
 	})
 }

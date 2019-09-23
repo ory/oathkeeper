@@ -49,10 +49,13 @@ func (a *AuthorizerDeny) Authorize(r *http.Request, session *authn.Authenticatio
 	return errors.WithStack(helper.ErrForbidden)
 }
 
-func (a *AuthorizerDeny) Validate() error {
-	if !a.c.AuthorizerDenyIsEnabled() {
-		return errors.WithStack(ErrAuthorizerNotEnabled.WithReasonf(`Authorizer "%s" is disabled per configuration.`, a.GetID()))
+func (a *AuthorizerDeny) Validate(config json.RawMessage) error {
+	if !a.c.AuthorizerIsEnabled(a.GetID()) {
+		return NewErrAuthorizerNotEnabled(a)
 	}
 
+	if err := a.c.AuthorizerConfig(a.GetID(), config, nil); err != nil {
+		return NewErrAuthorizerMisconfigured(a, err)
+	}
 	return nil
 }

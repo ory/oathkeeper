@@ -9,8 +9,7 @@ import (
 )
 
 func ResetViper() {
-	viper.Set(configuration.ViperKeyMutatorIDTokenJWKSURL, nil)
-
+	viper.Reset()
 	viper.Set("log.level", "debug")
 }
 
