@@ -96,6 +96,22 @@ func BindEnvs() {
 		ViperKeyAPIServeAddressHost,
 		ViperKeyAPIServeAddressPort,
 		ViperKeyAccessRuleRepositories,
+		ViperKeyAuthorizerAllowIsEnabled,
+		ViperKeyAuthorizerDenyIsEnabled,
+		ViperKeyAuthorizerKetoEngineACPORYIsEnabled,
+		ViperKeyMutatorCookieIsEnabled,
+		ViperKeyMutatorHeaderIsEnabled,
+		ViperKeyMutatorNoopIsEnabled,
+		ViperKeyMutatorHydratorIsEnabled,
+		ViperKeyMutatorIDTokenIsEnabled,
+		ViperKeyMutatorIDTokenJWKSURL,
+		ViperKeyAuthenticatorAnonymousIsEnabled,
+		ViperKeyAuthenticatorNoopIsEnabled,
+		ViperKeyAuthenticatorCookieSessionIsEnabled,
+		ViperKeyAuthenticatorJWTIsEnabled,
+		ViperKeyAuthenticatorOAuth2ClientCredentialsIsEnabled,
+		ViperKeyAuthenticatorOAuth2TokenIntrospectionIsEnabled,
+		ViperKeyAuthenticatorUnauthorizedIsEnabled,
 	); err != nil {
 		panic(err.Error())
 	}
