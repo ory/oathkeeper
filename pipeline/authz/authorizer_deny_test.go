@@ -46,9 +46,9 @@ func TestAuthorizerDeny(t *testing.T) {
 
 	t.Run("method=validate", func(t *testing.T) {
 		viper.Set(configuration.ViperKeyAuthorizerDenyIsEnabled, true)
-		require.NoError(t, a.Validate())
+		require.NoError(t, a.Validate(nil))
 
 		viper.Set(configuration.ViperKeyAuthorizerDenyIsEnabled, false)
-		require.Error(t, a.Validate())
+		require.Error(t, a.Validate(nil))
 	})
 }

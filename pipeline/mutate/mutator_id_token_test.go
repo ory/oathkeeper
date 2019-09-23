@@ -33,6 +33,8 @@ import (
 	"text/template"
 	"time"
 
+	"github.com/tidwall/sjson"
+
 	"github.com/ory/oathkeeper/rule"
 
 	"github.com/dgrijalva/jwt-go"
@@ -69,7 +71,7 @@ func TestMutatorIDToken(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, "id_token", a.GetID())
 
-	viper.Set(configuration.ViperKeyMutatorIDTokenIssuerURL, "/foo/bar")
+	viper.Set("mutators.id_token.config.issuer_url", "/foo/bar")
 
 	t.Run("method=mutate", func(t *testing.T) {
 
@@ -111,7 +113,7 @@ func TestMutatorIDToken(t *testing.T) {
 					Config:  json.RawMessage([]byte(`{"bad": "key"}`)),
 					Match:   jwt.MapClaims{},
 					K:       "file://../../test/stub/jwks-hs.json",
-					Err:     errors.New(`json: unknown field "bad"`),
+					Err:     errors.New(`mutator matching this route is misconfigured or disabled`),
 				},
 				{
 					Rule:    &rule.Rule{ID: "test-rule6"},
@@ -158,9 +160,8 @@ func TestMutatorIDToken(t *testing.T) {
 
 			for i, tc := range testCases {
 				t.Run(fmt.Sprintf("case=%d", i), func(t *testing.T) {
-					viper.Set(configuration.ViperKeyMutatorIDTokenJWKSURL, tc.K)
-					viper.Set(configuration.ViperKeyMutatorIDTokenTTL, tc.Ttl)
-
+					tc.Config, _ = sjson.SetBytes(tc.Config, "jwks_url", tc.K)
+					tc.Config, _ = sjson.SetBytes(tc.Config, "ttl", tc.Ttl.String())
 					err := a.Mutate(r, tc.Session, tc.Config, tc.Rule)
 					if tc.Err == nil {
 						require.NoError(t, err)
@@ -198,12 +199,12 @@ func TestMutatorIDToken(t *testing.T) {
 			tc := testCase{
 				Rule:    &rule.Rule{ID: "test-rule"},
 				Session: &authn.AuthenticationSession{Subject: "foo", Extra: map[string]interface{}{"abc": "value1", "def": "value2"}},
-				Config:  json.RawMessage([]byte(`{"claims": "{\"custom-claim\": \"{{ print .Extra.abc }}/{{ print .Extra.def }}\", \"aud\": [\"foo\", \"bar\"]}"}`)),
+				Config:  json.RawMessage([]byte(`{"claims": "{\"custom-claim\": \"{{ print .Extra.abc }}/{{ print .Extra.def }}\", \"aud\": [\"foo\", \"bar\"]}", "jwks_url": "file://../../test/stub/jwks-ecdsa.json"}`)),
 				K:       "file://../../test/stub/jwks-ecdsa.json",
 			}
 
-			viper.Set(configuration.ViperKeyMutatorIDTokenJWKSURL, tc.K)
-			viper.Set(configuration.ViperKeyMutatorIDTokenTTL, tc.Ttl)
+			// viper.Set(configuration.ViperKeyMutatorIDTokenJWKSURL, tc.K)
+			// viper.Set(configuration.ViperKeyMutatorIDTokenTTL, tc.Ttl)
 
 			cache := template.New("rules")
 
@@ -248,18 +249,19 @@ func TestMutatorIDToken(t *testing.T) {
 		}{
 			{e: false, pass: false},
 			{e: true, pass: false},
-			{e: true, i: "/foo", pass: false},
-			{e: true, j: "/foo", pass: false},
-			{e: true, i: "/foo", j: "/foo", pass: true},
+			{e: true, i: "http://baz/foo", pass: false},
+			{e: true, j: "", pass: false},
+			{e: true, i: "http://baz/foo", j: "http://baz/foo", pass: true},
 		} {
 			t.Run(fmt.Sprintf("case=%d", k), func(t *testing.T) {
 				viper.Set(configuration.ViperKeyMutatorIDTokenIsEnabled, tc.e)
-				viper.Set(configuration.ViperKeyMutatorIDTokenIssuerURL, tc.i)
-				viper.Set(configuration.ViperKeyMutatorIDTokenJWKSURL, tc.j)
+				// viper.Set(configuration.ViperKeyMutatorIDTokenIssuerURL, tc.i)
+				// viper.Set(configuration.ViperKeyMutatorIDTokenJWKSURL, tc.j)
+				err := a.Validate(json.RawMessage(`{"issuer_url":"` + tc.i + `", "jwks_url": "` + tc.j + `"}`))
 				if tc.pass {
-					require.NoError(t, a.Validate())
+					require.NoError(t, err)
 				} else {
-					require.Error(t, a.Validate())
+					require.Error(t, err)
 				}
 			})
 		}

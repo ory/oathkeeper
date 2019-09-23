@@ -1,0 +1,42 @@
+{
+  "$id": "https://raw.githubusercontent.com/ory/oathkeeper/master/.schemas/mutators.id_token.schema.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "title": "ID Token Mutator Configuration",
+  "description": "This section is optional when the mutator is disabled.",
+  "required": ["jwks_url","issuer_url"],
+  "properties": {
+    "claims": {
+      "type": "string"
+    },
+    "issuer_url": {
+      "type": "string",
+      "title": "Issuer URL",
+      "description": "Sets the \"iss\" value of the ID Token.\n\n>If this mutator is enabled, this value is required."
+    },
+    "jwks_url": {
+      "type": "string",
+      "format": "uri",
+      "title": "JSON Web Key URL",
+      "description": "Sets the URL where keys should be fetched from. Supports remote locations (http, https) as well as local filesystem paths.\n\n>If this mutator is enabled, this value is required.",
+      "examples": [
+        "https://fetch-keys/from/this/location.json",
+        "file:///from/this/absolute/location.json",
+        "file://../from/this/relative/location.json"
+      ]
+    },
+    "ttl": {
+      "type": "string",
+      "title": "Expire After",
+      "description": "Sets the time-to-live of the JSON Web Token.",
+      "pattern": "^[0-9]+(ns|us|ms|s|m|h)$",
+      "default": "1m",
+      "examples": [
+        "1h",
+        "1m",
+        "30s"
+      ]
+    }
+  },
+  "additionalProperties": false
+}

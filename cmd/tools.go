@@ -13,5 +13,5 @@ import (
 	_ "github.com/ory/go-acc"
 	_ "github.com/ory/x/tools/listx"
 
-	_ "github.com/gobuffalo/packr/v2/..."
+	_ "github.com/gobuffalo/packr/v2"
 )

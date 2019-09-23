@@ -42,7 +42,7 @@ func TestCredentialsIssuerBroken(t *testing.T) {
 	})
 
 	t.Run("method=validate", func(t *testing.T) {
-		require.Error(t, mutate.NewMutatorBroken(false).Validate())
-		require.NoError(t, mutate.NewMutatorBroken(true).Validate())
+		require.Error(t, mutate.NewMutatorBroken(false).Validate(nil))
+		require.NoError(t, mutate.NewMutatorBroken(true).Validate(nil))
 	})
 }

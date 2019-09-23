@@ -74,7 +74,7 @@ func (v *ValidatorDefault) validateAuthenticators(r *Rule) error {
 			return herodot.ErrInternalServerError.WithReasonf(`Value "%s" of "authenticators[%d]" is not in list of supported authenticators: %v`, a.Handler, k, v.r.AvailablePipelineAuthenticators()).WithTrace(err).WithDebug(err.Error())
 		}
 
-		if err := auth.Validate(); err != nil {
+		if err := auth.Validate(a.Config); err != nil {
 			return err
 		}
 	}
@@ -92,7 +92,7 @@ func (v *ValidatorDefault) validateAuthorizer(r *Rule) error {
 		return errors.WithStack(herodot.ErrInternalServerError.WithReasonf(`Value "%s" of "authorizer.handler" is not in list of supported authorizers: %v`, r.Authorizer.Handler, v.r.AvailablePipelineAuthorizers()).WithTrace(err).WithDebug(err.Error()))
 	}
 
-	return auth.Validate()
+	return auth.Validate(r.Authorizer.Config)
 }
 
 func (v *ValidatorDefault) validateMutators(r *Rule) error {
@@ -107,7 +107,7 @@ func (v *ValidatorDefault) validateMutators(r *Rule) error {
 				v.r.AvailablePipelineMutators()).WithTrace(err).WithDebug(err.Error())
 		}
 
-		if err := mutator.Validate(); err != nil {
+		if err := mutator.Validate(m.Config); err != nil {
 			return err
 		}
 	}

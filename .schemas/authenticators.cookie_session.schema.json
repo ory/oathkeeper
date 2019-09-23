@@ -1,0 +1,31 @@
+{
+  "$id": "https://raw.githubusercontent.com/ory/oathkeeper/master/.schemas/authenticators.cookie_session.schema.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "title": "Cookie Session Authenticator Configuration",
+  "description": "This section is optional when the authenticator is disabled.",
+  "properties": {
+    "check_session_url": {
+      "title": "Session Check URL",
+      "type": "string",
+      "format": "uri",
+      "description": "The origin to proxy requests to. If the response is a 200 with body `{ \"subject\": \"...\", \"extra\": {} }`. The request will pass the subject through successfully, otherwise it will be marked as unauthorized.\n\n>If this authenticator is enabled, this value is required.",
+      "examples": [
+        "https://session-store-host"
+      ]
+    },
+    "only": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "additionalItems": false
+      },
+      "title": "Only Cookies",
+      "description": "A list of possible cookies to look for on incoming requests, and will fallthrough to the next authenticator if none of the passed cookies are set on the request."
+    }
+  },
+  "required": [
+    "check_session_url"
+  ],
+  "additionalProperties": false
+}

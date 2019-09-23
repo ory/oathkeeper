@@ -1,16 +1,19 @@
 package configuration
 
 import (
+	"encoding/json"
 	"net/url"
 	"time"
 
+	"github.com/gobuffalo/packr/v2"
 	"github.com/sirupsen/logrus"
 
-	"github.com/rs/cors"
-	"golang.org/x/oauth2/clientcredentials"
-
 	"github.com/ory/fosite"
+
+	"github.com/rs/cors"
 )
+
+var schemas = packr.New("schemas", "../../.schemas")
 
 type Provider interface {
 	CORSEnabled(iface string) bool
@@ -28,55 +31,25 @@ type Provider interface {
 
 	ProxyServeAddress() string
 	APIServeAddress() string
+
+	ToScopeStrategy(value string, key string) fosite.ScopeStrategy
+	ParseURLs(sources []string) ([]url.URL, error)
+	JSONWebKeyURLs() []url.URL
 }
 
 type ProviderAuthenticators interface {
-	AuthenticatorAnonymousIsEnabled() bool
-	AuthenticatorAnonymousIdentifier() string
-
-	AuthenticatorNoopIsEnabled() bool
-
-	AuthenticatorCookieSessionIsEnabled() bool
-	AuthenticatorCookieSessionCheckSessionURL() *url.URL
-	AuthenticatorCookieSessionOnly() []string
-
-	AuthenticatorJWTIsEnabled() bool
-	AuthenticatorJWTJWKSURIs() []url.URL
-	AuthenticatorJWTScopeStrategy() fosite.ScopeStrategy
-
-	AuthenticatorOAuth2ClientCredentialsIsEnabled() bool
-	AuthenticatorOAuth2ClientCredentialsTokenURL() *url.URL
-
-	AuthenticatorOAuth2TokenIntrospectionIsEnabled() bool
-	AuthenticatorOAuth2TokenIntrospectionScopeStrategy() fosite.ScopeStrategy
-	AuthenticatorOAuth2TokenIntrospectionIntrospectionURL() *url.URL
-	AuthenticatorOAuth2TokenIntrospectionPreAuthorization() *clientcredentials.Config
-
-	AuthenticatorUnauthorizedIsEnabled() bool
+	AuthenticatorConfig(id string, overrides json.RawMessage, destination interface{}) error
+	AuthenticatorIsEnabled(id string) bool
 }
 
 type ProviderAuthorizers interface {
-	AuthorizerAllowIsEnabled() bool
-
-	AuthorizerDenyIsEnabled() bool
-
-	AuthorizerKetoEngineACPORYIsEnabled() bool
-	AuthorizerKetoEngineACPORYBaseURL() *url.URL
+	AuthorizerConfig(id string, overrides json.RawMessage, destination interface{}) error
+	AuthorizerIsEnabled(id string) bool
 }
 
 type ProviderMutators interface {
-	MutatorCookieIsEnabled() bool
-
-	MutatorHeaderIsEnabled() bool
-
-	MutatorIDTokenIsEnabled() bool
-	MutatorIDTokenIssuerURL() *url.URL
-	MutatorIDTokenJWKSURL() *url.URL
-	MutatorIDTokenTTL() time.Duration
-
-	MutatorNoopIsEnabled() bool
-
-	MutatorHydratorIsEnabled() bool
+	MutatorConfig(id string, overrides json.RawMessage, destination interface{}) error
+	MutatorIsEnabled(id string) bool
 }
 
 func MustValidate(l logrus.FieldLogger, p Provider) {

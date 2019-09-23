@@ -4,10 +4,11 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/ory/herodot"
-	"github.com/ory/oathkeeper/pipeline"
+	"github.com/pkg/errors"
 
-	"github.com/go-errors/errors"
+	"github.com/ory/herodot"
+
+	"github.com/ory/oathkeeper/pipeline"
 )
 
 var ErrAuthenticatorNotResponsible = errors.New("Authenticator not responsible")
@@ -20,7 +21,19 @@ var ErrAuthenticatorNotEnabled = herodot.DefaultError{
 type Authenticator interface {
 	Authenticate(r *http.Request, config json.RawMessage, rule pipeline.Rule) (*AuthenticationSession, error)
 	GetID() string
-	Validate() error
+	Validate(config json.RawMessage) error
+}
+
+func NewErrAuthenticatorNotEnabled(a Authenticator) *herodot.DefaultError {
+	return ErrAuthenticatorNotEnabled.WithTrace(errors.New("")).WithReasonf(`Authenticator "%s" is disabled per configuration.`, a.GetID())
+}
+
+func NewErrAuthenticatorMisconfigured(a Authenticator, err error) *herodot.DefaultError {
+	return ErrAuthenticatorNotEnabled.WithTrace(err).WithReasonf(
+		`Configuration for authenticator "%s" could not be validated: %s`,
+		a.GetID(),
+		err,
+	)
 }
 
 type AuthenticationSession struct {

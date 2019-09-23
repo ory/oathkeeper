@@ -70,38 +70,29 @@ func TestAuthenticatorOAuth2ClientCredentials(t *testing.T) {
 	authInvalid.SetBasicAuth("foo", "bar")
 
 	for k, tc := range []struct {
-		setup         func()
 		r             *http.Request
 		config        json.RawMessage
 		expectErr     error
 		expectSession *authn.AuthenticationSession
 	}{
 		{
-			setup: func() {
-				viper.Set(configuration.ViperKeyAuthenticatorClientCredentialsTokenURL, "")
-			},
 			r:         &http.Request{Header: http.Header{}},
 			expectErr: authn.ErrAuthenticatorNotResponsible,
+			config:    json.RawMessage(`{"token_url":""}`),
 		},
 		{
-			r: authInvalid,
-			setup: func() {
-				viper.Set(configuration.ViperKeyAuthenticatorClientCredentialsTokenURL, ts.URL+"/oauth2/token")
-			},
+			r:         authInvalid,
 			expectErr: helper.ErrUnauthorized,
+			config:    json.RawMessage(`{"token_url":"` + ts.URL + "/oauth2/token" + `"}`),
 		},
 		{
-			setup: func() {
-				viper.Set(configuration.ViperKeyAuthenticatorClientCredentialsTokenURL, ts.URL+"/oauth2/token")
-			},
 			r:             authOk,
 			expectErr:     nil,
 			expectSession: &authn.AuthenticationSession{Subject: "client"},
+			config:        json.RawMessage(`{"token_url":"` + ts.URL + "/oauth2/token" + `"}`),
 		},
 	} {
 		t.Run(fmt.Sprintf("method=authenticate/case=%d", k), func(t *testing.T) {
-			tc.setup()
-
 			session, err := a.Authenticate(tc.r, tc.config, nil)
 
 			if tc.expectErr != nil {
@@ -118,19 +109,15 @@ func TestAuthenticatorOAuth2ClientCredentials(t *testing.T) {
 
 	t.Run("method=validate", func(t *testing.T) {
 		viper.Set(configuration.ViperKeyAuthenticatorOAuth2ClientCredentialsIsEnabled, false)
-		viper.Set(configuration.ViperKeyAuthenticatorClientCredentialsTokenURL, "")
-		require.Error(t, a.Validate())
+		require.Error(t, a.Validate(json.RawMessage(`{"token_url":""}`)))
 
 		viper.Set(configuration.ViperKeyAuthenticatorOAuth2ClientCredentialsIsEnabled, false)
-		viper.Set(configuration.ViperKeyAuthenticatorClientCredentialsTokenURL, ts.URL+"/oauth2/token")
-		require.Error(t, a.Validate())
+		require.Error(t, a.Validate(json.RawMessage(`{"token_url":"`+ts.URL+"/oauth2/token"+`"}`)))
 
 		viper.Set(configuration.ViperKeyAuthenticatorOAuth2ClientCredentialsIsEnabled, true)
-		viper.Set(configuration.ViperKeyAuthenticatorClientCredentialsTokenURL, "")
-		require.Error(t, a.Validate())
+		require.Error(t, a.Validate(json.RawMessage(`{"token_url":""}`)))
 
 		viper.Set(configuration.ViperKeyAuthenticatorOAuth2ClientCredentialsIsEnabled, true)
-		viper.Set(configuration.ViperKeyAuthenticatorClientCredentialsTokenURL, ts.URL+"/oauth2/token")
-		require.NoError(t, a.Validate())
+		require.NoError(t, a.Validate(json.RawMessage(`{"token_url":"`+ts.URL+"/oauth2/token"+`"}`)))
 	})
 }

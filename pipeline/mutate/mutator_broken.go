@@ -48,7 +48,7 @@ func (a *MutatorBroken) Mutate(r *http.Request, session *authn.AuthenticationSes
 	return errors.New("forced denial of credentials")
 }
 
-func (a *MutatorBroken) Validate() error {
+func (a *MutatorBroken) Validate(_ json.RawMessage) error {
 	if !a.enabled {
 		return errors.WithStack(ErrMutatorNotEnabled.WithReasonf(`Mutator "%s" is disabled per configuration.`, a.GetID()))
 	}

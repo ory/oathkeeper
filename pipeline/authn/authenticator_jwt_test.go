@@ -29,14 +29,14 @@ import (
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
+	"github.com/tidwall/sjson"
 
-	"github.com/ory/viper"
+	"github.com/ory/x/urlx"
 
 	"github.com/ory/herodot"
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/internal"
 	. "github.com/ory/oathkeeper/pipeline/authn"
-	"github.com/ory/x/urlx"
 
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
@@ -51,7 +51,7 @@ func TestAuthenticatorJWT(t *testing.T) {
 		"file://../../test/stub/jwks-ecdsa.json",
 	}
 	conf := internal.NewConfigurationWithDefaults()
-	viper.Set(configuration.ViperKeyAuthenticatorJWTJWKSURIs, keys)
+	// viper.Set(configuration.ViperKeyAuthenticatorJWTJWKSURIs, keys)
 	reg := internal.NewRegistry(conf)
 
 	a, err := reg.PipelineAuthenticator("jwt")
@@ -88,9 +88,6 @@ func TestAuthenticatorJWT(t *testing.T) {
 			},
 			{
 				d: "should pass because JWT is valid",
-				setup: func() {
-					viper.Set(configuration.ViperKeyAuthenticatorJWTScopeStrategy, "exact")
-				},
 				r: &http.Request{Header: http.Header{"Authorization": []string{"bearer " + gen(keys[1], jwt.MapClaims{
 					"sub":   "sub",
 					"exp":   now.Add(time.Hour).Unix(),
@@ -98,7 +95,7 @@ func TestAuthenticatorJWT(t *testing.T) {
 					"iss":   "iss-2",
 					"scope": []string{"scope-3", "scope-2", "scope-1"},
 				})}}},
-				config:    `{"target_audience": ["aud-1", "aud-2"], "trusted_issuers": ["iss-1", "iss-2"], "required_scope": ["scope-1", "scope-2"]}`,
+				config:    `{"target_audience": ["aud-1", "aud-2"], "trusted_issuers": ["iss-1", "iss-2"], "required_scope": ["scope-1", "scope-2"], "scope_strategy":"exact"}`,
 				expectErr: false,
 				expectSess: &AuthenticationSession{
 					Subject: "sub",
@@ -113,9 +110,6 @@ func TestAuthenticatorJWT(t *testing.T) {
 			},
 			{
 				d: "should pass because JWT scope can be a string",
-				setup: func() {
-					viper.Set(configuration.ViperKeyAuthenticatorJWTScopeStrategy, "exact")
-				},
 				r: &http.Request{Header: http.Header{"Authorization": []string{"bearer " + gen(keys[2], jwt.MapClaims{
 					"sub":   "sub",
 					"exp":   now.Add(time.Hour).Unix(),
@@ -123,7 +117,7 @@ func TestAuthenticatorJWT(t *testing.T) {
 					"iss":   "iss-2",
 					"scope": "scope-3 scope-2 scope-1",
 				})}}},
-				config:    `{"target_audience": ["aud-1", "aud-2"], "trusted_issuers": ["iss-1", "iss-2"], "required_scope": ["scope-1", "scope-2"]}`,
+				config:    `{"target_audience": ["aud-1", "aud-2"], "trusted_issuers": ["iss-1", "iss-2"], "required_scope": ["scope-1", "scope-2"], "scope_strategy":"exact"}`,
 				expectErr: false,
 				expectSess: &AuthenticationSession{
 					Subject: "sub",
@@ -138,9 +132,6 @@ func TestAuthenticatorJWT(t *testing.T) {
 			},
 			{
 				d: "should pass because JWT is valid and HS256 is allowed",
-				setup: func() {
-					viper.Set(configuration.ViperKeyAuthenticatorJWTScopeStrategy, "none")
-				},
 				r: &http.Request{Header: http.Header{"Authorization": []string{"bearer " + gen(keys[0], jwt.MapClaims{
 					"sub": "sub",
 					"exp": now.Add(time.Hour).Unix(),
@@ -154,9 +145,6 @@ func TestAuthenticatorJWT(t *testing.T) {
 			},
 			{
 				d: "should pass because JWT is valid and ES256 is allowed",
-				setup: func() {
-					viper.Set(configuration.ViperKeyAuthenticatorJWTScopeStrategy, "none")
-				},
 				r: &http.Request{Header: http.Header{"Authorization": []string{"bearer " + gen(keys[3], jwt.MapClaims{
 					"sub": "sub",
 					"exp": now.Add(time.Hour).Unix(),
@@ -245,6 +233,7 @@ func TestAuthenticatorJWT(t *testing.T) {
 					tc.setup()
 				}
 
+				tc.config, _ = sjson.Set(tc.config, "jwks_urls", keys)
 				session, err := a.Authenticate(tc.r, json.RawMessage([]byte(tc.config)), nil)
 				if tc.expectErr {
 					if tc.expectCode != 0 {
@@ -260,9 +249,5 @@ func TestAuthenticatorJWT(t *testing.T) {
 				}
 			})
 		}
-	})
-
-	t.Run("method=validate", func(t *testing.T) {
-
 	})
 }

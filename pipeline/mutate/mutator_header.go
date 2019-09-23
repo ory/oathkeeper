@@ -36,15 +36,9 @@ func (a *MutatorHeader) WithCache(t *template.Template) {
 }
 
 func (a *MutatorHeader) Mutate(r *http.Request, session *authn.AuthenticationSession, config json.RawMessage, rl pipeline.Rule) error {
-	if len(config) == 0 {
-		config = []byte("{}")
-	}
-
-	var cfg MutatorHeaderConfig
-	d := json.NewDecoder(bytes.NewBuffer(config))
-	d.DisallowUnknownFields()
-	if err := d.Decode(&cfg); err != nil {
-		return errors.WithStack(err)
+	cfg, err := a.config(config)
+	if err != nil {
+		return err
 	}
 
 	for hdr, templateString := range cfg.Headers {
@@ -71,10 +65,20 @@ func (a *MutatorHeader) Mutate(r *http.Request, session *authn.AuthenticationSes
 	return nil
 }
 
-func (a *MutatorHeader) Validate() error {
-	if !a.c.MutatorHeaderIsEnabled() {
-		return errors.WithStack(ErrMutatorNotEnabled.WithReasonf(`Mutator "%s" is disabled per configuration.`, a.GetID()))
+func (a *MutatorHeader) Validate(config json.RawMessage) error {
+	if !a.c.MutatorIsEnabled(a.GetID()) {
+		return NewErrMutatorNotEnabled(a)
 	}
 
-	return nil
+	_, err := a.config(config)
+	return err
+}
+
+func (a *MutatorHeader) config(config json.RawMessage) (*MutatorHeaderConfig, error) {
+	var c MutatorHeaderConfig
+	if err := a.c.MutatorConfig(a.GetID(), config, &c); err != nil {
+		return nil, NewErrMutatorMisconfigured(a, err)
+	}
+
+	return &c, nil
 }

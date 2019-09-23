@@ -48,9 +48,9 @@ func TestAuthenticatorBroken(t *testing.T) {
 
 	t.Run("method=validate", func(t *testing.T) {
 		viper.Set(configuration.ViperKeyAuthenticatorUnauthorizedIsEnabled, true)
-		require.NoError(t, a.Validate())
+		require.NoError(t, a.Validate(nil))
 
 		viper.Set(configuration.ViperKeyAuthenticatorUnauthorizedIsEnabled, false)
-		require.Error(t, a.Validate())
+		require.Error(t, a.Validate(nil))
 	})
 }

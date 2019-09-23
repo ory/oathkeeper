@@ -38,10 +38,6 @@ func (a *MutatorCookie) WithCache(t *template.Template) {
 }
 
 func (a *MutatorCookie) Mutate(r *http.Request, session *authn.AuthenticationSession, config json.RawMessage, rl pipeline.Rule) error {
-	if len(config) == 0 {
-		config = []byte("{}")
-	}
-
 	// Cache request cookies
 	requestCookies := r.Cookies()
 
@@ -50,11 +46,9 @@ func (a *MutatorCookie) Mutate(r *http.Request, session *authn.AuthenticationSes
 	// Keep track of rule cookies in a map
 	cookies := map[string]bool{}
 
-	var cfg CredentialsCookiesConfig
-	d := json.NewDecoder(bytes.NewBuffer(config))
-	d.DisallowUnknownFields()
-	if err := d.Decode(&cfg); err != nil {
-		return errors.WithStack(err)
+	cfg, err := a.config(config)
+	if err != nil {
+		return err
 	}
 
 	for cookie, templateString := range cfg.Cookies {
@@ -98,10 +92,20 @@ func (a *MutatorCookie) Mutate(r *http.Request, session *authn.AuthenticationSes
 	return nil
 }
 
-func (a *MutatorCookie) Validate() error {
-	if !a.c.MutatorCookieIsEnabled() {
-		return errors.WithStack(ErrMutatorNotEnabled.WithReasonf(`Mutator "%s" is disabled per configuration.`, a.GetID()))
+func (a *MutatorCookie) Validate(config json.RawMessage) error {
+	if !a.c.MutatorIsEnabled(a.GetID()) {
+		return NewErrMutatorNotEnabled(a)
 	}
 
-	return nil
+	_, err := a.config(config)
+	return err
+}
+
+func (a *MutatorCookie) config(config json.RawMessage) (*CredentialsCookiesConfig, error) {
+	var c CredentialsCookiesConfig
+	if err := a.c.MutatorConfig(a.GetID(), config, &c); err != nil {
+		return nil, NewErrMutatorMisconfigured(a, err)
+	}
+
+	return &c, nil
 }
