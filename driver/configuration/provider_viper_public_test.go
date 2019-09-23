@@ -61,6 +61,21 @@ func TestPipelineConfig(t *testing.T) {
 		assert.Equal(t, "http://override-url/foo", dec.Api.URL)
 		assert.Equal(t, 15, dec.Api.Retry.NumberOfRetries)
 	})
+
+	t.Run("case=should pass array values", func(t *testing.T) {
+		var dec authn.AuthenticatorOAuth2JWTConfiguration
+		require.NoError(t, p.PipelineConfig("authenticators", "jwt", json.RawMessage(`{}`), &dec))
+		assert.Equal(t,
+			[]string{"https://my-website.com/.well-known/jwks.json", "https://my-other-website.com/.well-known/jwks.json", "file://path/to/local/jwks.json"},
+			dec.JWKSURLs,
+		)
+
+		require.NoError(t, p.PipelineConfig("authenticators", "jwt", json.RawMessage(`{"jwks_urls":["http://foo"]}`), &dec))
+		assert.Equal(t,
+			[]string{"http://foo"},
+			dec.JWKSURLs,
+		)
+	})
 }
 
 func TestViperProvider(t *testing.T) {

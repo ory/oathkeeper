@@ -8,7 +8,6 @@ before finalizing the upgrade process.
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
-
 - [master](#master)
 - [v0.19.0-beta.1+oryOS.13](#v0190-beta1oryos13)
   - [Config changes](#config-changes)
@@ -49,16 +48,19 @@ before finalizing the upgrade process.
 
 ### Config changes
 
-This release homogenizes all configuration settings. Previously all handlers (mutators, authenticators, and authorizers)
-had two different types of config: global and per access rule.
+This release homogenizes all configuration settings. Previously all handlers
+(mutators, authenticators, and authorizers) had two different types of config:
+global and per access rule.
 
-With this release, all handlers have the same configuration for global and per access rule. For example, the `id_token`
-handler requires the `issuer_url`. Previously, this value was only configurable in the global config. Now, it
-can be set on a per rule basis as well as globally. The global config will always be used as a fallback when no
-access rule specific configuration is set.
+With this release, all handlers have the same configuration for global and per
+access rule. For example, the `id_token` handler requires the `issuer_url`.
+Previously, this value was only configurable in the global config. Now, it can
+be set on a per rule basis as well as globally. The global config will always be
+used as a fallback when no access rule specific configuration is set.
 
-For this to work, the ORY Oathkeeper configuration file has changed when it comes to mutators, authenticaotrs, and
-authorizers. Instead of defining the config at the same level as the `enabled` flag, it is now nested in a subkey
+For this to work, the ORY Oathkeeper configuration file has changed when it
+comes to mutators, authenticaotrs, and authorizers. Instead of defining the
+config at the same level as the `enabled` flag, it is now nested in a subkey
 "config":
 
 ```
@@ -76,8 +78,9 @@ authorizers:
 
 ### Hydrator Mutator
 
-The Hydrator mutator has two configuration keys `api.retry.number` and `api.retry.delayInMilliseconds`. These have
-been renamed for consistency reasons to: `api.retry.number_of_retries` and `api.retry.delay_in_milliseconds`.
+The Hydrator mutator has two configuration keys `api.retry.number` and
+`api.retry.delayInMilliseconds`. These have been renamed for consistency reasons
+to: `api.retry.number_of_retries` and `api.retry.delay_in_milliseconds`.
 
 ## v0.18.0-beta.1+oryOS.12
 

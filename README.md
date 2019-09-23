@@ -317,7 +317,8 @@ Howard Edidin, Ken Adler Oz Haven, Stefan Hans, TheCrealm
 ## Sponsors
 
 Support this project by becoming a sponsor. Your logo will show up here with a
-link to your website. [a href="ctive.com/ory/sponsor/0/website" target="_blank""
+link to your website. [a href="ctive.com/ory/sponsor/0/website"
+target="\_blank""
 
 ]
 

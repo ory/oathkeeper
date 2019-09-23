@@ -1,7 +1,6 @@
 package authn
 
 import (
-	"bytes"
 	"encoding/json"
 	"net/http"
 
@@ -68,20 +67,14 @@ func (a *AuthenticatorJWT) Config(config json.RawMessage) (*AuthenticatorOAuth2J
 }
 
 func (a *AuthenticatorJWT) Authenticate(r *http.Request, config json.RawMessage, _ pipeline.Rule) (*AuthenticationSession, error) {
-	var cf AuthenticatorOAuth2JWTConfiguration
 	token := helper.BearerTokenFromRequest(r)
 	if token == "" {
 		return nil, errors.WithStack(ErrAuthenticatorNotResponsible)
 	}
 
-	if len(config) == 0 {
-		config = []byte("{}")
-	}
-
-	d := json.NewDecoder(bytes.NewBuffer(config))
-	d.DisallowUnknownFields()
-	if err := d.Decode(&cf); err != nil {
-		return nil, errors.WithStack(err)
+	cf, err := a.Config(config)
+	if err != nil {
+		return nil, err
 	}
 
 	if len(cf.AllowedAlgorithms) == 0 {

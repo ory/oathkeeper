@@ -7,7 +7,7 @@ mutators:
     enabled: true
     config:
       issuer_url: https://my-oathkeeper/
-     jwks_url: file://./jwks-idt.json
+      jwks_url: file://./jwks-idt.json
 
 authorizers:
   allow:
