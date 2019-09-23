@@ -108,7 +108,7 @@ func (h *CredentialsHandler) jwksURLs() ([]url.URL, error) {
 	i := 0
 	for u := range t {
 		result[i] = u
-		i ++
+		i++
 	}
 
 	return result, nil

@@ -1180,21 +1180,28 @@
 
 **Merged pull requests:**
 
-- Add cors handling to proxy e build [se c](cle ci build status badge [\
-  (\#10](ttps:/ (\#9](https://github.)
-- Remove goveralls from circle build Use circle ci build status badge
-  [ (\](https:/ (\#9](https://github.com/ory/oathkeepe)
+- Add cors handling to proxy e build [se c](cle ci build status badge [\
+
+  (em10](ttps:/ (s 9](m circle build )
+
+- Remove goveralls from circle build Use circle ci build status badge Use circle
+  ci build status badge Switch from glide to
 - Use circle ci build status badge Switch from glide to golang/dep for vendoring
 
-  (\#8](h (\#7](https://github.com/or)
+  ( S8](h (fr7](glide to golang/dep f)
 
 - Switch from glide to golang/dep for vendoring Resolve tests by replacing nil
-  slice [# [](h ([a7](asr](https://github.com/aeneasr))
+  slice e tests by replacing nil slice
+
+  ## [Change)
+
 - Resolve tests by replacing nil slice
 
-  ## [Change](g](https://github.com/ory/oathkeepe
+  ## [*Merge](g](l requests:\*\*
 
-  (\*Merged pull requests:\*\*
+- Return )
+
+(\*Merged pull requests:\*\*
 
 - Return )
 
@@ -1209,16 +1216,23 @@
 **Merged pull requests:**
 
 - Return arrays instead of null on rule creation Add circleci configuration file
-  [# [](https: ([a5](asr](https://github.com/aeneasr))
+  Add circleci configuration file
+
+  ##  circleci co
+
 - Add circleci configuration file
 
-  ## [Change](g](https://github.com/ory/oathkeepe
-
-  (\*Merged pull requests:\*\*
+  ## [x una)](g](l requests:\*\*
 
 - Fix una)
 
-## ll Changelog](zed [\#4](https://github.com/or
+(\*Merged pull requests:\*\*
+
+- Fix una)
+
+## ll Changelog](zed [)
+
+](\*\*Merged pull request
 
 \*\*Merg (2017-10-18)
 
@@ -1233,13 +1247,15 @@
 
 - Skip ac)
 
-## ll Changelog](ks [\#3](https://github.com/ory
+## ll Changelog](ks [2)
+
+]( \*\*Merged pull request
 
 \*\*Merg (2017-10-12)
 
 **Merged pull requests:**
 
-- Skip acp checks [ s:](github.com/ory/oathkee
+- Skip acp checks [://](github.com/ory/oathkee
 
 **Merged pull requests:**
 

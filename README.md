@@ -301,7 +301,8 @@ $ go test ./...
 ## Backers
 
 Thank you to all our backers! 🙏 [a
-href="https://opencollective.com/ory#backers" target="]
+
+href="ref="https://opencollective.com/ory#ba" target="]
 
 <a href="https://opencollective.com/ory#backers" target="_blank"><img src="https://opencollective.com/ory/backers.svg?width=890"></a>
 
@@ -316,7 +317,8 @@ Howard Edidin, Ken Adler Oz Haven, Stefan Hans, TheCrealm
 ## Sponsors
 
 Support this project by becoming a sponsor. Your logo will show up here with a
-link to your website. [a href="https://opencollective.com/ory/sponsor/0/website"
+link to your website. [a href="ctive.com/ory/sponsor/0/website" target="_blank""
+
 ]
 
 <a href="https://opencollective.com/ory/sponsor/0/website" target="_blank"><img src="https://opencollective.com/ory/sponsor/0/avatar.svg"></a>
