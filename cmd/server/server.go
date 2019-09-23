@@ -134,6 +134,9 @@ func clusterID(c configuration.Provider) string {
 		}
 		_, _ = id.WriteString(c.ProxyServeAddress())
 		_, _ = id.WriteString(c.APIServeAddress())
+		_, _ = id.WriteString(viper.GetString("mutators.id_token.config.jwks_url"))
+		_, _ = id.WriteString(viper.GetString("mutators.id_token.config.issuer_url"))
+		_, _ = id.WriteString(viper.GetString("authenticators.jwt.config.jwks_urls"))
 	}
 
 	return id.String()
