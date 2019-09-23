@@ -79,7 +79,7 @@ func (h *CredentialsHandler) wellKnown(w http.ResponseWriter, r *http.Request, _
 }
 
 func (h *CredentialsHandler) jwksURLs() ([]url.URL, error) {
-	t := map[url.URL]bool{}
+	t := map[string]bool{}
 	for _, u := range h.c.JSONWebKeyURLs() {
 		t[u] = true
 	}
@@ -92,14 +92,9 @@ func (h *CredentialsHandler) jwksURLs() ([]url.URL, error) {
 		for _, m := range r.Mutators {
 			if m.Handler == new(mutate.MutatorIDToken).GetID() {
 				u := gjson.GetBytes(m.Config, "jwks_url").String()
-				if len(u) == 0 {
-					continue
+				if len(u) > 0 {
+					t[u] = true
 				}
-				uu, err := url.Parse(u)
-				if err != nil {
-					return nil, err
-				}
-				t[*uu] = true
 			}
 		}
 	}
@@ -107,7 +102,11 @@ func (h *CredentialsHandler) jwksURLs() ([]url.URL, error) {
 	result := make([]url.URL, len(t))
 	i := 0
 	for u := range t {
-		result[i] = u
+		uu, err := url.Parse(u)
+		if err != nil {
+			return nil, err
+		}
+		result[i] = *uu
 		i++
 	}
 

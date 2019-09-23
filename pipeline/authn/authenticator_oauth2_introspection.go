@@ -1,7 +1,6 @@
 package authn
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -66,16 +65,9 @@ type AuthenticatorOAuth2IntrospectionResult struct {
 
 func (a *AuthenticatorOAuth2Introspection) Authenticate(r *http.Request, config json.RawMessage, _ pipeline.Rule) (*AuthenticationSession, error) {
 	var i AuthenticatorOAuth2IntrospectionResult
-	var cf AuthenticatorOAuth2IntrospectionConfiguration
-
-	if len(config) == 0 {
-		config = []byte("{}")
-	}
-
-	d := json.NewDecoder(bytes.NewBuffer(config))
-	d.DisallowUnknownFields()
-	if err := d.Decode(&cf); err != nil {
-		return nil, errors.WithStack(err)
+	cf, err := a.Config(config)
+	if err != nil {
+		return nil, err
 	}
 
 	token := helper.BearerTokenFromRequest(r)

@@ -34,7 +34,7 @@ type Provider interface {
 
 	ToScopeStrategy(value string, key string) fosite.ScopeStrategy
 	ParseURLs(sources []string) ([]url.URL, error)
-	JSONWebKeyURLs() []url.URL
+	JSONWebKeyURLs() []string
 }
 
 type ProviderAuthenticators interface {

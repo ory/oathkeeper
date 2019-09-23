@@ -1218,7 +1218,7 @@
 - Return arrays instead of null on rule creation Add circleci configuration file
   Add circleci configuration file
 
-  ##  circleci co
+  ## circleci co
 
 - Add circleci configuration file
 

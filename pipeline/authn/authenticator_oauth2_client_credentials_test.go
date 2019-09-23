@@ -78,7 +78,7 @@ func TestAuthenticatorOAuth2ClientCredentials(t *testing.T) {
 		{
 			r:         &http.Request{Header: http.Header{}},
 			expectErr: authn.ErrAuthenticatorNotResponsible,
-			config:    json.RawMessage(`{"token_url":""}`),
+			config:    json.RawMessage(`{"token_url":"http://foo"}`),
 		},
 		{
 			r:         authInvalid,

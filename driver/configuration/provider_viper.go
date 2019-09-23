@@ -59,7 +59,7 @@ const (
 	ViperKeyMutatorHydratorIsEnabled = "mutators.hydrator.enabled"
 
 	ViperKeyMutatorIDTokenIsEnabled = "mutators.id_token.enabled"
-	ViperKeyMutatorIDTokenJWKSURL   = "mutators.id_token.jwks_url"
+	ViperKeyMutatorIDTokenJWKSURL   = "mutators.id_token.config.jwks_url"
 )
 
 // Authenticators
@@ -284,6 +284,6 @@ func (v *ViperProvider) MutatorConfig(id string, override json.RawMessage, dest 
 	return v.PipelineConfig("mutators", id, override, dest)
 }
 
-func (v *ViperProvider) JSONWebKeyURLs() []url.URL {
-	return []url.URL{*v.getURL(viperx.GetString(v.l, ViperKeyMutatorIDTokenJWKSURL, ""), ViperKeyMutatorIDTokenJWKSURL)}
+func (v *ViperProvider) JSONWebKeyURLs() []string {
+	return viperx.GetStringSlice(v.l, ViperKeyMutatorIDTokenJWKSURL, []string{})
 }

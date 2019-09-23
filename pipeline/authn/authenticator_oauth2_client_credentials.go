@@ -1,7 +1,6 @@
 package authn
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"net/http"
@@ -10,8 +9,9 @@ import (
 	"golang.org/x/oauth2"
 
 	"github.com/ory/oathkeeper/driver/configuration"
-	"github.com/ory/oathkeeper/pipeline"
 	"github.com/ory/x/httpx"
+
+	"github.com/ory/oathkeeper/pipeline"
 
 	"github.com/pkg/errors"
 	"golang.org/x/oauth2/clientcredentials"
@@ -55,15 +55,9 @@ func (a *AuthenticatorOAuth2ClientCredentials) Config(config json.RawMessage) (*
 }
 
 func (a *AuthenticatorOAuth2ClientCredentials) Authenticate(r *http.Request, config json.RawMessage, _ pipeline.Rule) (*AuthenticationSession, error) {
-	var cf AuthenticatorOAuth2Configuration
-	if len(config) == 0 {
-		config = []byte("{}")
-	}
-
-	d := json.NewDecoder(bytes.NewBuffer(config))
-	d.DisallowUnknownFields()
-	if err := d.Decode(&cf); err != nil {
-		return nil, errors.WithStack(err)
+	cf, err := a.Config(config)
+	if err != nil {
+		return nil, err
 	}
 
 	user, password, ok := r.BasicAuth()
@@ -71,7 +65,6 @@ func (a *AuthenticatorOAuth2ClientCredentials) Authenticate(r *http.Request, con
 		return nil, errors.WithStack(ErrAuthenticatorNotResponsible)
 	}
 
-	var err error
 	user, err = url.QueryUnescape(user)
 	if err != nil {
 		return nil, errors.Wrapf(helper.ErrUnauthorized, err.Error())
