@@ -57,7 +57,7 @@ require (
 	github.com/sqs/goreturns v0.0.0-20181028201513-538ac6014518
 	github.com/square/go-jose v2.3.1+incompatible
 	github.com/stretchr/testify v1.3.0
-	github.com/tidwall/gjson v1.3.2 // indirect
+	github.com/tidwall/gjson v1.3.2
 	github.com/tidwall/sjson v1.0.4
 	github.com/tomasen/realip v0.0.0-20180522021738-f0c99a92ddce
 	github.com/toqueteos/webbrowser v1.1.0 // indirect

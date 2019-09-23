@@ -267,3 +267,7 @@ func (v *ViperProvider) MutatorIsEnabled(id string) bool {
 func (v *ViperProvider) MutatorConfig(id string, override json.RawMessage, dest interface{}) error {
 	return v.PipelineConfig("mutators", id, override, dest)
 }
+
+func (v *ViperProvider) JSONWebKeyURLs() []url.URL {
+	return []url.URL{*v.getURL(viperx.GetString(v.l, ViperKeyMutatorIDTokenJWKSURL, ""), ViperKeyMutatorIDTokenJWKSURL)}
+}

@@ -704,16 +704,12 @@
 
 - Make Oathkeeper work without Hydra \(Fix JWK Manager\)
 
-  Expected at least one private key
-  [\#61](https:/
+  Expected at least one private key [\#61](https:/
 
-- Expected at least one private key
-  Disallow unknown JSON fields
+- Expected at least one private key Disallow unknown JSON fields
   [\#45](https://gith
-- Disallow unknown JSON fields Write AWS Lambda function for oathkeeper
-  [\#44](
-- Write AWS Lambda function for oathkeeper
-  **Merged pull requests:**
+- Disallow unknown JSON fields Write AWS Lambda function for oathkeeper [\#44](
+- Write AWS Lambda function for oathkeeper **Merged pull requests:**
 
 - rsakey: Resolves iss
 
@@ -721,76 +717,60 @@
 
 - rsakey: Resolves issues with broken tests
   ([aeneasr](https://github.com/aeneasr))
-- cmd: I
-  (md: Improves cors parsing [\#67](http)
+- cmd: I (md: Improves cors parsing [\#67](http)
 - cmd: Improves cors parsing om/aeneasr))
-- cmd: Doesn't fatal if no ORY Hydr
-  (md: Doesn't fatal if no ORY Hydra is )
+- cmd: Doesn't fatal if no ORY Hydr (md: Doesn't fatal if no ORY Hydra is )
 - cmd: Doesn't fatal if no ORY Hydra is unresponsive.
   ([aeneasr](https://github.com/aeneasr))
-- Keto [
-  (eto [\#60](https://github.com/ory/oat)
+- Keto [ (eto [\#60](https://github.com/ory/oat)
 - Keto easr](https://github.com/aeneasr))
 
 ## [v0.11.1
-  (# [v0.11.12](https://github.com/ory/o)
+
+(# [v0.11.12](https://github.com/ory/o)
 
 ## Full Changelog](https://github.com/ory/oathkeeper/compare/v (2018-05-07)
 
+**Closed issues:**
+
+- Unable to refresh RSA keys for JWK signing [\#53]
 
 **Closed issues:**
 
-- Unable to refresh RSA keys for JWK signing
-  [\#53]
-
-**Closed issues:**
-
-- Unable to refresh RSA keys for JWK signing
-  Add well known endpoint to swagger docs
-  [\#47](h
-- Add well known endpoint to swagger docs
-  **Merged pull requests:**
+- Unable to refresh RSA keys for JWK signing Add well known endpoint to swagger
+  docs [\#47](h
+- Add well known endpoint to swagger docs **Merged pull requests:**
 
 - Update README.md [\#
 
 **Merged pull requests:**
 
 - Update README.md //github.com/aeneasr))
-- docs: Moves documentati
-  (ocs: Moves documentation to new repos)
+- docs: Moves documentati (ocs: Moves documentation to new repos)
 - docs: Moves documentation to new repository
   ([aeneasr](https://github.com/aeneasr))
-- Update
-  (pdate 2-EXECUTION.md [\#56](https://g)
+- Update (pdate 2-EXECUTION.md [\#56](https://g)
 - Update 2-EXECUTION.md thub.com/maryoush))
-- Update 2-EXECUTION.md [\#5
-  (pdate 2-EXECUTION.md [\#55](https://git)
+- Update 2-EXECUTION.md [\#5 (pdate 2-EXECUTION.md [\#55](https://git)
 - Update 2-EXECUTION.md ub.com/taland))
-- Improve tests [\#54](https://g
-  (mprove tests [\#54](https://github.)
+- Improve tests [\#54](https://g (mprove tests [\#54](https://github.)
 - Improve tests ps://github.com/aeneasr))
-- cmd: correct logging
-  (md: correct logging typo [\#52](https)
+- cmd: correct logging (md: correct logging typo [\#52](https)
 - cmd: correct logging typo m/euank))
-- docs: Adds license note to all sourc
-  (ocs: Adds license note to all sou)
+- docs: Adds license note to all sourc (ocs: Adds license note to all sou)
 - docs: Adds license note to all source files
   ([aeneasr](https://github.com/aeneasr))
-- ci: Re
-  (i: Resolves issue with pushing docs
-)
-- ci: Resolves issue with pushing docs
-  ([aeneasr](https://github.com/aeneasr))
-- docs:
-  (ocs: Adds automatic summary generatio)
+- ci: Re (i: Resolves issue with pushing docs )
+- ci: Resolves issue with pushing docs ([aeneasr](https://github.com/aeneasr))
+- docs: (ocs: Adds automatic summary generatio)
 - docs: Adds automatic summary generation
   ([aeneasr](https://github.com/aeneasr))
 
 ## [v0
-  (# [v0.0.29](https://github.com/ory/oa)
+
+(# [v0.0.29](https://github.com/ory/oa)
 
 ## Full Changelog](https://github.com/ory/oathkeeper/compare (2017-12-19)
-
 
 **Merged pull requests:**
 
@@ -801,20 +781,18 @@
 - Adds use field to well known /aeneasr))
 
 ## [v0.0.28](https://github.com/ory
-  (# [v0.0.28](https://github.com/ory/oa)
+
+(# [v0.0.28](https://github.com/ory/oa)
 
 ## Full Changelog](https://github.com/ory/oathkeeper/compare (2017-12-19)
 
-
 **Closed issues:**
 
 - Make key discovery easier with well-known feature
 
-
 **Closed issues:**
 
-- Make key discovery easier with well-known feature
-  **Merged pull requests:**
+- Make key discovery easier with well-known feature **Merged pull requests:**
 
 - Replaces key discove
 
@@ -824,40 +802,45 @@
   ([aeneasr](https://github.com/aeneasr))
 
 ## [v0
-  (# [v0.0.27](https://github.com/ory/oa)
+
+(# [v0.0.27](https://github.com/ory/oa)
 
 ## Full Changelog](https://github.com/ory/oathkeeper/compare (2017-12-12)
-
-
-**Merged pull requests:**
-
-- Adds cors capabilities to management server
 
 **Merged pull requests:**
 
 - Adds cors capabilities to management server
-  ([aeneasr](https://github.com/aeneasr))
-
-## [v0
-  (# [v0.0.26](https://github.com/ory/oa)
-
-## Full Changelog](https://github.com/ory/oathkeeper/compare (2017-12-11)
-
 
 **Merged pull requests:**
 
-- Fixes broken image link in docs
-  [\#39](ht
+- Adds cors capabilities to management server (# [v0 (#
+  [v0.0.26](https://github.)
+
+## [v0
+
+(# Full Changelog](https://github.com/o
+
+## Full Changelog](equests:\*\*
+
+- Fixes broken image link i (2017-12-11)
 
 **Merged pull requests:**
 
-- Fixes broken image link in docs ([aeneasr](https://github.com/aeneasr))
+- Fixes broken image link in docs [*Mer](ht
+
+**Merged pull requests:**
+
+- Fixes broken image link in docs (thub.com/ory/oa)
+
+## Full Changelog)
 
 ## [v0
-  (# [v0.0.25](https://github.com/ory/oa)
 
-## Full Changelog](https://github.com/ory/oathkeeper/compare (2017-11-28)
+(# Full Changelog](https://github.com/o
 
+## Full Changelog](equests:\*\*
+
+- Add extra data from token (2017-11-28)
 
 **Merged pull requests:**
 
@@ -865,37 +848,40 @@
 
 **Merged pull requests:**
 
-- Add extra data from token introspection to session
-  ([aeneasr](https://github.com/aeneasr))
+- Add extra data from token introspection to session (# [v0 (#
+  [v0.0.24](https://github.)
 
 ## [v0
-  (# [v0.0.24](https://github.com/ory/oa)
 
-## Full Changelog](https://github.com/ory/oathkeeper/compare (2017-11-26)
+(# Full Changelog](https://github.com/o
 
+## Full Changelog](:\*\*
 
-**Closed issues:**
-
-- Document HYDRA_JWK_SET_ID [\#34](https://github.com
+- Document HYDRA_JWK_SET_ID [\#34](2017-11-26)
 
 **Closed issues:**
 
-- Document HYDRA_JWK_SET_ID should be oathkeeper or hydra
-  [\#27](https://git
-- Investigate if the issuer should be oathkeeper or hydra
-  **Merged pull requests:**
+- Document HYDRA_JWK_SET_ID [umen](HYDRA_JWK_SET_ID s
 
-- Telemetry [\#36](htt
+**Closed issues:**
+
+- Document HYDRA_JWK_SET_ID should be oathkeeper or hydra [nves](gate if the
+- Investigate if the issuer should be oathkeeper or hydra **Merged pull
+  requests:**
+
+- Telemetry [ll r](htt
 
 **Merged pull requests:**
 
-- Telemetry (https://github.com/aeneasr))
+- Telemetry (](htt (# [v0.0.23](http))
 
-## [v0.0.23](htt
-  (# [v0.0.23](https://github.com/ory/oa)
+## [ [v0.0.](htt
 
-## Full Changelog](https://github.com/ory/oathkeeper/compare (2017-11-24)
+(# Full Changelog](https://github.com/o
 
+## Full Changelog](:\*\*
+
+- Rename basicAuthorizationModeEna (2017-11-24)
 
 **Closed issues:**
 
@@ -904,106 +890,104 @@
 **Closed issues:**
 
 - Rename basicAuthorizationModeEnabled to something that does not clash with
-  HTTP basic authorization better clarity
-  [\#13](https://github.com/ory/oat
-- Rename bypass values for better clarity
-  **Merged pull requests:**
+  HTTP basic authorization better clarity [enam](bypass values for better c
+- Rename bypass values for better clarity **Merged pull requests:**
 
 - Print formatted outp
 
 **Merged pull requests:**
 
-- Print formatted output string in rule management CLI
-  ([aeneasr](https://github.com/aeneasr))
-- docs:
-  (ocs: Add JWK set docs [\#33](https://)
+- Print formatted output string in rule management CLI (ocs: (ocs: Add JWK set
+  docs [\#33])
+- docs: (ocs: Add JWK set docs ub.com/aeneasr))
 - docs: Add JWK set docs ub.com/aeneasr))
-- Update docs and add tests [\#
-  (pdate docs and add tests [\#32](https)
+- Update docs and add tests [\# (pdate docs and add tests com/aeneasr))
 - Update docs and add tests com/aeneasr))
 
-## [v0.0.22](https://github.com/
-  (# [v0.0.22](https://github.com/ory/oa)
+## [ [v0.0.](](https://github.co
 
-## Full Changelog](https://github.com/ory/oathkeeper/compare (2017-11-20)
+(# Full Changelog](https://github.com/o
 
+## Full Changelog](equests:\*\*
 
-**Merged pull requests:**
-
-- Renames bypass values for better clarity
-
+- Renames bypass values for (2017-11-20)
 
 **Merged pull requests:**
 
 - Renames bypass values for better clarity
-  ([aeneasr](https://github.com/aeneasr))
+
+**Merged pull requests:**
+
+- Renames bypass values for better clarity (# [v0 (# [v0.0.21](https://github.)
 
 ## [v0
-  (# [v0.0.21](https://github.com/ory/oa)
 
-## Full Changelog](https://github.com/ory/oathkeeper/compare (2017-11-19)
+(# Full Changelog](https://github.com/o
 
+## Full Changelog](equests:\*\*
 
-**Merged pull requests:**
-
-- Request hydra.keys scope and fix panic
-  [\
+- Request hydra.keys scope (2017-11-19)
 
 **Merged pull requests:**
 
-- Request hydra.keys scope and fix panic
-  ([aeneasr](https://github.com/aeneasr))
+- Request hydra.keys scope and fix panic [\
+
+**Merged pull requests:**
+
+- Request hydra.keys scope and fix panic (# [v0 (# [v0.0.20](https://github.)
 
 ## [v0
-  (# [v0.0.20](https://github.com/ory/oa)
 
-## Full Changelog](https://github.com/ory/oathkeeper/compare (2017-11-18)
+(# Full Changelog](https://github.com/o
 
+## Full Changelog](equests:\*\*
 
-**Merged pull requests:**
-
-- docs: Improve swagger documentation
-  [\#28
+- docs: Improve swagger doc (2017-11-18)
 
 **Merged pull requests:**
 
-- docs: Improve swagger documentation
-  ([aeneasr](https://github.com/aeneasr))
-- cmd: A
-  (md: Add rules management capabilities)
-- cmd: Add rules management capabilities to the cli
-  ([aeneasr](https://github.com/aeneasr))
-- unstag
-  (nstaged [\#25](https://github.com/ory)
-- unstaged ](https://github.com/aeneasr))
+- docs: Improve swagger documentation [\*M28
 
-## [v0.0.19](ht
-  (# [v0.0.19](https://github.com/ory/oa)
+**Merged pull requests:**
 
-## Full Changelog](https://github.com/ory/oathkeeper/compare (2017-11-13)
+- docs: Improve swagger documentation (md: A (md: Add rules management ca)
+- cmd: A (md: Add rules management capabilities)
+- cmd: Add rules management capabilities to the cli (nstag (nstaged
+  [\#25](https://gith)
+- unstag (nstaged ](https://github.com/aeneasr))
+- unstaged ](](ht (# [v0.0.19](https))
 
+## [ [v0.0.](ht
+
+(# Full Changelog](https://github.com/o
+
+## Full Changelog](:\*\*
+
+- evaluator: token\[:5\] will caus (2017-11-13)
 
 **Closed issues:**
 
-- evaluator: token\[:5\] will cause panic
-  [\#22](h
+- evaluator: tokenos:5 i will cause panic [*Clo](h
 
 **Closed issues:**
 
-- evaluator: tokenit:5b. will cause panic
-  **Merged pull requests:**
+- evaluator: tokenit:5b. will cause panic **Merged pull requests:**
 
 - evaluator: Use full
 
 **Merged pull requests:**
 
-- evaluator: Use full request URL ([aeneasr](https://github.com/aeneasr))
+- evaluator: Use full request URL (thub.com/ory/oa)
+
+## Full Changelog)
 
 ## [v0
-  (# [v0.0.18](https://github.com/ory/oa)
 
-## Full Changelog](https://github.com/ory/oathkeeper/compare (2017-11-13)
+(# Full Changelog](https://github.com/o
 
+## Full Changelog](equests:\*\*
+
+- evaluator: Resolve potent (2017-11-13)
 
 **Merged pull requests:**
 
@@ -1011,46 +995,48 @@
 
 **Merged pull requests:**
 
-- evaluator: Resolve potential panic in token id generation
-  ([aeneasr](https://github.com/aeneasr))
+- evaluator: Resolve potential panic in token id generation (# [v0 (#
+  [v0.0.17](https://github.)
 
 ## [v0
-  (# [v0.0.17](https://github.com/ory/oa)
 
-## Full Changelog](https://github.com/ory/oathkeeper/compare (2017-11-12)
+(# Full Changelog](https://github.com/o
 
+## Full Changelog](equests:\*\*
 
-**Merged pull requests:**
-
-- Introduces surrogate_id to SQLManager
-  [\#
+- Introduces surrogate_id t (2017-11-12)
 
 **Merged pull requests:**
 
-- Introduces surrogate_id to SQLManager
-  ([aeneasr](https://github.com/aeneasr))
+- Introduces surrogate_id to SQLManager [\*M
+
+**Merged pull requests:**
+
+- Introduces surrogate_id to SQLManager (# [v0 (# [v0.0.16](https://github.)
 
 ## [v0
-  (# [v0.0.16](https://github.com/ory/oa)
 
-## Full Changelog](https://github.com/ory/oathkeeper/compare (2017-11-12)
+(# Full Changelog](https://github.com/o
 
+## Full Changelog](equests:\*\*
 
-**Merged pull requests:**
-
-- Replace MatchesPath with MatchesURL
-  [\#20
+- Replace MatchesPath with (2017-11-12)
 
 **Merged pull requests:**
 
-- Replace MatchesPath with MatchesURL
-  ([aeneasr](https://github.com/aeneasr))
+- Replace MatchesPath with MatchesURL [\*M20
+
+**Merged pull requests:**
+
+- Replace MatchesPath with MatchesURL (# [v0 (# [v0.0.15](https://github.)
 
 ## [v0
-  (# [v0.0.15](https://github.com/ory/oa)
 
-## Full Changelog](https://github.com/ory/oathkeeper/compare (2017-11-09)
+(# Full Changelog](https://github.com/o
 
+## Full Changelog](equests:\*\*
+
+- Add HTTPS capabilities an (2017-11-09)
 
 **Merged pull requests:**
 
@@ -1058,14 +1044,16 @@
 
 **Merged pull requests:**
 
-- Add HTTPS capabilities and document proxy/management commands
-  ([aeneasr](https://github.com/aeneasr))
+- Add HTTPS capabilities and document proxy/management commands (# [v0 (#
+  [v0.0.14](https://github.)
 
 ## [v0
-  (# [v0.0.14](https://github.com/ory/oa)
 
-## Full Changelog](https://github.com/ory/oathkeeper/compare (2017-11-07)
+(# Full Changelog](https://github.com/o
 
+## Full Changelog](equests:\*\*
+
+- Make refresh_delay config (2017-11-07)
 
 **Merged pull requests:**
 
@@ -1073,129 +1061,146 @@
 
 **Merged pull requests:**
 
-- Make refresh_delay configurable and skip it on boot
-  ([aeneasr](https://github.com/aeneasr))
+- Make refresh_delay configurable and skip it on boot (# [v0 (#
+  [v0.0.13](https://github.)
 
 ## [v0
-  (# [v0.0.13](https://github.com/ory/oa)
 
-## Full Changelog](https://github.com/ory/oathkeeper/compare (2017-11-07)
+(# Full Changelog](https://github.com/o
 
+## Full Changelog](equests:\*\*
 
-**Merged pull requests:**
-
-- Store rules path match in plaintext
-  [\#17
+- Store rules path match in (2017-11-07)
 
 **Merged pull requests:**
 
-- Store rules path match in plaintext
-  ([aeneasr](https://github.com/aeneasr))
+- Store rules path match in plaintext [\*M17
+
+**Merged pull requests:**
+
+- Store rules path match in plaintext (# [v0 (# [v0.0.12](https://github.)
 
 ## [v0
-  (# [v0.0.12](https://github.com/ory/oa)
 
-## Full Changelog](https://github.com/ory/oathkeeper/compare (2017-11-07)
+(# Full Changelog](https://github.com/o
 
+## Full Changelog](equests:\*\*
 
-**Merged pull requests:**
-
-- Use ladon regex compiler for matches
-  [\#1
+- Use ladon regex compiler (2017-11-07)
 
 **Merged pull requests:**
 
-- Use ladon regex compiler for matches
-  ([aeneasr](https://github.com/aeneasr))
+- Use ladon regex compiler for matches [\*M1
+
+**Merged pull requests:**
+
+- Use ladon regex compiler for matches (# [v0 (# [v0.0.11](https://github.)
 
 ## [v0
-  (# [v0.0.11](https://github.com/ory/oa)
 
-## Full Changelog](https://github.com/ory/oathkeeper/compare (2017-11-06)
+(# Full Changelog](https://github.com/o
 
+## Full Changelog](tps://github.com/ory/oathkeeper/tree/v0.0 (2017-11-06)
 
-## [v0.0.10](https://github.com/ory/oathkeeper/tree/v0.0.10) (2017-11-06)
+##
 
+## Full Changelog](https://github.com/ory/oathkeeper/com (2017-11-06)
 
-## Full Changelog](https://github.com/ory/oathkeeper/compare (2017-11-06)
+## Full Changelog](ps://github.com/ory/oathkeeper/tree/v0.0. (2017-11-06)
 
+##
 
-## [v0.0.9](https://github.com/ory/oathkeeper/tree/v0.0.9) (2017-11-06)
-
+## Full Changelog](https://github.com/ory/oathkeeper/ (2017-11-06)
 
-## Full Changelog](https://github.com/ory/oathkeeper/compa (2017-11-06)
+## Full Changelog](://github.com/ory/oathkeeper/tree/v0.0. (2017-11-06)
 
+## # Full Changelog](https://github.com/ory/oathkeeper/com (2017-11-06)
 
-## [v0.0.8](https://github.com/ory/oathkeeper/tree/v0.0.8) (2017-11-06)
+## Full Changelog](uests:\*\*
 
-
-## Full Changelog](https://github.com/ory/oathkeeper/compa (2017-11-06)
-
+- Make oathkeeper binary ex (2017-11-06)
 
 **Merged pull requests:**
 
-- Make oathkeeper binary executable\#
+- Make oathkeeper binary executableke
+
   [\
 
 **Merged pull requests:**
 
 - Make oathkeeper binary executablehk
 
-  ## [v0.0.7](https://github.com/ory/oathkeeper/tre
-  ([aeneasr](https://github.com/aeneasr))
+  ## [Change](g](https://github.com/ory/oathkeeper/
 
-## ll Changelog](https://github.com/ory/oathkeeper/compare (2017-11-06)
+  (\*Merged pull requests:\*\*
+
+- Build o)
+
+## ll Changelog](eper docker image statically
+
+\*\*Merge (2017-11-06)
 
 **Merged pull requests:**
 
 - Build oathekeeper docker image statically
 
-
 **Merged pull requests:**
 
 - Build oathekeeper docker image statically
-  ## [v0.0.6](https://github.com/ory/oathkeeper/tre
-  ([aeneasr](https://github.com/aeneasr))
 
-## ll Changelog](https://github.com/ory/oathkeeper/compare (2017-11-03)
+  ## [Change](g](https://github.com/ory/oathkeeper/
+
+  (\*Merged pull requests:\*\*
+
+- Added s)
+
+## ll Changelog](ll command [\#12](https://githu
+
+\*\*Merg (2017-11-03)
 
 **Merged pull requests:**
 
-- Added serve all command [\#12](https://githu
+- Added serve all command [ ub.](m/ory/oathkee
 
 **Merged pull requests:**
 
 - Added serve all command ub.com/ory/oathkeeper/tree/v0.0.5) (2017-11-01)
 
-  ([aeneasr](https://github.com/aeneasr))
+  (\*Merged pull requests:\*\*
 
-## ll Changelog](https://github.com/ory/oathkeeper/compare (2017-11-01)
+- Add cor)
+
+## ll Changelog](ling to proxy [\#11](https://gi
+
+\*\*Merg (2017-11-01)
 
 **Merged pull requests:**
 
-- Add cors handling to proxy [\#11](https://gi
+- Add cors handling to proxy [ e b](ld [\#1
 
 **Merged pull requests:**
 
-- Add cors handling to proxy e build
-  [\#10](https://github.com/ory/oathkeep
-  (\#10](https://github.com/ory/oathkeep)
-- Remove goveralls from circle build
-  Use circle ci build status badge
-  [\#9](https:/
-  (\#9](https://github.com/ory/oathkeepe)
+- Add cors handling to proxy e build [se c](cle ci build status badge [\
+  (\#10](ttps:/ (\#9](https://github.)
+- Remove goveralls from circle build Use circle ci build status badge
+  [ (\](https:/ (\#9](https://github.com/ory/oathkeepe)
 - Use circle ci build status badge Switch from glide to golang/dep for vendoring
 
-  (\#8](https://github.com/ory/oathkeepe)
-- Switch from glide to golang/dep for vendoring
-  Resolve tests by replacing nil slice
-  [\#7](h
-  (\#7](https://github.com/ory/oathkeepe)
-- Resolve tests by replacing nil slice
-  ## [v0.0.4](https://github.com/ory/oathkeeper/t
-  ([aeneasr](https://github.com/aeneasr))
+  (\#8](h (\#7](https://github.com/or)
 
-## ll Changelog](https://github.com/ory/oathkeeper/compare (2017-10-21)
+- Switch from glide to golang/dep for vendoring Resolve tests by replacing nil
+  slice [# [](h ([a7](asr](https://github.com/aeneasr))
+- Resolve tests by replacing nil slice
+
+  ## [Change](g](https://github.com/ory/oathkeepe
+
+  (\*Merged pull requests:\*\*
+
+- Return )
+
+## ll Changelog]( instead of null on rule creati
+
+\*\*Merg (2017-10-21)
 
 **Merged pull requests:**
 
@@ -1203,47 +1208,53 @@
 
 **Merged pull requests:**
 
-- Return arrays instead of null on rule creation
-  Add circleci configuration file
-  [\#5](https:
-  (\#5](https://github.com/ory/oathkeepe)
+- Return arrays instead of null on rule creation Add circleci configuration file
+  [# [](https: ([a5](asr](https://github.com/aeneasr))
 - Add circleci configuration file
-  ## [v0.0.3](https://github.com/ory/oathkeeper/t
-  ([aeneasr](https://github.com/aeneasr))
 
-## ll Changelog](https://github.com/ory/oathkeeper/compare (2017-10-18)
+  ## [Change](g](https://github.com/ory/oathkeepe
 
-**Merged pull requests:**
+  (\*Merged pull requests:\*\*
 
-- Fix unauthorized [\#4](https://github.com/or
+- Fix una)
 
-**Merged pull requests:**
+## ll Changelog](zed [\#4](https://github.com/or
 
-- Fix unauthorized ://github.com/ory/oathkeeper/tree/v0.0.2) (2017
-  ([aeneasr](https://github.com/aeneasr))
-
-## ll Changelog](https://github.com/ory/oathkeeper/compare (2017-10-12)
+\*\*Merg (2017-10-18)
 
 **Merged pull requests:**
 
-- Skip acp checks [\#3](https://github.com/ory
+- Fix unauthorized [ :/](ithub.com/ory/oathkee
 
 **Merged pull requests:**
 
-- Skip acp checks s://github.com/ory/oathkeeper/tree/v0.0.1) (201
-  ([aeneasr](https://github.com/aeneasr))
+- Fix unauthorized ://github.com/ory/oathkeeper/tree/v0.0.2) (2017 (\*Merged
+  pull requests:\*\*
 
-## erged pull requests:**
+- Skip ac)
+
+## ll Changelog](ks [\#3](https://github.com/ory
+
+\*\*Merg (2017-10-12)
+
+**Merged pull requests:**
+
+- Skip acp checks [ s:](github.com/ory/oathkee
+
+**Merged pull requests:**
+
+- Skip acp checks s://github.com/ory/oathkeeper/tree/v0.0.1) (201 ( travis: add
+  goveralls repor (2017-10)
+
+## erged pull requests:\*\*
 
 - travis: add goveralls repor (2017-10-10)
 
 **Merged pull requests:**
 
-- travis: add goveralls report submission
-  Prototype [\#1](https://github.com/ory/oathkeep
-  ([aeneasr](https://github.com/aeneasr))
-- Prototype hange Log was automatically generated by
-[gith
-  (_This Change Log was automatically ge)
+- travis: add goveralls report submission Prototype his Change Log was
+  automatically ge)
+- Prototype hange Log was automatically generated by [gith (\_This Change Log
+  was automatically ge)
 
-\* _This Change Log was automatically generated by _
+\*_This Change Log was automatically generated by _

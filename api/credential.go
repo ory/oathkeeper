@@ -1,11 +1,16 @@
 package api
 
 import (
+	"context"
 	"net/http"
 	"net/url"
 
+	"github.com/tidwall/gjson"
+
 	"github.com/ory/oathkeeper/credentials"
 	"github.com/ory/oathkeeper/driver/configuration"
+	"github.com/ory/oathkeeper/pipeline/mutate"
+	"github.com/ory/oathkeeper/rule"
 	"github.com/ory/oathkeeper/x"
 
 	"github.com/julienschmidt/httprouter"
@@ -19,6 +24,7 @@ const (
 type credentialHandlerRegistry interface {
 	x.RegistryWriter
 	credentials.FetcherRegistry
+	rule.Registry
 }
 
 type CredentialsHandler struct {
@@ -49,9 +55,12 @@ func (h *CredentialsHandler) SetRoutes(r *x.RouterAPI) {
 //       200: jsonWebKeySet
 //       500: genericError
 func (h *CredentialsHandler) wellKnown(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-	sets, err := h.r.CredentialsFetcher().ResolveSets(r.Context(), []url.URL{
-		// *h.c.MutatorIDTokenJWKSURL(),
-	})
+	urls, err := h.jwksURLs()
+	if err != nil {
+		h.r.Writer().WriteError(w, r, err)
+		return
+	}
+	sets, err := h.r.CredentialsFetcher().ResolveSets(r.Context(), urls)
 	if err != nil {
 		h.r.Writer().WriteError(w, r, err)
 		return
@@ -67,4 +76,40 @@ func (h *CredentialsHandler) wellKnown(w http.ResponseWriter, r *http.Request, _
 	}
 
 	h.r.Writer().Write(w, r, &jose.JSONWebKeySet{Keys: keys})
+}
+
+func (h *CredentialsHandler) jwksURLs() ([]url.URL, error) {
+	t := map[url.URL]bool{}
+	for _, u := range h.c.JSONWebKeyURLs() {
+		t[u] = true
+	}
+
+	rules, err := h.r.RuleRepository().List(context.Background(), 2147483647, 0)
+	if err != nil {
+		return nil, err
+	}
+	for _, r := range rules {
+		for _, m := range r.Mutators {
+			if m.Handler == new(mutate.MutatorIDToken).GetID() {
+				u := gjson.GetBytes(m.Config, "jwks_url").String()
+				if len(u) == 0 {
+					continue
+				}
+				uu, err := url.Parse(u)
+				if err != nil {
+					return nil, err
+				}
+				t[*uu] = true
+			}
+		}
+	}
+
+	result := make([]url.URL, len(t))
+	i := 0
+	for u := range t {
+		result[i] = u
+		i ++
+	}
+
+	return result, nil
 }

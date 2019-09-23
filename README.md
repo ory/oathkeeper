@@ -82,8 +82,7 @@ documentation and upgrade instructions.
 
 ## Installation
 
-Head over to the
-to build ORY Oathkeeper from source.
+Head over to the to build ORY Oathkeeper from source.
 
 ## Who's using it?
 
@@ -187,11 +186,10 @@ as well as all of our backers
 
 <a href="https://opencollective.com/ory#backers" target="_blank"><img src="https://opencollective.com/ory/backers.svg?width=890"></a>
 
-and past & current supporters (in alphabetical order) on
-TheCrealm.
+and past & current supporters (in alphabetical order) on TheCrealm.
 
-<em>\* Uses one of ORY's : Alexander Alimovs, Billy, Chancy Kennedy,
-Drozzy, Edwin Trejos, Howard Edidin, Ken Adler Oz Haven, Stefan Hans, TheCrealm.
+<em>\* Uses one of ORY's : Alexander Alimovs, Billy, Chancy Kennedy, Drozzy,
+Edwin Trejos, Howard Edidin, Ken Adler Oz Haven, Stefan Hans, TheCrealm.
 
 <em>\* Uses one of ORY's major projects in production.</em>
 
@@ -207,8 +205,8 @@ Drozzy, Edwin Trejos, Howard Edidin, Ken Adler Oz Haven, Stefan Hans, TheCrealm.
 
 The # ORY Hydra: OAuth2 & OpenID Connect Server
 
- is a visual admin interface for
-managing ORY Hydra, ORY Oathkeeper, and ORY Keto.
+is a visual admin interface for managing ORY Hydra, ORY Oathkeeper, and ORY
+Keto.
 
 ### ORY Hydra: OAuth2 & OpenID Connect Server
 
@@ -231,9 +229,8 @@ The ices from the ORY Ecosystem.
 
 ## Security
 
- repository contains numerous
-examples of setting up this project individually and together with other
-services from the ORY Ecosystem.
+repository contains numerous examples of setting up this project individually
+and together with other services from the ORY Ecosystem.
 
 ## Security
 
@@ -241,9 +238,10 @@ services from the ORY Ecosystem.
 
 If you think you found a security vulnerability, please refrain from posting it
 publicly on the forums, the chat, or GitHub and send us an email to
+
 ## Telemetry
 
-Our services  instead.
+Our services instead.
 
 ## Telemetry
 
@@ -252,8 +250,7 @@ off. Click ntation
 
 ### Guide
 
-The Guide is available
-[here](h to learn more.
+The Guide is available [here](h to learn more.
 
 ## Documentation
 
@@ -261,11 +258,12 @@ The Guide is available
 
 The Guide is available ### HTTP API documentation
 
-The HTTP API is documented.
+The HTTP API is documented .
 
 ### HTTP API documentation
 
 The HTTP API is documented
+
 ### Upgrading and Changelog
 
 New releases might introduce b.
@@ -274,7 +272,8 @@ New releases might introduce b.
 
 New releases might introduce breaking changes. To help you identify and
 incorporate those changes, we document these changes in
-### Command line documenta and 
+
+### Command line documenta and
 
 Run `oathkeeper -h` or `oat.
 
@@ -287,18 +286,22 @@ Run `oathkeeper -h` or `oathkeeper help`.
 Developing with ORY Oathkeeper is as easy as:
 
 ```shell
-$ cd $GOPATH/src/github.com/ory/oathkeeper
 $ export GO111MODULE=on
 $ go test ./...
 ```
 
+#
+
+```
+
 ##
+
 ```
 
 ## Backers
 
-Thank you to all our backers! 🙏
-[a href="https://opencollective.com/ory#backers" target="]
+Thank you to all our backers! 🙏 [a
+href="https://opencollective.com/ory#backers" target="]
 
 <a href="https://opencollective.com/ory#backers" target="_blank"><img src="https://opencollective.com/ory/backers.svg?width=890"></a>
 
@@ -307,14 +310,14 @@ on Crealm
 
 ## Sponsors
 
-Support this p: Alexander Alimovs, Billy, Chancy Kennedy,
-Drozzy, Edwin Trejos, Howard Edidin, Ken Adler Oz Haven, Stefan Hans, TheCrealm
+Support this p: Alexander Alimovs, Billy, Chancy Kennedy, Drozzy, Edwin Trejos,
+Howard Edidin, Ken Adler Oz Haven, Stefan Hans, TheCrealm
 
 ## Sponsors
 
 Support this project by becoming a sponsor. Your logo will show up here with a
-link to your website.
-[a href="https://opencollective.com/ory/sponsor/0/website" ]
+link to your website. [a href="https://opencollective.com/ory/sponsor/0/website"
+]
 
 <a href="https://opencollective.com/ory/sponsor/0/website" target="_blank"><img src="https://opencollective.com/ory/sponsor/0/avatar.svg"></a>
 
@@ -337,4 +340,8 @@ link to your website.
 <a href="https://opencollective.com/ory/sponsor/9/website" target="_blank"><img src="https://opencollective.com/ory/sponsor/9/avatar.svg"></a>
 
 A special thanks goes out to **Wayne Robinson** for supporting this ecosystem
-with \$200 every month since Oktober 2016
+with \$200 every month since Oktober 201
+
+```
+
+```
