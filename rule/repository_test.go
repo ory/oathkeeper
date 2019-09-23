@@ -122,7 +122,7 @@ func TestRepository(t *testing.T) {
 	}
 
 	var index int
-	mr := &mockRepositoryRegistry{v: validatorNoop{ret: errors.New("")}}
+	mr := &mockRepositoryRegistry{v: validatorNoop{ret: errors.New("this is a forced test error and can be ignored")}}
 	for name, repo := range map[string]Repository{
 		"memory": NewRepositoryMemory(mr),
 	} {

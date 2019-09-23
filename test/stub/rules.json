@@ -96,7 +96,10 @@
     },
     "mutators": [
       {
-        "handler": "id_token"
+        "handler": "id_token",
+        "config": {
+          "jwks_url": "http://stub/"
+        }
       }
     ]
   }
