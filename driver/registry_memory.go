@@ -53,9 +53,9 @@ type RegistryMemory struct {
 	apiAuthForwarderHandler	*api.AuthForwardHandler
 	healthxHandler      	*healthx.Handler
 
-	proxyRequestHandler 	*proxy.RequestHandler
-	proxyProxy          	*proxy.Proxy
-	ruleFetcher         	rule.Fetcher
+	proxyRequestHandler *proxy.RequestHandler
+	proxyProxy          *proxy.Proxy
+	ruleFetcher         rule.Fetcher
 
 	authenticators map[string]authn.Authenticator
 	authorizers    map[string]authz.Authorizer
