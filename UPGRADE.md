@@ -10,7 +10,7 @@ before finalizing the upgrade process.
 
 - [master](#master)
 - [v0.19.0-beta.1+oryOS.13](#v0190-beta1oryos13)
-  - [Config changes](#config-changes)
+  - [Config Changes](#config-changes)
   - [Hydrator Mutator](#hydrator-mutator)
 - [v0.18.0-beta.1+oryOS.12](#v0180-beta1oryos12)
   - [Access Rule Mutators](#access-rule-mutators)
@@ -46,7 +46,7 @@ before finalizing the upgrade process.
 
 ## v0.19.0-beta.1+oryOS.13
 
-### Config changes
+### Config Changes
 
 This release homogenizes all configuration settings. Previously all handlers
 (mutators, authenticators, and authorizers) had two different types of config:
@@ -58,7 +58,7 @@ Previously, this value was only configurable in the global config. Now, it can
 be set on a per rule basis as well as globally. The global config will always be
 used as a fallback when no access rule specific configuration is set.
 
-For this to work, the ORY Oathkeeper configuration file has changed when it
+For this to work, the ORY Oathkeeper global configuration file (`~/.oathkeeper.yaml`) has changed when it
 comes to mutators, authenticaotrs, and authorizers. Instead of defining the
 config at the same level as the `enabled` flag, it is now nested in a subkey
 "config":
