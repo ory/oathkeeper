@@ -79,6 +79,7 @@ func runAPI(d driver.Driver, n *negroni.Negroni, logger *logrus.Logger) func() {
 		d.Registry().CredentialHandler().SetRoutes(router)
 
 		n.Use(negronilogrus.NewMiddlewareFromLogger(logger, "oathkeeper-api"))
+		n.Use(d.Registry().AuthForwardHandler())
 		n.Use(d.Registry().DecisionHandler()) // This needs to be the last entry, otherwise the judge API won't work
 
 		n.UseHandler(router)
@@ -165,6 +166,7 @@ func RunServe(version, build, date string) func(cmd *cobra.Command, args []strin
 				WriteKey:      "MSx9A6YQ1qodnkzEFOv22cxOmOCJXMFa",
 				WhitelistedPaths: []string{
 					"/",
+					api.AuthForwardPath,
 					api.CredentialsPath,
 					api.DecisionPath,
 					api.RulesPath,
