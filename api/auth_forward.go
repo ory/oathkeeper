@@ -31,9 +31,9 @@ import (
 )
 
 const (
-	AuthForwardPath   = "/auth_forward"
-	xForwardedURI     = "X-Forwarded-Uri"
-	xForwardedMethod  = "X-Forwarded-Method"
+	AuthForwardPath  = "/auth_forward"
+	xForwardedURI    = "X-Forwarded-Uri"
+	xForwardedMethod = "X-Forwarded-Method"
 )
 
 type authForwardHandlerRegistry interface {
