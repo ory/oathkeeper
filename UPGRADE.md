@@ -9,7 +9,7 @@ before finalizing the upgrade process.
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
 - [master](#master)
-- [v0.19.0-beta.1+oryOS.13](#v0190-beta1oryos13)
+- [v0.19.0-beta.1+oryOS.12](#v0190-beta1oryos12)
   - [Config Changes](#config-changes)
   - [Hydrator Mutator](#hydrator-mutator)
 - [v0.18.0-beta.1+oryOS.12](#v0180-beta1oryos12)
@@ -44,7 +44,7 @@ before finalizing the upgrade process.
 
 ## master
 
-## v0.19.0-beta.1+oryOS.13
+## v0.19.0-beta.1+oryOS.12
 
 ### Config Changes
 
