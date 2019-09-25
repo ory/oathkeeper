@@ -35,7 +35,7 @@ install-stable:
 		git checkout $$OATHKEEPER_LATEST
 		packr2
 		GO111MODULE=on go install \
-				-ldflags "-X github.com/ory/oathkeeper/cmd.Version=$$OATHKEEPER_LATEST -X github.com/ory/oathkeeper/cmd.Date=`TZ=UTC date -u '+%Y-%m-%dT%H:%M:%SZ'` -X github.com/ory/oathkeeper/cmd.Commit=`git rev-parse HEAD`" \
+				-ldflags "-X github.com/ory/oathkeeper/x.Version=$$OATHKEEPER_LATEST -X github.com/ory/oathkeeper/x.Date=`TZ=UTC date -u '+%Y-%m-%dT%H:%M:%SZ'` -X github.com/ory/oathkeeper/x.Commit=`git rev-parse HEAD`" \
 				.
 		packr2 clean
 		git checkout master

@@ -58,10 +58,10 @@ Previously, this value was only configurable in the global config. Now, it can
 be set on a per rule basis as well as globally. The global config will always be
 used as a fallback when no access rule specific configuration is set.
 
-For this to work, the ORY Oathkeeper global configuration file (`~/.oathkeeper.yaml`) has changed when it
-comes to mutators, authenticaotrs, and authorizers. Instead of defining the
-config at the same level as the `enabled` flag, it is now nested in a subkey
-"config":
+For this to work, the ORY Oathkeeper global configuration file
+(`~/.oathkeeper.yaml`) has changed when it comes to mutators, authenticaotrs,
+and authorizers. Instead of defining the config at the same level as the
+`enabled` flag, it is now nested in a subkey "config":
 
 ```
 authorizers:
