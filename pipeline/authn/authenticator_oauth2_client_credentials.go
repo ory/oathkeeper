@@ -8,8 +8,9 @@ import (
 
 	"golang.org/x/oauth2"
 
-	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/x/httpx"
+
+	"github.com/ory/oathkeeper/driver/configuration"
 
 	"github.com/ory/oathkeeper/pipeline"
 
@@ -80,6 +81,7 @@ func (a *AuthenticatorOAuth2ClientCredentials) Authenticate(r *http.Request, con
 		ClientSecret: password,
 		Scopes:       cf.Scopes,
 		TokenURL:     cf.TokenURL,
+		AuthStyle:    oauth2.AuthStyleInHeader,
 	}
 
 	token, err := c.Token(context.WithValue(
