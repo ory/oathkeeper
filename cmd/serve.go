@@ -22,6 +22,7 @@ package cmd
 
 import (
 	"github.com/ory/oathkeeper/cmd/server"
+	"github.com/ory/oathkeeper/x"
 
 	"github.com/ory/x/logrusx"
 	"github.com/ory/x/viperx"
@@ -41,7 +42,7 @@ on configuration options, open the configuration documentation:
 
 >> https://www.ory.sh/docs/oathkeeper/configuration <<
 `,
-	Run: server.RunServe(Version, Commit, Date),
+	Run: server.RunServe(x.Version, x.Commit, x.Date),
 }
 
 func init() {

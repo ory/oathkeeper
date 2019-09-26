@@ -37,12 +37,6 @@ import (
 	"github.com/ory/x/logrusx"
 )
 
-var (
-	Version = "master"
-	Date    = "undefined"
-	Commit  = "undefined"
-)
-
 var schemas = packr.New("schemas", "../.schemas")
 
 // RootCmd represents the base command when called without any subcommands

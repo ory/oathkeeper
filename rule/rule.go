@@ -70,6 +70,10 @@ type Rule struct {
 	// You will need this ID later on to update or delete the rule.
 	ID string `json:"id"`
 
+	// Version represents the access rule version. Should match one of ORY Oathkeepers release versions. Supported since
+	// v0.20.0-beta.1+oryOS.14.
+	Version string `json:"version"`
+
 	// Description is a human readable description of this rule.
 	Description string `json:"description"`
 
@@ -110,12 +114,39 @@ type Upstream struct {
 	URL string `json:"url"`
 }
 
+var _ json.Unmarshaler = new(Rule)
+
 func NewRule() *Rule {
 	return &Rule{
 		Match:          RuleMatch{},
 		Authenticators: []RuleHandler{},
 		Mutators:       []RuleHandler{},
 	}
+}
+
+func (r *Rule) UnmarshalJSON(raw []byte) error {
+	var rr struct {
+		ID             string        `json:"id"`
+		Version        string        `json:"version"`
+		Description    string        `json:"description"`
+		Match          RuleMatch     `json:"match"`
+		Authenticators []RuleHandler `json:"authenticators"`
+		Authorizer     RuleHandler   `json:"authorizer"`
+		Mutators       []RuleHandler `json:"mutators"`
+		Upstream       Upstream      `json:"upstream"`
+	}
+
+	transformed, err := migrateRuleJSON(raw)
+	if err != nil {
+		return err
+	}
+
+	if err := errors.WithStack(json.Unmarshal(transformed, &rr)); err != nil {
+		return err
+	}
+
+	*r = rr
+	return nil
 }
 
 // GetID returns the rule's ID.
