@@ -31,11 +31,11 @@ import (
 )
 
 const (
-	DecisionTraefikPath  = "/decisions/traefik"
-	xForwardedProto  = "X-Forwarded-Proto"
-	xForwardedHost   = "X-Forwarded-Host"
-	xForwardedURI    = "X-Forwarded-Uri"
-	xForwardedMethod = "X-Forwarded-Method"
+	DecisionTraefikPath = "/decisions/traefik"
+	xForwardedProto  	= "X-Forwarded-Proto"
+	xForwardedHost   	= "X-Forwarded-Host"
+	xForwardedURI    	= "X-Forwarded-Uri"
+	xForwardedMethod 	= "X-Forwarded-Method"
 )
 
 type decisionTraefikHandlerRegistry interface {
@@ -68,15 +68,13 @@ func (h *DecisionTraefikHandler) ServeHTTP(w http.ResponseWriter, r *http.Reques
 	}
 }
 
-// swagger:route GET /decisionTraefiks api decisionTraefiks
+// swagger:route GET /decisions/traefik api decisionTraefiks
 //
 // Access Control DecisionTraefik API
 //
-// > This endpoint works with all HTTP Methods (GET, POST, PUT, ...) and matches every path prefixed with /decisionTraefik.
-//
 // This endpoint mirrors the proxy capability of ORY Oathkeeper's proxy functionality but instead of forwarding the
 // request to the upstream server, returns 200 (request should be allowed), 401 (unauthorized), or 403 (forbidden)
-// status codes. This endpoint can be used to integrate with other API Proxies like Ambassador, Kong, Envoy, and many more.
+// status codes. This endpoint can be used to integrate with the Traefik proxy.
 //
 //     Schemes: http, https
 //
