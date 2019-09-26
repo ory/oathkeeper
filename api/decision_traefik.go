@@ -31,12 +31,14 @@ import (
 )
 
 const (
-	AuthForwardPath  = "/auth_forward"
+	DecisionTraefikPath  = "/decisions/traefik"
+	xForwardedProto  = "X-Forwarded-Proto"
+	xForwardedHost   = "X-Forwarded-Host"
 	xForwardedURI    = "X-Forwarded-Uri"
 	xForwardedMethod = "X-Forwarded-Method"
 )
 
-type authForwardHandlerRegistry interface {
+type decisionTraefikHandlerRegistry interface {
 	x.RegistryWriter
 	x.RegistryLogger
 
@@ -44,34 +46,33 @@ type authForwardHandlerRegistry interface {
 	ProxyRequestHandler() *proxy.RequestHandler
 }
 
-type AuthForwardHandler struct {
-	r authForwardHandlerRegistry
+type DecisionTraefikHandler struct {
+	r decisionTraefikHandlerRegistry
 }
 
-func NewAuthForwarderHandler(r authForwardHandlerRegistry) *AuthForwardHandler {
-	return &AuthForwardHandler{r: r}
+func NewDecisionTraefikerHandler(r decisionTraefikHandlerRegistry) *DecisionTraefikHandler {
+	return &DecisionTraefikHandler{r: r}
 }
 
-func (h *AuthForwardHandler) ServeHTTP(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
-	if len(r.URL.Path) >= len(AuthForwardPath) && r.URL.Path[:len(AuthForwardPath)] == AuthForwardPath {
+func (h *DecisionTraefikHandler) ServeHTTP(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
+	if r.Method == "GET" && len(r.URL.Path) >= len(DecisionTraefikPath) && r.URL.Path[:len(DecisionTraefikPath)] == DecisionTraefikPath {
 		r.URL.Scheme = "http"
 		r.URL.Host = r.Host
 		if r.TLS != nil {
 			r.URL.Scheme = "https"
 		}
-		r.URL.Path = r.URL.Path[len(AuthForwardPath):]
 
-		h.authForwards(w, r)
+		h.decisionTraefiks(w, r)
 	} else {
 		next(w, r)
 	}
 }
 
-// swagger:route GET /authForwards api authForwards
+// swagger:route GET /decisionTraefiks api decisionTraefiks
 //
-// Access Control AuthForward API
+// Access Control DecisionTraefik API
 //
-// > This endpoint works with all HTTP Methods (GET, POST, PUT, ...) and matches every path prefixed with /authForward.
+// > This endpoint works with all HTTP Methods (GET, POST, PUT, ...) and matches every path prefixed with /decisionTraefik.
 //
 // This endpoint mirrors the proxy capability of ORY Oathkeeper's proxy functionality but instead of forwarding the
 // request to the upstream server, returns 200 (request should be allowed), 401 (unauthorized), or 403 (forbidden)
@@ -85,15 +86,19 @@ func (h *AuthForwardHandler) ServeHTTP(w http.ResponseWriter, r *http.Request, n
 //       403: genericError
 //       404: genericError
 //       500: genericError
-func (h *AuthForwardHandler) authForwards(w http.ResponseWriter, r *http.Request) {
-	uriToMatch, err := url.Parse(r.Header.Get(xForwardedURI))
+func (h *DecisionTraefikHandler) decisionTraefiks(w http.ResponseWriter, r *http.Request) {
+	urlToMatch := url.URL{
+		Scheme: r.Header.Get(xForwardedProto),
+		Host: r.Header.Get(xForwardedHost),
+		Path: r.Header.Get(xForwardedURI),
+	}
 	methodToMatch := r.Header.Get(xForwardedMethod)
 
-	rl, err := h.r.RuleMatcher().Match(r.Context(), methodToMatch, uriToMatch)
+	rl, err := h.r.RuleMatcher().Match(r.Context(), methodToMatch, &urlToMatch)
 	if err != nil {
 		h.r.Logger().WithError(err).
 			WithField("granted", false).
-			WithField("access_url", uriToMatch.String()).
+			WithField("access_url", urlToMatch.String()).
 			Warn("Access request denied")
 		h.r.Writer().WriteError(w, r, err)
 		return
@@ -103,7 +108,7 @@ func (h *AuthForwardHandler) authForwards(w http.ResponseWriter, r *http.Request
 	if err != nil {
 		h.r.Logger().WithError(err).
 			WithField("granted", false).
-			WithField("access_url", uriToMatch.String()).
+			WithField("access_url", urlToMatch.String()).
 			Warn("Access request denied")
 		h.r.Writer().WriteError(w, r, err)
 		return
@@ -111,7 +116,7 @@ func (h *AuthForwardHandler) authForwards(w http.ResponseWriter, r *http.Request
 
 	h.r.Logger().
 		WithField("granted", true).
-		WithField("access_url", uriToMatch.String()).
+		WithField("access_url", urlToMatch.String()).
 		Warn("Access request granted")
 
 	for k := range headers {

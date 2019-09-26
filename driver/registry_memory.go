@@ -50,7 +50,7 @@ type RegistryMemory struct {
 	ruleRepository      	*rule.RepositoryMemory
 	apiRuleHandler      	*api.RuleHandler
 	apiJudgeHandler     	*api.DecisionHandler
-	apiAuthForwarderHandler	*api.AuthForwardHandler
+	apiDecisionTraefikerHandler	*api.DecisionTraefikHandler
 	healthxHandler      	*healthx.Handler
 
 	proxyRequestHandler *proxy.RequestHandler
@@ -183,11 +183,11 @@ func (r *RegistryMemory) DecisionHandler() *api.DecisionHandler {
 	return r.apiJudgeHandler
 }
 
-func (r *RegistryMemory) AuthForwardHandler() *api.AuthForwardHandler {
-	if r.apiAuthForwarderHandler == nil {
-		r.apiAuthForwarderHandler = api.NewAuthForwarderHandler(r)
+func (r *RegistryMemory) DecisionTraefikHandler() *api.DecisionTraefikHandler {
+	if r.apiDecisionTraefikerHandler == nil {
+		r.apiDecisionTraefikerHandler = api.NewDecisionTraefikerHandler(r)
 	}
-	return r.apiAuthForwarderHandler
+	return r.apiDecisionTraefikerHandler
 }
 
 func (r *RegistryMemory) CredentialsFetcher() credentials.Fetcher {
