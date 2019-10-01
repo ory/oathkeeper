@@ -25,7 +25,12 @@ import (
 	"strings"
 )
 
-func BearerTokenFromRequest(r *http.Request) string {
+type BearerTokenLocation struct {
+	Header         *string `json:"header"`
+	QueryParameter *string `json:"query_parameter"`
+}
+
+func BearerTokenFromRequest(r *http.Request, tokenLocation *BearerTokenLocation) string {
 	auth := r.Header.Get("Authorization")
 	split := strings.SplitN(auth, " ", 2)
 	if len(split) != 2 || !strings.EqualFold(split[0], "bearer") {

@@ -21,12 +21,13 @@ type AuthenticatorJWTRegistry interface {
 }
 
 type AuthenticatorOAuth2JWTConfiguration struct {
-	Scope             []string `json:"required_scope"`
-	Audience          []string `json:"target_audience"`
-	Issuers           []string `json:"trusted_issuers"`
-	AllowedAlgorithms []string `json:"allowed_algorithms"`
-	JWKSURLs          []string `json:"jwks_urls"`
-	ScopeStrategy     string   `json:"scope_strategy"`
+	Scope               []string                    `json:"required_scope"`
+	Audience            []string                    `json:"target_audience"`
+	Issuers             []string                    `json:"trusted_issuers"`
+	AllowedAlgorithms   []string                    `json:"allowed_algorithms"`
+	JWKSURLs            []string                    `json:"jwks_urls"`
+	ScopeStrategy       string                      `json:"scope_strategy"`
+	BearerTokenLocation *helper.BearerTokenLocation `json:"token_from"`
 }
 
 type AuthenticatorJWT struct {
@@ -67,14 +68,14 @@ func (a *AuthenticatorJWT) Config(config json.RawMessage) (*AuthenticatorOAuth2J
 }
 
 func (a *AuthenticatorJWT) Authenticate(r *http.Request, config json.RawMessage, _ pipeline.Rule) (*AuthenticationSession, error) {
-	token := helper.BearerTokenFromRequest(r)
-	if token == "" {
-		return nil, errors.WithStack(ErrAuthenticatorNotResponsible)
-	}
-
 	cf, err := a.Config(config)
 	if err != nil {
 		return nil, err
+	}
+
+	token := helper.BearerTokenFromRequest(r, cf.BearerTokenLocation)
+	if token == "" {
+		return nil, errors.WithStack(ErrAuthenticatorNotResponsible)
 	}
 
 	if len(cf.AllowedAlgorithms) == 0 {
