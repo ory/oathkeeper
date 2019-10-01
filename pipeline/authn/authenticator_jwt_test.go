@@ -187,7 +187,7 @@ func TestAuthenticatorJWT(t *testing.T) {
 				expectCode: 401,
 			},
 			{
-				d: "should pass because JWT is missing scope",
+				d: "should fail because JWT is missing scope",
 				r: &http.Request{Header: http.Header{"Authorization": []string{"bearer " + gen(keys[2], jwt.MapClaims{
 					"sub":   "sub",
 					"exp":   now.Add(time.Hour).Unix(),
@@ -197,7 +197,7 @@ func TestAuthenticatorJWT(t *testing.T) {
 				expectErr: true,
 			},
 			{
-				d: "should pass because JWT issuer is untrusted",
+				d: "should fail because JWT issuer is untrusted",
 				r: &http.Request{Header: http.Header{"Authorization": []string{"bearer " + gen(keys[1], jwt.MapClaims{
 					"sub": "sub",
 					"exp": now.Add(time.Hour).Unix(),
@@ -207,7 +207,7 @@ func TestAuthenticatorJWT(t *testing.T) {
 				expectErr: true,
 			},
 			{
-				d: "should pass because JWT is missing audience",
+				d: "should fail because JWT is missing audience",
 				r: &http.Request{Header: http.Header{"Authorization": []string{"bearer " + gen(keys[1], jwt.MapClaims{
 					"sub": "sub",
 					"exp": now.Add(time.Hour).Unix(),
