@@ -23,6 +23,10 @@ package authn_test
 import (
 	"encoding/json"
 	"fmt"
+	"net/http"
+	"net/http/httptest"
+	"testing"
+
 	"github.com/julienschmidt/httprouter"
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/internal"
@@ -31,9 +35,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/tidwall/sjson"
-	"net/http"
-	"net/http/httptest"
-	"testing"
 )
 
 func TestAuthenticatorOAuth2Introspection(t *testing.T) {
