@@ -104,7 +104,15 @@ func TestAuthenticatorOAuth2Introspection(t *testing.T) {
 				r:         &http.Request{Header: http.Header{"X-Custom-Header": {"bearer token"}}},
 				config:    []byte(`{"token_from": {"header": "X-Custom-Header"}}`),
 				expectErr: false,
-				// TODO: will need to set some config here, so the test can pass
+				setup: func(t *testing.T, m *httprouter.Router) {
+					m.POST("/oauth2/introspect", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+						require.NoError(t, r.ParseForm())
+						require.Equal(t, "token", r.Form.Get("token"))
+						require.NoError(t, json.NewEncoder(w).Encode(&AuthenticatorOAuth2IntrospectionResult{
+							Active: true,
+						}))
+					})
+				},
 			},
 			{
 				d: "should pass because the valid JWT token was provided in a proper location (custom query parameter)",
@@ -115,7 +123,15 @@ func TestAuthenticatorOAuth2Introspection(t *testing.T) {
 				},
 				config:    []byte(`{"token_from": {"query_parameter": "token"}}`),
 				expectErr: false,
-				// TODO: will need to set some config here, so the test can pass
+				setup: func(t *testing.T, m *httprouter.Router) {
+					m.POST("/oauth2/introspect", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+						require.NoError(t, r.ParseForm())
+						require.Equal(t, "token", r.Form.Get("token"))
+						require.NoError(t, json.NewEncoder(w).Encode(&AuthenticatorOAuth2IntrospectionResult{
+							Active: true,
+						}))
+					})
+				},
 			},
 			{
 				d:      "should fail because not active",
