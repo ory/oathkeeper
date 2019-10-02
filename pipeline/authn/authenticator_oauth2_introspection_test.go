@@ -83,7 +83,7 @@ func TestAuthenticatorOAuth2Introspection(t *testing.T) {
 			{
 				d:              "should return error saying that authenticator is not responsible for validating the request, as the token was not provided in a proper location (custom header)",
 				r:              &http.Request{Header: http.Header{"Authorization": {"bearer token"}}},
-				config:         []byte(`{"token_from": {"header": "X-MyCustomHeaderName"}}`),
+				config:         []byte(`{"token_from": {"header": "X-Custom-Header"}}`),
 				expectErr:      true,
 				expectExactErr: ErrAuthenticatorNotResponsible,
 			},
@@ -101,8 +101,8 @@ func TestAuthenticatorOAuth2Introspection(t *testing.T) {
 			},
 			{
 				d:         "should pass because the valid JWT token was provided in a proper location (custom header)",
-				r:         &http.Request{Header: http.Header{"X-MyCustomHeaderName": {"bearer token"}}},
-				config:    []byte(`{"token_from": {"header": "X-MyCustomHeaderName"}}`),
+				r:         &http.Request{Header: http.Header{"X-Custom-Header": {"bearer token"}}},
+				config:    []byte(`{"token_from": {"header": "X-Custom-Header"}}`),
 				expectErr: false,
 				// TODO: will need to set some config here, so the test can pass
 			},
