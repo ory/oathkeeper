@@ -23,21 +23,17 @@ package authn_test
 import (
 	"encoding/json"
 	"fmt"
-	"net/http"
-	"net/http/httptest"
-	"testing"
-
-	"github.com/tidwall/sjson"
-
-	"github.com/ory/viper"
-
+	"github.com/julienschmidt/httprouter"
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/internal"
 	. "github.com/ory/oathkeeper/pipeline/authn"
-
-	"github.com/julienschmidt/httprouter"
+	"github.com/ory/viper"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/tidwall/sjson"
+	"net/http"
+	"net/http/httptest"
+	"testing"
 )
 
 func TestAuthenticatorOAuth2Introspection(t *testing.T) {
@@ -51,12 +47,13 @@ func TestAuthenticatorOAuth2Introspection(t *testing.T) {
 	t.Run("method=authenticate", func(t *testing.T) {
 
 		for k, tc := range []struct {
-			d          string
-			setup      func(*testing.T, *httprouter.Router)
-			r          *http.Request
-			config     json.RawMessage
-			expectErr  bool
-			expectSess *AuthenticationSession
+			d              string
+			setup          func(*testing.T, *httprouter.Router)
+			r              *http.Request
+			config         json.RawMessage
+			expectErr      bool
+			expectExactErr error
+			expectSess     *AuthenticationSession
 		}{
 			{
 				d:         "should fail because no payloads",
@@ -76,6 +73,49 @@ func TestAuthenticatorOAuth2Introspection(t *testing.T) {
 					})
 				},
 				expectErr: true,
+			},
+			{
+				d:              "should return error saying that authenticator is not responsible for validating the request, as the token was not provided in a proper location (default)",
+				r:              &http.Request{Header: http.Header{"Foobar": {"bearer token"}}},
+				expectErr:      true,
+				expectExactErr: ErrAuthenticatorNotResponsible,
+			},
+			{
+				d:              "should return error saying that authenticator is not responsible for validating the request, as the token was not provided in a proper location (custom header)",
+				r:              &http.Request{Header: http.Header{"Authorization": {"bearer token"}}},
+				config:         []byte(`{"token_from": {"header": "X-MyCustomHeaderName"}}`),
+				expectErr:      true,
+				expectExactErr: ErrAuthenticatorNotResponsible,
+			},
+			{
+				d: "should return error saying that authenticator is not responsible for validating the request, as the token was not provided in a proper location (custom query parameter)",
+				r: &http.Request{
+					Form: map[string][]string{
+						"someOtherQueryParam": []string{"bearer token"},
+					},
+					Header: http.Header{"Authorization": {"bearer token"}},
+				},
+				config:         []byte(`{"token_from": {"query_parameter": "token"}}`),
+				expectErr:      true,
+				expectExactErr: ErrAuthenticatorNotResponsible,
+			},
+			{
+				d:         "should pass because the valid JWT token was provided in a proper location (custom header)",
+				r:         &http.Request{Header: http.Header{"X-MyCustomHeaderName": {"bearer token"}}},
+				config:    []byte(`{"token_from": {"header": "X-MyCustomHeaderName"}}`),
+				expectErr: false,
+				// TODO: will need to set some config here, so the test can pass
+			},
+			{
+				d: "should pass because the valid JWT token was provided in a proper location (custom query parameter)",
+				r: &http.Request{
+					Form: map[string][]string{
+						"token": []string{"bearer token"},
+					},
+				},
+				config:    []byte(`{"token_from": {"query_parameter": "token"}}`),
+				expectErr: false,
+				// TODO: will need to set some config here, so the test can pass
 			},
 			{
 				d:      "should fail because not active",
@@ -255,6 +295,9 @@ func TestAuthenticatorOAuth2Introspection(t *testing.T) {
 				sess, err := a.Authenticate(tc.r, tc.config, nil)
 				if tc.expectErr {
 					require.Error(t, err)
+					if tc.expectExactErr != nil {
+						assert.EqualError(t, err, tc.expectExactErr.Error())
+					}
 				} else {
 					require.NoError(t, err)
 				}

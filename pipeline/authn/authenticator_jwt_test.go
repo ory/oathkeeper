@@ -67,13 +67,14 @@ func TestAuthenticatorJWT(t *testing.T) {
 
 	t.Run("method=authenticate", func(t *testing.T) {
 		for k, tc := range []struct {
-			setup      func()
-			d          string
-			r          *http.Request
-			config     string
-			expectErr  bool
-			expectCode int
-			expectSess *AuthenticationSession
+			setup          func()
+			d              string
+			r              *http.Request
+			config         string
+			expectErr      bool
+			expectExactErr error
+			expectCode     int
+			expectSess     *AuthenticationSession
 		}{
 			{
 				d:         "should fail because no payloads",
@@ -84,6 +85,69 @@ func TestAuthenticatorJWT(t *testing.T) {
 				d:         "should fail because not a jwt",
 				r:         &http.Request{Header: http.Header{"Authorization": []string{"bearer invalid.token.sign"}}},
 				expectErr: true,
+			},
+			{
+				d: "should return error saying that authenticator is not responsible for validating the request, as the token was not provided in a proper location (default)",
+				r: &http.Request{Header: http.Header{"Foobar": []string{"bearer " + gen(keys[1], jwt.MapClaims{
+					"sub": "sub",
+					"exp": now.Add(time.Hour).Unix(),
+				})}}},
+				expectErr:      true,
+				expectExactErr: ErrAuthenticatorNotResponsible,
+			},
+			{
+				d: "should return error saying that authenticator is not responsible for validating the request, as the token was not provided in a proper location (custom header)",
+				r: &http.Request{Header: http.Header{"Authorization": []string{"bearer " + gen(keys[1], jwt.MapClaims{
+					"sub": "sub",
+					"exp": now.Add(time.Hour).Unix(),
+				})}}},
+				config:         `{"token_from": {"header": "X-MyCustomHeaderName"}}`,
+				expectErr:      true,
+				expectExactErr: ErrAuthenticatorNotResponsible,
+			},
+			{
+				d: "should return error saying that authenticator is not responsible for validating the request, as the token was not provided in a proper location (custom query parameter)",
+				r: &http.Request{
+					Form: map[string][]string{
+						"someOtherQueryParam": []string{
+							fmt.Sprintf("bearer %s", gen(keys[1], jwt.MapClaims{
+								"sub": "sub",
+								"exp": now.Add(time.Hour).Unix(),
+							})),
+						},
+					},
+					Header: http.Header{"Authorization": []string{"bearer " + gen(keys[1], jwt.MapClaims{
+						"sub": "sub",
+						"exp": now.Add(time.Hour).Unix(),
+					})}},
+				},
+				config:         `{"token_from": {"query_parameter": "token"}}`,
+				expectErr:      true,
+				expectExactErr: ErrAuthenticatorNotResponsible,
+			},
+			{
+				d: "should pass because the valid JWT token was provided in a proper location (custom header)",
+				r: &http.Request{Header: http.Header{"X-MyCustomHeaderName": []string{"bearer " + gen(keys[1], jwt.MapClaims{
+					"sub": "sub",
+					"exp": now.Add(time.Hour).Unix(),
+				})}}},
+				config:    `{"token_from": {"header": "X-MyCustomHeaderName"}}`,
+				expectErr: false,
+			},
+			{
+				d: "should pass because the valid JWT token was provided in a proper location (custom query parameter)",
+				r: &http.Request{
+					Form: map[string][]string{
+						"token": []string{
+							fmt.Sprintf("bearer %s", gen(keys[1], jwt.MapClaims{
+								"sub": "sub",
+								"exp": now.Add(time.Hour).Unix(),
+							})),
+						},
+					},
+				},
+				config:    `{"token_from": {"query_parameter": "token"}}`,
+				expectErr: false,
 			},
 			{
 				d: "should pass because JWT is valid",
@@ -235,10 +299,13 @@ func TestAuthenticatorJWT(t *testing.T) {
 				tc.config, _ = sjson.Set(tc.config, "jwks_urls", keys)
 				session, err := a.Authenticate(tc.r, json.RawMessage([]byte(tc.config)), nil)
 				if tc.expectErr {
+					require.Error(t, err)
 					if tc.expectCode != 0 {
 						assert.Equal(t, tc.expectCode, herodot.ToDefaultError(err, "").StatusCode(), "Status code mismatch")
 					}
-					require.Error(t, err)
+					if tc.expectExactErr != nil {
+						assert.EqualError(t, err, tc.expectExactErr.Error())
+					}
 				} else {
 					require.NoError(t, err, "%#v", errors.Cause(err))
 				}
