@@ -25,14 +25,28 @@ import (
 	"strings"
 )
 
+const (
+	defaultAuthorizationHeader = "Authorization"
+)
+
 type BearerTokenLocation struct {
 	Header         *string `json:"header"`
 	QueryParameter *string `json:"query_parameter"`
 }
 
 func BearerTokenFromRequest(r *http.Request, tokenLocation *BearerTokenLocation) string {
-	auth := r.Header.Get("Authorization")
-	split := strings.SplitN(auth, " ", 2)
+	var token string
+	if tokenLocation != nil {
+		if tokenLocation.Header != nil {
+			token = r.Header.Get(*tokenLocation.Header)
+		} else if tokenLocation.QueryParameter != nil {
+			token = r.FormValue(*tokenLocation.QueryParameter)
+		}
+	} else {
+		token = r.Header.Get(defaultAuthorizationHeader)
+	}
+
+	split := strings.SplitN(token, " ", 2)
 	if len(split) != 2 || !strings.EqualFold(split[0], "bearer") {
 		return ""
 	}
