@@ -1,10 +1,11 @@
 package helper_test
 
 import (
-	"github.com/ory/oathkeeper/helper"
-	"github.com/stretchr/testify/assert"
 	"net/http"
 	"testing"
+
+	"github.com/ory/oathkeeper/helper"
+	"github.com/stretchr/testify/assert"
 )
 
 const (
