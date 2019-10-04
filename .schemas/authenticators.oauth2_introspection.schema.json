@@ -104,7 +104,7 @@
     },
     "token_from": {
       "title": "Token From",
-      "description": "The location of the bearer token.\n If not configured, the token will be received from a default location - 'Authorization' header.\n Only one location (header or query) can be specified.",
+      "description": "The location of the bearer token.\n If not configured, the token will be received from a default location - 'Authorization' header.\n One and only one location (header or query) must be specified.",
       "oneOf": [
         {
           "type": "object",
@@ -115,7 +115,7 @@
             "header": {
               "title": "Header",
               "type": "string",
-              "description": "The header that must contain a Bearer token for request authentication. It can't be set along with query_parameter."
+              "description": "The header (case insensitive) that must contain a Bearer token for request authentication.\n It can't be set along with query_parameter."
             }
           }
         },
@@ -128,7 +128,7 @@
             "query_parameter": {
               "title": "Query Parameter",
               "type": "string",
-              "description": "The query parameter that must contain a Bearer token for request authentication. It can't be set along with header."
+              "description": "The query parameter (case sensitive) that must contain a Bearer token for request authentication.\n It can't be set along with header."
             }
           }
         }
