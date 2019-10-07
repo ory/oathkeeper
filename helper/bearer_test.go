@@ -58,4 +58,11 @@ func TestBearerTokenFromRequest(t *testing.T) {
 		token := helper.BearerTokenFromRequest(request, &tokenLocation)
 		assert.Equal(t, expectedToken, token)
 	})
+	t.Run("case=token should be received from default header if custom token location is set, but neither Header nor Query Param is configured", func(t *testing.T) {
+		expectedToken := "token"
+		request := &http.Request{Header: http.Header{defaultHeaderName: {"bearer " + expectedToken}}}
+		tokenLocation := helper.BearerTokenLocation{}
+		token := helper.BearerTokenFromRequest(request, &tokenLocation)
+		assert.Equal(t, expectedToken, token)
+	})
 }
