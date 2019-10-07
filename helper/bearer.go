@@ -41,6 +41,8 @@ func BearerTokenFromRequest(r *http.Request, tokenLocation *BearerTokenLocation)
 			token = r.Header.Get(*tokenLocation.Header)
 		} else if tokenLocation.QueryParameter != nil {
 			token = r.FormValue(*tokenLocation.QueryParameter)
+		} else {
+			token = r.Header.Get(defaultAuthorizationHeader)
 		}
 	} else {
 		token = r.Header.Get(defaultAuthorizationHeader)
