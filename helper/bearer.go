@@ -35,19 +35,14 @@ type BearerTokenLocation struct {
 }
 
 func BearerTokenFromRequest(r *http.Request, tokenLocation *BearerTokenLocation) string {
-	var token string
 	if tokenLocation != nil {
 		if tokenLocation.Header != nil {
-			token = r.Header.Get(*tokenLocation.Header)
+			return r.Header.Get(*tokenLocation.Header)
 		} else if tokenLocation.QueryParameter != nil {
-			token = r.FormValue(*tokenLocation.QueryParameter)
-		} else {
-			token = r.Header.Get(defaultAuthorizationHeader)
+			return r.FormValue(*tokenLocation.QueryParameter)
 		}
-	} else {
-		token = r.Header.Get(defaultAuthorizationHeader)
 	}
-
+	token := r.Header.Get(defaultAuthorizationHeader)
 	split := strings.SplitN(token, " ", 2)
 	if len(split) != 2 || !strings.EqualFold(split[0], "bearer") {
 		return ""

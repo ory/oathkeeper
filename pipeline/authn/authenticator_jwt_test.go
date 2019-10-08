@@ -110,10 +110,10 @@ func TestAuthenticatorJWT(t *testing.T) {
 				r: &http.Request{
 					Form: map[string][]string{
 						"someOtherQueryParam": []string{
-							fmt.Sprintf("bearer %s", gen(keys[1], jwt.MapClaims{
+							gen(keys[1], jwt.MapClaims{
 								"sub": "sub",
 								"exp": now.Add(time.Hour).Unix(),
-							})),
+							}),
 						},
 					},
 					Header: http.Header{"Authorization": []string{"bearer " + gen(keys[1], jwt.MapClaims{
@@ -127,7 +127,7 @@ func TestAuthenticatorJWT(t *testing.T) {
 			},
 			{
 				d: "should pass because the valid JWT token was provided in a proper location (custom header)",
-				r: &http.Request{Header: http.Header{"X-Custom-Header": []string{"bearer " + gen(keys[1], jwt.MapClaims{
+				r: &http.Request{Header: http.Header{"X-Custom-Header": []string{gen(keys[1], jwt.MapClaims{
 					"sub": "sub",
 					"exp": now.Add(time.Hour).Unix(),
 				})}}},
@@ -139,10 +139,10 @@ func TestAuthenticatorJWT(t *testing.T) {
 				r: &http.Request{
 					Form: map[string][]string{
 						"token": []string{
-							fmt.Sprintf("bearer %s", gen(keys[1], jwt.MapClaims{
+							gen(keys[1], jwt.MapClaims{
 								"sub": "sub",
 								"exp": now.Add(time.Hour).Unix(),
-							})),
+							}),
 						},
 					},
 				},

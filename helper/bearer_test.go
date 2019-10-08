@@ -41,7 +41,7 @@ func TestBearerTokenFromRequest(t *testing.T) {
 	t.Run("case=token should be received from custom header if custom location is set to header and token is present", func(t *testing.T) {
 		expectedToken := "token"
 		customHeaderName := "Custom-Auth-Header"
-		request := &http.Request{Header: http.Header{customHeaderName: {"bearer " + expectedToken}}}
+		request := &http.Request{Header: http.Header{customHeaderName: {expectedToken}}}
 		tokenLocation := helper.BearerTokenLocation{Header: &customHeaderName}
 		token := helper.BearerTokenFromRequest(request, &tokenLocation)
 		assert.Equal(t, expectedToken, token)
@@ -51,7 +51,7 @@ func TestBearerTokenFromRequest(t *testing.T) {
 		customQueryParameterName := "Custom-Auth"
 		request := &http.Request{
 			Form: map[string][]string{
-				customQueryParameterName: []string{"bearer " + expectedToken},
+				customQueryParameterName: []string{expectedToken},
 			},
 		}
 		tokenLocation := helper.BearerTokenLocation{QueryParameter: &customQueryParameterName}
