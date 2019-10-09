@@ -27,17 +27,14 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/tidwall/sjson"
-
-	"github.com/ory/viper"
-
+	"github.com/julienschmidt/httprouter"
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/internal"
 	. "github.com/ory/oathkeeper/pipeline/authn"
-
-	"github.com/julienschmidt/httprouter"
+	"github.com/ory/viper"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/tidwall/sjson"
 )
 
 func TestAuthenticatorOAuth2Introspection(t *testing.T) {
@@ -51,12 +48,13 @@ func TestAuthenticatorOAuth2Introspection(t *testing.T) {
 	t.Run("method=authenticate", func(t *testing.T) {
 
 		for k, tc := range []struct {
-			d          string
-			setup      func(*testing.T, *httprouter.Router)
-			r          *http.Request
-			config     json.RawMessage
-			expectErr  bool
-			expectSess *AuthenticationSession
+			d              string
+			setup          func(*testing.T, *httprouter.Router)
+			r              *http.Request
+			config         json.RawMessage
+			expectErr      bool
+			expectExactErr error
+			expectSess     *AuthenticationSession
 		}{
 			{
 				d:         "should fail because no payloads",
@@ -76,6 +74,65 @@ func TestAuthenticatorOAuth2Introspection(t *testing.T) {
 					})
 				},
 				expectErr: true,
+			},
+			{
+				d:              "should return error saying that authenticator is not responsible for validating the request, as the token was not provided in a proper location (default)",
+				r:              &http.Request{Header: http.Header{"Foobar": {"bearer token"}}},
+				expectErr:      true,
+				expectExactErr: ErrAuthenticatorNotResponsible,
+			},
+			{
+				d:              "should return error saying that authenticator is not responsible for validating the request, as the token was not provided in a proper location (custom header)",
+				r:              &http.Request{Header: http.Header{"Authorization": {"bearer token"}}},
+				config:         []byte(`{"token_from": {"header": "X-Custom-Header"}}`),
+				expectErr:      true,
+				expectExactErr: ErrAuthenticatorNotResponsible,
+			},
+			{
+				d: "should return error saying that authenticator is not responsible for validating the request, as the token was not provided in a proper location (custom query parameter)",
+				r: &http.Request{
+					Form: map[string][]string{
+						"someOtherQueryParam": []string{"token"},
+					},
+					Header: http.Header{"Authorization": {"bearer token"}},
+				},
+				config:         []byte(`{"token_from": {"query_parameter": "token"}}`),
+				expectErr:      true,
+				expectExactErr: ErrAuthenticatorNotResponsible,
+			},
+			{
+				d:         "should pass because the valid JWT token was provided in a proper location (custom header)",
+				r:         &http.Request{Header: http.Header{"X-Custom-Header": {"token"}}},
+				config:    []byte(`{"token_from": {"header": "X-Custom-Header"}}`),
+				expectErr: false,
+				setup: func(t *testing.T, m *httprouter.Router) {
+					m.POST("/oauth2/introspect", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+						require.NoError(t, r.ParseForm())
+						require.Equal(t, "token", r.Form.Get("token"))
+						require.NoError(t, json.NewEncoder(w).Encode(&AuthenticatorOAuth2IntrospectionResult{
+							Active: true,
+						}))
+					})
+				},
+			},
+			{
+				d: "should pass because the valid JWT token was provided in a proper location (custom query parameter)",
+				r: &http.Request{
+					Form: map[string][]string{
+						"token": []string{"token"},
+					},
+				},
+				config:    []byte(`{"token_from": {"query_parameter": "token"}}`),
+				expectErr: false,
+				setup: func(t *testing.T, m *httprouter.Router) {
+					m.POST("/oauth2/introspect", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+						require.NoError(t, r.ParseForm())
+						require.Equal(t, "token", r.Form.Get("token"))
+						require.NoError(t, json.NewEncoder(w).Encode(&AuthenticatorOAuth2IntrospectionResult{
+							Active: true,
+						}))
+					})
+				},
 			},
 			{
 				d:      "should fail because not active",
@@ -255,6 +312,9 @@ func TestAuthenticatorOAuth2Introspection(t *testing.T) {
 				sess, err := a.Authenticate(tc.r, tc.config, nil)
 				if tc.expectErr {
 					require.Error(t, err)
+					if tc.expectExactErr != nil {
+						assert.EqualError(t, err, tc.expectExactErr.Error())
+					}
 				} else {
 					require.NoError(t, err)
 				}

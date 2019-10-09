@@ -20,12 +20,13 @@ import (
 )
 
 type AuthenticatorOAuth2IntrospectionConfiguration struct {
-	Scopes           []string                                              `json:"required_scope"`
-	Audience         []string                                              `json:"target_audience"`
-	Issuers          []string                                              `json:"trusted_issuers"`
-	PreAuth          *AuthenticatorOAuth2IntrospectionPreAuthConfiguration `json:"pre_authorization"`
-	ScopeStrategy    string                                                `json:"scope_strategy"`
-	IntrospectionURL string                                                `json:"introspection_url"`
+	Scopes              []string                                              `json:"required_scope"`
+	Audience            []string                                              `json:"target_audience"`
+	Issuers             []string                                              `json:"trusted_issuers"`
+	PreAuth             *AuthenticatorOAuth2IntrospectionPreAuthConfiguration `json:"pre_authorization"`
+	ScopeStrategy       string                                                `json:"scope_strategy"`
+	IntrospectionURL    string                                                `json:"introspection_url"`
+	BearerTokenLocation *helper.BearerTokenLocation                           `json:"token_from"`
 }
 
 type AuthenticatorOAuth2IntrospectionPreAuthConfiguration struct {
@@ -70,7 +71,7 @@ func (a *AuthenticatorOAuth2Introspection) Authenticate(r *http.Request, config 
 		return nil, err
 	}
 
-	token := helper.BearerTokenFromRequest(r)
+	token := helper.BearerTokenFromRequest(r, cf.BearerTokenLocation)
 	if token == "" {
 		return nil, errors.WithStack(ErrAuthenticatorNotResponsible)
 	}

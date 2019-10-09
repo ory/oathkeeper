@@ -9,6 +9,7 @@ require (
 	github.com/blang/semver v3.5.1+incompatible
 	github.com/bxcodec/faker v2.0.1+incompatible
 	github.com/cenkalti/backoff v2.1.1+incompatible
+	github.com/codegangsta/negroni v1.0.0 // indirect
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/fsnotify/fsnotify v1.4.7
 	github.com/ghodss/yaml v1.0.0
