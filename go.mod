@@ -1,13 +1,10 @@
 module github.com/ory/oathkeeper
 
-replace github.com/ory/hive => ../hive
-
 require (
 	github.com/Microsoft/go-winio v0.4.12 // indirect
 	github.com/asaskevich/govalidator v0.0.0-20180720115003-f9ffefc3facf
 	github.com/auth0/go-jwt-middleware v0.0.0-20170425171159-5493cabe49f7
 	github.com/bxcodec/faker v2.0.1+incompatible
-	github.com/codegangsta/negroni v1.0.0 // indirect
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/fsnotify/fsnotify v1.4.7
 	github.com/ghodss/yaml v1.0.0
@@ -38,10 +35,10 @@ require (
 	github.com/ory/fosite v0.29.2
 	github.com/ory/go-acc v0.0.0-20181118080137-ddc355013f90
 	github.com/ory/go-convenience v0.1.0
-	github.com/ory/gojsonschema v0.0.0-20190720140244-a64d4f892691
+	github.com/ory/gojsonschema v1.2.0
 	github.com/ory/graceful v0.1.1
 	github.com/ory/herodot v0.6.2
-	github.com/ory/hive v0.0.0-00010101000000-000000000000
+	github.com/ory/hive v0.0.0-20190926162825-a173b14e6b8f // indirect
 	github.com/ory/ladon v1.0.1
 	github.com/ory/viper v1.5.6
 	github.com/ory/x v0.0.72
@@ -64,3 +61,5 @@ require (
 
 // Fix for https://github.com/golang/lint/issues/436
 replace github.com/golang/lint => github.com/golang/lint v0.0.0-20190227174305-8f45f776aaf1
+
+go 1.13
