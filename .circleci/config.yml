@@ -113,13 +113,13 @@ jobs:
   release-npm:
     docker:
       - image: circleci/node:8.9.3
-    working_directory: ~/hydra
+    working_directory: ~/oathkeeper
     steps:
       - checkout
       - run: echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" > ~/.npmrc
       - run: |
           npm version -f --no-git-tag-version $CIRCLE_TAG
-      - run: npm view ory-hydra-sdk
+      - run: npm view ory-oathkeeper-sdk
       - run: npm whoami
       - run: npm publish
 
@@ -158,10 +158,10 @@ workflows:
               ignore: /.*/
       - release-changelog:
           requires:
-            - release
-            - release-npm
+            - test
+            - format
           filters:
             tags:
               only: /.*/
             branches:
-              ignore: /.*/
+              only: master
