@@ -92,23 +92,21 @@ jobs:
 
   release-changelog:
     docker:
-      - image: circleci/ruby:2.4-node
+      - image: circleci/ruby:2.5-node
     steps:
       - checkout
-      - run: gem install github_changelog_generator
+      - run: gem install github_changelog_generator -v 1.14.3
       - run: sudo npm i -g doctoc
       - run: github_changelog_generator -u ory -p oathkeeper -o CHANGELOG.md --token $GITHUB_TOKEN
       - run: doctoc CHANGELOG.md
-      - run: doctoc README.md
       - run: git config --global user.email "circleci@ory.am"
       - run: git config --global user.name "ORY Continuous Integration"
       - run: git add CHANGELOG.md
-      - run: git add README.md
       - run: |
-          git commit -a -m "docs: Incorporates changes from version $(git describe --tags)" || true
+          git commit -m "docs: Incorporates changes from version $(git describe --tags) [ci skip]" -- CHANGELOG.md
       - run: git remote rm origin
       - run: git remote add origin https://arekkas:$GITHUB_TOKEN@github.com/ory/oathkeeper.git
-      - run: git push origin HEAD:master || true
+      - run: git push origin HEAD:master
 
   release-npm:
     docker:
