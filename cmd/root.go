@@ -35,6 +35,8 @@ import (
 	"github.com/ory/x/viperx"
 
 	"github.com/ory/x/logrusx"
+
+	"github.com/ory/oathkeeper/driver/configuration"
 )
 
 var schemas = packr.New("schemas", "../.schemas")
@@ -64,6 +66,7 @@ func init() {
 
 	cobra.OnInitialize(func() {
 		viperx.InitializeConfig("oathkeeper", "", nil)
+		configuration.BindEnvs()
 
 		logger = logrusx.New()
 
