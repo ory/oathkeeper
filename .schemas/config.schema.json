@@ -175,18 +175,6 @@
         true
       ],
       "description": "En-/disables this component."
-    },
-    "scopeStrategy": {
-      "title": "Scope Strategy",
-      "type": "string",
-      "enum": [
-        "hierarchic",
-        "exact",
-        "wildcard",
-        "none"
-      ],
-      "default": "none",
-      "description": "Sets the strategy validation algorithm."
     }
   },
   "properties": {
