@@ -176,7 +176,7 @@ authenticators:
         # REQUIRED IF ENABLED - The OAuth 2.0 Client Secret to be used for the OAuth 2.0 Client Credentials Grant.
         client_secret: some_secret
 
-        # REQUIRED IF ENABLED - The OAuth 2.0 Scope to be requested during the OAuth 2.0 Client Credentials Grant.
+        # The OAuth 2.0 Scope to be requested during the OAuth 2.0 Client Credentials Grant.
         scope:
           - foo
           - bar

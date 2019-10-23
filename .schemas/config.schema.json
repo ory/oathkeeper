@@ -4,18 +4,6 @@
   "title": "ORY Oathkeeper Configuration",
   "type": "object",
   "definitions": {
-    "scopeStrategy": {
-      "title": "Scope Strategy",
-      "type": "string",
-      "enum": [
-        "hierarchic",
-        "exact",
-        "wildcard",
-        "none"
-      ],
-      "default": "none",
-      "description": "Sets the strategy validation algorithm."
-    },
     "tlsxSource": {
       "type": "object",
       "additionalProperties": false,
@@ -187,6 +175,513 @@
       ],
       "default": "none",
       "description": "Sets the strategy validation algorithm."
+    },
+    "config_authenticators_anonymous": {
+      "type": "object",
+      "title": "Anonymous Authenticator Configuration",
+      "description": "This section is optional when the authenticator is disabled.",
+      "properties": {
+        "subject": {
+          "type": "string",
+          "title": "Anonymous Subject",
+          "examples": [
+            "guest",
+            "anon",
+            "anonymous",
+            "unknown"
+          ],
+          "default": "anonymous",
+          "description": "Sets the anonymous username."
+        }
+      },
+      "additionalProperties": false
+    },
+    "config_authenticators_cookie_session": {
+      "type": "object",
+      "title": "Cookie Session Authenticator Configuration",
+      "description": "This section is optional when the authenticator is disabled.",
+      "properties": {
+        "check_session_url": {
+          "title": "Session Check URL",
+          "type": "string",
+          "format": "uri",
+          "description": "The origin to proxy requests to. If the response is a 200 with body `{ \"subject\": \"...\", \"extra\": {} }`. The request will pass the subject through successfully, otherwise it will be marked as unauthorized.\n\n>If this authenticator is enabled, this value is required.",
+          "examples": [
+            "https://session-store-host"
+          ]
+        },
+        "only": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "additionalItems": false
+          },
+          "title": "Only Cookies",
+          "description": "A list of possible cookies to look for on incoming requests, and will fallthrough to the next authenticator if none of the passed cookies are set on the request."
+        }
+      },
+      "required": [
+        "check_session_url"
+      ],
+      "additionalProperties": false
+    },
+    "config_authenticators_jwt": {
+      "type": "object",
+      "title": "JWT Authenticator Configuration",
+      "description": "This section is optional when the authenticator is disabled.",
+      "required": ["jwks_urls"],
+      "properties": {
+        "required_scope": {
+          "type": "array",
+          "title": "Required Token Scope",
+          "description": "An array of OAuth 2.0 scopes that are required when accessing an endpoint protected by this handler.\n If the token used in the Authorization header did not request that specific scope, the request is denied.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "target_audience": {
+          "title": "Intended Audience",
+          "type": "array",
+          "description": "An array of audiences that are required when accessing an endpoint protected by this handler.\n If the token used in the Authorization header is not intended for any of the requested audiences, the request is denied.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "trusted_issuers": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "allowed_algorithms": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "jwks_urls": {
+          "title": "JSON Web Key URLs",
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uri"
+          },
+          "description": "URLs where ORY Oathkeeper can retrieve JSON Web Keys from for validating the JSON Web Token. Usually something like \"https://my-keys.com/.well-known/jwks.json\". The response of that endpoint must return a JSON Web Key Set (JWKS).\n\n>If this authenticator is enabled, this value is required.",
+          "examples": [
+            "https://my-website.com/.well-known/jwks.json",
+            "https://my-other-website.com/.well-known/jwks.json",
+            "file://path/to/local/jwks.json"
+          ]
+        },
+        "scope_strategy": {
+          "$ref": "#/definitions/scopeStrategy"
+        },
+        "token_from": {
+          "title": "Token From",
+          "description": "The location of the token.\n If not configured, the token will be received from a default location - 'Authorization' header.\n One and only one location (header or query) must be specified.",
+          "oneOf": [
+            {
+              "type": "object",
+              "required": [
+                "header"
+              ],
+              "properties": {
+                "header": {
+                  "title": "Header",
+                  "type": "string",
+                  "description": "The header (case insensitive) that must contain a token for request authentication. It can't be set along with query_parameter."
+                }
+              }
+            },
+            {
+              "type": "object",
+              "required": [
+                "query_parameter"
+              ],
+              "properties": {
+                "query_parameter": {
+                  "title": "Query Parameter",
+                  "type": "string",
+                  "description": "The query parameter (case sensitive) that must contain a token for request authentication. It can't be set along with header."
+                }
+              }
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "config_authenticators_oauth2_client_credentials": {
+      "type": "object",
+      "title": "OAuth 2.0 Client Credentials Authenticator Configuration",
+      "description": "This section is optional when the authenticator is disabled.",
+      "properties": {
+        "token_url": {
+          "type": "string",
+          "description": "The OAuth 2.0 Token Endpoint that will be used to validate the client credentials.\n\n>If this authenticator is enabled, this value is required.",
+          "format": "uri",
+          "examples": [
+            "https://my-website.com/oauth2/token"
+          ]
+        },
+        "required_scope": {
+          "type": "array",
+          "title": "Request Permissions (Token Scope)",
+          "description": "Scopes is an array of OAuth 2.0 scopes that are required when accessing an endpoint protected by this rule.\n If the token used in the Authorization header did not request that specific scope, the request is denied.",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "token_url"
+      ],
+      "additionalProperties": false
+    },
+    "config_authenticators_oauth2_introspection": {
+      "type": "object",
+      "title": "OAuth 2.0 Introspection Authenticator Configuration",
+      "description": "This section is optional when the authenticator is disabled.",
+      "properties": {
+        "introspection_url": {
+          "type": "string",
+          "format": "uri",
+          "examples": [
+            "https://my-website.com/oauth2/introspection"
+          ],
+          "title": "OAuth 2.0 Introspection URL",
+          "description": "The OAuth 2.0 Token Introspection endpoint URL.\n\n>If this authenticator is enabled, this value is required."
+        },
+        "scope_strategy": {
+          "$ref": "#/definitions/scopeStrategy"
+        },
+        "pre_authorization": {
+          "title": "Pre-Authorization",
+          "description": "Enable pre-authorization in cases where the OAuth 2.0 Token Introspection endpoint is protected by OAuth 2.0 Bearer Tokens that can be retrieved using the OAuth 2.0 Client Credentials grant.",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "enabled": {
+              "title": "Enabled",
+              "type": "boolean",
+              "default": false
+            },
+            "client_id": {
+              "type": "string",
+              "title": "OAuth 2.0 Client ID",
+              "description": "The OAuth 2.0 Client ID to be used for the OAuth 2.0 Client Credentials Grant.\n\n>If pre-authorization is enabled, this value is required."
+            },
+            "client_secret": {
+              "type": "string",
+              "title": "OAuth 2.0 Client Secret",
+              "description": "The OAuth 2.0 Client Secret to be used for the OAuth 2.0 Client Credentials Grant.\n\n>If pre-authorization is enabled, this value is required."
+            },
+            "token_url": {
+              "type": "string",
+              "format": "uri",
+              "title": "OAuth 2.0 Token URL",
+              "description": "The OAuth 2.0 Token Endpoint where the OAuth 2.0 Client Credentials Grant will be performed.\n\n>If pre-authorization is enabled, this value is required."
+            },
+            "scope": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "title": "OAuth 2.0 Scope",
+              "description": "The OAuth 2.0 Scope to be requested during the OAuth 2.0 Client Credentials Grant.",
+              "examples": [
+                [
+                  "[\"foo\", \"bar\"]"
+                ]
+              ]
+            }
+          },
+          "oneOf": [
+            {
+              "properties": {
+                "enabled": {
+                  "const": false
+                }
+              }
+            },
+            {
+              "required": [
+                "client_id",
+                "client_secret",
+                "token_url"
+              ],
+              "properties": {
+                "enabled": {
+                  "const": true
+                },
+                "client_id": {
+                  "type": "string",
+                  "title": "OAuth 2.0 Client ID",
+                  "description": "The OAuth 2.0 Client ID to be used for the OAuth 2.0 Client Credentials Grant.\n\n>If pre-authorization is enabled, this value is required."
+                },
+                "client_secret": {
+                  "type": "string",
+                  "title": "OAuth 2.0 Client Secret",
+                  "description": "The OAuth 2.0 Client Secret to be used for the OAuth 2.0 Client Credentials Grant.\n\n>If pre-authorization is enabled, this value is required."
+                },
+                "token_url": {
+                  "type": "string",
+                  "format": "uri",
+                  "title": "OAuth 2.0 Token URL",
+                  "description": "The OAuth 2.0 Token Endpoint where the OAuth 2.0 Client Credentials Grant will be performed.\n\n>If pre-authorization is enabled, this value is required."
+                },
+                "scope": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "title": "OAuth 2.0 Scope",
+                  "description": "The OAuth 2.0 Scope to be requested during the OAuth 2.0 Client Credentials Grant.",
+                  "examples": [
+                    [
+                      "[\"foo\", \"bar\"]"
+                    ]
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        "required_scope": {
+          "title": "Required Scope",
+          "description": "An array of OAuth 2.0 scopes that are required when accessing an endpoint protected by this handler.\n If the token used in the Authorization header did not request that specific scope, the request is denied.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "target_audience": {
+          "title": "Target Audience",
+          "description": "An array of audiences that are required when accessing an endpoint protected by this handler.\n If the token used in the Authorization header is not intended for any of the requested audiences, the request is denied.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "trusted_issuers": {
+          "title": "Trusted Issuers",
+          "description": "The token must have been issued by one of the issuers listed in this array.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "token_from": {
+          "title": "Token From",
+          "description": "The location of the token.\n If not configured, the token will be received from a default location - 'Authorization' header.\n One and only one location (header or query) must be specified.",
+          "type": "object",
+          "oneOf": [
+            {
+              "required": [
+                "header"
+              ],
+              "properties": {
+                "header": {
+                  "title": "Header",
+                  "type": "string",
+                  "description": "The header (case insensitive) that must contain a token for request authentication.\n It can't be set along with query_parameter."
+                }
+              }
+            },
+            {
+              "required": [
+                "query_parameter"
+              ],
+              "properties": {
+                "query_parameter": {
+                  "title": "Query Parameter",
+                  "type": "string",
+                  "description": "The query parameter (case sensitive) that must contain a token for request authentication.\n It can't be set along with header."
+                }
+              }
+            }
+          ]
+        }
+      },
+      "required": [
+        "introspection_url"
+      ],
+      "additionalProperties": false
+    },
+    "config_authorizers_keto_engine_acp_ory":  {
+      "type": "object",
+      "title": "ORY Keto Access Control Policy Authorizer Configuration",
+      "description": "This section is optional when the authorizer is disabled.",
+      "properties": {
+        "base_url": {
+          "title": "Base URL",
+          "type": "string",
+          "format": "uri",
+          "description": "The base URL of ORY Keto.\n\n>If this authorizer is enabled, this value is required.",
+          "examples": [
+            "http://my-keto/"
+          ]
+        },
+        "required_action": {
+          "type": "string",
+          "default": "unset"
+        },
+        "required_resource": {
+          "type": "string",
+          "default": "unset"
+        },
+        "subject": {
+          "type": "string"
+        },
+        "flavor": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "base_url",
+        "required_action",
+        "required_resource"
+      ],
+      "additionalProperties": false
+    },
+    "config_mutators_cookie":  {
+      "type": "object",
+      "title": "Cookie Mutator Configuration",
+      "description": "This section is optional when the mutator is disabled.",
+      "required": [
+        "cookies"
+      ],
+      "properties": {
+        "cookies": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "config_mutators_header":   {
+      "type": "object",
+      "title": "Header Mutator Configuration",
+      "description": "This section is optional when the mutator is disabled.",
+      "required": [
+        "headers"
+      ],
+      "properties": {
+        "headers": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "config_mutators_hydrator":  {
+      "type": "object",
+      "title": "Hydrator Mutator Configuration",
+      "description": "This section is optional when the mutator is disabled.",
+      "properties": {
+        "api": {
+          "additionalProperties": false,
+          "required": [
+            "url"
+          ],
+          "type": "object",
+          "properties": {
+            "url": {
+              "type": "string",
+              "format": "uri"
+            },
+            "auth": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "basic": {
+                  "required": [
+                    "username",
+                    "password"
+                  ],
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "username": {
+                      "type": "string"
+                    },
+                    "password": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            },
+            "retry": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "number_of_retries": {
+                  "type": "number",
+                  "minimum": 0,
+                  "default": 100
+                },
+                "delay_in_milliseconds": {
+                  "type": "number",
+                  "minimum": 0,
+                  "default": 3
+                }
+              }
+            }
+          }
+        }
+      },
+      "required": [
+        "api"
+      ],
+      "additionalProperties": false
+    },
+    "config_mutators_id_token":  {
+      "type": "object",
+      "title": "ID Token Mutator Configuration",
+      "description": "This section is optional when the mutator is disabled.",
+      "required": [
+        "jwks_url",
+        "issuer_url"
+      ],
+      "properties": {
+        "claims": {
+          "type": "string"
+        },
+        "issuer_url": {
+          "type": "string",
+          "title": "Issuer URL",
+          "description": "Sets the \"iss\" value of the ID Token.\n\n>If this mutator is enabled, this value is required."
+        },
+        "jwks_url": {
+          "type": "string",
+          "format": "uri",
+          "title": "JSON Web Key URL",
+          "description": "Sets the URL where keys should be fetched from. Supports remote locations (http, https) as well as local filesystem paths.\n\n>If this mutator is enabled, this value is required.",
+          "examples": [
+            "https://fetch-keys/from/this/location.json",
+            "file:///from/this/absolute/location.json",
+            "file://../from/this/relative/location.json"
+          ]
+        },
+        "ttl": {
+          "type": "string",
+          "title": "Expire After",
+          "description": "Sets the time-to-live of the JSON Web Token.",
+          "pattern": "^[0-9]+(ns|us|ms|s|m|h)$",
+          "default": "1m",
+          "examples": [
+            "1h",
+            "1m",
+            "30s"
+          ]
+        }
+      },
+      "additionalProperties": false
     }
   },
   "properties": {
@@ -329,29 +824,13 @@
           "title": "Anonymous",
           "description": "The [`anonymous` authenticator](https://www.ory.sh/docs/oathkeeper/pipeline/authn#anonymous).",
           "type": "object",
+          "additionalProperties": false,
           "properties": {
             "enabled": {
               "$ref": "#/definitions/handlerSwitch"
             },
             "config": {
-              "type": "object",
-              "title": "Anonymous Authenticator Configuration",
-              "description": "This section is optional when the authenticator is disabled.",
-              "properties": {
-                "subject": {
-                  "type": "string",
-                  "title": "Anonymous Subject",
-                  "examples": [
-                    "guest",
-                    "anon",
-                    "anonymous",
-                    "unknown"
-                  ],
-                  "default": "anonymous",
-                  "description": "Sets the anonymous username."
-                }
-              },
-              "additionalProperties": false
+              "$ref": "#/definitions/config_authenticators_anonymous"
             }
           }
         },
@@ -359,6 +838,7 @@
           "title": "No Operation (noop)",
           "description": "The [`noop` authenticator](https://www.ory.sh/docs/oathkeeper/pipeline/authn#noop).",
           "type": "object",
+          "additionalProperties": false,
           "properties": {
             "enabled": {
               "$ref": "#/definitions/handlerSwitch"
@@ -369,6 +849,7 @@
           "title": "Unauthorized",
           "description": "The [`unauthorized` authenticator](https://www.ory.sh/docs/oathkeeper/pipeline/authn#unauthorized).",
           "type": "object",
+          "additionalProperties": false,
           "properties": {
             "enabled": {
               "$ref": "#/definitions/handlerSwitch"
@@ -379,29 +860,27 @@
           "title": "Cookie Session",
           "description": "The [`cookie_session` authenticator](https://www.ory.sh/docs/oathkeeper/pipeline/authn#cookie_session).",
           "type": "object",
-          "anyOf": [
+          "additionalProperties": false,
+          "properties": {
+            "enabled": {
+              "$ref": "#/definitions/handlerSwitch"
+            },
+            "config": {
+              "$ref": "#/definitions/config_authenticators_cookie_session"
+            }
+          },
+          "oneOf": [
             {
               "properties": {
                 "enabled": {
-                  "title": "Enabled",
-                  "description": "En-/disables this component.",
-                  "const": false,
-                  "examples": [
-                    true
-                  ]
+                  "const": false
                 }
               }
             },
             {
               "properties": {
                 "enabled": {
-                  "title": "Enabled",
-                  "description": "En-/disables this component.",
-                  "const": true,
-                  "default": false
-                },
-                "config": {
-                  "$ref": "https://raw.githubusercontent.com/ory/oathkeeper/master/.schemas/authenticators.cookie_session.schema.json#"
+                  "const": true
                 }
               },
               "required": [
@@ -414,111 +893,27 @@
           "title": "JSON Web Token (jwt)",
           "description": "The [`jwt` authenticator](https://www.ory.sh/docs/oathkeeper/pipeline/authn#jwt).",
           "type": "object",
-          "anyOf": [
+          "additionalProperties": false,
+          "properties": {
+            "enabled": {
+              "$ref": "#/definitions/handlerSwitch"
+            },
+            "config": {
+              "$ref": "#/definitions/config_authenticators_jwt"
+            }
+          },
+          "oneOf": [
             {
               "properties": {
                 "enabled": {
-                  "title": "Enabled",
-                  "description": "En-/disables this component.",
-                  "const": false,
-                  "examples": [
-                    true
-                  ]
+                  "const": false
                 }
               }
             },
             {
               "properties": {
                 "enabled": {
-                  "title": "Enabled",
-                  "description": "En-/disables this component.",
-                  "const": true,
-                  "default": false
-                },
-                "config": {
-                  "type": "object",
-                  "title": "JWT Authenticator Configuration",
-                  "description": "This section is optional when the authenticator is disabled.",
-                  "properties": {
-                    "required_scope": {
-                      "type": "array",
-                      "title": "Required Token Scope",
-                      "description": "An array of OAuth 2.0 scopes that are required when accessing an endpoint protected by this handler.\n If the token used in the Authorization header did not request that specific scope, the request is denied.",
-                      "items": {
-                        "type": "string"
-                      }
-                    },
-                    "target_audience": {
-                      "title": "Intended Audience",
-                      "type": "array",
-                      "description": "An array of audiences that are required when accessing an endpoint protected by this handler.\n If the token used in the Authorization header is not intended for any of the requested audiences, the request is denied.",
-                      "items": {
-                        "type": "string"
-                      }
-                    },
-                    "trusted_issuers": {
-                      "type": "array",
-                      "items": {
-                        "type": "string"
-                      }
-                    },
-                    "allowed_algorithms": {
-                      "type": "array",
-                      "items": {
-                        "type": "string"
-                      }
-                    },
-                    "jwks_urls": {
-                      "title": "JSON Web Key URLs",
-                      "type": "array",
-                      "items": {
-                        "type": "string",
-                        "format": "uri"
-                      },
-                      "description": "URLs where ORY Oathkeeper can retrieve JSON Web Keys from for validating the JSON Web Token. Usually something like \"https://my-keys.com/.well-known/jwks.json\". The response of that endpoint must return a JSON Web Key Set (JWKS).\n\n>If this authenticator is enabled, this value is required.",
-                      "examples": [
-                        "https://my-website.com/.well-known/jwks.json",
-                        "https://my-other-website.com/.well-known/jwks.json",
-                        "file://path/to/local/jwks.json"
-                      ]
-                    },
-                    "scope_strategy": {
-                      "$ref": "#/definitions/scopeStrategy"
-                    },
-                    "token_from": {
-                      "title": "Token From",
-                      "description": "The location of the token.\n If not configured, the token will be received from a default location - 'Authorization' header.\n One and only one location (header or query) must be specified.",
-                      "oneOf": [
-                        {
-                          "type": "object",
-                          "required": [
-                            "header"
-                          ],
-                          "properties": {
-                            "header": {
-                              "title": "Header",
-                              "type": "string",
-                              "description": "The header (case insensitive) that must contain a token for request authentication. It can't be set along with query_parameter."
-                            }
-                          }
-                        },
-                        {
-                          "type": "object",
-                          "required": [
-                            "query_parameter"
-                          ],
-                          "properties": {
-                            "query_parameter": {
-                              "title": "Query Parameter",
-                              "type": "string",
-                              "description": "The query parameter (case sensitive) that must contain a token for request authentication. It can't be set along with header."
-                            }
-                          }
-                        }
-                      ]
-                    }
-                  },
-                  "additionalProperties": false
+                  "const": true
                 }
               },
               "required": [
@@ -531,53 +926,27 @@
           "title": "OAuth 2.0 Client Credentials",
           "description": "The [`oauth2_client_credentials` authenticator](https://www.ory.sh/docs/oathkeeper/pipeline/authn#oauth2_client_credentials).",
           "type": "object",
-          "anyOf": [
+          "additionalProperties": false,
+          "properties": {
+            "enabled": {
+              "$ref": "#/definitions/handlerSwitch"
+            },
+            "config": {
+              "$ref": "#/definitions/config_authenticators_oauth2_client_credentials"
+            }
+          },
+          "oneOf": [
             {
               "properties": {
                 "enabled": {
-                  "title": "Enabled",
-                  "description": "En-/disables this component.",
-                  "const": false,
-                  "examples": [
-                    true
-                  ]
+                  "const": false
                 }
               }
             },
             {
               "properties": {
                 "enabled": {
-                  "title": "Enabled",
-                  "description": "En-/disables this component.",
-                  "const": true,
-                  "default": false
-                },
-                "config": {
-                  "type": "object",
-                  "title": "OAuth 2.0 Client Credentials Authenticator Configuration",
-                  "description": "This section is optional when the authenticator is disabled.",
-                  "properties": {
-                    "token_url": {
-                      "type": "string",
-                      "description": "The OAuth 2.0 Token Endpoint that will be used to validate the client credentials.\n\n>If this authenticator is enabled, this value is required.",
-                      "format": "uri",
-                      "examples": [
-                        "https://my-website.com/oauth2/token"
-                      ]
-                    },
-                    "required_scope": {
-                      "type": "array",
-                      "title": "Request Permissions (Token Scope)",
-                      "description": "Scopes is an array of OAuth 2.0 scopes that are required when accessing an endpoint protected by this rule.\n If the token used in the Authorization header did not request that specific scope, the request is denied.",
-                      "items": {
-                        "type": "string"
-                      }
-                    }
-                  },
-                  "required": [
-                    "token_url"
-                  ],
-                  "additionalProperties": false
+                  "const": true
                 }
               },
               "required": [
@@ -590,167 +959,27 @@
           "title": "OAuth 2.0 Token Introspection",
           "description": "The [`oauth2_introspection` authenticator](https://www.ory.sh/docs/oathkeeper/pipeline/authn#oauth2_introspection).",
           "type": "object",
-          "anyOf": [
+          "additionalProperties": false,
+          "properties": {
+            "enabled": {
+              "$ref": "#/definitions/handlerSwitch"
+            },
+            "config": {
+              "$ref": "#/definitions/config_authenticators_oauth2_introspection"
+            }
+          },
+          "oneOf": [
             {
               "properties": {
                 "enabled": {
-                  "title": "Enabled",
-                  "description": "En-/disables this component.",
-                  "const": false,
-                  "examples": [
-                    true
-                  ]
+                  "const": false
                 }
               }
             },
             {
               "properties": {
                 "enabled": {
-                  "title": "Enabled",
-                  "description": "En-/disables this component.",
-                  "const": true,
-                  "default": false
-                },
-                "config": {
-                  "type": "object",
-                  "title": "OAuth 2.0 Introspection Authenticator Configuration",
-                  "description": "This section is optional when the authenticator is disabled.",
-                  "properties": {
-                    "introspection_url": {
-                      "type": "string",
-                      "format": "uri",
-                      "examples": [
-                        "https://my-website.com/oauth2/introspection"
-                      ],
-                      "title": "OAuth 2.0 Introspection URL",
-                      "description": "The OAuth 2.0 Token Introspection endpoint URL.\n\n>If this authenticator is enabled, this value is required."
-                    },
-                    "scope_strategy": {
-                      "$ref": "#/definitions/scopeStrategy"
-                    },
-                    "pre_authorization": {
-                      "title": "Pre-Authorization",
-                      "description": "Enable pre-authorization in cases where the OAuth 2.0 Token Introspection endpoint is protected by OAuth 2.0 Bearer Tokens that can be retrieved using the OAuth 2.0 Client Credentials grant.",
-                      "oneOf": [
-                        {
-                          "type": "object",
-                          "properties": {
-                            "enabled": {
-                              "title": "Enabled",
-                              "const": false,
-                              "default": false
-                            }
-                          }
-                        },
-                        {
-                          "type": "object",
-                          "additionalProperties": false,
-                          "required": [
-                            "client_id",
-                            "client_secret",
-                            "token_url"
-                          ],
-                          "properties": {
-                            "enabled": {
-                              "title": "Enabled",
-                              "const": true,
-                              "default": false,
-                              "default": false
-                            },
-                            "client_id": {
-                              "type": "string",
-                              "title": "OAuth 2.0 Client ID",
-                              "description": "The OAuth 2.0 Client ID to be used for the OAuth 2.0 Client Credentials Grant.\n\n>If pre-authorization is enabled, this value is required."
-                            },
-                            "client_secret": {
-                              "type": "string",
-                              "title": "OAuth 2.0 Client Secret",
-                              "description": "The OAuth 2.0 Client Secret to be used for the OAuth 2.0 Client Credentials Grant.\n\n>If pre-authorization is enabled, this value is required."
-                            },
-                            "token_url": {
-                              "type": "string",
-                              "format": "uri",
-                              "title": "OAuth 2.0 Token URL",
-                              "description": "The OAuth 2.0 Token Endpoint where the OAuth 2.0 Client Credentials Grant will be performed.\n\n>If pre-authorization is enabled, this value is required."
-                            },
-                            "scope": {
-                              "type": "array",
-                              "items": {
-                                "type": "string"
-                              },
-                              "title": "OAuth 2.0 Scope",
-                              "description": "The OAuth 2.0 Scope to be requested during the OAuth 2.0 Client Credentials Grant.",
-                              "examples": [
-                                [
-                                  "[\"foo\", \"bar\"]"
-                                ]
-                              ]
-                            }
-                          }
-                        }
-                      ]
-                    },
-                    "required_scope": {
-                      "title": "Required Scope",
-                      "description": "An array of OAuth 2.0 scopes that are required when accessing an endpoint protected by this handler.\n If the token used in the Authorization header did not request that specific scope, the request is denied.",
-                      "type": "array",
-                      "items": {
-                        "type": "string"
-                      }
-                    },
-                    "target_audience": {
-                      "title": "Target Audience",
-                      "description": "An array of audiences that are required when accessing an endpoint protected by this handler.\n If the token used in the Authorization header is not intended for any of the requested audiences, the request is denied.",
-                      "type": "array",
-                      "items": {
-                        "type": "string"
-                      }
-                    },
-                    "trusted_issuers": {
-                      "title": "Trusted Issuers",
-                      "description": "The token must have been issued by one of the issuers listed in this array.",
-                      "type": "array",
-                      "items": {
-                        "type": "string"
-                      }
-                    },
-                    "token_from": {
-                      "title": "Token From",
-                      "description": "The location of the token.\n If not configured, the token will be received from a default location - 'Authorization' header.\n One and only one location (header or query) must be specified.",
-                      "oneOf": [
-                        {
-                          "type": "object",
-                          "required": [
-                            "header"
-                          ],
-                          "properties": {
-                            "header": {
-                              "title": "Header",
-                              "type": "string",
-                              "description": "The header (case insensitive) that must contain a token for request authentication.\n It can't be set along with query_parameter."
-                            }
-                          }
-                        },
-                        {
-                          "type": "object",
-                          "required": [
-                            "query_parameter"
-                          ],
-                          "properties": {
-                            "query_parameter": {
-                              "title": "Query Parameter",
-                              "type": "string",
-                              "description": "The query parameter (case sensitive) that must contain a token for request authentication.\n It can't be set along with header."
-                            }
-                          }
-                        }
-                      ]
-                    }
-                  },
-                  "required": [
-                    "introspection_url"
-                  ],
-                  "additionalProperties": false
+                  "const": true
                 }
               },
               "required": [
@@ -771,6 +1000,7 @@
           "title": "Allow",
           "description": "The [`allow` authorizer](https://www.ory.sh/docs/oathkeeper/pipeline/authz#allow).",
           "type": "object",
+          "additionalProperties": false,
           "properties": {
             "enabled": {
               "$ref": "#/definitions/handlerSwitch"
@@ -781,6 +1011,7 @@
           "title": "Deny",
           "description": "The [`deny` authorizer](https://www.ory.sh/docs/oathkeeper/pipeline/authz#allow).",
           "type": "object",
+          "additionalProperties": false,
           "properties": {
             "enabled": {
               "$ref": "#/definitions/handlerSwitch"
@@ -791,60 +1022,27 @@
           "title": "ORY Keto Access Control Policies Engine",
           "description": "The [`keto_engine_acp_ory` authorizer](https://www.ory.sh/docs/oathkeeper/pipeline/authz#keto_engine_acp_ory).",
           "type": "object",
-          "anyOf": [
+          "additionalProperties": false,
+          "properties": {
+            "enabled": {
+              "$ref": "#/definitions/handlerSwitch"
+            },
+            "config": {
+              "$ref": "#/definitions/config_authorizers_keto_engine_acp_ory"
+            }
+          },
+          "oneOf": [
             {
               "properties": {
                 "enabled": {
-                  "title": "Enabled",
-                  "description": "En-/disables this component.",
-                  "const": false,
-                  "examples": [
-                    true
-                  ]
+                  "const": false
                 }
               }
             },
             {
               "properties": {
                 "enabled": {
-                  "title": "Enabled",
-                  "description": "En-/disables this component.",
-                  "const": true,
-                  "default": false
-                },
-                "config": {
-                  "type": "object",
-                  "title": "ORY Keto Access Control Policy Authorizer Configuration",
-                  "description": "This section is optional when the authorizer is disabled.",
-                  "properties": {
-                    "base_url": {
-                      "title": "Base URL",
-                      "type": "string",
-                      "format": "uri",
-                      "description": "The base URL of ORY Keto.\n\n>If this authorizer is enabled, this value is required.",
-                      "examples": [
-                        "http://my-keto/"
-                      ]
-                    },
-                    "required_action": {
-                      "type": "string"
-                    },
-                    "required_resource": {
-                      "type": "string"
-                    },
-                    "subject": {
-                      "type": "string"
-                    },
-                    "flavor": {
-                      "type": "string"
-                    }
-                  },
-                  "required": [
-                    "base_url",
-                    "required_action",
-                    "required_resource"
-                  ],
-                  "additionalProperties": false
+                  "const": true
                 }
               },
               "required": [
@@ -865,6 +1063,7 @@
           "title": "No Operation (noop)",
           "description": "The [`noop` mutator](https://www.ory.sh/docs/oathkeeper/pipeline/mutator#noop).",
           "type": "object",
+          "additionalProperties": false,
           "properties": {
             "enabled": {
               "$ref": "#/definitions/handlerSwitch"
@@ -875,42 +1074,27 @@
           "title": "HTTP Cookie",
           "description": "The [`cookie` mutator](https://www.ory.sh/docs/oathkeeper/pipeline/mutator#cookie).",
           "type": "object",
-          "anyOf": [
+          "additionalProperties": false,
+          "properties": {
+            "enabled": {
+              "$ref": "#/definitions/handlerSwitch"
+            },
+            "config": {
+              "$ref": "#/definitions/config_mutators_cookie"
+            }
+          },
+          "oneOf": [
             {
               "properties": {
                 "enabled": {
-                  "title": "Enabled",
-                  "description": "En-/disables this component.",
-                  "const": false,
-                  "default": false
+                  "const": false
                 }
               }
             },
             {
               "properties": {
                 "enabled": {
-                  "title": "Enabled",
-                  "description": "En-/disables this component.",
-                  "const": true,
-                  "default": false,
-                  "default": false
-                },
-                "config": {
-                  "type": "object",
-                  "title": "Cookie Mutator Configuration",
-                  "description": "This section is optional when the mutator is disabled.",
-                  "required": [
-                    "cookies"
-                  ],
-                  "properties": {
-                    "cookies": {
-                      "type": "object",
-                      "additionalProperties": {
-                        "type": "string"
-                      }
-                    }
-                  },
-                  "additionalProperties": false
+                  "const": true
                 }
               },
               "required": [
@@ -923,43 +1107,27 @@
           "title": "HTTP Header",
           "description": "The [`header` mutator](https://www.ory.sh/docs/oathkeeper/pipeline/mutator#header).",
           "type": "object",
-          "anyOf": [
+          "additionalProperties": false,
+          "properties": {
+            "enabled": {
+              "$ref": "#/definitions/handlerSwitch"
+            },
+            "config": {
+              "$ref": "#/definitions/config_mutators_header"
+            }
+          },
+          "oneOf": [
             {
               "properties": {
                 "enabled": {
-                  "title": "Enabled",
-                  "description": "En-/disables this component.",
-                  "const": false,
-                  "examples": [
-                    true
-                  ]
+                  "const": false
                 }
               }
             },
             {
               "properties": {
                 "enabled": {
-                  "title": "Enabled",
-                  "description": "En-/disables this component.",
-                  "const": true,
-                  "default": false
-                },
-                "config": {
-                  "type": "object",
-                  "title": "Header Mutator Configuration",
-                  "description": "This section is optional when the mutator is disabled.",
-                  "required": [
-                    "headers"
-                  ],
-                  "properties": {
-                    "headers": {
-                      "type": "object",
-                      "additionalProperties": {
-                        "type": "string"
-                      }
-                    }
-                  },
-                  "additionalProperties": false
+                  "const": true
                 }
               },
               "required": [
@@ -972,88 +1140,27 @@
           "title": "Hydrator",
           "description": "The [`hydrator` mutator](https://www.ory.sh/docs/oathkeeper/pipeline/mutator#hydrator).",
           "type": "object",
-          "anyOf": [
+          "additionalProperties": false,
+          "properties": {
+            "enabled": {
+              "$ref": "#/definitions/handlerSwitch"
+            },
+            "config": {
+              "$ref": "#/definitions/config_mutators_hydrator"
+            }
+          },
+          "oneOf": [
             {
               "properties": {
                 "enabled": {
-                  "title": "Enabled",
-                  "description": "En-/disables this component.",
-                  "const": false,
-                  "examples": [
-                    true
-                  ]
+                  "const": false
                 }
               }
             },
             {
               "properties": {
                 "enabled": {
-                  "title": "Enabled",
-                  "description": "En-/disables this component.",
-                  "const": true,
-                  "default": false
-                },
-                "config": {
-                  "type": "object",
-                  "title": "Hydrator Mutator Configuration",
-                  "description": "This section is optional when the mutator is disabled.",
-                  "properties": {
-                    "api": {
-                      "additionalProperties": false,
-                      "required": [
-                        "url"
-                      ],
-                      "type": "object",
-                      "properties": {
-                        "url": {
-                          "type": "string",
-                          "format": "uri"
-                        },
-                        "auth": {
-                          "type": "object",
-                          "additionalProperties": false,
-                          "properties": {
-                            "basic": {
-                              "required": [
-                                "username",
-                                "password"
-                              ],
-                              "type": "object",
-                              "additionalProperties": false,
-                              "properties": {
-                                "username": {
-                                  "type": "string"
-                                },
-                                "password": {
-                                  "type": "string"
-                                }
-                              }
-                            }
-                          }
-                        },
-                        "retry": {
-                          "type": "object",
-                          "additionalProperties": false,
-                          "properties": {
-                            "number_of_retries": {
-                              "type": "number",
-                              "minimum": 0,
-                              "default": 100
-                            },
-                            "delay_in_milliseconds": {
-                              "type": "number",
-                              "minimum": 0,
-                              "default": 3
-                            }
-                          }
-                        }
-                      }
-                    }
-                  },
-                  "required": [
-                    "api"
-                  ],
-                  "additionalProperties": false
+                  "const": true
                 }
               },
               "required": [
@@ -1066,69 +1173,27 @@
           "title": "ID Token (JSON Web Token)",
           "description": "The [`id_token` mutator](https://www.ory.sh/docs/oathkeeper/pipeline/mutator#id_token).",
           "type": "object",
-          "anyOf": [
+          "additionalProperties": false,
+          "properties": {
+            "enabled": {
+              "$ref": "#/definitions/handlerSwitch"
+            },
+            "config": {
+              "$ref": "#/definitions/config_mutators_id_token"
+            }
+          },
+          "oneOf": [
             {
               "properties": {
                 "enabled": {
-                  "title": "Enabled",
-                  "description": "En-/disables this component.",
-                  "const": false,
-                  "examples": [
-                    true
-                  ]
+                  "const": false
                 }
               }
             },
             {
               "properties": {
                 "enabled": {
-                  "title": "Enabled",
-                  "description": "En-/disables this component.",
-                  "const": true,
-                  "default": false
-                },
-                "config": {
-                  "type": "object",
-                  "title": "ID Token Mutator Configuration",
-                  "description": "This section is optional when the mutator is disabled.",
-                  "required": [
-                    "jwks_url",
-                    "issuer_url"
-                  ],
-                  "properties": {
-                    "claims": {
-                      "type": "string"
-                    },
-                    "issuer_url": {
-                      "type": "string",
-                      "title": "Issuer URL",
-                      "description": "Sets the \"iss\" value of the ID Token.\n\n>If this mutator is enabled, this value is required."
-                    },
-                    "jwks_url": {
-                      "type": "string",
-                      "format": "uri",
-                      "title": "JSON Web Key URL",
-                      "description": "Sets the URL where keys should be fetched from. Supports remote locations (http, https) as well as local filesystem paths.\n\n>If this mutator is enabled, this value is required.",
-                      "examples": [
-                        "https://fetch-keys/from/this/location.json",
-                        "file:///from/this/absolute/location.json",
-                        "file://../from/this/relative/location.json"
-                      ]
-                    },
-                    "ttl": {
-                      "type": "string",
-                      "title": "Expire After",
-                      "description": "Sets the time-to-live of the JSON Web Token.",
-                      "pattern": "^[0-9]+(ns|us|ms|s|m|h)$",
-                      "default": "1m",
-                      "examples": [
-                        "1h",
-                        "1m",
-                        "30s"
-                      ]
-                    }
-                  },
-                  "additionalProperties": false
+                  "const": true
                 }
               },
               "required": [

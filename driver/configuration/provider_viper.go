@@ -243,7 +243,7 @@ func (v *ViperProvider) PipelineConfig(prefix, id string, override json.RawMessa
 		}
 	}
 
-	schema, err := schemas.Find(fmt.Sprintf("%s.%s.schema.json", prefix, id))
+	schema, err := schemas.Find(fmt.Sprintf("pipeline/%s.%s.schema.json", prefix, id))
 	if err != nil {
 		return errors.WithStack(err)
 	}
