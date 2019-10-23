@@ -176,7 +176,7 @@
       "default": "none",
       "description": "Sets the strategy validation algorithm."
     },
-    "config_authenticators_anonymous": {
+    "configAuthenticatorsAnonymous": {
       "type": "object",
       "title": "Anonymous Authenticator Configuration",
       "description": "This section is optional when the authenticator is disabled.",
@@ -196,7 +196,7 @@
       },
       "additionalProperties": false
     },
-    "config_authenticators_cookie_session": {
+    "configAuthenticatorsCookieSession": {
       "type": "object",
       "title": "Cookie Session Authenticator Configuration",
       "description": "This section is optional when the authenticator is disabled.",
@@ -225,7 +225,7 @@
       ],
       "additionalProperties": false
     },
-    "config_authenticators_jwt": {
+    "configAuthenticatorsJwt": {
       "type": "object",
       "title": "JWT Authenticator Configuration",
       "description": "This section is optional when the authenticator is disabled.",
@@ -311,7 +311,7 @@
       },
       "additionalProperties": false
     },
-    "config_authenticators_oauth2_client_credentials": {
+    "configAuthenticatorsOauth2ClientCredentials": {
       "type": "object",
       "title": "OAuth 2.0 Client Credentials Authenticator Configuration",
       "description": "This section is optional when the authenticator is disabled.",
@@ -338,7 +338,7 @@
       ],
       "additionalProperties": false
     },
-    "config_authenticators_oauth2_introspection": {
+    "configAuthenticatorsOauth2Introspection": {
       "type": "object",
       "title": "OAuth 2.0 Introspection Authenticator Configuration",
       "description": "This section is optional when the authenticator is disabled.",
@@ -508,7 +508,7 @@
       ],
       "additionalProperties": false
     },
-    "config_authorizers_keto_engine_acp_ory":  {
+    "configAuthorizersKetoEngineAcpOry":  {
       "type": "object",
       "title": "ORY Keto Access Control Policy Authorizer Configuration",
       "description": "This section is optional when the authorizer is disabled.",
@@ -544,7 +544,7 @@
       ],
       "additionalProperties": false
     },
-    "config_mutators_cookie":  {
+    "configMutatorsCookie":  {
       "type": "object",
       "title": "Cookie Mutator Configuration",
       "description": "This section is optional when the mutator is disabled.",
@@ -561,7 +561,7 @@
       },
       "additionalProperties": false
     },
-    "config_mutators_header":   {
+    "configMutatorsHeader":   {
       "type": "object",
       "title": "Header Mutator Configuration",
       "description": "This section is optional when the mutator is disabled.",
@@ -578,7 +578,7 @@
       },
       "additionalProperties": false
     },
-    "config_mutators_hydrator":  {
+    "configMutatorsHydrator":  {
       "type": "object",
       "title": "Hydrator Mutator Configuration",
       "description": "This section is optional when the mutator is disabled.",
@@ -640,7 +640,7 @@
       ],
       "additionalProperties": false
     },
-    "config_mutators_id_token":  {
+    "configMutatorsIdToken":  {
       "type": "object",
       "title": "ID Token Mutator Configuration",
       "description": "This section is optional when the mutator is disabled.",
@@ -830,7 +830,7 @@
               "$ref": "#/definitions/handlerSwitch"
             },
             "config": {
-              "$ref": "#/definitions/config_authenticators_anonymous"
+              "$ref": "#/definitions/configAuthenticatorsAnonymous"
             }
           }
         },
@@ -866,7 +866,7 @@
               "$ref": "#/definitions/handlerSwitch"
             },
             "config": {
-              "$ref": "#/definitions/config_authenticators_cookie_session"
+              "$ref": "#/definitions/configAuthenticatorsCookieSession"
             }
           },
           "oneOf": [
@@ -899,7 +899,7 @@
               "$ref": "#/definitions/handlerSwitch"
             },
             "config": {
-              "$ref": "#/definitions/config_authenticators_jwt"
+              "$ref": "#/definitions/configAuthenticatorsJwt"
             }
           },
           "oneOf": [
@@ -932,7 +932,7 @@
               "$ref": "#/definitions/handlerSwitch"
             },
             "config": {
-              "$ref": "#/definitions/config_authenticators_oauth2_client_credentials"
+              "$ref": "#/definitions/configAuthenticatorsOauth2ClientCredentials"
             }
           },
           "oneOf": [
@@ -965,7 +965,7 @@
               "$ref": "#/definitions/handlerSwitch"
             },
             "config": {
-              "$ref": "#/definitions/config_authenticators_oauth2_introspection"
+              "$ref": "#/definitions/configAuthenticatorsOauth2Introspection"
             }
           },
           "oneOf": [
@@ -1028,7 +1028,7 @@
               "$ref": "#/definitions/handlerSwitch"
             },
             "config": {
-              "$ref": "#/definitions/config_authorizers_keto_engine_acp_ory"
+              "$ref": "#/definitions/configAuthorizersKetoEngineAcpOry"
             }
           },
           "oneOf": [
@@ -1080,7 +1080,7 @@
               "$ref": "#/definitions/handlerSwitch"
             },
             "config": {
-              "$ref": "#/definitions/config_mutators_cookie"
+              "$ref": "#/definitions/configMutatorsCookie"
             }
           },
           "oneOf": [
@@ -1113,7 +1113,7 @@
               "$ref": "#/definitions/handlerSwitch"
             },
             "config": {
-              "$ref": "#/definitions/config_mutators_header"
+              "$ref": "#/definitions/configMutatorsHeader"
             }
           },
           "oneOf": [
@@ -1146,7 +1146,7 @@
               "$ref": "#/definitions/handlerSwitch"
             },
             "config": {
-              "$ref": "#/definitions/config_mutators_hydrator"
+              "$ref": "#/definitions/configMutatorsHydrator"
             }
           },
           "oneOf": [
@@ -1179,7 +1179,7 @@
               "$ref": "#/definitions/handlerSwitch"
             },
             "config": {
-              "$ref": "#/definitions/config_mutators_id_token"
+              "$ref": "#/definitions/configMutatorsIdToken"
             }
           },
           "oneOf": [
