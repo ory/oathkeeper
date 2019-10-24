@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/url"
+	"os"
 	"testing"
 
 	"github.com/rs/cors"
@@ -341,4 +342,22 @@ func TestAuthenticatorOAuth2TokenIntrospectionPreAuthorization(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestViperProvider_envs(t *testing.T) {
+	p := NewViperProvider(logrus.New())
+	BindEnvs()
+
+	assert.Equal(t, ":4455", p.ProxyServeAddress())
+	assert.Equal(t, false, p.AuthenticatorIsEnabled("oauth2_introspection"))
+
+	err := os.Setenv("SERVE_PROXY_HOST", "foo")
+	require.NoError(t, err)
+	err = os.Setenv("SERVE_PROXY_PORT", "8080")
+	require.NoError(t, err)
+	err = os.Setenv("AUTHENTICATORS_OAUTH2_INTROSPECTION_ENABLED", "true")
+	require.NoError(t, err)
+
+	assert.Equal(t, "foo:8080", p.ProxyServeAddress())
+	assert.Equal(t, true, p.AuthenticatorIsEnabled("oauth2_introspection"))
 }

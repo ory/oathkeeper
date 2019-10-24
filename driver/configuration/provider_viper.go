@@ -87,7 +87,7 @@ const (
 )
 
 func BindEnvs() {
-	if err := viper.BindEnv(
+	keys := []string{
 		ViperKeyProxyReadTimeout,
 		ViperKeyProxyWriteTimeout,
 		ViperKeyProxyIdleTimeout,
@@ -112,8 +112,13 @@ func BindEnvs() {
 		ViperKeyAuthenticatorOAuth2ClientCredentialsIsEnabled,
 		ViperKeyAuthenticatorOAuth2TokenIntrospectionIsEnabled,
 		ViperKeyAuthenticatorUnauthorizedIsEnabled,
-	); err != nil {
-		panic(err.Error())
+	}
+
+	for _, key := range keys {
+		env := strings.ToUpper(strings.ReplaceAll(key, ".", "_"))
+		if err := viper.BindEnv(key, env); err != nil {
+			panic(err.Error())
+		}
 	}
 }
 
