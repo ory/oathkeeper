@@ -40,7 +40,17 @@ func runProxy(d driver.Driver, n *negroni.Negroni, logger *logrus.Logger) func()
 			Transport: proxy,
 		}
 
-		n.Use(negronilogrus.NewMiddlewareFromLogger(logger, "oathkeeper-proxy"))
+		proxyLogger := negronilogrus.NewMiddlewareFromLogger(logger, "oathkeeper-proxy")
+		if d.Configuration().ProxyDisableHealthAccessLog() {
+			if err := proxyLogger.ExcludeURL(healthx.AliveCheckPath); err != nil {
+				logger.Fatalf("Exclude alive check from access log: %v", err)
+			}
+			if err := proxyLogger.ExcludeURL(healthx.ReadyCheckPath); err != nil {
+				logger.Fatalf("Exclude ready check from access log: %v", err)
+			}
+		}
+
+		n.Use(proxyLogger)
 		n.UseHandler(handler)
 
 		h := corsx.Initialize(n, logger, "serve.proxy")
@@ -78,7 +88,17 @@ func runAPI(d driver.Driver, n *negroni.Negroni, logger *logrus.Logger) func() {
 		d.Registry().HealthHandler().SetRoutes(router.Router, true)
 		d.Registry().CredentialHandler().SetRoutes(router)
 
-		n.Use(negronilogrus.NewMiddlewareFromLogger(logger, "oathkeeper-api"))
+		apiLogger := negronilogrus.NewMiddlewareFromLogger(logger, "oathkeeper-api")
+		if d.Configuration().APIDisableHealthAccessLog() {
+			if err := apiLogger.ExcludeURL(healthx.AliveCheckPath); err != nil {
+				logger.Fatalf("Exclude alive check from access log: %v", err)
+			}
+			if err := apiLogger.ExcludeURL(healthx.ReadyCheckPath); err != nil {
+				logger.Fatalf("Exclude ready check from access log: %v", err)
+			}
+		}
+
+		n.Use(apiLogger)
 		n.Use(d.Registry().DecisionHandler()) // This needs to be the last entry, otherwise the judge API won't work
 
 		n.UseHandler(router)

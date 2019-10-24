@@ -3,6 +3,7 @@ package configuration_test
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/url"
 	"testing"
 
@@ -12,10 +13,10 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/ory/gojsonschema"
+	"github.com/ory/viper"
+	"github.com/ory/x/logrusx"
 	"github.com/ory/x/urlx"
 	"github.com/ory/x/viperx"
-
-	"github.com/ory/viper"
 
 	. "github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/pipeline/authn"
@@ -133,6 +134,11 @@ func TestViperProvider(t *testing.T) {
 					assert.Equal(t, "/path/to/cert.pem", viper.GetString("serve."+daemon+".tls.cert.path"))
 				})
 			}
+		})
+
+		t.Run("group=access_log", func(t *testing.T) {
+			assert.Equal(t, false, p.ProxyDisableHealthAccessLog())
+			assert.Equal(t, false, p.APIDisableHealthAccessLog())
 		})
 	})
 
@@ -341,4 +347,25 @@ func TestAuthenticatorOAuth2TokenIntrospectionPreAuthorization(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestViperProvider_DisableHealthAccessLog_config(t *testing.T) {
+	l := logrusx.New()
+	l.SetOutput(ioutil.Discard)
+
+	p := NewViperProvider(l)
+
+	assert.Equal(t, false, p.ProxyDisableHealthAccessLog())
+	assert.Equal(t, false, p.APIDisableHealthAccessLog())
+
+	viper.Set(ViperKeyProxyDisableHealthAccessLog, true)
+
+	assert.Equal(t, true, p.ProxyDisableHealthAccessLog())
+	assert.Equal(t, false, p.APIDisableHealthAccessLog())
+
+	viper.Set(ViperKeyProxyDisableHealthAccessLog, false)
+	viper.Set(ViperKeyAPIDisableHealthAccessLog, true)
+
+	assert.Equal(t, false, p.ProxyDisableHealthAccessLog())
+	assert.Equal(t, true, p.APIDisableHealthAccessLog())
 }

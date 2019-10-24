@@ -44,6 +44,11 @@ serve:
         path: /path/to/cert.pem
         base64: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tXG5NSUlEWlRDQ0FrMmdBd0lCQWdJRVY1eE90REFOQmdr...
 
+    # Access Log configuration for proxy server.
+    access_log:
+      # Disable access log for health endpoints.
+      disable_for_health: false
+
   api:
     port: 1235
     host: 127.0.0.2
@@ -72,6 +77,11 @@ serve:
       cert:
         path: /path/to/cert.pem
         base64: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tXG5NSUlEWlRDQ0FrMmdBd0lCQWdJRVY1eE90REFOQmdr...
+
+    # Access Log configuration for api server.
+    access_log:
+      # Disable access log for health endpoints.
+      disable_for_health: false
 
 # Configures Access Rules
 access_rules:

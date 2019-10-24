@@ -30,7 +30,9 @@ type Provider interface {
 	AccessRuleRepositories() []url.URL
 
 	ProxyServeAddress() string
+	ProxyDisableHealthAccessLog() bool
 	APIServeAddress() string
+	APIDisableHealthAccessLog() bool
 
 	ToScopeStrategy(value string, key string) fosite.ScopeStrategy
 	ParseURLs(sources []string) ([]url.URL, error)

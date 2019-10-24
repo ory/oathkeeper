@@ -29,14 +29,16 @@ import (
 var _ Provider = new(ViperProvider)
 
 const (
-	ViperKeyProxyReadTimeout       = "serve.proxy.timeout.read"
-	ViperKeyProxyWriteTimeout      = "serve.proxy.timeout.write"
-	ViperKeyProxyIdleTimeout       = "serve.proxy.timeout.idle"
-	ViperKeyProxyServeAddressHost  = "serve.proxy.host"
-	ViperKeyProxyServeAddressPort  = "serve.proxy.port"
-	ViperKeyAPIServeAddressHost    = "serve.api.host"
-	ViperKeyAPIServeAddressPort    = "serve.api.port"
-	ViperKeyAccessRuleRepositories = "access_rules.repositories"
+	ViperKeyProxyReadTimeout            = "serve.proxy.timeout.read"
+	ViperKeyProxyWriteTimeout           = "serve.proxy.timeout.write"
+	ViperKeyProxyIdleTimeout            = "serve.proxy.timeout.idle"
+	ViperKeyProxyServeAddressHost       = "serve.proxy.host"
+	ViperKeyProxyServeAddressPort       = "serve.proxy.port"
+	ViperKeyProxyDisableHealthAccessLog = "serve.proxy.access_log.disable_for_health"
+	ViperKeyAPIServeAddressHost         = "serve.api.host"
+	ViperKeyAPIServeAddressPort         = "serve.api.port"
+	ViperKeyAPIDisableHealthAccessLog   = "serve.api.access_log.disable_for_health"
+	ViperKeyAccessRuleRepositories      = "access_rules.repositories"
 )
 
 // Authorizers
@@ -93,8 +95,10 @@ func BindEnvs() {
 		ViperKeyProxyIdleTimeout,
 		ViperKeyProxyServeAddressHost,
 		ViperKeyProxyServeAddressPort,
+		ViperKeyProxyDisableHealthAccessLog,
 		ViperKeyAPIServeAddressHost,
 		ViperKeyAPIServeAddressPort,
+		ViperKeyAPIDisableHealthAccessLog,
 		ViperKeyAccessRuleRepositories,
 		ViperKeyAuthorizerAllowIsEnabled,
 		ViperKeyAuthorizerDenyIsEnabled,
@@ -163,12 +167,20 @@ func (v *ViperProvider) ProxyServeAddress() string {
 	)
 }
 
+func (v *ViperProvider) ProxyDisableHealthAccessLog() bool {
+	return viperx.GetBool(v.l, ViperKeyProxyDisableHealthAccessLog, false)
+}
+
 func (v *ViperProvider) APIServeAddress() string {
 	return fmt.Sprintf(
 		"%s:%d",
 		viperx.GetString(v.l, ViperKeyAPIServeAddressHost, ""),
 		viperx.GetInt(v.l, ViperKeyAPIServeAddressPort, 4456),
 	)
+}
+
+func (v *ViperProvider) APIDisableHealthAccessLog() bool {
+	return viperx.GetBool(v.l, ViperKeyAPIDisableHealthAccessLog, false)
 }
 
 func (v *ViperProvider) ParseURLs(sources []string) ([]url.URL, error) {

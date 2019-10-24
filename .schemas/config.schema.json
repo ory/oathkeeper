@@ -19,6 +19,17 @@
         }
       }
     },
+    "accessLog": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "disable_for_health": {
+          "title": "Disable for healthcheck endpoints",
+          "type": "boolean",
+          "default": false
+        }
+      }
+    },
     "scopeStrategy": {
       "title": "Scope Strategy",
       "type": "string",
@@ -64,6 +75,9 @@
             },
             "tls": {
               "$ref": "https://raw.githubusercontent.com/ory/x/master/.schemas/tlsx/viper.schema.json#"
+            },
+            "access_log": {
+              "$ref": "#/definitions/accessLog"
             }
           }
         },
@@ -137,6 +151,9 @@
             },
             "tls": {
               "$ref": "https://raw.githubusercontent.com/ory/x/master/.schemas/tlsx/viper.schema.json#"
+            },
+            "access_log": {
+              "$ref": "#/definitions/accessLog"
             }
           }
         }
