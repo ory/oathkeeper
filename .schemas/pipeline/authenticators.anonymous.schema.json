@@ -1,5 +1,5 @@
 {
-  "$id": "https://raw.githubusercontent.com/ory/oathkeeper/master/.schemas/authenticators.anonymous.schema.json",
+  "$id": "https://raw.githubusercontent.com/ory/oathkeeper/v0.32.1-beta.1/.schemas/authenticators.anonymous.schema.json",
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$ref": "../config.schema.json#/definitions/configAuthenticatorsAnonymous"
+  "$ref": "https://raw.githubusercontent.com/ory/oathkeeper/v0.32.1-beta.1/.schemas/config.schema.json#/definitions/configAuthenticatorsAnonymous"
 }
