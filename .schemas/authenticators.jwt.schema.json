@@ -1,5 +1,5 @@
 {
-  "$id": "https://raw.githubusercontent.com/ory/oathkeeper/v0.32.0-beta.1/.schemas/authenticators.jwt.schema.json",
+  "$id": "https://raw.githubusercontent.com/ory/oathkeeper/master/.schemas/authenticators.jwt.schema.json",
   "$schema": "http://json-schema.org/draft-07/schema#",
   "type": "object",
   "title": "JWT Authenticator Configuration",
@@ -48,7 +48,7 @@
       ]
     },
     "scope_strategy": {
-      "$ref": "https://raw.githubusercontent.com/ory/oathkeeper/v0.32.0-beta.1/.schemas/scope_strategy.schema.json#"
+      "$ref": "https://raw.githubusercontent.com/ory/oathkeeper/master/.schemas/scope_strategy.schema.json#"
     },
     "token_from": {
       "title": "Token From",
