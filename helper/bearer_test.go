@@ -4,8 +4,9 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/ory/oathkeeper/helper"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/ory/oathkeeper/helper"
 )
 
 const (

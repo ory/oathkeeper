@@ -154,10 +154,7 @@
     },
     "handlerSwitch": {
       "title": "Enabled",
-      "enum": [
-        false,
-        true
-      ],
+      "type": "boolean",
       "default": false,
       "examples": [
         true
@@ -873,19 +870,19 @@
             {
               "properties": {
                 "enabled": {
-                  "const": false
-                }
-              }
-            },
-            {
-              "properties": {
-                "enabled": {
                   "const": true
                 }
               },
               "required": [
                 "config"
               ]
+            },
+            {
+              "properties": {
+                "enabled": {
+                  "const": false
+                }
+              }
             }
           ]
         },
@@ -906,19 +903,19 @@
             {
               "properties": {
                 "enabled": {
-                  "const": false
-                }
-              }
-            },
-            {
-              "properties": {
-                "enabled": {
                   "const": true
                 }
               },
               "required": [
                 "config"
               ]
+            },
+            {
+              "properties": {
+                "enabled": {
+                  "const": false
+                }
+              }
             }
           ]
         },
@@ -939,19 +936,19 @@
             {
               "properties": {
                 "enabled": {
-                  "const": false
-                }
-              }
-            },
-            {
-              "properties": {
-                "enabled": {
                   "const": true
                 }
               },
               "required": [
                 "config"
               ]
+            },
+            {
+              "properties": {
+                "enabled": {
+                  "const": false
+                }
+              }
             }
           ]
         },
@@ -972,19 +969,19 @@
             {
               "properties": {
                 "enabled": {
-                  "const": false
-                }
-              }
-            },
-            {
-              "properties": {
-                "enabled": {
                   "const": true
                 }
               },
               "required": [
                 "config"
               ]
+            },
+            {
+              "properties": {
+                "enabled": {
+                  "const": false
+                }
+              }
             }
           ]
         }
@@ -1035,19 +1032,19 @@
             {
               "properties": {
                 "enabled": {
-                  "const": false
-                }
-              }
-            },
-            {
-              "properties": {
-                "enabled": {
                   "const": true
                 }
               },
               "required": [
                 "config"
               ]
+            },
+            {
+              "properties": {
+                "enabled": {
+                  "const": false
+                }
+              }
             }
           ]
         }
@@ -1087,19 +1084,19 @@
             {
               "properties": {
                 "enabled": {
-                  "const": false
-                }
-              }
-            },
-            {
-              "properties": {
-                "enabled": {
                   "const": true
                 }
               },
               "required": [
                 "config"
               ]
+            },
+            {
+              "properties": {
+                "enabled": {
+                  "const": false
+                }
+              }
             }
           ]
         },
@@ -1120,19 +1117,19 @@
             {
               "properties": {
                 "enabled": {
-                  "const": false
-                }
-              }
-            },
-            {
-              "properties": {
-                "enabled": {
                   "const": true
                 }
               },
               "required": [
                 "config"
               ]
+            },
+            {
+              "properties": {
+                "enabled": {
+                  "const": false
+                }
+              }
             }
           ]
         },
@@ -1153,19 +1150,19 @@
             {
               "properties": {
                 "enabled": {
-                  "const": false
-                }
-              }
-            },
-            {
-              "properties": {
-                "enabled": {
                   "const": true
                 }
               },
               "required": [
                 "config"
               ]
+            },
+            {
+              "properties": {
+                "enabled": {
+                  "const": false
+                }
+              }
             }
           ]
         },
@@ -1186,19 +1183,19 @@
             {
               "properties": {
                 "enabled": {
-                  "const": false
-                }
-              }
-            },
-            {
-              "properties": {
-                "enabled": {
                   "const": true
                 }
               },
               "required": [
                 "config"
               ]
+            },
+            {
+              "properties": {
+                "enabled": {
+                  "const": false
+                }
+              }
             }
           ]
         }
