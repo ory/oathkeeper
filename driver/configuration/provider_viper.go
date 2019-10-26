@@ -243,15 +243,27 @@ func (v *ViperProvider) PipelineConfig(prefix, id string, override json.RawMessa
 		}
 	}
 
-	schema, err := schemas.Find(fmt.Sprintf("%s.%s.schema.json", prefix, id))
+	rawComponentSchema, err := schemas.Find(fmt.Sprintf("pipeline/%s.%s.schema.json", prefix, id))
 	if err != nil {
 		return errors.WithStack(err)
 	}
 
-	if result, err := gojsonschema.Validate(
-		gojsonschema.NewBytesLoader(schema),
-		gojsonschema.NewBytesLoader(marshalled),
-	); err != nil {
+	rawRootSchema, err := schemas.Find("config.schema.json")
+	if err != nil {
+		return errors.WithStack(err)
+	}
+
+	sbl := gojsonschema.NewSchemaLoader()
+	if err := sbl.AddSchemas(gojsonschema.NewBytesLoader(rawRootSchema)); err != nil {
+		return errors.WithStack(err)
+	}
+
+	schema, err := sbl.Compile(gojsonschema.NewBytesLoader(rawComponentSchema))
+	if err != nil {
+		return errors.WithStack(err)
+	}
+
+	if result, err := schema.Validate(gojsonschema.NewBytesLoader(marshalled)); err != nil {
 		return errors.WithStack(err)
 	} else if !result.Valid() {
 		return errors.WithStack(result.Errors())

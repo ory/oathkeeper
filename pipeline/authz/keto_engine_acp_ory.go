@@ -200,5 +200,13 @@ func (a *AuthorizerKetoEngineACPORY) Config(config json.RawMessage) (*Authorizer
 		return nil, NewErrAuthorizerMisconfigured(a, err)
 	}
 
+	if c.RequiredAction == "" {
+		c.RequiredAction = "unset"
+	}
+
+	if c.RequiredResource == "" {
+		c.RequiredResource = "unset"
+	}
+
 	return &c, nil
 }

@@ -319,7 +319,7 @@ func TestAuthenticatorOAuth2TokenIntrospectionPreAuthorization(t *testing.T) {
 		{enabled: true, id: "a", secret: "b", turl: "", err: true},
 		{enabled: true, id: "", secret: "b", turl: "c", err: true},
 		{enabled: true, id: "a", secret: "", turl: "c", err: true},
-		{enabled: false, id: "a", secret: "b", turl: "c", err: false},
+		{enabled: false, id: "a", secret: "b", turl: "c", err: true},
 		{enabled: true, id: "a", secret: "b", turl: "https://some-url", err: false},
 	} {
 		t.Run(fmt.Sprintf("case=%d", k), func(t *testing.T) {
