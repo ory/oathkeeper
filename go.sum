@@ -84,8 +84,6 @@ github.com/globalsign/mgo v0.0.0-20181015135952-eeefdecb41b8 h1:DujepqpGd1hyOd7a
 github.com/globalsign/mgo v0.0.0-20181015135952-eeefdecb41b8/go.mod h1:xkRDCp4j0OGD1HRkm4kmhM+pmpv3AKq5SU7GMg4oO/Q=
 github.com/go-bindata/go-bindata v3.1.1+incompatible h1:tR4f0e4VTO7LK6B2YWyAoVEzG9ByG1wrXB4TL9+jiYg=
 github.com/go-bindata/go-bindata v3.1.1+incompatible/go.mod h1:xK8Dsgwmeed+BBsSy2XTopBn/8uK2HWuGSnA11C3Joo=
-github.com/go-bindata/go-bindata v3.1.2+incompatible h1:5vjJMVhowQdPzjE1LdxyFF7YFTXg5IgGVW4gBr5IbvE=
-github.com/go-bindata/go-bindata v3.1.2+incompatible/go.mod h1:xK8Dsgwmeed+BBsSy2XTopBn/8uK2HWuGSnA11C3Joo=
 github.com/go-kit/kit v0.8.0/go.mod h1:xBxKIO96dXMWWy0MnWVtmwkA9/13aqxPnvrjFYMA2as=
 github.com/go-logfmt/logfmt v0.3.0/go.mod h1:Qt1PoO58o5twSAckw1HlFXLmHsOX5/0LbT9GBnD5lWE=
 github.com/go-logfmt/logfmt v0.4.0/go.mod h1:3RMwSq7FuexP4Kalkev3ejPJsZTpXXBr9+V4qmtdjCk=
@@ -523,12 +521,8 @@ github.com/ory/ladon v1.0.1/go.mod h1:1VhCA2mBtaMhRUS6VS0d9qrNVDQnFXqSRb5D0NvQUP
 github.com/ory/pagination v0.0.1/go.mod h1:d1ToRROAUleriPhmb2dYbhANhhLwZ8s395m2yJCDFh8=
 github.com/ory/viper v1.5.6 h1:w4ceGgWwWLzAFYQ7bHaDZmwNsAto2JPVdyQjQnn7VWI=
 github.com/ory/viper v1.5.6/go.mod h1:TYmpFpKLxjQwvT4f0QPpkOn4sDXU1kDgAwJpgLYiQ28=
-github.com/ory/x v0.0.76 h1:pM9oK8szqYr/tAa0I/oGiCRVGppt4pJSm56oQUnjsvM=
-github.com/ory/x v0.0.76/go.mod h1:TH1ImNLBepjywXHy3fgEXDgOIxH+ZF95jkZuo4/lPEU=
-github.com/ory/x v0.0.77 h1:juHvrvCuletCoNmflOWNLp0K/cV61D2rHc2HlVXAwFw=
-github.com/ory/x v0.0.77/go.mod h1:WVlPrVNe4wtPfdXqE6B+x7a7xoTR2EFGIGxZTPdAuxw=
-github.com/ory/x v0.0.78 h1:Rup+zJE/SIbdkw6o71bq2aGborCN5x93vEfb5AckBrQ=
-github.com/ory/x v0.0.78/go.mod h1:WVlPrVNe4wtPfdXqE6B+x7a7xoTR2EFGIGxZTPdAuxw=
+github.com/ory/x v0.0.79 h1:epo/41vLUB/GdgJ1qNxKK7hYqzCUu1GpKVsAGUu9EA0=
+github.com/ory/x v0.0.79/go.mod h1:WVlPrVNe4wtPfdXqE6B+x7a7xoTR2EFGIGxZTPdAuxw=
 github.com/parnurzeal/gorequest v0.2.15/go.mod h1:3Kh2QUMJoqw3icWAecsyzkpY7UzRfDhbRdTjtNwNiUE=
 github.com/pborman/uuid v1.2.0 h1:J7Q5mO4ysT1dv8hyrUGHb9+ooztCXu1D8MY8DZYsu3g=
 github.com/pborman/uuid v1.2.0/go.mod h1:X/NO0urCmaxf9VXbdlT7C2Yzkj2IKimNn4k+gtPdI/k=
