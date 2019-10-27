@@ -117,19 +117,21 @@ access_rules:
 }
 
 func TestFetcherWatchRepositoryFromFS(t *testing.T) {
-	viper.Reset()
 	conf := internal.NewConfigurationWithDefaults() // this resets viper!!
 	r := internal.NewRegistry(conf)
 
+	dir := path.Join(os.TempDir(), uuid.New().String())
+	require.NoError(t, os.MkdirAll(dir, 0777))
+
 	id := uuid.New().String()
-	repository := path.Join(os.TempDir(), "access-rules-"+id+".json")
-	require.NoError(t, ioutil.WriteFile(repository, []byte("[]"), 0666))
+	repository := path.Join(dir, "access-rules-"+id+".json")
+	require.NoError(t, ioutil.WriteFile(repository, []byte("[]"), 0777))
 
 	require.NoError(t, ioutil.WriteFile(filepath.Join(os.TempDir(), ".oathkeeper-"+id+".yml"), []byte(`
 access_rules:
   repositories:
   - file://`+repository+`
-`), 0666))
+`), 0777))
 
 	viperx.InitializeConfig("oathkeeper-"+id, os.TempDir(), nil)
 	viperx.WatchConfig(nil, nil)
@@ -148,7 +150,7 @@ access_rules:
 		{content: `[{"id":"2"},{"id":"3"}]`, expectIDs: []string{"2", "3"}},
 	} {
 		t.Run(fmt.Sprintf("case=%d", k), func(t *testing.T) {
-			require.NoError(t, ioutil.WriteFile(repository, []byte(tc.content), 0666))
+			require.NoError(t, ioutil.WriteFile(repository, []byte(tc.content), 0777))
 			time.Sleep(time.Millisecond * 500)
 
 			rules, err := r.RuleRepository().List(context.Background(), 500, 0)
@@ -159,7 +161,7 @@ access_rules:
 				ids[k] = r.ID
 			}
 
-			require.Len(t, ids, len(tc.expectIDs))
+			assert.Len(t, ids, len(tc.expectIDs), "%+v", rules)
 			for _, id := range tc.expectIDs {
 				assert.True(t, stringslice.Has(ids, id), "\nexpected: %v\nactual: %v", tc.expectIDs, ids)
 			}
