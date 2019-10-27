@@ -154,10 +154,7 @@
     },
     "handlerSwitch": {
       "title": "Enabled",
-      "enum": [
-        false,
-        true
-      ],
+      "type": "boolean",
       "default": false,
       "examples": [
         true
@@ -523,12 +520,10 @@
           ]
         },
         "required_action": {
-          "type": "string",
-          "default": "unset"
+          "type": "string"
         },
         "required_resource": {
-          "type": "string",
-          "default": "unset"
+          "type": "string"
         },
         "subject": {
           "type": "string"
@@ -804,6 +799,7 @@
           "title": "Repositories",
           "description": "Locations (list of URLs) where access rules should be fetched from on boot. It is expected that the documents at those locations return a JSON or YAML Array containing ORY Oathkeeper Access Rules:\n\n- If the URL Scheme is `file://`, the access rules (an array of access rules is expected) will be fetched from the local file system.\n- If the URL Scheme is `inline://`, the access rules (an array of access rules is expected) are expected to be a base64 encoded (with padding!) JSON/YAML string (base64_encode(`[{\"id\":\"foo-rule\",\"authenticators\":[....]}]`)).\n- If the URL Scheme is `http://` or `https://`, the access rules (an array of access rules is expected) will be fetched from the provided HTTP(s) location.",
           "type": "array",
+          "default": [],
           "items": {
             "type": "string",
             "format": "uri"
@@ -860,32 +856,31 @@
           "title": "Cookie Session",
           "description": "The [`cookie_session` authenticator](https://www.ory.sh/docs/oathkeeper/pipeline/authn#cookie_session).",
           "type": "object",
-          "additionalProperties": false,
           "properties": {
             "enabled": {
               "$ref": "#/definitions/handlerSwitch"
-            },
-            "config": {
-              "$ref": "#/definitions/configAuthenticatorsCookieSession"
             }
           },
           "oneOf": [
             {
               "properties": {
                 "enabled": {
-                  "const": false
-                }
-              }
-            },
-            {
-              "properties": {
-                "enabled": {
                   "const": true
+                },
+                "config": {
+                  "$ref": "#/definitions/configAuthenticatorsCookieSession"
                 }
               },
               "required": [
                 "config"
               ]
+            },
+            {
+              "properties": {
+                "enabled": {
+                  "const": false
+                }
+              }
             }
           ]
         },
@@ -893,32 +888,31 @@
           "title": "JSON Web Token (jwt)",
           "description": "The [`jwt` authenticator](https://www.ory.sh/docs/oathkeeper/pipeline/authn#jwt).",
           "type": "object",
-          "additionalProperties": false,
           "properties": {
             "enabled": {
               "$ref": "#/definitions/handlerSwitch"
-            },
-            "config": {
-              "$ref": "#/definitions/configAuthenticatorsJwt"
             }
           },
           "oneOf": [
             {
               "properties": {
                 "enabled": {
-                  "const": false
-                }
-              }
-            },
-            {
-              "properties": {
-                "enabled": {
                   "const": true
+                },
+                "config": {
+                  "$ref": "#/definitions/configAuthenticatorsJwt"
                 }
               },
               "required": [
                 "config"
               ]
+            },
+            {
+              "properties": {
+                "enabled": {
+                  "const": false
+                }
+              }
             }
           ]
         },
@@ -926,32 +920,32 @@
           "title": "OAuth 2.0 Client Credentials",
           "description": "The [`oauth2_client_credentials` authenticator](https://www.ory.sh/docs/oathkeeper/pipeline/authn#oauth2_client_credentials).",
           "type": "object",
-          "additionalProperties": false,
+
           "properties": {
             "enabled": {
               "$ref": "#/definitions/handlerSwitch"
-            },
-            "config": {
-              "$ref": "#/definitions/configAuthenticatorsOauth2ClientCredentials"
             }
           },
           "oneOf": [
             {
               "properties": {
                 "enabled": {
-                  "const": false
-                }
-              }
-            },
-            {
-              "properties": {
-                "enabled": {
                   "const": true
+                },
+                "config": {
+                  "$ref": "#/definitions/configAuthenticatorsOauth2ClientCredentials"
                 }
               },
               "required": [
                 "config"
               ]
+            },
+            {
+              "properties": {
+                "enabled": {
+                  "const": false
+                }
+              }
             }
           ]
         },
@@ -959,32 +953,32 @@
           "title": "OAuth 2.0 Token Introspection",
           "description": "The [`oauth2_introspection` authenticator](https://www.ory.sh/docs/oathkeeper/pipeline/authn#oauth2_introspection).",
           "type": "object",
-          "additionalProperties": false,
+
           "properties": {
             "enabled": {
               "$ref": "#/definitions/handlerSwitch"
-            },
-            "config": {
-              "$ref": "#/definitions/configAuthenticatorsOauth2Introspection"
             }
           },
           "oneOf": [
             {
               "properties": {
                 "enabled": {
-                  "const": false
-                }
-              }
-            },
-            {
-              "properties": {
-                "enabled": {
                   "const": true
+                },
+                "config": {
+                  "$ref": "#/definitions/configAuthenticatorsOauth2Introspection"
                 }
               },
               "required": [
                 "config"
               ]
+            },
+            {
+              "properties": {
+                "enabled": {
+                  "const": false
+                }
+              }
             }
           ]
         }
@@ -1022,32 +1016,31 @@
           "title": "ORY Keto Access Control Policies Engine",
           "description": "The [`keto_engine_acp_ory` authorizer](https://www.ory.sh/docs/oathkeeper/pipeline/authz#keto_engine_acp_ory).",
           "type": "object",
-          "additionalProperties": false,
           "properties": {
             "enabled": {
               "$ref": "#/definitions/handlerSwitch"
-            },
-            "config": {
-              "$ref": "#/definitions/configAuthorizersKetoEngineAcpOry"
             }
           },
           "oneOf": [
             {
               "properties": {
                 "enabled": {
-                  "const": false
-                }
-              }
-            },
-            {
-              "properties": {
-                "enabled": {
                   "const": true
+                },
+                "config": {
+                  "$ref": "#/definitions/configAuthorizersKetoEngineAcpOry"
                 }
               },
               "required": [
                 "config"
               ]
+            },
+            {
+              "properties": {
+                "enabled": {
+                  "const": false
+                }
+              }
             }
           ]
         }
@@ -1074,32 +1067,32 @@
           "title": "HTTP Cookie",
           "description": "The [`cookie` mutator](https://www.ory.sh/docs/oathkeeper/pipeline/mutator#cookie).",
           "type": "object",
-          "additionalProperties": false,
+
           "properties": {
             "enabled": {
               "$ref": "#/definitions/handlerSwitch"
-            },
-            "config": {
-              "$ref": "#/definitions/configMutatorsCookie"
             }
           },
           "oneOf": [
             {
               "properties": {
                 "enabled": {
-                  "const": false
-                }
-              }
-            },
-            {
-              "properties": {
-                "enabled": {
                   "const": true
+                },
+                "config": {
+                  "$ref": "#/definitions/configMutatorsCookie"
                 }
               },
               "required": [
                 "config"
               ]
+            },
+            {
+              "properties": {
+                "enabled": {
+                  "const": false
+                }
+              }
             }
           ]
         },
@@ -1107,32 +1100,32 @@
           "title": "HTTP Header",
           "description": "The [`header` mutator](https://www.ory.sh/docs/oathkeeper/pipeline/mutator#header).",
           "type": "object",
-          "additionalProperties": false,
+
           "properties": {
             "enabled": {
               "$ref": "#/definitions/handlerSwitch"
-            },
-            "config": {
-              "$ref": "#/definitions/configMutatorsHeader"
             }
           },
           "oneOf": [
             {
               "properties": {
                 "enabled": {
-                  "const": false
-                }
-              }
-            },
-            {
-              "properties": {
-                "enabled": {
                   "const": true
+                },
+                "config": {
+                  "$ref": "#/definitions/configMutatorsHeader"
                 }
               },
               "required": [
                 "config"
               ]
+            },
+            {
+              "properties": {
+                "enabled": {
+                  "const": false
+                }
+              }
             }
           ]
         },
@@ -1140,32 +1133,32 @@
           "title": "Hydrator",
           "description": "The [`hydrator` mutator](https://www.ory.sh/docs/oathkeeper/pipeline/mutator#hydrator).",
           "type": "object",
-          "additionalProperties": false,
+
           "properties": {
             "enabled": {
               "$ref": "#/definitions/handlerSwitch"
-            },
-            "config": {
-              "$ref": "#/definitions/configMutatorsHydrator"
             }
           },
           "oneOf": [
             {
               "properties": {
                 "enabled": {
-                  "const": false
-                }
-              }
-            },
-            {
-              "properties": {
-                "enabled": {
                   "const": true
+                },
+                "config": {
+                  "$ref": "#/definitions/configMutatorsHydrator"
                 }
               },
               "required": [
                 "config"
               ]
+            },
+            {
+              "properties": {
+                "enabled": {
+                  "const": false
+                }
+              }
             }
           ]
         },
@@ -1173,32 +1166,32 @@
           "title": "ID Token (JSON Web Token)",
           "description": "The [`id_token` mutator](https://www.ory.sh/docs/oathkeeper/pipeline/mutator#id_token).",
           "type": "object",
-          "additionalProperties": false,
+
           "properties": {
             "enabled": {
               "$ref": "#/definitions/handlerSwitch"
-            },
-            "config": {
-              "$ref": "#/definitions/configMutatorsIdToken"
             }
           },
           "oneOf": [
             {
               "properties": {
                 "enabled": {
-                  "const": false
-                }
-              }
-            },
-            {
-              "properties": {
-                "enabled": {
                   "const": true
+                },
+                "config": {
+                  "$ref": "#/definitions/configMutatorsIdToken"
                 }
               },
               "required": [
                 "config"
               ]
+            },
+            {
+              "properties": {
+                "enabled": {
+                  "const": false
+                }
+              }
             }
           ]
         }
@@ -1242,7 +1235,8 @@
       "type": "string",
       "enum": [
         "cpu",
-        "mem"
+        "mem",
+        ""
       ]
     }
   },

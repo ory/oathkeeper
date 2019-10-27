@@ -25,7 +25,6 @@ import (
 
 func TestPipelineConfig(t *testing.T) {
 	viper.Reset()
-	BindEnvs()
 	viperx.InitializeConfig(
 		"oathkeeper",
 		"./../../docs/",
@@ -80,7 +79,6 @@ func TestPipelineConfig(t *testing.T) {
 
 func TestViperProvider(t *testing.T) {
 	viper.Reset()
-	BindEnvs()
 	viperx.InitializeConfig(
 		"oathkeeper",
 		"./../../docs/",

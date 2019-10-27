@@ -46,7 +46,8 @@ before finalizing the upgrade process.
 
 ## v0.32.0-beta.1+oryOS.12
 
-An issue with the release pipeline has been resolved, which required several version increases. No functionality has changed in a backwards incompatible way.
+An issue with the release pipeline has been resolved, which required several
+version increases. No functionality has changed in a backwards incompatible way.
 
 ## v0.19.0-beta.1+oryOS.12
 

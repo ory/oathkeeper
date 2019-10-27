@@ -86,37 +86,6 @@ const (
 	ViperKeyAuthenticatorUnauthorizedIsEnabled = "authenticators.unauthorized.enabled"
 )
 
-func BindEnvs() {
-	if err := viper.BindEnv(
-		ViperKeyProxyReadTimeout,
-		ViperKeyProxyWriteTimeout,
-		ViperKeyProxyIdleTimeout,
-		ViperKeyProxyServeAddressHost,
-		ViperKeyProxyServeAddressPort,
-		ViperKeyAPIServeAddressHost,
-		ViperKeyAPIServeAddressPort,
-		ViperKeyAccessRuleRepositories,
-		ViperKeyAuthorizerAllowIsEnabled,
-		ViperKeyAuthorizerDenyIsEnabled,
-		ViperKeyAuthorizerKetoEngineACPORYIsEnabled,
-		ViperKeyMutatorCookieIsEnabled,
-		ViperKeyMutatorHeaderIsEnabled,
-		ViperKeyMutatorNoopIsEnabled,
-		ViperKeyMutatorHydratorIsEnabled,
-		ViperKeyMutatorIDTokenIsEnabled,
-		ViperKeyMutatorIDTokenJWKSURL,
-		ViperKeyAuthenticatorAnonymousIsEnabled,
-		ViperKeyAuthenticatorNoopIsEnabled,
-		ViperKeyAuthenticatorCookieSessionIsEnabled,
-		ViperKeyAuthenticatorJWTIsEnabled,
-		ViperKeyAuthenticatorOAuth2ClientCredentialsIsEnabled,
-		ViperKeyAuthenticatorOAuth2TokenIntrospectionIsEnabled,
-		ViperKeyAuthenticatorUnauthorizedIsEnabled,
-	); err != nil {
-		panic(err.Error())
-	}
-}
-
 type ViperProvider struct {
 	l logrus.FieldLogger
 }
