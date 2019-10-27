@@ -64,8 +64,8 @@ func init() {
 
 	cobra.OnInitialize(func() {
 		viperx.InitializeConfig("oathkeeper", "", nil)
-
 		logger = logrusx.New()
+
 		if err := viperx.Validate(gojsonschema.NewBytesLoader(schema)); err != nil {
 			viperx.LoggerWithValidationErrorFields(logger, err).
 				WithError(err).
