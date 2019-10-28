@@ -37,14 +37,14 @@ changes in future releases. Any breaking change will have extensive
 documentation and upgrade instructions.
 
 [![CircleCI](https://circleci.com/gh/ory/oathkeeper.svg?style=shield&circle-token=eb458bf636326d41674141b6bbfa475a39c9db1e)](https://circleci.com/gh/ory/oathkeeper)
-
+[![Coverage Status](https://coveralls.io/repos/github/ory/oathkeeper/badge.svg?branch=master)](https://coveralls.io/github/ory/oathkeeper?branch=master)
 ![Go Report Card](https://goreportcard.com/badge/github.com/ory/oathkeeper)
 
 ---
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
-![Go Report Card](https://goreportcard.com/badge/github.com/ory/oathkeeper)
+
 
 - [Installation](#installation)
 - [Who's using it?](#whos-using-it)
@@ -54,31 +54,25 @@ documentation and upgrade instructions.
   - [ORY Keto: Access Control Policies as a Server](#ory-keto-access-control-policies-as-a-server)
   - [Examples](#examples)
 - [Security](#security)
-- [Security](#security-1)
   - [Disclosing vulnerabilities](#disclosing-vulnerabilities)
 - [Telemetry](#telemetry)
-- [Telemetry](#telemetry-1)
-  - [Guide](#guide)
 - [Documentation](#documentation)
-  - [Guide](#guide-1)
+  - [Guide](#guide)
   - [HTTP API documentation](#http-api-documentation)
   - [Upgrading and Changelog](#upgrading-and-changelog)
-  - [Upgrading and Changelog](#upgrading-and-changelog-1)
-  - [Command line documenta and](#command-line-documenta-and)
   - [Command line documentation](#command-line-documentation)
   - [Develop](#develop)
+- [Backers](#backers)
+- [Sponsors](#sponsors)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 ## Installation
 
-Head over to the to build ORY Oathkeeper from source.
-
-## Who's using it?
-
-<!--BEGIN A to learn how
-to install ORY Oathkeeper on Linux, macOS, Windows, and Docker and how to build
-ORY Oathkeeper from source.
+Head over to the
+[ORY Developer Documentation](https://www.ory.sh/docs/oathkeeper/install) to
+learn how to install ORY Oathkeeper on Linux, macOS, Windows, and Docker and how
+to build ORY Oathkeeper from source.
 
 ## Who's using it?
 
@@ -176,10 +170,10 @@ as well as all of our backers
 
 <a href="https://opencollective.com/ory#backers" target="_blank"><img src="https://opencollective.com/ory/backers.svg?width=890"></a>
 
-and past & current supporters (in alphabetical order) on TheCrealm.
-
-<em>\* Uses one of ORY's : Alexander Alimovs, Billy, Chancy Kennedy, Drozzy,
-Edwin Trejos, Howard Edidin, Ken Adler Oz Haven, Stefan Hans, TheCrealm.
+and past & current supporters (in alphabetical order) on
+[Patreon](https://www.patreon.com/_ory): Alexander Alimovs, Billy, Chancy
+Kennedy, Drozzy, Edwin Trejos, Howard Edidin, Ken Adler Oz Haven, Stefan Hans,
+TheCrealm.
 
 <em>\* Uses one of ORY's major projects in production.</em>
 
@@ -193,12 +187,12 @@ Edwin Trejos, Howard Edidin, Ken Adler Oz Haven, Stefan Hans, TheCrealm.
 
 ### ORY Security Console: Administrative User Interface
 
-The ORY Security Console is a visual admin interface for managing ORY Hydra, ORY Oathkeeper, and ORY
-Keto.
+The [ORY Security Console](https://console.ory.sh/) is a visual admin interface
+for managing ORY Hydra, ORY Oathkeeper, and ORY Keto.
 
 ### ORY Hydra: OAuth2 & OpenID Connect Server
 
-resource consumption. ORY Hydra is not an ORY Hydra is a hardened OAuth2 and
+[ORY Hydra](https://github.com/ory/hydra) ORY Hydra is a hardened OAuth2 and
 OpenID Connect server optimized for low-latency, high throughput, and low
 resource consumption. ORY Hydra is not an identity provider (user sign up, user
 log in, password reset flow), but connects to your existing identity provider
@@ -206,19 +200,16 @@ through a consent app.
 
 ### ORY Keto: Access Control Policies as a Server
 
-determine whether a subject (user, appl is a policy decision point. It uses a
+[ORY Keto](https://github.com/ory/keto) is a policy decision point. It uses a
 set of access control policies, similar to AWS IAM Policies, in order to
 determine whether a subject (user, application, service, car, ...) is authorized
 to perform a certain action on a resource.
 
 ### Examples
 
-The ices from the ORY Ecosystem.
-
-## Security
-
-repository contains numerous examples of setting up this project individually
-and together with other services from the ORY Ecosystem.
+The [ory/examples](https://github.com/ory/examples) repository contains numerous
+examples of setting up this project individually and together with other
+services from the ORY Ecosystem.
 
 ## Security
 
@@ -226,44 +217,31 @@ and together with other services from the ORY Ecosystem.
 
 If you think you found a security vulnerability, please refrain from posting it
 publicly on the forums, the chat, or GitHub and send us an email to
-
-## Telemetry
-
-Our services instead.
+[hi@ory.am](mailto:hi@ory.am) instead.
 
 ## Telemetry
 
 Our services collect summarized, anonymized data which can optionally be turned
-off. Click ntation
-
-### Guide
-
-The Guide is available [here](h to learn more.
+off. Click [here](https://www.ory.sh/docs/guides/master/telemetry/) to learn
+more.
 
 ## Documentation
 
 ### Guide
 
-The Guide is available ### HTTP API documentation
-
-The HTTP API is documented .
+The Guide is available
+[here](https://www.ory.sh/docs/guides/master/oathkeeper/).
 
 ### HTTP API documentation
 
 The HTTP API is documented
-
-### Upgrading and Changelog
-
-New releases might introduce b.
+[here](https://www.ory.sh/docs/api/oathkeeper?version=master).
 
 ### Upgrading and Changelog
 
 New releases might introduce breaking changes. To help you identify and
 incorporate those changes, we document these changes in
-
-### Command line documenta and
-
-Run `oathkeeper -h` or `oat.
+[UPGRADE.md](./UPGRADE.md) and [CHANGELOG.md](./CHANGELOG.md).
 
 ### Command line documentation
 
@@ -274,6 +252,9 @@ Run `oathkeeper -h` or `oathkeeper help`.
 Developing with ORY Oathkeeper is as easy as:
 
 ```shell
+$ cd ~
+$ go get -d -u github.com/ory/oathkeeper
+$ cd $GOPATH/src/github.com/ory/oathkeeper
 $ export GO111MODULE=on
 $ go test ./...
 ```
