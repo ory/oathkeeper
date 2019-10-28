@@ -3,7 +3,15 @@
 set -euxo pipefail
 
 waitport() {
-    while ! nc -z localhost $1 ; do sleep 1 ; done
+  i=0
+  while ! nc -z localhost "$1" ; do
+    sleep 1
+    if [ $i -gt 10 ]; then
+      cat ./oathkeeper.log
+      exit 1
+    fi
+    i=$((i+1))
+  done
 }
 
 cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
