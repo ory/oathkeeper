@@ -3,7 +3,17 @@
 set -euxo pipefail
 
 waitport() {
-    while ! nc -z localhost $1 ; do sleep 1 ; done
+  i=0
+  while ! nc -z localhost "$1" ; do
+    sleep 1
+    if [ $i -gt 10 ]; then
+      cat ./oathkeeper.e2e.log
+      echo "-----"
+      cat ./api.e2e.log
+      exit 1
+    fi
+    i=$((i+1))
+  done
 }
 
 cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
@@ -27,7 +37,16 @@ waitport 6660
 waitport 6661
 waitport 6662
 
+function finish {
+  cat ./oathkeeper.e2e.log
+  echo "-----"
+  cat ./api.e2e.log
+}
+trap finish EXIT
+
 okclient
 
 kill %1 || true
 kill %2 || true
+
+trap - EXIT
