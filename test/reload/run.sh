@@ -28,6 +28,11 @@ cp config.1.yaml config.yaml
 
 LOG_LEVEL=debug oathkeeper --config ./config.yaml serve >> ./oathkeeper.log 2>&1 &
 
+function finish {
+  cat ./oathkeeper.log
+}
+trap finish EXIT
+
 waitport 6060
 waitport 6061
 

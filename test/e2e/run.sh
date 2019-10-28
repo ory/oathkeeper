@@ -31,6 +31,11 @@ go install github.com/ory/oathkeeper/test/e2e/okclient
 oathkeeper --config ./config.yml serve >> ./oathkeeper.e2e.log 2>&1 &
 PORT=6662 okapi >> ./api.e2e.log 2>&1 &
 
+function finish {
+  cat ./oathkeeper.log
+}
+trap finish EXIT
+
 waitport 6660
 waitport 6661
 waitport 6662
