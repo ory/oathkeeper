@@ -21,6 +21,7 @@ import (
 	"github.com/ory/oathkeeper/pipeline/authn"
 	"github.com/ory/oathkeeper/pipeline/authz"
 	"github.com/ory/oathkeeper/pipeline/mutate"
+	"github.com/ory/oathkeeper/x"
 )
 
 func TestPipelineConfig(t *testing.T) {
@@ -56,9 +57,9 @@ func TestPipelineConfig(t *testing.T) {
 		require.NoError(t, p.PipelineConfig("mutators", "hydrator", json.RawMessage(``), &dec))
 		assert.Equal(t, "https://some-url/", dec.Api.URL)
 
-		require.NoError(t, p.PipelineConfig("mutators", "hydrator", json.RawMessage(`{"api":{"url":"http://override-url/foo","retry":{"number_of_retries":15}}}`), &dec))
+		require.NoError(t, p.PipelineConfig("mutators", "hydrator", json.RawMessage(`{"api":{"url":"http://override-url/foo","retry":{"give_up_after":"15s"}}}`), &dec))
 		assert.Equal(t, "http://override-url/foo", dec.Api.URL)
-		assert.Equal(t, 15, dec.Api.Retry.NumberOfRetries)
+		assert.Equal(t, "15s", dec.Api.Retry.GiveUpAfter)
 	})
 
 	t.Run("case=should pass array values", func(t *testing.T) {
@@ -267,7 +268,7 @@ func TestViperProvider(t *testing.T) {
 		})
 
 		t.Run("mutator=hydrator", func(t *testing.T) {
-			a := mutate.NewMutatorHydrator(p)
+			a := mutate.NewMutatorHydrator(p, new(x.TestLoggerProvider))
 			assert.True(t, p.MutatorIsEnabled(a.GetID()))
 			require.NoError(t, a.Validate(nil))
 		})

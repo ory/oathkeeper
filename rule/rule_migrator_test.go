@@ -44,6 +44,43 @@ func TestRuleMigration(t *testing.T) {
 			out:     `{"id":"","version":"v0.19.0-beta.1","description":"","match":{"methods":null,"url":""},"authenticators":null,"authorizer":{"handler":"","config":null},"mutators":null,"upstream":{"preserve_host":false,"strip_path":"","url":""}}`,
 			version: "v0.19.0-beta.1+oryOS.12",
 		},
+		{
+			d:       "should migrate to 0.33.0",
+			in:      `{
+  "version": "v0.30.0-beta.1",
+  "mutators": [
+	{},	
+    {
+      "handler": "hydrator",
+      "config": {
+        "retry": {
+          "delay_in_milliseconds": 500,
+          "number_of_retries": 5
+        }
+      }
+    }
+  ]
+}`,
+			out:     `{
+  "id": "",
+  "version": "v0.33.0-beta.1",
+  "description":"","match":{"methods":null,"url":""},"authenticators":null,"authorizer":{"handler":"","config":null},
+  "mutators": [
+	{"handler":"","config":null},
+    {
+      "handler": "hydrator",
+      "config": {
+        "retry": {
+          "max_delay": "500ms",
+          "give_up_after": "2500ms"
+        }
+      }
+    }
+  ],
+  "upstream":{"preserve_host":false,"strip_path":"","url":""}
+}`,
+			version: "v0.33.0-beta.1+oryOS.12",
+		},
 	} {
 		t.Run(fmt.Sprintf("case=%d/description=%s", k, tc.d), func(t *testing.T) {
 			var r Rule

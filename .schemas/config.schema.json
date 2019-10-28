@@ -615,15 +615,15 @@
               "type": "object",
               "additionalProperties": false,
               "properties": {
-                "number_of_retries": {
-                  "type": "number",
-                  "minimum": 0,
-                  "default": 100
+                "give_up_after": {
+                  "type": "string",
+                  "default": "1s",
+                  "pattern": "^[0-9]+(ns|us|ms|s|m|h)$"
                 },
-                "delay_in_milliseconds": {
-                  "type": "number",
-                  "minimum": 0,
-                  "default": 3
+                "max_delay": {
+                  "type": "string",
+                  "pattern": "^[0-9]+(ns|us|ms|s|m|h)$",
+                  "default": "100ms"
                 }
               }
             }

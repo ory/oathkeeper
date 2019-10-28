@@ -28,8 +28,7 @@ import (
 	"time"
 
 	"github.com/ory/oathkeeper/pipeline/authn"
-
-	"github.com/cenkalti/backoff"
+	"github.com/ory/oathkeeper/x"
 
 	"github.com/ory/x/httpx"
 
@@ -55,6 +54,7 @@ const (
 type MutatorHydrator struct {
 	c      configuration.Provider
 	client *http.Client
+	d      mutatorHydratorDependencies
 }
 
 type BasicAuth struct {
@@ -67,8 +67,8 @@ type auth struct {
 }
 
 type retryConfig struct {
-	NumberOfRetries     int `json:"number_of_retries"`
-	DelayInMilliseconds int `json:"delay_in_milliseconds"`
+	MaxDelay    string `json:"max_delay"`
+	GiveUpAfter string `json:"give_up_after"`
 }
 
 type externalAPIConfig struct {
@@ -81,8 +81,12 @@ type MutatorHydratorConfig struct {
 	Api externalAPIConfig `json:"api"`
 }
 
-func NewMutatorHydrator(c configuration.Provider) *MutatorHydrator {
-	return &MutatorHydrator{c: c, client: httpx.NewResilientClientLatencyToleranceSmall(nil)}
+type mutatorHydratorDependencies interface {
+	x.RegistryLogger
+}
+
+func NewMutatorHydrator(c configuration.Provider, d mutatorHydratorDependencies) *MutatorHydrator {
+	return &MutatorHydrator{c: c, d: d, client: httpx.NewResilientClientLatencyToleranceSmall(nil)}
 }
 
 func (a *MutatorHydrator) GetID() string {
@@ -120,31 +124,44 @@ func (a *MutatorHydrator) Mutate(r *http.Request, session *authn.AuthenticationS
 	}
 	req.Header.Set(contentTypeHeaderKey, contentTypeJSONHeaderValue)
 
-	retryConfig := retryConfig{defaultNumberOfRetries, defaultDelayInMilliseconds}
+	var client http.Client
 	if cfg.Api.Retry != nil {
-		retryConfig = *cfg.Api.Retry
-	}
-	var res *http.Response
-	err = backoff.Retry(func() error {
-		res, err = a.client.Do(req)
-		if err != nil {
-			return errors.WithStack(err)
-		}
-		switch res.StatusCode {
-		case http.StatusOK:
-			return nil
-		case http.StatusUnauthorized:
-			if cfg.Api.Auth != nil {
-				return errors.New(ErrInvalidCredentials)
+		maxRetryDelay := time.Second
+		giveUpAfter := time.Millisecond * 50
+		if len(cfg.Api.Retry.MaxDelay) > 0 {
+			if d, err := time.ParseDuration(cfg.Api.Retry.MaxDelay); err != nil {
+				a.d.Logger().WithError(err).Warn("Unable to parse max_delay in the Hydrator Mutator, falling pack to default.")
 			} else {
-				return errors.New(ErrNoCredentialsProvided)
+				maxRetryDelay = d
 			}
-		default:
-			return errors.New(ErrNon200ResponseFromAPI)
 		}
-	}, backoff.WithMaxRetries(backoff.NewConstantBackOff(time.Millisecond*time.Duration(retryConfig.DelayInMilliseconds)), uint64(retryConfig.NumberOfRetries)))
+		if len(cfg.Api.Retry.GiveUpAfter) > 0 {
+			if d, err := time.ParseDuration(cfg.Api.Retry.GiveUpAfter); err != nil {
+				a.d.Logger().WithError(err).Warn("Unable to parse max_delay in the Hydrator Mutator, falling pack to default.")
+			} else {
+				giveUpAfter = d
+			}
+		}
+
+		client.Transport = httpx.NewResilientRoundTripper(a.client.Transport, maxRetryDelay, giveUpAfter)
+	}
+
+	res, err := client.Do(req)
 	if err != nil {
-		return err
+		return errors.WithStack(err)
+	}
+	defer res.Body.Close()
+
+	switch res.StatusCode {
+	case http.StatusOK:
+	case http.StatusUnauthorized:
+		if cfg.Api.Auth != nil {
+			return errors.New(ErrInvalidCredentials)
+		} else {
+			return errors.New(ErrNoCredentialsProvided)
+		}
+	default:
+		return errors.New(ErrNon200ResponseFromAPI)
 	}
 
 	sessionFromUpstream := authn.AuthenticationSession{}
