@@ -33,6 +33,10 @@ go install github.com/ory/oathkeeper/test/e2e/okclient
 oathkeeper --config ./config.yml serve >> ./oathkeeper.e2e.log 2>&1 &
 PORT=6662 okapi >> ./api.e2e.log 2>&1 &
 
+waitport 6660
+waitport 6661
+waitport 6662
+
 function finish {
   cat ./oathkeeper.e2e.log
   echo "-----"
@@ -40,11 +44,9 @@ function finish {
 }
 trap finish EXIT
 
-waitport 6660
-waitport 6661
-waitport 6662
-
 okclient
 
 kill %1 || true
 kill %2 || true
+
+trap - EXIT

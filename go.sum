@@ -521,8 +521,8 @@ github.com/ory/ladon v1.0.1/go.mod h1:1VhCA2mBtaMhRUS6VS0d9qrNVDQnFXqSRb5D0NvQUP
 github.com/ory/pagination v0.0.1/go.mod h1:d1ToRROAUleriPhmb2dYbhANhhLwZ8s395m2yJCDFh8=
 github.com/ory/viper v1.5.6 h1:w4ceGgWwWLzAFYQ7bHaDZmwNsAto2JPVdyQjQnn7VWI=
 github.com/ory/viper v1.5.6/go.mod h1:TYmpFpKLxjQwvT4f0QPpkOn4sDXU1kDgAwJpgLYiQ28=
-github.com/ory/x v0.0.79 h1:epo/41vLUB/GdgJ1qNxKK7hYqzCUu1GpKVsAGUu9EA0=
-github.com/ory/x v0.0.79/go.mod h1:WVlPrVNe4wtPfdXqE6B+x7a7xoTR2EFGIGxZTPdAuxw=
+github.com/ory/x v0.0.80 h1:Gv8puLh2Yn3cyx0k9vweQSfoR+xwgQAPQotkqX43Rjo=
+github.com/ory/x v0.0.80/go.mod h1:WVlPrVNe4wtPfdXqE6B+x7a7xoTR2EFGIGxZTPdAuxw=
 github.com/parnurzeal/gorequest v0.2.15/go.mod h1:3Kh2QUMJoqw3icWAecsyzkpY7UzRfDhbRdTjtNwNiUE=
 github.com/pborman/uuid v1.2.0 h1:J7Q5mO4ysT1dv8hyrUGHb9+ooztCXu1D8MY8DZYsu3g=
 github.com/pborman/uuid v1.2.0/go.mod h1:X/NO0urCmaxf9VXbdlT7C2Yzkj2IKimNn4k+gtPdI/k=
