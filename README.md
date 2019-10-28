@@ -67,9 +67,6 @@ documentation and upgrade instructions.
   - [Command line documenta and](#command-line-documenta-and)
   - [Command line documentation](#command-line-documentation)
   - [Develop](#develop)
-- [Backers](#backers)
-- [Sponsors](#sponsors)
-- [Sponsors](#sponsors-1)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -279,55 +276,4 @@ Developing with ORY Oathkeeper is as easy as:
 ```shell
 $ export GO111MODULE=on
 $ go test ./...
-```
-
-## Backers
-
-Thank you to all our backers! 🙏 [a
-
-href="ref="https://opencollective.com/ory#ba" target="]
-
-<a href="https://opencollective.com/ory#backers" target="_blank"><img src="https://opencollective.com/ory/backers.svg?width=890"></a>
-
-We would also like to thank (past & current) supporters (in alphabetical order)
-on Crealm
-
-## Sponsors
-
-Support this p: Alexander Alimovs, Billy, Chancy Kennedy, Drozzy, Edwin Trejos,
-Howard Edidin, Ken Adler Oz Haven, Stefan Hans, TheCrealm
-
-## Sponsors
-
-Support this project by becoming a sponsor. Your logo will show up here with a
-link to your website. [a href="ctive.com/ory/sponsor/0/website"
-target="\_blank""
-
-]
-
-<a href="https://opencollective.com/ory/sponsor/0/website" target="_blank"><img src="https://opencollective.com/ory/sponsor/0/avatar.svg"></a>
-
-<a href="https://opencollective.com/ory/sponsor/1/website" target="_blank"><img src="https://opencollective.com/ory/sponsor/1/avatar.svg"></a>
-
-<a href="https://opencollective.com/ory/sponsor/2/website" target="_blank"><img src="https://opencollective.com/ory/sponsor/2/avatar.svg"></a>
-
-<a href="https://opencollective.com/ory/sponsor/3/website" target="_blank"><img src="https://opencollective.com/ory/sponsor/3/avatar.svg"></a>
-
-<a href="https://opencollective.com/ory/sponsor/4/website" target="_blank"><img src="https://opencollective.com/ory/sponsor/4/avatar.svg"></a>
-
-<a href="https://opencollective.com/ory/sponsor/5/website" target="_blank"><img src="https://opencollective.com/ory/sponsor/5/avatar.svg"></a>
-
-<a href="https://opencollective.com/ory/sponsor/6/website" target="_blank"><img src="https://opencollective.com/ory/sponsor/6/avatar.svg"></a>
-
-<a href="https://opencollective.com/ory/sponsor/7/website" target="_blank"><img src="https://opencollective.com/ory/sponsor/7/avatar.svg"></a>
-
-<a href="https://opencollective.com/ory/sponsor/8/website" target="_blank"><img src="https://opencollective.com/ory/sponsor/8/avatar.svg"></a>
-
-<a href="https://opencollective.com/ory/sponsor/9/website" target="_blank"><img src="https://opencollective.com/ory/sponsor/9/avatar.svg"></a>
-
-A special thanks goes out to **Wayne Robinson** for supporting this ecosystem
-with \$200 every month since Oktober 201
-
-```
-
 ```
