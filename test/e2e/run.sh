@@ -34,7 +34,9 @@ oathkeeper --config ./config.yml serve >> ./oathkeeper.e2e.log 2>&1 &
 PORT=6662 okapi >> ./api.e2e.log 2>&1 &
 
 function finish {
-  cat ./oathkeeper.log
+  cat ./oathkeeper.e2e.log
+  echo "-----"
+  cat ./api.e2e.log
 }
 trap finish EXIT
 
