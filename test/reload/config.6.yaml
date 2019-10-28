@@ -5,7 +5,7 @@ serve:
     port: 6060
 
 access_rules:
-  repositories:
+  repositories: []
 
 authenticators:
   noop:
