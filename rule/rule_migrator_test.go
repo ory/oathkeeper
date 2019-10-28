@@ -45,8 +45,8 @@ func TestRuleMigration(t *testing.T) {
 			version: "v0.19.0-beta.1+oryOS.12",
 		},
 		{
-			d:       "should migrate to 0.33.0",
-			in:      `{
+			d: "should migrate to 0.33.0",
+			in: `{
   "version": "v0.30.0-beta.1",
   "mutators": [
 	{},	
@@ -61,7 +61,7 @@ func TestRuleMigration(t *testing.T) {
     }
   ]
 }`,
-			out:     `{
+			out: `{
   "id": "",
   "version": "v0.33.0-beta.1",
   "description":"","match":{"methods":null,"url":""},"authenticators":null,"authorizer":{"handler":"","config":null},

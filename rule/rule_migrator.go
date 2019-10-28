@@ -50,7 +50,6 @@ func migrateRuleJSON(raw []byte) ([]byte, error) {
 					continue
 				}
 
-
 				rj := gjson.GetBytes(raw, fmt.Sprintf(`mutators.%d.config.retry.number_of_retries`, key))
 				dj := gjson.GetBytes(raw, fmt.Sprintf(`mutators.%d.config.retry.delay_in_milliseconds`, key))
 

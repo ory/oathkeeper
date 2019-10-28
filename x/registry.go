@@ -6,7 +6,7 @@ import (
 	"github.com/ory/herodot"
 )
 
-type TestLoggerProvider struct {}
+type TestLoggerProvider struct{}
 
 func (lp *TestLoggerProvider) Logger() logrus.FieldLogger {
 	return logrus.New()

@@ -48,12 +48,14 @@ before finalizing the upgrade process.
 
 The "mutator" hydrator config has changed:
 
-- `config.retry.delay_in_milliseconds: 100` (int) is now `config.retry.max_delay: 100ms` (duration)
-- `config.retry.max_retries: 3` (int) is now `config.retry.give_up_after: 1s` (duration)
+- `config.retry.delay_in_milliseconds: 100` (int) is now
+  `config.retry.max_delay: 100ms` (duration)
+- `config.retry.max_retries: 3` (int) is now `config.retry.give_up_after: 1s`
+  (duration)
 
-A new feature introduce in this release allows to keep using existing access rules
-by setting `"version": "v0.32.0-beta.1"` in the existing rules. ORY Oathkeeper will
-migrate the old config to the new config.
+A new feature introduce in this release allows to keep using existing access
+rules by setting `"version": "v0.32.0-beta.1"` in the existing rules. ORY
+Oathkeeper will migrate the old config to the new config.
 
 This access rule definition will properly be migrated:
 
