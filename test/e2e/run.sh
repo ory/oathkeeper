@@ -7,7 +7,9 @@ waitport() {
   while ! nc -z localhost "$1" ; do
     sleep 1
     if [ $i -gt 10 ]; then
-      cat ./oathkeeper.log
+      cat ./oathkeeper.e2e.log
+      echo "-----"
+      cat ./api.e2e.log
       exit 1
     fi
     i=$((i+1))
