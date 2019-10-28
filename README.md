@@ -42,41 +42,34 @@ documentation and upgrade instructions.
 
 ---
 
-<!-- START doctoc generated TOC please keep comment here to allow
-
-![Go Report Card](https://goreportcard.com/badge/github.com/ory/oathkeeper)
-
----
-
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+![Go Report Card](https://goreportcard.com/badge/github.com/ory/oathkeeper)
 
 - [Installation](#installation)
-- - [ORY Security Console: Administ
-- - [ORY Hydra: OAuth2 &
+- [Who's using it?](#whos-using-it)
+- [Ecosystem](#ecosystem)
   - [ORY Security Console: Administrative User Interface](#ory-security-console-administrative-user-interface)
   - [ORY Hydra: OAuth2 & OpenID Connect Server](#ory-hydra-oauth2--openid-connect-server)
-  - ecurity](#security)
-  - [Disclosing vulnerabilities](#disclosing-vulnerabilities)
-- [Telemet
+  - [ORY Keto: Access Control Policies as a Server](#ory-keto-access-control-policies-as-a-server)
   - [Examples](#examples)
 - [Security](#security)
-  - ocumentation](#documentation)
+- [Security](#security-1)
+  - [Disclosing vulnerabilities](#disclosing-vulnerabilities)
+- [Telemetry](#telemetry)
+- [Telemetry](#telemetry-1)
   - [Guide](#guide)
-  - [
-- - [Guide](#guide)
-  -
-- - [HTTP API documentation](#htt
-  - [Guide](#guide)
+- [Documentation](#documentation)
+  - [Guide](#guide-1)
   - [HTTP API documentation](#http-api-documentation)
   - [Upgrading and Changelog](#upgrading-and-changelog)
-  - ackers](#backers)
+  - [Upgrading and Changelog](#upgrading-and-changelog-1)
+  - [Command line documenta and](#command-line-documenta-and)
+  - [Command line documentation](#command-line-documentation)
+  - [Develop](#develop)
+- [Backers](#backers)
 - [Sponsors](#sponsors)
-
-<!-- END do
-  - ponsors](#sponsors)
-- <#backers>
-- -- END doctoc generat
+- [Sponsors](#sponsors-1)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -203,9 +196,7 @@ Edwin Trejos, Howard Edidin, Ken Adler Oz Haven, Stefan Hans, TheCrealm.
 
 ### ORY Security Console: Administrative User Interface
 
-The # ORY Hydra: OAuth2 & OpenID Connect Server
-
-is a visual admin interface for managing ORY Hydra, ORY Oathkeeper, and ORY
+The ORY Security Console is a visual admin interface for managing ORY Hydra, ORY Oathkeeper, and ORY
 Keto.
 
 ### ORY Hydra: OAuth2 & OpenID Connect Server
@@ -288,14 +279,6 @@ Developing with ORY Oathkeeper is as easy as:
 ```shell
 $ export GO111MODULE=on
 $ go test ./...
-```
-
-#
-
-```
-
-##
-
 ```
 
 ## Backers
