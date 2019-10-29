@@ -107,6 +107,8 @@ func TestAuthorizerKetoWarden(t *testing.T) {
 			r: &http.Request{URL: &url.URL{}},
 			setup: func(t *testing.T) *httptest.Server {
 				return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+					assert.Contains(t, r.Header, "Content-Type")
+					assert.Contains(t, r.Header["Content-Type"], "application/json")
 					assert.Contains(t, r.URL.Path, "exact")
 					w.Write([]byte(`{"allowed":false}`))
 				}))
