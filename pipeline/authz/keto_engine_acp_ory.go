@@ -140,6 +140,7 @@ func (a *AuthorizerKetoEngineACPORY) Authorize(r *http.Request, session *authn.A
 	}
 
 	req, err := http.NewRequest("POST", urlx.AppendPaths(baseURL, "/engines/acp/ory", flavor, "/allowed").String(), &b)
+	req.Header.Add("Content-Type", "application/json")
 	if err != nil {
 		return errors.WithStack(err)
 	}
