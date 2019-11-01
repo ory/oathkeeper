@@ -109,10 +109,11 @@ func (m *RepositoryMemory) Match(ctx context.Context, method string, u *url.URL)
 	defer m.RUnlock()
 
 	var rules []Rule
-	for _, rule := range m.rules {
+	for i, rule := range m.rules {
 		if err := rule.IsMatching(method, u); err == nil {
 			rules = append(rules, rule)
 		}
+		m.rules[i] = rule
 	}
 
 	if len(rules) == 0 {

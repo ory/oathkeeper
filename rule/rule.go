@@ -173,7 +173,7 @@ func (r *Rule) IsMatching(method string, u *url.URL) error {
 }
 
 func (r *Rule) CompileURL() (*regexp.Regexp, error) {
-	m := r.Match
+	m := &r.Match
 	c := crc32.ChecksumIEEE([]byte(m.URL))
 	if m.compiledURL == nil || c != m.compiledURLChecksum {
 		r, err := compiler.CompileRegex(m.URL, '<', '>')
