@@ -66,7 +66,7 @@ func (a *AuthenticatorCookieSession) Authenticate(r *http.Request, config json.R
 	origin := cf.CheckSessionURL
 	body, err := forwardRequestToSessionStore(r, origin)
 	if err != nil {
-		return nil, helper.ErrForbidden.WithReason(err.Error()).WithTrace(err)
+		return nil, err
 	}
 
 	var session struct {
@@ -115,10 +115,12 @@ func forwardRequestToSessionStore(r *http.Request, checkSessionURL string) (json
 	if res.StatusCode == 200 {
 		body, err := ioutil.ReadAll(res.Body)
 		if err != nil {
-			return json.RawMessage{}, err
+			return json.RawMessage{}, helper.ErrForbidden.WithReason(err.Error()).WithTrace(err)
 		}
 		return json.RawMessage(body), nil
-	} else {
-		return json.RawMessage{}, errors.WithStack(helper.ErrUnauthorized)
+	} else if res.StatusCode == 401 {
+		return json.RawMessage{}, helper.ErrUnauthorized
 	}
+
+	return json.RawMessage{}, errors.WithStack(helper.ErrUnauthorized)
 }
