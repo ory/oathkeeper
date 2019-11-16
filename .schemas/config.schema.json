@@ -468,6 +468,11 @@
             "type": "string"
           }
         },
+        "request_headers": {
+          "title": "Request Headers",
+          "description": "Additional headers to be added to the request to the OAuth2 Introspection URL",
+          "type": "object"
+        },
         "token_from": {
           "title": "Token From",
           "description": "The location of the token.\n If not configured, the token will be received from a default location - 'Authorization' header.\n One and only one location (header or query) must be specified.",
