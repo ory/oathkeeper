@@ -20,14 +20,14 @@ import (
 )
 
 type AuthenticatorOAuth2IntrospectionConfiguration struct {
-	Scopes              []string                                              `json:"required_scope"`
-	Audience            []string                                              `json:"target_audience"`
-	Issuers             []string                                              `json:"trusted_issuers"`
-	PreAuth             *AuthenticatorOAuth2IntrospectionPreAuthConfiguration `json:"pre_authorization"`
-	ScopeStrategy       string                                                `json:"scope_strategy"`
-	IntrospectionURL    string                                                `json:"introspection_url"`
-	BearerTokenLocation *helper.BearerTokenLocation                           `json:"token_from"`
-	RequestHeaders      map[string]string                                     `json:"request_headers"`
+	Scopes                      []string                                              `json:"required_scope"`
+	Audience                    []string                                              `json:"target_audience"`
+	Issuers                     []string                                              `json:"trusted_issuers"`
+	PreAuth                     *AuthenticatorOAuth2IntrospectionPreAuthConfiguration `json:"pre_authorization"`
+	ScopeStrategy               string                                                `json:"scope_strategy"`
+	IntrospectionURL            string                                                `json:"introspection_url"`
+	BearerTokenLocation         *helper.BearerTokenLocation                           `json:"token_from"`
+	IntrospectionRequestHeaders map[string]string                                     `json:"introspection_request_headers"`
 }
 
 type AuthenticatorOAuth2IntrospectionPreAuthConfiguration struct {
@@ -82,7 +82,7 @@ func (a *AuthenticatorOAuth2Introspection) Authenticate(r *http.Request, config 
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
-	for key, value := range cf.RequestHeaders {
+	for key, value := range cf.IntrospectionRequestHeaders {
 		introspectReq.Header.Set(key, value)
 	}
 	// set/override the content-type header

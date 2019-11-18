@@ -468,9 +468,9 @@
             "type": "string"
           }
         },
-        "request_headers": {
-          "title": "Request Headers",
-          "description": "Additional headers to be added to the request to the OAuth2 Introspection URL",
+        "introspection_request_headers": {
+          "title": "Introspection Request Headers",
+          "description": "Additional headers to be added to the introspection request.",
           "type": "object"
         },
         "token_from": {
