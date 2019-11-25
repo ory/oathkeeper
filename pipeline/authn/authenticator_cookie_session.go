@@ -19,6 +19,7 @@ type AuthenticatorCookieSessionFilter struct {
 type AuthenticatorCookieSessionConfiguration struct {
 	Only            []string `json:"only"`
 	CheckSessionURL string   `json:"check_session_url"`
+	PreservePath    bool     `json:"preserve_path"`
 }
 
 type AuthenticatorCookieSession struct {
@@ -64,7 +65,8 @@ func (a *AuthenticatorCookieSession) Authenticate(r *http.Request, config json.R
 	}
 
 	origin := cf.CheckSessionURL
-	body, err := forwardRequestToSessionStore(r, origin)
+	preservePath := cf.PreservePath
+	body, err := forwardRequestToSessionStore(r, origin, preservePath)
 	if err != nil {
 		return nil, helper.ErrForbidden.WithReason(err.Error()).WithTrace(err)
 	}
@@ -96,12 +98,15 @@ func cookieSessionResponsible(r *http.Request, only []string) bool {
 	return false
 }
 
-func forwardRequestToSessionStore(r *http.Request, checkSessionURL string) (json.RawMessage, error) {
+func forwardRequestToSessionStore(r *http.Request, checkSessionURL string, preservePath bool) (json.RawMessage, error) {
 	reqUrl, err := url.Parse(checkSessionURL)
 	if err != nil {
 		return nil, helper.ErrForbidden.WithReason(err.Error()).WithTrace(err)
 	}
-	reqUrl.Path = r.URL.Path
+
+	if !preservePath {
+		reqUrl.Path = r.URL.Path
+	}
 
 	res, err := http.DefaultClient.Do(&http.Request{
 		Method: r.Method,

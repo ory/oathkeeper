@@ -68,6 +68,22 @@ func TestAuthenticatorCookieSession(t *testing.T) {
 			assert.Equal(t, &AuthenticationSession{Subject: "123"}, session)
 		})
 
+		t.Run("description=should pass through method and headers ONLY to auth server when PreservePath is true", func(t *testing.T) {
+			testServer, requestRecorder := makeServer(200, `{"subject": "123"}`)
+			session, err := pipelineAuthenticator.Authenticate(
+				makeRequest("PUT", "/users/123?query=string", map[string]string{"sessionid": "zyx"}, ""),
+				json.RawMessage(fmt.Sprintf(`{"check_session_url": "%s", "preserve_path": true}`, testServer.URL)),
+				nil,
+			)
+			require.NoError(t, err, "%#v", errors.Cause(err))
+			assert.Len(t, requestRecorder.requests, 1)
+			r := requestRecorder.requests[0]
+			assert.Equal(t, r.Method, "PUT")
+			assert.Equal(t, r.URL.Path, "/")
+			assert.Equal(t, r.Header.Get("Cookie"), "sessionid=zyx")
+			assert.Equal(t, &AuthenticationSession{Subject: "123"}, session)
+		})
+
 		t.Run("description=does not pass request body through to auth server", func(t *testing.T) {
 			testServer, requestRecorder := makeServer(200, `{}`)
 			pipelineAuthenticator.Authenticate(
