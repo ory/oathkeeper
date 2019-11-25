@@ -20,13 +20,14 @@ import (
 )
 
 type AuthenticatorOAuth2IntrospectionConfiguration struct {
-	Scopes              []string                                              `json:"required_scope"`
-	Audience            []string                                              `json:"target_audience"`
-	Issuers             []string                                              `json:"trusted_issuers"`
-	PreAuth             *AuthenticatorOAuth2IntrospectionPreAuthConfiguration `json:"pre_authorization"`
-	ScopeStrategy       string                                                `json:"scope_strategy"`
-	IntrospectionURL    string                                                `json:"introspection_url"`
-	BearerTokenLocation *helper.BearerTokenLocation                           `json:"token_from"`
+	Scopes                      []string                                              `json:"required_scope"`
+	Audience                    []string                                              `json:"target_audience"`
+	Issuers                     []string                                              `json:"trusted_issuers"`
+	PreAuth                     *AuthenticatorOAuth2IntrospectionPreAuthConfiguration `json:"pre_authorization"`
+	ScopeStrategy               string                                                `json:"scope_strategy"`
+	IntrospectionURL            string                                                `json:"introspection_url"`
+	BearerTokenLocation         *helper.BearerTokenLocation                           `json:"token_from"`
+	IntrospectionRequestHeaders map[string]string                                     `json:"introspection_request_headers"`
 }
 
 type AuthenticatorOAuth2IntrospectionPreAuthConfiguration struct {
@@ -77,7 +78,16 @@ func (a *AuthenticatorOAuth2Introspection) Authenticate(r *http.Request, config 
 	}
 
 	body := url.Values{"token": {token}, "scope": {strings.Join(cf.Scopes, " ")}}
-	resp, err := a.client.Post(cf.IntrospectionURL, "application/x-www-form-urlencoded", strings.NewReader(body.Encode()))
+	introspectReq, err := http.NewRequest(http.MethodPost, cf.IntrospectionURL, strings.NewReader(body.Encode()))
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+	for key, value := range cf.IntrospectionRequestHeaders {
+		introspectReq.Header.Set(key, value)
+	}
+	// set/override the content-type header
+	introspectReq.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	resp, err := a.client.Do(introspectReq)
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
@@ -96,7 +106,7 @@ func (a *AuthenticatorOAuth2Introspection) Authenticate(r *http.Request, config 
 	}
 
 	if !i.Active {
-		return nil, errors.WithStack(helper.ErrForbidden.WithReason("Access token i says token is not active"))
+		return nil, errors.WithStack(helper.ErrUnauthorized.WithReason("Access token i says token is not active"))
 	}
 
 	for _, audience := range cf.Audience {
