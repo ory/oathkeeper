@@ -32,6 +32,7 @@ const (
 type BearerTokenLocation struct {
 	Header         *string `json:"header"`
 	QueryParameter *string `json:"query_parameter"`
+	Cookie         *string `json:"cookie"`
 }
 
 func BearerTokenFromRequest(r *http.Request, tokenLocation *BearerTokenLocation) string {
@@ -40,6 +41,12 @@ func BearerTokenFromRequest(r *http.Request, tokenLocation *BearerTokenLocation)
 			return r.Header.Get(*tokenLocation.Header)
 		} else if tokenLocation.QueryParameter != nil {
 			return r.FormValue(*tokenLocation.QueryParameter)
+		} else if tokenLocation.Cookie != nil {
+			cookie, err := r.Cookie(*tokenLocation.Cookie)
+			if err != nil {
+				return ""
+			}
+			return cookie.Value
 		}
 	}
 	token := r.Header.Get(defaultAuthorizationHeader)
