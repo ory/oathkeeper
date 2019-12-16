@@ -112,9 +112,9 @@ func configWithBasicAuthnForMutator(user, password string) func(*httptest.Server
 	}
 }
 
-func configWithRetriesForMutator(numberOfRetries, retriesDelayInMilliseconds int) func(*httptest.Server) json.RawMessage {
+func configWithRetriesForMutator(giveUpAfter, retryDelay string) func(*httptest.Server) json.RawMessage {
 	return func(s *httptest.Server) json.RawMessage {
-		return []byte(fmt.Sprintf(`{"api": {"url": "%s", "retry": {"number_of_retries": %d, "delay_in_milliseconds": %d}}}`, s.URL, numberOfRetries, retriesDelayInMilliseconds))
+		return []byte(fmt.Sprintf(`{"api": {"url": "%s", "retry": {"give_up_after": "%s", "max_delay": "%s"}}}`, s.URL, giveUpAfter, retryDelay))
 	}
 }
 
@@ -310,7 +310,7 @@ func TestMutatorHydrator(t *testing.T) {
 				Setup:   withInitialErrors(defaultRouterSetup(setExtra(sampleKey, sampleValue)), 2, http.StatusInternalServerError),
 				Session: newAuthenticationSession(),
 				Rule:    &rule.Rule{ID: "test-rule"},
-				Config:  configWithRetriesForMutator(3, 100),
+				Config:  configWithRetriesForMutator("1s", "100ms"),
 				Request: &http.Request{},
 				Match:   newAuthenticationSession(setExtra(sampleKey, sampleValue)),
 				Err:     nil,
