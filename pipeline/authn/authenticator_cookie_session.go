@@ -8,6 +8,8 @@ import (
 
 	"github.com/pkg/errors"
 
+	"github.com/ory/herodot"
+
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/helper"
 	"github.com/ory/oathkeeper/pipeline"
@@ -68,7 +70,7 @@ func (a *AuthenticatorCookieSession) Authenticate(r *http.Request, config json.R
 	preservePath := cf.PreservePath
 	body, err := forwardRequestToSessionStore(r, origin, preservePath)
 	if err != nil {
-		return nil, helper.ErrForbidden.WithReason(err.Error()).WithTrace(err)
+		return nil, err
 	}
 
 	var session struct {
@@ -101,7 +103,7 @@ func cookieSessionResponsible(r *http.Request, only []string) bool {
 func forwardRequestToSessionStore(r *http.Request, checkSessionURL string, preservePath bool) (json.RawMessage, error) {
 	reqUrl, err := url.Parse(checkSessionURL)
 	if err != nil {
-		return nil, helper.ErrForbidden.WithReason(err.Error()).WithTrace(err)
+		return nil, errors.WithStack(herodot.ErrInternalServerError.WithReasonf("Unable to parse session check URL: %s", err))
 	}
 
 	if !preservePath {
@@ -120,9 +122,9 @@ func forwardRequestToSessionStore(r *http.Request, checkSessionURL string, prese
 	if res.StatusCode == 200 {
 		body, err := ioutil.ReadAll(res.Body)
 		if err != nil {
-			return json.RawMessage{}, err
+			return json.RawMessage{}, errors.WithStack(herodot.ErrInternalServerError.WithReasonf("Unable to fetch cookie session context from remote: %+v", err))
 		}
-		return json.RawMessage(body), nil
+		return body, nil
 	} else {
 		return json.RawMessage{}, errors.WithStack(helper.ErrUnauthorized)
 	}
