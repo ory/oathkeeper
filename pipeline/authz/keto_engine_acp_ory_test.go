@@ -70,7 +70,7 @@ func TestAuthorizerKetoWarden(t *testing.T) {
 		{
 			config: []byte(`{ "required_action": "action", "required_resource": "resource" }`),
 			rule: &rule.Rule{
-				Match: rule.RuleMatch{
+				Match: &rule.RuleMatch{
 					Methods: []string{"POST"},
 					URL:     "https://localhost/",
 				},
@@ -82,7 +82,7 @@ func TestAuthorizerKetoWarden(t *testing.T) {
 		{
 			config: []byte(`{ "required_action": "action", "required_resource": "resource", "flavor": "regex" }`),
 			rule: &rule.Rule{
-				Match: rule.RuleMatch{
+				Match: &rule.RuleMatch{
 					Methods: []string{"POST"},
 					URL:     "https://localhost/",
 				},
@@ -99,7 +99,7 @@ func TestAuthorizerKetoWarden(t *testing.T) {
 		{
 			config: []byte(`{ "required_action": "action", "required_resource": "resource", "flavor": "exact" }`),
 			rule: &rule.Rule{
-				Match: rule.RuleMatch{
+				Match: &rule.RuleMatch{
 					Methods: []string{"POST"},
 					URL:     "https://localhost/",
 				},
@@ -119,7 +119,7 @@ func TestAuthorizerKetoWarden(t *testing.T) {
 		{
 			config: []byte(`{ "required_action": "action:$1:$2", "required_resource": "resource:$1:$2" }`),
 			rule: &rule.Rule{
-				Match: rule.RuleMatch{
+				Match: &rule.RuleMatch{
 					Methods: []string{"POST"},
 					URL:     "https://localhost/api/users/<[0-9]+>/<[a-z]+>",
 				},
@@ -145,7 +145,7 @@ func TestAuthorizerKetoWarden(t *testing.T) {
 		{
 			config: []byte(`{ "required_action": "action:$1:$2", "required_resource": "resource:$1:$2", "subject": "{{ .Extra.name }}" }`),
 			rule: &rule.Rule{
-				Match: rule.RuleMatch{
+				Match: &rule.RuleMatch{
 					Methods: []string{"POST"},
 					URL:     "https://localhost/api/users/<[0-9]+>/<[a-z]+>",
 				},
@@ -171,7 +171,7 @@ func TestAuthorizerKetoWarden(t *testing.T) {
 		{
 			config: []byte(`{ "required_action": "action:$1:$2", "required_resource": "resource:$1:$2", "subject": "{{ .Extra.name }}" }`),
 			rule: &rule.Rule{
-				Match: rule.RuleMatch{
+				Match: &rule.RuleMatch{
 					Methods: []string{"POST"},
 					URL:     "https://localhost/api/users/<[0-9]+>/<[a-z]+>",
 				},

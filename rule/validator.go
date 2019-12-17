@@ -116,6 +116,10 @@ func (v *ValidatorDefault) validateMutators(r *Rule) error {
 }
 
 func (v *ValidatorDefault) Validate(r *Rule) error {
+	if r.Match == nil {
+		return errors.WithStack(herodot.ErrInternalServerError.WithReasonf(`Value "match" is empty but must be set.`))
+	}
+
 	if r.Match.URL == "" {
 		return errors.WithStack(herodot.ErrInternalServerError.WithReasonf(`Value "%s" of "match.url" field is not a valid url.`, r.Match.URL))
 	}

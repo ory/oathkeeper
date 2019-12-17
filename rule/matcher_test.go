@@ -33,7 +33,7 @@ import (
 var testRules = []Rule{
 	{
 		ID:             "foo1",
-		Match:          RuleMatch{URL: "https://localhost:1234/<foo|bar>", Methods: []string{"POST"}},
+		Match:          &RuleMatch{URL: "https://localhost:1234/<foo|bar>", Methods: []string{"POST"}},
 		Description:    "Create users rule",
 		Authorizer:     RuleHandler{Handler: "allow", Config: []byte(`{"type":"any"}`)},
 		Authenticators: []RuleHandler{{Handler: "anonymous", Config: []byte(`{"name":"anonymous1"}`)}},
@@ -42,7 +42,7 @@ var testRules = []Rule{
 	},
 	{
 		ID:             "foo2",
-		Match:          RuleMatch{URL: "https://localhost:34/<baz|bar>", Methods: []string{"GET"}},
+		Match:          &RuleMatch{URL: "https://localhost:34/<baz|bar>", Methods: []string{"GET"}},
 		Description:    "Get users rule",
 		Authorizer:     RuleHandler{Handler: "deny", Config: []byte(`{"type":"any"}`)},
 		Authenticators: []RuleHandler{{Handler: "oauth2_introspection", Config: []byte(`{"name":"anonymous1"}`)}},
@@ -51,7 +51,7 @@ var testRules = []Rule{
 	},
 	{
 		ID:             "foo3",
-		Match:          RuleMatch{URL: "https://localhost:343/<baz|bar>", Methods: []string{"GET"}},
+		Match:          &RuleMatch{URL: "https://localhost:343/<baz|bar>", Methods: []string{"GET"}},
 		Description:    "Get users rule",
 		Authorizer:     RuleHandler{Handler: "deny"},
 		Authenticators: []RuleHandler{{Handler: "oauth2_introspection"}},
@@ -98,6 +98,15 @@ func TestMatcher(t *testing.T) {
 				testMatcher(t, matcher, "GET", "https://localhost:34/baz", false, &testRules[1])
 				testMatcher(t, matcher, "POST", "https://localhost:1234/foo", false, &testRules[0])
 				testMatcher(t, matcher, "DELETE", "https://localhost:1234/foo", true, nil)
+			})
+
+			t.Run("case=cache", func(t *testing.T) {
+				r, err := matcher.Match(context.Background(), "GET", mustParseURL(t, "https://localhost:34/baz"))
+				require.NoError(t, err)
+				got, err := matcher.Get(context.Background(), r.ID)
+				require.NoError(t, err)
+				assert.NotEmpty(t, got.Match.compiledURL)
+				assert.NotEmpty(t, got.Match.compiledURLChecksum)
 			})
 
 			require.NoError(t, matcher.Set(context.Background(), testRules[1:]))
