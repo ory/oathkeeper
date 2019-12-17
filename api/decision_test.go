@@ -59,14 +59,14 @@ func TestDecisionAPI(t *testing.T) {
 	defer ts.Close()
 
 	ruleNoOpAuthenticator := rule.Rule{
-		Match:          rule.RuleMatch{Methods: []string{"GET"}, URL: ts.URL + "/authn-noop/<[0-9]+>"},
+		Match:          &rule.RuleMatch{Methods: []string{"GET"}, URL: ts.URL + "/authn-noop/<[0-9]+>"},
 		Authenticators: []rule.RuleHandler{{Handler: "noop"}},
 		Authorizer:     rule.RuleHandler{Handler: "allow"},
 		Mutators:       []rule.RuleHandler{{Handler: "noop"}},
 		Upstream:       rule.Upstream{URL: ""},
 	}
 	ruleNoOpAuthenticatorModifyUpstream := rule.Rule{
-		Match:          rule.RuleMatch{Methods: []string{"GET"}, URL: ts.URL + "/strip-path/authn-noop/<[0-9]+>"},
+		Match:          &rule.RuleMatch{Methods: []string{"GET"}, URL: ts.URL + "/strip-path/authn-noop/<[0-9]+>"},
 		Authenticators: []rule.RuleHandler{{Handler: "noop"}},
 		Authorizer:     rule.RuleHandler{Handler: "allow"},
 		Mutators:       []rule.RuleHandler{{Handler: "noop"}},
@@ -118,7 +118,7 @@ func TestDecisionAPI(t *testing.T) {
 			d:   "should fail because no authorizer was configured",
 			url: ts.URL + "/decisions" + "/authn-anon/authz-none/cred-none/1234",
 			rules: []rule.Rule{{
-				Match:          rule.RuleMatch{Methods: []string{"GET"}, URL: ts.URL + "/authn-anon/authz-none/cred-none/<[0-9]+>"},
+				Match:          &rule.RuleMatch{Methods: []string{"GET"}, URL: ts.URL + "/authn-anon/authz-none/cred-none/<[0-9]+>"},
 				Authenticators: []rule.RuleHandler{{Handler: "anonymous"}},
 				Upstream:       rule.Upstream{URL: ""},
 			}},
@@ -131,7 +131,7 @@ func TestDecisionAPI(t *testing.T) {
 			d:   "should fail because no mutator was configured",
 			url: ts.URL + "/decisions" + "/authn-anon/authz-allow/cred-none/1234",
 			rules: []rule.Rule{{
-				Match:          rule.RuleMatch{Methods: []string{"GET"}, URL: ts.URL + "/authn-anon/authz-allow/cred-none/<[0-9]+>"},
+				Match:          &rule.RuleMatch{Methods: []string{"GET"}, URL: ts.URL + "/authn-anon/authz-allow/cred-none/<[0-9]+>"},
 				Authenticators: []rule.RuleHandler{{Handler: "anonymous"}},
 				Authorizer:     rule.RuleHandler{Handler: "allow"},
 				Upstream:       rule.Upstream{URL: ""},
@@ -142,7 +142,7 @@ func TestDecisionAPI(t *testing.T) {
 			d:   "should pass with anonymous and everything else set to noop",
 			url: ts.URL + "/decisions" + "/authn-anon/authz-allow/cred-noop/1234",
 			rules: []rule.Rule{{
-				Match:          rule.RuleMatch{Methods: []string{"GET"}, URL: ts.URL + "/authn-anon/authz-allow/cred-noop/<[0-9]+>"},
+				Match:          &rule.RuleMatch{Methods: []string{"GET"}, URL: ts.URL + "/authn-anon/authz-allow/cred-noop/<[0-9]+>"},
 				Authenticators: []rule.RuleHandler{{Handler: "anonymous"}},
 				Authorizer:     rule.RuleHandler{Handler: "allow"},
 				Mutators:       []rule.RuleHandler{{Handler: "noop"}},
@@ -155,7 +155,7 @@ func TestDecisionAPI(t *testing.T) {
 			d:   "should fail when authorizer fails",
 			url: ts.URL + "/decisions" + "/authn-anon/authz-deny/cred-noop/1234",
 			rules: []rule.Rule{{
-				Match:          rule.RuleMatch{Methods: []string{"GET"}, URL: ts.URL + "/authn-anon/authz-deny/cred-noop/<[0-9]+>"},
+				Match:          &rule.RuleMatch{Methods: []string{"GET"}, URL: ts.URL + "/authn-anon/authz-deny/cred-noop/<[0-9]+>"},
 				Authenticators: []rule.RuleHandler{{Handler: "anonymous"}},
 				Authorizer:     rule.RuleHandler{Handler: "deny"},
 				Mutators:       []rule.RuleHandler{{Handler: "noop"}},
@@ -167,7 +167,7 @@ func TestDecisionAPI(t *testing.T) {
 			d:   "should fail when authenticator fails",
 			url: ts.URL + "/decisions" + "/authn-broken/authz-none/cred-none/1234",
 			rules: []rule.Rule{{
-				Match:          rule.RuleMatch{Methods: []string{"GET"}, URL: ts.URL + "/authn-broken/authz-none/cred-none/<[0-9]+>"},
+				Match:          &rule.RuleMatch{Methods: []string{"GET"}, URL: ts.URL + "/authn-broken/authz-none/cred-none/<[0-9]+>"},
 				Authenticators: []rule.RuleHandler{{Handler: "unauthorized"}},
 				Upstream:       rule.Upstream{URL: ""},
 			}},
@@ -177,7 +177,7 @@ func TestDecisionAPI(t *testing.T) {
 			d:   "should fail when mutator fails",
 			url: ts.URL + "/decisions" + "/authn-anonymous/authz-allow/cred-broken/1234",
 			rules: []rule.Rule{{
-				Match:          rule.RuleMatch{Methods: []string{"GET"}, URL: ts.URL + "/authn-anonymous/authz-allow/cred-broken/<[0-9]+>"},
+				Match:          &rule.RuleMatch{Methods: []string{"GET"}, URL: ts.URL + "/authn-anonymous/authz-allow/cred-broken/<[0-9]+>"},
 				Authenticators: []rule.RuleHandler{{Handler: "anonymous"}},
 				Authorizer:     rule.RuleHandler{Handler: "allow"},
 				Mutators:       []rule.RuleHandler{{Handler: "broken"}},
@@ -189,7 +189,7 @@ func TestDecisionAPI(t *testing.T) {
 			d:   "should fail when one of the mutators fails",
 			url: ts.URL + "/decisions" + "/authn-anonymous/authz-allow/cred-broken/1234",
 			rules: []rule.Rule{{
-				Match:          rule.RuleMatch{Methods: []string{"GET"}, URL: ts.URL + "/authn-anonymous/authz-allow/cred-broken/<[0-9]+>"},
+				Match:          &rule.RuleMatch{Methods: []string{"GET"}, URL: ts.URL + "/authn-anonymous/authz-allow/cred-broken/<[0-9]+>"},
 				Authenticators: []rule.RuleHandler{{Handler: "anonymous"}},
 				Authorizer:     rule.RuleHandler{Handler: "allow"},
 				Mutators:       []rule.RuleHandler{{Handler: "noop"}, {Handler: "broken"}},

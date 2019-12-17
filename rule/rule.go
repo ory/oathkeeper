@@ -78,7 +78,7 @@ type Rule struct {
 	Description string `json:"description"`
 
 	// Match defines the URL that this rule should match.
-	Match RuleMatch `json:"match"`
+	Match *RuleMatch `json:"match"`
 
 	// Authenticators is a list of authentication handlers that will try and authenticate the provided credentials.
 	// Authenticators are checked iteratively from index 0 to n and if the first authenticator to return a positive
@@ -118,7 +118,7 @@ var _ json.Unmarshaler = new(Rule)
 
 func NewRule() *Rule {
 	return &Rule{
-		Match:          RuleMatch{},
+		Match:          &RuleMatch{},
 		Authenticators: []RuleHandler{},
 		Mutators:       []RuleHandler{},
 	}
@@ -129,7 +129,7 @@ func (r *Rule) UnmarshalJSON(raw []byte) error {
 		ID             string        `json:"id"`
 		Version        string        `json:"version"`
 		Description    string        `json:"description"`
-		Match          RuleMatch     `json:"match"`
+		Match          *RuleMatch    `json:"match"`
 		Authenticators []RuleHandler `json:"authenticators"`
 		Authorizer     RuleHandler   `json:"authorizer"`
 		Mutators       []RuleHandler `json:"mutators"`
@@ -176,11 +176,11 @@ func (r *Rule) CompileURL() (*regexp.Regexp, error) {
 	m := r.Match
 	c := crc32.ChecksumIEEE([]byte(m.URL))
 	if m.compiledURL == nil || c != m.compiledURLChecksum {
-		r, err := compiler.CompileRegex(m.URL, '<', '>')
+		regex, err := compiler.CompileRegex(m.URL, '<', '>')
 		if err != nil {
 			return nil, errors.Wrap(err, "Unable to compile URL matcher")
 		}
-		m.compiledURL = r
+		m.compiledURL = regex
 		m.compiledURLChecksum = c
 	}
 

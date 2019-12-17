@@ -54,15 +54,19 @@ func TestValidateRule(t *testing.T) {
 	}{
 		{
 			r:         &Rule{},
+			expectErr: `Value "match" is empty but must be set.`,
+		},
+		{
+			r:         &Rule{Match: &RuleMatch{}},
 			expectErr: `Value "" of "match.url" field is not a valid url.`,
 		},
 		{
-			r:         &Rule{Match: RuleMatch{URL: "https://www.ory.sh", Methods: []string{"FOO"}}},
+			r:         &Rule{Match: &RuleMatch{URL: "https://www.ory.sh", Methods: []string{"FOO"}}},
 			expectErr: `Value "FOO" of "match.methods" is not a valid HTTP method, valid methods are:`,
 		},
 		{
 			r: &Rule{
-				Match:    RuleMatch{URL: "https://www.ory.sh", Methods: []string{"POST"}},
+				Match:    &RuleMatch{URL: "https://www.ory.sh", Methods: []string{"POST"}},
 				Upstream: Upstream{URL: "https://www.ory.sh"},
 			},
 			expectErr: `Value of "authenticators" must be set and can not be an empty array.`,
@@ -70,7 +74,7 @@ func TestValidateRule(t *testing.T) {
 		{
 			setup: prep(true, false, false),
 			r: &Rule{
-				Match:          RuleMatch{URL: "https://www.ory.sh", Methods: []string{"POST"}},
+				Match:          &RuleMatch{URL: "https://www.ory.sh", Methods: []string{"POST"}},
 				Upstream:       Upstream{URL: "https://www.ory.sh"},
 				Authenticators: []RuleHandler{{Handler: "foo"}},
 			},
@@ -79,7 +83,7 @@ func TestValidateRule(t *testing.T) {
 		{
 			setup: prep(false, false, false),
 			r: &Rule{
-				Match:          RuleMatch{URL: "https://www.ory.sh", Methods: []string{"POST"}},
+				Match:          &RuleMatch{URL: "https://www.ory.sh", Methods: []string{"POST"}},
 				Upstream:       Upstream{URL: "https://www.ory.sh"},
 				Authenticators: []RuleHandler{{Handler: "noop"}},
 			},
@@ -88,7 +92,7 @@ func TestValidateRule(t *testing.T) {
 		{
 			setup: prep(true, false, false),
 			r: &Rule{
-				Match:          RuleMatch{URL: "https://www.ory.sh", Methods: []string{"POST"}},
+				Match:          &RuleMatch{URL: "https://www.ory.sh", Methods: []string{"POST"}},
 				Upstream:       Upstream{URL: "https://www.ory.sh"},
 				Authenticators: []RuleHandler{{Handler: "noop"}},
 			},
@@ -97,7 +101,7 @@ func TestValidateRule(t *testing.T) {
 		{
 			setup: prep(true, true, false),
 			r: &Rule{
-				Match:          RuleMatch{URL: "https://www.ory.sh", Methods: []string{"POST"}},
+				Match:          &RuleMatch{URL: "https://www.ory.sh", Methods: []string{"POST"}},
 				Upstream:       Upstream{URL: "https://www.ory.sh"},
 				Authenticators: []RuleHandler{{Handler: "noop"}},
 				Authorizer:     RuleHandler{Handler: "foo"},
@@ -107,7 +111,7 @@ func TestValidateRule(t *testing.T) {
 		{
 			setup: prep(true, true, false),
 			r: &Rule{
-				Match:          RuleMatch{URL: "https://www.ory.sh", Methods: []string{"POST"}},
+				Match:          &RuleMatch{URL: "https://www.ory.sh", Methods: []string{"POST"}},
 				Upstream:       Upstream{URL: "https://www.ory.sh"},
 				Authenticators: []RuleHandler{{Handler: "noop"}},
 				Authorizer:     RuleHandler{Handler: "allow"},
@@ -117,7 +121,7 @@ func TestValidateRule(t *testing.T) {
 		{
 			setup: prep(true, true, true),
 			r: &Rule{
-				Match:          RuleMatch{URL: "https://www.ory.sh", Methods: []string{"POST"}},
+				Match:          &RuleMatch{URL: "https://www.ory.sh", Methods: []string{"POST"}},
 				Upstream:       Upstream{URL: "https://www.ory.sh"},
 				Authenticators: []RuleHandler{{Handler: "noop"}},
 				Authorizer:     RuleHandler{Handler: "allow"},
@@ -128,7 +132,7 @@ func TestValidateRule(t *testing.T) {
 		{
 			setup: prep(true, true, true),
 			r: &Rule{
-				Match:          RuleMatch{URL: "https://www.ory.sh", Methods: []string{"POST"}},
+				Match:          &RuleMatch{URL: "https://www.ory.sh", Methods: []string{"POST"}},
 				Upstream:       Upstream{URL: "https://www.ory.sh"},
 				Authenticators: []RuleHandler{{Handler: "noop"}},
 				Authorizer:     RuleHandler{Handler: "allow"},
@@ -138,7 +142,7 @@ func TestValidateRule(t *testing.T) {
 		{
 			setup: prep(true, true, false),
 			r: &Rule{
-				Match:          RuleMatch{URL: "https://www.ory.sh", Methods: []string{"POST"}},
+				Match:          &RuleMatch{URL: "https://www.ory.sh", Methods: []string{"POST"}},
 				Upstream:       Upstream{URL: "https://www.ory.sh"},
 				Authenticators: []RuleHandler{{Handler: "noop"}},
 				Authorizer:     RuleHandler{Handler: "allow"},
