@@ -16,8 +16,6 @@ import (
 	"github.com/ory/gojsonschema"
 	"github.com/ory/x/jsonx"
 
-	"github.com/ory/viper"
-
 	"github.com/ory/fosite"
 	"github.com/ory/x/corsx"
 	"github.com/ory/x/urlx"
@@ -185,7 +183,7 @@ func (v *ViperProvider) pipelineIsEnabled(prefix, id string) bool {
 
 func (v *ViperProvider) PipelineConfig(prefix, id string, override json.RawMessage, dest interface{}) error {
 	// we need to create a copy for config otherwise we will accidentally override values
-	config, err := x.Deepcopy(viper.GetStringMap(fmt.Sprintf("%s.%s.config", prefix, id)))
+	config, err := x.Deepcopy(viperx.GetStringMapConfig(prefix, id, "config"))
 	if err != nil {
 		return errors.WithStack(err)
 	}
