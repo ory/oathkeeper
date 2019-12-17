@@ -23,6 +23,7 @@ package api
 import (
 	"net/http"
 
+	"github.com/ory/oathkeeper/pipeline/authn"
 	"github.com/ory/oathkeeper/x"
 
 	"github.com/ory/oathkeeper/proxy"
@@ -83,33 +84,44 @@ func (h *DecisionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request, next
 //       404: genericError
 //       500: genericError
 func (h *DecisionHandler) decisions(w http.ResponseWriter, r *http.Request) {
+	fields := map[string]interface{}{
+		"http_method":     r.Method,
+		"http_url":        r.URL.String(),
+		"http_host":       r.Host,
+		"http_user_agent": r.UserAgent(),
+	}
+
+	if sess, ok := r.Context().Value(proxy.SessionCtxKey).(*authn.AuthenticationSession); ok {
+		fields["subject"] = sess.Subject
+	}
+
 	rl, err := h.r.RuleMatcher().Match(r.Context(), r.Method, r.URL)
 	if err != nil {
 		h.r.Logger().WithError(err).
+			WithFields(fields).
 			WithField("granted", false).
-			WithField("access_url", r.URL.String()).
 			Warn("Access request denied")
 		h.r.Writer().WriteError(w, r, err)
 		return
 	}
 
-	headers, err := h.r.ProxyRequestHandler().HandleRequest(r, rl)
+	s, err := h.r.ProxyRequestHandler().HandleRequest(r, rl)
 	if err != nil {
 		h.r.Logger().WithError(err).
+			WithFields(fields).
 			WithField("granted", false).
-			WithField("access_url", r.URL.String()).
 			Warn("Access request denied")
 		h.r.Writer().WriteError(w, r, err)
 		return
 	}
 
 	h.r.Logger().
+		WithFields(fields).
 		WithField("granted", true).
-		WithField("access_url", r.URL.String()).
 		Warn("Access request granted")
 
-	for k := range headers {
-		w.Header().Set(k, headers.Get(k))
+	for k := range s.Header {
+		w.Header().Set(k, s.Header.Get(k))
 	}
 
 	w.WriteHeader(http.StatusOK)

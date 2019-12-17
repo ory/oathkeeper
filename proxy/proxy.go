@@ -27,6 +27,7 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/ory/oathkeeper/pipeline/authn"
 	"github.com/ory/oathkeeper/x"
 
 	"github.com/pkg/errors"
@@ -52,15 +53,28 @@ type Proxy struct {
 
 type key int
 
-const director key = 0
+const (
+	director key = iota + 1
+	SessionCtxKey
+)
 
 func (d *Proxy) RoundTrip(r *http.Request) (*http.Response, error) {
 	rw := NewSimpleResponseWriter()
+	fields := map[string]interface{}{
+		"http_method":     r.Method,
+		"http_url":        r.URL.String(),
+		"http_host":       r.Host,
+		"http_user_agent": r.UserAgent(),
+	}
+
+	if sess, ok := r.Context().Value(SessionCtxKey).(*authn.AuthenticationSession); ok {
+		fields["subject"] = sess.Subject
+	}
 
 	if err, ok := r.Context().Value(director).(error); ok && err != nil {
 		d.r.Logger().WithError(err).
+			WithFields(fields).
 			WithField("granted", false).
-			WithField("access_url", r.URL.String()).
 			Warn("Access request denied")
 
 		d.r.Writer().WriteError(rw, r, err)
@@ -76,13 +90,13 @@ func (d *Proxy) RoundTrip(r *http.Request) (*http.Response, error) {
 			d.r.Logger().
 				WithError(errors.WithStack(err)).
 				WithField("granted", false).
-				WithField("access_url", r.URL.String()).
+				WithFields(fields).
 				Warn("Access request denied because roundtrip failed")
 			// don't need to return because covered in next line
 		} else {
 			d.r.Logger().
 				WithField("granted", true).
-				WithField("access_url", r.URL.String()).
+				WithFields(fields).
 				Warn("Access request granted")
 		}
 
@@ -93,7 +107,7 @@ func (d *Proxy) RoundTrip(r *http.Request) (*http.Response, error) {
 	d.r.Logger().
 		WithError(err).
 		WithField("granted", false).
-		WithField("access_url", r.URL.String()).
+		WithFields(fields).
 		Warn("Unable to type assert context")
 
 	d.r.Writer().Write(rw, r, err)
@@ -113,14 +127,15 @@ func (d *Proxy) Director(r *http.Request) {
 		return
 	}
 
-	headers, err := d.r.ProxyRequestHandler().HandleRequest(r, rl)
+	s, err := d.r.ProxyRequestHandler().HandleRequest(r, rl)
 	if err != nil {
 		*r = *r.WithContext(context.WithValue(r.Context(), director, err))
 		return
 	}
+	*r = *r.WithContext(context.WithValue(r.Context(), SessionCtxKey, s))
 
-	for h := range headers {
-		r.Header.Set(h, headers.Get(h))
+	for h := range s.Header {
+		r.Header.Set(h, s.Header.Get(h))
 	}
 
 	if err := ConfigureBackendURL(r, rl); err != nil {
