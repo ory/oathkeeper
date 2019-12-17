@@ -38,6 +38,9 @@ type BearerTokenLocation struct {
 func BearerTokenFromRequest(r *http.Request, tokenLocation *BearerTokenLocation) string {
 	if tokenLocation != nil {
 		if tokenLocation.Header != nil {
+			if *tokenLocation.Header == defaultAuthorizationHeader {
+				return DefaultBearerTokenFromRequest(r)
+			}
 			return r.Header.Get(*tokenLocation.Header)
 		} else if tokenLocation.QueryParameter != nil {
 			return r.FormValue(*tokenLocation.QueryParameter)
@@ -49,6 +52,11 @@ func BearerTokenFromRequest(r *http.Request, tokenLocation *BearerTokenLocation)
 			return cookie.Value
 		}
 	}
+
+	return DefaultBearerTokenFromRequest(r)
+}
+
+func DefaultBearerTokenFromRequest(r *http.Request) string {
 	token := r.Header.Get(defaultAuthorizationHeader)
 	split := strings.SplitN(token, " ", 2)
 	if len(split) != 2 || !strings.EqualFold(split[0], "bearer") {
