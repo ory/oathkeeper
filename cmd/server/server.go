@@ -9,11 +9,12 @@ import (
 	"net/http/httputil"
 	"sync"
 
-	negronilogrus "github.com/meatballhat/negroni-logrus"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/urfave/negroni"
+
+	"github.com/ory/x/reqlog"
 
 	"github.com/ory/viper"
 
@@ -40,7 +41,7 @@ func runProxy(d driver.Driver, n *negroni.Negroni, logger *logrus.Logger) func()
 			Transport: proxy,
 		}
 
-		n.Use(negronilogrus.NewMiddlewareFromLogger(logger, "oathkeeper-proxy"))
+		n.Use(reqlog.NewMiddlewareFromLogger(logger, "oathkeeper-proxy").ExcludePaths(healthx.ReadyCheckPath, healthx.AliveCheckPath))
 		n.UseHandler(handler)
 
 		h := corsx.Initialize(n, logger, "serve.proxy")
@@ -78,7 +79,7 @@ func runAPI(d driver.Driver, n *negroni.Negroni, logger *logrus.Logger) func() {
 		d.Registry().HealthHandler().SetRoutes(router.Router, true)
 		d.Registry().CredentialHandler().SetRoutes(router)
 
-		n.Use(negronilogrus.NewMiddlewareFromLogger(logger, "oathkeeper-api"))
+		n.Use(reqlog.NewMiddlewareFromLogger(logger, "oathkeeper-api").ExcludePaths(healthx.ReadyCheckPath, healthx.AliveCheckPath))
 		n.Use(d.Registry().DecisionHandler()) // This needs to be the last entry, otherwise the judge API won't work
 
 		n.UseHandler(router)
