@@ -59,7 +59,7 @@ func TestHandler(t *testing.T) {
 	rules := []rule.Rule{
 		{
 			ID: "foo1",
-			Match: rule.RuleMatch{
+			Match: &rule.RuleMatch{
 				URL:     "https://localhost:1234/<foo|bar>",
 				Methods: []string{"POST"},
 			},
@@ -75,7 +75,7 @@ func TestHandler(t *testing.T) {
 		},
 		{
 			ID: "foo2",
-			Match: rule.RuleMatch{
+			Match: &rule.RuleMatch{
 				URL:     "https://localhost:34/<baz|bar>",
 				Methods: []string{"GET"},
 			},

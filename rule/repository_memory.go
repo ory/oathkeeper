@@ -105,14 +105,16 @@ func (m *RepositoryMemory) Set(ctx context.Context, rules []Rule) error {
 }
 
 func (m *RepositoryMemory) Match(ctx context.Context, method string, u *url.URL) (*Rule, error) {
-	m.RLock()
-	defer m.RUnlock()
+	m.Lock()
+	defer m.Unlock()
 
 	var rules []Rule
-	for _, rule := range m.rules {
-		if err := rule.IsMatching(method, u); err == nil {
-			rules = append(rules, rule)
+	for k := range m.rules {
+		r := &m.rules[k]
+		if err := r.IsMatching(method, u); err == nil {
+			rules = append(rules, *r)
 		}
+		m.rules[k] = *r
 	}
 
 	if len(rules) == 0 {
