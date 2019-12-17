@@ -66,4 +66,12 @@ func TestBearerTokenFromRequest(t *testing.T) {
 		token := helper.BearerTokenFromRequest(request, &tokenLocation)
 		assert.Equal(t, expectedToken, token)
 	})
+	t.Run("case=token should be received from default header if custom location is set to default location and token is present", func(t *testing.T) {
+		expectedToken := "token"
+		customHeaderName := "Authorization"
+		request := &http.Request{Header: http.Header{customHeaderName: {"bearer " + expectedToken}}}
+		tokenLocation := helper.BearerTokenLocation{Header: &customHeaderName}
+		token := helper.BearerTokenFromRequest(request, &tokenLocation)
+		assert.Equal(t, expectedToken, token)
+	})
 }
