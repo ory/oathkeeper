@@ -33,6 +33,8 @@ waitport 6061
 
 function finish {
   cat ./oathkeeper.log
+  cat ./config.yaml
+  cat ./rules.3.yaml
 }
 trap finish EXIT
 
