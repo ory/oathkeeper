@@ -8,6 +8,8 @@ waitport() {
     sleep 1
     if [ $i -gt 10 ]; then
       cat ./oathkeeper.log
+      cat ./config.yaml
+      cat ./rules.3.yaml
       exit 1
     fi
     i=$((i+1))
