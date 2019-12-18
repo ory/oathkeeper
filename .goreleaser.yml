@@ -72,12 +72,24 @@ scoop:
     email: hi@ory.sh
 
 dockers:
-  - image_templates:
+  - dockerfile: Dockerfile
+    binaries:
+      - oathkeeper
+    image_templates:
       - "oryd/oathkeeper:v{{ .Major }}"
       - "oryd/oathkeeper:v{{ .Major }}.{{ .Minor }}"
       - "oryd/oathkeeper:v{{ .Major }}.{{ .Minor }}.{{ .Patch }}"
       - "oryd/oathkeeper:{{ .Env.DOCKER_SHORT_TAG }}"
       - "oryd/oathkeeper:latest"
+  - dockerfile: Dockerfile-alpine
+    binaries:
+      - oathkeeper
+    image_templates:
+      - "oryd/oathkeeper:v{{ .Major }}-alpine"
+      - "oryd/oathkeeper:v{{ .Major }}.{{ .Minor }}-alpine"
+      - "oryd/oathkeeper:v{{ .Major }}.{{ .Minor }}.{{ .Patch }}-alpine"
+      - "oryd/oathkeeper:{{ .Env.DOCKER_SHORT_TAG }}-alpine"
+      - "oryd/oathkeeper:latest-alpine"
 
 release:
   prerelease: auto
