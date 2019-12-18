@@ -51,5 +51,6 @@ docker:
 		packr2 || (GO111MODULE=on go install github.com/gobuffalo/packr/v2/packr2 && packr2)
 		CGO_ENABLED=0 GO111MODULE=on GOOS=linux GOARCH=amd64 go build
 		packr2 clean
-		docker build -t oryd/oathkeeper:unstable.$$(date +'%s') .
+		docker build -t oryd/oathkeeper:dev .
+		docker build -t oryd/oathkeeper:dev-alpine -f Dockerfile-alpine .
 		rm oathkeeper

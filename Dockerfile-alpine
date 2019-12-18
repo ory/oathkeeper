@@ -3,14 +3,13 @@
 # $ make docker
 FROM alpine:3.10
 
+RUN addgroup -S ory; \
+    adduser -S ory -G ory -D -H -s /bin/nologin
 RUN apk add -U --no-cache ca-certificates
 
-FROM scratch
-
-COPY --from=0 /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 COPY oathkeeper /usr/bin/oathkeeper
 
-USER 1000
+USER ory
 
 ENTRYPOINT ["oathkeeper"]
 CMD ["serve"]
