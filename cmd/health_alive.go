@@ -11,7 +11,7 @@ import (
 // healthCmd represents the health command
 var healthAliveCmd = &cobra.Command{
 	Use:   "alive",
-	Short: "Command for checking alive status",
+	Short: "Checks if an ORY Oathkeeper deployment is alive",
 	Run: func(cmd *cobra.Command, args []string) {
 		client := newClient(cmd)
 
