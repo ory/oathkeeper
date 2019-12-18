@@ -15,6 +15,10 @@ var healthReadyCmd = &cobra.Command{
 	Short: "Checks if an ORY Oathkeeper deployment is ready",
 	Long: `Usage example:
   oathkeeper health --endpoint=http://localhost:4456/ ready
+
+Note:
+  The endpoint URL should point to a single ORY Oathkeeper deployment.
+  If the endpoint URL points to a Load Balancer, these commands will effective test the Load Balancer.
 `,
 	Run: func(cmd *cobra.Command, args []string) {
 		client := newClient(cmd)
@@ -28,7 +32,6 @@ var healthReadyCmd = &cobra.Command{
 		if r.Payload.Status != "ok" {
 			os.Exit(1)
 		}
-		os.Exit(0)
 	},
 }
 
