@@ -10,6 +10,10 @@ import (
 var healthCmd = &cobra.Command{
 	Use:   "health",
 	Short: "Commands for checking the status of an ORY Oathkeeper deployment",
+	Long: `Note:
+  The endpoint URL should point to a single ORY Oathkeeper deployment.
+  If the endpoint URL points to a Load Balancer, these commands will effective test the Load Balancer.
+`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println(cmd.UsageString())
 	},
