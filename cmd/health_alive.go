@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+
 	"github.com/ory/oathkeeper/sdk/go/oathkeeper/client/api"
 	"github.com/ory/x/cmdx"
 	"github.com/spf13/cobra"
