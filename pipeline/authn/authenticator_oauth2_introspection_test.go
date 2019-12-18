@@ -314,7 +314,7 @@ func TestAuthenticatorOAuth2Introspection(t *testing.T) {
 				if tc.expectErr {
 					require.Error(t, err)
 					if tc.expectExactErr != nil {
-						assert.EqualError(t, err, tc.expectExactErr.Error())
+						assert.EqualError(t, err, tc.expectExactErr.Error(), "%+v", err)
 					}
 				} else {
 					require.NoError(t, err)

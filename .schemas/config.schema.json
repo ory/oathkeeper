@@ -283,10 +283,11 @@
           "description": "The location of the token.\n If not configured, the token will be received from a default location - 'Authorization' header.\n One and only one location (header or query) must be specified.",
           "oneOf": [
             {
+              "type": "null"
+            },
+            {
               "type": "object",
-              "required": [
-                "header"
-              ],
+              "additionalProperties": false,
               "properties": {
                 "header": {
                   "title": "Header",
@@ -297,9 +298,7 @@
             },
             {
               "type": "object",
-              "required": [
-                "query_parameter"
-              ],
+              "additionalProperties": false,
               "properties": {
                 "query_parameter": {
                   "title": "Query Parameter",
@@ -481,12 +480,13 @@
         "token_from": {
           "title": "Token From",
           "description": "The location of the token.\n If not configured, the token will be received from a default location - 'Authorization' header.\n One and only one location (header or query) must be specified.",
-          "type": "object",
           "oneOf": [
             {
-              "required": [
-                "header"
-              ],
+              "type": "null"
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
               "properties": {
                 "header": {
                   "title": "Header",
@@ -496,9 +496,8 @@
               }
             },
             {
-              "required": [
-                "query_parameter"
-              ],
+              "type": "object",
+              "additionalProperties": false,
               "properties": {
                 "query_parameter": {
                   "title": "Query Parameter",
@@ -508,9 +507,8 @@
               }
             },
             {
-              "required": [
-                "cookie"
-              ],
+              "type": "object",
+              "additionalProperties": false,
               "properties": {
                 "cookie": {
                   "title": "Cookie",
@@ -821,7 +819,6 @@
           "title": "Repositories",
           "description": "Locations (list of URLs) where access rules should be fetched from on boot. It is expected that the documents at those locations return a JSON or YAML Array containing ORY Oathkeeper Access Rules:\n\n- If the URL Scheme is `file://`, the access rules (an array of access rules is expected) will be fetched from the local file system.\n- If the URL Scheme is `inline://`, the access rules (an array of access rules is expected) are expected to be a base64 encoded (with padding!) JSON/YAML string (base64_encode(`[{\"id\":\"foo-rule\",\"authenticators\":[....]}]`)).\n- If the URL Scheme is `http://` or `https://`, the access rules (an array of access rules is expected) will be fetched from the provided HTTP(s) location.",
           "type": "array",
-          "default": [],
           "items": {
             "type": "string",
             "format": "uri"
