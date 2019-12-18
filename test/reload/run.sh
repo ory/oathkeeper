@@ -7,9 +7,8 @@ waitport() {
   while ! nc -z localhost "$1" ; do
     sleep 1
     if [ $i -gt 10 ]; then
-      cat ./oathkeeper.log
       cat ./config.yaml
-      cat ./rules.3.yaml
+      cat ./oathkeeper.log
       exit 1
     fi
     i=$((i+1))
@@ -34,9 +33,9 @@ waitport 6060
 waitport 6061
 
 function finish {
-  cat ./oathkeeper.log
   cat ./config.yaml
-  cat ./rules.3.yaml
+  cat ./rules.3.json
+  cat ./oathkeeper.log
 }
 trap finish EXIT
 
