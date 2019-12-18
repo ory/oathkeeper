@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/url"
+	"os"
 	"testing"
 
 	"github.com/rs/cors"
@@ -40,16 +41,30 @@ func TestPipelineConfig(t *testing.T) {
 
 	p := NewViperProvider(logrus.New())
 
+	t.Run("case=should use config from environment variables", func(t *testing.T) {
+		var res json.RawMessage
+		require.NoError(t, os.Setenv("AUTHENTICATORS_OAUTH2_INTROSPECTION_CONFIG_INTROSPECTION_URL", "https://override/path"))
+
+		require.NoError(t, p.PipelineConfig("authenticators", "oauth2_introspection", nil, &res))
+		assert.JSONEq(t, `{"introspection_request_headers":{},"introspection_url":"https://override/path","pre_authorization":{"client_id":"some_id","client_secret":"some_secret","enabled":true,"scope":["foo","bar"],"token_url":"https://my-website.com/oauth2/token"},"required_scope":[],"scope_strategy":"exact","target_audience":[],"trusted_issuers":[]}`, string(res), "%s", res)
+
+		require.NoError(t, os.Setenv("AUTHENTICATORS_OAUTH2_INTROSPECTION_CONFIG_INTROSPECTION_URL", ""))
+
+		require.NoError(t, p.PipelineConfig("authenticators", "oauth2_introspection", nil, &res))
+		assert.JSONEq(t, `{"introspection_request_headers":{},"introspection_url":"https://my-website.com/oauth2/introspection","pre_authorization":{"client_id":"some_id","client_secret":"some_secret","enabled":true,"scope":["foo","bar"],"token_url":"https://my-website.com/oauth2/token"},"required_scope":[],"scope_strategy":"exact","target_audience":[],"trusted_issuers":[]}`, string(res), "%s", res)
+
+	})
+
 	t.Run("case=should fail when invalid value is used in override", func(t *testing.T) {
 		res := json.RawMessage{}
 		require.Error(t, p.PipelineConfig("mutators", "hydrator", json.RawMessage(`{"not-api":"invalid"}`), &res))
-		assert.JSONEq(t, `{"api":{"url":"https://some-url/"},"not-api":"invalid"}`, string(res))
+		assert.JSONEq(t, `{"api":{"url":"https://some-url/","retry":{"give_up_after":"1s","max_delay":"100ms"}},"not-api":"invalid"}`, string(res))
 
 		require.Error(t, p.PipelineConfig("mutators", "hydrator", json.RawMessage(`{"api":{"this-key-does-not-exist":true}}`), &res))
-		assert.JSONEq(t, `{"api":{"url":"https://some-url/","this-key-does-not-exist":true}}`, string(res))
+		assert.JSONEq(t, `{"api":{"url":"https://some-url/","this-key-does-not-exist":true,"retry":{"give_up_after":"1s","max_delay":"100ms"}}}`, string(res))
 
 		require.Error(t, p.PipelineConfig("mutators", "hydrator", json.RawMessage(`{"api":{"url":"not-a-url"}}`), &res))
-		assert.JSONEq(t, `{"api":{"url":"not-a-url"}}`, string(res))
+		assert.JSONEq(t, `{"api":{"url":"not-a-url","retry":{"give_up_after":"1s","max_delay":"100ms"}}}`, string(res))
 	})
 
 	t.Run("case=should pass and override values", func(t *testing.T) {
