@@ -9,7 +9,7 @@ import (
 // healthCmd represents the health command
 var healthCmd = &cobra.Command{
 	Use:   "health",
-	Short: "Commands for checking health",
+	Short: "Commands for checking the status of an ORY Oathkeeper deployment",
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println(cmd.UsageString())
 	},
