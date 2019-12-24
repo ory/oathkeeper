@@ -88,6 +88,20 @@ access_rules:
     # fetched from the provided HTTP(s) location.
     - https://path-to-my-rules/rules.json
 
+errors:
+  redirect:
+    enabled: true
+    config:
+      to: bar
+      when:
+        - errors:
+            - unauthorized
+            - forbidden
+            - internal_server_error
+          request:
+            content_type:
+              - application/json
+
 # All authenticators can be configured under this configuration key
 authenticators:
   # Configures the anonymous authenticator

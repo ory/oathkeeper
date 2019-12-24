@@ -27,7 +27,7 @@ func TestCredentialsHandler(t *testing.T) {
 
 	require.NoError(t, r.RuleRepository().Set(
 		context.Background(),
-		[]rule.Rule{{Mutators: []rule.RuleHandler{{Handler: "id_token", Config: json.RawMessage(`{"jwks_url":"file://../test/stub/jwks-rsa-single.json"}`)}}}}),
+		[]rule.Rule{{Mutators: []rule.Handler{{Handler: "id_token", Config: json.RawMessage(`{"jwks_url":"file://../test/stub/jwks-rsa-single.json"}`)}}}}),
 	)
 
 	router := x.NewAPIRouter()

@@ -111,14 +111,15 @@ func (h *DecisionHandler) decisions(w http.ResponseWriter, r *http.Request) {
 			WithFields(fields).
 			WithField("granted", false).
 			Warn("Access request denied")
-		h.r.Writer().WriteError(w, r, err)
+
+		// h.r.ProxyRequestHandler().HandleError(r, rl, err)
 		return
 	}
 
 	h.r.Logger().
 		WithFields(fields).
 		WithField("granted", true).
-		Warn("Access request granted")
+		Info("Access request granted")
 
 	for k := range s.Header {
 		w.Header().Set(k, s.Header.Get(k))

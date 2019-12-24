@@ -86,6 +86,11 @@ const (
 	ViperKeyAuthenticatorUnauthorizedIsEnabled = "authenticators.unauthorized.enabled"
 )
 
+// Errors
+const (
+	ViperKeyErrors = "errors"
+)
+
 type ViperProvider struct {
 	l logrus.FieldLogger
 }
@@ -239,6 +244,14 @@ func (v *ViperProvider) PipelineConfig(prefix, id string, override json.RawMessa
 	}
 
 	return nil
+}
+
+func (v *ViperProvider) ErrorHandlerConfig(id string, override json.RawMessage, dest interface{}) error {
+	return v.PipelineConfig(ViperKeyErrors, id, override, dest)
+}
+
+func (v *ViperProvider) ErrorHandlerIsEnabled(id string) bool {
+	return v.pipelineIsEnabled(ViperKeyErrors, id)
 }
 
 func (v *ViperProvider) AuthenticatorIsEnabled(id string) bool {

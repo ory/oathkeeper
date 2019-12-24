@@ -23,10 +23,13 @@ package proxy
 import (
 	"net/http"
 
+	"github.com/ory/herodot"
+
 	"github.com/ory/oathkeeper/x"
 
 	"github.com/ory/oathkeeper/pipeline/authn"
 	"github.com/ory/oathkeeper/pipeline/authz"
+	pe "github.com/ory/oathkeeper/pipeline/errors"
 	"github.com/ory/oathkeeper/pipeline/mutate"
 
 	"github.com/pkg/errors"
@@ -36,11 +39,13 @@ import (
 )
 
 type requestHandlerRegistry interface {
+	x.RegistryWriter
 	x.RegistryLogger
 
 	authn.Registry
 	authz.Registry
 	mutate.Registry
+	pe.Registry
 }
 
 type RequestHandler struct {
@@ -49,6 +54,44 @@ type RequestHandler struct {
 
 func NewRequestHandler(r requestHandlerRegistry) *RequestHandler {
 	return &RequestHandler{r: r}
+}
+
+func (d *RequestHandler) HandleError(w http.ResponseWriter, r *http.Request, rl *rule.Rule, err error) {
+	for name := range rl.Errors {
+		handler, err := d.r.PipelineErrorHandler(name)
+		if err != nil {
+			d.r.Writer().WriteError(w, r, errors.WithStack(herodot.ErrInternalServerError.WithReasonf("Unable to find error handler named: %s. This is a configuration issue and should be reported to the administrator.", name)))
+			return
+		}
+
+		re := rl.Errors[name]
+		if err := handler.Validate(re.Config); err != nil {
+			d.r.Writer().WriteError(w, r, err)
+			return
+		}
+
+		if e := handler.Handle(w, r, re.Config, rl, err); e == nil {
+			return
+		} else if errors.Cause(e) == pe.ErrHandlerNotResponsible {
+			// loop
+		} else {
+			d.r.Writer().WriteError(w, r, errors.WithStack(herodot.ErrInternalServerError.WithReasonf(`Unable to execute error handler. This is either a bug or a configuration issue and should be reported to the administrator. Returned error: "%s". Original error: "%s"`, name, err, e)))
+			return
+		}
+	}
+
+	for name, handler := range d.r.AvailablePipelineErrorHandlers() {
+		if e := handler.Handle(w, r, nil, rl, err); e == nil {
+			return
+		} else if errors.Cause(e) == pe.ErrHandlerNotResponsible {
+			// loop
+		} else {
+			d.r.Writer().WriteError(w, r, errors.WithStack(herodot.ErrInternalServerError.WithReasonf(`Unable to execute error handler. This is either a bug or a configuration issue and should be reported to the administrator. Returned error: "%s". Original error: "%s"`, name, err, e)))
+			return
+		}
+	}
+
+	d.r.Writer().WriteError(w, r, errors.WithStack(herodot.ErrInternalServerError.WithReasonf("Unable to handle HTTP request because no matching error handling strategy was found. This is a bug and should be reported to: http://github.com/ory/oathkeeper")))
 }
 
 func (d *RequestHandler) HandleRequest(r *http.Request, rl *rule.Rule) (session *authn.AuthenticationSession, err error) {

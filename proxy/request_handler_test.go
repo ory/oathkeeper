@@ -53,9 +53,9 @@ func TestRequestHandler(t *testing.T) {
 			expectErr: true,
 			r:         newTestRequest("http://localhost"),
 			rule: rule.Rule{
-				Authenticators: []rule.RuleHandler{},
-				Authorizer:     rule.RuleHandler{},
-				Mutators:       []rule.RuleHandler{},
+				Authenticators: []rule.Handler{},
+				Authorizer:     rule.Handler{},
+				Mutators:       []rule.Handler{},
 			},
 		},
 		{
@@ -68,9 +68,9 @@ func TestRequestHandler(t *testing.T) {
 			expectErr: true,
 			r:         newTestRequest("http://localhost"),
 			rule: rule.Rule{
-				Authenticators: []rule.RuleHandler{},
-				Authorizer:     rule.RuleHandler{},
-				Mutators:       []rule.RuleHandler{},
+				Authenticators: []rule.Handler{},
+				Authorizer:     rule.Handler{},
+				Mutators:       []rule.Handler{},
 			},
 		},
 		{
@@ -83,9 +83,9 @@ func TestRequestHandler(t *testing.T) {
 			expectErr: false,
 			r:         newTestRequest("http://localhost"),
 			rule: rule.Rule{
-				Authenticators: []rule.RuleHandler{{Handler: "noop"}},
-				Authorizer:     rule.RuleHandler{Handler: "allow"},
-				Mutators:       []rule.RuleHandler{{Handler: "noop"}},
+				Authenticators: []rule.Handler{{Handler: "noop"}},
+				Authorizer:     rule.Handler{Handler: "allow"},
+				Mutators:       []rule.Handler{{Handler: "noop"}},
 			},
 		},
 		{
@@ -98,9 +98,9 @@ func TestRequestHandler(t *testing.T) {
 			expectErr: true,
 			r:         newTestRequest("http://localhost"),
 			rule: rule.Rule{
-				Authenticators: []rule.RuleHandler{{Handler: "anonymous"}},
-				Authorizer:     rule.RuleHandler{},
-				Mutators:       []rule.RuleHandler{},
+				Authenticators: []rule.Handler{{Handler: "anonymous"}},
+				Authorizer:     rule.Handler{},
+				Mutators:       []rule.Handler{},
 			},
 		},
 		{
@@ -113,9 +113,9 @@ func TestRequestHandler(t *testing.T) {
 			expectErr: true,
 			r:         newTestRequest("http://localhost"),
 			rule: rule.Rule{
-				Authenticators: []rule.RuleHandler{{Handler: "anonymous"}},
-				Authorizer:     rule.RuleHandler{Handler: "allow"},
-				Mutators:       []rule.RuleHandler{},
+				Authenticators: []rule.Handler{{Handler: "anonymous"}},
+				Authorizer:     rule.Handler{Handler: "allow"},
+				Mutators:       []rule.Handler{},
 			},
 		},
 		{
@@ -128,9 +128,9 @@ func TestRequestHandler(t *testing.T) {
 			expectErr: true,
 			r:         newTestRequest("http://localhost"),
 			rule: rule.Rule{
-				Authenticators: []rule.RuleHandler{{Handler: "anonymous"}},
-				Authorizer:     rule.RuleHandler{Handler: "allow"},
-				Mutators:       []rule.RuleHandler{{Handler: "noop"}},
+				Authenticators: []rule.Handler{{Handler: "anonymous"}},
+				Authorizer:     rule.Handler{Handler: "allow"},
+				Mutators:       []rule.Handler{{Handler: "noop"}},
 			},
 		},
 		{
@@ -143,9 +143,9 @@ func TestRequestHandler(t *testing.T) {
 			expectErr: true,
 			r:         newTestRequest("http://localhost"),
 			rule: rule.Rule{
-				Authenticators: []rule.RuleHandler{{Handler: "anonymous"}},
-				Authorizer:     rule.RuleHandler{Handler: "allow"},
-				Mutators:       []rule.RuleHandler{{Handler: "noop"}},
+				Authenticators: []rule.Handler{{Handler: "anonymous"}},
+				Authorizer:     rule.Handler{Handler: "allow"},
+				Mutators:       []rule.Handler{{Handler: "noop"}},
 			},
 		},
 		{
@@ -158,9 +158,9 @@ func TestRequestHandler(t *testing.T) {
 			expectErr: true,
 			r:         newTestRequest("http://localhost"),
 			rule: rule.Rule{
-				Authenticators: []rule.RuleHandler{{Handler: "anonymous"}},
-				Authorizer:     rule.RuleHandler{Handler: "allow"},
-				Mutators:       []rule.RuleHandler{{Handler: "noop"}},
+				Authenticators: []rule.Handler{{Handler: "anonymous"}},
+				Authorizer:     rule.Handler{Handler: "allow"},
+				Mutators:       []rule.Handler{{Handler: "noop"}},
 			},
 		},
 		{
@@ -173,9 +173,9 @@ func TestRequestHandler(t *testing.T) {
 			expectErr: true,
 			r:         newTestRequest("http://localhost"),
 			rule: rule.Rule{
-				Authenticators: []rule.RuleHandler{{Handler: "invalid-id"}},
-				Authorizer:     rule.RuleHandler{Handler: "allow"},
-				Mutators:       []rule.RuleHandler{{Handler: "noop"}},
+				Authenticators: []rule.Handler{{Handler: "invalid-id"}},
+				Authorizer:     rule.Handler{Handler: "allow"},
+				Mutators:       []rule.Handler{{Handler: "noop"}},
 			},
 		},
 		{
@@ -188,9 +188,9 @@ func TestRequestHandler(t *testing.T) {
 			expectErr: true,
 			r:         newTestRequest("http://localhost"),
 			rule: rule.Rule{
-				Authenticators: []rule.RuleHandler{{Handler: "anonymous"}},
-				Authorizer:     rule.RuleHandler{Handler: "invalid-id"},
-				Mutators:       []rule.RuleHandler{{Handler: "noop"}},
+				Authenticators: []rule.Handler{{Handler: "anonymous"}},
+				Authorizer:     rule.Handler{Handler: "invalid-id"},
+				Mutators:       []rule.Handler{{Handler: "noop"}},
 			},
 		},
 		{
@@ -203,9 +203,9 @@ func TestRequestHandler(t *testing.T) {
 			expectErr: true,
 			r:         newTestRequest("http://localhost"),
 			rule: rule.Rule{
-				Authenticators: []rule.RuleHandler{{Handler: "anonymous"}},
-				Authorizer:     rule.RuleHandler{Handler: "allow"},
-				Mutators:       []rule.RuleHandler{{Handler: "invalid-id"}},
+				Authenticators: []rule.Handler{{Handler: "anonymous"}},
+				Authorizer:     rule.Handler{Handler: "allow"},
+				Mutators:       []rule.Handler{{Handler: "invalid-id"}},
 			},
 		},
 	} {
