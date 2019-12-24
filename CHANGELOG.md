@@ -4,6 +4,7 @@
 
 - [Change Log](#change-log)
   - [Unreleased](#unreleased)
+  - [v0.33.1-beta.1 (2019-12-18)](#v0331-beta1-2019-12-18)
   - [v0.33.0-beta.1 (2019-12-16)](#v0330-beta1-2019-12-16)
   - [v0.32.1-beta.1 (2019-10-30)](#v0321-beta1-2019-10-30)
   - [v0.32.0-beta.1 (2019-10-20)](#v0320-beta1-2019-10-20)
@@ -70,7 +71,19 @@
 
 ## [Unreleased](https://github.com/ory/oathkeeper/tree/HEAD)
 
-[Full Changelog](https://github.com/ory/oathkeeper/compare/v0.33.0-beta.1...HEAD)
+[Full Changelog](https://github.com/ory/oathkeeper/compare/v0.33.1-beta.1...HEAD)
+
+**Implemented enhancements:**
+
+- Provide an endpoint that allows to fetch configuration information [\#131](https://github.com/ory/oathkeeper/issues/131)
+- TLS Termination 'X-Forwarded-Proto' [\#95](https://github.com/ory/oathkeeper/issues/95)
+
+**Closed issues:**
+
+- cookie\_session authenticator masks 401 errors [\#298](https://github.com/ory/oathkeeper/issues/298)
+
+## [v0.33.1-beta.1](https://github.com/ory/oathkeeper/tree/v0.33.1-beta.1) (2019-12-18)
+[Full Changelog](https://github.com/ory/oathkeeper/compare/v0.33.0-beta.1...v0.33.1-beta.1)
 
 **Fixed bugs:**
 
@@ -80,11 +93,13 @@
 
 - Replace the base image with alpine [\#312](https://github.com/ory/oathkeeper/issues/312)
 - token\_from required for oauth2\_introspection but ignores "seperated" values [\#308](https://github.com/ory/oathkeeper/issues/308)
+- Allow path in `cookie\_session.check\_session\_url` to be used [\#296](https://github.com/ory/oathkeeper/issues/296)
 - Remote audit log [\#242](https://github.com/ory/oathkeeper/issues/242)
 
 **Merged pull requests:**
 
 - Properly merge env vars into pipeline configs [\#320](https://github.com/ory/oathkeeper/pull/320) ([aeneasr](https://github.com/aeneasr))
+- cmd: Add health check commands [\#319](https://github.com/ory/oathkeeper/pull/319) ([tleef](https://github.com/tleef))
 - Switch to alpine Docker base-image [\#318](https://github.com/ory/oathkeeper/pull/318) ([aeneasr](https://github.com/aeneasr))
 - Add more details to decision logging [\#316](https://github.com/ory/oathkeeper/pull/316) ([aeneasr](https://github.com/aeneasr))
 - authn: Improve session endpoint debugability [\#315](https://github.com/ory/oathkeeper/pull/315) ([aeneasr](https://github.com/aeneasr))
@@ -183,6 +198,7 @@
 **Merged pull requests:**
 
 - Resolve broken tests [\#262](https://github.com/ory/oathkeeper/pull/262) ([aeneasr](https://github.com/aeneasr))
+- Homogenize configuration management [\#258](https://github.com/ory/oathkeeper/pull/258) ([aeneasr](https://github.com/aeneasr))
 - Fix \#250: Ignore query parameters to build payload for Keto engine [\#251](https://github.com/ory/oathkeeper/pull/251) ([GuillaumeSmaha](https://github.com/GuillaumeSmaha))
 
 ## [v0.18.0-beta.1](https://github.com/ory/oathkeeper/tree/v0.18.0-beta.1) (2019-08-22)
@@ -190,7 +206,6 @@
 
 **Merged pull requests:**
 
-- Homogenize configuration management [\#258](https://github.com/ory/oathkeeper/pull/258) ([aeneasr](https://github.com/aeneasr))
 - ID Token Custom Claims [\#246](https://github.com/ory/oathkeeper/pull/246) ([aeneasr](https://github.com/aeneasr))
 - docs: Updates issue and pull request templates [\#245](https://github.com/ory/oathkeeper/pull/245) ([aeneasr](https://github.com/aeneasr))
 - Add mutator for modifying authenticationSession with external API [\#240](https://github.com/ory/oathkeeper/pull/240) ([kubadz](https://github.com/kubadz))
@@ -227,6 +242,7 @@
 
 - rules: Support kubernetes configmap reloading [\#230](https://github.com/ory/oathkeeper/pull/230) ([aeneasr](https://github.com/aeneasr))
 - docs: Updates issue and pull request templates [\#226](https://github.com/ory/oathkeeper/pull/226) ([aeneasr](https://github.com/aeneasr))
+- Fix json encode of config for "credentials\_issuer" and "authorizer" during import [\#184](https://github.com/ory/oathkeeper/pull/184) ([stszap](https://github.com/stszap))
 
 ## [v0.17.1-beta.1](https://github.com/ory/oathkeeper/tree/v0.17.1-beta.1) (2019-07-23)
 [Full Changelog](https://github.com/ory/oathkeeper/compare/v0.17.0-beta.1...v0.17.1-beta.1)
@@ -276,6 +292,7 @@
 - server: Properly declare negroni middleware [\#200](https://github.com/ory/oathkeeper/pull/200) ([aeneasr](https://github.com/aeneasr))
 - docs: Updates issue and pull request templates [\#198](https://github.com/ory/oathkeeper/pull/198) ([aeneasr](https://github.com/aeneasr))
 - docs: Updates issue and pull request templates [\#197](https://github.com/ory/oathkeeper/pull/197) ([aeneasr](https://github.com/aeneasr))
+- docs: Updates issue and pull request templates [\#196](https://github.com/ory/oathkeeper/pull/196) ([aeneasr](https://github.com/aeneasr))
 
 ## [v0.16.0-beta.3](https://github.com/ory/oathkeeper/tree/v0.16.0-beta.3) (2019-05-19)
 [Full Changelog](https://github.com/ory/oathkeeper/compare/v0.15.2...v0.16.0-beta.3)
@@ -312,10 +329,6 @@
 
 - Credential issuer config is base64 encoded [\#182](https://github.com/ory/oathkeeper/issues/182)
 
-**Merged pull requests:**
-
-- Fix json encode of config for "credentials\_issuer" and "authorizer" during import [\#184](https://github.com/ory/oathkeeper/pull/184) ([stszap](https://github.com/stszap))
-
 ## [v0.15.1](https://github.com/ory/oathkeeper/tree/v0.15.1) (2019-04-29)
 [Full Changelog](https://github.com/ory/oathkeeper/compare/v0.15.0...v0.15.1)
 
@@ -348,7 +361,6 @@
 
 **Merged pull requests:**
 
-- docs: Updates issue and pull request templates [\#196](https://github.com/ory/oathkeeper/pull/196) ([aeneasr](https://github.com/aeneasr))
 - docker: Remove full tag from build pipeline [\#179](https://github.com/ory/oathkeeper/pull/179) ([aeneasr](https://github.com/aeneasr))
 -  sdk: Remove sdk dependencies to keto/hydra [\#173](https://github.com/ory/oathkeeper/pull/173) ([aeneasr](https://github.com/aeneasr))
 - ci: Adopt new release pipeline [\#171](https://github.com/ory/oathkeeper/pull/171) ([aeneasr](https://github.com/aeneasr))
@@ -360,8 +372,7 @@
 - Ensure rule matcher is locked before updating [\#159](https://github.com/ory/oathkeeper/pull/159) ([jtescher](https://github.com/jtescher))
 - proxy: improve debugability of JWT authenticator [\#156](https://github.com/ory/oathkeeper/pull/156) ([aeneasr](https://github.com/aeneasr))
 - issue \#149 - Update README building-from-source part with the gomodul… [\#152](https://github.com/ory/oathkeeper/pull/152) ([pink-lucifer](https://github.com/pink-lucifer))
-- docs: Update documentation links [\#144](https://github.com/ory/oathkeeper/pull/144) ([aeneasr](https://github.com/aeneasr))
-- Add environment parameters \(and description\) to configure proxy server timeout settings [\#132](https://github.com/ory/oathkeeper/pull/132) ([7phs](https://github.com/7phs))
+- docs: Align changelog, upgrade with new versions [\#143](https://github.com/ory/oathkeeper/pull/143) ([aeneasr](https://github.com/aeneasr))
 
 ## [v0.14.2+oryOS.10](https://github.com/ory/oathkeeper/tree/v0.14.2+oryOS.10) (2018-12-13)
 [Full Changelog](https://github.com/ory/oathkeeper/compare/v0.14.1+oryOS.10...v0.14.2+oryOS.10)
@@ -389,7 +400,7 @@
 
 - vendor: Update keto to latest [\#146](https://github.com/ory/oathkeeper/pull/146) ([aeneasr](https://github.com/aeneasr))
 - proxy: Update to recent keto changes  [\#145](https://github.com/ory/oathkeeper/pull/145) ([aeneasr](https://github.com/aeneasr))
-- docs: Align changelog, upgrade with new versions [\#143](https://github.com/ory/oathkeeper/pull/143) ([aeneasr](https://github.com/aeneasr))
+- docs: Update documentation links [\#144](https://github.com/ory/oathkeeper/pull/144) ([aeneasr](https://github.com/aeneasr))
 - docs: Fix proxy help command description [\#142](https://github.com/ory/oathkeeper/pull/142) ([aeneasr](https://github.com/aeneasr))
 - Ignore query parameters when matching url in rules. [\#139](https://github.com/ory/oathkeeper/pull/139) ([stszap](https://github.com/stszap))
 - Support "scope" claim as a string in jwt authenticator [\#137](https://github.com/ory/oathkeeper/pull/137) ([stszap](https://github.com/stszap))
@@ -429,7 +440,6 @@
 - proxy: Add JWT authenticator [\#109](https://github.com/ory/oathkeeper/pull/109) ([aeneasr](https://github.com/aeneasr))
 - cmd: Disable cors per default [\#107](https://github.com/ory/oathkeeper/pull/107) ([aeneasr](https://github.com/aeneasr))
 - Resolve various issues [\#93](https://github.com/ory/oathkeeper/pull/93) ([aeneasr](https://github.com/aeneasr))
-- rule: Adds validator for rules [\#77](https://github.com/ory/oathkeeper/pull/77) ([aeneasr](https://github.com/aeneasr))
 
 **Fixed bugs:**
 
@@ -465,6 +475,7 @@
 **Merged pull requests:**
 
 - docs: Improve some docs and update SDK [\#135](https://github.com/ory/oathkeeper/pull/135) ([aeneasr](https://github.com/aeneasr))
+- Add environment parameters \(and description\) to configure proxy server timeout settings [\#132](https://github.com/ory/oathkeeper/pull/132) ([7phs](https://github.com/7phs))
 - Make subject configurable using go template [\#129](https://github.com/ory/oathkeeper/pull/129) ([lsjostro](https://github.com/lsjostro))
 - docs: Updates issue and pull request templates [\#127](https://github.com/ory/oathkeeper/pull/127) ([aeneasr](https://github.com/aeneasr))
 - docs: Updates issue and pull request templates [\#126](https://github.com/ory/oathkeeper/pull/126) ([aeneasr](https://github.com/aeneasr))
@@ -502,6 +513,10 @@
 
 ## [v0.11.12](https://github.com/ory/oathkeeper/tree/v0.11.12) (2018-05-07)
 [Full Changelog](https://github.com/ory/oathkeeper/compare/v0.0.29...v0.11.12)
+
+**Implemented enhancements:**
+
+- rule: Adds validator for rules [\#77](https://github.com/ory/oathkeeper/pull/77) ([aeneasr](https://github.com/aeneasr))
 
 **Closed issues:**
 
