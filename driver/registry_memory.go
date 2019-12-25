@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/ory/oathkeeper/pipeline"
+	pe "github.com/ory/oathkeeper/pipeline/errors"
 	"github.com/ory/oathkeeper/proxy"
 
 	"github.com/ory/x/logrusx"
@@ -21,6 +22,7 @@ import (
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/pipeline/authn"
 	"github.com/ory/oathkeeper/pipeline/authz"
+	ep "github.com/ory/oathkeeper/pipeline/errors"
 	"github.com/ory/oathkeeper/pipeline/mutate"
 	"github.com/ory/oathkeeper/rule"
 )
@@ -55,6 +57,7 @@ type RegistryMemory struct {
 	authenticators map[string]authn.Authenticator
 	authorizers    map[string]authz.Authorizer
 	mutators       map[string]mutate.Mutator
+	errors         map[string]ep.Handler
 
 	ruleRepositoryLock sync.Mutex
 }
@@ -77,7 +80,7 @@ func (r *RegistryMemory) RuleFetcher() rule.Fetcher {
 
 func (r *RegistryMemory) ProxyRequestHandler() *proxy.RequestHandler {
 	if r.proxyRequestHandler == nil {
-		r.proxyRequestHandler = proxy.NewRequestHandler(r)
+		r.proxyRequestHandler = proxy.NewRequestHandler(r, r.c)
 	}
 	return r.proxyRequestHandler
 }
@@ -199,6 +202,49 @@ func (r *RegistryMemory) CredentialsVerifier() credentials.Verifier {
 	}
 
 	return r.credentialsVerifier
+}
+
+func (r *RegistryMemory) AvailablePipelineErrorHandlers() pe.Handlers {
+	r.prepareErrors()
+	r.RLock()
+	defer r.RUnlock()
+
+	hs := make(pe.Handlers, 0, len(r.errors))
+	for _, e := range r.errors {
+		hs = append(hs, e)
+	}
+
+	return hs
+}
+
+func (r *RegistryMemory) PipelineErrorHandler(id string) (pe.Handler, error) {
+	r.prepareErrors()
+	r.RLock()
+	defer r.RUnlock()
+
+	a, ok := r.errors[id]
+	if !ok {
+		return nil, errors.WithStack(pipeline.ErrPipelineHandlerNotFound)
+	}
+	return a, nil
+}
+
+func (r *RegistryMemory) prepareErrors() {
+	r.Lock()
+	defer r.Unlock()
+
+	if r.errors == nil {
+		interim := []ep.Handler{
+			ep.NewErrorJSON(r.c, r),
+			ep.NewErrorRedirect(r.c, r),
+			ep.NewErrorWWWAuthenticate(r.c, r),
+		}
+
+		r.errors = map[string]ep.Handler{}
+		for _, a := range interim {
+			r.errors[a.GetID()] = a
+		}
+	}
 }
 
 func (r *RegistryMemory) AvailablePipelineAuthenticators() (available []string) {

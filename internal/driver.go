@@ -11,6 +11,9 @@ import (
 func ResetViper() {
 	viper.Reset()
 	viper.Set("log.level", "debug")
+
+	// We need to reset the default value as defined in configuration.init()
+	viper.SetDefault(configuration.ViperKeyErrorsJSONIsEnabled, true)
 }
 
 func NewConfigurationWithDefaults() *configuration.ViperProvider {

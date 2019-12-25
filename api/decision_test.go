@@ -48,6 +48,7 @@ func TestDecisionAPI(t *testing.T) {
 	viper.Set(configuration.ViperKeyAuthorizerAllowIsEnabled, true)
 	viper.Set(configuration.ViperKeyAuthorizerDenyIsEnabled, true)
 	viper.Set(configuration.ViperKeyMutatorNoopIsEnabled, true)
+	viper.Set(configuration.ViperKeyErrorsWWWAuthenticateIsEnabled, true)
 	reg := internal.NewRegistry(conf).WithBrokenPipelineMutator()
 
 	d := reg.DecisionHandler()
@@ -59,17 +60,17 @@ func TestDecisionAPI(t *testing.T) {
 	defer ts.Close()
 
 	ruleNoOpAuthenticator := rule.Rule{
-		Match:          &rule.RuleMatch{Methods: []string{"GET"}, URL: ts.URL + "/authn-noop/<[0-9]+>"},
-		Authenticators: []rule.RuleHandler{{Handler: "noop"}},
-		Authorizer:     rule.RuleHandler{Handler: "allow"},
-		Mutators:       []rule.RuleHandler{{Handler: "noop"}},
+		Match:          &rule.Match{Methods: []string{"GET"}, URL: ts.URL + "/authn-noop/<[0-9]+>"},
+		Authenticators: []rule.Handler{{Handler: "noop"}},
+		Authorizer:     rule.Handler{Handler: "allow"},
+		Mutators:       []rule.Handler{{Handler: "noop"}},
 		Upstream:       rule.Upstream{URL: ""},
 	}
 	ruleNoOpAuthenticatorModifyUpstream := rule.Rule{
-		Match:          &rule.RuleMatch{Methods: []string{"GET"}, URL: ts.URL + "/strip-path/authn-noop/<[0-9]+>"},
-		Authenticators: []rule.RuleHandler{{Handler: "noop"}},
-		Authorizer:     rule.RuleHandler{Handler: "allow"},
-		Mutators:       []rule.RuleHandler{{Handler: "noop"}},
+		Match:          &rule.Match{Methods: []string{"GET"}, URL: ts.URL + "/strip-path/authn-noop/<[0-9]+>"},
+		Authenticators: []rule.Handler{{Handler: "noop"}},
+		Authorizer:     rule.Handler{Handler: "allow"},
+		Mutators:       []rule.Handler{{Handler: "noop"}},
 		Upstream:       rule.Upstream{URL: "", StripPath: "/strip-path/", PreserveHost: true},
 	}
 
@@ -118,8 +119,8 @@ func TestDecisionAPI(t *testing.T) {
 			d:   "should fail because no authorizer was configured",
 			url: ts.URL + "/decisions" + "/authn-anon/authz-none/cred-none/1234",
 			rules: []rule.Rule{{
-				Match:          &rule.RuleMatch{Methods: []string{"GET"}, URL: ts.URL + "/authn-anon/authz-none/cred-none/<[0-9]+>"},
-				Authenticators: []rule.RuleHandler{{Handler: "anonymous"}},
+				Match:          &rule.Match{Methods: []string{"GET"}, URL: ts.URL + "/authn-anon/authz-none/cred-none/<[0-9]+>"},
+				Authenticators: []rule.Handler{{Handler: "anonymous"}},
 				Upstream:       rule.Upstream{URL: ""},
 			}},
 			transform: func(r *http.Request) {
@@ -131,9 +132,9 @@ func TestDecisionAPI(t *testing.T) {
 			d:   "should fail because no mutator was configured",
 			url: ts.URL + "/decisions" + "/authn-anon/authz-allow/cred-none/1234",
 			rules: []rule.Rule{{
-				Match:          &rule.RuleMatch{Methods: []string{"GET"}, URL: ts.URL + "/authn-anon/authz-allow/cred-none/<[0-9]+>"},
-				Authenticators: []rule.RuleHandler{{Handler: "anonymous"}},
-				Authorizer:     rule.RuleHandler{Handler: "allow"},
+				Match:          &rule.Match{Methods: []string{"GET"}, URL: ts.URL + "/authn-anon/authz-allow/cred-none/<[0-9]+>"},
+				Authenticators: []rule.Handler{{Handler: "anonymous"}},
+				Authorizer:     rule.Handler{Handler: "allow"},
 				Upstream:       rule.Upstream{URL: ""},
 			}},
 			code: http.StatusInternalServerError,
@@ -142,10 +143,10 @@ func TestDecisionAPI(t *testing.T) {
 			d:   "should pass with anonymous and everything else set to noop",
 			url: ts.URL + "/decisions" + "/authn-anon/authz-allow/cred-noop/1234",
 			rules: []rule.Rule{{
-				Match:          &rule.RuleMatch{Methods: []string{"GET"}, URL: ts.URL + "/authn-anon/authz-allow/cred-noop/<[0-9]+>"},
-				Authenticators: []rule.RuleHandler{{Handler: "anonymous"}},
-				Authorizer:     rule.RuleHandler{Handler: "allow"},
-				Mutators:       []rule.RuleHandler{{Handler: "noop"}},
+				Match:          &rule.Match{Methods: []string{"GET"}, URL: ts.URL + "/authn-anon/authz-allow/cred-noop/<[0-9]+>"},
+				Authenticators: []rule.Handler{{Handler: "anonymous"}},
+				Authorizer:     rule.Handler{Handler: "allow"},
+				Mutators:       []rule.Handler{{Handler: "noop"}},
 				Upstream:       rule.Upstream{URL: ""},
 			}},
 			code:  http.StatusOK,
@@ -155,10 +156,10 @@ func TestDecisionAPI(t *testing.T) {
 			d:   "should fail when authorizer fails",
 			url: ts.URL + "/decisions" + "/authn-anon/authz-deny/cred-noop/1234",
 			rules: []rule.Rule{{
-				Match:          &rule.RuleMatch{Methods: []string{"GET"}, URL: ts.URL + "/authn-anon/authz-deny/cred-noop/<[0-9]+>"},
-				Authenticators: []rule.RuleHandler{{Handler: "anonymous"}},
-				Authorizer:     rule.RuleHandler{Handler: "deny"},
-				Mutators:       []rule.RuleHandler{{Handler: "noop"}},
+				Match:          &rule.Match{Methods: []string{"GET"}, URL: ts.URL + "/authn-anon/authz-deny/cred-noop/<[0-9]+>"},
+				Authenticators: []rule.Handler{{Handler: "anonymous"}},
+				Authorizer:     rule.Handler{Handler: "deny"},
+				Mutators:       []rule.Handler{{Handler: "noop"}},
 				Upstream:       rule.Upstream{URL: ""},
 			}},
 			code: http.StatusForbidden,
@@ -167,8 +168,8 @@ func TestDecisionAPI(t *testing.T) {
 			d:   "should fail when authenticator fails",
 			url: ts.URL + "/decisions" + "/authn-broken/authz-none/cred-none/1234",
 			rules: []rule.Rule{{
-				Match:          &rule.RuleMatch{Methods: []string{"GET"}, URL: ts.URL + "/authn-broken/authz-none/cred-none/<[0-9]+>"},
-				Authenticators: []rule.RuleHandler{{Handler: "unauthorized"}},
+				Match:          &rule.Match{Methods: []string{"GET"}, URL: ts.URL + "/authn-broken/authz-none/cred-none/<[0-9]+>"},
+				Authenticators: []rule.Handler{{Handler: "unauthorized"}},
 				Upstream:       rule.Upstream{URL: ""},
 			}},
 			code: http.StatusUnauthorized,
@@ -177,10 +178,10 @@ func TestDecisionAPI(t *testing.T) {
 			d:   "should fail when mutator fails",
 			url: ts.URL + "/decisions" + "/authn-anonymous/authz-allow/cred-broken/1234",
 			rules: []rule.Rule{{
-				Match:          &rule.RuleMatch{Methods: []string{"GET"}, URL: ts.URL + "/authn-anonymous/authz-allow/cred-broken/<[0-9]+>"},
-				Authenticators: []rule.RuleHandler{{Handler: "anonymous"}},
-				Authorizer:     rule.RuleHandler{Handler: "allow"},
-				Mutators:       []rule.RuleHandler{{Handler: "broken"}},
+				Match:          &rule.Match{Methods: []string{"GET"}, URL: ts.URL + "/authn-anonymous/authz-allow/cred-broken/<[0-9]+>"},
+				Authenticators: []rule.Handler{{Handler: "anonymous"}},
+				Authorizer:     rule.Handler{Handler: "allow"},
+				Mutators:       []rule.Handler{{Handler: "broken"}},
 				Upstream:       rule.Upstream{URL: ""},
 			}},
 			code: http.StatusInternalServerError,
@@ -189,13 +190,26 @@ func TestDecisionAPI(t *testing.T) {
 			d:   "should fail when one of the mutators fails",
 			url: ts.URL + "/decisions" + "/authn-anonymous/authz-allow/cred-broken/1234",
 			rules: []rule.Rule{{
-				Match:          &rule.RuleMatch{Methods: []string{"GET"}, URL: ts.URL + "/authn-anonymous/authz-allow/cred-broken/<[0-9]+>"},
-				Authenticators: []rule.RuleHandler{{Handler: "anonymous"}},
-				Authorizer:     rule.RuleHandler{Handler: "allow"},
-				Mutators:       []rule.RuleHandler{{Handler: "noop"}, {Handler: "broken"}},
+				Match:          &rule.Match{Methods: []string{"GET"}, URL: ts.URL + "/authn-anonymous/authz-allow/cred-broken/<[0-9]+>"},
+				Authenticators: []rule.Handler{{Handler: "anonymous"}},
+				Authorizer:     rule.Handler{Handler: "allow"},
+				Mutators:       []rule.Handler{{Handler: "noop"}, {Handler: "broken"}},
 				Upstream:       rule.Upstream{URL: ""},
 			}},
 			code: http.StatusInternalServerError,
+		},
+		{
+			d:   "should fail when authorizer fails and send www_authenticate as defined in the rule",
+			url: ts.URL + "/decisions" + "/authn-anon/authz-deny/cred-noop/1234",
+			rules: []rule.Rule{{
+				Match:          &rule.Match{Methods: []string{"GET"}, URL: ts.URL + "/authn-anon/authz-deny/cred-noop/<[0-9]+>"},
+				Authenticators: []rule.Handler{{Handler: "anonymous"}},
+				Authorizer:     rule.Handler{Handler: "deny"},
+				Mutators:       []rule.Handler{{Handler: "noop"}},
+				Upstream:       rule.Upstream{URL: ""},
+				Errors:         []rule.ErrorHandler{{Handler: "www_authenticate"}},
+			}},
+			code: http.StatusUnauthorized,
 		},
 	} {
 		t.Run(fmt.Sprintf("case=%d/description=%s", k, tc.d), func(t *testing.T) {

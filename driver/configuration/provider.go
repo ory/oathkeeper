@@ -15,11 +15,16 @@ import (
 
 var schemas = packr.New("schemas", "../../.schemas")
 
+const (
+	ForbiddenStrategyErrorType = "forbidden"
+)
+
 type Provider interface {
 	CORSEnabled(iface string) bool
 	CORSOptions(iface string) cors.Options
 
 	ProviderAuthenticators
+	ProviderErrorHandlers
 	ProviderAuthorizers
 	ProviderMutators
 
@@ -37,6 +42,11 @@ type Provider interface {
 	JSONWebKeyURLs() []string
 }
 
+type ProviderErrorHandlers interface {
+	ErrorHandlerConfig(id string, override json.RawMessage, dest interface{}) error
+	ErrorHandlerIsEnabled(id string) bool
+	ErrorHandlerFallbackSpecificity() []string
+}
 type ProviderAuthenticators interface {
 	AuthenticatorConfig(id string, overrides json.RawMessage, destination interface{}) error
 	AuthenticatorIsEnabled(id string) bool

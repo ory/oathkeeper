@@ -1,5 +1,5 @@
 {
-  "$id": "https://raw.githubusercontent.com/ory/oathkeeper/v0.32.1-beta.1/.schemas/config.schema.json",
+  "$id": "https://raw.githubusercontent.com/ory/oathkeeper/v0.34.0-beta.1/.schemas/config.schema.json",
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "ORY Oathkeeper Configuration",
   "type": "object",
@@ -173,6 +173,137 @@
       "default": "none",
       "description": "Sets the strategy validation algorithm."
     },
+    "configErrorsRedirect": {
+      "type": "object",
+      "title": "HTTP Redirect Error Handler",
+      "description": "This section is optional when the error handler is disabled.",
+      "additionalProperties": false,
+      "required": [
+        "to"
+      ],
+      "properties": {
+        "to": {
+          "title": "Redirect to",
+          "description": "Set the redirect target. Must be a http/https URL.",
+          "type": "string",
+          "format": "uri"
+        },
+        "code": {
+          "title": "HTTP Redirect Status Code",
+          "description": "Defines the HTTP Redirect status code which can bei 301 (Moved Permanently) or 302 (Found).",
+          "type": "number",
+          "enum": [
+            301,
+            302
+          ],
+          "default": 302
+        },
+        "when": {
+          "$ref": "#/definitions/configErrorsWhen"
+        }
+      }
+    },
+    "configErrorsWhen": {
+      "title": "Error Handler Conditions",
+      "description": "Conditions set under which circumstances an error handler should be responsible for handling the request. If no conditions are given, the error handler will be responsible for all requests. Sections error and request are combined using AND.",
+      "type": "array",
+      "additionalItems": false,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "error": {
+            "title": "Error Type Conditions",
+            "description": "Defines which error this error handler should listen to. The list uses OR (e.g. when the error is not_found OR unauthorized). If left empty, all errors will be handled by this error handler.",
+            "type": "array",
+            "additionalItems": false,
+            "items": {
+              "type": "string",
+              "enum": [
+                "unauthorized",
+                "forbidden",
+                "internal_server_error",
+                "not_found"
+              ]
+            }
+          },
+          "request": {
+            "title": "HTTP Request Conditions",
+            "description": "Defines which HTTP Request conditions must be met for this error handler to be executed. If left empty, all HTTP requests will match. All subkeys (e.g. cidr, header.accept, header.content_type) are handled as AND.",
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "cidr": {
+                "title": "Client IP CIDR Mask",
+                "description": "Defines one or more CIDR masks to match the client IP (remote address and X-Forwarded-For) against. If empty, all IPs will be matched. If more than one value, OR will be applied (e.g. 129.168.1.0/24 OR 188.177.0.0/16.",
+                "type": "array",
+                "additionalItems": false,
+                "items": {
+                  "type": "string"
+                }
+              },
+              "header": {
+                "title": "HTTP Request Header Conditions",
+                "description": "Defines conditions the HTTP Request Header must full fill for this handler to match the request. Subkeys are matched with AND. If, for example, both content_type and accept are set, both requirements must be matched for the handler to be responsible.",
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "content_type": {
+                    "type": "array",
+                    "title": "HTTP Request Header Content Type Condition",
+                    "description": "Defines the HTTP Header Content-Type condition. If left empty, all content types match. If more than one element is defined, at least one has to match.",
+                    "additionalItems": false,
+                    "item": {
+                      "type": "string"
+                    }
+                  },
+                  "accept": {
+                    "type": "array",
+                    "title": "HTTP Request Header Accept Condition",
+                    "description": "Defines the HTTP Header Accept condition. If left empty, all accept values match. If more than one element is defined, at least one has to match.",
+                    "additionalItems": false,
+                    "item": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "configErrorsJSON": {
+      "type": "object",
+      "title": "JSON Error Handler",
+      "description": "This section is optional when the error handler is disabled.",
+      "additionalProperties": false,
+      "properties": {
+        "verbose": {
+          "type": "boolean"
+        },
+        "when": {
+          "$ref": "#/definitions/configErrorsWhen"
+        }
+      }
+    },
+    "configErrorsWWWAuthenticate": {
+      "type": "object",
+      "title": "WWW-Authenticate Error Handler",
+      "description": "This section is optional when the error handler is disabled.",
+      "additionalProperties": false,
+      "properties": {
+        "realm": {
+          "type": "string",
+          "title": "The WWW-Authenticate Realm",
+          "description": "This is a message that will be displayed by the browser. Most browsers show a message like \"The website says: <realm>\". Using a real message is thus more appropriate than a Realm identifier.",
+          "default": "Please authenticate."
+        },
+        "when": {
+          "$ref": "#/definitions/configErrorsWhen"
+        }
+      }
+    },
     "configAuthenticatorsAnonymous": {
       "type": "object",
       "title": "Anonymous Authenticator Configuration",
@@ -231,7 +362,9 @@
       "type": "object",
       "title": "JWT Authenticator Configuration",
       "description": "This section is optional when the authenticator is disabled.",
-      "required": ["jwks_urls"],
+      "required": [
+        "jwks_urls"
+      ],
       "properties": {
         "required_scope": {
           "type": "array",
@@ -525,7 +658,7 @@
       ],
       "additionalProperties": false
     },
-    "configAuthorizersKetoEngineAcpOry":  {
+    "configAuthorizersKetoEngineAcpOry": {
       "type": "object",
       "title": "ORY Keto Access Control Policy Authorizer Configuration",
       "description": "This section is optional when the authorizer is disabled.",
@@ -559,7 +692,7 @@
       ],
       "additionalProperties": false
     },
-    "configMutatorsCookie":  {
+    "configMutatorsCookie": {
       "type": "object",
       "title": "Cookie Mutator Configuration",
       "description": "This section is optional when the mutator is disabled.",
@@ -576,7 +709,7 @@
       },
       "additionalProperties": false
     },
-    "configMutatorsHeader":   {
+    "configMutatorsHeader": {
       "type": "object",
       "title": "Header Mutator Configuration",
       "description": "This section is optional when the mutator is disabled.",
@@ -593,7 +726,7 @@
       },
       "additionalProperties": false
     },
-    "configMutatorsHydrator":  {
+    "configMutatorsHydrator": {
       "type": "object",
       "title": "Hydrator Mutator Configuration",
       "description": "This section is optional when the mutator is disabled.",
@@ -655,7 +788,7 @@
       ],
       "additionalProperties": false
     },
-    "configMutatorsIdToken":  {
+    "configMutatorsIdToken": {
       "type": "object",
       "title": "ID Token Mutator Configuration",
       "description": "This section is optional when the mutator is disabled.",
@@ -939,7 +1072,6 @@
           "title": "OAuth 2.0 Client Credentials",
           "description": "The [`oauth2_client_credentials` authenticator](https://www.ory.sh/docs/oathkeeper/pipeline/authn#oauth2_client_credentials).",
           "type": "object",
-
           "properties": {
             "enabled": {
               "$ref": "#/definitions/handlerSwitch"
@@ -972,7 +1104,6 @@
           "title": "OAuth 2.0 Token Introspection",
           "description": "The [`oauth2_introspection` authenticator](https://www.ory.sh/docs/oathkeeper/pipeline/authn#oauth2_introspection).",
           "type": "object",
-
           "properties": {
             "enabled": {
               "$ref": "#/definitions/handlerSwitch"
@@ -1000,6 +1131,132 @@
               }
             }
           ]
+        }
+      }
+    },
+    "errors": {
+      "title": "Error Handling",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "fallback": {
+          "title": "Error Handling Fallback",
+          "description": "This array defines how to handle errors when no \"when\" clause matches. If you have, for example, enabled redirect and json in your access rule, you could tell ORY Oathkeeper to try sending JSON if the request does not match the access rule definition",
+          "default": [
+            "json"
+          ],
+          "examples": [
+            "json",
+            "redirect"
+          ]
+        },
+        "handlers": {
+          "additionalProperties": false,
+          "title": "Individual Error Handler Configuration",
+          "type": "object",
+          "properties": {
+            "www_authenticate": {
+              "title": "HTTP WWW-Authenticate Handler",
+              "description": "Responds with the WWW-Authenticate HTTP Response",
+              "type": "object",
+              "properties": {
+                "enabled": {
+                  "$ref": "#/definitions/handlerSwitch"
+                }
+              },
+              "oneOf": [
+                {
+                  "properties": {
+                    "enabled": {
+                      "const": true
+                    },
+                    "config": {
+                      "$ref": "#/definitions/configErrorsWWWAuthenticate"
+                    }
+                  },
+                  "required": [
+                    "config"
+                  ]
+                },
+                {
+                  "properties": {
+                    "enabled": {
+                      "const": false
+                    }
+                  }
+                }
+              ]
+            },
+            "redirect": {
+              "title": "HTTP Redirect Error Handler",
+              "description": "Responds with a 301/302 HTTP redirect.",
+              "type": "object",
+              "properties": {
+                "enabled": {
+                  "$ref": "#/definitions/handlerSwitch"
+                }
+              },
+              "oneOf": [
+                {
+                  "properties": {
+                    "enabled": {
+                      "const": true
+                    },
+                    "config": {
+                      "$ref": "#/definitions/configErrorsRedirect"
+                    }
+                  },
+                  "required": [
+                    "config"
+                  ]
+                },
+                {
+                  "properties": {
+                    "enabled": {
+                      "const": false
+                    }
+                  }
+                }
+              ]
+            },
+            "json": {
+              "title": "JSON Error Handler",
+              "description": "Responds with a JSON error response",
+              "properties": {
+                "enabled": {
+                  "title": "Enabled",
+                  "type": "boolean",
+                  "default": true,
+                  "examples": [
+                    true
+                  ],
+                  "description": "En-/disables this component."
+                }
+              },
+              "oneOf": [
+                {
+                  "properties": {
+                    "enabled": {
+                      "const": true
+                    },
+                    "config": {
+                      "$ref": "#/definitions/configErrorsJSON"
+                    }
+                  },
+                  "required": [
+                    "config"
+                  ]
+                },
+                {
+                  "properties": {
+                    "enabled": {
+                      "const": false
+                    }
+                  }
+                }
+              ]
+            }
+          }
         }
       }
     },
@@ -1086,7 +1343,6 @@
           "title": "HTTP Cookie",
           "description": "The [`cookie` mutator](https://www.ory.sh/docs/oathkeeper/pipeline/mutator#cookie).",
           "type": "object",
-
           "properties": {
             "enabled": {
               "$ref": "#/definitions/handlerSwitch"
@@ -1119,7 +1375,6 @@
           "title": "HTTP Header",
           "description": "The [`header` mutator](https://www.ory.sh/docs/oathkeeper/pipeline/mutator#header).",
           "type": "object",
-
           "properties": {
             "enabled": {
               "$ref": "#/definitions/handlerSwitch"
@@ -1152,7 +1407,6 @@
           "title": "Hydrator",
           "description": "The [`hydrator` mutator](https://www.ory.sh/docs/oathkeeper/pipeline/mutator#hydrator).",
           "type": "object",
-
           "properties": {
             "enabled": {
               "$ref": "#/definitions/handlerSwitch"
@@ -1185,7 +1439,6 @@
           "title": "ID Token (JSON Web Token)",
           "description": "The [`id_token` mutator](https://www.ory.sh/docs/oathkeeper/pipeline/mutator#id_token).",
           "type": "object",
-
           "properties": {
             "enabled": {
               "$ref": "#/definitions/handlerSwitch"

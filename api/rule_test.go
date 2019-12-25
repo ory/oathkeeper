@@ -59,14 +59,14 @@ func TestHandler(t *testing.T) {
 	rules := []rule.Rule{
 		{
 			ID: "foo1",
-			Match: &rule.RuleMatch{
+			Match: &rule.Match{
 				URL:     "https://localhost:1234/<foo|bar>",
 				Methods: []string{"POST"},
 			},
 			Description:    "Create users rule",
-			Authorizer:     rule.RuleHandler{Handler: "allow", Config: json.RawMessage(`{"type":"any"}`)},
-			Authenticators: []rule.RuleHandler{{Handler: "anonymous", Config: json.RawMessage(`{"name":"anonymous1"}`)}},
-			Mutators:       []rule.RuleHandler{{Handler: "id_token", Config: json.RawMessage(`{"issuer":"anything"}`)}},
+			Authorizer:     rule.Handler{Handler: "allow", Config: json.RawMessage(`{"type":"any"}`)},
+			Authenticators: []rule.Handler{{Handler: "anonymous", Config: json.RawMessage(`{"name":"anonymous1"}`)}},
+			Mutators:       []rule.Handler{{Handler: "id_token", Config: json.RawMessage(`{"issuer":"anything"}`)}},
 			Upstream: rule.Upstream{
 				URL:          "http://localhost:1235/",
 				StripPath:    "/bar",
@@ -75,14 +75,14 @@ func TestHandler(t *testing.T) {
 		},
 		{
 			ID: "foo2",
-			Match: &rule.RuleMatch{
+			Match: &rule.Match{
 				URL:     "https://localhost:34/<baz|bar>",
 				Methods: []string{"GET"},
 			},
 			Description:    "Get users rule",
-			Authorizer:     rule.RuleHandler{Handler: "deny", Config: json.RawMessage(`{"type":"any"}`)},
-			Authenticators: []rule.RuleHandler{{Handler: "oauth2_introspection", Config: json.RawMessage(`{"name":"anonymous1"}`)}},
-			Mutators:       []rule.RuleHandler{{Handler: "id_token", Config: json.RawMessage(`{"issuer":"anything"}`)}, {Handler: "headers", Config: json.RawMessage(`{"headers":{"X-User":"user"}}`)}},
+			Authorizer:     rule.Handler{Handler: "deny", Config: json.RawMessage(`{"type":"any"}`)},
+			Authenticators: []rule.Handler{{Handler: "oauth2_introspection", Config: json.RawMessage(`{"name":"anonymous1"}`)}},
+			Mutators:       []rule.Handler{{Handler: "id_token", Config: json.RawMessage(`{"issuer":"anything"}`)}, {Handler: "headers", Config: json.RawMessage(`{"headers":{"X-User":"user"}}`)}},
 			Upstream: rule.Upstream{
 				URL:          "http://localhost:333/",
 				StripPath:    "/foo",

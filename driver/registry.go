@@ -3,6 +3,7 @@ package driver
 import (
 	"github.com/sirupsen/logrus"
 
+	"github.com/ory/oathkeeper/pipeline/errors"
 	"github.com/ory/oathkeeper/proxy"
 
 	"github.com/ory/oathkeeper/api"
@@ -37,6 +38,7 @@ type Registry interface {
 	authn.Registry
 	authz.Registry
 	mutate.Registry
+	errors.Registry
 
 	rule.Registry
 	credentials.FetcherRegistry

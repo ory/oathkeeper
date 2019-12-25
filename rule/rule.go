@@ -33,7 +33,7 @@ import (
 	"github.com/ory/ladon/compiler"
 )
 
-type RuleMatch struct {
+type Match struct {
 	// An array of HTTP methods (e.g. GET, POST, PUT, DELETE, ...). When ORY Oathkeeper searches for rules
 	// to decide what to do with an incoming request to the proxy server, it compares the HTTP method of the incoming
 	// request with the HTTP methods of each rules. If a match is found, the rule is considered a partial match.
@@ -54,7 +54,7 @@ type RuleMatch struct {
 	compiledURLChecksum uint32
 }
 
-type RuleHandler struct {
+type Handler struct {
 	// Handler identifies the implementation which will be used to handle this specific request. Please read the user
 	// guide for a complete list of available handlers.
 	Handler string `json:"handler"`
@@ -62,6 +62,23 @@ type RuleHandler struct {
 	// Config contains the configuration for the handler. Please read the user
 	// guide for a complete list of each handler's available settings.
 	Config json.RawMessage `json:"config"`
+}
+
+type ErrorHandler struct {
+	// Handler identifies the implementation which will be used to handle this specific request. Please read the user
+	// guide for a complete list of available handlers.
+	Handler string `json:"handler"`
+
+	// Config defines additional configuration for the response handler.
+	Config json.RawMessage `json:"config"`
+}
+
+type OnErrorRequest struct {
+	// ContentType defines the content type(s) that should match. Wildcards such as `application/*` are supported.
+	ContentType []string `json:"content_type"`
+
+	// Accept defines the accept header that should match. Wildcards such as `application/*` are supported.
+	Accept []string `json:"accept"`
 }
 
 // Rule is a single rule that will get checked on every HTTP request.
@@ -78,7 +95,7 @@ type Rule struct {
 	Description string `json:"description"`
 
 	// Match defines the URL that this rule should match.
-	Match *RuleMatch `json:"match"`
+	Match *Match `json:"match"`
 
 	// Authenticators is a list of authentication handlers that will try and authenticate the provided credentials.
 	// Authenticators are checked iteratively from index 0 to n and if the first authenticator to return a positive
@@ -86,17 +103,22 @@ type Rule struct {
 	//
 	// If you want the rule to first check a specific authenticator  before "falling back" to others, have that authenticator
 	// as the first item in the array.
-	Authenticators []RuleHandler `json:"authenticators"`
+	Authenticators []Handler `json:"authenticators"`
 
 	// Authorizer is the authorization handler which will try to authorize the subject (authenticated using an Authenticator)
 	// making the request.
-	Authorizer RuleHandler `json:"authorizer"`
+	Authorizer Handler `json:"authorizer"`
 
 	// Mutators is a list of mutation handlers that transform the HTTP request. A common use case is generating a new set
 	// of credentials (e.g. JWT) which then will be forwarded to the upstream server.
 	//
 	// Mutations are performed iteratively from index 0 to n and should all succeed in order for the HTTP request to be forwarded.
-	Mutators []RuleHandler `json:"mutators"`
+	Mutators []Handler `json:"mutators"`
+
+	// Errors is a list of error handlers. These will be invoked if any part of the system returns an error. You can
+	// configure error matchers to listen on certain errors (e.g. unauthorized) and execute specific logic (e.g. redirect
+	// to the login endpoint, return with an XML error, return a json error, ...).
+	Errors []ErrorHandler `json:"errors"`
 
 	// Upstream is the location of the server where requests matching this rule should be forwarded to.
 	Upstream Upstream `json:"upstream"`
@@ -118,22 +140,23 @@ var _ json.Unmarshaler = new(Rule)
 
 func NewRule() *Rule {
 	return &Rule{
-		Match:          &RuleMatch{},
-		Authenticators: []RuleHandler{},
-		Mutators:       []RuleHandler{},
+		Match:          &Match{},
+		Authenticators: []Handler{},
+		Mutators:       []Handler{},
 	}
 }
 
 func (r *Rule) UnmarshalJSON(raw []byte) error {
 	var rr struct {
-		ID             string        `json:"id"`
-		Version        string        `json:"version"`
-		Description    string        `json:"description"`
-		Match          *RuleMatch    `json:"match"`
-		Authenticators []RuleHandler `json:"authenticators"`
-		Authorizer     RuleHandler   `json:"authorizer"`
-		Mutators       []RuleHandler `json:"mutators"`
-		Upstream       Upstream      `json:"upstream"`
+		ID             string         `json:"id"`
+		Version        string         `json:"version"`
+		Description    string         `json:"description"`
+		Match          *Match         `json:"match"`
+		Authenticators []Handler      `json:"authenticators"`
+		Authorizer     Handler        `json:"authorizer"`
+		Mutators       []Handler      `json:"mutators"`
+		Errors         []ErrorHandler `json:"errors"`
+		Upstream       Upstream       `json:"upstream"`
 	}
 
 	transformed, err := migrateRuleJSON(raw)

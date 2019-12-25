@@ -55,7 +55,8 @@ type key int
 
 const (
 	director key = iota + 1
-	SessionCtxKey
+	ContextKeyMatchedRule
+	ContextKeySession
 )
 
 func (d *Proxy) RoundTrip(r *http.Request) (*http.Response, error) {
@@ -67,9 +68,11 @@ func (d *Proxy) RoundTrip(r *http.Request) (*http.Response, error) {
 		"http_user_agent": r.UserAgent(),
 	}
 
-	if sess, ok := r.Context().Value(SessionCtxKey).(*authn.AuthenticationSession); ok {
+	if sess, ok := r.Context().Value(ContextKeySession).(*authn.AuthenticationSession); ok {
 		fields["subject"] = sess.Subject
 	}
+
+	rl, _ := r.Context().Value(ContextKeyMatchedRule).(*rule.Rule)
 
 	if err, ok := r.Context().Value(director).(error); ok && err != nil {
 		d.r.Logger().WithError(err).
@@ -77,7 +80,7 @@ func (d *Proxy) RoundTrip(r *http.Request) (*http.Response, error) {
 			WithField("granted", false).
 			Warn("Access request denied")
 
-		d.r.Writer().WriteError(rw, r, err)
+		d.r.ProxyRequestHandler().HandleError(rw, r, rl, err)
 
 		return &http.Response{
 			StatusCode: rw.code,
@@ -110,7 +113,7 @@ func (d *Proxy) RoundTrip(r *http.Request) (*http.Response, error) {
 		WithFields(fields).
 		Warn("Unable to type assert context")
 
-	d.r.Writer().Write(rw, r, err)
+	d.r.ProxyRequestHandler().HandleError(rw, r, rl, err)
 
 	return &http.Response{
 		StatusCode: rw.code,
@@ -127,12 +130,13 @@ func (d *Proxy) Director(r *http.Request) {
 		return
 	}
 
+	*r = *r.WithContext(context.WithValue(r.Context(), ContextKeyMatchedRule, rl))
 	s, err := d.r.ProxyRequestHandler().HandleRequest(r, rl)
 	if err != nil {
 		*r = *r.WithContext(context.WithValue(r.Context(), director, err))
 		return
 	}
-	*r = *r.WithContext(context.WithValue(r.Context(), SessionCtxKey, s))
+	*r = *r.WithContext(context.WithValue(r.Context(), ContextKeySession, s))
 
 	for h := range s.Header {
 		r.Header.Set(h, s.Header.Get(h))

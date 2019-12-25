@@ -36,7 +36,7 @@ func mustParse(t *testing.T, u string) *url.URL {
 
 func TestRule(t *testing.T) {
 	r := &Rule{
-		Match: &RuleMatch{
+		Match: &Match{
 			Methods: []string{"DELETE"},
 			URL:     "https://localhost/users/<[0-9]+>",
 		},
