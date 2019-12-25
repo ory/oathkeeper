@@ -160,6 +160,10 @@ func TestMutatorIDToken(t *testing.T) {
 
 			for i, tc := range testCases {
 				t.Run(fmt.Sprintf("case=%d", i), func(t *testing.T) {
+					if tc.Ttl == 0 {
+						tc.Ttl = time.Second * 5
+					}
+
 					tc.Config, _ = sjson.SetBytes(tc.Config, "jwks_url", tc.K)
 					tc.Config, _ = sjson.SetBytes(tc.Config, "ttl", tc.Ttl.String())
 					err := a.Mutate(r, tc.Session, tc.Config, tc.Rule)
