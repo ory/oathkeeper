@@ -4,9 +4,10 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/spf13/cobra"
+
 	"github.com/ory/oathkeeper/sdk/go/oathkeeper/client/api"
 	"github.com/ory/x/cmdx"
-	"github.com/spf13/cobra"
 )
 
 // healthCmd represents the health command

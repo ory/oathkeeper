@@ -45,6 +45,7 @@ type Provider interface {
 type ProviderErrorHandlers interface {
 	ErrorHandlerConfig(id string, override json.RawMessage, dest interface{}) error
 	ErrorHandlerIsEnabled(id string) bool
+	ErrorHandlerFallbackSpecificity() []string
 }
 type ProviderAuthenticators interface {
 	AuthenticatorConfig(id string, overrides json.RawMessage, destination interface{}) error

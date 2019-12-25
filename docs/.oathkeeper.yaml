@@ -89,18 +89,31 @@ access_rules:
     - https://path-to-my-rules/rules.json
 
 errors:
-  redirect:
-    enabled: true
-    config:
-      to: bar
-      when:
-        - errors:
-            - unauthorized
-            - forbidden
-            - internal_server_error
-          request:
-            content_type:
-              - application/json
+  fallback:
+    - json
+  handlers:
+    redirect:
+      enabled: true
+      config:
+        to: http://path-to/redirect
+    json:
+      enabled: true
+      config:
+        verbose: true
+        when:
+          -
+            error:
+              - unauthorized
+              - forbidden
+              - internal_server_error
+            request:
+              header:
+                content_type:
+                  - application/json
+                accept:
+                  - application/json
+              cidr:
+                - 127.0.0.0/24
 
 # All authenticators can be configured under this configuration key
 authenticators:

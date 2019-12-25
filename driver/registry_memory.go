@@ -80,7 +80,7 @@ func (r *RegistryMemory) RuleFetcher() rule.Fetcher {
 
 func (r *RegistryMemory) ProxyRequestHandler() *proxy.RequestHandler {
 	if r.proxyRequestHandler == nil {
-		r.proxyRequestHandler = proxy.NewRequestHandler(r)
+		r.proxyRequestHandler = proxy.NewRequestHandler(r, r.c)
 	}
 	return r.proxyRequestHandler
 }
@@ -236,6 +236,8 @@ func (r *RegistryMemory) prepareErrors() {
 	if r.errors == nil {
 		interim := []ep.Handler{
 			ep.NewErrorJSON(r.c, r),
+			ep.NewErrorRedirect(r.c, r),
+			ep.NewErrorWWWAuthenticate(r.c, r),
 		}
 
 		r.errors = map[string]ep.Handler{}

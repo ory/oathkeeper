@@ -48,6 +48,7 @@ func TestDecisionAPI(t *testing.T) {
 	viper.Set(configuration.ViperKeyAuthorizerAllowIsEnabled, true)
 	viper.Set(configuration.ViperKeyAuthorizerDenyIsEnabled, true)
 	viper.Set(configuration.ViperKeyMutatorNoopIsEnabled, true)
+	viper.Set(configuration.ViperKeyErrorsWWWAuthenticateIsEnabled, true)
 	reg := internal.NewRegistry(conf).WithBrokenPipelineMutator()
 
 	d := reg.DecisionHandler()
@@ -196,6 +197,19 @@ func TestDecisionAPI(t *testing.T) {
 				Upstream:       rule.Upstream{URL: ""},
 			}},
 			code: http.StatusInternalServerError,
+		},
+		{
+			d:   "should fail when authorizer fails and send www_authenticate as defined in the rule",
+			url: ts.URL + "/decisions" + "/authn-anon/authz-deny/cred-noop/1234",
+			rules: []rule.Rule{{
+				Match:          &rule.Match{Methods: []string{"GET"}, URL: ts.URL + "/authn-anon/authz-deny/cred-noop/<[0-9]+>"},
+				Authenticators: []rule.Handler{{Handler: "anonymous"}},
+				Authorizer:     rule.Handler{Handler: "deny"},
+				Mutators:       []rule.Handler{{Handler: "noop"}},
+				Upstream:       rule.Upstream{URL: ""},
+				Errors:         []rule.ErrorHandler{{Handler: "www_authenticate"}},
+			}},
+			code: http.StatusUnauthorized,
 		},
 	} {
 		t.Run(fmt.Sprintf("case=%d/description=%s", k, tc.d), func(t *testing.T) {

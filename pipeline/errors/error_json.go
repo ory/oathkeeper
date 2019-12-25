@@ -8,7 +8,7 @@ import (
 	"github.com/ory/x/errorsx"
 
 	"github.com/ory/oathkeeper/driver/configuration"
-	"github.com/ory/oathkeeper/rule"
+	"github.com/ory/oathkeeper/pipeline"
 	"github.com/ory/oathkeeper/x"
 )
 
@@ -16,8 +16,7 @@ var _ Handler = new(ErrorJSON)
 
 type (
 	ErrorJSONConfig struct {
-		Verbose bool  `json:"verbose"`
-		Whens   Whens `json:"when"`
+		Verbose bool `json:"verbose"`
 	}
 	ErrorJSON struct {
 		c configuration.Provider
@@ -35,45 +34,41 @@ func NewErrorJSON(
 	return &ErrorJSON{c: c, d: d}
 }
 
-func (a *ErrorJSON) Handle(w http.ResponseWriter, r *http.Request, config json.RawMessage, _ *rule.Rule, ge error) error {
+func (a *ErrorJSON) Handle(w http.ResponseWriter, r *http.Request, config json.RawMessage, _ pipeline.Rule, handleError error) error {
 	c, err := a.Config(config)
 	if err != nil {
 		return err
 	}
 
-	if err := MatchesWhen(c.Whens, r, ge); err != nil {
-		return err
-	}
-
 	if !c.Verbose {
-		if sc, ok := errorsx.Cause(ge).(statusCoder); ok {
+		if sc, ok := errorsx.Cause(handleError).(statusCoder); ok {
 			switch sc.StatusCode() {
 			case http.StatusInternalServerError:
-				ge = herodot.ErrInternalServerError.WithTrace(ge)
+				handleError = herodot.ErrInternalServerError.WithTrace(handleError)
 			case http.StatusForbidden:
-				ge = herodot.ErrForbidden.WithTrace(ge)
+				handleError = herodot.ErrForbidden.WithTrace(handleError)
 			case http.StatusNotFound:
-				ge = herodot.ErrNotFound.WithTrace(ge)
+				handleError = herodot.ErrNotFound.WithTrace(handleError)
 			case http.StatusUnauthorized:
-				ge = herodot.ErrUnauthorized.WithTrace(ge)
+				handleError = herodot.ErrUnauthorized.WithTrace(handleError)
 			case http.StatusBadRequest:
-				ge = herodot.ErrBadRequest.WithTrace(ge)
+				handleError = herodot.ErrBadRequest.WithTrace(handleError)
 			case http.StatusUnsupportedMediaType:
-				ge = herodot.ErrUnsupportedMediaType.WithTrace(ge)
+				handleError = herodot.ErrUnsupportedMediaType.WithTrace(handleError)
 			case http.StatusConflict:
-				ge = herodot.ErrConflict.WithTrace(ge)
+				handleError = herodot.ErrConflict.WithTrace(handleError)
 			}
 		} else {
-			ge = herodot.ErrInternalServerError.WithTrace(ge)
+			handleError = herodot.ErrInternalServerError.WithTrace(handleError)
 		}
 	}
 
-	a.d.Writer().WriteError(w, r, ge)
+	a.d.Writer().WriteError(w, r, handleError)
 	return nil
 }
 
 func (a *ErrorJSON) Validate(config json.RawMessage) error {
-	if !a.c.AuthorizerIsEnabled(a.GetID()) {
+	if !a.c.ErrorHandlerIsEnabled(a.GetID()) {
 		return NewErrErrorHandlerNotEnabled(a)
 	}
 

@@ -13,12 +13,12 @@ import (
 	"github.com/rs/cors"
 	"github.com/sirupsen/logrus"
 
+	"github.com/ory/viper"
+
 	"github.com/ory/go-convenience/stringsx"
 
-	"github.com/ory/gojsonschema"
-	"github.com/ory/x/jsonx"
-
 	"github.com/ory/fosite"
+	"github.com/ory/gojsonschema"
 	"github.com/ory/x/corsx"
 	"github.com/ory/x/urlx"
 	"github.com/ory/x/viperx"
@@ -27,6 +27,11 @@ import (
 )
 
 var _ Provider = new(ViperProvider)
+
+func init() {
+	// The JSON error handler is the default error handler and must be enabled by default.
+	viper.SetDefault(ViperKeyErrorsJSONIsEnabled, true)
+}
 
 const (
 	ViperKeyProxyReadTimeout       = "serve.proxy.timeout.read"
@@ -88,7 +93,11 @@ const (
 
 // Errors
 const (
-	ViperKeyErrors = "errors"
+	ViperKeyErrors                         = "errors.handlers"
+	ViperKeyErrorsFallback                 = "errors.fallback"
+	ViperKeyErrorsJSONIsEnabled            = ViperKeyErrors + ".json.enabled"
+	ViperKeyErrorsRedirectIsEnabled        = ViperKeyErrors + ".redirect.enabled"
+	ViperKeyErrorsWWWAuthenticateIsEnabled = ViperKeyErrors + ".www_authenticate.enabled"
 )
 
 type ViperProvider struct {
@@ -212,12 +221,12 @@ func (v *ViperProvider) PipelineConfig(prefix, id string, override json.RawMessa
 	}
 
 	if dest != nil {
-		if err := jsonx.NewStrictDecoder(bytes.NewBuffer(marshalled)).Decode(dest); err != nil {
+		if err := json.NewDecoder(bytes.NewBuffer(marshalled)).Decode(dest); err != nil {
 			return errors.WithStack(err)
 		}
 	}
 
-	rawComponentSchema, err := schemas.Find(fmt.Sprintf("pipeline/%s.%s.schema.json", prefix, id))
+	rawComponentSchema, err := schemas.Find(fmt.Sprintf("pipeline/%s.%s.schema.json", strings.Split(prefix, ".")[0], id))
 	if err != nil {
 		return errors.WithStack(err)
 	}
@@ -248,6 +257,10 @@ func (v *ViperProvider) PipelineConfig(prefix, id string, override json.RawMessa
 
 func (v *ViperProvider) ErrorHandlerConfig(id string, override json.RawMessage, dest interface{}) error {
 	return v.PipelineConfig(ViperKeyErrors, id, override, dest)
+}
+
+func (v *ViperProvider) ErrorHandlerFallbackSpecificity() []string {
+	return viperx.GetStringSlice(v.l, ViperKeyErrorsFallback, []string{"json"})
 }
 
 func (v *ViperProvider) ErrorHandlerIsEnabled(id string) bool {

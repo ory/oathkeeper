@@ -91,7 +91,7 @@ func (h *DecisionHandler) decisions(w http.ResponseWriter, r *http.Request) {
 		"http_user_agent": r.UserAgent(),
 	}
 
-	if sess, ok := r.Context().Value(proxy.SessionCtxKey).(*authn.AuthenticationSession); ok {
+	if sess, ok := r.Context().Value(proxy.ContextKeySession).(*authn.AuthenticationSession); ok {
 		fields["subject"] = sess.Subject
 	}
 
@@ -101,7 +101,7 @@ func (h *DecisionHandler) decisions(w http.ResponseWriter, r *http.Request) {
 			WithFields(fields).
 			WithField("granted", false).
 			Warn("Access request denied")
-		h.r.Writer().WriteError(w, r, err)
+		h.r.ProxyRequestHandler().HandleError(w, r, rl, err)
 		return
 	}
 
@@ -112,7 +112,7 @@ func (h *DecisionHandler) decisions(w http.ResponseWriter, r *http.Request) {
 			WithField("granted", false).
 			Warn("Access request denied")
 
-		// h.r.ProxyRequestHandler().HandleError(r, rl, err)
+		h.r.ProxyRequestHandler().HandleError(w, r, rl, err)
 		return
 	}
 

@@ -8,12 +8,12 @@ import (
 
 	"github.com/ory/herodot"
 
-	"github.com/ory/oathkeeper/rule"
+	"github.com/ory/oathkeeper/pipeline"
 )
 
 type Handler interface {
 	GetID() string
-	Handle(w http.ResponseWriter, r *http.Request, config json.RawMessage, _ *rule.Rule, err error) error
+	Handle(w http.ResponseWriter, r *http.Request, config json.RawMessage, _ pipeline.Rule, err error) error
 	Validate(config json.RawMessage) error
 }
 

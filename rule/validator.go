@@ -26,8 +26,10 @@ import (
 
 	"github.com/ory/go-convenience/stringslice"
 	"github.com/ory/herodot"
+
 	"github.com/ory/oathkeeper/pipeline/authn"
 	"github.com/ory/oathkeeper/pipeline/authz"
+	pe "github.com/ory/oathkeeper/pipeline/errors"
 	"github.com/ory/oathkeeper/pipeline/mutate"
 )
 
@@ -47,6 +49,7 @@ type validatorRegistry interface {
 	authn.Registry
 	authz.Registry
 	mutate.Registry
+	pe.Registry
 }
 
 type Validator interface {
@@ -115,6 +118,22 @@ func (v *ValidatorDefault) validateMutators(r *Rule) error {
 	return nil
 }
 
+func (v *ValidatorDefault) validateErrorHandlers(r *Rule) error {
+	for k, m := range r.Errors {
+		mutator, err := v.r.PipelineErrorHandler(m.Handler)
+		if err != nil {
+			return herodot.ErrInternalServerError.WithReasonf(`Value "%s" of "errors[%d]" is not in list of supported errors: %v`, m.Handler, k,
+				v.r.AvailablePipelineErrorHandlers()).WithTrace(err).WithDebug(err.Error())
+		}
+
+		if err := mutator.Validate(m.Config); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 func (v *ValidatorDefault) Validate(r *Rule) error {
 	if r.Match == nil {
 		return errors.WithStack(herodot.ErrInternalServerError.WithReasonf(`Value "match" is empty but must be set.`))
@@ -145,6 +164,10 @@ func (v *ValidatorDefault) Validate(r *Rule) error {
 	}
 
 	if err := v.validateMutators(r); err != nil {
+		return err
+	}
+
+	if err := v.validateErrorHandlers(r); err != nil {
 		return err
 	}
 

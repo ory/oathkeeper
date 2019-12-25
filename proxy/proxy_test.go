@@ -44,31 +44,6 @@ import (
 	"github.com/ory/oathkeeper/rule"
 )
 
-// type jurorDenyAll struct{}
-//
-// func (j *jurorDenyAll) GetID() string {
-//	return "pass_through_deny"
-// }
-//
-// func (j jurorDenyAll) Try(r *http.Request, rl *rule.Rule, u *url.URL) (*Session, error) {
-//	return nil, errors.WithStack(helper.ErrUnauthorized)
-// }
-//
-// type jurorAcceptAll struct{}
-//
-// func (j *jurorAcceptAll) GetID() string {
-//	return "pass_through_accept"
-// }
-//
-// func (j jurorAcceptAll) Try(r *http.Request, rl *rule.Rule, u *url.URL) (*Session, error) {
-//	return &Session{
-//		Subject:   "",
-//		Anonymous: true,
-//		ClientID:  "",
-//		Disabled:  true,
-//	}, nil
-// }
-
 func TestProxy(t *testing.T) {
 	backend := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// assert.NotEmpty(t, helper.BearerTokenFromRequest(r))
@@ -91,6 +66,7 @@ func TestProxy(t *testing.T) {
 	viper.Set(configuration.ViperKeyAuthorizerAllowIsEnabled, true)
 	viper.Set(configuration.ViperKeyAuthorizerDenyIsEnabled, true)
 	viper.Set(configuration.ViperKeyMutatorNoopIsEnabled, true)
+	viper.Set(configuration.ViperKeyErrorsWWWAuthenticateIsEnabled, true)
 
 	ruleNoOpAuthenticator := rule.Rule{
 		Match:          &rule.Match{Methods: []string{"GET"}, URL: ts.URL + "/authn-noop/<[0-9]+>"},
@@ -212,6 +188,19 @@ func TestProxy(t *testing.T) {
 				Upstream:       rule.Upstream{URL: backend.URL},
 			}},
 			code: http.StatusForbidden,
+		},
+		{
+			d:   "should fail when authorizer fails and send www_authenticate as defined in the rule",
+			url: ts.URL + "/authn-anon/authz-deny/cred-noop/1234",
+			rules: []rule.Rule{{
+				Match:          &rule.Match{Methods: []string{"GET"}, URL: ts.URL + "/authn-anon/authz-deny/cred-noop/<[0-9]+>"},
+				Authenticators: []rule.Handler{{Handler: "anonymous"}},
+				Authorizer:     rule.Handler{Handler: "deny"},
+				Mutators:       []rule.Handler{{Handler: "noop"}},
+				Upstream:       rule.Upstream{URL: backend.URL},
+				Errors:         []rule.ErrorHandler{{Handler: "www_authenticate"}},
+			}},
+			code: http.StatusUnauthorized,
 		},
 		{
 			d:   "should fail when authenticator fails",
@@ -350,14 +339,6 @@ func TestConfigureBackendURL(t *testing.T) {
 		})
 	}
 }
-
-// func panicCompileRegex(pattern string) *regexp.Regexp {
-//	exp, err := regexp.Compile(pattern)
-//	if err != nil {
-//		panic(err.Error())
-//	}
-//	return exp
-// }
 
 //
 // func BenchmarkDirector(b *testing.B) {

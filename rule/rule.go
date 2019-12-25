@@ -64,9 +64,11 @@ type Handler struct {
 	Config json.RawMessage `json:"config"`
 }
 
-type Errors map[string]ErrorHandler
-
 type ErrorHandler struct {
+	// Handler identifies the implementation which will be used to handle this specific request. Please read the user
+	// guide for a complete list of available handlers.
+	Handler string `json:"handler"`
+
 	// Config defines additional configuration for the response handler.
 	Config json.RawMessage `json:"config"`
 }
@@ -116,7 +118,7 @@ type Rule struct {
 	// Errors is a list of error handlers. These will be invoked if any part of the system returns an error. You can
 	// configure error matchers to listen on certain errors (e.g. unauthorized) and execute specific logic (e.g. redirect
 	// to the login endpoint, return with an XML error, return a json error, ...).
-	Errors Errors `json:"errors"`
+	Errors []ErrorHandler `json:"errors"`
 
 	// Upstream is the location of the server where requests matching this rule should be forwarded to.
 	Upstream Upstream `json:"upstream"`
@@ -146,15 +148,15 @@ func NewRule() *Rule {
 
 func (r *Rule) UnmarshalJSON(raw []byte) error {
 	var rr struct {
-		ID             string    `json:"id"`
-		Version        string    `json:"version"`
-		Description    string    `json:"description"`
-		Match          *Match    `json:"match"`
-		Authenticators []Handler `json:"authenticators"`
-		Authorizer     Handler   `json:"authorizer"`
-		Mutators       []Handler `json:"mutators"`
-		Errors         Errors    `json:"errors"`
-		Upstream       Upstream  `json:"upstream"`
+		ID             string         `json:"id"`
+		Version        string         `json:"version"`
+		Description    string         `json:"description"`
+		Match          *Match         `json:"match"`
+		Authenticators []Handler      `json:"authenticators"`
+		Authorizer     Handler        `json:"authorizer"`
+		Mutators       []Handler      `json:"mutators"`
+		Errors         []ErrorHandler `json:"errors"`
+		Upstream       Upstream       `json:"upstream"`
 	}
 
 	transformed, err := migrateRuleJSON(raw)

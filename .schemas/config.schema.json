@@ -173,6 +173,36 @@
       "default": "none",
       "description": "Sets the strategy validation algorithm."
     },
+    "configErrorsRedirect": {
+      "type": "object",
+      "title": "HTTP Redirect Error Handler",
+      "description": "This section is optional when the error handler is disabled.",
+      "additionalProperties": false,
+      "required": [
+        "to"
+      ],
+      "properties": {
+        "to": {
+          "title": "Redirect to",
+          "description": "Set the redirect target. Must be a http/https URL.",
+          "type": "string",
+          "format": "uri"
+        },
+        "code": {
+          "title": "HTTP Redirect Status Code",
+          "description": "Defines the HTTP Redirect status code which can bei 301 (Moved Permanently) or 302 (Found).",
+          "type": "number",
+          "enum": [
+            301,
+            302
+          ],
+          "default": 302
+        },
+        "when": {
+          "$ref": "#/definitions/configErrorsWhen"
+        }
+      }
+    },
     "configErrorsWhen": {
       "title": "Error Handler Conditions",
       "description": "Conditions set under which circumstances an error handler should be responsible for handling the request. If no conditions are given, the error handler will be responsible for all requests. Sections error and request are combined using AND.",
@@ -251,6 +281,23 @@
       "properties": {
         "verbose": {
           "type": "boolean"
+        },
+        "when": {
+          "$ref": "#/definitions/configErrorsWhen"
+        }
+      }
+    },
+    "configErrorsWWWAuthenticate": {
+      "type": "object",
+      "title": "WWW-Authenticate Error Handler",
+      "description": "This section is optional when the error handler is disabled.",
+      "additionalProperties": false,
+      "properties": {
+        "realm": {
+          "type": "string",
+          "title": "The WWW-Authenticate Realm",
+          "description": "This is a message that will be displayed by the browser. Most browsers show a message like \"The website says: <realm>\". Using a real message is thus more appropriate than a Realm identifier.",
+          "default": "Please authenticate."
         },
         "when": {
           "$ref": "#/definitions/configErrorsWhen"
@@ -1084,6 +1131,132 @@
               }
             }
           ]
+        }
+      }
+    },
+    "errors": {
+      "title": "Error Handling",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "fallback": {
+          "title": "Error Handling Fallback",
+          "description": "This array defines how to handle errors when no \"when\" clause matches. If you have, for example, enabled redirect and json in your access rule, you could tell ORY Oathkeeper to try sending JSON if the request does not match the access rule definition",
+          "default": [
+            "json"
+          ],
+          "examples": [
+            "json",
+            "redirect"
+          ]
+        },
+        "handlers": {
+          "additionalProperties": false,
+          "title": "Individual Error Handler Configuration",
+          "type": "object",
+          "properties": {
+            "www_authenticate": {
+              "title": "HTTP WWW-Authenticate Handler",
+              "description": "Responds with the WWW-Authenticate HTTP Response",
+              "type": "object",
+              "properties": {
+                "enabled": {
+                  "$ref": "#/definitions/handlerSwitch"
+                }
+              },
+              "oneOf": [
+                {
+                  "properties": {
+                    "enabled": {
+                      "const": true
+                    },
+                    "config": {
+                      "$ref": "#/definitions/configErrorsWWWAuthenticate"
+                    }
+                  },
+                  "required": [
+                    "config"
+                  ]
+                },
+                {
+                  "properties": {
+                    "enabled": {
+                      "const": false
+                    }
+                  }
+                }
+              ]
+            },
+            "redirect": {
+              "title": "HTTP Redirect Error Handler",
+              "description": "Responds with a 301/302 HTTP redirect.",
+              "type": "object",
+              "properties": {
+                "enabled": {
+                  "$ref": "#/definitions/handlerSwitch"
+                }
+              },
+              "oneOf": [
+                {
+                  "properties": {
+                    "enabled": {
+                      "const": true
+                    },
+                    "config": {
+                      "$ref": "#/definitions/configErrorsRedirect"
+                    }
+                  },
+                  "required": [
+                    "config"
+                  ]
+                },
+                {
+                  "properties": {
+                    "enabled": {
+                      "const": false
+                    }
+                  }
+                }
+              ]
+            },
+            "json": {
+              "title": "JSON Error Handler",
+              "description": "Responds with a JSON error response",
+              "properties": {
+                "enabled": {
+                  "title": "Enabled",
+                  "type": "boolean",
+                  "default": true,
+                  "examples": [
+                    true
+                  ],
+                  "description": "En-/disables this component."
+                }
+              },
+              "oneOf": [
+                {
+                  "properties": {
+                    "enabled": {
+                      "const": true
+                    },
+                    "config": {
+                      "$ref": "#/definitions/configErrorsJSON"
+                    }
+                  },
+                  "required": [
+                    "config"
+                  ]
+                },
+                {
+                  "properties": {
+                    "enabled": {
+                      "const": false
+                    }
+                  }
+                }
+              ]
+            }
+          }
         }
       }
     },

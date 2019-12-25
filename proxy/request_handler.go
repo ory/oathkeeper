@@ -21,10 +21,13 @@
 package proxy
 
 import (
+	"encoding/json"
 	"net/http"
 
 	"github.com/ory/herodot"
+	"github.com/ory/x/errorsx"
 
+	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/x"
 
 	"github.com/ory/oathkeeper/pipeline/authn"
@@ -50,48 +53,118 @@ type requestHandlerRegistry interface {
 
 type RequestHandler struct {
 	r requestHandlerRegistry
+	c configuration.Provider
 }
 
-func NewRequestHandler(r requestHandlerRegistry) *RequestHandler {
-	return &RequestHandler{r: r}
+type whenConfig struct {
+	When pe.Whens `json:"when"`
 }
 
-func (d *RequestHandler) HandleError(w http.ResponseWriter, r *http.Request, rl *rule.Rule, err error) {
-	for name := range rl.Errors {
-		handler, err := d.r.PipelineErrorHandler(name)
+func NewRequestHandler(r requestHandlerRegistry, c configuration.Provider) *RequestHandler {
+	return &RequestHandler{r: r, c: c}
+}
+
+// matchesWhen
+func (d *RequestHandler) matchesWhen(w http.ResponseWriter, r *http.Request, h pe.Handler, config json.RawMessage, handleErr error) error {
+	var when whenConfig
+	if err := d.c.ErrorHandlerConfig(h.GetID(), config, &when); err != nil {
+		d.r.Writer().WriteError(w, r, pe.NewErrErrorHandlerMisconfigured(h, err))
+		return err
+	}
+
+	if err := pe.MatchesWhen(when.When, r, handleErr); err != nil {
+		if errorsx.Cause(err) == pe.ErrHandlerNotResponsible {
+			return err
+		}
+		d.r.Writer().WriteError(w, r, errors.WithStack(herodot.ErrInternalServerError.WithReasonf(`Unable to execute error handler "%s". This is either a bug or a configuration issue and should be reported to the administrator. Returned error: "%s". Original error: "%s"`, h.GetID(), err, handleErr)))
+		return err
+	}
+
+	return nil
+}
+
+func (d *RequestHandler) HandleError(w http.ResponseWriter, r *http.Request, rl *rule.Rule, handleErr error) {
+	if rl == nil {
+		// Create a new, empty rule.
+		rl = new(rule.Rule)
+	}
+
+	var h pe.Handler
+	var config json.RawMessage
+	for _, re := range rl.Errors {
+		handler, err := d.r.PipelineErrorHandler(re.Handler)
 		if err != nil {
-			d.r.Writer().WriteError(w, r, errors.WithStack(herodot.ErrInternalServerError.WithReasonf("Unable to find error handler named: %s. This is a configuration issue and should be reported to the administrator.", name)))
+			d.r.Writer().WriteError(w, r, errors.WithStack(herodot.ErrInternalServerError.WithReasonf(
+				"Unable to find error handler named: %s. This is a configuration issue and should be reported to the administrator.", re.Handler,
+			)))
 			return
 		}
 
-		re := rl.Errors[name]
-		if err := handler.Validate(re.Config); err != nil {
-			d.r.Writer().WriteError(w, r, err)
+		if err := d.matchesWhen(w, r, handler, re.Config, handleErr); errorsx.Cause(err) == pe.ErrHandlerNotResponsible {
+			continue
+		} else if err != nil {
+			// error was handled already by d.matchesWhen
 			return
 		}
 
-		if e := handler.Handle(w, r, re.Config, rl, err); e == nil {
+		if h != nil {
+			d.r.Writer().WriteError(w, r, errors.WithStack(herodot.ErrInternalServerError.WithReasonf(
+				`Found more than one error handlers to be responsible for this request. This is a configuration error that needs to be resolved by the system administrator."`,
+			)))
 			return
-		} else if errors.Cause(e) == pe.ErrHandlerNotResponsible {
-			// loop
-		} else {
-			d.r.Writer().WriteError(w, r, errors.WithStack(herodot.ErrInternalServerError.WithReasonf(`Unable to execute error handler. This is either a bug or a configuration issue and should be reported to the administrator. Returned error: "%s". Original error: "%s"`, name, err, e)))
-			return
+		}
+
+		h = handler
+		config = re.Config
+	}
+
+	if h == nil {
+		for _, name := range d.c.ErrorHandlerFallbackSpecificity() {
+			if !d.c.ErrorHandlerIsEnabled(name) {
+				d.r.Writer().WriteError(w, r, errors.WithStack(herodot.ErrInternalServerError.WithReasonf(
+					`Fallback error handler "%s" was requested but is disabled or unknown. This is a configuration issue and should be reported to the administrator.`, name,
+				)))
+				return
+			}
+
+			handler, err := d.r.PipelineErrorHandler(name)
+			if err != nil {
+				d.r.Writer().WriteError(w, r, errors.WithStack(herodot.ErrInternalServerError.WithReasonf(
+					`Unable to find fallback error handler named "%s". This is a configuration issue and should be reported to the administrator.`, name,
+				)))
+				return
+			}
+
+			if err := d.matchesWhen(w, r, handler, nil, handleErr); errorsx.Cause(err) == pe.ErrHandlerNotResponsible {
+				continue
+			} else if err != nil {
+				// error was handled already by d.matchesWhen
+				return
+			}
+
+			h = handler
+			break
 		}
 	}
 
-	for name, handler := range d.r.AvailablePipelineErrorHandlers() {
-		if e := handler.Handle(w, r, nil, rl, err); e == nil {
-			return
-		} else if errors.Cause(e) == pe.ErrHandlerNotResponsible {
-			// loop
-		} else {
-			d.r.Writer().WriteError(w, r, errors.WithStack(herodot.ErrInternalServerError.WithReasonf(`Unable to execute error handler. This is either a bug or a configuration issue and should be reported to the administrator. Returned error: "%s". Original error: "%s"`, name, err, e)))
-			return
-		}
+	if h == nil {
+		d.r.Writer().WriteError(w, r, errors.WithStack(herodot.ErrInternalServerError.WithReasonf(
+			"Unable to handle HTTP request because no matching error handling strategy was found. This is a bug and should be reported to: http://github.com/ory/oathkeeper",
+		)))
+		return
 	}
 
-	d.r.Writer().WriteError(w, r, errors.WithStack(herodot.ErrInternalServerError.WithReasonf("Unable to handle HTTP request because no matching error handling strategy was found. This is a bug and should be reported to: http://github.com/ory/oathkeeper")))
+	if err := h.Validate(config); err != nil {
+		d.r.Writer().WriteError(w, r, err)
+		return
+	}
+
+	if err := h.Handle(w, r, config, rl, handleErr); err != nil {
+		d.r.Writer().WriteError(w, r, errors.WithStack(herodot.ErrInternalServerError.WithReasonf(
+			`Unable to execute error handler "%s". This is either a bug or a configuration issue and should be reported to the administrator. Returned error: "%s". Original error: "%s"`, h.GetID(), err, handleErr,
+		)))
+		return
+	}
 }
 
 func (d *RequestHandler) HandleRequest(r *http.Request, rl *rule.Rule) (session *authn.AuthenticationSession, err error) {
