@@ -44,6 +44,14 @@ before finalizing the upgrade process.
 
 ## master
 
+## v0.34.0-beta.1+oryOS.14
+
+A new feature was introduced which allows you to handle errors in different ways (e.g. redirect to login, return JSON error, ...) depending on the error and HTTP request type. For more information, head over to: https://www.ory.sh/docs/next/oathkeeper/pipeline/error
+
+One backwards incompatible change has been made, as JSON errors returned by ORY Oathkeeper now include only minimal information about the error source. You can change this behavior by setting `verbose` to `true`, see: https://www.ory.sh/docs/next/oathkeeper/pipeline/error#json
+
+No other backwards incompatible changes have been made!
+
 ## v0.33.0-beta.1+oryOS.13
 
 The "mutator" hydrator config has changed:
