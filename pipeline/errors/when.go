@@ -21,8 +21,13 @@ type (
 	}
 
 	WhenRequest struct {
-		CIDR   []string           `json:"cidr"`
-		Header *WhenRequestHeader `json:"header"`
+		RemoteIP *WhenRequestRemoteIP `json:"remote_ip"`
+		Header   *WhenRequestHeader   `json:"header"`
+	}
+
+	WhenRequestRemoteIP struct {
+		Match                     []string `json:"match"`
+		RespectForwardedForHeader bool     `json:"respect_forwarded_for_header"`
 	}
 
 	WhenRequestHeader struct {
@@ -104,20 +109,20 @@ func matchesAcceptMIME(request string, handlers []string) bool {
 		for _, match := range hspec {
 			m := match.Value
 			switch {
-			case a == "*/*":
-				return true
 			case m == "*/*":
 				return true
+			case strings.HasSuffix(m, "/*") && strings.TrimSuffix(m, "/*") == strings.Split(a, "/")[0]:
+				return true
+
 			case a == m:
 				return true
-			case strings.HasSuffix(m, "/*"):
-				if strings.TrimSuffix(m, "/*") == strings.Split(a, "/")[0] {
-					return true
-				}
-			case strings.HasSuffix(a, "/*"):
-				if strings.TrimSuffix(a, "/*") == strings.Split(m, "/")[0] {
-					return true
-				}
+
+			// If the request contains wildcards, we expect the handler / search value to have an exact match! Otherwise
+			// we will get a lot of conflicts.
+			case a == "*/*" && a == m:
+				return true
+			case strings.HasSuffix(a, "/*") && a == m:
+				return true
 			}
 		}
 	}
@@ -161,18 +166,21 @@ func matchesRequest(when When, r *http.Request) error {
 		}
 	}
 
-	if len(when.Request.CIDR) > 0 {
+	if when.Request.RemoteIP != nil && len(when.Request.RemoteIP.Match) > 0 {
 		remoteIP, _, err := net.SplitHostPort(r.RemoteAddr)
 		if err != nil {
 			return errors.WithStack(err)
 		}
 
 		check := []string{remoteIP}
-		for _, fwd := range stringsx.Splitx(r.Header.Get("X-Forwarded-For"), ",") {
-			check = append(check, strings.TrimSpace(fwd))
+
+		if when.Request.RemoteIP.RespectForwardedForHeader {
+			for _, fwd := range stringsx.Splitx(r.Header.Get("X-Forwarded-For"), ",") {
+				check = append(check, strings.TrimSpace(fwd))
+			}
 		}
 
-		for _, rn := range when.Request.CIDR {
+		for _, rn := range when.Request.RemoteIP.Match {
 			_, cidr, err := net.ParseCIDR(rn)
 			if err != nil {
 				return errors.WithStack(err)
