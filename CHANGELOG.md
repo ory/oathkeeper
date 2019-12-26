@@ -3,7 +3,7 @@
 **Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
 
 - [Change Log](#change-log)
-  - [Unreleased](#unreleased)
+  - [v0.34.0-beta.1 (2019-12-26)](#v0340-beta1-2019-12-26)
   - [v0.33.1-beta.1 (2019-12-18)](#v0331-beta1-2019-12-18)
   - [v0.33.0-beta.1 (2019-12-16)](#v0330-beta1-2019-12-16)
   - [v0.32.1-beta.1 (2019-10-30)](#v0321-beta1-2019-10-30)
@@ -69,9 +69,8 @@
 
 # Change Log
 
-## [Unreleased](https://github.com/ory/oathkeeper/tree/HEAD)
-
-[Full Changelog](https://github.com/ory/oathkeeper/compare/v0.33.1-beta.1...HEAD)
+## [v0.34.0-beta.1](https://github.com/ory/oathkeeper/tree/v0.34.0-beta.1) (2019-12-26)
+[Full Changelog](https://github.com/ory/oathkeeper/compare/v0.33.1-beta.1...v0.34.0-beta.1)
 
 **Implemented enhancements:**
 
@@ -229,6 +228,7 @@
 
 **Merged pull requests:**
 
+- Add sprig template library [\#235](https://github.com/ory/oathkeeper/pull/235) ([hypnoglow](https://github.com/hypnoglow))
 - docs: Updates issue and pull request templates [\#232](https://github.com/ory/oathkeeper/pull/232) ([aeneasr](https://github.com/aeneasr))
 
 ## [v0.17.3-beta.1](https://github.com/ory/oathkeeper/tree/v0.17.3-beta.1) (2019-08-03)
@@ -248,7 +248,6 @@
 
 **Merged pull requests:**
 
-- Add sprig template library [\#235](https://github.com/ory/oathkeeper/pull/235) ([hypnoglow](https://github.com/hypnoglow))
 - rules: Support kubernetes configmap reloading [\#230](https://github.com/ory/oathkeeper/pull/230) ([aeneasr](https://github.com/aeneasr))
 - docs: Updates issue and pull request templates [\#226](https://github.com/ory/oathkeeper/pull/226) ([aeneasr](https://github.com/aeneasr))
 
@@ -291,7 +290,6 @@
 - docker: Use non-root user in image [\#209](https://github.com/ory/oathkeeper/pull/209) ([aeneasr](https://github.com/aeneasr))
 - Remove binary license [\#208](https://github.com/ory/oathkeeper/pull/208) ([aeneasr](https://github.com/aeneasr))
 - Update config.yaml [\#204](https://github.com/ory/oathkeeper/pull/204) ([haf](https://github.com/haf))
-- ci: Rename job release-docs to docs [\#193](https://github.com/ory/oathkeeper/pull/193) ([aeneasr](https://github.com/aeneasr))
 
 ## [v0.16.0-beta.4](https://github.com/ory/oathkeeper/tree/v0.16.0-beta.4) (2019-05-28)
 [Full Changelog](https://github.com/ory/oathkeeper/compare/v0.16.0-beta.3...v0.16.0-beta.4)
@@ -324,6 +322,7 @@
 
 **Merged pull requests:**
 
+- ci: Rename job release-docs to docs [\#193](https://github.com/ory/oathkeeper/pull/193) ([aeneasr](https://github.com/aeneasr))
 - ci: Resolve goreleaser issues [\#192](https://github.com/ory/oathkeeper/pull/192) ([aeneasr](https://github.com/aeneasr))
 - ci: Update release pipeline [\#191](https://github.com/ory/oathkeeper/pull/191) ([aeneasr](https://github.com/aeneasr))
 - docs: Updates issue and pull request templates [\#189](https://github.com/ory/oathkeeper/pull/189) ([aeneasr](https://github.com/aeneasr))
@@ -740,6 +739,7 @@
 
 - Return arrays instead of null on rule creation [\#6](https://github.com/ory/oathkeeper/pull/6) ([aeneasr](https://github.com/aeneasr))
 - Add circleci configuration file [\#5](https://github.com/ory/oathkeeper/pull/5) ([aeneasr](https://github.com/aeneasr))
+- travis: add goveralls report submission [\#2](https://github.com/ory/oathkeeper/pull/2) ([aeneasr](https://github.com/aeneasr))
 
 ## [v0.0.3](https://github.com/ory/oathkeeper/tree/v0.0.3) (2017-10-18)
 [Full Changelog](https://github.com/ory/oathkeeper/compare/v0.0.2...v0.0.3)
@@ -758,7 +758,6 @@
 ## [v0.0.1](https://github.com/ory/oathkeeper/tree/v0.0.1) (2017-10-10)
 **Merged pull requests:**
 
-- travis: add goveralls report submission [\#2](https://github.com/ory/oathkeeper/pull/2) ([aeneasr](https://github.com/aeneasr))
 - Prototype [\#1](https://github.com/ory/oathkeeper/pull/1) ([aeneasr](https://github.com/aeneasr))
 
 
