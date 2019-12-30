@@ -1,62 +1,17 @@
-version: '2'
+version: '3.7'
 
 services:
-
-  oathkeeper-migrate:
+  oathkeeper:
     build:
       context: .
-      dockerfile: Dockerfile
-    links:
-      - postgresd:postgresd
-    environment:
-      - LOG_LEVEL=debug
-    command:
-      migrate sql postgres://dbuser:secret@postgresd:5432/accesscontroldb?sslmode=disable
-    restart: on-failure
-
-  oathkeeper-proxy:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    links:
-      - postgresd:postgresd
+      dockerfile: Dockerfile-dc
     ports:
       - "4455:4455"
-    depends_on:
-      - oathkeeper-api
-    command:
-      serve proxy
-    environment:
-      - LOG_LEVEL=debug
-      - PORT=4455
-      - ISSUER_URL=http://localhost:4455/
-      - OATHKEEPER_API_URL=http://oathkeeper-api:4456
-      - CREDENTIALS_ISSUER_ID_TOKEN_HS256_SECRET=arandomsecretarandomsecretarando
-    restart: on-failure
-
-  oathkeeper-api:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    links:
-      - postgresd:postgresd
-    ports:
       - "4456:4456"
-    depends_on:
-      - oathkeeper-migrate
     command:
-      serve api
-    environment:
-      - LOG_LEVEL=debug
-      - PORT=4456
-      - DATABASE_URL=postgres://dbuser:secret@postgresd:5432/accesscontroldb?sslmode=disable
-      - ISSUER_URL=http://localhost:4455/
-      - CREDENTIALS_ISSUER_ID_TOKEN_HS256_SECRET=arandomsecretarandomsecretarando
+      serve --config=/etc/config/oathkeeper/config.yaml
+    volumes:
+      - type: bind
+        source: ./.docker_compose
+        target: /etc/config/oathkeeper
     restart: on-failure
-
-  postgresd:
-    image: postgres:9.6
-    environment:
-      - POSTGRES_USER=dbuser
-      - POSTGRES_PASSWORD=secret
-      - POSTGRES_DB=accesscontroldb
