@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+	"time"
 
 	"github.com/pkg/errors"
 	"golang.org/x/oauth2/clientcredentials"
@@ -28,6 +29,8 @@ type AuthenticatorOAuth2IntrospectionConfiguration struct {
 	IntrospectionURL            string                                                `json:"introspection_url"`
 	BearerTokenLocation         *helper.BearerTokenLocation                           `json:"token_from"`
 	IntrospectionRequestHeaders map[string]string                                     `json:"introspection_request_headers"`
+	Timeout                     string                                                `json:"timeout"`
+	MaxWait                     string                                                `json:"back_off_max_wait"`
 }
 
 type AuthenticatorOAuth2IntrospectionPreAuthConfiguration struct {
@@ -46,6 +49,7 @@ type AuthenticatorOAuth2Introspection struct {
 
 func NewAuthenticatorOAuth2Introspection(c configuration.Provider) *AuthenticatorOAuth2Introspection {
 	var rt http.RoundTripper
+
 	return &AuthenticatorOAuth2Introspection{c: c, client: httpx.NewResilientClientLatencyToleranceSmall(rt)}
 }
 
@@ -159,7 +163,24 @@ func (a *AuthenticatorOAuth2Introspection) Config(config json.RawMessage) (*Auth
 	}
 
 	if c.PreAuth != nil && c.PreAuth.Enabled {
-		a.client = httpx.NewResilientClientLatencyToleranceSmall(
+		if c.Timeout == "" {
+			c.Timeout = "500ms"
+		}
+		duration, err := time.ParseDuration(c.Timeout)
+		if err != nil {
+			return nil, err
+		}
+		timeout := time.Millisecond * duration
+
+		if c.MaxWait == "" {
+			c.MaxWait = "1s"
+		}
+		maxWait, err := time.ParseDuration(c.MaxWait)
+		if err != nil {
+			return nil, err
+		}
+
+		a.client = httpx.NewResilientClientLatencyToleranceConfigurable(
 			(&clientcredentials.Config{
 				ClientID:     c.PreAuth.ClientID,
 				ClientSecret: c.PreAuth.ClientSecret,
@@ -168,6 +189,8 @@ func (a *AuthenticatorOAuth2Introspection) Config(config json.RawMessage) (*Auth
 			}).
 				Client(context.Background()).
 				Transport,
+			timeout,
+			maxWait,
 		)
 	}
 
