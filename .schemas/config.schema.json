@@ -651,6 +651,30 @@
               }
             }
           ]
+        },
+        "timeout": {
+          "title": "HTTP Idle Timeout",
+          "type": "string",
+          "default": "500ms",
+          "pattern": "^[0-9]+(ns|us|ms|s|m|h)$",
+          "description": "The amount of time to wait for any http action by the oauth2 introspection authenticator.",
+          "examples": [
+            "5s",
+            "5m",
+            "5h"
+          ]
+        },
+        "back_off_max_wait": {
+          "title": "HTTP Idle Timeout",
+          "type": "string",
+          "default": "1s",
+          "pattern": "^[0-9]+(ns|us|ms|s|m|h)$",
+          "description": "The maximum amount of time to wait for the retry handler.",
+          "examples": [
+            "5s",
+            "5m",
+            "5h"
+          ]
         }
       },
       "required": [
