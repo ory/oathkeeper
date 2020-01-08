@@ -25,9 +25,9 @@ import (
 	"fmt"
 	"hash/crc32"
 	"net/url"
-	"regexp"
 	"strings"
 
+	"github.com/dlclark/regexp2"
 	"github.com/pkg/errors"
 
 	"github.com/ory/ladon/compiler"
@@ -50,7 +50,7 @@ type Match struct {
 	// brackets < and >. The following example matches all paths of the domain `mydomain.com`: `https://mydomain.com/<.*>`.
 	URL string `json:"url"`
 
-	compiledURL         *regexp.Regexp
+	compiledURL         *regexp2.Regexp
 	compiledURLChecksum uint32
 }
 
@@ -177,25 +177,22 @@ func (r *Rule) GetID() string {
 	return r.ID
 }
 
-// IsMatching returns an error if the provided method and URL do not match the rule.
-func (r *Rule) IsMatching(method string, u *url.URL) error {
+// IsMatching checks whether the provided url and method match the rule.
+// An error will be returned if a regexp timeout occurs.
+func (r *Rule) IsMatching(method string, u *url.URL) (bool, error) {
 	if !stringInSlice(method, r.Match.Methods) {
-		return errors.Errorf("rule %s does not match URL %s", r.ID, u)
+		return false, nil
 	}
 
 	c, err := r.CompileURL()
 	if err != nil {
-		return errors.WithStack(err)
+		return false, errors.WithStack(err)
 	}
 
-	if !c.MatchString(fmt.Sprintf("%s://%s%s", u.Scheme, u.Host, u.Path)) {
-		return errors.Errorf("rule %s does not match URL %s", r.ID, u)
-	}
-
-	return nil
+	return c.MatchString(fmt.Sprintf("%s://%s%s", u.Scheme, u.Host, u.Path))
 }
 
-func (r *Rule) CompileURL() (*regexp.Regexp, error) {
+func (r *Rule) CompileURL() (*regexp2.Regexp, error) {
 	m := r.Match
 	c := crc32.ChecksumIEEE([]byte(m.URL))
 	if m.compiledURL == nil || c != m.compiledURLChecksum {

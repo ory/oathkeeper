@@ -115,9 +115,19 @@ func (a *AuthorizerKetoEngineACPORY) Authorize(r *http.Request, session *authn.A
 
 	var b bytes.Buffer
 	u := fmt.Sprintf("%s://%s%s", r.URL.Scheme, r.URL.Host, r.URL.Path)
+
+	action, err := compiled.Replace(u, cf.RequiredAction, -1, -1)
+	if err != nil {
+		return errors.WithStack(err)
+	}
+	resource, err := compiled.Replace(u, cf.RequiredResource, -1, -1)
+	if err != nil {
+		return errors.WithStack(err)
+	}
+
 	if err := json.NewEncoder(&b).Encode(&AuthorizerKetoEngineACPORYRequestBody{
-		Action:   compiled.ReplaceAllString(u, cf.RequiredAction),
-		Resource: compiled.ReplaceAllString(u, cf.RequiredResource),
+		Action:   action,
+		Resource: resource,
 		Context:  a.contextCreator(r),
 		Subject:  subject,
 	}); err != nil {

@@ -111,10 +111,11 @@ func (m *RepositoryMemory) Match(ctx context.Context, method string, u *url.URL)
 	var rules []Rule
 	for k := range m.rules {
 		r := &m.rules[k]
-		if err := r.IsMatching(method, u); err == nil {
+		if matched, err := r.IsMatching(method, u); err != nil {
+			return nil, errors.WithStack(err)
+		} else if matched {
 			rules = append(rules, *r)
 		}
-		m.rules[k] = *r
 	}
 
 	if len(rules) == 0 {

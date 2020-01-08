@@ -42,7 +42,120 @@ func TestRule(t *testing.T) {
 		},
 	}
 
-	assert.NoError(t, r.IsMatching("DELETE", mustParse(t, "https://localhost/users/1234")))
-	assert.NoError(t, r.IsMatching("DELETE", mustParse(t, "https://localhost/users/1234?key=value&key1=value1")))
-	assert.Error(t, r.IsMatching("DELETE", mustParse(t, "https://localhost/users/abcd")))
+	var tests = []struct {
+		method        string
+		url           string
+		expectedMatch bool
+		expectedErr   error
+	}{
+		{
+			method:        "DELETE",
+			url:           "https://localhost/users/1234",
+			expectedMatch: true,
+			expectedErr:   nil,
+		},
+		{
+			method:        "DELETE",
+			url:           "https://localhost/users/1234?key=value&key1=value1",
+			expectedMatch: true,
+			expectedErr:   nil,
+		},
+		{
+			method:        "DELETE",
+			url:           "https://localhost/users/abcd",
+			expectedMatch: false,
+			expectedErr:   nil,
+		},
+	}
+	for ind, tcase := range tests {
+		t.Run(string(ind), func(t *testing.T) {
+			matched, err := r.IsMatching(tcase.method, mustParse(t, tcase.url))
+			assert.Equal(t, tcase.expectedMatch, matched)
+			assert.Equal(t, tcase.expectedErr, err)
+		})
+	}
+}
+
+func TestRule1(t *testing.T) {
+	r := &Rule{
+		Match: &Match{
+			Methods: []string{"DELETE"},
+			URL:     "https://localhost/users/<[[:digit:]]*>",
+		},
+	}
+
+	var tests = []struct {
+		method        string
+		url           string
+		expectedMatch bool
+		expectedErr   error
+	}{
+		{
+			method:        "DELETE",
+			url:           "https://localhost/users/1234",
+			expectedMatch: true,
+			expectedErr:   nil,
+		},
+		{
+			method:        "DELETE",
+			url:           "https://localhost/users/1234?key=value&key1=value1",
+			expectedMatch: true,
+			expectedErr:   nil,
+		},
+		{
+			method:        "DELETE",
+			url:           "https://localhost/users/abcd",
+			expectedMatch: false,
+			expectedErr:   nil,
+		},
+	}
+	for ind, tcase := range tests {
+		t.Run(string(ind), func(t *testing.T) {
+			matched, err := r.IsMatching(tcase.method, mustParse(t, tcase.url))
+			assert.Equal(t, tcase.expectedMatch, matched)
+			assert.Equal(t, tcase.expectedErr, err)
+		})
+	}
+}
+
+func TestRule2(t *testing.T) {
+	r := &Rule{
+		Match: &Match{
+			Methods: []string{"DELETE"},
+			URL:     "https://localhost/users/<(?!admin).*>",
+		},
+	}
+
+	var tests = []struct {
+		method        string
+		url           string
+		expectedMatch bool
+		expectedErr   error
+	}{
+		{
+			method:        "DELETE",
+			url:           "https://localhost/users/manager",
+			expectedMatch: true,
+			expectedErr:   nil,
+		},
+		{
+			method:        "DELETE",
+			url:           "https://localhost/users/1234?key=value&key1=value1",
+			expectedMatch: true,
+			expectedErr:   nil,
+		},
+		{
+			method:        "DELETE",
+			url:           "https://localhost/users/admin",
+			expectedMatch: false,
+			expectedErr:   nil,
+		},
+	}
+	for ind, tcase := range tests {
+		t.Run(string(ind), func(t *testing.T) {
+			matched, err := r.IsMatching(tcase.method, mustParse(t, tcase.url))
+			assert.Equal(t, tcase.expectedMatch, matched)
+			assert.Equal(t, tcase.expectedErr, err)
+		})
+	}
 }

@@ -1,8 +1,10 @@
 package pipeline
 
-import "regexp"
+import (
+	"github.com/dlclark/regexp2"
+)
 
 type Rule interface {
 	GetID() string
-	CompileURL() (*regexp.Regexp, error)
+	CompileURL() (*regexp2.Regexp, error)
 }
