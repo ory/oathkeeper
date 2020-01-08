@@ -29,6 +29,7 @@ import (
 
 	"github.com/ory/x/viperx"
 
+	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/helper"
 	"github.com/ory/oathkeeper/x"
 
@@ -44,8 +45,24 @@ type repositoryMemoryRegistry interface {
 
 type RepositoryMemory struct {
 	sync.RWMutex
-	rules []Rule
-	r     repositoryMemoryRegistry
+	rules            []Rule
+	matchingStrategy configuration.MatchingStrategy
+	r                repositoryMemoryRegistry
+}
+
+// MatchingStrategy returns current MatchingStrategy.
+func (m *RepositoryMemory) MatchingStrategy(_ context.Context) (configuration.MatchingStrategy, error) {
+	m.RLock()
+	defer m.RUnlock()
+	return m.matchingStrategy, nil
+}
+
+// SetMatchingStrategy updates MatchingStrategy.
+func (m *RepositoryMemory) SetMatchingStrategy(_ context.Context, ms configuration.MatchingStrategy) error {
+	m.Lock()
+	defer m.Unlock()
+	m.matchingStrategy = ms
+	return nil
 }
 
 func NewRepositoryMemory(r repositoryMemoryRegistry) *RepositoryMemory {

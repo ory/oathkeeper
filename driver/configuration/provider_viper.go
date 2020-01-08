@@ -37,14 +37,15 @@ func init() {
 }
 
 const (
-	ViperKeyProxyReadTimeout       = "serve.proxy.timeout.read"
-	ViperKeyProxyWriteTimeout      = "serve.proxy.timeout.write"
-	ViperKeyProxyIdleTimeout       = "serve.proxy.timeout.idle"
-	ViperKeyProxyServeAddressHost  = "serve.proxy.host"
-	ViperKeyProxyServeAddressPort  = "serve.proxy.port"
-	ViperKeyAPIServeAddressHost    = "serve.api.host"
-	ViperKeyAPIServeAddressPort    = "serve.api.port"
-	ViperKeyAccessRuleRepositories = "access_rules.repositories"
+	ViperKeyProxyReadTimeout           = "serve.proxy.timeout.read"
+	ViperKeyProxyWriteTimeout          = "serve.proxy.timeout.write"
+	ViperKeyProxyIdleTimeout           = "serve.proxy.timeout.idle"
+	ViperKeyProxyServeAddressHost      = "serve.proxy.host"
+	ViperKeyProxyServeAddressPort      = "serve.proxy.port"
+	ViperKeyAPIServeAddressHost        = "serve.api.host"
+	ViperKeyAPIServeAddressPort        = "serve.api.port"
+	ViperKeyAccessRuleRepositories     = "access_rules.repositories"
+	ViperKeyAccessRuleMatchingStrategy = "access_rules.matching_strategy"
 )
 
 // Authorizers
@@ -129,6 +130,11 @@ func (v *ViperProvider) AccessRuleRepositories() []url.URL {
 	}
 
 	return repositories
+}
+
+// AccessRuleMatchingStrategy returns current MatchingStrategy.
+func (v *ViperProvider) AccessRuleMatchingStrategy() MatchingStrategy {
+	return MatchingStrategy(viperx.GetInt(v.l, ViperKeyAccessRuleMatchingStrategy, int(Regexp)))
 }
 
 func (v *ViperProvider) CORSEnabled(iface string) bool {

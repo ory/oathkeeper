@@ -19,6 +19,15 @@ const (
 	ForbiddenStrategyErrorType = "forbidden"
 )
 
+// MatchingStrategy defines matching strategy such as Regexp or Glob.
+type MatchingStrategy int
+
+// Possible values.
+const (
+	Regexp MatchingStrategy = iota
+	Glob
+)
+
 type Provider interface {
 	CORSEnabled(iface string) bool
 	CORSOptions(iface string) cors.Options
@@ -33,6 +42,7 @@ type Provider interface {
 	ProxyIdleTimeout() time.Duration
 
 	AccessRuleRepositories() []url.URL
+	AccessRuleMatchingStrategy() MatchingStrategy
 
 	ProxyServeAddress() string
 	APIServeAddress() string

@@ -40,8 +40,9 @@ type event struct {
 type eventType int
 
 const (
-	eventRepositoryConfigChange eventType = iota
+	eventRepositoryConfigChanged eventType = iota
 	eventFileChanged
+	eventMatchingStrategyChanged
 )
 
 var _ Fetcher = new(FetcherDefault)
@@ -197,12 +198,30 @@ func (f *FetcherDefault) watch(ctx context.Context, watcher *fsnotify.Watcher, e
 			return nil
 		}
 
-		f.enqueueEvent(events, event{et: eventRepositoryConfigChange, source: "viper_watcher"})
+		f.enqueueEvent(events, event{et: eventRepositoryConfigChanged, source: "viper_watcher"})
 
 		return nil
 	})
 
-	f.enqueueEvent(events, event{et: eventRepositoryConfigChange, source: "entrypoint"})
+	var initialConfig map[string]interface{}
+
+	f.enqueueEvent(events, event{et: eventRepositoryConfigChanged, source: "entrypoint"})
+
+	viperx.AddWatcher(func(e fsnotify.Event) error {
+		// TODO: clarify why we don't save initial state as a string and then compare it with the current state
+		// by invoking f.c.AccessRuleMatchingStrategy method?
+		if reflect.DeepEqual(initialConfig, viper.Get(configuration.ViperKeyAccessRuleMatchingStrategy)) {
+			f.r.Logger().
+				Debug("Not reloading access rule matching strategy because configuration value has not changed.")
+			return nil
+		}
+
+		f.enqueueEvent(events, event{et: eventMatchingStrategyChanged, source: "viper_watcher"})
+
+		return nil
+	})
+
+	f.enqueueEvent(events, event{et: eventMatchingStrategyChanged, source: "entrypoint"})
 
 	for {
 		select {
@@ -238,7 +257,7 @@ func (f *FetcherDefault) watch(ctx context.Context, watcher *fsnotify.Watcher, e
 				WithField("op", e.Op.String()).
 				Debugf("Detected file change in directory containing access rules. Triggering a reload.")
 
-			f.enqueueEvent(events, event{et: eventRepositoryConfigChange, source: "fsnotify"})
+			f.enqueueEvent(events, event{et: eventRepositoryConfigChanged, source: "fsnotify"})
 		case e, ok := <-events:
 			if !ok {
 				// channel was closed
@@ -247,13 +266,21 @@ func (f *FetcherDefault) watch(ctx context.Context, watcher *fsnotify.Watcher, e
 			}
 
 			switch e.et {
-			case eventRepositoryConfigChange:
+			case eventRepositoryConfigChanged:
 				f.r.Logger().
 					WithField("event", "config_change").
 					WithField("source", e.source).
 					Debugf("Viper detected a configuration change, reloading config.")
 				if err := f.configUpdate(ctx, watcher, f.c.AccessRuleRepositories(), events); err != nil {
 					return err
+				}
+			case eventMatchingStrategyChanged:
+				f.r.Logger().
+					WithField("event", "config_change").
+					WithField("source", e.source).
+					Debugf("Viper detected a configuration change, reloading config.")
+				if err := f.r.RuleRepository().SetMatchingStrategy(ctx, f.c.AccessRuleMatchingStrategy()); err != nil {
+					return errors.Wrapf(err, "unable to update matching strategy")
 				}
 			case eventFileChanged:
 				f.r.Logger().
