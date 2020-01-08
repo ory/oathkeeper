@@ -138,14 +138,6 @@ type Upstream struct {
 
 var _ json.Unmarshaler = new(Rule)
 
-func NewRule() *Rule {
-	return &Rule{
-		Match:          &Match{},
-		Authenticators: []Handler{},
-		Mutators:       []Handler{},
-	}
-}
-
 func (r *Rule) UnmarshalJSON(raw []byte) error {
 	var rr struct {
 		ID             string         `json:"id"`
@@ -184,7 +176,7 @@ func (r *Rule) IsMatching(method string, u *url.URL) (bool, error) {
 		return false, nil
 	}
 
-	c, err := r.CompileURL()
+	c, err := r.compileRegexp()
 	if err != nil {
 		return false, errors.WithStack(err)
 	}
@@ -192,7 +184,7 @@ func (r *Rule) IsMatching(method string, u *url.URL) (bool, error) {
 	return c.MatchString(fmt.Sprintf("%s://%s%s", u.Scheme, u.Host, u.Path))
 }
 
-func (r *Rule) CompileURL() (*regexp2.Regexp, error) {
+func (r *Rule) compileRegexp() (*regexp2.Regexp, error) {
 	m := r.Match
 	c := crc32.ChecksumIEEE([]byte(m.URL))
 	if m.compiledURL == nil || c != m.compiledURLChecksum {
@@ -205,6 +197,17 @@ func (r *Rule) CompileURL() (*regexp2.Regexp, error) {
 	}
 
 	return m.compiledURL, nil
+}
+
+// Replace searches the input string and replaces each match (with the rule's pattern)
+// found with the replacement text.
+func (r *Rule) Replace(input, replacement string) (string, error) {
+	re, err := r.compileRegexp()
+	if err != nil {
+		return "", errors.WithStack(err)
+	}
+
+	return re.Replace(input, replacement, -1, -1)
 }
 
 func stringInSlice(a string, list []string) bool {

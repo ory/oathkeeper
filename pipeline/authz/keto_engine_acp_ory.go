@@ -94,11 +94,6 @@ func (a *AuthorizerKetoEngineACPORY) Authorize(r *http.Request, session *authn.A
 		return err
 	}
 
-	compiled, err := rule.CompileURL()
-	if err != nil {
-		return errors.WithStack(err)
-	}
-
 	subject := session.Subject
 	if cf.Subject != "" {
 		templateId := fmt.Sprintf("%s:%s", rule.GetID(), "subject")
@@ -116,11 +111,11 @@ func (a *AuthorizerKetoEngineACPORY) Authorize(r *http.Request, session *authn.A
 	var b bytes.Buffer
 	u := fmt.Sprintf("%s://%s%s", r.URL.Scheme, r.URL.Host, r.URL.Path)
 
-	action, err := compiled.Replace(u, cf.RequiredAction, -1, -1)
+	action, err := rule.Replace(u, cf.RequiredAction)
 	if err != nil {
 		return errors.WithStack(err)
 	}
-	resource, err := compiled.Replace(u, cf.RequiredResource, -1, -1)
+	resource, err := rule.Replace(u, cf.RequiredResource)
 	if err != nil {
 		return errors.WithStack(err)
 	}
@@ -140,10 +135,10 @@ func (a *AuthorizerKetoEngineACPORY) Authorize(r *http.Request, session *authn.A
 	}
 
 	req, err := http.NewRequest("POST", urlx.AppendPaths(baseURL, "/engines/acp/ory", flavor, "/allowed").String(), &b)
-	req.Header.Add("Content-Type", "application/json")
 	if err != nil {
 		return errors.WithStack(err)
 	}
+	req.Header.Add("Content-Type", "application/json")
 
 	res, err := a.client.Do(req)
 	if err != nil {
