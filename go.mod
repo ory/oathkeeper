@@ -37,7 +37,7 @@ require (
 	github.com/ory/graceful v0.1.1
 	github.com/ory/herodot v0.6.2
 	github.com/ory/ladon v1.0.1
-	github.com/ory/sdk/swagutil v0.0.0-20200108113256-c1b2ef1818f3 // indirect
+	github.com/ory/sdk/swagutil v0.0.0-20200108122515-375eeddba1e8 // indirect
 	github.com/ory/viper v1.5.6
 	github.com/ory/x v0.0.88
 	github.com/pborman/uuid v1.2.0

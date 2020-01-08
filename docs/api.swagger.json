@@ -518,6 +518,7 @@
   },
   "definitions": {
     "Upstream": {
+      "description": "Upstream upstream",
       "type": "object",
       "properties": {
         "preserve_host": {
@@ -547,6 +548,7 @@
       }
     },
     "healthStatus": {
+      "description": "HealthStatus health status",
       "type": "object",
       "properties": {
         "status": {
@@ -563,21 +565,27 @@
           "type": "string"
         },
         "crv": {
+          "description": "crv",
           "type": "string"
         },
         "d": {
+          "description": "d",
           "type": "string"
         },
         "dp": {
+          "description": "dp",
           "type": "string"
         },
         "dq": {
+          "description": "dq",
           "type": "string"
         },
         "e": {
+          "description": "e",
           "type": "string"
         },
         "k": {
+          "description": "k",
           "type": "string"
         },
         "kid": {
@@ -589,15 +597,19 @@
           "type": "string"
         },
         "n": {
+          "description": "n",
           "type": "string"
         },
         "p": {
+          "description": "p",
           "type": "string"
         },
         "q": {
+          "description": "q",
           "type": "string"
         },
         "qi": {
+          "description": "qi",
           "type": "string"
         },
         "use": {
@@ -605,6 +617,7 @@
           "type": "string"
         },
         "x": {
+          "description": "x",
           "type": "string"
         },
         "x5c": {
@@ -615,6 +628,7 @@
           }
         },
         "y": {
+          "description": "y",
           "type": "string"
         }
       }
@@ -669,6 +683,7 @@
       }
     },
     "ruleHandler": {
+      "description": "RuleHandler rule handler",
       "type": "object",
       "properties": {
         "config": {
@@ -698,6 +713,7 @@
       }
     },
     "version": {
+      "description": "Version version",
       "type": "object",
       "properties": {
         "version": {
