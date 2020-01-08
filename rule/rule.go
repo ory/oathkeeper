@@ -31,6 +31,8 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/ory/ladon/compiler"
+
+	"github.com/ory/oathkeeper/driver/configuration"
 )
 
 type Match struct {
@@ -171,17 +173,25 @@ func (r *Rule) GetID() string {
 
 // IsMatching checks whether the provided url and method match the rule.
 // An error will be returned if a regexp timeout occurs.
-func (r *Rule) IsMatching(method string, u *url.URL) (bool, error) {
+func (r *Rule) IsMatching(strategy configuration.MatchingStrategy, method string, u *url.URL) (bool, error) {
 	if !stringInSlice(method, r.Match.Methods) {
 		return false, nil
 	}
 
-	c, err := r.compileRegexp()
-	if err != nil {
-		return false, errors.WithStack(err)
+	switch strategy {
+	case configuration.Regexp:
+		c, err := r.compileRegexp()
+		if err != nil {
+			return false, errors.WithStack(err)
+		}
+
+		return c.MatchString(fmt.Sprintf("%s://%s%s", u.Scheme, u.Host, u.Path))
+	case configuration.Glob:
+		// TODO: implement
 	}
 
-	return c.MatchString(fmt.Sprintf("%s://%s%s", u.Scheme, u.Host, u.Path))
+	return false, errors.Errorf("unknown matching strategy: %v", strategy)
+
 }
 
 func (r *Rule) compileRegexp() (*regexp2.Regexp, error) {

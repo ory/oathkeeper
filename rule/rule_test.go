@@ -26,6 +26,8 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/ory/oathkeeper/driver/configuration"
 )
 
 func mustParse(t *testing.T, u string) *url.URL {
@@ -69,7 +71,7 @@ func TestRule(t *testing.T) {
 	}
 	for ind, tcase := range tests {
 		t.Run(string(ind), func(t *testing.T) {
-			matched, err := r.IsMatching(tcase.method, mustParse(t, tcase.url))
+			matched, err := r.IsMatching(configuration.Regexp, tcase.method, mustParse(t, tcase.url))
 			assert.Equal(t, tcase.expectedMatch, matched)
 			assert.Equal(t, tcase.expectedErr, err)
 		})
@@ -111,7 +113,7 @@ func TestRule1(t *testing.T) {
 	}
 	for ind, tcase := range tests {
 		t.Run(string(ind), func(t *testing.T) {
-			matched, err := r.IsMatching(tcase.method, mustParse(t, tcase.url))
+			matched, err := r.IsMatching(configuration.Regexp, tcase.method, mustParse(t, tcase.url))
 			assert.Equal(t, tcase.expectedMatch, matched)
 			assert.Equal(t, tcase.expectedErr, err)
 		})
@@ -153,7 +155,7 @@ func TestRule2(t *testing.T) {
 	}
 	for ind, tcase := range tests {
 		t.Run(string(ind), func(t *testing.T) {
-			matched, err := r.IsMatching(tcase.method, mustParse(t, tcase.url))
+			matched, err := r.IsMatching(configuration.Regexp, tcase.method, mustParse(t, tcase.url))
 			assert.Equal(t, tcase.expectedMatch, matched)
 			assert.Equal(t, tcase.expectedErr, err)
 		})
