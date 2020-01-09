@@ -3,6 +3,7 @@
 **Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
 
 - [Change Log](#change-log)
+  - [Unreleased](#unreleased)
   - [v0.34.0-beta.1 (2019-12-26)](#v0340-beta1-2019-12-26)
   - [v0.33.1-beta.1 (2019-12-18)](#v0331-beta1-2019-12-18)
   - [v0.33.0-beta.1 (2019-12-16)](#v0330-beta1-2019-12-16)
@@ -68,6 +69,20 @@
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 # Change Log
+
+## [Unreleased](https://github.com/ory/oathkeeper/tree/HEAD)
+
+[Full Changelog](https://github.com/ory/oathkeeper/compare/v0.34.0-beta.1...HEAD)
+
+**Closed issues:**
+
+- support the cookie as token source \(token\_from\) for JWT authenticator [\#330](https://github.com/ory/oathkeeper/issues/330)
+- oathkeeper-maester start failed [\#327](https://github.com/ory/oathkeeper/issues/327)
+- Allow http client timeout to be configurable [\#310](https://github.com/ory/oathkeeper/issues/310)
+
+**Merged pull requests:**
+
+- pipeline/authn: add unit test for token\_from-\>cookie for both jwt and oauth2\_introspection authenticators \(\#330\) [\#331](https://github.com/ory/oathkeeper/pull/331) ([ngrigoriev](https://github.com/ngrigoriev))
 
 ## [v0.34.0-beta.1](https://github.com/ory/oathkeeper/tree/v0.34.0-beta.1) (2019-12-26)
 [Full Changelog](https://github.com/ory/oathkeeper/compare/v0.33.1-beta.1...v0.34.0-beta.1)
@@ -546,10 +561,6 @@
 ## [v0.0.29](https://github.com/ory/oathkeeper/tree/v0.0.29) (2017-12-19)
 [Full Changelog](https://github.com/ory/oathkeeper/compare/v0.0.28...v0.0.29)
 
-**Merged pull requests:**
-
-- Adds use field to well known [\#48](https://github.com/ory/oathkeeper/pull/48) ([aeneasr](https://github.com/aeneasr))
-
 ## [v0.0.28](https://github.com/ory/oathkeeper/tree/v0.0.28) (2017-12-19)
 [Full Changelog](https://github.com/ory/oathkeeper/compare/v0.0.27...v0.0.28)
 
@@ -654,6 +665,7 @@
 
 **Merged pull requests:**
 
+- Adds use field to well known [\#48](https://github.com/ory/oathkeeper/pull/48) ([aeneasr](https://github.com/aeneasr))
 - Introduces surrogate\_id to SQLManager [\#21](https://github.com/ory/oathkeeper/pull/21) ([aeneasr](https://github.com/aeneasr))
 
 ## [v0.0.16](https://github.com/ory/oathkeeper/tree/v0.0.16) (2017-11-12)
@@ -739,7 +751,6 @@
 
 - Return arrays instead of null on rule creation [\#6](https://github.com/ory/oathkeeper/pull/6) ([aeneasr](https://github.com/aeneasr))
 - Add circleci configuration file [\#5](https://github.com/ory/oathkeeper/pull/5) ([aeneasr](https://github.com/aeneasr))
-- travis: add goveralls report submission [\#2](https://github.com/ory/oathkeeper/pull/2) ([aeneasr](https://github.com/aeneasr))
 
 ## [v0.0.3](https://github.com/ory/oathkeeper/tree/v0.0.3) (2017-10-18)
 [Full Changelog](https://github.com/ory/oathkeeper/compare/v0.0.2...v0.0.3)
@@ -758,6 +769,7 @@
 ## [v0.0.1](https://github.com/ory/oathkeeper/tree/v0.0.1) (2017-10-10)
 **Merged pull requests:**
 
+- travis: add goveralls report submission [\#2](https://github.com/ory/oathkeeper/pull/2) ([aeneasr](https://github.com/aeneasr))
 - Prototype [\#1](https://github.com/ory/oathkeeper/pull/1) ([aeneasr](https://github.com/aeneasr))
 
 
