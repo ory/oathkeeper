@@ -161,3 +161,45 @@ func TestRule2(t *testing.T) {
 		})
 	}
 }
+
+func TestRuleGlob(t *testing.T) {
+	r := &Rule{
+		Match: &Match{
+			Methods: []string{"DELETE"},
+			URL:     "https://localhost/users/<[0-9]*>",
+		},
+	}
+
+	var tests = []struct {
+		method        string
+		url           string
+		expectedMatch bool
+		expectedErr   error
+	}{
+		{
+			method:        "DELETE",
+			url:           "https://localhost/users/1234",
+			expectedMatch: true,
+			expectedErr:   nil,
+		},
+		{
+			method:        "DELETE",
+			url:           "https://localhost/users/1234?key=value&key1=value1",
+			expectedMatch: true,
+			expectedErr:   nil,
+		},
+		{
+			method:        "DELETE",
+			url:           "https://localhost/users/abcd",
+			expectedMatch: false,
+			expectedErr:   nil,
+		},
+	}
+	for ind, tcase := range tests {
+		t.Run(string(ind), func(t *testing.T) {
+			matched, err := r.IsMatching(configuration.Glob, tcase.method, mustParse(t, tcase.url))
+			assert.Equal(t, tcase.expectedMatch, matched)
+			assert.Equal(t, tcase.expectedErr, err)
+		})
+	}
+}

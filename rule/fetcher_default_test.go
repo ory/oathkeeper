@@ -54,10 +54,11 @@ func TestFetcherWatchConfig(t *testing.T) {
 	}()
 
 	for k, tc := range []struct {
-		config     string
-		tmpContent string
-		expectIDs  []string
-		expectNone bool
+		config           string
+		tmpContent       string
+		expectIDs        []string
+		expectNone       bool
+		expectedStrategy configuration.MatchingStrategy
 	}{
 		{config: ""},
 		{
@@ -86,14 +87,18 @@ access_rules:
 access_rules:
   repositories:
     - file://../test/stub/rules.yaml
+  matching_strategy: glob
 `,
-			expectIDs: []string{"test-rule-1-yaml"},
+			expectIDs:        []string{"test-rule-1-yaml"},
+			expectedStrategy: configuration.Glob,
 		},
 		{
 			config: `
 access_rules:
   repositories:
+  matching_strategy: regexp
 `,
+			expectedStrategy: configuration.Regexp,
 		},
 	} {
 		t.Run(fmt.Sprintf("case=%d", k), func(t *testing.T) {
@@ -103,6 +108,10 @@ access_rules:
 			rules, err := r.RuleRepository().List(context.Background(), 500, 0)
 			require.NoError(t, err)
 			require.Len(t, rules, len(tc.expectIDs))
+
+			strategy, err := r.RuleRepository().MatchingStrategy(context.Background())
+			require.NoError(t, err)
+			require.Equal(t, tc.expectedStrategy, strategy)
 
 			ids := make([]string, len(rules))
 			for k, r := range rules {
