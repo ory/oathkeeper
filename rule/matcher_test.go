@@ -105,8 +105,7 @@ func TestMatcher(t *testing.T) {
 				require.NoError(t, err)
 				got, err := matcher.Get(context.Background(), r.ID)
 				require.NoError(t, err)
-				assert.NotEmpty(t, got.Match.compiledURL)
-				assert.NotEmpty(t, got.Match.compiledURLChecksum)
+				assert.NotEmpty(t, got.matchingEngine.Checksum())
 			})
 
 			require.NoError(t, matcher.Set(context.Background(), testRules[1:]))

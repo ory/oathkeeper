@@ -23,14 +23,10 @@ package rule
 import (
 	"encoding/json"
 	"fmt"
-	"hash/crc32"
 	"net/url"
 	"strings"
 
-	"github.com/dlclark/regexp2"
 	"github.com/pkg/errors"
-
-	"github.com/ory/ladon/compiler"
 
 	"github.com/ory/oathkeeper/driver/configuration"
 )
@@ -51,9 +47,6 @@ type Match struct {
 	// You can use regular expressions in this field to match more than one url. Regular expressions are encapsulated in
 	// brackets < and >. The following example matches all paths of the domain `mydomain.com`: `https://mydomain.com/<.*>`.
 	URL string `json:"url"`
-
-	compiledURL         *regexp2.Regexp
-	compiledURLChecksum uint32
 }
 
 type Handler struct {
@@ -124,6 +117,8 @@ type Rule struct {
 
 	// Upstream is the location of the server where requests matching this rule should be forwarded to.
 	Upstream Upstream `json:"upstream"`
+
+	matchingEngine MatchingEngine
 }
 
 type Upstream struct {
@@ -151,6 +146,7 @@ func (r *Rule) UnmarshalJSON(raw []byte) error {
 		Mutators       []Handler      `json:"mutators"`
 		Errors         []ErrorHandler `json:"errors"`
 		Upstream       Upstream       `json:"upstream"`
+		matchingEngine MatchingEngine
 	}
 
 	transformed, err := migrateRuleJSON(raw)
@@ -177,47 +173,21 @@ func (r *Rule) IsMatching(strategy configuration.MatchingStrategy, method string
 	if !stringInSlice(method, r.Match.Methods) {
 		return false, nil
 	}
-
-	switch strategy {
-	case configuration.Regexp:
-		c, err := r.compileRegexp()
-		if err != nil {
-			return false, errors.WithStack(err)
-		}
-
-		return c.MatchString(fmt.Sprintf("%s://%s%s", u.Scheme, u.Host, u.Path))
-	case configuration.Glob:
-		// TODO: implement
+	if err := ensureMatchingEngine(r, strategy); err != nil {
+		return false, err
 	}
-
-	return false, errors.Errorf("unknown matching strategy: %v", strategy)
-
+	matchAgainst := fmt.Sprintf("%s://%s%s", u.Scheme, u.Host, u.Path)
+	return r.matchingEngine.IsMatching(r.Match.URL, matchAgainst)
 }
 
-func (r *Rule) compileRegexp() (*regexp2.Regexp, error) {
-	m := r.Match
-	c := crc32.ChecksumIEEE([]byte(m.URL))
-	if m.compiledURL == nil || c != m.compiledURLChecksum {
-		regex, err := compiler.CompileRegex(m.URL, '<', '>')
-		if err != nil {
-			return nil, errors.Wrap(err, "Unable to compile URL matcher")
-		}
-		m.compiledURL = regex
-		m.compiledURLChecksum = c
-	}
-
-	return m.compiledURL, nil
-}
-
-// Replace searches the input string and replaces each match (with the rule's pattern)
+// ReplaceAllString searches the input string and replaces each match (with the rule's pattern)
 // found with the replacement text.
-func (r *Rule) Replace(input, replacement string) (string, error) {
-	re, err := r.compileRegexp()
-	if err != nil {
-		return "", errors.WithStack(err)
+func (r *Rule) ReplaceAllString(strategy configuration.MatchingStrategy, input, replacement string) (string, error) {
+	if err := ensureMatchingEngine(r, strategy); err != nil {
+		return "", err
 	}
 
-	return re.Replace(input, replacement, -1, -1)
+	return r.matchingEngine.ReplaceAllString(r.Match.URL, input, replacement)
 }
 
 func stringInSlice(a string, list []string) bool {
@@ -227,4 +197,20 @@ func stringInSlice(a string, list []string) bool {
 		}
 	}
 	return false
+}
+
+func ensureMatchingEngine(rule *Rule, strategy configuration.MatchingStrategy) error {
+	if rule.matchingEngine != nil {
+		return nil
+	}
+	switch strategy {
+	case configuration.Glob:
+		rule.matchingEngine = new(globMatchingEngine)
+		return nil
+	case "", configuration.Regexp:
+		rule.matchingEngine = new(regexpMatchingEngine)
+		return nil
+	}
+
+	return errors.Wrap(ErrUnknownMatchingStrategy, string(strategy))
 }

@@ -133,6 +133,7 @@ func (m *RepositoryMemory) Match(_ context.Context, method string, u *url.URL) (
 		} else if matched {
 			rules = append(rules, *r)
 		}
+		m.rules[k] = *r
 	}
 
 	if len(rules) == 0 {

@@ -111,11 +111,11 @@ func (a *AuthorizerKetoEngineACPORY) Authorize(r *http.Request, session *authn.A
 	var b bytes.Buffer
 	u := fmt.Sprintf("%s://%s%s", r.URL.Scheme, r.URL.Host, r.URL.Path)
 
-	action, err := rule.Replace(u, cf.RequiredAction)
+	action, err := rule.ReplaceAllString(a.c.AccessRuleMatchingStrategy(), u, cf.RequiredAction)
 	if err != nil {
 		return errors.WithStack(err)
 	}
-	resource, err := rule.Replace(u, cf.RequiredResource)
+	resource, err := rule.ReplaceAllString(a.c.AccessRuleMatchingStrategy(), u, cf.RequiredResource)
 	if err != nil {
 		return errors.WithStack(err)
 	}

@@ -20,11 +20,11 @@ require (
 	github.com/go-swagger/go-swagger v0.21.1-0.20200107003254-1c98855b472d
 	github.com/gobuffalo/httptest v1.0.2
 	github.com/gobuffalo/packr/v2 v2.0.0-rc.15
+	github.com/gobwas/glob v0.2.3
 	github.com/golang/gddo v0.0.0-20190904175337-72a348e765d2
 	github.com/golang/mock v1.3.1
 	github.com/google/uuid v1.1.1
 	github.com/gorilla/mux v1.7.1 // indirect
-	github.com/hashicorp/golang-lru v0.5.3 // indirect
 	github.com/huandu/xstrings v1.2.0 // indirect
 	github.com/imdario/mergo v0.3.7
 	github.com/julienschmidt/httprouter v1.2.0
