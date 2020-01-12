@@ -20,12 +20,13 @@ const (
 )
 
 // MatchingStrategy defines matching strategy such as Regexp or Glob.
-type MatchingStrategy int
+// Empty string defaults to "regexp"
+type MatchingStrategy string
 
-// Possible values.
+// Possible matching strategies.
 const (
-	Regexp MatchingStrategy = iota
-	Glob
+	Regexp MatchingStrategy = "regexp"
+	Glob   MatchingStrategy = "glob"
 )
 
 type Provider interface {

@@ -94,6 +94,11 @@ func (a *AuthorizerKetoEngineACPORY) Authorize(r *http.Request, session *authn.A
 		return err
 	}
 
+	// only Regexp matching strategy is supported for now.
+	if !(a.c.AccessRuleMatchingStrategy() == "" || a.c.AccessRuleMatchingStrategy() == configuration.Regexp) {
+		return helper.ErrNonRegexpMatchingStrategy
+	}
+
 	subject := session.Subject
 	if cf.Subject != "" {
 		templateId := fmt.Sprintf("%s:%s", rule.GetID(), "subject")

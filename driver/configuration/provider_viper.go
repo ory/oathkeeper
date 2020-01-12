@@ -134,7 +134,7 @@ func (v *ViperProvider) AccessRuleRepositories() []url.URL {
 
 // AccessRuleMatchingStrategy returns current MatchingStrategy.
 func (v *ViperProvider) AccessRuleMatchingStrategy() MatchingStrategy {
-	return MatchingStrategy(viperx.GetInt(v.l, ViperKeyAccessRuleMatchingStrategy, int(Regexp)))
+	return MatchingStrategy(viperx.GetString(v.l, ViperKeyAccessRuleMatchingStrategy, ""))
 }
 
 func (v *ViperProvider) CORSEnabled(iface string) bool {

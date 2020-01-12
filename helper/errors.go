@@ -47,6 +47,12 @@ var (
 		CodeField:   http.StatusInternalServerError,
 		StatusField: http.StatusText(http.StatusInternalServerError),
 	}
+	// TODO: discuss the text and status code
+	ErrNonRegexpMatchingStrategy = &herodot.DefaultError{
+		ErrorField:  "The matched handler uses Regexp MatchingStrategy which is not selected in the configuration",
+		CodeField:   http.StatusInternalServerError,
+		StatusField: http.StatusText(http.StatusInternalServerError),
+	}
 	ErrMatchesNoRule = &herodot.DefaultError{
 		ErrorField:  "Requested url does not match any rules",
 		CodeField:   http.StatusNotFound,
