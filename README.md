@@ -257,7 +257,6 @@ The Guide is available
 [here](https://www.ory.sh/docs/oathkeeper/).
 
 ### HTTP API documentation
-
 The HTTP API is documented
 [here](https://www.ory.sh/docs/oathkeeper/sdk/api).
 

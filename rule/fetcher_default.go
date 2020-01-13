@@ -276,9 +276,9 @@ func (f *FetcherDefault) watch(ctx context.Context, watcher *fsnotify.Watcher, e
 				}
 			case eventMatchingStrategyChanged:
 				f.r.Logger().
-					WithField("event", "config_change").
+					WithField("event", "matching_strategy_config_change").
 					WithField("source", e.source).
-					Debugf("Viper detected a configuration change, reloading config.")
+					Debugf("Viper detected a configuration change, updating matching strategy")
 				if err := f.r.RuleRepository().SetMatchingStrategy(ctx, f.c.AccessRuleMatchingStrategy()); err != nil {
 					return errors.Wrapf(err, "unable to update matching strategy")
 				}
