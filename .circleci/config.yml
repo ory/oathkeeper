@@ -126,7 +126,7 @@ workflows:
             branches:
               only: master
       - sdk/generate:
-          appname: Ory_Hydra
+          appname: Ory_Oathkeeper
           requires:
             - test
             - format

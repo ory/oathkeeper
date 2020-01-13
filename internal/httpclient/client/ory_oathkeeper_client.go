@@ -16,7 +16,7 @@ import (
 	"github.com/ory/oathkeeper/internal/httpclient/client/version"
 )
 
-// Default ory hydra HTTP client.
+// Default ory oathkeeper HTTP client.
 var Default = NewHTTPClient(nil)
 
 const (
@@ -31,14 +31,14 @@ const (
 // DefaultSchemes are the default schemes found in Meta (info) section of spec file
 var DefaultSchemes = []string{"http", "https"}
 
-// NewHTTPClient creates a new ory hydra HTTP client.
-func NewHTTPClient(formats strfmt.Registry) *OryHydra {
+// NewHTTPClient creates a new ory oathkeeper HTTP client.
+func NewHTTPClient(formats strfmt.Registry) *OryOathkeeper {
 	return NewHTTPClientWithConfig(formats, nil)
 }
 
-// NewHTTPClientWithConfig creates a new ory hydra HTTP client,
+// NewHTTPClientWithConfig creates a new ory oathkeeper HTTP client,
 // using a customizable transport config.
-func NewHTTPClientWithConfig(formats strfmt.Registry, cfg *TransportConfig) *OryHydra {
+func NewHTTPClientWithConfig(formats strfmt.Registry, cfg *TransportConfig) *OryOathkeeper {
 	// ensure nullable parameters have default
 	if cfg == nil {
 		cfg = DefaultTransportConfig()
@@ -49,14 +49,14 @@ func NewHTTPClientWithConfig(formats strfmt.Registry, cfg *TransportConfig) *Ory
 	return New(transport, formats)
 }
 
-// New creates a new ory hydra client
-func New(transport runtime.ClientTransport, formats strfmt.Registry) *OryHydra {
+// New creates a new ory oathkeeper client
+func New(transport runtime.ClientTransport, formats strfmt.Registry) *OryOathkeeper {
 	// ensure nullable parameters have default
 	if formats == nil {
 		formats = strfmt.Default
 	}
 
-	cli := new(OryHydra)
+	cli := new(OryOathkeeper)
 	cli.Transport = transport
 
 	cli.API = api.New(transport, formats)
@@ -107,8 +107,8 @@ func (cfg *TransportConfig) WithSchemes(schemes []string) *TransportConfig {
 	return cfg
 }
 
-// OryHydra is a client for ory hydra
-type OryHydra struct {
+// OryOathkeeper is a client for ory oathkeeper
+type OryOathkeeper struct {
 	API *api.Client
 
 	Health *health.Client
@@ -119,7 +119,7 @@ type OryHydra struct {
 }
 
 // SetTransport changes the transport on the client and all its subresources
-func (c *OryHydra) SetTransport(transport runtime.ClientTransport) {
+func (c *OryOathkeeper) SetTransport(transport runtime.ClientTransport) {
 	c.Transport = transport
 
 	c.API.SetTransport(transport)

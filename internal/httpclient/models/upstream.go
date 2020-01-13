@@ -11,7 +11,7 @@ import (
 	"github.com/go-openapi/swag"
 )
 
-// Upstream Upstream upstream
+// Upstream upstream
 // swagger:model Upstream
 type Upstream struct {
 
