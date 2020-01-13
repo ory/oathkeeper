@@ -119,6 +119,33 @@ func TestAuthenticatorCookieSession(t *testing.T) {
 			require.NoError(t, err, "%#v", errors.Cause(err))
 		})
 
+		t.Run("description=should work with nested extra keys", func(t *testing.T) {
+			testServer, _ := makeServer(200, `{"subject": "123", "session": {"foo": "bar"}}`)
+			session, err := pipelineAuthenticator.Authenticate(
+				makeRequest("GET", "/", map[string]string{"sessionid": "zyx"}, ""),
+				json.RawMessage(fmt.Sprintf(`{"check_session_url": "%s", "extra_from": "session"}`, testServer.URL)),
+				nil,
+			)
+			require.NoError(t, err, "%#v", errors.Cause(err))
+			assert.Equal(t, &AuthenticationSession{
+				Subject: "123",
+				Extra:   map[string]interface{}{"foo": "bar"},
+			}, session)
+		})
+
+		t.Run("description=should work with the root key for extra and a custom subject key", func(t *testing.T) {
+			testServer, _ := makeServer(200, `{"identity": {"id": "123"}, "session": {"foo": "bar"}}`)
+			session, err := pipelineAuthenticator.Authenticate(
+				makeRequest("GET", "/", map[string]string{"sessionid": "zyx"}, ""),
+				json.RawMessage(fmt.Sprintf(`{"check_session_url": "%s", "subject_from": "identity.id", "extra_from": "@this"}`, testServer.URL)),
+				nil,
+			)
+			require.NoError(t, err, "%#v", errors.Cause(err))
+			assert.Equal(t, &AuthenticationSession{
+				Subject: "123",
+				Extra:   map[string]interface{}{"session": map[string]interface{}{"foo": "bar"}, "identity": map[string]interface{}{"id": "123"}},
+			}, session)
+		})
 	})
 }
 
