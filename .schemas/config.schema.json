@@ -357,6 +357,12 @@
           "description": "The `extra` field in the ORY Oathkeeper authentication session is set using this JSON Path. Defaults to `extra`, and could be `@this` (for the root element), `foo.bar` (for key foo.bar), or any other valid GJSON path. See [GSJON Syntax](https://github.com/tidwall/gjson/blob/master/SYNTAX.md) for reference.",
           "type": "string",
           "default": "extra"
+        },
+        "subject_from": {
+          "title": "Subject JSON Path",
+          "description": "The `subject` field in the ORY Oathkeeper authentication session is set using this JSON Path. Defaults to `subject`. See [GSJON Syntax](https://github.com/tidwall/gjson/blob/master/SYNTAX.md) for reference.",
+          "type": "string",
+          "default": "subject"
         }
       },
       "required": [
