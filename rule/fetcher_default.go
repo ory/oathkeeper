@@ -202,25 +202,20 @@ func (f *FetcherDefault) watch(ctx context.Context, watcher *fsnotify.Watcher, e
 
 		return nil
 	})
-
-	var initialConfig map[string]interface{}
-
 	f.enqueueEvent(events, event{et: eventRepositoryConfigChanged, source: "entrypoint"})
 
+	var strategy configuration.MatchingStrategy
 	viperx.AddWatcher(func(e fsnotify.Event) error {
-		// TODO: clarify why we don't save initial state as a string and then compare it with the current state
-		// by invoking f.c.AccessRuleMatchingStrategy method?
-		if reflect.DeepEqual(initialConfig, viper.Get(configuration.ViperKeyAccessRuleMatchingStrategy)) {
+		if strategy == f.c.AccessRuleMatchingStrategy() {
 			f.r.Logger().
 				Debug("Not reloading access rule matching strategy because configuration value has not changed.")
 			return nil
 		}
 
 		f.enqueueEvent(events, event{et: eventMatchingStrategyChanged, source: "viper_watcher"})
-
+		strategy = f.c.AccessRuleMatchingStrategy()
 		return nil
 	})
-
 	f.enqueueEvent(events, event{et: eventMatchingStrategyChanged, source: "entrypoint"})
 
 	for {

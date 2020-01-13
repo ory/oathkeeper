@@ -1,0 +1,6 @@
+- id: test-rule-1-glob
+  match:
+    url: myproxy.com/<m.n>
+    methods:
+      - GET
+      - POST
