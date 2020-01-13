@@ -24,7 +24,6 @@ sdk:
 		$$(go env GOPATH)/bin/swagger generate client -f ./docs/api.swagger.json -t internal/httpclient -A Ory_Oathkeeper
 		make format
 
-
 .PHONY: install-stable
 install-stable:
 		OATHKEEPER_LATEST=$$(git describe --abbrev=0 --tags)
