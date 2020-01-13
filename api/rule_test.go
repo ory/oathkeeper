@@ -30,9 +30,9 @@ import (
 	"github.com/ory/oathkeeper/x"
 
 	"github.com/ory/oathkeeper/internal"
+	"github.com/ory/oathkeeper/internal/httpclient/client"
+	sdkrule "github.com/ory/oathkeeper/internal/httpclient/client/api"
 	"github.com/ory/oathkeeper/rule"
-	"github.com/ory/oathkeeper/sdk/go/oathkeeper/client"
-	sdkrule "github.com/ory/oathkeeper/sdk/go/oathkeeper/client/api"
 	"github.com/ory/x/pointerx"
 
 	"github.com/stretchr/testify/assert"
