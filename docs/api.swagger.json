@@ -518,6 +518,7 @@
   },
   "definitions": {
     "Upstream": {
+      "description": "Upstream upstream",
       "type": "object",
       "properties": {
         "preserve_host": {
@@ -535,6 +536,7 @@
       }
     },
     "healthNotReadyStatus": {
+      "description": "HealthNotReadyStatus health not ready status",
       "type": "object",
       "properties": {
         "errors": {
@@ -547,6 +549,7 @@
       }
     },
     "healthStatus": {
+      "description": "HealthStatus health status",
       "type": "object",
       "properties": {
         "status": {
@@ -556,6 +559,7 @@
       }
     },
     "jsonWebKey": {
+      "description": "JSONWebKey json web key",
       "type": "object",
       "properties": {
         "alg": {
@@ -563,21 +567,27 @@
           "type": "string"
         },
         "crv": {
+          "description": "crv",
           "type": "string"
         },
         "d": {
+          "description": "d",
           "type": "string"
         },
         "dp": {
+          "description": "dp",
           "type": "string"
         },
         "dq": {
+          "description": "dq",
           "type": "string"
         },
         "e": {
+          "description": "e",
           "type": "string"
         },
         "k": {
+          "description": "k",
           "type": "string"
         },
         "kid": {
@@ -589,15 +599,19 @@
           "type": "string"
         },
         "n": {
+          "description": "n",
           "type": "string"
         },
         "p": {
+          "description": "p",
           "type": "string"
         },
         "q": {
+          "description": "q",
           "type": "string"
         },
         "qi": {
+          "description": "qi",
           "type": "string"
         },
         "use": {
@@ -605,6 +619,7 @@
           "type": "string"
         },
         "x": {
+          "description": "x",
           "type": "string"
         },
         "x5c": {
@@ -615,11 +630,13 @@
           }
         },
         "y": {
+          "description": "y",
           "type": "string"
         }
       }
     },
     "jsonWebKeySet": {
+      "description": "JSONWebKeySet json web key set",
       "type": "object",
       "properties": {
         "keys": {
@@ -698,6 +715,7 @@
       }
     },
     "version": {
+      "description": "Version version",
       "type": "object",
       "properties": {
         "version": {
