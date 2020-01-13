@@ -20,7 +20,7 @@ const (
 )
 
 // MatchingStrategy defines matching strategy such as Regexp or Glob.
-// Empty string defaults to "regexp"
+// Empty string defaults to "regexp".
 type MatchingStrategy string
 
 // Possible matching strategies.

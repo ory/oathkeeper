@@ -44,8 +44,11 @@ type Match struct {
 	// request with this field. If a match is found, the rule is considered a partial match.
 	// If the matchesMethods field is satisfied as well, the rule is considered a full match.
 	//
-	// You can use regular expressions in this field to match more than one url. Regular expressions are encapsulated in
-	// brackets < and >. The following example matches all paths of the domain `mydomain.com`: `https://mydomain.com/<.*>`.
+	// You can use regular expressions or glob patterns in this field to match more than one url.
+	// The matching strategy is determined by configuration parameter MatchingStrategy.
+	// Regular expressions and glob patterns are encapsulated in brackets < and >.
+	// The following regexp example matches all paths of the domain `mydomain.com`: `https://mydomain.com/<.*>`.
+	// The glob equivalent of the above regexp example is `https://mydomain.com/<*>`.
 	URL string `json:"url"`
 }
 
@@ -168,7 +171,7 @@ func (r *Rule) GetID() string {
 }
 
 // IsMatching checks whether the provided url and method match the rule.
-// An error will be returned if a regexp timeout occurs.
+// An error will be returned if a regexp matching strategy is selected and regexp timeout occurs.
 func (r *Rule) IsMatching(strategy configuration.MatchingStrategy, method string, u *url.URL) (bool, error) {
 	if !stringInSlice(method, r.Match.Methods) {
 		return false, nil

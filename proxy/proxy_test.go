@@ -279,7 +279,6 @@ backend_url=%s
 
 func TestProxy_GlobMatchingEngine(t *testing.T) {
 	backend := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// assert.NotEmpty(t, helper.BearerTokenFromRequest(r))
 		fmt.Fprint(w, "authorization="+r.Header.Get("Authorization")+"\n")
 		fmt.Fprint(w, "host="+r.Host+"\n")
 		fmt.Fprint(w, "url="+r.URL.String())
@@ -480,7 +479,7 @@ func TestProxy_GlobMatchingEngine(t *testing.T) {
 	} {
 		t.Run(fmt.Sprintf("case=%d/description=%s", k, tc.d), func(t *testing.T) {
 			reg.RuleRepository().(*rule.RepositoryMemory).WithRules(tc.rules)
-			reg.RuleRepository().SetMatchingStrategy(context.Background(), configuration.Glob)
+			require.NoError(t, reg.RuleRepository().SetMatchingStrategy(context.Background(), configuration.Glob))
 
 			req, err := http.NewRequest("GET", tc.url, nil)
 			require.NoError(t, err)
