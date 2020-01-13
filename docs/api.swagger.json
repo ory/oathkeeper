@@ -518,7 +518,7 @@
   },
   "definitions": {
     "Upstream": {
-      "description": "Upstream Upstream upstream",
+      "description": "Upstream Upstream Upstream upstream",
       "type": "object",
       "properties": {
         "preserve_host": {
@@ -548,6 +548,7 @@
       }
     },
     "healthStatus": {
+      "description": "HealthStatus health status",
       "type": "object",
       "properties": {
         "status": {
@@ -557,7 +558,7 @@
       }
     },
     "jsonWebKey": {
-      "description": "JSONWebKey JSONWebKey json web key",
+      "description": "JSONWebKey JSONWebKey JSONWebKey json web key",
       "type": "object",
       "properties": {
         "alg": {
@@ -634,6 +635,7 @@
       }
     },
     "jsonWebKeySet": {
+      "description": "JSONWebKeySet json web key set",
       "type": "object",
       "properties": {
         "keys": {
@@ -683,6 +685,7 @@
       }
     },
     "ruleHandler": {
+      "description": "RuleHandler rule handler",
       "type": "object",
       "properties": {
         "config": {
@@ -696,6 +699,7 @@
       }
     },
     "ruleMatch": {
+      "description": "RuleMatch rule match",
       "type": "object",
       "properties": {
         "methods": {
@@ -712,6 +716,7 @@
       }
     },
     "version": {
+      "description": "Version version",
       "type": "object",
       "properties": {
         "version": {
