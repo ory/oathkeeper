@@ -122,7 +122,6 @@ jobs:
       - run: npm publish
 
 workflows:
-  version: 2
   "test, build, and relase":
     jobs:
       - format:
