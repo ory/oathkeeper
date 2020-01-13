@@ -518,6 +518,7 @@
   },
   "definitions": {
     "Upstream": {
+      "description": "Upstream upstream",
       "type": "object",
       "properties": {
         "preserve_host": {
@@ -547,6 +548,7 @@
       }
     },
     "healthStatus": {
+      "description": "HealthStatus health status",
       "type": "object",
       "properties": {
         "status": {
@@ -556,6 +558,7 @@
       }
     },
     "jsonWebKey": {
+      "description": "JSONWebKey json web key",
       "type": "object",
       "properties": {
         "alg": {
@@ -563,21 +566,27 @@
           "type": "string"
         },
         "crv": {
+          "description": "crv",
           "type": "string"
         },
         "d": {
+          "description": "d",
           "type": "string"
         },
         "dp": {
+          "description": "dp",
           "type": "string"
         },
         "dq": {
+          "description": "dq",
           "type": "string"
         },
         "e": {
+          "description": "e",
           "type": "string"
         },
         "k": {
+          "description": "k",
           "type": "string"
         },
         "kid": {
@@ -589,15 +598,19 @@
           "type": "string"
         },
         "n": {
+          "description": "n",
           "type": "string"
         },
         "p": {
+          "description": "p",
           "type": "string"
         },
         "q": {
+          "description": "q",
           "type": "string"
         },
         "qi": {
+          "description": "qi",
           "type": "string"
         },
         "use": {
@@ -605,6 +618,7 @@
           "type": "string"
         },
         "x": {
+          "description": "x",
           "type": "string"
         },
         "x5c": {
@@ -615,11 +629,13 @@
           }
         },
         "y": {
+          "description": "y",
           "type": "string"
         }
       }
     },
     "jsonWebKeySet": {
+      "description": "JSONWebKeySet json web key set",
       "type": "object",
       "properties": {
         "keys": {
@@ -633,7 +649,7 @@
     },
     "rule": {
       "type": "object",
-      "title": "swaggerRule is a single rule that will get checked on every HTTP request.",
+      "title": "Rule swaggerRule is a single rule that will get checked on every HTTP request.",
       "properties": {
         "authenticators": {
           "description": "Authenticators is a list of authentication handlers that will try and authenticate the provided credentials.\nAuthenticators are checked iteratively from index 0 to n and if the first authenticator to return a positive\nresult will be the one used.\n\nIf you want the rule to first check a specific authenticator  before \"falling back\" to others, have that authenticator\nas the first item in the array.",
@@ -669,6 +685,7 @@
       }
     },
     "ruleHandler": {
+      "description": "RuleHandler rule handler",
       "type": "object",
       "properties": {
         "config": {
@@ -682,6 +699,7 @@
       }
     },
     "ruleMatch": {
+      "description": "RuleMatch rule match",
       "type": "object",
       "properties": {
         "methods": {
@@ -698,6 +716,7 @@
       }
     },
     "version": {
+      "description": "Version version",
       "type": "object",
       "properties": {
         "version": {
