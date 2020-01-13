@@ -518,7 +518,7 @@
   },
   "definitions": {
     "Upstream": {
-      "description": "Upstream upstream",
+      "description": "Upstream Upstream upstream",
       "type": "object",
       "properties": {
         "preserve_host": {
@@ -536,7 +536,6 @@
       }
     },
     "healthNotReadyStatus": {
-      "description": "HealthNotReadyStatus health not ready status",
       "type": "object",
       "properties": {
         "errors": {
@@ -549,7 +548,6 @@
       }
     },
     "healthStatus": {
-      "description": "HealthStatus health status",
       "type": "object",
       "properties": {
         "status": {
@@ -559,7 +557,7 @@
       }
     },
     "jsonWebKey": {
-      "description": "JSONWebKey json web key",
+      "description": "JSONWebKey JSONWebKey json web key",
       "type": "object",
       "properties": {
         "alg": {
@@ -636,7 +634,6 @@
       }
     },
     "jsonWebKeySet": {
-      "description": "JSONWebKeySet json web key set",
       "type": "object",
       "properties": {
         "keys": {
@@ -715,7 +712,6 @@
       }
     },
     "version": {
-      "description": "Version version",
       "type": "object",
       "properties": {
         "version": {
