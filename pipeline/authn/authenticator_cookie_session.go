@@ -95,7 +95,7 @@ func (a *AuthenticatorCookieSession) Authenticate(r *http.Request, config json.R
 	extra := map[string]interface{}{}
 	rawExtra := gjson.GetBytes(body, cf.ExtraFrom).Raw
 	if rawExtra == "" {
-		rawExtra = "{}"
+		rawExtra = "null"
 	}
 
 	if err = json.Unmarshal([]byte(rawExtra), &extra); err != nil {
