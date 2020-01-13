@@ -82,6 +82,7 @@
 
 **Merged pull requests:**
 
+- authn/cookie\_session: Add extra\_from modifier [\#335](https://github.com/ory/oathkeeper/pull/335) ([aeneasr](https://github.com/aeneasr))
 - pipeline/authn: add unit test for token\_from-\>cookie for both jwt and oauth2\_introspection authenticators \(\#330\) [\#331](https://github.com/ory/oathkeeper/pull/331) ([ngrigoriev](https://github.com/ngrigoriev))
 
 ## [v0.34.0-beta.1](https://github.com/ory/oathkeeper/tree/v0.34.0-beta.1) (2019-12-26)
@@ -117,7 +118,6 @@
 - Replace the base image with alpine [\#312](https://github.com/ory/oathkeeper/issues/312)
 - token\_from required for oauth2\_introspection but ignores "seperated" values [\#308](https://github.com/ory/oathkeeper/issues/308)
 - Allow path in `cookie\_session.check\_session\_url` to be used [\#296](https://github.com/ory/oathkeeper/issues/296)
-- Remote audit log [\#242](https://github.com/ory/oathkeeper/issues/242)
 
 **Merged pull requests:**
 
@@ -351,6 +351,10 @@
 
 - Credential issuer config is base64 encoded [\#182](https://github.com/ory/oathkeeper/issues/182)
 
+**Closed issues:**
+
+- Remote audit log [\#242](https://github.com/ory/oathkeeper/issues/242)
+
 **Merged pull requests:**
 
 - Fix json encode of config for "credentials\_issuer" and "authorizer" during import [\#184](https://github.com/ory/oathkeeper/pull/184) ([stszap](https://github.com/stszap))
@@ -561,6 +565,10 @@
 ## [v0.0.29](https://github.com/ory/oathkeeper/tree/v0.0.29) (2017-12-19)
 [Full Changelog](https://github.com/ory/oathkeeper/compare/v0.0.28...v0.0.29)
 
+**Merged pull requests:**
+
+- Adds use field to well known [\#48](https://github.com/ory/oathkeeper/pull/48) ([aeneasr](https://github.com/aeneasr))
+
 ## [v0.0.28](https://github.com/ory/oathkeeper/tree/v0.0.28) (2017-12-19)
 [Full Changelog](https://github.com/ory/oathkeeper/compare/v0.0.27...v0.0.28)
 
@@ -665,7 +673,6 @@
 
 **Merged pull requests:**
 
-- Adds use field to well known [\#48](https://github.com/ory/oathkeeper/pull/48) ([aeneasr](https://github.com/aeneasr))
 - Introduces surrogate\_id to SQLManager [\#21](https://github.com/ory/oathkeeper/pull/21) ([aeneasr](https://github.com/aeneasr))
 
 ## [v0.0.16](https://github.com/ory/oathkeeper/tree/v0.0.16) (2017-11-12)
