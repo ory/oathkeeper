@@ -7,6 +7,7 @@ import (
 	"net/url"
 
 	"github.com/pkg/errors"
+	"github.com/tidwall/gjson"
 
 	"github.com/ory/herodot"
 
@@ -15,6 +16,12 @@ import (
 	"github.com/ory/oathkeeper/pipeline"
 )
 
+func init() {
+	gjson.AddModifier("this", func(json, arg string) string {
+		return json
+	})
+}
+
 type AuthenticatorCookieSessionFilter struct {
 }
 
@@ -22,6 +29,7 @@ type AuthenticatorCookieSessionConfiguration struct {
 	Only            []string `json:"only"`
 	CheckSessionURL string   `json:"check_session_url"`
 	PreservePath    bool     `json:"preserve_path"`
+	ExtraFrom       string   `json:"extra_from"`
 }
 
 type AuthenticatorCookieSession struct {
@@ -53,6 +61,10 @@ func (a *AuthenticatorCookieSession) Config(config json.RawMessage) (*Authentica
 		return nil, NewErrAuthenticatorMisconfigured(a, err)
 	}
 
+	if len(c.ExtraFrom) == 0 {
+		c.ExtraFrom = "extra"
+	}
+
 	return &c, nil
 }
 
@@ -74,17 +86,25 @@ func (a *AuthenticatorCookieSession) Authenticate(r *http.Request, config json.R
 	}
 
 	var session struct {
-		Subject string                 `json:"subject"`
-		Extra   map[string]interface{} `json:"extra"`
+		Subject string `json:"subject"`
 	}
-	err = json.Unmarshal(body, &session)
-	if err != nil {
+	if err = json.Unmarshal(body, &session); err != nil {
 		return nil, helper.ErrForbidden.WithReason(err.Error()).WithTrace(err)
+	}
+
+	extra := map[string]interface{}{}
+	rawExtra := gjson.GetBytes(body, cf.ExtraFrom).Raw
+	if rawExtra == "" {
+		rawExtra = "null"
+	}
+
+	if err = json.Unmarshal([]byte(rawExtra), &extra); err != nil {
+		return nil, helper.ErrForbidden.WithReasonf("The configured GJSON path returned an error on JSON output: %s", err.Error()).WithDebugf("GJSON path: %s\nBody: %s\nResult: %s", cf.ExtraFrom, body, rawExtra).WithTrace(err)
 	}
 
 	return &AuthenticationSession{
 		Subject: session.Subject,
-		Extra:   session.Extra,
+		Extra:   extra,
 	}, nil
 }
 
