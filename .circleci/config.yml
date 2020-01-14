@@ -38,11 +38,6 @@ jobs:
     steps:
       - checkout
       - setup_remote_docker
-      - run:
-          command: |
-            ./.circleci/release_name.bash
-            echo 'export DOCKER_SHORT_TAG=$CIRCLE_SHA1' >> $BASH_ENV
-            source $BASH_ENV
       - run: go mod download
       - run: go install github.com/ory/go-acc github.com/mattn/goveralls
       - run: go-acc -o coverage.txt ./... -- -failfast -timeout=20m
