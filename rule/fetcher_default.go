@@ -204,16 +204,15 @@ func (f *FetcherDefault) watch(ctx context.Context, watcher *fsnotify.Watcher, e
 	})
 	f.enqueueEvent(events, event{et: eventRepositoryConfigChanged, source: "entrypoint"})
 
-	var strategy configuration.MatchingStrategy
+	var strategy map[string]interface{}
 	viperx.AddWatcher(func(e fsnotify.Event) error {
-		if strategy == f.c.AccessRuleMatchingStrategy() {
+		if reflect.DeepEqual(strategy, viper.Get(configuration.ViperKeyAccessRuleMatchingStrategy)) {
 			f.r.Logger().
 				Debug("Not reloading access rule matching strategy because configuration value has not changed.")
 			return nil
 		}
 
 		f.enqueueEvent(events, event{et: eventMatchingStrategyChanged, source: "viper_watcher"})
-		strategy = f.c.AccessRuleMatchingStrategy()
 		return nil
 	})
 	f.enqueueEvent(events, event{et: eventMatchingStrategyChanged, source: "entrypoint"})
