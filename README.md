@@ -2,10 +2,10 @@
 
 <h4 align="center">
     <a href="https://discord.gg/PAMQWkr">Chat</a> |
-    <a href="https://community.ory.am/">Forums</a> |
+    <a href="https://community.ory.sh/">Forums</a> |
     <a href="http://eepurl.com/di390P">Newsletter</a><br/><br/>
-    <a href="https://www.ory.sh/docs/guides/master/oathkeeper/">Guide</a> |
-    <a href="https://www.ory.sh/docs/api/oathkeeper?version=master">API Docs</a> |
+    <a href="https://www.ory.sh/docs/oathkeeper/">Guide</a> |
+    <a href="https://www.ory.sh/docs/oathkeeper/sdk/api">API Docs</a> |
     <a href="https://godoc.org/github.com/ory/oathkeeper">Code Docs</a><br/><br/>
     <a href="https://opencollective.com/ory">Support this project!</a>
 </h4>
@@ -70,7 +70,7 @@ documentation and upgrade instructions.
 ## Installation
 
 Head over to the
-[ORY Developer Documentation](https://www.ory.sh/docs/oathkeeper/install) to
+[ORY Developer Documentation](https://www.ory.sh/docs/keto/install) to
 learn how to install ORY Oathkeeper on Linux, macOS, Windows, and Docker and how
 to build ORY Oathkeeper from source.
 
@@ -217,12 +217,12 @@ services from the ORY Ecosystem.
 
 If you think you found a security vulnerability, please refrain from posting it
 publicly on the forums, the chat, or GitHub and send us an email to
-[hi@ory.am](mailto:hi@ory.am) instead.
+[hi@ory.sh](mailto:hi@ory.sh) instead.
 
 ## Telemetry
 
 Our services collect summarized, anonymized data which can optionally be turned
-off. Click [here](https://www.ory.sh/docs/guides/master/telemetry/) to learn
+off. Click [here](https://www.ory.sh/docs/ecosystem/sqa) to learn
 more.
 
 ## Documentation
@@ -230,12 +230,12 @@ more.
 ### Guide
 
 The Guide is available
-[here](https://www.ory.sh/docs/guides/master/oathkeeper/).
+[here](https://www.ory.sh/docs/oathkeeper/).
 
 ### HTTP API documentation
 
 The HTTP API is documented
-[here](https://www.ory.sh/docs/api/oathkeeper?version=master).
+[here](https://www.ory.sh/docs/oathkeeper/sdk/api).
 
 ### Upgrading and Changelog
 
