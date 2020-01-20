@@ -518,7 +518,7 @@
   },
   "definitions": {
     "Upstream": {
-      "description": "Upstream Upstream Upstream Upstream Upstream Upstream upstream",
+      "description": "Upstream Upstream Upstream Upstream Upstream Upstream Upstream upstream",
       "type": "object",
       "properties": {
         "preserve_host": {
@@ -548,7 +548,7 @@
       }
     },
     "healthStatus": {
-      "description": "HealthStatus HealthStatus HealthStatus HealthStatus health status",
+      "description": "HealthStatus HealthStatus HealthStatus HealthStatus HealthStatus health status",
       "type": "object",
       "properties": {
         "status": {
@@ -558,6 +558,7 @@
       }
     },
     "jsonWebKey": {
+      "description": "JSONWebKey json web key",
       "type": "object",
       "properties": {
         "alg": {
@@ -634,7 +635,7 @@
       }
     },
     "jsonWebKeySet": {
-      "description": "JSONWebKeySet json web key set",
+      "description": "JSONWebKeySet JSONWebKeySet json web key set",
       "type": "object",
       "properties": {
         "keys": {
@@ -648,7 +649,7 @@
     },
     "rule": {
       "type": "object",
-      "title": "Rule Rule Rule swaggerRule is a single rule that will get checked on every HTTP request.",
+      "title": "swaggerRule is a single rule that will get checked on every HTTP request.",
       "properties": {
         "authenticators": {
           "description": "Authenticators is a list of authentication handlers that will try and authenticate the provided credentials.\nAuthenticators are checked iteratively from index 0 to n and if the first authenticator to return a positive\nresult will be the one used.\n\nIf you want the rule to first check a specific authenticator  before \"falling back\" to others, have that authenticator\nas the first item in the array.",
@@ -697,7 +698,6 @@
       }
     },
     "ruleMatch": {
-      "description": "RuleMatch rule match",
       "type": "object",
       "properties": {
         "methods": {
@@ -714,7 +714,7 @@
       }
     },
     "version": {
-      "description": "Version Version Version Version version",
+      "description": "Version Version Version Version Version version",
       "type": "object",
       "properties": {
         "version": {
