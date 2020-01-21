@@ -869,8 +869,11 @@
             "port": {
               "type": "number",
               "default": 4456,
+              "examples": [4456],
               "title": "Port",
-              "description": "The port to listen on."
+              "description": "The port to listen on.",
+              "minimum": 1,
+              "maximum": 65535
             },
             "host": {
               "type": "string",
@@ -898,8 +901,11 @@
             "port": {
               "type": "number",
               "default": 4455,
+              "examples": [4455],
               "title": "Port",
-              "description": "The port to listen on."
+              "description": "The port to listen on.",
+              "minimum": 1,
+              "maximum": 65535
             },
             "host": {
               "type": "string",
