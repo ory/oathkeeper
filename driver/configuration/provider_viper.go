@@ -2,9 +2,12 @@ package configuration
 
 import (
 	"bytes"
+	"encoding/binary"
 	"encoding/json"
 	"fmt"
+	"hash/crc64"
 	"net/url"
+	"os"
 	"strings"
 	"time"
 
@@ -101,11 +104,15 @@ const (
 )
 
 type ViperProvider struct {
-	l logrus.FieldLogger
+	l            logrus.FieldLogger
+	configCachge map[uint64]map[string]interface{}
 }
 
 func NewViperProvider(l logrus.FieldLogger) *ViperProvider {
-	return &ViperProvider{l: l}
+	return &ViperProvider{
+		l:            l,
+		configCachge: make(map[uint64]map[string]interface{}),
+	}
 }
 
 func (v *ViperProvider) AccessRuleRepositories() []url.URL {
@@ -197,7 +204,53 @@ func (v *ViperProvider) pipelineIsEnabled(prefix, id string) bool {
 	return viperx.GetBool(v.l, fmt.Sprintf("%s.%s.enabled", prefix, id), false)
 }
 
+func (v *ViperProvider) hashPipelineConfig(prefix, id string, override json.RawMessage) (uint64, error) {
+	ts := viper.ConfigChangeAt().UnixNano()
+	b := make([]byte, 8)
+	binary.LittleEndian.PutUint64(b, uint64(ts))
+
+	env, err := json.Marshal(os.Environ())
+	if err != nil {
+		return 0, err
+	}
+
+	slices := [][]byte{
+		[]byte(prefix),
+		[]byte(id),
+		[]byte(override),
+		[]byte(b),
+		[]byte(env),
+	}
+
+	var hashSlices []byte
+	for _, s := range slices {
+		hashSlices = append(hashSlices, s...)
+	}
+
+	return crc64.Checksum(hashSlices, crc64.MakeTable(crc64.ECMA)), nil
+}
+
 func (v *ViperProvider) PipelineConfig(prefix, id string, override json.RawMessage, dest interface{}) error {
+	hash, err := v.hashPipelineConfig(prefix, id, override)
+	if err != nil {
+		return errors.WithStack(err)
+	}
+
+	c, ok := v.configCachge[hash]
+	if ok {
+		if dest != nil {
+			marshalled, err := json.Marshal(c)
+			if err != nil {
+				return errors.WithStack(err)
+			}
+			if err := json.NewDecoder(bytes.NewBuffer(marshalled)).Decode(dest); err != nil {
+				return errors.WithStack(err)
+			}
+		}
+
+		return nil
+	}
+
 	// we need to create a copy for config otherwise we will accidentally override values
 	config, err := x.Deepcopy(viperx.GetStringMapConfig(stringsx.Splitx(fmt.Sprintf("%s.%s.config", prefix, id), ".")...))
 	if err != nil {
@@ -251,6 +304,8 @@ func (v *ViperProvider) PipelineConfig(prefix, id string, override json.RawMessa
 	} else if !result.Valid() {
 		return errors.WithStack(result.Errors())
 	}
+
+	v.configCachge[hash] = config
 
 	return nil
 }
