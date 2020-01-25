@@ -138,7 +138,7 @@
           "description": "Indicates whether the request can include user credentials like cookies, HTTP authentication or client side SSL certificates."
         },
         "max_age": {
-          "type": "number",
+          "type": "integer",
           "default": 0,
           "title": "Maximum Age",
           "description": "Indicates how long (in seconds) the results of a preflight request can be cached. The default is 0 which stands for no max age."
@@ -191,7 +191,7 @@
         "code": {
           "title": "HTTP Redirect Status Code",
           "description": "Defines the HTTP Redirect status code which can bei 301 (Moved Permanently) or 302 (Found).",
-          "type": "number",
+          "type": "integer",
           "enum": [
             301,
             302
@@ -867,13 +867,10 @@
           "additionalProperties": false,
           "properties": {
             "port": {
-              "type": "number",
+              "type": "integer",
               "default": 4456,
-              "examples": [4456],
               "title": "Port",
-              "description": "The port to listen on.",
-              "minimum": 1,
-              "maximum": 65535
+              "description": "The port to listen on."
             },
             "host": {
               "type": "string",
@@ -899,13 +896,10 @@
           "additionalProperties": false,
           "properties": {
             "port": {
-              "type": "number",
+              "type": "integer",
               "default": 4455,
-              "examples": [4455],
               "title": "Port",
-              "description": "The port to listen on.",
-              "minimum": 1,
-              "maximum": 65535
+              "description": "The port to listen on."
             },
             "host": {
               "type": "string",
