@@ -60,6 +60,7 @@ require (
 	golang.org/x/oauth2 v0.0.0-20190604053449-0f29369cfe45
 	golang.org/x/tools v0.0.0-20191224055732-dd894d0a8a40
 	gopkg.in/square/go-jose.v2 v2.3.1
+	gopkg.in/yaml.v2 v2.2.4
 )
 
 // Fix for https://github.com/golang/lint/issues/436
