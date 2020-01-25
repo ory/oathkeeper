@@ -14,7 +14,6 @@ require (
 	github.com/go-openapi/runtime v0.19.5
 	github.com/go-openapi/strfmt v0.19.3
 	github.com/go-openapi/swag v0.19.5
-	github.com/go-openapi/validate v0.19.3
 	github.com/go-sql-driver/mysql v1.4.1
 	github.com/go-swagger/go-swagger v0.21.1-0.20200107003254-1c98855b472d
 	github.com/gobuffalo/httptest v1.0.2
@@ -36,7 +35,7 @@ require (
 	github.com/ory/herodot v0.6.2
 	github.com/ory/ladon v1.0.1
 	github.com/ory/sdk/swagutil v0.0.0-20200123152503-0d50960e70bd // indirect
-	github.com/ory/viper v1.5.6
+	github.com/ory/viper v1.5.7
 	github.com/ory/x v0.0.91
 	github.com/pborman/uuid v1.2.0
 	github.com/pelletier/go-toml v1.6.0 // indirect
