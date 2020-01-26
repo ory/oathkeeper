@@ -34,7 +34,7 @@ require (
 	github.com/ory/graceful v0.1.1
 	github.com/ory/herodot v0.6.2
 	github.com/ory/ladon v1.0.1
-	github.com/ory/sdk/swagutil v0.0.0-20200123152503-0d50960e70bd // indirect
+	github.com/ory/sdk/swagutil v0.0.0-20200123152503-0d50960e70bd
 	github.com/ory/viper v1.5.7
 	github.com/ory/x v0.0.91
 	github.com/pborman/uuid v1.2.0
@@ -57,7 +57,6 @@ require (
 	golang.org/x/oauth2 v0.0.0-20190604053449-0f29369cfe45
 	golang.org/x/tools v0.0.0-20191224055732-dd894d0a8a40
 	gopkg.in/square/go-jose.v2 v2.3.1
-	gopkg.in/yaml.v2 v2.2.7
 )
 
 // Fix for https://github.com/golang/lint/issues/436
