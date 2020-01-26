@@ -14,5 +14,6 @@ import (
 	_ "github.com/ory/x/tools/listx"
 
 	_ "github.com/gobuffalo/packr/v2"
+
 	_ "github.com/ory/sdk/swagutil"
 )
