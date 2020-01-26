@@ -2,10 +2,13 @@ package configuration
 
 import (
 	"bytes"
+	"encoding/binary"
 	"encoding/json"
 	"fmt"
+	"hash/crc64"
 	"net/url"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/imdario/mergo"
@@ -101,11 +104,16 @@ const (
 )
 
 type ViperProvider struct {
-	l logrus.FieldLogger
+	l            logrus.FieldLogger
+	configMutex  sync.RWMutex
+	configCachge map[uint64]json.RawMessage
 }
 
 func NewViperProvider(l logrus.FieldLogger) *ViperProvider {
-	return &ViperProvider{l: l}
+	return &ViperProvider{
+		l:            l,
+		configCachge: make(map[uint64]json.RawMessage),
+	}
 }
 
 func (v *ViperProvider) AccessRuleRepositories() []url.URL {
@@ -197,7 +205,46 @@ func (v *ViperProvider) pipelineIsEnabled(prefix, id string) bool {
 	return viperx.GetBool(v.l, fmt.Sprintf("%s.%s.enabled", prefix, id), false)
 }
 
+func (v *ViperProvider) hashPipelineConfig(prefix, id string, override json.RawMessage) (uint64, error) {
+	ts := viper.ConfigChangeAt().UnixNano()
+	b := make([]byte, 8)
+	binary.LittleEndian.PutUint64(b, uint64(ts))
+
+	slices := [][]byte{
+		[]byte(prefix),
+		[]byte(id),
+		[]byte(override),
+		[]byte(b),
+	}
+
+	var hashSlices []byte
+	for _, s := range slices {
+		hashSlices = append(hashSlices, s...)
+	}
+
+	return crc64.Checksum(hashSlices, crc64.MakeTable(crc64.ECMA)), nil
+}
+
 func (v *ViperProvider) PipelineConfig(prefix, id string, override json.RawMessage, dest interface{}) error {
+	hash, err := v.hashPipelineConfig(prefix, id, override)
+	if err != nil {
+		return errors.WithStack(err)
+	}
+
+	v.configMutex.RLock()
+	c, ok := v.configCachge[hash]
+	v.configMutex.RUnlock()
+
+	if ok {
+		if dest != nil {
+			if err := json.NewDecoder(bytes.NewBuffer(c)).Decode(dest); err != nil {
+				return errors.WithStack(err)
+			}
+		}
+
+		return nil
+	}
+
 	// we need to create a copy for config otherwise we will accidentally override values
 	config, err := x.Deepcopy(viperx.GetStringMapConfig(stringsx.Splitx(fmt.Sprintf("%s.%s.config", prefix, id), ".")...))
 	if err != nil {
@@ -251,6 +298,10 @@ func (v *ViperProvider) PipelineConfig(prefix, id string, override json.RawMessa
 	} else if !result.Valid() {
 		return errors.WithStack(result.Errors())
 	}
+
+	v.configMutex.Lock()
+	v.configCachge[hash] = marshalled
+	v.configMutex.Unlock()
 
 	return nil
 }
