@@ -224,12 +224,15 @@ func TestAuthorizerKetoWarden(t *testing.T) {
 		viper.Set(configuration.ViperKeyAuthorizerKetoEngineACPORYIsEnabled, false)
 		require.Error(t, a.Validate(json.RawMessage(`{"base_url":"","required_action":"foo","required_resource":"bar"}`)))
 
+		viper.Reset()
 		viper.Set(configuration.ViperKeyAuthorizerKetoEngineACPORYIsEnabled, true)
 		require.Error(t, a.Validate(json.RawMessage(`{"base_url":"","required_action":"foo","required_resource":"bar"}`)))
 
+		viper.Reset()
 		viper.Set(configuration.ViperKeyAuthorizerKetoEngineACPORYIsEnabled, false)
 		require.Error(t, a.Validate(json.RawMessage(`{"base_url":"http://foo/bar","required_action":"foo","required_resource":"bar"}`)))
 
+		viper.Reset()
 		viper.Set(configuration.ViperKeyAuthorizerKetoEngineACPORYIsEnabled, true)
 		require.NoError(t, a.Validate(json.RawMessage(`{"base_url":"http://foo/bar","required_action":"foo","required_resource":"bar"}`)))
 	})

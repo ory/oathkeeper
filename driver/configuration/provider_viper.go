@@ -104,15 +104,20 @@ const (
 )
 
 type ViperProvider struct {
-	l            logrus.FieldLogger
-	configMutex  sync.RWMutex
-	configCachge map[uint64]json.RawMessage
+	l logrus.FieldLogger
+
+	enabledMutex sync.RWMutex
+	enabledCache map[uint64]bool
+
+	configMutex sync.RWMutex
+	configCache map[uint64]json.RawMessage
 }
 
 func NewViperProvider(l logrus.FieldLogger) *ViperProvider {
 	return &ViperProvider{
 		l:            l,
-		configCachge: make(map[uint64]json.RawMessage),
+		enabledCache: make(map[uint64]bool),
+		configCache:  make(map[uint64]json.RawMessage),
 	}
 }
 
@@ -202,7 +207,24 @@ func (v *ViperProvider) ToScopeStrategy(value string, key string) fosite.ScopeSt
 }
 
 func (v *ViperProvider) pipelineIsEnabled(prefix, id string) bool {
-	return viperx.GetBool(v.l, fmt.Sprintf("%s.%s.enabled", prefix, id), false)
+	hash, err := v.hashPipelineConfig(prefix, id, nil)
+	if err != nil {
+		return false
+	}
+
+	v.enabledMutex.RLock()
+	e, ok := v.enabledCache[hash]
+	v.enabledMutex.RUnlock()
+
+	if ok {
+		return e
+	}
+
+	v.enabledMutex.Lock()
+	v.enabledCache[hash] = viperx.GetBool(v.l, fmt.Sprintf("%s.%s.enabled", prefix, id), false)
+	v.enabledMutex.Unlock()
+
+	return v.enabledCache[hash]
 }
 
 func (v *ViperProvider) hashPipelineConfig(prefix, id string, override json.RawMessage) (uint64, error) {
@@ -232,7 +254,7 @@ func (v *ViperProvider) PipelineConfig(prefix, id string, override json.RawMessa
 	}
 
 	v.configMutex.RLock()
-	c, ok := v.configCachge[hash]
+	c, ok := v.configCache[hash]
 	v.configMutex.RUnlock()
 
 	if ok {
@@ -300,7 +322,7 @@ func (v *ViperProvider) PipelineConfig(prefix, id string, override json.RawMessa
 	}
 
 	v.configMutex.Lock()
-	v.configCachge[hash] = marshalled
+	v.configCache[hash] = marshalled
 	v.configMutex.Unlock()
 
 	return nil

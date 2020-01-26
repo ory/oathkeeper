@@ -48,6 +48,7 @@ func TestAuthorizerDeny(t *testing.T) {
 		viper.Set(configuration.ViperKeyAuthorizerDenyIsEnabled, true)
 		require.NoError(t, a.Validate(nil))
 
+		viper.Reset()
 		viper.Set(configuration.ViperKeyAuthorizerDenyIsEnabled, false)
 		require.Error(t, a.Validate(nil))
 	})
