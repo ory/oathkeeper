@@ -7,8 +7,8 @@ import (
 	"fmt"
 	"hash/crc64"
 	"net/url"
-	"os"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/imdario/mergo"
@@ -105,13 +105,14 @@ const (
 
 type ViperProvider struct {
 	l            logrus.FieldLogger
-	configCachge map[uint64]map[string]interface{}
+	configMutex  sync.RWMutex
+	configCachge map[uint64]json.RawMessage
 }
 
 func NewViperProvider(l logrus.FieldLogger) *ViperProvider {
 	return &ViperProvider{
 		l:            l,
-		configCachge: make(map[uint64]map[string]interface{}),
+		configCachge: make(map[uint64]json.RawMessage),
 	}
 }
 
@@ -209,17 +210,11 @@ func (v *ViperProvider) hashPipelineConfig(prefix, id string, override json.RawM
 	b := make([]byte, 8)
 	binary.LittleEndian.PutUint64(b, uint64(ts))
 
-	env, err := json.Marshal(os.Environ())
-	if err != nil {
-		return 0, err
-	}
-
 	slices := [][]byte{
 		[]byte(prefix),
 		[]byte(id),
 		[]byte(override),
 		[]byte(b),
-		[]byte(env),
 	}
 
 	var hashSlices []byte
@@ -236,14 +231,13 @@ func (v *ViperProvider) PipelineConfig(prefix, id string, override json.RawMessa
 		return errors.WithStack(err)
 	}
 
+	v.configMutex.RLock()
 	c, ok := v.configCachge[hash]
+	v.configMutex.RUnlock()
+
 	if ok {
 		if dest != nil {
-			marshalled, err := json.Marshal(c)
-			if err != nil {
-				return errors.WithStack(err)
-			}
-			if err := json.NewDecoder(bytes.NewBuffer(marshalled)).Decode(dest); err != nil {
+			if err := json.NewDecoder(bytes.NewBuffer(c)).Decode(dest); err != nil {
 				return errors.WithStack(err)
 			}
 		}
@@ -305,7 +299,9 @@ func (v *ViperProvider) PipelineConfig(prefix, id string, override json.RawMessa
 		return errors.WithStack(result.Errors())
 	}
 
-	v.configCachge[hash] = config
+	v.configMutex.Lock()
+	v.configCachge[hash] = marshalled
+	v.configMutex.Unlock()
 
 	return nil
 }

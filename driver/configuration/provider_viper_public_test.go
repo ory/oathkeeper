@@ -48,10 +48,8 @@ func TestPipelineConfig(t *testing.T) {
 		require.NoError(t, p.PipelineConfig("authenticators", "oauth2_introspection", nil, &res))
 		assert.JSONEq(t, `{"introspection_request_headers":{},"introspection_url":"https://override/path","pre_authorization":{"client_id":"some_id","client_secret":"some_secret","enabled":true,"scope":["foo","bar"],"token_url":"https://my-website.com/oauth2/token"},"required_scope":[],"scope_strategy":"exact","target_audience":[],"trusted_issuers":[]}`, string(res), "%s", res)
 
+		// Cleanup
 		require.NoError(t, os.Setenv("AUTHENTICATORS_OAUTH2_INTROSPECTION_CONFIG_INTROSPECTION_URL", ""))
-
-		require.NoError(t, p.PipelineConfig("authenticators", "oauth2_introspection", nil, &res))
-		assert.JSONEq(t, `{"introspection_request_headers":{},"introspection_url":"https://my-website.com/oauth2/introspection","pre_authorization":{"client_id":"some_id","client_secret":"some_secret","enabled":true,"scope":["foo","bar"],"token_url":"https://my-website.com/oauth2/token"},"required_scope":[],"scope_strategy":"exact","target_audience":[],"trusted_issuers":[]}`, string(res), "%s", res)
 
 	})
 
@@ -100,8 +98,7 @@ v0.35.1
 594	  20119202 ns/op
 
 v0.35.2
-870572	     13456 ns/op (CRC32)
-817059	     14213 ns/op (CRC64 - in use)
+3048037	      3908 ns/op
 */
 
 func BenchmarkPipelineConfig(b *testing.B) {
