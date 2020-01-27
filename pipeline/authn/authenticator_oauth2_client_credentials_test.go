@@ -111,12 +111,15 @@ func TestAuthenticatorOAuth2ClientCredentials(t *testing.T) {
 		viper.Set(configuration.ViperKeyAuthenticatorOAuth2ClientCredentialsIsEnabled, false)
 		require.Error(t, a.Validate(json.RawMessage(`{"token_url":""}`)))
 
+		viper.Reset()
 		viper.Set(configuration.ViperKeyAuthenticatorOAuth2ClientCredentialsIsEnabled, false)
 		require.Error(t, a.Validate(json.RawMessage(`{"token_url":"`+ts.URL+"/oauth2/token"+`"}`)))
 
+		viper.Reset()
 		viper.Set(configuration.ViperKeyAuthenticatorOAuth2ClientCredentialsIsEnabled, true)
 		require.Error(t, a.Validate(json.RawMessage(`{"token_url":""}`)))
 
+		viper.Reset()
 		viper.Set(configuration.ViperKeyAuthenticatorOAuth2ClientCredentialsIsEnabled, true)
 		require.NoError(t, a.Validate(json.RawMessage(`{"token_url":"`+ts.URL+"/oauth2/token"+`"}`)))
 	})

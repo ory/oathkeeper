@@ -123,6 +123,39 @@ func BenchmarkPipelineConfig(b *testing.B) {
 	}
 }
 
+/*
+go test ./... -v -bench=. -run BenchmarkPipelineEnabled -benchtime=10s
+
+v0.35.4
+11708	   1009975 ns/op
+
+v0.35.5
+18848694	       603 ns/op
+*/
+
+func BenchmarkPipelineEnabled(b *testing.B) {
+	viper.Reset()
+	viperx.InitializeConfig(
+		"oathkeeper",
+		"./../../docs/",
+		logrus.New(),
+	)
+
+	err := viperx.Validate(gojsonschema.NewReferenceLoader("file://../../.schemas/config.schema.json"))
+	if err != nil {
+		viperx.LoggerWithValidationErrorFields(logrus.New(), err).Error("unable to validate")
+	}
+	require.NoError(b, err)
+
+	p := NewViperProvider(logrus.New())
+
+	for n := 0; n < b.N; n++ {
+		p.AuthorizerIsEnabled("allow")
+		p.AuthenticatorIsEnabled("noop")
+		p.MutatorIsEnabled("noop")
+	}
+}
+
 func TestViperProvider(t *testing.T) {
 	viper.Reset()
 	viperx.InitializeConfig(

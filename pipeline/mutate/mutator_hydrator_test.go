@@ -351,6 +351,7 @@ func TestMutatorHydrator(t *testing.T) {
 			{enabled: true, shouldPass: true, apiUrl: "http://api/bar"},
 		} {
 			t.Run(fmt.Sprintf("case=%d", k), func(t *testing.T) {
+				viper.Reset()
 				viper.Set(configuration.ViperKeyMutatorHydratorIsEnabled, testCase.enabled)
 
 				err := a.Validate(json.RawMessage(`{"api":{"url":"` + testCase.apiUrl + `"}}`))

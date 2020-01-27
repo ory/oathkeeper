@@ -49,6 +49,7 @@ func TestAuthenticatorNoop(t *testing.T) {
 		viper.Set(configuration.ViperKeyAuthenticatorNoopIsEnabled, true)
 		require.NoError(t, a.Validate(nil))
 
+		viper.Reset()
 		viper.Set(configuration.ViperKeyAuthenticatorNoopIsEnabled, false)
 		require.Error(t, a.Validate(nil))
 	})
