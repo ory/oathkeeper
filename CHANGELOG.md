@@ -3,6 +3,7 @@
 **Table of Contents**
 
 - [Change Log](#change-log)
+  - [v0.35.5-beta.2 (2020-01-31)](#v0355-beta2-2020-01-31)
   - [v0.35.5-beta.1 (2020-01-27)](#v0355-beta1-2020-01-27)
   - [v0.35.4-beta.1 (2020-01-26)](#v0354-beta1-2020-01-26)
   - [v0.35.3-beta.1 (2020-01-26)](#v0353-beta1-2020-01-26)
@@ -75,6 +76,9 @@
 
 # Change Log
 
+## [v0.35.5-beta.2](https://github.com/ory/oathkeeper/tree/v0.35.5-beta.2) (2020-01-31)
+[Full Changelog](https://github.com/ory/oathkeeper/compare/v0.35.5-beta.1...v0.35.5-beta.2)
+
 ## [v0.35.5-beta.1](https://github.com/ory/oathkeeper/tree/v0.35.5-beta.1) (2020-01-27)
 [Full Changelog](https://github.com/ory/oathkeeper/compare/v0.35.4-beta.1...v0.35.5-beta.1)
 
@@ -104,6 +108,7 @@
 **Merged pull requests:**
 
 - Use integer instead of number in config JSON schema [\#350](https://github.com/ory/oathkeeper/pull/350) ([aeneasr](https://github.com/aeneasr))
+- ci: Bump ory/sdk orb and Go version [\#349](https://github.com/ory/oathkeeper/pull/349) ([aeneasr](https://github.com/aeneasr))
 - Cache config to improve latencies [\#348](https://github.com/ory/oathkeeper/pull/348) ([ecktom](https://github.com/ecktom))
 - Set min/max for port range in config JSON Schema [\#345](https://github.com/ory/oathkeeper/pull/345) ([aeneasr](https://github.com/aeneasr))
 - Fix profiling env variable not being picked up [\#343](https://github.com/ory/oathkeeper/pull/343) ([ecktom](https://github.com/ecktom))
@@ -134,6 +139,7 @@
 - authn/cookie\_session: Add subject\_from modifier [\#336](https://github.com/ory/oathkeeper/pull/336) ([aeneasr](https://github.com/aeneasr))
 - authn/cookie\_session: Add extra\_from modifier [\#335](https://github.com/ory/oathkeeper/pull/335) ([aeneasr](https://github.com/aeneasr))
 - Move to new SDK pipeline [\#333](https://github.com/ory/oathkeeper/pull/333) ([aeneasr](https://github.com/aeneasr))
+- pipeline/authn: add unit test for token\_from-\>cookie for both jwt and oauth2\_introspection authenticators \(\#330\) [\#331](https://github.com/ory/oathkeeper/pull/331) ([ngrigoriev](https://github.com/ngrigoriev))
 
 ## [v0.34.0-beta.1](https://github.com/ory/oathkeeper/tree/v0.34.0-beta.1) (2019-12-26)
 [Full Changelog](https://github.com/ory/oathkeeper/compare/v0.33.1-beta.1...v0.34.0-beta.1)
@@ -153,7 +159,6 @@
 
 **Merged pull requests:**
 
-- ci: Bump ory/sdk orb and Go version [\#349](https://github.com/ory/oathkeeper/pull/349) ([aeneasr](https://github.com/aeneasr))
 - pipe/err: Improve IP and MIME matching [\#323](https://github.com/ory/oathkeeper/pull/323) ([aeneasr](https://github.com/aeneasr))
 - Add customizable error handlers [\#322](https://github.com/ory/oathkeeper/pull/322) ([aeneasr](https://github.com/aeneasr))
 
@@ -202,12 +207,12 @@
 
 **Merged pull requests:**
 
-- pipeline/authn: add unit test for token\_from-\>cookie for both jwt and oauth2\_introspection authenticators \(\#330\) [\#331](https://github.com/ory/oathkeeper/pull/331) ([ngrigoriev](https://github.com/ngrigoriev))
 - Update documentation banner image [\#307](https://github.com/ory/oathkeeper/pull/307) ([jfcurran](https://github.com/jfcurran))
 - allow specifying additional headers for the oauth introspection request [\#302](https://github.com/ory/oathkeeper/pull/302) ([paulbdavis](https://github.com/paulbdavis))
 - add cookie as an option for oauth2\_introspection authenticator [\#301](https://github.com/ory/oathkeeper/pull/301) ([paulbdavis](https://github.com/paulbdavis))
 - add preserve\_path option for cookie session to not override the path [\#297](https://github.com/ory/oathkeeper/pull/297) ([paulbdavis](https://github.com/paulbdavis))
 - pipeline/mutator: Refactor hydrator retry config  [\#287](https://github.com/ory/oathkeeper/pull/287) ([aeneasr](https://github.com/aeneasr))
+- docs: Updates issue and pull request templates [\#232](https://github.com/ory/oathkeeper/pull/232) ([aeneasr](https://github.com/aeneasr))
 
 ## [v0.32.1-beta.1](https://github.com/ory/oathkeeper/tree/v0.32.1-beta.1) (2019-10-30)
 [Full Changelog](https://github.com/ory/oathkeeper/compare/v0.32.0-beta.1...v0.32.1-beta.1)
@@ -232,8 +237,6 @@
 - authz: Add Content-Type header in the call to Keto [\#290](https://github.com/ory/oathkeeper/pull/290) ([Sbou](https://github.com/Sbou))
 - Auto-kill test runner after 10 retries [\#286](https://github.com/ory/oathkeeper/pull/286) ([aeneasr](https://github.com/aeneasr))
 - Dereference config schema and resolve issues [\#282](https://github.com/ory/oathkeeper/pull/282) ([aeneasr](https://github.com/aeneasr))
-- Support alternative token location [\#271](https://github.com/ory/oathkeeper/pull/271) ([kubadz](https://github.com/kubadz))
-- support multiple mutators [\#233](https://github.com/ory/oathkeeper/pull/233) ([jakkab](https://github.com/jakkab))
 
 ## [v0.32.0-beta.1](https://github.com/ory/oathkeeper/tree/v0.32.0-beta.1) (2019-10-20)
 [Full Changelog](https://github.com/ory/oathkeeper/compare/v0.31.0-beta.1...v0.32.0-beta.1)
@@ -260,6 +263,7 @@
 
 **Merged pull requests:**
 
+- Support alternative token location [\#271](https://github.com/ory/oathkeeper/pull/271) ([kubadz](https://github.com/kubadz))
 - authn: Force auth style in oauth2 client credentials authn [\#267](https://github.com/ory/oathkeeper/pull/267) ([aeneasr](https://github.com/aeneasr))
 - fix \#256: change error code from 403 to 401 [\#259](https://github.com/ory/oathkeeper/pull/259) ([ngrigoriev](https://github.com/ngrigoriev))
 
@@ -281,6 +285,10 @@
 ## [v0.18.0-beta.1](https://github.com/ory/oathkeeper/tree/v0.18.0-beta.1) (2019-08-22)
 [Full Changelog](https://github.com/ory/oathkeeper/compare/v0.17.4-beta.1...v0.18.0-beta.1)
 
+**Fixed bugs:**
+
+- rule: Resolve k8s configmap reload issue [\#231](https://github.com/ory/oathkeeper/pull/231) ([aeneasr](https://github.com/aeneasr))
+
 **Merged pull requests:**
 
 - ID Token Custom Claims [\#246](https://github.com/ory/oathkeeper/pull/246) ([aeneasr](https://github.com/aeneasr))
@@ -290,6 +298,7 @@
 - docs: Updates issue and pull request templates [\#238](https://github.com/ory/oathkeeper/pull/238) ([aeneasr](https://github.com/aeneasr))
 - docs: Updates issue and pull request templates [\#237](https://github.com/ory/oathkeeper/pull/237) ([aeneasr](https://github.com/aeneasr))
 - doc: Add adopters placeholder [\#236](https://github.com/ory/oathkeeper/pull/236) ([aeneasr](https://github.com/aeneasr))
+- support multiple mutators [\#233](https://github.com/ory/oathkeeper/pull/233) ([jakkab](https://github.com/jakkab))
 
 ## [v0.17.4-beta.1](https://github.com/ory/oathkeeper/tree/v0.17.4-beta.1) (2019-08-09)
 [Full Changelog](https://github.com/ory/oathkeeper/compare/v0.17.3-beta.1...v0.17.4-beta.1)
@@ -297,14 +306,9 @@
 **Merged pull requests:**
 
 - Add sprig template library [\#235](https://github.com/ory/oathkeeper/pull/235) ([hypnoglow](https://github.com/hypnoglow))
-- docs: Updates issue and pull request templates [\#232](https://github.com/ory/oathkeeper/pull/232) ([aeneasr](https://github.com/aeneasr))
 
 ## [v0.17.3-beta.1](https://github.com/ory/oathkeeper/tree/v0.17.3-beta.1) (2019-08-03)
 [Full Changelog](https://github.com/ory/oathkeeper/compare/v0.17.2-beta.1...v0.17.3-beta.1)
-
-**Fixed bugs:**
-
-- rule: Resolve k8s configmap reload issue [\#231](https://github.com/ory/oathkeeper/pull/231) ([aeneasr](https://github.com/aeneasr))
 
 ## [v0.17.2-beta.1](https://github.com/ory/oathkeeper/tree/v0.17.2-beta.1) (2019-08-02)
 [Full Changelog](https://github.com/ory/oathkeeper/compare/v0.17.1-beta.1...v0.17.2-beta.1)
@@ -318,7 +322,6 @@
 
 - rules: Support kubernetes configmap reloading [\#230](https://github.com/ory/oathkeeper/pull/230) ([aeneasr](https://github.com/aeneasr))
 - docs: Updates issue and pull request templates [\#226](https://github.com/ory/oathkeeper/pull/226) ([aeneasr](https://github.com/aeneasr))
-- Add cookie session authenticator [\#211](https://github.com/ory/oathkeeper/pull/211) ([alexdavid](https://github.com/alexdavid))
 
 ## [v0.17.1-beta.1](https://github.com/ory/oathkeeper/tree/v0.17.1-beta.1) (2019-07-23)
 [Full Changelog](https://github.com/ory/oathkeeper/compare/v0.17.0-beta.1...v0.17.1-beta.1)
@@ -354,6 +357,7 @@
 **Merged pull requests:**
 
 - Add description into the name of subtest [\#212](https://github.com/ory/oathkeeper/pull/212) ([minchao](https://github.com/minchao))
+- Add cookie session authenticator [\#211](https://github.com/ory/oathkeeper/pull/211) ([alexdavid](https://github.com/alexdavid))
 - ci: Update golangci install script [\#210](https://github.com/ory/oathkeeper/pull/210) ([aeneasr](https://github.com/aeneasr))
 - docker: Use non-root user in image [\#209](https://github.com/ory/oathkeeper/pull/209) ([aeneasr](https://github.com/aeneasr))
 - Remove binary license [\#208](https://github.com/ory/oathkeeper/pull/208) ([aeneasr](https://github.com/aeneasr))
@@ -646,10 +650,6 @@
 ## [v0.0.25](https://github.com/ory/oathkeeper/tree/v0.0.25) (2017-11-28)
 [Full Changelog](https://github.com/ory/oathkeeper/compare/v0.0.24...v0.0.25)
 
-**Closed issues:**
-
-- Investigate if the issuer should be oathkeeper or hydra [\#27](https://github.com/ory/oathkeeper/issues/27)
-
 **Merged pull requests:**
 
 - Add extra data from token introspection to session [\#37](https://github.com/ory/oathkeeper/pull/37) ([aeneasr](https://github.com/aeneasr))
@@ -660,6 +660,7 @@
 **Closed issues:**
 
 - Document HYDRA\_JWK\_SET\_ID [\#34](https://github.com/ory/oathkeeper/issues/34)
+- Investigate if the issuer should be oathkeeper or hydra [\#27](https://github.com/ory/oathkeeper/issues/27)
 
 **Merged pull requests:**
 
@@ -685,7 +686,6 @@
 **Merged pull requests:**
 
 - Renames bypass values for better clarity [\#31](https://github.com/ory/oathkeeper/pull/31) ([aeneasr](https://github.com/aeneasr))
-- Store rules path match in plaintext [\#17](https://github.com/ory/oathkeeper/pull/17) ([aeneasr](https://github.com/aeneasr))
 
 ## [v0.0.21](https://github.com/ory/oathkeeper/tree/v0.0.21) (2017-11-19)
 [Full Changelog](https://github.com/ory/oathkeeper/compare/v0.0.20...v0.0.21)
@@ -751,6 +751,10 @@
 
 ## [v0.0.13](https://github.com/ory/oathkeeper/tree/v0.0.13) (2017-11-07)
 [Full Changelog](https://github.com/ory/oathkeeper/compare/v0.0.12...v0.0.13)
+
+**Merged pull requests:**
+
+- Store rules path match in plaintext [\#17](https://github.com/ory/oathkeeper/pull/17) ([aeneasr](https://github.com/aeneasr))
 
 ## [v0.0.12](https://github.com/ory/oathkeeper/tree/v0.0.12) (2017-11-07)
 [Full Changelog](https://github.com/ory/oathkeeper/compare/v0.0.11...v0.0.12)
