@@ -557,12 +557,16 @@ github.com/ory/ladon v1.0.1/go.mod h1:1VhCA2mBtaMhRUS6VS0d9qrNVDQnFXqSRb5D0NvQUP
 github.com/ory/pagination v0.0.1/go.mod h1:d1ToRROAUleriPhmb2dYbhANhhLwZ8s395m2yJCDFh8=
 github.com/ory/sdk/swagutil v0.0.0-20200123152503-0d50960e70bd h1:QrEYSnaOX6kpyBcQGUlExcI4RwCq2S/Wta/zbgT74Kk=
 github.com/ory/sdk/swagutil v0.0.0-20200123152503-0d50960e70bd/go.mod h1:Ufg1eAyz+Zt3+oweSZVThG13ewewWCKwBmoNmK8Z0co=
+github.com/ory/sdk/swagutil v0.0.0-20200131170418-ead0c2285f93 h1:+QLNv/tFJbwIpJ7fYGx07G0+IxO8FhhyaVGVkX6RAFM=
+github.com/ory/sdk/swagutil v0.0.0-20200131170418-ead0c2285f93/go.mod h1:Ufg1eAyz+Zt3+oweSZVThG13ewewWCKwBmoNmK8Z0co=
 github.com/ory/viper v1.5.6/go.mod h1:TYmpFpKLxjQwvT4f0QPpkOn4sDXU1kDgAwJpgLYiQ28=
 github.com/ory/viper v1.5.7 h1:VeXfcBgTG3SCMlw4hmXkazXPZbyvBTdUjS7Dxm3gOjQ=
 github.com/ory/viper v1.5.7/go.mod h1:+Mfm2gCDqtYRn5gVaLsBtXACO59zITETZQ/jQwc9SZo=
 github.com/ory/x v0.0.88/go.mod h1:wrnJRjIfYXFY/AUiuUlcIUpLBDxFtWc+8x6toAeLZXU=
 github.com/ory/x v0.0.91 h1:4sySRGI1dExt3FpvXcnenpagoM6oQeEvboQ53/tcY9g=
 github.com/ory/x v0.0.91/go.mod h1:lfcTaGXpTZs7IEQAW00r9EtTCOxD//SiP5uWtNiz31g=
+github.com/ory/x v0.0.93 h1:lZG4tjrkJ8cxI85463kD7Cq8h1YxZcPVzCkFcu2WXXI=
+github.com/ory/x v0.0.93/go.mod h1:lfcTaGXpTZs7IEQAW00r9EtTCOxD//SiP5uWtNiz31g=
 github.com/parnurzeal/gorequest v0.2.15/go.mod h1:3Kh2QUMJoqw3icWAecsyzkpY7UzRfDhbRdTjtNwNiUE=
 github.com/pborman/uuid v1.2.0 h1:J7Q5mO4ysT1dv8hyrUGHb9+ooztCXu1D8MY8DZYsu3g=
 github.com/pborman/uuid v1.2.0/go.mod h1:X/NO0urCmaxf9VXbdlT7C2Yzkj2IKimNn4k+gtPdI/k=
