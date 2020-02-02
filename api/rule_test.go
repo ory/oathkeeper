@@ -24,7 +24,6 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"net/http"
 	"net/http/httptest"
 	"net/url"
 	"testing"
@@ -32,11 +31,12 @@ import (
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/x"
 
+	"github.com/ory/x/pointerx"
+
 	"github.com/ory/oathkeeper/internal"
 	"github.com/ory/oathkeeper/internal/httpclient/client"
 	sdkrule "github.com/ory/oathkeeper/internal/httpclient/client/api"
 	"github.com/ory/oathkeeper/rule"
-	"github.com/ory/x/pointerx"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -59,7 +59,7 @@ func TestHandler(t *testing.T) {
 		Schemes:  []string{u.Scheme},
 	})
 
-	rules := []rule.Rule{
+	rulesRegexp := []rule.Rule{
 		{
 			ID: "foo1",
 			Match: &rule.Match{
@@ -93,45 +93,7 @@ func TestHandler(t *testing.T) {
 			},
 		},
 	}
-
-	reg.RuleRepository().(*rule.RepositoryMemory).WithRules(rules)
-
-	t.Run("case=create a new rule", func(t *testing.T) {
-		results, err := cl.API.ListRules(sdkrule.NewListRulesParams().WithLimit(pointerx.Int64(10)))
-		require.NoError(t, err)
-		require.Len(t, results.Payload, 2)
-		assert.True(t, results.Payload[0].ID != results.Payload[1].ID)
-
-		result, err := cl.API.GetRule(sdkrule.NewGetRuleParams().WithID(rules[1].ID))
-		require.NoError(t, err)
-
-		var b bytes.Buffer
-		var ruleResult rule.Rule
-		require.NoError(t, json.NewEncoder(&b).Encode(result.Payload))
-		require.NoError(t, json.NewDecoder(&b).Decode(&ruleResult))
-
-		assert.EqualValues(t, rules[1], ruleResult)
-	})
-}
-
-func TestHandlerGlob(t *testing.T) {
-	conf := internal.NewConfigurationWithDefaults()
-	reg := internal.NewRegistry(conf).WithBrokenPipelineMutator()
-
-	router := x.NewAPIRouter()
-	reg.RuleHandler().SetRoutes(router)
-	server := httptest.NewServer(router)
-
-	u, err := url.ParseRequestURI(server.URL)
-	require.NoError(t, err)
-
-	cl := client.NewHTTPClientWithConfig(nil, &client.TransportConfig{
-		Host:     u.Host,
-		BasePath: u.Path,
-		Schemes:  []string{u.Scheme},
-	})
-
-	rules := []rule.Rule{
+	rulesGlob := []rule.Rule{
 		{
 			ID: "foo1",
 			Match: &rule.Match{
@@ -166,28 +128,31 @@ func TestHandlerGlob(t *testing.T) {
 		},
 	}
 
-	reg.RuleRepository().(*rule.RepositoryMemory).WithRules(rules)
-	require.NoError(t, reg.RuleRepository().SetMatchingStrategy(context.Background(), configuration.Glob))
-
 	t.Run("case=create a new rule", func(t *testing.T) {
-		results, err := cl.API.ListRules(sdkrule.NewListRulesParams().WithLimit(pointerx.Int64(10)))
-		require.NoError(t, err)
-		require.Len(t, results.Payload, 2)
-		assert.True(t, results.Payload[0].ID != results.Payload[1].ID)
+		testFunc := func(strategy configuration.MatchingStrategy, rules []rule.Rule) {
+			reg.RuleRepository().(*rule.RepositoryMemory).WithRules(rules)
+			require.NoError(t, reg.RuleRepository().SetMatchingStrategy(context.Background(), strategy))
+			results, err := cl.API.ListRules(sdkrule.NewListRulesParams().WithLimit(pointerx.Int64(10)))
+			require.NoError(t, err)
+			require.Len(t, results.Payload, 2)
+			assert.True(t, results.Payload[0].ID != results.Payload[1].ID)
 
-		result, err := cl.API.GetRule(sdkrule.NewGetRuleParams().WithID(rules[1].ID))
-		require.NoError(t, err)
+			result, err := cl.API.GetRule(sdkrule.NewGetRuleParams().WithID(rules[1].ID))
+			require.NoError(t, err)
 
-		var b bytes.Buffer
-		var ruleResult rule.Rule
-		require.NoError(t, json.NewEncoder(&b).Encode(result.Payload))
-		require.NoError(t, json.NewDecoder(&b).Decode(&ruleResult))
-		assert.EqualValues(t, rules[1], ruleResult)
+			var b bytes.Buffer
+			var ruleResult rule.Rule
+			require.NoError(t, json.NewEncoder(&b).Encode(result.Payload))
+			require.NoError(t, json.NewDecoder(&b).Decode(&ruleResult))
 
-		u, err := url.Parse("https://localhost:34/baz")
-		require.NoError(t, err)
-		matchedRule, err := reg.RuleRepository().(*rule.RepositoryMemory).Match(context.Background(), http.MethodGet, u)
-		require.NoError(t, err)
-		assert.Equal(t, ruleResult.ID, matchedRule.ID)
+			assert.EqualValues(t, rules[1], ruleResult)
+		}
+		t.Run("regexp", func(t *testing.T) {
+			testFunc(configuration.Regexp, rulesRegexp)
+		})
+		t.Run("glob", func(t *testing.T) {
+			testFunc(configuration.Glob, rulesGlob)
+		})
+
 	})
 }
