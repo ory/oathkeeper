@@ -180,35 +180,9 @@ Billy, Chancy Kennedy, Drozzy, Edwin Trejos, Howard Edidin, Ken Adler Oz Haven, 
 
 ## Ecosystem
 
-<a href="https://console.ory.sh/">
-    <img align="right" width="30%" src="docs/images/sec-console.png" alt="ORY Security Console">
-</a>
+<!--BEGIN ECOSYSTEM-->
 
-### ORY Security Console: Administrative User Interface
-
-The [ORY Security Console](https://console.ory.sh/) is a visual admin interface
-for managing ORY Hydra, ORY Oathkeeper, and ORY Keto.
-
-### ORY Hydra: OAuth2 & OpenID Connect Server
-
-[ORY Hydra](https://github.com/ory/hydra) ORY Hydra is a hardened OAuth2 and
-OpenID Connect server optimized for low-latency, high throughput, and low
-resource consumption. ORY Hydra is not an identity provider (user sign up, user
-log in, password reset flow), but connects to your existing identity provider
-through a consent app.
-
-### ORY Keto: Access Control Policies as a Server
-
-[ORY Keto](https://github.com/ory/keto) is a policy decision point. It uses a
-set of access control policies, similar to AWS IAM Policies, in order to
-determine whether a subject (user, application, service, car, ...) is authorized
-to perform a certain action on a resource.
-
-### Examples
-
-The [ory/examples](https://github.com/ory/examples) repository contains numerous
-examples of setting up this project individually and together with other
-services from the ORY Ecosystem.
+<!--END ECOSYSTEM-->
 
 ## Security
 
