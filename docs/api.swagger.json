@@ -516,7 +516,7 @@
       }
     }
   },
-  "definitions": {
+  "definitions": {"UUID":{"type": "string", "format": "uuid4"},
     "Upstream": {
       "type": "object",
       "properties": {

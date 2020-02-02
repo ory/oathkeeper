@@ -9,12 +9,11 @@ import (
 	"fmt"
 
 	"github.com/go-openapi/runtime"
-
-	strfmt "github.com/go-openapi/strfmt"
+	"github.com/go-openapi/strfmt"
 )
 
 // New creates a new api API client.
-func New(transport runtime.ClientTransport, formats strfmt.Registry) *Client {
+func New(transport runtime.ClientTransport, formats strfmt.Registry) ClientService {
 	return &Client{transport: transport, formats: formats}
 }
 
@@ -26,10 +25,23 @@ type Client struct {
 	formats   strfmt.Registry
 }
 
-/*
-Decisions accesses control decision API
+// ClientService is the interface for Client methods
+type ClientService interface {
+	Decisions(params *DecisionsParams) (*DecisionsOK, error)
 
-> This endpoint works with all HTTP Methods (GET, POST, PUT, ...) and matches every path prefixed with /decision.
+	GetRule(params *GetRuleParams) (*GetRuleOK, error)
+
+	GetWellKnownJSONWebKeys(params *GetWellKnownJSONWebKeysParams) (*GetWellKnownJSONWebKeysOK, error)
+
+	ListRules(params *ListRulesParams) (*ListRulesOK, error)
+
+	SetTransport(transport runtime.ClientTransport)
+}
+
+/*
+  Decisions accesses control decision API
+
+  > This endpoint works with all HTTP Methods (GET, POST, PUT, ...) and matches every path prefixed with /decision.
 
 This endpoint mirrors the proxy capability of ORY Oathkeeper's proxy functionality but instead of forwarding the
 request to the upstream server, returns 200 (request should be allowed), 401 (unauthorized), or 403 (forbidden)
@@ -67,9 +79,9 @@ func (a *Client) Decisions(params *DecisionsParams) (*DecisionsOK, error) {
 }
 
 /*
-GetRule retrieves a rule
+  GetRule retrieves a rule
 
-Use this method to retrieve a rule from the storage. If it does not exist you will receive a 404 error.
+  Use this method to retrieve a rule from the storage. If it does not exist you will receive a 404 error.
 */
 func (a *Client) GetRule(params *GetRuleParams) (*GetRuleOK, error) {
 	// TODO: Validate the params before sending
@@ -103,9 +115,9 @@ func (a *Client) GetRule(params *GetRuleParams) (*GetRuleOK, error) {
 }
 
 /*
-GetWellKnownJSONWebKeys lists cryptographic keys
+  GetWellKnownJSONWebKeys lists cryptographic keys
 
-This endpoint returns cryptographic keys that are required to, for example, verify signatures of ID Tokens.
+  This endpoint returns cryptographic keys that are required to, for example, verify signatures of ID Tokens.
 */
 func (a *Client) GetWellKnownJSONWebKeys(params *GetWellKnownJSONWebKeysParams) (*GetWellKnownJSONWebKeysOK, error) {
 	// TODO: Validate the params before sending
@@ -139,9 +151,9 @@ func (a *Client) GetWellKnownJSONWebKeys(params *GetWellKnownJSONWebKeysParams) 
 }
 
 /*
-ListRules lists all rules
+  ListRules lists all rules
 
-This method returns an array of all rules that are stored in the backend. This is useful if you want to get a full
+  This method returns an array of all rules that are stored in the backend. This is useful if you want to get a full
 view of what rules you have currently in place.
 */
 func (a *Client) ListRules(params *ListRulesParams) (*ListRulesOK, error) {
