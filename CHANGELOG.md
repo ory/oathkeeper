@@ -158,6 +158,7 @@
 - authn/cookie\_session: Add extra\_from modifier [\#335](https://github.com/ory/oathkeeper/pull/335) ([aeneasr](https://github.com/aeneasr))
 - Move to new SDK pipeline [\#333](https://github.com/ory/oathkeeper/pull/333) ([aeneasr](https://github.com/aeneasr))
 - pipeline/authn: add unit test for token\_from-\>cookie for both jwt and oauth2\_introspection authenticators \(\#330\) [\#331](https://github.com/ory/oathkeeper/pull/331) ([ngrigoriev](https://github.com/ngrigoriev))
+- Properly merge env vars into pipeline configs [\#320](https://github.com/ory/oathkeeper/pull/320) ([aeneasr](https://github.com/aeneasr))
 
 ## [v0.34.0-beta.1](https://github.com/ory/oathkeeper/tree/v0.34.0-beta.1) (2019-12-26)
 
@@ -198,7 +199,6 @@
 
 **Merged pull requests:**
 
-- Properly merge env vars into pipeline configs [\#320](https://github.com/ory/oathkeeper/pull/320) ([aeneasr](https://github.com/aeneasr))
 - cmd: Add health check commands [\#319](https://github.com/ory/oathkeeper/pull/319) ([tleef](https://github.com/tleef))
 - Switch to alpine Docker base-image [\#318](https://github.com/ory/oathkeeper/pull/318) ([aeneasr](https://github.com/aeneasr))
 - Add more details to decision logging [\#316](https://github.com/ory/oathkeeper/pull/316) ([aeneasr](https://github.com/aeneasr))
@@ -530,6 +530,7 @@
 - docs: Updates issue and pull request templates [\#126](https://github.com/ory/oathkeeper/pull/126) ([aeneasr](https://github.com/aeneasr))
 - cmd: TLS environment variables [\#124](https://github.com/ory/oathkeeper/pull/124) ([fredbi](https://github.com/fredbi))
 - docs: Fix typo in README. [\#118](https://github.com/ory/oathkeeper/pull/118) ([ddunkin](https://github.com/ddunkin))
+- cmd: Enables TLS option on serve api [\#116](https://github.com/ory/oathkeeper/pull/116) ([fredbi](https://github.com/fredbi))
 
 ## [v0.13.9+oryOS.9](https://github.com/ory/oathkeeper/tree/v0.13.9+oryOS.9) (2018-11-14)
 
@@ -547,7 +548,6 @@
 **Merged pull requests:**
 
 - cmd: Properly document JWT refresh [\#117](https://github.com/ory/oathkeeper/pull/117) ([aeneasr](https://github.com/aeneasr))
-- cmd: Enables TLS option on serve api [\#116](https://github.com/ory/oathkeeper/pull/116) ([fredbi](https://github.com/fredbi))
 - Prepare beta.9 release [\#115](https://github.com/ory/oathkeeper/pull/115) ([aeneasr](https://github.com/aeneasr))
 - Aligned TLS options with hydra: allow cert&key to be specified with file [\#114](https://github.com/ory/oathkeeper/pull/114) ([fredbi](https://github.com/fredbi))
 - Improve integration tests [\#113](https://github.com/ory/oathkeeper/pull/113) ([aeneasr](https://github.com/aeneasr))
@@ -568,6 +568,7 @@
 **Merged pull requests:**
 
 - Resolve various issues [\#99](https://github.com/ory/oathkeeper/pull/99) ([aeneasr](https://github.com/aeneasr))
+- Node sdk [\#94](https://github.com/ory/oathkeeper/pull/94) ([aeneasr](https://github.com/aeneasr))
 - judge: Add endpoint for answering access requests directly [\#91](https://github.com/ory/oathkeeper/pull/91) ([aeneasr](https://github.com/aeneasr))
 - health: Introduce health and version endpoint [\#90](https://github.com/ory/oathkeeper/pull/90) ([aeneasr](https://github.com/aeneasr))
 
@@ -599,7 +600,6 @@
 
 **Merged pull requests:**
 
-- Node sdk [\#94](https://github.com/ory/oathkeeper/pull/94) ([aeneasr](https://github.com/aeneasr))
 - rsakey: Resolve HS256 kid mismatch [\#85](https://github.com/ory/oathkeeper/pull/85) ([aeneasr](https://github.com/aeneasr))
 - cmd: Allows connectivity to MySQL  [\#84](https://github.com/ory/oathkeeper/pull/84) ([aeneasr](https://github.com/aeneasr))
 - cmd: Resolves recursive stack overflow [\#81](https://github.com/ory/oathkeeper/pull/81) ([aeneasr](https://github.com/aeneasr))
@@ -787,7 +787,6 @@
 **Merged pull requests:**
 
 - docs: Improve swagger documentation [\#28](https://github.com/ory/oathkeeper/pull/28) ([aeneasr](https://github.com/aeneasr))
-- cmd: Add rules management capabilities to the cli [\#26](https://github.com/ory/oathkeeper/pull/26) ([aeneasr](https://github.com/aeneasr))
 - unstaged [\#25](https://github.com/ory/oathkeeper/pull/25) ([aeneasr](https://github.com/aeneasr))
 
 ## [v0.0.19](https://github.com/ory/oathkeeper/tree/v0.0.19) (2017-11-13)
@@ -824,6 +823,7 @@
 
 **Merged pull requests:**
 
+- cmd: Add rules management capabilities to the cli [\#26](https://github.com/ory/oathkeeper/pull/26) ([aeneasr](https://github.com/aeneasr))
 - Replace MatchesPath with MatchesURL [\#20](https://github.com/ory/oathkeeper/pull/20) ([aeneasr](https://github.com/aeneasr))
 
 ## [v0.0.15](https://github.com/ory/oathkeeper/tree/v0.0.15) (2017-11-09)
