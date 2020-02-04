@@ -2,18 +2,19 @@ package rule
 
 import (
 	"bytes"
-	"hash/crc32"
+	"hash/crc64"
 
 	"github.com/gobwas/glob"
 )
 
 type globMatchingEngine struct {
 	compiled glob.Glob
-	checksum uint32
+	checksum uint64
+	table    *crc64.Table
 }
 
 // Checksum of a saved pattern.
-func (ge *globMatchingEngine) Checksum() uint32 {
+func (ge *globMatchingEngine) Checksum() uint64 {
 	return ge.checksum
 }
 
@@ -31,7 +32,10 @@ func (ge *globMatchingEngine) ReplaceAllString(_, _, _ string) (string, error) {
 }
 
 func (ge *globMatchingEngine) compile(pattern string) error {
-	if checksum := crc32.ChecksumIEEE([]byte(pattern)); checksum != ge.checksum {
+	if ge.table == nil {
+		ge.table = crc64.MakeTable(polynomial)
+	}
+	if checksum := crc64.Checksum([]byte(pattern), ge.table); checksum != ge.checksum {
 		compiled, err := compileGlob(pattern, '<', '>')
 		if err != nil {
 			return err

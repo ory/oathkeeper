@@ -1,8 +1,13 @@
 package rule
 
 import (
+	"hash/crc64"
+
 	"github.com/pkg/errors"
 )
+
+// polynomial for crc64 table which is used for checking crc64 checksum
+const polynomial = crc64.ECMA
 
 // common errors for MatchingEngine.
 var (
@@ -15,5 +20,5 @@ var (
 type MatchingEngine interface {
 	IsMatching(pattern, matchAgainst string) (bool, error)
 	ReplaceAllString(pattern, input, replacement string) (string, error)
-	Checksum() uint32
+	Checksum() uint64
 }

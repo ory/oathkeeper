@@ -4,10 +4,8 @@
     <a href="https://discord.gg/PAMQWkr">Chat</a> |
     <a href="https://community.ory.sh/">Forums</a> |
     <a href="http://eepurl.com/di390P">Newsletter</a><br/><br/>
-    <a href="https://www.ory.sh/docs/guides/master/oathkeeper/">Guide</a> |
     <a href="https://www.ory.sh/docs/oathkeeper/sdk/api">API Docs</a> |
     <a href="https://www.ory.sh/docs/oathkeeper/">Guide</a> |
-    <a href="https://www.ory.sh/docs/oathkeeper/sdk/api">API Docs</a> |
     <a href="https://godoc.org/github.com/ory/oathkeeper">Code Docs</a><br/><br/>
     <a href="https://opencollective.com/ory">Support this project!</a>
 </h4>
@@ -257,6 +255,7 @@ The Guide is available
 [here](https://www.ory.sh/docs/oathkeeper/).
 
 ### HTTP API documentation
+
 The HTTP API is documented
 [here](https://www.ory.sh/docs/oathkeeper/sdk/api).
 

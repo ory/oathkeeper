@@ -1,7 +1,7 @@
 package rule
 
 import (
-	"hash/crc32"
+	"hash/crc64"
 
 	"github.com/dlclark/regexp2"
 	"github.com/ory/ladon/compiler"
@@ -9,11 +9,15 @@ import (
 
 type regexpMatchingEngine struct {
 	compiled *regexp2.Regexp
-	checksum uint32
+	checksum uint64
+	table    *crc64.Table
 }
 
 func (re *regexpMatchingEngine) compile(pattern string) error {
-	if checksum := crc32.ChecksumIEEE([]byte(pattern)); checksum != re.checksum {
+	if re.table == nil {
+		re.table = crc64.MakeTable(polynomial)
+	}
+	if checksum := crc64.Checksum([]byte(pattern), re.table); checksum != re.checksum {
 		compiled, err := compiler.CompileRegex(pattern, '<', '>')
 		if err != nil {
 			return err
@@ -25,7 +29,7 @@ func (re *regexpMatchingEngine) compile(pattern string) error {
 }
 
 // Checksum of a saved pattern.
-func (re *regexpMatchingEngine) Checksum() uint32 {
+func (re *regexpMatchingEngine) Checksum() uint64 {
 	return re.checksum
 }
 

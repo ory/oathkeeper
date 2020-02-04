@@ -68,59 +68,6 @@ var testRules = []Rule{
 	},
 }
 
-func TestMatcher(t *testing.T) {
-	type m interface {
-		Matcher
-		Repository
-	}
-
-	var testMatcher = func(t *testing.T, matcher Matcher, method string, url string, expectErr bool, expect *Rule) {
-		r, err := matcher.Match(context.Background(), method, mustParseURL(t, url))
-		if expectErr {
-			require.Error(t, err)
-		} else {
-			require.NoError(t, err)
-			assert.EqualValues(t, *expect, *r)
-		}
-	}
-
-	for name, matcher := range map[string]m{
-		"memory": NewRepositoryMemory(new(mockRepositoryRegistry)),
-	} {
-		t.Run(fmt.Sprintf("matcher=%s", name), func(t *testing.T) {
-			t.Run("case=empty", func(t *testing.T) {
-				testMatcher(t, matcher, "GET", "https://localhost:34/baz", true, nil)
-				testMatcher(t, matcher, "POST", "https://localhost:1234/foo", true, nil)
-				testMatcher(t, matcher, "DELETE", "https://localhost:1234/foo", true, nil)
-			})
-
-			require.NoError(t, matcher.Set(context.Background(), testRules))
-
-			t.Run("case=created", func(t *testing.T) {
-				testMatcher(t, matcher, "GET", "https://localhost:34/baz", false, &testRules[1])
-				testMatcher(t, matcher, "POST", "https://localhost:1234/foo", false, &testRules[0])
-				testMatcher(t, matcher, "DELETE", "https://localhost:1234/foo", true, nil)
-			})
-
-			t.Run("case=cache", func(t *testing.T) {
-				r, err := matcher.Match(context.Background(), "GET", mustParseURL(t, "https://localhost:34/baz"))
-				require.NoError(t, err)
-				got, err := matcher.Get(context.Background(), r.ID)
-				require.NoError(t, err)
-				assert.NotEmpty(t, got.matchingEngine.Checksum())
-			})
-
-			require.NoError(t, matcher.Set(context.Background(), testRules[1:]))
-
-			t.Run("case=updated", func(t *testing.T) {
-				testMatcher(t, matcher, "GET", "https://localhost:34/baz", false, &testRules[1])
-				testMatcher(t, matcher, "POST", "https://localhost:1234/foo", true, nil)
-				testMatcher(t, matcher, "DELETE", "https://localhost:1234/foo", true, nil)
-			})
-		})
-	}
-}
-
 var testRulesGlob = []Rule{
 	{
 		ID:             "foo1",
@@ -151,7 +98,7 @@ var testRulesGlob = []Rule{
 	},
 }
 
-func TestMatcherGlob(t *testing.T) {
+func TestMatcher(t *testing.T) {
 	type m interface {
 		Matcher
 		Repository
@@ -170,8 +117,40 @@ func TestMatcherGlob(t *testing.T) {
 	for name, matcher := range map[string]m{
 		"memory": NewRepositoryMemory(new(mockRepositoryRegistry)),
 	} {
-		t.Run(fmt.Sprintf("matcher=%s", name), func(t *testing.T) {
+		t.Run(fmt.Sprintf("regexp matcher=%s", name), func(t *testing.T) {
+			t.Run("case=empty", func(t *testing.T) {
+				testMatcher(t, matcher, "GET", "https://localhost:34/baz", true, nil)
+				testMatcher(t, matcher, "POST", "https://localhost:1234/foo", true, nil)
+				testMatcher(t, matcher, "DELETE", "https://localhost:1234/foo", true, nil)
+			})
+
+			require.NoError(t, matcher.Set(context.Background(), testRules))
+
+			t.Run("case=created", func(t *testing.T) {
+				testMatcher(t, matcher, "GET", "https://localhost:34/baz", false, &testRules[1])
+				testMatcher(t, matcher, "POST", "https://localhost:1234/foo", false, &testRules[0])
+				testMatcher(t, matcher, "DELETE", "https://localhost:1234/foo", true, nil)
+			})
+
+			t.Run("case=cache", func(t *testing.T) {
+				r, err := matcher.Match(context.Background(), "GET", mustParseURL(t, "https://localhost:34/baz"))
+				require.NoError(t, err)
+				got, err := matcher.Get(context.Background(), r.ID)
+				require.NoError(t, err)
+				assert.NotEmpty(t, got.matchingEngine.Checksum())
+			})
+
+			require.NoError(t, matcher.Set(context.Background(), testRules[1:]))
+
+			t.Run("case=updated", func(t *testing.T) {
+				testMatcher(t, matcher, "GET", "https://localhost:34/baz", false, &testRules[1])
+				testMatcher(t, matcher, "POST", "https://localhost:1234/foo", true, nil)
+				testMatcher(t, matcher, "DELETE", "https://localhost:1234/foo", true, nil)
+			})
+		})
+		t.Run(fmt.Sprintf("glob matcher=%s", name), func(t *testing.T) {
 			require.NoError(t, matcher.SetMatchingStrategy(context.Background(), configuration.Glob))
+			require.NoError(t, matcher.Set(context.Background(), []Rule{}))
 			t.Run("case=empty", func(t *testing.T) {
 				testMatcher(t, matcher, "GET", "https://localhost:34/baz", true, nil)
 				testMatcher(t, matcher, "POST", "https://localhost:1234/foo", true, nil)
