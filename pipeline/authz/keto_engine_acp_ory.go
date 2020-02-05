@@ -94,9 +94,9 @@ func (a *AuthorizerKetoEngineACPORY) Authorize(r *http.Request, session *authn.A
 		return err
 	}
 
-	compiled, err := rule.CompileURL()
-	if err != nil {
-		return errors.WithStack(err)
+	// only Regexp matching strategy is supported for now.
+	if !(a.c.AccessRuleMatchingStrategy() == "" || a.c.AccessRuleMatchingStrategy() == configuration.Regexp) {
+		return helper.ErrNonRegexpMatchingStrategy
 	}
 
 	subject := session.Subject
@@ -115,9 +115,19 @@ func (a *AuthorizerKetoEngineACPORY) Authorize(r *http.Request, session *authn.A
 
 	var b bytes.Buffer
 	u := fmt.Sprintf("%s://%s%s", r.URL.Scheme, r.URL.Host, r.URL.Path)
+
+	action, err := rule.ReplaceAllString(a.c.AccessRuleMatchingStrategy(), u, cf.RequiredAction)
+	if err != nil {
+		return errors.WithStack(err)
+	}
+	resource, err := rule.ReplaceAllString(a.c.AccessRuleMatchingStrategy(), u, cf.RequiredResource)
+	if err != nil {
+		return errors.WithStack(err)
+	}
+
 	if err := json.NewEncoder(&b).Encode(&AuthorizerKetoEngineACPORYRequestBody{
-		Action:   compiled.ReplaceAllString(u, cf.RequiredAction),
-		Resource: compiled.ReplaceAllString(u, cf.RequiredResource),
+		Action:   action,
+		Resource: resource,
 		Context:  a.contextCreator(r),
 		Subject:  subject,
 	}); err != nil {
@@ -130,10 +140,10 @@ func (a *AuthorizerKetoEngineACPORY) Authorize(r *http.Request, session *authn.A
 	}
 
 	req, err := http.NewRequest("POST", urlx.AppendPaths(baseURL, "/engines/acp/ory", flavor, "/allowed").String(), &b)
-	req.Header.Add("Content-Type", "application/json")
 	if err != nil {
 		return errors.WithStack(err)
 	}
+	req.Header.Add("Content-Type", "application/json")
 
 	res, err := a.client.Do(req)
 	if err != nil {

@@ -23,14 +23,12 @@ package rule
 import (
 	"encoding/json"
 	"fmt"
-	"hash/crc32"
 	"net/url"
-	"regexp"
 	"strings"
 
 	"github.com/pkg/errors"
 
-	"github.com/ory/ladon/compiler"
+	"github.com/ory/oathkeeper/driver/configuration"
 )
 
 type Match struct {
@@ -46,12 +44,12 @@ type Match struct {
 	// request with this field. If a match is found, the rule is considered a partial match.
 	// If the matchesMethods field is satisfied as well, the rule is considered a full match.
 	//
-	// You can use regular expressions in this field to match more than one url. Regular expressions are encapsulated in
-	// brackets < and >. The following example matches all paths of the domain `mydomain.com`: `https://mydomain.com/<.*>`.
+	// You can use regular expressions or glob patterns in this field to match more than one url.
+	// The matching strategy is determined by configuration parameter MatchingStrategy.
+	// Regular expressions and glob patterns are encapsulated in brackets < and >.
+	// The following regexp example matches all paths of the domain `mydomain.com`: `https://mydomain.com/<.*>`.
+	// The glob equivalent of the above regexp example is `https://mydomain.com/<*>`.
 	URL string `json:"url"`
-
-	compiledURL         *regexp.Regexp
-	compiledURLChecksum uint32
 }
 
 type Handler struct {
@@ -122,6 +120,8 @@ type Rule struct {
 
 	// Upstream is the location of the server where requests matching this rule should be forwarded to.
 	Upstream Upstream `json:"upstream"`
+
+	matchingEngine MatchingEngine
 }
 
 type Upstream struct {
@@ -138,14 +138,6 @@ type Upstream struct {
 
 var _ json.Unmarshaler = new(Rule)
 
-func NewRule() *Rule {
-	return &Rule{
-		Match:          &Match{},
-		Authenticators: []Handler{},
-		Mutators:       []Handler{},
-	}
-}
-
 func (r *Rule) UnmarshalJSON(raw []byte) error {
 	var rr struct {
 		ID             string         `json:"id"`
@@ -157,6 +149,7 @@ func (r *Rule) UnmarshalJSON(raw []byte) error {
 		Mutators       []Handler      `json:"mutators"`
 		Errors         []ErrorHandler `json:"errors"`
 		Upstream       Upstream       `json:"upstream"`
+		matchingEngine MatchingEngine
 	}
 
 	transformed, err := migrateRuleJSON(raw)
@@ -177,37 +170,27 @@ func (r *Rule) GetID() string {
 	return r.ID
 }
 
-// IsMatching returns an error if the provided method and URL do not match the rule.
-func (r *Rule) IsMatching(method string, u *url.URL) error {
+// IsMatching checks whether the provided url and method match the rule.
+// An error will be returned if a regexp matching strategy is selected and regexp timeout occurs.
+func (r *Rule) IsMatching(strategy configuration.MatchingStrategy, method string, u *url.URL) (bool, error) {
 	if !stringInSlice(method, r.Match.Methods) {
-		return errors.Errorf("rule %s does not match URL %s", r.ID, u)
+		return false, nil
 	}
-
-	c, err := r.CompileURL()
-	if err != nil {
-		return errors.WithStack(err)
+	if err := ensureMatchingEngine(r, strategy); err != nil {
+		return false, err
 	}
-
-	if !c.MatchString(fmt.Sprintf("%s://%s%s", u.Scheme, u.Host, u.Path)) {
-		return errors.Errorf("rule %s does not match URL %s", r.ID, u)
-	}
-
-	return nil
+	matchAgainst := fmt.Sprintf("%s://%s%s", u.Scheme, u.Host, u.Path)
+	return r.matchingEngine.IsMatching(r.Match.URL, matchAgainst)
 }
 
-func (r *Rule) CompileURL() (*regexp.Regexp, error) {
-	m := r.Match
-	c := crc32.ChecksumIEEE([]byte(m.URL))
-	if m.compiledURL == nil || c != m.compiledURLChecksum {
-		regex, err := compiler.CompileRegex(m.URL, '<', '>')
-		if err != nil {
-			return nil, errors.Wrap(err, "Unable to compile URL matcher")
-		}
-		m.compiledURL = regex
-		m.compiledURLChecksum = c
+// ReplaceAllString searches the input string and replaces each match (with the rule's pattern)
+// found with the replacement text.
+func (r *Rule) ReplaceAllString(strategy configuration.MatchingStrategy, input, replacement string) (string, error) {
+	if err := ensureMatchingEngine(r, strategy); err != nil {
+		return "", err
 	}
 
-	return m.compiledURL, nil
+	return r.matchingEngine.ReplaceAllString(r.Match.URL, input, replacement)
 }
 
 func stringInSlice(a string, list []string) bool {
@@ -217,4 +200,20 @@ func stringInSlice(a string, list []string) bool {
 		}
 	}
 	return false
+}
+
+func ensureMatchingEngine(rule *Rule, strategy configuration.MatchingStrategy) error {
+	if rule.matchingEngine != nil {
+		return nil
+	}
+	switch strategy {
+	case configuration.Glob:
+		rule.matchingEngine = new(globMatchingEngine)
+		return nil
+	case "", configuration.Regexp:
+		rule.matchingEngine = new(regexpMatchingEngine)
+		return nil
+	}
+
+	return errors.Wrap(ErrUnknownMatchingStrategy, string(strategy))
 }

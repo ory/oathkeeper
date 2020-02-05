@@ -982,6 +982,16 @@
           "examples": [
             "[\"file://path/to/rules.json\",\"inline://W3siaWQiOiJmb28tcnVsZSIsImF1dGhlbnRpY2F0b3JzIjpbXX1d\",\"https://path-to-my-rules/rules.json\"]"
           ]
+        },
+        "matching_strategy": {
+          "title": "Matching strategy",
+          "description": "This an optional field describing matching strategy. Currently supported values are 'glob' and 'regexp'.",
+          "type": "string",
+          "default": "regexp",
+          "enum":  ["glob", "regexp"],
+          "examples": [
+            "glob", "regexp"
+          ]
         }
       }
     },

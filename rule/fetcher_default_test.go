@@ -28,6 +28,107 @@ import (
 
 const testRule = `[{"id":"test-rule-5","upstream":{"preserve_host":true,"strip_path":"/api","url":"mybackend.com/api"},"match":{"url":"myproxy.com/api","methods":["GET","POST"]},"authenticators":[{"handler":"noop"},{"handler":"anonymous"}],"authorizer":{"handler":"allow"},"mutators":[{"handler":"noop"}]}]`
 
+func TestFetcherReload(t *testing.T) {
+	viper.Reset()
+	conf := internal.NewConfigurationWithDefaults() // this resets viper and must be at the top
+	r := internal.NewRegistry(conf)
+	testConfigPath := "../test/update"
+
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		_, _ = w.Write([]byte(testRule))
+	}))
+	defer ts.Close()
+
+	tempdir := os.TempDir()
+
+	id := uuid.New().String()
+	configFile := filepath.Join(tempdir, ".oathkeeper-"+id+".yml")
+	require.NoError(t, ioutil.WriteFile(configFile, []byte(""), 0666))
+
+	l := logrus.New()
+	l.Level = logrus.TraceLevel
+	viperx.InitializeConfig("oathkeeper-"+id, tempdir, nil)
+	viperx.WatchConfig(l, nil)
+
+	go func() {
+		require.NoError(t, r.RuleFetcher().Watch(context.TODO()))
+	}()
+
+	// initial config without a repo and without a matching strategy
+	config, err := ioutil.ReadFile(path.Join(testConfigPath, "config_no_repo.yaml"))
+	require.NoError(t, err)
+	require.NoError(t, ioutil.WriteFile(configFile, config, 0666))
+	time.Sleep(time.Millisecond * 500)
+
+	rules, err := r.RuleRepository().List(context.Background(), 500, 0)
+	require.NoError(t, err)
+	require.Empty(t, rules)
+
+	strategy, err := r.RuleRepository().MatchingStrategy(context.Background())
+	require.NoError(t, err)
+	require.Equal(t, configuration.MatchingStrategy(""), strategy)
+
+	// config with a repo and without a matching strategy
+	config, err = ioutil.ReadFile(path.Join(testConfigPath, "config_default.yaml"))
+	require.NoError(t, err)
+	require.NoError(t, ioutil.WriteFile(configFile, config, 0666))
+	time.Sleep(time.Millisecond * 500)
+
+	rules, err = r.RuleRepository().List(context.Background(), 500, 0)
+	require.NoError(t, err)
+	require.Equal(t, 1, len(rules))
+	require.Equal(t, "test-rule-1-glob", rules[0].ID)
+
+	strategy, err = r.RuleRepository().MatchingStrategy(context.Background())
+	require.NoError(t, err)
+	require.Equal(t, configuration.MatchingStrategy(""), strategy)
+
+	// config with a glob matching strategy
+	config, err = ioutil.ReadFile(path.Join(testConfigPath, "config_glob.yaml"))
+	require.NoError(t, err)
+	require.NoError(t, ioutil.WriteFile(configFile, config, 0666))
+	time.Sleep(time.Millisecond * 500)
+
+	rules, err = r.RuleRepository().List(context.Background(), 500, 0)
+	require.NoError(t, err)
+	require.Equal(t, 1, len(rules))
+	require.Equal(t, "test-rule-1-glob", rules[0].ID)
+
+	strategy, err = r.RuleRepository().MatchingStrategy(context.Background())
+	require.NoError(t, err)
+	require.Equal(t, configuration.Glob, strategy)
+
+	// config with unknown matching strategy
+	config, err = ioutil.ReadFile(path.Join(testConfigPath, "config_error.yaml"))
+	require.NoError(t, err)
+	require.NoError(t, ioutil.WriteFile(configFile, config, 0666))
+	time.Sleep(time.Millisecond * 500)
+
+	rules, err = r.RuleRepository().List(context.Background(), 500, 0)
+	require.NoError(t, err)
+	require.Equal(t, 1, len(rules))
+	require.Equal(t, "test-rule-1-glob", rules[0].ID)
+
+	strategy, err = r.RuleRepository().MatchingStrategy(context.Background())
+	require.NoError(t, err)
+	require.Equal(t, configuration.MatchingStrategy("UNKNOWN"), strategy)
+
+	// config with regexp matching strategy
+	config, err = ioutil.ReadFile(path.Join(testConfigPath, "config_regexp.yaml"))
+	require.NoError(t, err)
+	require.NoError(t, ioutil.WriteFile(configFile, config, 0666))
+	time.Sleep(time.Millisecond * 500)
+
+	rules, err = r.RuleRepository().List(context.Background(), 500, 0)
+	require.NoError(t, err)
+	require.Equal(t, 1, len(rules))
+	require.Equal(t, "test-rule-1-glob", rules[0].ID)
+
+	strategy, err = r.RuleRepository().MatchingStrategy(context.Background())
+	require.NoError(t, err)
+	require.Equal(t, configuration.Regexp, strategy)
+}
+
 func TestFetcherWatchConfig(t *testing.T) {
 	viper.Reset()
 	conf := internal.NewConfigurationWithDefaults() // this resets viper and must be at the top
@@ -54,10 +155,11 @@ func TestFetcherWatchConfig(t *testing.T) {
 	}()
 
 	for k, tc := range []struct {
-		config     string
-		tmpContent string
-		expectIDs  []string
-		expectNone bool
+		config           string
+		tmpContent       string
+		expectIDs        []string
+		expectNone       bool
+		expectedStrategy configuration.MatchingStrategy
 	}{
 		{config: ""},
 		{
@@ -86,14 +188,18 @@ access_rules:
 access_rules:
   repositories:
     - file://../test/stub/rules.yaml
+  matching_strategy: glob
 `,
-			expectIDs: []string{"test-rule-1-yaml"},
+			expectIDs:        []string{"test-rule-1-yaml"},
+			expectedStrategy: configuration.Glob,
 		},
 		{
 			config: `
 access_rules:
   repositories:
+  matching_strategy: regexp
 `,
+			expectedStrategy: configuration.Regexp,
 		},
 	} {
 		t.Run(fmt.Sprintf("case=%d", k), func(t *testing.T) {
@@ -103,6 +209,10 @@ access_rules:
 			rules, err := r.RuleRepository().List(context.Background(), 500, 0)
 			require.NoError(t, err)
 			require.Len(t, rules, len(tc.expectIDs))
+
+			strategy, err := r.RuleRepository().MatchingStrategy(context.Background())
+			require.NoError(t, err)
+			require.Equal(t, tc.expectedStrategy, strategy)
 
 			ids := make([]string, len(rules))
 			for k, r := range rules {

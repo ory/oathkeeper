@@ -8,6 +8,7 @@ require (
 	github.com/blang/semver v3.5.1+incompatible
 	github.com/bxcodec/faker v2.0.1+incompatible
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
+	github.com/dlclark/regexp2 v1.2.0
 	github.com/fsnotify/fsnotify v1.4.7
 	github.com/ghodss/yaml v1.0.0
 	github.com/go-openapi/errors v0.19.2
@@ -19,6 +20,7 @@ require (
 	github.com/go-swagger/go-swagger v0.21.1-0.20200107003254-1c98855b472d
 	github.com/gobuffalo/httptest v1.0.2
 	github.com/gobuffalo/packr/v2 v2.0.0-rc.15
+	github.com/gobwas/glob v0.2.3
 	github.com/golang/gddo v0.0.0-20190904175337-72a348e765d2
 	github.com/golang/mock v1.3.1
 	github.com/google/uuid v1.1.1
@@ -34,7 +36,7 @@ require (
 	github.com/ory/gojsonschema v1.2.0
 	github.com/ory/graceful v0.1.1
 	github.com/ory/herodot v0.6.2
-	github.com/ory/ladon v1.0.1
+	github.com/ory/ladon v1.1.0
 	github.com/ory/sdk/swagutil v0.0.0-20200202121523-307941feee4b
 	github.com/ory/viper v1.5.7
 	github.com/ory/x v0.0.93

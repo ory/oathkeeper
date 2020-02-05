@@ -35,6 +35,8 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/ory/x/sqlcon/dockertest"
+
+	"github.com/ory/oathkeeper/driver/configuration"
 )
 
 func TestMain(m *testing.M) {
@@ -118,6 +120,18 @@ func TestRepository(t *testing.T) {
 			count, err = repo.Count(context.Background())
 			require.NoError(t, err)
 			assert.Equal(t, len(rules)-1, count)
+
+			strategy, err := repo.MatchingStrategy(context.Background())
+			require.NoError(t, err)
+			require.Equal(t, configuration.MatchingStrategy(""), strategy)
+
+			err = repo.SetMatchingStrategy(context.Background(), configuration.Glob)
+			require.NoError(t, err)
+
+			strategy, err = repo.MatchingStrategy(context.Background())
+			require.NoError(t, err)
+			require.Equal(t, configuration.Glob, strategy)
+
 		})
 	}
 

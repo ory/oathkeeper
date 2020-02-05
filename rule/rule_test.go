@@ -26,6 +26,8 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/ory/oathkeeper/driver/configuration"
 )
 
 func mustParse(t *testing.T, u string) *url.URL {
@@ -35,14 +37,110 @@ func mustParse(t *testing.T, u string) *url.URL {
 }
 
 func TestRule(t *testing.T) {
-	r := &Rule{
-		Match: &Match{
-			Methods: []string{"DELETE"},
-			URL:     "https://localhost/users/<[0-9]+>",
+	rules := []Rule{
+		{
+			Match: &Match{
+				Methods: []string{"DELETE"},
+				URL:     "https://localhost/users/<[0-9]+>",
+			},
+		},
+		{
+			Match: &Match{
+				Methods: []string{"DELETE"},
+				URL:     "https://localhost/users/<[[:digit:]]*>",
+			},
+		},
+		{
+			Match: &Match{
+				Methods: []string{"DELETE"},
+				URL:     "https://localhost/users/<[0-9]*>",
+			},
 		},
 	}
 
-	assert.NoError(t, r.IsMatching("DELETE", mustParse(t, "https://localhost/users/1234")))
-	assert.NoError(t, r.IsMatching("DELETE", mustParse(t, "https://localhost/users/1234?key=value&key1=value1")))
-	assert.Error(t, r.IsMatching("DELETE", mustParse(t, "https://localhost/users/abcd")))
+	var tests = []struct {
+		method        string
+		url           string
+		expectedMatch bool
+		expectedErr   error
+	}{
+		{
+			method:        "DELETE",
+			url:           "https://localhost/users/1234",
+			expectedMatch: true,
+			expectedErr:   nil,
+		},
+		{
+			method:        "DELETE",
+			url:           "https://localhost/users/1234?key=value&key1=value1",
+			expectedMatch: true,
+			expectedErr:   nil,
+		},
+		{
+			method:        "DELETE",
+			url:           "https://localhost/users/abcd",
+			expectedMatch: false,
+			expectedErr:   nil,
+		},
+	}
+	for ind, tcase := range tests {
+		t.Run(string(ind), func(t *testing.T) {
+			testFunc := func(rule Rule, strategy configuration.MatchingStrategy) {
+				matched, err := rule.IsMatching(strategy, tcase.method, mustParse(t, tcase.url))
+				assert.Equal(t, tcase.expectedMatch, matched)
+				assert.Equal(t, tcase.expectedErr, err)
+			}
+			t.Run("rule0", func(t *testing.T) {
+				testFunc(rules[0], configuration.Regexp)
+			})
+			t.Run("rule1", func(t *testing.T) {
+				testFunc(rules[1], configuration.Regexp)
+			})
+			t.Run("rule2", func(t *testing.T) {
+				testFunc(rules[2], configuration.Glob)
+			})
+		})
+	}
+}
+
+func TestRule1(t *testing.T) {
+	r := &Rule{
+		Match: &Match{
+			Methods: []string{"DELETE"},
+			URL:     "https://localhost/users/<(?!admin).*>",
+		},
+	}
+
+	var tests = []struct {
+		method        string
+		url           string
+		expectedMatch bool
+		expectedErr   error
+	}{
+		{
+			method:        "DELETE",
+			url:           "https://localhost/users/manager",
+			expectedMatch: true,
+			expectedErr:   nil,
+		},
+		{
+			method:        "DELETE",
+			url:           "https://localhost/users/1234?key=value&key1=value1",
+			expectedMatch: true,
+			expectedErr:   nil,
+		},
+		{
+			method:        "DELETE",
+			url:           "https://localhost/users/admin",
+			expectedMatch: false,
+			expectedErr:   nil,
+		},
+	}
+	for ind, tcase := range tests {
+		t.Run(string(ind), func(t *testing.T) {
+			matched, err := r.IsMatching(configuration.Regexp, tcase.method, mustParse(t, tcase.url))
+			assert.Equal(t, tcase.expectedMatch, matched)
+			assert.Equal(t, tcase.expectedErr, err)
+		})
+	}
 }

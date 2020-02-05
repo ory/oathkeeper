@@ -22,6 +22,8 @@ package rule
 
 import (
 	"context"
+
+	"github.com/ory/oathkeeper/driver/configuration"
 )
 
 type Repository interface {
@@ -29,4 +31,6 @@ type Repository interface {
 	Set(context.Context, []Rule) error
 	Get(context.Context, string) (*Rule, error)
 	Count(context.Context) (int, error)
+	MatchingStrategy(context.Context) (configuration.MatchingStrategy, error)
+	SetMatchingStrategy(context.Context, configuration.MatchingStrategy) error
 }

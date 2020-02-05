@@ -87,6 +87,8 @@ access_rules:
     # If the URL Scheme is `http://` or `https://`, the access rules (an array of access rules is expected) will be
     # fetched from the provided HTTP(s) location.
     - https://path-to-my-rules/rules.json
+  # Optional fields describing matching strategy, defaults to "regexp".
+  matching_strategy: glob
 
 errors:
   fallback:

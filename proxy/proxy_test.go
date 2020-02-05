@@ -21,6 +21,7 @@
 package proxy_test
 
 import (
+	"context"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -82,6 +83,20 @@ func TestProxy(t *testing.T) {
 		Mutators:       []rule.Handler{{Handler: "noop"}},
 		Upstream:       rule.Upstream{URL: backend.URL, StripPath: "/strip-path/", PreserveHost: true},
 	}
+	ruleNoOpAuthenticatorGlob := rule.Rule{
+		Match:          &rule.Match{Methods: []string{"GET"}, URL: ts.URL + "/authn-noop/<[0-9]*>"},
+		Authenticators: []rule.Handler{{Handler: "noop"}},
+		Authorizer:     rule.Handler{Handler: "allow"},
+		Mutators:       []rule.Handler{{Handler: "noop"}},
+		Upstream:       rule.Upstream{URL: backend.URL},
+	}
+	ruleNoOpAuthenticatorModifyUpstreamGlob := rule.Rule{
+		Match:          &rule.Match{Methods: []string{"GET"}, URL: ts.URL + "/strip-path/authn-noop/<[0-9]*>"},
+		Authenticators: []rule.Handler{{Handler: "noop"}},
+		Authorizer:     rule.Handler{Handler: "allow"},
+		Mutators:       []rule.Handler{{Handler: "noop"}},
+		Upstream:       rule.Upstream{URL: backend.URL, StripPath: "/strip-path/", PreserveHost: true},
+	}
 
 	// acceptRuleStripHost := rule.Rule{MatchesMethods: []string{"GET"}, MatchesURLCompiled: mustCompileRegex(t, proxy.URL+"/users/<[0-9]+>"), Mode: "pass_through_accept", Upstream: rule.Upstream{URLParsed: u, StripPath: "/users/", PreserveHost: true}}
 	// acceptRuleStripHostWithoutTrailing := rule.Rule{MatchesMethods: []string{"GET"}, MatchesURLCompiled: mustCompileRegex(t, proxy.URL+"/users/<[0-9]+>"), Mode: "pass_through_accept", Upstream: rule.Upstream{URLParsed: u, StripPath: "/users", PreserveHost: true}}
@@ -89,30 +104,34 @@ func TestProxy(t *testing.T) {
 	// denyRule := rule.Rule{MatchesMethods: []string{"GET"}, MatchesURLCompiled: mustCompileRegex(t, proxy.URL+"/users/<[0-9]+>"), Mode: "pass_through_deny", Upstream: rule.Upstream{URLParsed: u}}
 
 	for k, tc := range []struct {
-		url       string
-		code      int
-		messages  []string
-		rules     []rule.Rule
-		transform func(r *http.Request)
-		d         string
+		url         string
+		code        int
+		messages    []string
+		rulesRegexp []rule.Rule
+		rulesGlob   []rule.Rule
+		transform   func(r *http.Request)
+		d           string
 	}{
 		{
-			d:     "should fail because url does not exist in rule set",
-			url:   ts.URL + "/invalid",
-			rules: []rule.Rule{},
-			code:  http.StatusNotFound,
+			d:           "should fail because url does not exist in rule set",
+			url:         ts.URL + "/invalid",
+			rulesRegexp: []rule.Rule{},
+			rulesGlob:   []rule.Rule{},
+			code:        http.StatusNotFound,
 		},
 		{
-			d:     "should fail because url does exist but is matched by two rules",
-			url:   ts.URL + "/authn-noop/1234",
-			rules: []rule.Rule{ruleNoOpAuthenticator, ruleNoOpAuthenticator},
-			code:  http.StatusInternalServerError,
+			d:           "should fail because url does exist but is matched by two rules",
+			url:         ts.URL + "/authn-noop/1234",
+			rulesRegexp: []rule.Rule{ruleNoOpAuthenticator, ruleNoOpAuthenticator},
+			rulesGlob:   []rule.Rule{ruleNoOpAuthenticatorGlob, ruleNoOpAuthenticatorGlob},
+			code:        http.StatusInternalServerError,
 		},
 		{
-			d:     "should pass",
-			url:   ts.URL + "/authn-noop/1234",
-			rules: []rule.Rule{ruleNoOpAuthenticator},
-			code:  http.StatusOK,
+			d:           "should pass",
+			url:         ts.URL + "/authn-noop/1234",
+			rulesRegexp: []rule.Rule{ruleNoOpAuthenticator},
+			rulesGlob:   []rule.Rule{ruleNoOpAuthenticatorGlob},
+			code:        http.StatusOK,
 			transform: func(r *http.Request) {
 				r.Header.Add("Authorization", "bearer token")
 			},
@@ -123,10 +142,11 @@ func TestProxy(t *testing.T) {
 			},
 		},
 		{
-			d:     "should pass",
-			url:   ts.URL + "/strip-path/authn-noop/1234",
-			rules: []rule.Rule{ruleNoOpAuthenticatorModifyUpstream},
-			code:  http.StatusOK,
+			d:           "should pass",
+			url:         ts.URL + "/strip-path/authn-noop/1234",
+			rulesRegexp: []rule.Rule{ruleNoOpAuthenticatorModifyUpstream},
+			rulesGlob:   []rule.Rule{ruleNoOpAuthenticatorModifyUpstreamGlob},
+			code:        http.StatusOK,
 			transform: func(r *http.Request) {
 				r.Header.Add("Authorization", "bearer token")
 			},
@@ -139,8 +159,13 @@ func TestProxy(t *testing.T) {
 		{
 			d:   "should fail because no authorizer was configured",
 			url: ts.URL + "/authn-anon/authz-none/cred-none/1234",
-			rules: []rule.Rule{{
+			rulesRegexp: []rule.Rule{{
 				Match:          &rule.Match{Methods: []string{"GET"}, URL: ts.URL + "/authn-anon/authz-none/cred-none/<[0-9]+>"},
+				Authenticators: []rule.Handler{{Handler: "anonymous"}},
+				Upstream:       rule.Upstream{URL: backend.URL},
+			}},
+			rulesGlob: []rule.Rule{{
+				Match:          &rule.Match{Methods: []string{"GET"}, URL: ts.URL + "/authn-anon/authz-none/cred-none/<[0-9]*>"},
 				Authenticators: []rule.Handler{{Handler: "anonymous"}},
 				Upstream:       rule.Upstream{URL: backend.URL},
 			}},
@@ -152,8 +177,14 @@ func TestProxy(t *testing.T) {
 		{
 			d:   "should fail because no credentials issuer was configured",
 			url: ts.URL + "/authn-anon/authz-allow/cred-none/1234",
-			rules: []rule.Rule{{
+			rulesRegexp: []rule.Rule{{
 				Match:          &rule.Match{Methods: []string{"GET"}, URL: ts.URL + "/authn-anon/authz-allow/cred-none/<[0-9]+>"},
+				Authenticators: []rule.Handler{{Handler: "anonymous"}},
+				Authorizer:     rule.Handler{Handler: "allow"},
+				Upstream:       rule.Upstream{URL: backend.URL},
+			}},
+			rulesGlob: []rule.Rule{{
+				Match:          &rule.Match{Methods: []string{"GET"}, URL: ts.URL + "/authn-anon/authz-allow/cred-none/<[0-9]*>"},
 				Authenticators: []rule.Handler{{Handler: "anonymous"}},
 				Authorizer:     rule.Handler{Handler: "allow"},
 				Upstream:       rule.Upstream{URL: backend.URL},
@@ -163,8 +194,15 @@ func TestProxy(t *testing.T) {
 		{
 			d:   "should pass with anonymous and everything else set to noop",
 			url: ts.URL + "/authn-anon/authz-allow/cred-noop/1234",
-			rules: []rule.Rule{{
+			rulesRegexp: []rule.Rule{{
 				Match:          &rule.Match{Methods: []string{"GET"}, URL: ts.URL + "/authn-anon/authz-allow/cred-noop/<[0-9]+>"},
+				Authenticators: []rule.Handler{{Handler: "anonymous"}},
+				Authorizer:     rule.Handler{Handler: "allow"},
+				Mutators:       []rule.Handler{{Handler: "noop"}},
+				Upstream:       rule.Upstream{URL: backend.URL},
+			}},
+			rulesGlob: []rule.Rule{{
+				Match:          &rule.Match{Methods: []string{"GET"}, URL: ts.URL + "/authn-anon/authz-allow/cred-noop/<[0-9]*>"},
 				Authenticators: []rule.Handler{{Handler: "anonymous"}},
 				Authorizer:     rule.Handler{Handler: "allow"},
 				Mutators:       []rule.Handler{{Handler: "noop"}},
@@ -180,8 +218,15 @@ func TestProxy(t *testing.T) {
 		{
 			d:   "should fail when authorizer fails",
 			url: ts.URL + "/authn-anon/authz-deny/cred-noop/1234",
-			rules: []rule.Rule{{
+			rulesRegexp: []rule.Rule{{
 				Match:          &rule.Match{Methods: []string{"GET"}, URL: ts.URL + "/authn-anon/authz-deny/cred-noop/<[0-9]+>"},
+				Authenticators: []rule.Handler{{Handler: "anonymous"}},
+				Authorizer:     rule.Handler{Handler: "deny"},
+				Mutators:       []rule.Handler{{Handler: "noop"}},
+				Upstream:       rule.Upstream{URL: backend.URL},
+			}},
+			rulesGlob: []rule.Rule{{
+				Match:          &rule.Match{Methods: []string{"GET"}, URL: ts.URL + "/authn-anon/authz-deny/cred-noop/<[0-9]*>"},
 				Authenticators: []rule.Handler{{Handler: "anonymous"}},
 				Authorizer:     rule.Handler{Handler: "deny"},
 				Mutators:       []rule.Handler{{Handler: "noop"}},
@@ -192,8 +237,16 @@ func TestProxy(t *testing.T) {
 		{
 			d:   "should fail when authorizer fails and send www_authenticate as defined in the rule",
 			url: ts.URL + "/authn-anon/authz-deny/cred-noop/1234",
-			rules: []rule.Rule{{
+			rulesRegexp: []rule.Rule{{
 				Match:          &rule.Match{Methods: []string{"GET"}, URL: ts.URL + "/authn-anon/authz-deny/cred-noop/<[0-9]+>"},
+				Authenticators: []rule.Handler{{Handler: "anonymous"}},
+				Authorizer:     rule.Handler{Handler: "deny"},
+				Mutators:       []rule.Handler{{Handler: "noop"}},
+				Upstream:       rule.Upstream{URL: backend.URL},
+				Errors:         []rule.ErrorHandler{{Handler: "www_authenticate"}},
+			}},
+			rulesGlob: []rule.Rule{{
+				Match:          &rule.Match{Methods: []string{"GET"}, URL: ts.URL + "/authn-anon/authz-deny/cred-noop/<[0-9]*>"},
 				Authenticators: []rule.Handler{{Handler: "anonymous"}},
 				Authorizer:     rule.Handler{Handler: "deny"},
 				Mutators:       []rule.Handler{{Handler: "noop"}},
@@ -205,8 +258,13 @@ func TestProxy(t *testing.T) {
 		{
 			d:   "should fail when authenticator fails",
 			url: ts.URL + "/authn-broken/authz-none/cred-none/1234",
-			rules: []rule.Rule{{
+			rulesRegexp: []rule.Rule{{
 				Match:          &rule.Match{Methods: []string{"GET"}, URL: ts.URL + "/authn-broken/authz-none/cred-none/<[0-9]+>"},
+				Authenticators: []rule.Handler{{Handler: "unauthorized"}},
+				Upstream:       rule.Upstream{URL: backend.URL},
+			}},
+			rulesGlob: []rule.Rule{{
+				Match:          &rule.Match{Methods: []string{"GET"}, URL: ts.URL + "/authn-broken/authz-none/cred-none/<[0-9]*>"},
 				Authenticators: []rule.Handler{{Handler: "unauthorized"}},
 				Upstream:       rule.Upstream{URL: backend.URL},
 			}},
@@ -215,8 +273,14 @@ func TestProxy(t *testing.T) {
 		{
 			d:   "should fail because no mutator was configured",
 			url: ts.URL + "/authn-anon/authz-deny/cred-noop/1234",
-			rules: []rule.Rule{{
+			rulesRegexp: []rule.Rule{{
 				Match:          &rule.Match{Methods: []string{"GET"}, URL: ts.URL + "/authn-anon/authz-deny/cred-noop/<[0-9]+>"},
+				Authenticators: []rule.Handler{{Handler: "anonymous"}},
+				Authorizer:     rule.Handler{Handler: "allow"},
+				Upstream:       rule.Upstream{URL: backend.URL},
+			}},
+			rulesGlob: []rule.Rule{{
+				Match:          &rule.Match{Methods: []string{"GET"}, URL: ts.URL + "/authn-anon/authz-deny/cred-noop/<[0-9]*>"},
 				Authenticators: []rule.Handler{{Handler: "anonymous"}},
 				Authorizer:     rule.Handler{Handler: "allow"},
 				Upstream:       rule.Upstream{URL: backend.URL},
@@ -226,8 +290,15 @@ func TestProxy(t *testing.T) {
 		{
 			d:   "should fail when one of the mutators fails",
 			url: ts.URL + "/authn-anon/authz-deny/cred-noop/1234",
-			rules: []rule.Rule{{
+			rulesRegexp: []rule.Rule{{
 				Match:          &rule.Match{Methods: []string{"GET"}, URL: ts.URL + "/authn-anon/authz-deny/cred-noop/<[0-9]+>"},
+				Authenticators: []rule.Handler{{Handler: "anonymous"}},
+				Authorizer:     rule.Handler{Handler: "allow"},
+				Mutators:       []rule.Handler{{Handler: "noop"}, {Handler: "broken"}},
+				Upstream:       rule.Upstream{URL: backend.URL},
+			}},
+			rulesGlob: []rule.Rule{{
+				Match:          &rule.Match{Methods: []string{"GET"}, URL: ts.URL + "/authn-anon/authz-deny/cred-noop/<[0-9]*>"},
 				Authenticators: []rule.Handler{{Handler: "anonymous"}},
 				Authorizer:     rule.Handler{Handler: "allow"},
 				Mutators:       []rule.Handler{{Handler: "noop"}, {Handler: "broken"}},
@@ -238,8 +309,15 @@ func TestProxy(t *testing.T) {
 		{
 			d:   "should fail when credentials issuer fails",
 			url: ts.URL + "/authn-anonymous/authz-allow/cred-broken/1234",
-			rules: []rule.Rule{{
+			rulesRegexp: []rule.Rule{{
 				Match:          &rule.Match{Methods: []string{"GET"}, URL: ts.URL + "/authn-anonymous/authz-allow/cred-broken/<[0-9]+>"},
+				Authenticators: []rule.Handler{{Handler: "anonymous"}},
+				Authorizer:     rule.Handler{Handler: "allow"},
+				Mutators:       []rule.Handler{{Handler: "broken"}},
+				Upstream:       rule.Upstream{URL: backend.URL},
+			}},
+			rulesGlob: []rule.Rule{{
+				Match:          &rule.Match{Methods: []string{"GET"}, URL: ts.URL + "/authn-anonymous/authz-allow/cred-broken/<[0-9]*>"},
 				Authenticators: []rule.Handler{{Handler: "anonymous"}},
 				Authorizer:     rule.Handler{Handler: "allow"},
 				Mutators:       []rule.Handler{{Handler: "broken"}},
@@ -249,29 +327,41 @@ func TestProxy(t *testing.T) {
 		},
 	} {
 		t.Run(fmt.Sprintf("case=%d/description=%s", k, tc.d), func(t *testing.T) {
-			reg.RuleRepository().(*rule.RepositoryMemory).WithRules(tc.rules)
+			testFunc := func(strategy configuration.MatchingStrategy, rules []rule.Rule) {
+				reg.RuleRepository().(*rule.RepositoryMemory).WithRules(rules)
+				require.NoError(t, reg.RuleRepository().SetMatchingStrategy(context.Background(), strategy))
 
-			req, err := http.NewRequest("GET", tc.url, nil)
-			require.NoError(t, err)
-			if tc.transform != nil {
-				tc.transform(req)
-			}
+				req, err := http.NewRequest("GET", tc.url, nil)
+				require.NoError(t, err)
+				if tc.transform != nil {
+					tc.transform(req)
+				}
 
-			res, err := http.DefaultClient.Do(req)
-			require.NoError(t, err)
+				res, err := http.DefaultClient.Do(req)
+				require.NoError(t, err)
 
-			greeting, err := ioutil.ReadAll(res.Body)
-			require.NoError(t, res.Body.Close())
-			require.NoError(t, err)
+				greeting, err := ioutil.ReadAll(res.Body)
+				require.NoError(t, res.Body.Close())
+				require.NoError(t, err)
 
-			assert.Equal(t, tc.code, res.StatusCode, "%s", res.Body)
-			for _, m := range tc.messages {
-				assert.True(t, strings.Contains(string(greeting), m), `Value "%s" not found in message:
+				assert.Equal(t, tc.code, res.StatusCode, "%s", res.Body)
+				for _, m := range tc.messages {
+					assert.True(t, strings.Contains(string(greeting), m), `Value "%s" not found in message:
 %s
 proxy_url=%s
 backend_url=%s
 `, m, greeting, ts.URL, backend.URL)
+				}
+
 			}
+
+			t.Run("regexp", func(t *testing.T) {
+				testFunc(configuration.Regexp, tc.rulesRegexp)
+			})
+			t.Run("glob", func(t *testing.T) {
+				testFunc(configuration.Glob, tc.rulesGlob)
+			})
+
 		})
 	}
 }
