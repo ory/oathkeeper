@@ -55,25 +55,25 @@ func (a *AuthenticatorOAuth2ClientCredentials) Config(config json.RawMessage) (*
 	return &c, nil
 }
 
-func (a *AuthenticatorOAuth2ClientCredentials) Authenticate(r *http.Request, config json.RawMessage, _ pipeline.Rule) (*AuthenticationSession, error) {
+func (a *AuthenticatorOAuth2ClientCredentials) Authenticate(r *http.Request, session *AuthenticationSession, config json.RawMessage, _ pipeline.Rule) error {
 	cf, err := a.Config(config)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	user, password, ok := r.BasicAuth()
 	if !ok {
-		return nil, errors.WithStack(ErrAuthenticatorNotResponsible)
+		return errors.WithStack(ErrAuthenticatorNotResponsible)
 	}
 
 	user, err = url.QueryUnescape(user)
 	if err != nil {
-		return nil, errors.Wrapf(helper.ErrUnauthorized, err.Error())
+		return errors.Wrapf(helper.ErrUnauthorized, err.Error())
 	}
 
 	password, err = url.QueryUnescape(password)
 	if err != nil {
-		return nil, errors.Wrapf(helper.ErrUnauthorized, err.Error())
+		return errors.Wrapf(helper.ErrUnauthorized, err.Error())
 	}
 
 	c := &clientcredentials.Config{
@@ -90,14 +90,13 @@ func (a *AuthenticatorOAuth2ClientCredentials) Authenticate(r *http.Request, con
 		httpx.NewResilientClientLatencyToleranceMedium(nil),
 	))
 	if err != nil {
-		return nil, errors.Wrapf(helper.ErrUnauthorized, err.Error())
+		return errors.Wrapf(helper.ErrUnauthorized, err.Error())
 	}
 
 	if token.AccessToken == "" {
-		return nil, errors.WithStack(helper.ErrUnauthorized)
+		return errors.WithStack(helper.ErrUnauthorized)
 	}
 
-	return &AuthenticationSession{
-		Subject: user,
-	}, nil
+	session.Subject = user
+	return nil
 }

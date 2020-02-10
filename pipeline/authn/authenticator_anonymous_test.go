@@ -29,6 +29,7 @@ import (
 
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/internal"
+	"github.com/ory/oathkeeper/pipeline/authn"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -39,18 +40,28 @@ func TestAuthenticatorAnonymous(t *testing.T) {
 	// viper.Set(configuration.ViperKeyAuthenticatorAnonymousIdentifier, "anon")
 	reg := internal.NewRegistry(conf)
 
+	session := new(authn.AuthenticationSession)
+
 	a, err := reg.PipelineAuthenticator("anonymous")
 	require.NoError(t, err)
 	assert.Equal(t, "anonymous", a.GetID())
 
 	t.Run("method=authenticate/case=is anonymous user", func(t *testing.T) {
-		session, err := a.Authenticate(&http.Request{Header: http.Header{}}, json.RawMessage(`{"subject":"anon"}`), nil)
+		err := a.Authenticate(
+			&http.Request{Header: http.Header{}},
+			session,
+			json.RawMessage(`{"subject":"anon"}`),
+			nil)
 		require.NoError(t, err)
 		assert.Equal(t, "anon", session.Subject)
 	})
 
 	t.Run("method=authenticate/case=has credentials", func(t *testing.T) {
-		_, err := a.Authenticate(&http.Request{Header: http.Header{"Authorization": {"foo"}}}, json.RawMessage(`{"subject":"anon"}`), nil)
+		err := a.Authenticate(
+			&http.Request{Header: http.Header{"Authorization": {"foo"}}},
+			session,
+			json.RawMessage(`{"subject":"anon"}`),
+			nil)
 		require.Error(t, err)
 	})
 

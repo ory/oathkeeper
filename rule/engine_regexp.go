@@ -1,6 +1,7 @@
 package rule
 
 import (
+	"errors"
 	"hash/crc64"
 
 	"github.com/dlclark/regexp2"
@@ -48,4 +49,23 @@ func (re *regexpMatchingEngine) ReplaceAllString(pattern, input, replacement str
 		return "", err
 	}
 	return re.compiled.Replace(input, replacement, -1, -1)
+}
+
+// FindStringSubmatch returns all captures in matchAgainst following the pattern
+func (re *regexpMatchingEngine) FindStringSubmatch(pattern, matchAgainst string) ([]string, error) {
+	if err := re.compile(pattern); err != nil {
+		return nil, err
+	}
+
+	m, _ := re.compiled.FindStringMatch(matchAgainst)
+	if m == nil {
+		return nil, errors.New("not match")
+	}
+
+	result := []string{}
+	for _, group := range m.Groups()[1:] {
+		result = append(result, group.String())
+	}
+
+	return result, nil
 }

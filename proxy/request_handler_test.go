@@ -37,6 +37,7 @@ import (
 
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/internal"
+	"github.com/ory/oathkeeper/pipeline/authn"
 
 	"github.com/stretchr/testify/require"
 
@@ -455,6 +456,96 @@ func TestRequestHandler(t *testing.T) {
 			} else {
 				require.NoError(t, err)
 			}
+		})
+	}
+}
+
+func TestInitializeSession(t *testing.T) {
+	for k, tc := range []struct {
+		d                string
+		ruleMatch        rule.Match
+		matchingStrategy configuration.MatchingStrategy
+		r                *http.Request
+		expectContext    authn.MatchContext
+	}{
+		{
+			d:                "Rule without capture",
+			r:                newTestRequest("http://localhost"),
+			matchingStrategy: configuration.Regexp,
+			ruleMatch: rule.Match{
+				URL: "http://localhost",
+			},
+			expectContext: authn.MatchContext{
+				RegexpCaptureGroups: []string{},
+				URL:                 urlx.ParseOrPanic("http://localhost"),
+			},
+		},
+		{
+			d:                "Rule with one capture",
+			r:                newTestRequest("http://localhost/user"),
+			matchingStrategy: configuration.Regexp,
+			ruleMatch: rule.Match{
+				URL: "http://localhost/<.*>",
+			},
+			expectContext: authn.MatchContext{
+				RegexpCaptureGroups: []string{"user"},
+				URL:                 urlx.ParseOrPanic("http://localhost/user"),
+			},
+		},
+		{
+			d:                "Request with query params",
+			r:                newTestRequest("http://localhost/user?param=test"),
+			matchingStrategy: configuration.Regexp,
+			ruleMatch: rule.Match{
+				URL: "http://localhost/<.*>",
+			},
+			expectContext: authn.MatchContext{
+				RegexpCaptureGroups: []string{"user"},
+				URL:                 urlx.ParseOrPanic("http://localhost/user?param=test"),
+			},
+		},
+		{
+			d:                "Rule with 2 captures",
+			r:                newTestRequest("http://localhost/user?param=test"),
+			matchingStrategy: configuration.Regexp,
+			ruleMatch: rule.Match{
+				URL: "<http|https>://localhost/<.*>",
+			},
+			expectContext: authn.MatchContext{
+				RegexpCaptureGroups: []string{"http", "user"},
+				URL:                 urlx.ParseOrPanic("http://localhost/user?param=test"),
+			},
+		},
+		{
+			d:                "Rule with Glob matching strategy",
+			r:                newTestRequest("http://localhost/user?param=test"),
+			matchingStrategy: configuration.Glob,
+			ruleMatch: rule.Match{
+				URL: "<http|https>://localhost/<*>",
+			},
+			expectContext: authn.MatchContext{
+				RegexpCaptureGroups: []string{},
+				URL:                 urlx.ParseOrPanic("http://localhost/user?param=test"),
+			},
+		},
+	} {
+		t.Run(fmt.Sprintf("case=%d/description=%s", k, tc.d), func(t *testing.T) {
+
+			conf := internal.NewConfigurationWithDefaults()
+			reg := internal.NewRegistry(conf)
+			viper.Set(configuration.ViperKeyAccessRuleMatchingStrategy, string(tc.matchingStrategy))
+
+			rule := rule.Rule{
+				Match:          &tc.ruleMatch,
+				Authenticators: []rule.Handler{},
+				Authorizer:     rule.Handler{},
+				Mutators:       []rule.Handler{},
+			}
+
+			session := reg.ProxyRequestHandler().InitializeAuthnSession(tc.r, &rule)
+
+			assert.NotNil(t, session)
+			assert.EqualValues(t, tc.expectContext, session.MatchContext)
 		})
 	}
 }

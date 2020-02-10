@@ -48,17 +48,17 @@ func (a *AuthenticatorAnonymous) Config(config json.RawMessage) (*AuthenticatorA
 	return &c, nil
 }
 
-func (a *AuthenticatorAnonymous) Authenticate(r *http.Request, config json.RawMessage, _ pipeline.Rule) (*AuthenticationSession, error) {
+func (a *AuthenticatorAnonymous) Authenticate(r *http.Request, session *AuthenticationSession, config json.RawMessage, _ pipeline.Rule) error {
 	if len(r.Header.Get("Authorization")) != 0 {
-		return nil, errors.WithStack(ErrAuthenticatorNotResponsible)
+		return errors.WithStack(ErrAuthenticatorNotResponsible)
 	}
 
 	cf, err := a.Config(config)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	return &AuthenticationSession{
-		Subject: stringsx.Coalesce(cf.Subject, "anonymous"),
-	}, nil
+	session.Subject = stringsx.Coalesce(cf.Subject, "anonymous")
+
+	return nil
 }

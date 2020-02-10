@@ -41,7 +41,7 @@ func TestAuthenticatorNoop(t *testing.T) {
 	assert.Equal(t, "noop", a.GetID())
 
 	t.Run("method=authenticate", func(t *testing.T) {
-		_, err := a.Authenticate(nil, nil, nil)
+		err := a.Authenticate(nil, nil, nil, nil)
 		require.NoError(t, err)
 	})
 

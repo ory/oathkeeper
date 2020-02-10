@@ -2,6 +2,7 @@ package mutate
 
 import (
 	"fmt"
+	"reflect"
 	"text/template"
 
 	"github.com/Masterminds/sprig"
@@ -17,6 +18,19 @@ func newTemplate(id string) *template.Template {
 					return ""
 				}
 				return fmt.Sprintf("%v", i)
+			},
+			"printIndex": func(element interface{}, i int) string {
+				if element == nil {
+					return ""
+				}
+				
+				list := reflect.ValueOf(element)
+				
+				if list.Kind() == reflect.Slice && i < list.Len() {
+					return fmt.Sprintf("%v", list.Index(i))
+				}
+
+				return ""
 			},
 		}).
 		Funcs(sprig.TxtFuncMap())
