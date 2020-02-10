@@ -316,7 +316,8 @@ func TestAuthenticatorJWT(t *testing.T) {
 				}
 
 				tc.config, _ = sjson.Set(tc.config, "jwks_urls", keys)
-				session, err := a.Authenticate(tc.r, json.RawMessage([]byte(tc.config)), nil)
+				session := new(AuthenticationSession)
+				err := a.Authenticate(tc.r, session, json.RawMessage([]byte(tc.config)), nil)
 				if tc.expectErr {
 					require.Error(t, err)
 					if tc.expectCode != 0 {

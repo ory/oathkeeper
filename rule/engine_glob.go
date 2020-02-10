@@ -31,6 +31,11 @@ func (ge *globMatchingEngine) ReplaceAllString(_, _, _ string) (string, error) {
 	return "", ErrMethodNotImplemented
 }
 
+// FindStringSubmatch is noop for now and always returns an empty array
+func (ge *globMatchingEngine) FindStringSubmatch(pattern, matchAgainst string) ([]string, error) {
+	return []string{}, nil
+}
+
 func (ge *globMatchingEngine) compile(pattern string) error {
 	if ge.table == nil {
 		ge.table = crc64.MakeTable(polynomial)

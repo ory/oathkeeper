@@ -31,6 +31,6 @@ func (a *AuthenticatorNoOp) Validate(config json.RawMessage) error {
 	return nil
 }
 
-func (a *AuthenticatorNoOp) Authenticate(r *http.Request, config json.RawMessage, _ pipeline.Rule) (*AuthenticationSession, error) {
-	return &AuthenticationSession{Subject: ""}, nil
+func (a *AuthenticatorNoOp) Authenticate(r *http.Request, session *AuthenticationSession, config json.RawMessage, _ pipeline.Rule) error {
+	return nil
 }

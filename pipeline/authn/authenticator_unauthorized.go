@@ -55,6 +55,6 @@ func (a *AuthenticatorUnauthorized) GetID() string {
 	return "unauthorized"
 }
 
-func (a *AuthenticatorUnauthorized) Authenticate(r *http.Request, config json.RawMessage, _ pipeline.Rule) (*AuthenticationSession, error) {
-	return nil, errors.WithStack(helper.ErrUnauthorized)
+func (a *AuthenticatorUnauthorized) Authenticate(r *http.Request, session *AuthenticationSession, config json.RawMessage, _ pipeline.Rule) error {
+	return errors.WithStack(helper.ErrUnauthorized)
 }

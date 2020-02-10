@@ -3,6 +3,7 @@ package authn
 import (
 	"encoding/json"
 	"net/http"
+	"net/url"
 
 	"github.com/pkg/errors"
 
@@ -19,7 +20,7 @@ var ErrAuthenticatorNotEnabled = herodot.DefaultError{
 }
 
 type Authenticator interface {
-	Authenticate(r *http.Request, config json.RawMessage, rule pipeline.Rule) (*AuthenticationSession, error)
+	Authenticate(r *http.Request, session *AuthenticationSession, config json.RawMessage, rule pipeline.Rule) error
 	GetID() string
 	Validate(config json.RawMessage) error
 }
@@ -37,9 +38,15 @@ func NewErrAuthenticatorMisconfigured(a Authenticator, err error) *herodot.Defau
 }
 
 type AuthenticationSession struct {
-	Subject string                 `json:"subject"`
-	Extra   map[string]interface{} `json:"extra"`
-	Header  http.Header            `json:"header"`
+	Subject      string                 `json:"subject"`
+	Extra        map[string]interface{} `json:"extra"`
+	Header       http.Header            `json:"header"`
+	MatchContext MatchContext           `json:"matchContext"`
+}
+
+type MatchContext struct {
+	RegexpCaptureGroups []string `json:"regexpCaptureGroups"`
+	URL                 *url.URL `json:"url"`
 }
 
 func (a *AuthenticationSession) SetHeader(key, val string) {

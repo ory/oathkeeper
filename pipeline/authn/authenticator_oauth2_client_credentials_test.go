@@ -93,7 +93,8 @@ func TestAuthenticatorOAuth2ClientCredentials(t *testing.T) {
 		},
 	} {
 		t.Run(fmt.Sprintf("method=authenticate/case=%d", k), func(t *testing.T) {
-			session, err := a.Authenticate(tc.r, tc.config, nil)
+			session := new(authn.AuthenticationSession)
+			err := a.Authenticate(tc.r, session, tc.config, nil)
 
 			if tc.expectErr != nil {
 				require.EqualError(t, errors.Cause(err), tc.expectErr.Error())

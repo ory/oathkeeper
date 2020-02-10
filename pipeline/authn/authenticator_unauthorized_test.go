@@ -42,7 +42,7 @@ func TestAuthenticatorBroken(t *testing.T) {
 	assert.Equal(t, "unauthorized", a.GetID())
 
 	t.Run("method=authenticate", func(t *testing.T) {
-		_, err := a.Authenticate(&http.Request{Header: http.Header{}}, nil, nil)
+		err := a.Authenticate(&http.Request{Header: http.Header{}}, nil, nil, nil)
 		require.Error(t, err)
 	})
 

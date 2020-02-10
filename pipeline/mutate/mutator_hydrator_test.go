@@ -39,6 +39,14 @@ func setSubject(subject string) func(a *authn.AuthenticationSession) {
 	}
 }
 
+func setMatchContext(groups []string) func(a *authn.AuthenticationSession) {
+	return func(a *authn.AuthenticationSession) {
+		a.MatchContext = authn.MatchContext{
+			RegexpCaptureGroups: groups,
+		}
+	}
+}
+
 func newAuthenticationSession(modifications ...func(a *authn.AuthenticationSession)) *authn.AuthenticationSession {
 	a := authn.AuthenticationSession{}
 	for _, f := range modifications {
@@ -135,6 +143,7 @@ func TestMutatorHydrator(t *testing.T) {
 			"foo": "hello",
 			"bar": 3.14,
 		}
+		sampleCaptureGroups := []string { "resource", "context"}
 		sampleUserId := "user"
 		sampleValidPassword := "passwd1"
 		sampleNotValidPassword := "passwd7"
@@ -176,11 +185,11 @@ func TestMutatorHydrator(t *testing.T) {
 			},
 			"No Changes": {
 				Setup:   defaultRouterSetup(),
-				Session: newAuthenticationSession(setExtra(sampleKey, sampleValue)),
+				Session: newAuthenticationSession(setExtra(sampleKey, sampleValue), setMatchContext(sampleCaptureGroups)),
 				Rule:    &rule.Rule{ID: "test-rule"},
 				Config:  defaultConfigForMutator(),
 				Request: &http.Request{},
-				Match:   newAuthenticationSession(setExtra(sampleKey, sampleValue)),
+				Match:   newAuthenticationSession(setExtra(sampleKey, sampleValue), setMatchContext(sampleCaptureGroups)),
 				Err:     nil,
 			},
 			"No Extra Before And After": {
