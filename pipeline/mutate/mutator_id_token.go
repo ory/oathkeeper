@@ -63,7 +63,7 @@ func (c *CredentialsIDTokenConfig) ClaimsTemplateID() string {
 }
 
 func NewMutatorIDToken(c configuration.Provider, r MutatorIDTokenRegistry) *MutatorIDToken {
-	return &MutatorIDToken{r: r, c: c, t: newTemplate("id_token")}
+	return &MutatorIDToken{r: r, c: c, t: NewTemplate("id_token")}
 }
 
 func (a *MutatorIDToken) GetID() string {
