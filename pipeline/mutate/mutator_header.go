@@ -24,7 +24,7 @@ type MutatorHeader struct {
 }
 
 func NewMutatorHeader(c configuration.Provider) *MutatorHeader {
-	return &MutatorHeader{c: c, t: newTemplate("header")}
+	return &MutatorHeader{c: c, t: NewTemplate("header")}
 }
 
 func (a *MutatorHeader) GetID() string {

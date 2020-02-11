@@ -22,6 +22,7 @@ package authz
 
 import (
 	"bytes"
+	"crypto/sha256"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -34,6 +35,7 @@ import (
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/pipeline"
 	"github.com/ory/oathkeeper/pipeline/authn"
+	"github.com/ory/oathkeeper/pipeline/mutate"
 
 	"github.com/ory/x/urlx"
 
@@ -51,11 +53,24 @@ type AuthorizerKetoEngineACPORYConfiguration struct {
 	BaseURL          string `json:"base_url"`
 }
 
+func (c *AuthorizerKetoEngineACPORYConfiguration) SubjectTemplateID() string {
+	return fmt.Sprintf("%x", sha256.Sum256([]byte(c.Subject)))
+}
+
+func (c *AuthorizerKetoEngineACPORYConfiguration) ActionTemplateID() string {
+	return fmt.Sprintf("%x", sha256.Sum256([]byte(c.RequiredAction)))
+}
+
+func (c *AuthorizerKetoEngineACPORYConfiguration) ResourceTemplateID() string {
+	return fmt.Sprintf("%x", sha256.Sum256([]byte(c.RequiredResource)))
+}
+
 type AuthorizerKetoEngineACPORY struct {
 	c configuration.Provider
 
 	client         *http.Client
 	contextCreator authorizerKetoWardenContext
+	t              *template.Template
 }
 
 func NewAuthorizerKetoEngineACPORY(c configuration.Provider) *AuthorizerKetoEngineACPORY {
@@ -68,6 +83,7 @@ func NewAuthorizerKetoEngineACPORY(c configuration.Provider) *AuthorizerKetoEngi
 				"requestedAt":     time.Now().UTC(),
 			}
 		},
+		t: mutate.NewTemplate("keto_engine_acp_ory"),
 	}
 }
 
@@ -101,11 +117,20 @@ func (a *AuthorizerKetoEngineACPORY) Authorize(r *http.Request, session *authn.A
 
 	subject := session.Subject
 	if cf.Subject != "" {
-		templateId := fmt.Sprintf("%s:%s", rule.GetID(), "subject")
-		subject, err = a.ParseSubject(session, templateId, cf.Subject)
+		subject, err = a.parseParameter(session, cf.SubjectTemplateID(), cf.Subject)
 		if err != nil {
 			return errors.WithStack(err)
 		}
+	}
+
+	action, err := a.parseParameter(session, cf.ActionTemplateID(), cf.RequiredAction)
+	if err != nil {
+		return errors.WithStack(err)
+	}
+
+	resource, err := a.parseParameter(session, cf.ResourceTemplateID(), cf.RequiredResource)
+	if err != nil {
+		return errors.WithStack(err)
 	}
 
 	flavor := "regex"
@@ -114,16 +139,6 @@ func (a *AuthorizerKetoEngineACPORY) Authorize(r *http.Request, session *authn.A
 	}
 
 	var b bytes.Buffer
-	u := fmt.Sprintf("%s://%s%s", r.URL.Scheme, r.URL.Host, r.URL.Path)
-
-	action, err := rule.ReplaceAllString(a.c.AccessRuleMatchingStrategy(), u, cf.RequiredAction)
-	if err != nil {
-		return errors.WithStack(err)
-	}
-	resource, err := rule.ReplaceAllString(a.c.AccessRuleMatchingStrategy(), u, cf.RequiredResource)
-	if err != nil {
-		return errors.WithStack(err)
-	}
 
 	if err := json.NewEncoder(&b).Encode(&AuthorizerKetoEngineACPORYRequestBody{
 		Action:   action,
@@ -171,29 +186,23 @@ func (a *AuthorizerKetoEngineACPORY) Authorize(r *http.Request, session *authn.A
 	return nil
 }
 
-func (a *AuthorizerKetoEngineACPORY) ParseSubject(session *authn.AuthenticationSession, templateId, templateString string) (string, error) {
-	tmplFn := template.New("rules").
-		Option("missingkey=zero").
-		Funcs(template.FuncMap{
-			"print": func(i interface{}) string {
-				if i == nil {
-					return ""
-				}
-				return fmt.Sprintf("%v", i)
-			},
-		})
+func (a *AuthorizerKetoEngineACPORY) parseParameter(session *authn.AuthenticationSession, templateID, templateString string) (string, error) {
 
-	tmpl, err := tmplFn.New(templateId).Parse(templateString)
-	if err != nil {
+	t := a.t.Lookup(templateID)
+	if t == nil {
+		var err error
+		t, err = a.t.New(templateID).Parse(templateString)
+		if err != nil {
+			return "", err
+		}
+	}
+
+	var b bytes.Buffer
+	if err := t.Execute(&b, session); err != nil {
 		return "", err
 	}
 
-	subject := bytes.Buffer{}
-	err = tmpl.Execute(&subject, session)
-	if err != nil {
-		return "", err
-	}
-	return subject.String(), nil
+	return b.String(), nil
 }
 
 func (a *AuthorizerKetoEngineACPORY) Validate(config json.RawMessage) error {

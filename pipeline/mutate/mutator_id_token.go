@@ -73,7 +73,7 @@ func NewMutatorIDToken(c configuration.Provider, r MutatorIDTokenRegistry) *Muta
 		MaxCost:     1 << 25,
 		BufferItems: 64,
 	})
-	return &MutatorIDToken{r: r, c: c, templates: newTemplate("id_token"), tokenCache: cache, tokenCacheEnabled: true}
+	return &MutatorIDToken{r: r, c: c, templates: NewTemplate("id_token"), tokenCache: cache, tokenCacheEnabled: true}
 }
 
 func (a *MutatorIDToken) GetID() string {

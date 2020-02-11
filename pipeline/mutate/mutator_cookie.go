@@ -26,7 +26,7 @@ type MutatorCookie struct {
 }
 
 func NewMutatorCookie(c configuration.Provider) *MutatorCookie {
-	return &MutatorCookie{c: c, t: newTemplate("cookie")}
+	return &MutatorCookie{c: c, t: NewTemplate("cookie")}
 }
 
 func (a *MutatorCookie) GetID() string {
