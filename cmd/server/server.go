@@ -163,7 +163,7 @@ func RunServe(version, build, date string) func(cmd *cobra.Command, args []strin
 				Service:       "ory-oathkeeper",
 				ClusterID:     clusterID(d.Configuration()),
 				IsDevelopment: isDevelopment(d.Configuration()),
-				WriteKey:      "MSx9A6YQ1qodnkzEFOv22cxOmOCJXMFa",
+				WriteKey:      "xRVRP48SAKw6ViJEnvB0u2PY8bVlsO6O",
 				WhitelistedPaths: []string{
 					"/",
 					api.CredentialsPath,
