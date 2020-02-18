@@ -10,6 +10,7 @@ import (
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/pipeline"
 	"github.com/ory/oathkeeper/pipeline/authn"
+	"github.com/ory/oathkeeper/x"
 
 	"github.com/pkg/errors"
 )
@@ -26,7 +27,7 @@ type MutatorCookie struct {
 }
 
 func NewMutatorCookie(c configuration.Provider) *MutatorCookie {
-	return &MutatorCookie{c: c, t: NewTemplate("cookie")}
+	return &MutatorCookie{c: c, t: x.NewTemplate("cookie")}
 }
 
 func (a *MutatorCookie) GetID() string {

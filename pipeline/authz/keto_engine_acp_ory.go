@@ -35,7 +35,7 @@ import (
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/pipeline"
 	"github.com/ory/oathkeeper/pipeline/authn"
-	"github.com/ory/oathkeeper/pipeline/mutate"
+	"github.com/ory/oathkeeper/x"
 
 	"github.com/ory/x/urlx"
 
@@ -83,7 +83,7 @@ func NewAuthorizerKetoEngineACPORY(c configuration.Provider) *AuthorizerKetoEngi
 				"requestedAt":     time.Now().UTC(),
 			}
 		},
-		t: mutate.NewTemplate("keto_engine_acp_ory"),
+		t: x.NewTemplate("keto_engine_acp_ory"),
 	}
 }
 
