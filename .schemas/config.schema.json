@@ -73,9 +73,11 @@
           ],
           "uniqueItems": true,
           "examples": [
-            "https://example.com",
-            "https://*.example.com",
-            "https://*.foo.example.com"
+            [
+              "https://example.com",
+              "https://*.example.com",
+              "https://*.foo.example.com"
+            ]
           ]
         },
         "allowed_methods": {
@@ -315,7 +317,6 @@
           "examples": [
             "guest",
             "anon",
-            "anonymous",
             "unknown"
           ],
           "default": "anonymous",
@@ -415,9 +416,11 @@
           },
           "description": "URLs where ORY Oathkeeper can retrieve JSON Web Keys from for validating the JSON Web Token. Usually something like \"https://my-keys.com/.well-known/jwks.json\". The response of that endpoint must return a JSON Web Key Set (JWKS).\n\n>If this authenticator is enabled, this value is required.",
           "examples": [
-            "https://my-website.com/.well-known/jwks.json",
-            "https://my-other-website.com/.well-known/jwks.json",
-            "file://path/to/local/jwks.json"
+            [
+              "https://my-website.com/.well-known/jwks.json",
+              "https://my-other-website.com/.well-known/jwks.json",
+              "file://path/to/local/jwks.json"
+            ]
           ]
         },
         "scope_strategy": {
@@ -548,7 +551,8 @@
               "description": "The OAuth 2.0 Scope to be requested during the OAuth 2.0 Client Credentials Grant.",
               "examples": [
                 [
-                  "[\"foo\", \"bar\"]"
+                  "foo",
+                  "bar"
                 ]
               ]
             }
@@ -596,7 +600,7 @@
                   "description": "The OAuth 2.0 Scope to be requested during the OAuth 2.0 Client Credentials Grant.",
                   "examples": [
                     [
-                      "[\"foo\", \"bar\"]"
+                      "foo", "bar"
                     ]
                   ]
                 }
@@ -980,7 +984,11 @@
             "format": "uri"
           },
           "examples": [
-            "[\"file://path/to/rules.json\",\"inline://W3siaWQiOiJmb28tcnVsZSIsImF1dGhlbnRpY2F0b3JzIjpbXX1d\",\"https://path-to-my-rules/rules.json\"]"
+            [
+              "file://path/to/rules.json",
+              "inline://W3siaWQiOiJmb28tcnVsZSIsImF1dGhlbnRpY2F0b3JzIjpbXX1d",
+              "https://path-to-my-rules/rules.json"
+            ]
           ]
         },
         "matching_strategy": {
@@ -988,9 +996,12 @@
           "description": "This an optional field describing matching strategy. Currently supported values are 'glob' and 'regexp'.",
           "type": "string",
           "default": "regexp",
-          "enum":  ["glob", "regexp"],
+          "enum": [
+            "glob",
+            "regexp"
+          ],
           "examples": [
-            "glob", "regexp"
+            "glob"
           ]
         }
       }
@@ -1175,13 +1186,16 @@
         "fallback": {
           "title": "Error Handling Fallback",
           "description": "This array defines how to handle errors when no \"when\" clause matches. If you have, for example, enabled redirect and json in your access rule, you could tell ORY Oathkeeper to try sending JSON if the request does not match the access rule definition",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
           "default": [
             "json"
           ],
-          "examples": [
-            "json",
+          "examples": [[
             "redirect"
-          ]
+          ]]
         },
         "handlers": {
           "additionalProperties": false,
@@ -1260,9 +1274,6 @@
                   "title": "Enabled",
                   "type": "boolean",
                   "default": true,
-                  "examples": [
-                    true
-                  ],
                   "description": "En-/disables this component."
                 }
               },
