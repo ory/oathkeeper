@@ -4,6 +4,7 @@ import (
 	"hash/crc64"
 
 	"github.com/dlclark/regexp2"
+
 	"github.com/ory/ladon/compiler"
 )
 

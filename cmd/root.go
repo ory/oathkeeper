@@ -29,13 +29,14 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 
-	"github.com/ory/gojsonschema"
+	_ "github.com/ory/jsonschema/v3/fileloader"
+	_ "github.com/ory/jsonschema/v3/httploader"
 
 	"github.com/ory/viper"
 	"github.com/ory/x/viperx"
-
-	"github.com/ory/x/logrusx"
 )
+
+var logger logrus.FieldLogger
 
 var schemas = packr.New("schemas", "../.schemas")
 
@@ -54,44 +55,39 @@ func Execute() {
 	}
 }
 
-var logger *logrus.Logger
-
 func init() {
+	viperx.RegisterConfigFlag(RootCmd, "oathkeeper")
+}
+
+func watchAndValidateViper() {
+	logger = viperx.InitializeConfig("oathkeeper", "", logger)
+
 	schema, err := schemas.Find("config.schema.json")
 	if err != nil {
-		panic(err)
+		logger.WithError(err).Fatal("Unable to open configuration JSON Schema.")
 	}
 
-	cobra.OnInitialize(func() {
-		viperx.InitializeConfig("oathkeeper", "", nil)
-		logger = logrusx.New()
+	if err := viperx.Validate("config.schema.json", schema); err != nil {
+		viperx.LoggerWithValidationErrorFields(logger, err).
+			Fatal("The configuration is invalid and could not be loaded.")
+	}
 
-		if err := viperx.Validate(gojsonschema.NewBytesLoader(schema)); err != nil {
+	viperx.AddWatcher(func(event fsnotify.Event) error {
+		if err := viperx.Validate("config.schema.json", schema); err != nil {
 			viperx.LoggerWithValidationErrorFields(logger, err).
-				WithError(err).
-				Fatal("The configuration is invalid and could not be loaded.")
+				Error("The changed configuration is invalid and could not be loaded. Rolling back to the last working configuration revision. Please address the validation errors before restarting ORY Oathkeeper.")
+			return viperx.ErrRollbackConfigurationChanges
 		}
-
-		viperx.AddWatcher(func(event fsnotify.Event) error {
-			if err := viperx.Validate(gojsonschema.NewBytesLoader(schema)); err != nil {
-				viperx.LoggerWithValidationErrorFields(logger, err).
-					WithError(err).
-					Error("The changed configuration is invalid and could not be loaded. Rolling back to the last working configuration revision. Please address the validation errors before restarting ORY Oathkeeper.")
-				return viperx.ErrRollbackConfigurationChanges
-			}
-			return nil
-		})
-
-		viperx.WatchConfig(logger, &viperx.WatchOptions{
-			Immutables: []string{"serve", "profiling", "log"},
-			OnImmutableChange: func(key string) {
-				logger.
-					WithField("key", key).
-					WithField("reset_to", fmt.Sprintf("%v", viper.Get(key))).
-					Error("A configuration value marked as immutable has changed. Rolling back to the last working configuration revision. To reload the values please restart ORY Oathkeeper.")
-			},
-		})
+		return nil
 	})
 
-	viperx.RegisterConfigFlag(RootCmd, "oathkeeper")
+	viperx.WatchConfig(logger, &viperx.WatchOptions{
+		Immutables: []string{"serve", "profiling", "log"},
+		OnImmutableChange: func(key string) {
+			logger.
+				WithField("key", key).
+				WithField("reset_to", fmt.Sprintf("%v", viper.Get(key))).
+				Error("A configuration value marked as immutable has changed. Rolling back to the last working configuration revision. To reload the values please restart ORY Oathkeeper.")
+		},
+	})
 }
