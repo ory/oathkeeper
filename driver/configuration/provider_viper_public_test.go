@@ -12,11 +12,13 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/ory/gojsonschema"
 	"github.com/ory/x/urlx"
 	"github.com/ory/x/viperx"
 
 	"github.com/ory/viper"
+
+	_ "github.com/ory/jsonschema/v3/fileloader"
+	_ "github.com/ory/jsonschema/v3/httploader"
 
 	. "github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/pipeline/authn"
@@ -33,7 +35,7 @@ func TestPipelineConfig(t *testing.T) {
 		logrus.New(),
 	)
 
-	err := viperx.Validate(gojsonschema.NewReferenceLoader("file://../../.schemas/config.schema.json"))
+	err := viperx.ValidateFromURL("file://../../.schemas/config.schema.json")
 	if err != nil {
 		viperx.LoggerWithValidationErrorFields(logrus.New(), err).Error("unable to validate")
 	}
@@ -109,7 +111,7 @@ func BenchmarkPipelineConfig(b *testing.B) {
 		logrus.New(),
 	)
 
-	err := viperx.Validate(gojsonschema.NewReferenceLoader("file://../../.schemas/config.schema.json"))
+	err := viperx.ValidateFromURL("file://../../.schemas/config.schema.json")
 	if err != nil {
 		viperx.LoggerWithValidationErrorFields(logrus.New(), err).Error("unable to validate")
 	}
@@ -141,7 +143,7 @@ func BenchmarkPipelineEnabled(b *testing.B) {
 		logrus.New(),
 	)
 
-	err := viperx.Validate(gojsonschema.NewReferenceLoader("file://../../.schemas/config.schema.json"))
+	err := viperx.ValidateFromURL("file://../../.schemas/config.schema.json")
 	if err != nil {
 		viperx.LoggerWithValidationErrorFields(logrus.New(), err).Error("unable to validate")
 	}
@@ -164,7 +166,7 @@ func TestViperProvider(t *testing.T) {
 		logrus.New(),
 	)
 
-	err := viperx.Validate(gojsonschema.NewReferenceLoader("file://../../.schemas/config.schema.json"))
+	err := viperx.ValidateFromURL("file://../../.schemas/config.schema.json")
 	if err != nil {
 		viperx.LoggerWithValidationErrorFields(logrus.New(), err).Error("unable to validate")
 	}

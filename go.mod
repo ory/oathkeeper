@@ -36,10 +36,11 @@ require (
 	github.com/ory/gojsonschema v1.2.0
 	github.com/ory/graceful v0.1.1
 	github.com/ory/herodot v0.6.2
+	github.com/ory/jsonschema/v3 v3.0.1
 	github.com/ory/ladon v1.1.0
 	github.com/ory/sdk/swagutil v0.0.0-20200202121523-307941feee4b
 	github.com/ory/viper v1.5.7
-	github.com/ory/x v0.0.93
+	github.com/ory/x v0.0.95
 	github.com/pborman/uuid v1.2.0
 	github.com/pelletier/go-toml v1.6.0 // indirect
 	github.com/phayes/freeport v0.0.0-20180830031419-95f893ade6f2
@@ -58,7 +59,7 @@ require (
 	github.com/xeipuuv/gojsonpointer v0.0.0-20190905194746-02993c407bfb // indirect
 	golang.org/x/crypto v0.0.0-20200117160349-530e935923ad
 	golang.org/x/oauth2 v0.0.0-20190604053449-0f29369cfe45
-	golang.org/x/tools v0.0.0-20191224055732-dd894d0a8a40
+	golang.org/x/tools v0.0.0-20200203215610-ab391d50b528
 	gopkg.in/square/go-jose.v2 v2.3.1
 )
 
