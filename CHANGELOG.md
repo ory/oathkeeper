@@ -91,6 +91,7 @@
 
 **Merged pull requests:**
 
+- fix: Load config file only in serve command [\#365](https://github.com/ory/oathkeeper/pull/365) ([aeneasr](https://github.com/aeneasr))
 - fix\(config.schema.json\): fixed examples for some keys [\#363](https://github.com/ory/oathkeeper/pull/363) ([zepatrik](https://github.com/zepatrik))
 
 ## [v0.36.0-beta.2](https://github.com/ory/oathkeeper/tree/v0.36.0-beta.2) (2020-02-14)
@@ -161,6 +162,7 @@
 - Set min/max for port range in config JSON Schema [\#345](https://github.com/ory/oathkeeper/pull/345) ([aeneasr](https://github.com/aeneasr))
 - Fix profiling env variable not being picked up [\#343](https://github.com/ory/oathkeeper/pull/343) ([ecktom](https://github.com/ecktom))
 - docs: Updates issue and pull request templates [\#341](https://github.com/ory/oathkeeper/pull/341) ([aeneasr](https://github.com/aeneasr))
+- Update upgrade guide [\#337](https://github.com/ory/oathkeeper/pull/337) ([aeneasr](https://github.com/aeneasr))
 
 ## [v0.35.1-beta.1](https://github.com/ory/oathkeeper/tree/v0.35.1-beta.1) (2020-01-14)
 
@@ -186,7 +188,6 @@
 
 **Merged pull requests:**
 
-- Update upgrade guide [\#337](https://github.com/ory/oathkeeper/pull/337) ([aeneasr](https://github.com/aeneasr))
 - authn/cookie\_session: Add subject\_from modifier [\#336](https://github.com/ory/oathkeeper/pull/336) ([aeneasr](https://github.com/aeneasr))
 - authn/cookie\_session: Add extra\_from modifier [\#335](https://github.com/ory/oathkeeper/pull/335) ([aeneasr](https://github.com/aeneasr))
 - Move to new SDK pipeline [\#333](https://github.com/ory/oathkeeper/pull/333) ([aeneasr](https://github.com/aeneasr))
@@ -213,6 +214,7 @@
 
 - pipe/err: Improve IP and MIME matching [\#323](https://github.com/ory/oathkeeper/pull/323) ([aeneasr](https://github.com/aeneasr))
 - Add customizable error handlers [\#322](https://github.com/ory/oathkeeper/pull/322) ([aeneasr](https://github.com/aeneasr))
+- cmd: Health endpoints now emit TRACE logs [\#314](https://github.com/ory/oathkeeper/pull/314) ([aeneasr](https://github.com/aeneasr))
 
 ## [v0.33.1-beta.1](https://github.com/ory/oathkeeper/tree/v0.33.1-beta.1) (2019-12-18)
 
@@ -236,9 +238,7 @@
 - Switch to alpine Docker base-image [\#318](https://github.com/ory/oathkeeper/pull/318) ([aeneasr](https://github.com/aeneasr))
 - Add more details to decision logging [\#316](https://github.com/ory/oathkeeper/pull/316) ([aeneasr](https://github.com/aeneasr))
 - authn: Improve session endpoint debugability [\#315](https://github.com/ory/oathkeeper/pull/315) ([aeneasr](https://github.com/aeneasr))
-- cmd: Health endpoints now emit TRACE logs [\#314](https://github.com/ory/oathkeeper/pull/314) ([aeneasr](https://github.com/aeneasr))
 - rule: Resolve matcher cache [\#313](https://github.com/ory/oathkeeper/pull/313) ([aeneasr](https://github.com/aeneasr))
-- Use default logic if header is Authorization [\#311](https://github.com/ory/oathkeeper/pull/311) ([pike1212](https://github.com/pike1212))
 
 ## [v0.33.0-beta.1](https://github.com/ory/oathkeeper/tree/v0.33.0-beta.1) (2019-12-16)
 
@@ -288,6 +288,7 @@
 
 **Merged pull requests:**
 
+- Use default logic if header is Authorization [\#311](https://github.com/ory/oathkeeper/pull/311) ([pike1212](https://github.com/pike1212))
 - authz: Add Content-Type header in the call to Keto [\#290](https://github.com/ory/oathkeeper/pull/290) ([Sbou](https://github.com/Sbou))
 - Auto-kill test runner after 10 retries [\#286](https://github.com/ory/oathkeeper/pull/286) ([aeneasr](https://github.com/aeneasr))
 - Dereference config schema and resolve issues [\#282](https://github.com/ory/oathkeeper/pull/282) ([aeneasr](https://github.com/aeneasr))
@@ -336,7 +337,6 @@
 **Merged pull requests:**
 
 - Resolve broken tests [\#262](https://github.com/ory/oathkeeper/pull/262) ([aeneasr](https://github.com/aeneasr))
-- Homogenize configuration management [\#258](https://github.com/ory/oathkeeper/pull/258) ([aeneasr](https://github.com/aeneasr))
 - Fix \#250: Ignore query parameters to build payload for Keto engine [\#251](https://github.com/ory/oathkeeper/pull/251) ([GuillaumeSmaha](https://github.com/GuillaumeSmaha))
 
 ## [v0.18.0-beta.1](https://github.com/ory/oathkeeper/tree/v0.18.0-beta.1) (2019-08-22)
@@ -345,6 +345,7 @@
 
 **Merged pull requests:**
 
+- Homogenize configuration management [\#258](https://github.com/ory/oathkeeper/pull/258) ([aeneasr](https://github.com/aeneasr))
 - ID Token Custom Claims [\#246](https://github.com/ory/oathkeeper/pull/246) ([aeneasr](https://github.com/aeneasr))
 - docs: Updates issue and pull request templates [\#245](https://github.com/ory/oathkeeper/pull/245) ([aeneasr](https://github.com/aeneasr))
 - Add mutator for modifying authenticationSession with external API [\#240](https://github.com/ory/oathkeeper/pull/240) ([kubadz](https://github.com/kubadz))
