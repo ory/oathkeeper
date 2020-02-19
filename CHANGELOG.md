@@ -3,6 +3,10 @@
 **Table of Contents**
 
 - [Changelog](#changelog)
+  - [Unreleased](#unreleased)
+  - [v0.36.0-beta.2 (2020-02-14)](#v0360-beta2-2020-02-14)
+  - [v0.36.0-beta.3 (2020-02-14)](#v0360-beta3-2020-02-14)
+  - [v0.36.0-beta.4 (2020-02-14)](#v0360-beta4-2020-02-14)
   - [v0.36.0-beta.1 (2020-02-05)](#v0360-beta1-2020-02-05)
   - [v0.35.5-beta.2 (2020-01-31)](#v0355-beta2-2020-01-31)
   - [v0.35.5-beta.1 (2020-01-27)](#v0355-beta1-2020-01-27)
@@ -76,6 +80,30 @@
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 # Changelog
+
+## [Unreleased](https://github.com/ory/oathkeeper/tree/HEAD)
+
+[Full Changelog](https://github.com/ory/oathkeeper/compare/v0.36.0-beta.2...HEAD)
+
+**Closed issues:**
+
+- Log specified http request headers [\#360](https://github.com/ory/oathkeeper/issues/360)
+
+**Merged pull requests:**
+
+- fix\(config.schema.json\): fixed examples for some keys [\#363](https://github.com/ory/oathkeeper/pull/363) ([zepatrik](https://github.com/zepatrik))
+
+## [v0.36.0-beta.2](https://github.com/ory/oathkeeper/tree/v0.36.0-beta.2) (2020-02-14)
+
+[Full Changelog](https://github.com/ory/oathkeeper/compare/v0.36.0-beta.3...v0.36.0-beta.2)
+
+## [v0.36.0-beta.3](https://github.com/ory/oathkeeper/tree/v0.36.0-beta.3) (2020-02-14)
+
+[Full Changelog](https://github.com/ory/oathkeeper/compare/v0.36.0-beta.4...v0.36.0-beta.3)
+
+## [v0.36.0-beta.4](https://github.com/ory/oathkeeper/tree/v0.36.0-beta.4) (2020-02-14)
+
+[Full Changelog](https://github.com/ory/oathkeeper/compare/v0.36.0-beta.1...v0.36.0-beta.4)
 
 ## [v0.36.0-beta.1](https://github.com/ory/oathkeeper/tree/v0.36.0-beta.1) (2020-02-05)
 
@@ -492,6 +520,7 @@
 - ci: Resolve CI build issue [\#160](https://github.com/ory/oathkeeper/pull/160) ([aeneasr](https://github.com/aeneasr))
 - Ensure rule matcher is locked before updating [\#159](https://github.com/ory/oathkeeper/pull/159) ([jtescher](https://github.com/jtescher))
 - proxy: improve debugability of JWT authenticator [\#156](https://github.com/ory/oathkeeper/pull/156) ([aeneasr](https://github.com/aeneasr))
+- issue \#149 - Update README building-from-source part with the gomodul… [\#152](https://github.com/ory/oathkeeper/pull/152) ([pink-lucifer](https://github.com/pink-lucifer))
 
 ## [v0.14.2+oryOS.10](https://github.com/ory/oathkeeper/tree/v0.14.2+oryOS.10) (2018-12-13)
 
@@ -520,7 +549,6 @@
 
 **Merged pull requests:**
 
-- issue \#149 - Update README building-from-source part with the gomodul… [\#152](https://github.com/ory/oathkeeper/pull/152) ([pink-lucifer](https://github.com/pink-lucifer))
 - vendor: Update keto to latest [\#146](https://github.com/ory/oathkeeper/pull/146) ([aeneasr](https://github.com/aeneasr))
 - proxy: Update to recent keto changes  [\#145](https://github.com/ory/oathkeeper/pull/145) ([aeneasr](https://github.com/aeneasr))
 - docs: Update documentation links [\#144](https://github.com/ory/oathkeeper/pull/144) ([aeneasr](https://github.com/aeneasr))
