@@ -99,7 +99,7 @@ func TestAuthorizerKetoWarden(t *testing.T) {
 			expectErr: true,
 		},
 		{
-			config: []byte(`{ "required_action": "action:{{ index .MatchContext.RegexpCaptureGroups 0}}:{{ index .MatchContext.RegexpCaptureGroups 1}}", "required_resource": "resource:{{ index .MatchContext.RegexpCaptureGroups 0}}:{{ index .MatchContext.RegexpCaptureGroups 1}}" }`),
+			config: []byte(`{ "required_action": "action:{{ printIndex .MatchContext.RegexpCaptureGroups (sub 1 1 | int)}}:{{ index .MatchContext.RegexpCaptureGroups (sub 2 1 | int)}}", "required_resource": "resource:{{ index .MatchContext.RegexpCaptureGroups 0}}:{{ index .MatchContext.RegexpCaptureGroups 1}}" }`),
 			r:      &http.Request{URL: urlx.ParseOrPanic("https://localhost/api/users/1234/abcde")},
 			setup: func(t *testing.T) *httptest.Server {
 				return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

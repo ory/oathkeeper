@@ -2,6 +2,7 @@ package rule
 
 import (
 	"fmt"
+	"regexp"
 	"strings"
 
 	"github.com/blang/semver"
@@ -80,10 +81,42 @@ func migrateRuleJSON(raw []byte) ([]byte, error) {
 			}
 		}
 
-		return raw, nil
+		version, _ = semver.Make("0.32.0-beta.1")
 	}
 
-	if semver.MustParseRange(">0.32.0-beta.1")(version) {
+	if semver.MustParseRange("<=0.37.0")(version) {
+		// Applies the following patch:
+		//
+		// - in the keto_engine_acp_ory authorizer we have to use go/template instaead of replacement syntax ('$x')
+		// - "required_action": "my:action:$1" => "required_action": "my:action:{{ printIndex .MatchContext.RegexpCaptureGroups 0}}"
+		if authorizer := gjson.GetBytes(raw, `authorizer`); authorizer.Exists() {
+			if authorizer.Get("handler").String() == "keto_engine_acp_ory" {
+
+				aj := gjson.GetBytes(raw, `authorizer.config.required_action`)
+				rj := gjson.GetBytes(raw, `authorizer.config.required_resource`)
+
+				re := regexp.MustCompile(`\$([0-9]+)`)
+				var err error
+				if aj.Exists() {
+					result := re.ReplaceAllString(aj.Str, "{{ printIndex .MatchContext.RegexpCaptureGroups (sub $1 1 | int)}}")
+					if raw, err = sjson.SetBytes(raw, `authorizer.config.required_action`, result); err != nil {
+						return nil, errors.WithStack(err)
+					}
+				}
+
+				if rj.Exists() {
+					result := re.ReplaceAllString(rj.Str, "{{ printIndex .MatchContext.RegexpCaptureGroups (sub $1 1 | int)}}")
+					if raw, err = sjson.SetBytes(raw, `authorizer.config.required_resource`, result); err != nil {
+						return nil, errors.WithStack(err)
+					}
+				}
+			}
+		}
+
+		version, _ = semver.Make("0.37.0")
+	}
+
+	if semver.MustParseRange(">=0.37.0")(version) {
 		return raw, nil
 	}
 
