@@ -93,7 +93,7 @@ func TestAuthenticatorOAuth2Introspection(t *testing.T) {
 				d: "should return error saying that authenticator is not responsible for validating the request, as the token was not provided in a proper location (custom query parameter)",
 				r: &http.Request{
 					Form: map[string][]string{
-						"someOtherQueryParam": []string{"token"},
+						"someOtherQueryParam": {"token"},
 					},
 					Header: http.Header{"Authorization": {"bearer token"}},
 				},
@@ -127,7 +127,7 @@ func TestAuthenticatorOAuth2Introspection(t *testing.T) {
 				d: "should pass because the valid token was provided in a proper location (custom query parameter)",
 				r: &http.Request{
 					Form: map[string][]string{
-						"token": []string{"token"},
+						"token": {"token"},
 					},
 				},
 				config:    []byte(`{"token_from": {"query_parameter": "token"}}`),
