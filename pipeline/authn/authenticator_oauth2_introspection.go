@@ -29,8 +29,7 @@ type AuthenticatorOAuth2IntrospectionConfiguration struct {
 	IntrospectionURL            string                                                `json:"introspection_url"`
 	BearerTokenLocation         *helper.BearerTokenLocation                           `json:"token_from"`
 	IntrospectionRequestHeaders map[string]string                                     `json:"introspection_request_headers"`
-	Timeout                     string                                                `json:"timeout"`
-	MaxWait                     string                                                `json:"back_off_max_wait"`
+	Retry                       *AuthenticatorOAuth2IntrospectionRetryConfiguration   `json:"retry"`
 }
 
 type AuthenticatorOAuth2IntrospectionPreAuthConfiguration struct {
@@ -39,6 +38,11 @@ type AuthenticatorOAuth2IntrospectionPreAuthConfiguration struct {
 	ClientSecret string   `json:"client_secret"`
 	Scope        []string `json:"scope"`
 	TokenURL     string   `json:"token_url"`
+}
+
+type AuthenticatorOAuth2IntrospectionRetryConfiguration struct {
+	Timeout string `json:"conn_timeout"`
+	MaxWait string `json:"max_wait"`
 }
 
 type AuthenticatorOAuth2Introspection struct {
@@ -163,19 +167,24 @@ func (a *AuthenticatorOAuth2Introspection) Config(config json.RawMessage) (*Auth
 	}
 
 	if c.PreAuth != nil && c.PreAuth.Enabled {
-		if c.Timeout == "" {
-			c.Timeout = "500ms"
+		if c.Retry == nil {
+			c.Retry = &AuthenticatorOAuth2IntrospectionRetryConfiguration{Timeout: "500ms", MaxWait: "1s"}
+		} else {
+			if c.Retry.Timeout == "" {
+				c.Retry.Timeout = "500ms"
+			}
+			if c.Retry.MaxWait == "" {
+				c.Retry.MaxWait = "1s"
+			}
 		}
-		duration, err := time.ParseDuration(c.Timeout)
+
+		duration, err := time.ParseDuration(c.Retry.Timeout)
 		if err != nil {
 			return nil, err
 		}
 		timeout := time.Millisecond * duration
 
-		if c.MaxWait == "" {
-			c.MaxWait = "1s"
-		}
-		maxWait, err := time.ParseDuration(c.MaxWait)
+		maxWait, err := time.ParseDuration(c.Retry.MaxWait)
 		if err != nil {
 			return nil, err
 		}

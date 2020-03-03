@@ -652,29 +652,34 @@
             }
           ]
         },
-        "timeout": {
-          "title": "HTTP Idle Timeout",
-          "type": "string",
-          "default": "500ms",
-          "pattern": "^[0-9]+(ns|us|ms|s|m|h)$",
-          "description": "The amount of time to wait for any http action by the oauth2 introspection authenticator.",
-          "examples": [
-            "5s",
-            "5m",
-            "5h"
-          ]
-        },
-        "back_off_max_wait": {
-          "title": "HTTP Idle Timeout",
-          "type": "string",
-          "default": "1s",
-          "pattern": "^[0-9]+(ns|us|ms|s|m|h)$",
-          "description": "The maximum amount of time to wait for the retry handler.",
-          "examples": [
-            "5s",
-            "5m",
-            "5h"
-          ]
+        "retry": {
+          "type": "object",
+          "properties": {
+            "conn_timeout": {
+              "title": "Connection Timeout",
+              "type": "string",
+              "default": "500ms",
+              "pattern": "^[0-9]+(ns|us|ms|s|m|h)$",
+              "description": "Sets the connection timeout. If reached, the request will canceled be retried.",
+              "examples": [
+                "5s",
+                "5m",
+                "5h"
+              ]
+            },
+            "max_wait": {
+              "title": "Max Wait",
+              "type": "string",
+              "default": "1s",
+              "pattern": "^[0-9]+(ns|us|ms|s|m|h)$",
+              "description": "The request fails after the specified amount of time was reached and no success response was received.",
+              "examples": [
+                "5s",
+                "5m",
+                "5h"
+              ]
+            }
+          }
         }
       },
       "required": [

@@ -46,12 +46,12 @@ func TestPipelineConfig(t *testing.T) {
 		require.NoError(t, os.Setenv("AUTHENTICATORS_OAUTH2_INTROSPECTION_CONFIG_INTROSPECTION_URL", "https://override/path"))
 
 		require.NoError(t, p.PipelineConfig("authenticators", "oauth2_introspection", nil, &res))
-		assert.JSONEq(t, `{"introspection_request_headers":{},"introspection_url":"https://override/path","pre_authorization":{"client_id":"some_id","client_secret":"some_secret","enabled":true,"scope":["foo","bar"],"token_url":"https://my-website.com/oauth2/token"},"required_scope":[],"scope_strategy":"exact","target_audience":[],"trusted_issuers":[]}`, string(res), "%s", res)
+		assert.JSONEq(t, `{"introspection_request_headers":{},"introspection_url":"https://override/path","pre_authorization":{"client_id":"some_id","client_secret":"some_secret","enabled":true,"scope":["foo","bar"],"token_url":"https://my-website.com/oauth2/token"},"required_scope":[],"retry":{"conn_timeout":"500ms", "max_wait":"1s"},"scope_strategy":"exact","target_audience":[],"trusted_issuers":[]}`, string(res), "%s", res)
 
 		require.NoError(t, os.Setenv("AUTHENTICATORS_OAUTH2_INTROSPECTION_CONFIG_INTROSPECTION_URL", ""))
 
 		require.NoError(t, p.PipelineConfig("authenticators", "oauth2_introspection", nil, &res))
-		assert.JSONEq(t, `{"introspection_request_headers":{},"introspection_url":"https://my-website.com/oauth2/introspection","pre_authorization":{"client_id":"some_id","client_secret":"some_secret","enabled":true,"scope":["foo","bar"],"token_url":"https://my-website.com/oauth2/token"},"required_scope":[],"scope_strategy":"exact","target_audience":[],"trusted_issuers":[]}`, string(res), "%s", res)
+		assert.JSONEq(t, `{"introspection_request_headers":{},"introspection_url":"https://my-website.com/oauth2/introspection","pre_authorization":{"client_id":"some_id","client_secret":"some_secret","enabled":true,"scope":["foo","bar"],"token_url":"https://my-website.com/oauth2/token"},"required_scope":[],"retry":{"conn_timeout":"500ms", "max_wait":"1s"},"scope_strategy":"exact","target_audience":[],"trusted_issuers":[]}`, string(res), "%s", res)
 
 	})
 
