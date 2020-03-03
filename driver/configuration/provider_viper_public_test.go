@@ -12,11 +12,13 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/ory/gojsonschema"
 	"github.com/ory/x/urlx"
 	"github.com/ory/x/viperx"
 
 	"github.com/ory/viper"
+
+	_ "github.com/ory/jsonschema/v3/fileloader"
+	_ "github.com/ory/jsonschema/v3/httploader"
 
 	. "github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/pipeline/authn"
@@ -33,7 +35,7 @@ func TestPipelineConfig(t *testing.T) {
 		logrus.New(),
 	)
 
-	err := viperx.Validate(gojsonschema.NewReferenceLoader("file://../../.schemas/config.schema.json"))
+	err := viperx.ValidateFromURL("file://../../.schemas/config.schema.json")
 	if err != nil {
 		viperx.LoggerWithValidationErrorFields(logrus.New(), err).Error("unable to validate")
 	}
@@ -48,10 +50,8 @@ func TestPipelineConfig(t *testing.T) {
 		require.NoError(t, p.PipelineConfig("authenticators", "oauth2_introspection", nil, &res))
 		assert.JSONEq(t, `{"introspection_request_headers":{},"introspection_url":"https://override/path","pre_authorization":{"client_id":"some_id","client_secret":"some_secret","enabled":true,"scope":["foo","bar"],"token_url":"https://my-website.com/oauth2/token"},"required_scope":[],"scope_strategy":"exact","target_audience":[],"trusted_issuers":[]}`, string(res), "%s", res)
 
+		// Cleanup
 		require.NoError(t, os.Setenv("AUTHENTICATORS_OAUTH2_INTROSPECTION_CONFIG_INTROSPECTION_URL", ""))
-
-		require.NoError(t, p.PipelineConfig("authenticators", "oauth2_introspection", nil, &res))
-		assert.JSONEq(t, `{"introspection_request_headers":{},"introspection_url":"https://my-website.com/oauth2/introspection","pre_authorization":{"client_id":"some_id","client_secret":"some_secret","enabled":true,"scope":["foo","bar"],"token_url":"https://my-website.com/oauth2/token"},"required_scope":[],"scope_strategy":"exact","target_audience":[],"trusted_issuers":[]}`, string(res), "%s", res)
 
 	})
 
@@ -93,6 +93,71 @@ func TestPipelineConfig(t *testing.T) {
 	})
 }
 
+/*
+go test ./... -v -bench=. -run BenchmarkPipelineConfig -benchtime=10s
+
+v0.35.1
+594	  20119202 ns/op
+
+v0.35.2
+3048037	      3908 ns/op
+*/
+
+func BenchmarkPipelineConfig(b *testing.B) {
+	viper.Reset()
+	viperx.InitializeConfig(
+		"oathkeeper",
+		"./../../docs/",
+		logrus.New(),
+	)
+
+	err := viperx.ValidateFromURL("file://../../.schemas/config.schema.json")
+	if err != nil {
+		viperx.LoggerWithValidationErrorFields(logrus.New(), err).Error("unable to validate")
+	}
+	require.NoError(b, err)
+
+	p := NewViperProvider(logrus.New())
+
+	for n := 0; n < b.N; n++ {
+		res := json.RawMessage{}
+		p.PipelineConfig("authenticators", "oauth2_introspection", nil, &res)
+	}
+}
+
+/*
+go test ./... -v -bench=. -run BenchmarkPipelineEnabled -benchtime=10s
+
+v0.35.4
+11708	   1009975 ns/op
+
+v0.35.5
+18848694	       603 ns/op
+*/
+
+func BenchmarkPipelineEnabled(b *testing.B) {
+	viper.Reset()
+	viperx.InitializeConfig(
+		"oathkeeper",
+		"./../../docs/",
+		logrus.New(),
+	)
+
+	err := viperx.ValidateFromURL("file://../../.schemas/config.schema.json")
+	if err != nil {
+		viperx.LoggerWithValidationErrorFields(logrus.New(), err).Error("unable to validate")
+	}
+	require.NoError(b, err)
+
+	p := NewViperProvider(logrus.New())
+
+	for n := 0; n < b.N; n++ {
+		p.AuthorizerIsEnabled("allow")
+		p.AuthenticatorIsEnabled("noop")
+		p.MutatorIsEnabled("noop")
+	}
+}
+
 func TestViperProvider(t *testing.T) {
 	viper.Reset()
 	viperx.InitializeConfig(
@@ -101,7 +166,7 @@ func TestViperProvider(t *testing.T) {
 		logrus.New(),
 	)
 
-	err := viperx.Validate(gojsonschema.NewReferenceLoader("file://../../.schemas/config.schema.json"))
+	err := viperx.ValidateFromURL("file://../../.schemas/config.schema.json")
 	if err != nil {
 		viperx.LoggerWithValidationErrorFields(logrus.New(), err).Error("unable to validate")
 	}

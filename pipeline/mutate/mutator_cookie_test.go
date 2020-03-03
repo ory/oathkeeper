@@ -209,6 +209,7 @@ func TestCredentialsIssuerCookies(t *testing.T) {
 			viper.Set(configuration.ViperKeyMutatorCookieIsEnabled, true)
 			require.Error(t, a.Validate(json.RawMessage(`{}`)))
 
+			viper.Reset()
 			viper.Set(configuration.ViperKeyMutatorCookieIsEnabled, false)
 			require.Error(t, a.Validate(json.RawMessage(`{"cookies":{}}`)))
 		})

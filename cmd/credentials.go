@@ -20,7 +20,8 @@ import (
 
 // credentialsCmd represents the credentials command
 var credentialsCmd = &cobra.Command{
-	Use: "credentials",
+	Use:   "credentials",
+	Short: "Generate RSA, ECDSA, and other keys and output them as JSON Web Keys",
 }
 
 func init() {

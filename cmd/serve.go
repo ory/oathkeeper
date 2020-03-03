@@ -21,13 +21,13 @@
 package cmd
 
 import (
-	"github.com/ory/oathkeeper/cmd/server"
-	"github.com/ory/oathkeeper/x"
-
 	"github.com/ory/x/logrusx"
 	"github.com/ory/x/viperx"
 
 	"github.com/spf13/cobra"
+
+	"github.com/ory/oathkeeper/cmd/server"
+	"github.com/ory/oathkeeper/x"
 )
 
 var serveCmd = &cobra.Command{
@@ -42,7 +42,10 @@ on configuration options, open the configuration documentation:
 
 >> https://www.ory.sh/docs/oathkeeper/configuration <<
 `,
-	Run: server.RunServe(x.Version, x.Commit, x.Date),
+	Run: func(cmd *cobra.Command, args []string) {
+		watchAndValidateViper()
+		server.RunServe(x.Version, x.Commit, x.Date)(cmd, args)
+	},
 }
 
 func init() {

@@ -2,10 +2,10 @@
 
 <h4 align="center">
     <a href="https://discord.gg/PAMQWkr">Chat</a> |
-    <a href="https://community.ory.am/">Forums</a> |
+    <a href="https://community.ory.sh/">Forums</a> |
     <a href="http://eepurl.com/di390P">Newsletter</a><br/><br/>
-    <a href="https://www.ory.sh/docs/guides/master/oathkeeper/">Guide</a> |
-    <a href="https://www.ory.sh/docs/api/oathkeeper?version=master">API Docs</a> |
+    <a href="https://www.ory.sh/docs/oathkeeper/sdk/api">API Docs</a> |
+    <a href="https://www.ory.sh/docs/oathkeeper/">Guide</a> |
     <a href="https://godoc.org/github.com/ory/oathkeeper">Code Docs</a><br/><br/>
     <a href="https://opencollective.com/ory">Support this project!</a>
 </h4>
@@ -70,7 +70,7 @@ documentation and upgrade instructions.
 ## Installation
 
 Head over to the
-[ORY Developer Documentation](https://www.ory.sh/docs/oathkeeper/install) to
+[ORY Developer Documentation](https://www.ory.sh/docs/keto/install) to
 learn how to install ORY Oathkeeper on Linux, macOS, Windows, and Docker and how
 to build ORY Oathkeeper from source.
 
@@ -82,14 +82,13 @@ The ORY community stands on the shoulders of individuals, companies, and
 maintainers. We thank everyone involved - from submitting bug reports and
 feature requests, to contributing patches, to sponsoring our work. Our community
 is 1000+ strong and growing rapidly. The ORY stack protects 1.200.000.000+ API
-requests every month with over 15.000+ active service nodes. Our small but
-expert team would have never been able to achieve this without each and everyone
-of you.
+requests every month with over 15.000+ active service nodes. We would have never
+been able to achieve this without each and everyone of you!
 
 The following list represents companies that have accompanied us along the way
 and that have made outstanding contributions to our ecosystem. _If you think
 that your company deserves a spot here, reach out to
-<a href="mailto:hi@ory.sh">hi@ory.sh</a>now_!
+<a href="mailto:hi@ory.sh">hi@ory.sh</a> now_!
 
 **Please consider giving back by becoming a sponsor of our open source work on
 <a href="https://www.patreon.com/_ory">Patreon</a> or
@@ -159,6 +158,12 @@ that your company deserves a spot here, reach out to
             <td align="center"><img height="32px" src="./docs/adopters/arduino.svg" alt="Arduino"></td>
             <td><a href="https://www.arduino.cc/">arduino.cc</a></td>
         </tr>
+        <tr>
+            <td>Sponsor</td>
+            <td>OrderMyGear</td>
+            <td align="center"><img height="32px" src="./docs/adopters/ordermygear.svg" alt="OrderMyGear"></td>
+            <td><a href="https://www.ordermygear.com/">ordermygear.com</a></td>
+        </tr>
     </tdbody>
 </table>
 
@@ -179,24 +184,45 @@ TheCrealm.
 
 <!--END ADOPTERS-->
 
+
+
 ## Ecosystem
 
-<a href="https://console.ory.sh/">
-    <img align="right" width="30%" src="docs/images/sec-console.png" alt="ORY Security Console">
-</a>
+<!--BEGIN ECOSYSTEM-->
+We build Ory on several guiding principles when it comes to our architecture design:
 
-### ORY Security Console: Administrative User Interface
+- Minimal dependencies
+- Runs everywhere
+- Scales without effort
+- Minimize room for human and network errors
 
-The [ORY Security Console](https://console.ory.sh/) is a visual admin interface
-for managing ORY Hydra, ORY Oathkeeper, and ORY Keto.
+ORY's architecture designed to run best on a Container Orchestration Systems such as Kubernetes, CloudFoundry, OpenShift, and similar projects.
+Binaries are small (5-15MB) and available for all popular processor types (ARM, AMD64, i386) and operating
+systems (FreeBSD, Linux, macOS, Windows) without system dependencies (Java, Node, Ruby, libxml, ...).
+
+### ORY Kratos: Identity and User Infrastructure and Management
+
+[ORY Kratos](https://github.com/ory/kratos) is an API-first Identity and User
+Management system that is built according to
+[cloud architecture best practices](https://www.ory.sh/docs/next/ecosystem/software-architecture-philosophy).
+It implements core use cases that almost every software application needs to
+deal with: Self-service Login and Registration, Multi-Factor Authentication
+(MFA/2FA), Account Recovery and Verification, Profile and Account Management.
 
 ### ORY Hydra: OAuth2 & OpenID Connect Server
 
-[ORY Hydra](https://github.com/ory/hydra) ORY Hydra is a hardened OAuth2 and
-OpenID Connect server optimized for low-latency, high throughput, and low
-resource consumption. ORY Hydra is not an identity provider (user sign up, user
-log in, password reset flow), but connects to your existing identity provider
-through a consent app.
+[ORY Hydra](https://github.com/ory/hydra) is an OpenID Certified™ OAuth2 and OpenID Connect
+Provider can connect to any existing identity database (LDAP, AD, KeyCloak, PHP+MySQL, ...)
+and user interface.
+
+### ORY Oathkeeper: Identity & Access Proxy
+
+[ORY Oathkeeper](https://github.com/ory/oathkeeper) is a BeyondCorp/Zero Trust
+Identity & Access Proxy (IAP) with configurable authentication, authorization,
+and request mutation rules for your web services: Authenticate JWT, Access Tokens,
+API Keys, mTLS; Check if the contained subject is allowed to perform the request;
+Encode resulting content into custom headers (`X-User-ID`), JSON Web Tokens
+and more!
 
 ### ORY Keto: Access Control Policies as a Server
 
@@ -204,12 +230,8 @@ through a consent app.
 set of access control policies, similar to AWS IAM Policies, in order to
 determine whether a subject (user, application, service, car, ...) is authorized
 to perform a certain action on a resource.
+<!--END ECOSYSTEM-->
 
-### Examples
-
-The [ory/examples](https://github.com/ory/examples) repository contains numerous
-examples of setting up this project individually and together with other
-services from the ORY Ecosystem.
 
 ## Security
 
@@ -217,12 +239,12 @@ services from the ORY Ecosystem.
 
 If you think you found a security vulnerability, please refrain from posting it
 publicly on the forums, the chat, or GitHub and send us an email to
-[hi@ory.am](mailto:hi@ory.am) instead.
+[hi@ory.sh](mailto:hi@ory.sh) instead.
 
 ## Telemetry
 
 Our services collect summarized, anonymized data which can optionally be turned
-off. Click [here](https://www.ory.sh/docs/guides/master/telemetry/) to learn
+off. Click [here](https://www.ory.sh/docs/ecosystem/sqa) to learn
 more.
 
 ## Documentation
@@ -230,12 +252,12 @@ more.
 ### Guide
 
 The Guide is available
-[here](https://www.ory.sh/docs/guides/master/oathkeeper/).
+[here](https://www.ory.sh/docs/oathkeeper/).
 
 ### HTTP API documentation
 
 The HTTP API is documented
-[here](https://www.ory.sh/docs/api/oathkeeper?version=master).
+[here](https://www.ory.sh/docs/oathkeeper/sdk/api).
 
 ### Upgrading and Changelog
 
@@ -258,3 +280,4 @@ $ cd $GOPATH/src/github.com/ory/oathkeeper
 $ export GO111MODULE=on
 $ go test ./...
 ```
+

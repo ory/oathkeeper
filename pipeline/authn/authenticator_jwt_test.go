@@ -126,6 +126,16 @@ func TestAuthenticatorJWT(t *testing.T) {
 				expectExactErr: ErrAuthenticatorNotResponsible,
 			},
 			{
+				d: "should return error saying that authenticator is not responsible for validating the request, as the token was not provided in a proper location (cookie)",
+				r: &http.Request{Header: http.Header{"Cookie": []string{"biscuit=" + gen(keys[1], jwt.MapClaims{
+					"sub": "sub",
+					"exp": now.Add(time.Hour).Unix(),
+				})}}},
+				config:         `{"token_from": {"cookie": "cake"}}`,
+				expectErr:      true,
+				expectExactErr: ErrAuthenticatorNotResponsible,
+			},
+			{
 				d: "should pass because the valid JWT token was provided in a proper location (custom header)",
 				r: &http.Request{Header: http.Header{"X-Custom-Header": []string{gen(keys[1], jwt.MapClaims{
 					"sub": "sub",
@@ -147,6 +157,15 @@ func TestAuthenticatorJWT(t *testing.T) {
 					},
 				},
 				config:    `{"token_from": {"query_parameter": "token"}}`,
+				expectErr: false,
+			},
+			{
+				d: "should pass because the valid JWT token was provided in a proper location (cookie)",
+				r: &http.Request{Header: http.Header{"Cookie": []string{"biscuit=" + gen(keys[1], jwt.MapClaims{
+					"sub": "sub",
+					"exp": now.Add(time.Hour).Unix(),
+				})}}},
+				config:    `{"token_from": {"cookie": "biscuit"}}`,
 				expectErr: false,
 			},
 			{

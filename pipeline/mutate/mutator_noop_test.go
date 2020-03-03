@@ -55,6 +55,7 @@ func TestMutatorNoop(t *testing.T) {
 		viper.Set(configuration.ViperKeyMutatorNoopIsEnabled, true)
 		require.NoError(t, a.Validate(nil))
 
+		viper.Reset()
 		viper.Set(configuration.ViperKeyMutatorNoopIsEnabled, false)
 		require.Error(t, a.Validate(nil))
 	})

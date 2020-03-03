@@ -258,6 +258,7 @@ func TestMutatorIDToken(t *testing.T) {
 			{e: true, i: "http://baz/foo", j: "http://baz/foo", pass: true},
 		} {
 			t.Run(fmt.Sprintf("case=%d", k), func(t *testing.T) {
+				viper.Reset()
 				viper.Set(configuration.ViperKeyMutatorIDTokenIsEnabled, tc.e)
 				// viper.Set(configuration.ViperKeyMutatorIDTokenIssuerURL, tc.i)
 				// viper.Set(configuration.ViperKeyMutatorIDTokenJWKSURL, tc.j)

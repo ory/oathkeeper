@@ -7,6 +7,9 @@ import (
 	"net/url"
 
 	"github.com/pkg/errors"
+	"github.com/tidwall/gjson"
+
+	"github.com/ory/go-convenience/stringsx"
 
 	"github.com/ory/herodot"
 
@@ -15,6 +18,12 @@ import (
 	"github.com/ory/oathkeeper/pipeline"
 )
 
+func init() {
+	gjson.AddModifier("this", func(json, arg string) string {
+		return json
+	})
+}
+
 type AuthenticatorCookieSessionFilter struct {
 }
 
@@ -22,6 +31,8 @@ type AuthenticatorCookieSessionConfiguration struct {
 	Only            []string `json:"only"`
 	CheckSessionURL string   `json:"check_session_url"`
 	PreservePath    bool     `json:"preserve_path"`
+	ExtraFrom       string   `json:"extra_from"`
+	SubjectFrom     string   `json:"subject_from"`
 }
 
 type AuthenticatorCookieSession struct {
@@ -53,6 +64,14 @@ func (a *AuthenticatorCookieSession) Config(config json.RawMessage) (*Authentica
 		return nil, NewErrAuthenticatorMisconfigured(a, err)
 	}
 
+	if len(c.ExtraFrom) == 0 {
+		c.ExtraFrom = "extra"
+	}
+
+	if len(c.SubjectFrom) == 0 {
+		c.SubjectFrom = "subject"
+	}
+
 	return &c, nil
 }
 
@@ -66,25 +85,30 @@ func (a *AuthenticatorCookieSession) Authenticate(r *http.Request, config json.R
 		return nil, errors.WithStack(ErrAuthenticatorNotResponsible)
 	}
 
-	origin := cf.CheckSessionURL
-	preservePath := cf.PreservePath
-	body, err := forwardRequestToSessionStore(r, origin, preservePath)
+	body, err := forwardRequestToSessionStore(r, cf.CheckSessionURL, cf.PreservePath)
 	if err != nil {
 		return nil, err
 	}
 
-	var session struct {
-		Subject string                 `json:"subject"`
-		Extra   map[string]interface{} `json:"extra"`
+	var (
+		subject string
+		extra   map[string]interface{}
+
+		subjectRaw = []byte(stringsx.Coalesce(gjson.GetBytes(body, cf.SubjectFrom).Raw, "null"))
+		extraRaw   = []byte(stringsx.Coalesce(gjson.GetBytes(body, cf.ExtraFrom).Raw, "null"))
+	)
+
+	if err = json.Unmarshal(subjectRaw, &subject); err != nil {
+		return nil, helper.ErrForbidden.WithReasonf("The configured subject_from GJSON path returned an error on JSON output: %s", err.Error()).WithDebugf("GJSON path: %s\nBody: %s\nResult: %s", cf.SubjectFrom, body, subjectRaw).WithTrace(err)
 	}
-	err = json.Unmarshal(body, &session)
-	if err != nil {
-		return nil, helper.ErrForbidden.WithReason(err.Error()).WithTrace(err)
+
+	if err = json.Unmarshal(extraRaw, &extra); err != nil {
+		return nil, helper.ErrForbidden.WithReasonf("The configured extra_from GJSON path returned an error on JSON output: %s", err.Error()).WithDebugf("GJSON path: %s\nBody: %s\nResult: %s", cf.ExtraFrom, body, extraRaw).WithTrace(err)
 	}
 
 	return &AuthenticationSession{
-		Subject: session.Subject,
-		Extra:   session.Extra,
+		Subject: subject,
+		Extra:   extra,
 	}, nil
 }
 

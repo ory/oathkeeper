@@ -58,6 +58,7 @@ func TestAuthenticatorAnonymous(t *testing.T) {
 		viper.Set(configuration.ViperKeyAuthenticatorAnonymousIsEnabled, true)
 		require.NoError(t, a.Validate(json.RawMessage(`{"subject":"foo"}`)))
 
+		viper.Reset()
 		viper.Set(configuration.ViperKeyAuthenticatorAnonymousIsEnabled, false)
 		require.Error(t, a.Validate(json.RawMessage(`{"subject":"foo"}`)))
 	})

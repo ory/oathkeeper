@@ -1,33 +1,28 @@
 SHELL=/bin/bash -o pipefail
 
+.PHONY: tools
+tools:
+		GO111MODULE=on go install github.com/ory/go-acc github.com/ory/x/tools/listx github.com/go-swagger/go-swagger/cmd/swagger github.com/sqs/goreturns github.com/ory/sdk/swagutil
+
 # Formats the code
 .PHONY: format
 format:
 		goreturns -w -local github.com/ory $$(listx .)
-		npm run format:docs
 
 .PHONY: gen
 		gen: mocks sdk
 
+# Generates the SDKs
 .PHONY: sdk
 sdk:
-		GO111MODULE=on go mod tidy
-		GO111MODULE=on go mod vendor
-		GO111MODULE=off swagger generate spec -m -o ./docs/api.swagger.json
-		GO111MODULE=off swagger validate ./docs/api.swagger.json
-
-		rm -rf ./sdk/go/oathkeeper/*
-		rm -rf ./sdk/js/swagger
-
-		GO111MODULE=off swagger generate client -f ./docs/api.swagger.json -t sdk/go/oathkeeper -A Ory_Oathkeeper
-
-		java -jar scripts/swagger-codegen-cli-2.2.3.jar generate -i ./docs/api.swagger.json -l javascript -o ./sdk/js/swagger
-
-		cd sdk/go; goreturns -w -i -local github.com/ory $$(listx .)
-
-		rm -f ./sdk/js/swagger/package.json
-		rm -rf ./sdk/js/swagger/test
-		rm -rf ./vendor
+		$$(go env GOPATH)/bin/swagger generate spec -m -o ./docs/api.swagger.json -x internal/httpclient
+		$$(go env GOPATH)/bin/swagutil sanitize ./docs/api.swagger.json
+		$$(go env GOPATH)/bin/swagger flatten --with-flatten=remove-unused -o ./docs/api.swagger.json ./docs/api.swagger.json
+		$$(go env GOPATH)/bin/swagger validate ./docs/api.swagger.json
+		rm -rf internal/httpclient
+		mkdir -p internal/httpclient
+		$$(go env GOPATH)/bin/swagger generate client -f ./docs/api.swagger.json -t internal/httpclient -A Ory_Oathkeeper
+		make format
 
 .PHONY: install-stable
 install-stable:

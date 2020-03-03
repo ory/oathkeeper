@@ -1,0 +1,3 @@
+access_rules:
+  repositories: file://../test/update/rules_glob.yaml
+  matching_strategy: regexp

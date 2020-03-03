@@ -73,9 +73,11 @@
           ],
           "uniqueItems": true,
           "examples": [
-            "https://example.com",
-            "https://*.example.com",
-            "https://*.foo.example.com"
+            [
+              "https://example.com",
+              "https://*.example.com",
+              "https://*.foo.example.com"
+            ]
           ]
         },
         "allowed_methods": {
@@ -138,7 +140,7 @@
           "description": "Indicates whether the request can include user credentials like cookies, HTTP authentication or client side SSL certificates."
         },
         "max_age": {
-          "type": "number",
+          "type": "integer",
           "default": 0,
           "title": "Maximum Age",
           "description": "Indicates how long (in seconds) the results of a preflight request can be cached. The default is 0 which stands for no max age."
@@ -191,7 +193,7 @@
         "code": {
           "title": "HTTP Redirect Status Code",
           "description": "Defines the HTTP Redirect status code which can bei 301 (Moved Permanently) or 302 (Found).",
-          "type": "number",
+          "type": "integer",
           "enum": [
             301,
             302
@@ -315,7 +317,6 @@
           "examples": [
             "guest",
             "anon",
-            "anonymous",
             "unknown"
           ],
           "default": "anonymous",
@@ -351,6 +352,18 @@
           "title": "Preserve Path",
           "type": "boolean",
           "description": "When set to true, any path specified in `check_session_url` will be preserved instead of overwriting the path with the path from the original request"
+        },
+        "extra_from": {
+          "title": "Extra JSON Path",
+          "description": "The `extra` field in the ORY Oathkeeper authentication session is set using this JSON Path. Defaults to `extra`, and could be `@this` (for the root element), `foo.bar` (for key foo.bar), or any other valid GJSON path. See [GSJON Syntax](https://github.com/tidwall/gjson/blob/master/SYNTAX.md) for reference.",
+          "type": "string",
+          "default": "extra"
+        },
+        "subject_from": {
+          "title": "Subject JSON Path",
+          "description": "The `subject` field in the ORY Oathkeeper authentication session is set using this JSON Path. Defaults to `subject`. See [GSJON Syntax](https://github.com/tidwall/gjson/blob/master/SYNTAX.md) for reference.",
+          "type": "string",
+          "default": "subject"
         }
       },
       "required": [
@@ -403,9 +416,11 @@
           },
           "description": "URLs where ORY Oathkeeper can retrieve JSON Web Keys from for validating the JSON Web Token. Usually something like \"https://my-keys.com/.well-known/jwks.json\". The response of that endpoint must return a JSON Web Key Set (JWKS).\n\n>If this authenticator is enabled, this value is required.",
           "examples": [
-            "https://my-website.com/.well-known/jwks.json",
-            "https://my-other-website.com/.well-known/jwks.json",
-            "file://path/to/local/jwks.json"
+            [
+              "https://my-website.com/.well-known/jwks.json",
+              "https://my-other-website.com/.well-known/jwks.json",
+              "file://path/to/local/jwks.json"
+            ]
           ]
         },
         "scope_strategy": {
@@ -425,7 +440,7 @@
                 "header": {
                   "title": "Header",
                   "type": "string",
-                  "description": "The header (case insensitive) that must contain a token for request authentication. It can't be set along with query_parameter."
+                  "description": "The header (case insensitive) that must contain a token for request authentication.\n It can't be set along with query_parameter or cookie."
                 }
               }
             },
@@ -436,7 +451,18 @@
                 "query_parameter": {
                   "title": "Query Parameter",
                   "type": "string",
-                  "description": "The query parameter (case sensitive) that must contain a token for request authentication. It can't be set along with header."
+                  "description": "The query parameter (case sensitive) that must contain a token for request authentication.\n It can't be set along with header or cookie."
+                }
+              }
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "cookie": {
+                  "title": "Cookie",
+                  "type": "string",
+                  "description": "The cookie (case sensitive) that must contain a token for request authentication.\n It can't be set along with header or query_parameter."
                 }
               }
             }
@@ -525,7 +551,8 @@
               "description": "The OAuth 2.0 Scope to be requested during the OAuth 2.0 Client Credentials Grant.",
               "examples": [
                 [
-                  "[\"foo\", \"bar\"]"
+                  "foo",
+                  "bar"
                 ]
               ]
             }
@@ -573,7 +600,7 @@
                   "description": "The OAuth 2.0 Scope to be requested during the OAuth 2.0 Client Credentials Grant.",
                   "examples": [
                     [
-                      "[\"foo\", \"bar\"]"
+                      "foo", "bar"
                     ]
                   ]
                 }
@@ -868,7 +895,7 @@
           "additionalProperties": false,
           "properties": {
             "port": {
-              "type": "number",
+              "type": "integer",
               "default": 4456,
               "title": "Port",
               "description": "The port to listen on."
@@ -897,7 +924,7 @@
           "additionalProperties": false,
           "properties": {
             "port": {
-              "type": "number",
+              "type": "integer",
               "default": 4455,
               "title": "Port",
               "description": "The port to listen on."
@@ -981,7 +1008,24 @@
             "format": "uri"
           },
           "examples": [
-            "[\"file://path/to/rules.json\",\"inline://W3siaWQiOiJmb28tcnVsZSIsImF1dGhlbnRpY2F0b3JzIjpbXX1d\",\"https://path-to-my-rules/rules.json\"]"
+            [
+              "file://path/to/rules.json",
+              "inline://W3siaWQiOiJmb28tcnVsZSIsImF1dGhlbnRpY2F0b3JzIjpbXX1d",
+              "https://path-to-my-rules/rules.json"
+            ]
+          ]
+        },
+        "matching_strategy": {
+          "title": "Matching strategy",
+          "description": "This an optional field describing matching strategy. Currently supported values are 'glob' and 'regexp'.",
+          "type": "string",
+          "default": "regexp",
+          "enum": [
+            "glob",
+            "regexp"
+          ],
+          "examples": [
+            "glob"
           ]
         }
       }
@@ -1166,13 +1210,16 @@
         "fallback": {
           "title": "Error Handling Fallback",
           "description": "This array defines how to handle errors when no \"when\" clause matches. If you have, for example, enabled redirect and json in your access rule, you could tell ORY Oathkeeper to try sending JSON if the request does not match the access rule definition",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
           "default": [
             "json"
           ],
-          "examples": [
-            "json",
+          "examples": [[
             "redirect"
-          ]
+          ]]
         },
         "handlers": {
           "additionalProperties": false,
@@ -1251,9 +1298,6 @@
                   "title": "Enabled",
                   "type": "boolean",
                   "default": true,
-                  "examples": [
-                    true
-                  ],
                   "description": "En-/disables this component."
                 }
               },

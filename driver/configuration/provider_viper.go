@@ -2,10 +2,13 @@ package configuration
 
 import (
 	"bytes"
+	"encoding/binary"
 	"encoding/json"
 	"fmt"
+	"hash/crc64"
 	"net/url"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/imdario/mergo"
@@ -34,14 +37,15 @@ func init() {
 }
 
 const (
-	ViperKeyProxyReadTimeout       = "serve.proxy.timeout.read"
-	ViperKeyProxyWriteTimeout      = "serve.proxy.timeout.write"
-	ViperKeyProxyIdleTimeout       = "serve.proxy.timeout.idle"
-	ViperKeyProxyServeAddressHost  = "serve.proxy.host"
-	ViperKeyProxyServeAddressPort  = "serve.proxy.port"
-	ViperKeyAPIServeAddressHost    = "serve.api.host"
-	ViperKeyAPIServeAddressPort    = "serve.api.port"
-	ViperKeyAccessRuleRepositories = "access_rules.repositories"
+	ViperKeyProxyReadTimeout           = "serve.proxy.timeout.read"
+	ViperKeyProxyWriteTimeout          = "serve.proxy.timeout.write"
+	ViperKeyProxyIdleTimeout           = "serve.proxy.timeout.idle"
+	ViperKeyProxyServeAddressHost      = "serve.proxy.host"
+	ViperKeyProxyServeAddressPort      = "serve.proxy.port"
+	ViperKeyAPIServeAddressHost        = "serve.api.host"
+	ViperKeyAPIServeAddressPort        = "serve.api.port"
+	ViperKeyAccessRuleRepositories     = "access_rules.repositories"
+	ViperKeyAccessRuleMatchingStrategy = "access_rules.matching_strategy"
 )
 
 // Authorizers
@@ -102,10 +106,20 @@ const (
 
 type ViperProvider struct {
 	l logrus.FieldLogger
+
+	enabledMutex sync.RWMutex
+	enabledCache map[uint64]bool
+
+	configMutex sync.RWMutex
+	configCache map[uint64]json.RawMessage
 }
 
 func NewViperProvider(l logrus.FieldLogger) *ViperProvider {
-	return &ViperProvider{l: l}
+	return &ViperProvider{
+		l:            l,
+		enabledCache: make(map[uint64]bool),
+		configCache:  make(map[uint64]json.RawMessage),
+	}
 }
 
 func (v *ViperProvider) AccessRuleRepositories() []url.URL {
@@ -116,6 +130,11 @@ func (v *ViperProvider) AccessRuleRepositories() []url.URL {
 	}
 
 	return repositories
+}
+
+// AccessRuleMatchingStrategy returns current MatchingStrategy.
+func (v *ViperProvider) AccessRuleMatchingStrategy() MatchingStrategy {
+	return MatchingStrategy(viperx.GetString(v.l, ViperKeyAccessRuleMatchingStrategy, ""))
 }
 
 func (v *ViperProvider) CORSEnabled(iface string) bool {
@@ -194,10 +213,66 @@ func (v *ViperProvider) ToScopeStrategy(value string, key string) fosite.ScopeSt
 }
 
 func (v *ViperProvider) pipelineIsEnabled(prefix, id string) bool {
-	return viperx.GetBool(v.l, fmt.Sprintf("%s.%s.enabled", prefix, id), false)
+	hash, err := v.hashPipelineConfig(prefix, id, nil)
+	if err != nil {
+		return false
+	}
+
+	v.enabledMutex.RLock()
+	e, ok := v.enabledCache[hash]
+	v.enabledMutex.RUnlock()
+
+	if ok {
+		return e
+	}
+
+	v.enabledMutex.Lock()
+	v.enabledCache[hash] = viperx.GetBool(v.l, fmt.Sprintf("%s.%s.enabled", prefix, id), false)
+	v.enabledMutex.Unlock()
+
+	return v.enabledCache[hash]
+}
+
+func (v *ViperProvider) hashPipelineConfig(prefix, id string, override json.RawMessage) (uint64, error) {
+	ts := viper.ConfigChangeAt().UnixNano()
+	b := make([]byte, 8)
+	binary.LittleEndian.PutUint64(b, uint64(ts))
+
+	slices := [][]byte{
+		[]byte(prefix),
+		[]byte(id),
+		[]byte(override),
+		[]byte(b),
+	}
+
+	var hashSlices []byte
+	for _, s := range slices {
+		hashSlices = append(hashSlices, s...)
+	}
+
+	return crc64.Checksum(hashSlices, crc64.MakeTable(crc64.ECMA)), nil
 }
 
 func (v *ViperProvider) PipelineConfig(prefix, id string, override json.RawMessage, dest interface{}) error {
+	hash, err := v.hashPipelineConfig(prefix, id, override)
+	if err != nil {
+		return errors.WithStack(err)
+	}
+
+	v.configMutex.RLock()
+	c, ok := v.configCache[hash]
+	v.configMutex.RUnlock()
+
+	if ok {
+		if dest != nil {
+			if err := json.NewDecoder(bytes.NewBuffer(c)).Decode(dest); err != nil {
+				return errors.WithStack(err)
+			}
+		}
+
+		return nil
+	}
+
 	// we need to create a copy for config otherwise we will accidentally override values
 	config, err := x.Deepcopy(viperx.GetStringMapConfig(stringsx.Splitx(fmt.Sprintf("%s.%s.config", prefix, id), ".")...))
 	if err != nil {
@@ -251,6 +326,10 @@ func (v *ViperProvider) PipelineConfig(prefix, id string, override json.RawMessa
 	} else if !result.Valid() {
 		return errors.WithStack(result.Errors())
 	}
+
+	v.configMutex.Lock()
+	v.configCache[hash] = marshalled
+	v.configMutex.Unlock()
 
 	return nil
 }

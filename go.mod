@@ -3,73 +3,64 @@ module github.com/ory/oathkeeper
 require (
 	github.com/Masterminds/goutils v1.1.0 // indirect
 	github.com/Masterminds/sprig v2.20.0+incompatible
-	github.com/Microsoft/go-winio v0.4.12 // indirect
-	github.com/asaskevich/govalidator v0.0.0-20180720115003-f9ffefc3facf
+	github.com/asaskevich/govalidator v0.0.0-20190424111038-f61b66f89f4a
 	github.com/auth0/go-jwt-middleware v0.0.0-20170425171159-5493cabe49f7
 	github.com/blang/semver v3.5.1+incompatible
-	github.com/bmizerany/assert v0.0.0-20160611221934-b7ed37b82869
 	github.com/bxcodec/faker v2.0.1+incompatible
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
+	github.com/dlclark/regexp2 v1.2.0
 	github.com/fsnotify/fsnotify v1.4.7
 	github.com/ghodss/yaml v1.0.0
-	github.com/go-openapi/analysis v0.19.0 // indirect
-	github.com/go-openapi/errors v0.19.0
-	github.com/go-openapi/inflect v0.19.0 // indirect
-	github.com/go-openapi/loads v0.19.0 // indirect
-	github.com/go-openapi/runtime v0.19.0
-	github.com/go-openapi/spec v0.19.0 // indirect
-	github.com/go-openapi/strfmt v0.19.0
-	github.com/go-openapi/swag v0.19.0
-	github.com/go-openapi/validate v0.19.0
+	github.com/go-openapi/errors v0.19.2
+	github.com/go-openapi/runtime v0.19.5
+	github.com/go-openapi/strfmt v0.19.3
+	github.com/go-openapi/swag v0.19.5
+	github.com/go-openapi/validate v0.19.3
 	github.com/go-sql-driver/mysql v1.4.1
-	github.com/go-swagger/go-swagger v0.19.0
-	github.com/go-swagger/scan-repo-boundary v0.0.0-20180623220736-973b3573c013 // indirect
+	github.com/go-swagger/go-swagger v0.21.1-0.20200107003254-1c98855b472d
 	github.com/gobuffalo/httptest v1.0.2
 	github.com/gobuffalo/packr/v2 v2.0.0-rc.15
+	github.com/gobwas/glob v0.2.3
 	github.com/golang/gddo v0.0.0-20190904175337-72a348e765d2
 	github.com/golang/mock v1.3.1
 	github.com/google/uuid v1.1.1
-	github.com/gorilla/handlers v1.4.0 // indirect
 	github.com/gorilla/mux v1.7.1 // indirect
 	github.com/huandu/xstrings v1.2.0 // indirect
 	github.com/imdario/mergo v0.3.7
-	github.com/jessevdk/go-flags v1.4.0 // indirect
 	github.com/julienschmidt/httprouter v1.2.0
 	github.com/lib/pq v1.0.0
 	github.com/mattn/goveralls v0.0.3
-	github.com/opencontainers/runc v1.0.0-rc5 // indirect
 	github.com/ory/fosite v0.29.2
 	github.com/ory/go-acc v0.0.0-20181118080137-ddc355013f90
 	github.com/ory/go-convenience v0.1.0
 	github.com/ory/gojsonschema v1.2.0
 	github.com/ory/graceful v0.1.1
 	github.com/ory/herodot v0.6.2
-	github.com/ory/ladon v1.0.1
-	github.com/ory/viper v1.5.6
-	github.com/ory/x v0.0.88
+	github.com/ory/jsonschema/v3 v3.0.1
+	github.com/ory/ladon v1.1.0
+	github.com/ory/sdk/swagutil v0.0.0-20200202121523-307941feee4b
+	github.com/ory/viper v1.5.7
+	github.com/ory/x v0.0.95
 	github.com/pborman/uuid v1.2.0
 	github.com/pelletier/go-toml v1.6.0 // indirect
 	github.com/phayes/freeport v0.0.0-20180830031419-95f893ade6f2
-	github.com/pkg/errors v0.8.1
+	github.com/pkg/errors v0.9.1
 	github.com/rs/cors v1.6.0
 	github.com/sirupsen/logrus v1.4.2
 	github.com/spf13/cobra v0.0.5
 	github.com/spf13/pflag v1.0.5 // indirect
-	github.com/spf13/viper v1.4.0 // indirect
 	github.com/sqs/goreturns v0.0.0-20181028201513-538ac6014518
 	github.com/square/go-jose v2.3.1+incompatible
 	github.com/stretchr/testify v1.4.0
-	github.com/subosito/gotenv v1.2.0 // indirect
-	github.com/tidwall/gjson v1.3.2
+	github.com/tidwall/gjson v1.3.5
 	github.com/tidwall/sjson v1.0.4
 	github.com/tomasen/realip v0.0.0-20180522021738-f0c99a92ddce
-	github.com/toqueteos/webbrowser v1.1.0 // indirect
 	github.com/urfave/negroni v1.0.0
 	github.com/xeipuuv/gojsonpointer v0.0.0-20190905194746-02993c407bfb // indirect
-	golang.org/x/crypto v0.0.0-20190701094942-4def268fd1a4
+	golang.org/x/crypto v0.0.0-20200117160349-530e935923ad
 	golang.org/x/oauth2 v0.0.0-20190604053449-0f29369cfe45
-	golang.org/x/tools v0.0.0-20191026034945-b2104f82a97d
-	gopkg.in/square/go-jose.v2 v2.3.0
+	golang.org/x/tools v0.0.0-20200203215610-ab391d50b528
+	gopkg.in/square/go-jose.v2 v2.3.1
 )
 
 // Fix for https://github.com/golang/lint/issues/436

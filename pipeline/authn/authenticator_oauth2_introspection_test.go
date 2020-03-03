@@ -102,7 +102,14 @@ func TestAuthenticatorOAuth2Introspection(t *testing.T) {
 				expectExactErr: ErrAuthenticatorNotResponsible,
 			},
 			{
-				d:         "should pass because the valid JWT token was provided in a proper location (custom header)",
+				d:              "should return error saying that authenticator is not responsible for validating the request, as the token was not provided in a proper location (cookie)",
+				r:              &http.Request{Header: http.Header{"Cookie": {"biscuit=bearer token"}}},
+				config:         []byte(`{"token_from": {"cookie": "cake"}}`),
+				expectErr:      true,
+				expectExactErr: ErrAuthenticatorNotResponsible,
+			},
+			{
+				d:         "should pass because the valid token was provided in a proper location (custom header)",
 				r:         &http.Request{Header: http.Header{"X-Custom-Header": {"token"}}},
 				config:    []byte(`{"token_from": {"header": "X-Custom-Header"}}`),
 				expectErr: false,
@@ -117,13 +124,28 @@ func TestAuthenticatorOAuth2Introspection(t *testing.T) {
 				},
 			},
 			{
-				d: "should pass because the valid JWT token was provided in a proper location (custom query parameter)",
+				d: "should pass because the valid token was provided in a proper location (custom query parameter)",
 				r: &http.Request{
 					Form: map[string][]string{
 						"token": []string{"token"},
 					},
 				},
 				config:    []byte(`{"token_from": {"query_parameter": "token"}}`),
+				expectErr: false,
+				setup: func(t *testing.T, m *httprouter.Router) {
+					m.POST("/oauth2/introspect", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+						require.NoError(t, r.ParseForm())
+						require.Equal(t, "token", r.Form.Get("token"))
+						require.NoError(t, json.NewEncoder(w).Encode(&AuthenticatorOAuth2IntrospectionResult{
+							Active: true,
+						}))
+					})
+				},
+			},
+			{
+				d:         "should pass because the valid token was provided in a proper location (cookie)",
+				r:         &http.Request{Header: http.Header{"Cookie": {"biscuit=token"}}},
+				config:    []byte(`{"token_from": {"cookie": "biscuit"}}`),
 				expectErr: false,
 				setup: func(t *testing.T, m *httprouter.Router) {
 					m.POST("/oauth2/introspect", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
@@ -331,12 +353,15 @@ func TestAuthenticatorOAuth2Introspection(t *testing.T) {
 		viper.Set(configuration.ViperKeyAuthenticatorOAuth2TokenIntrospectionIsEnabled, false)
 		require.Error(t, a.Validate(json.RawMessage(`{"introspection_url":""}`)))
 
+		viper.Reset()
 		viper.Set(configuration.ViperKeyAuthenticatorOAuth2TokenIntrospectionIsEnabled, true)
 		require.Error(t, a.Validate(json.RawMessage(`{"introspection_url":""}`)))
 
+		viper.Reset()
 		viper.Set(configuration.ViperKeyAuthenticatorOAuth2TokenIntrospectionIsEnabled, false)
 		require.Error(t, a.Validate(json.RawMessage(`{"introspection_url":"/oauth2/token"}`)))
 
+		viper.Reset()
 		viper.Set(configuration.ViperKeyAuthenticatorOAuth2TokenIntrospectionIsEnabled, true)
 		require.Error(t, a.Validate(json.RawMessage(`{"introspection_url":"/oauth2/token"}`)))
 	})
