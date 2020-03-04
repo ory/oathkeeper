@@ -41,8 +41,8 @@ type AuthenticatorOAuth2IntrospectionPreAuthConfiguration struct {
 }
 
 type AuthenticatorOAuth2IntrospectionRetryConfiguration struct {
-	Timeout string `json:"conn_timeout"`
-	MaxWait string `json:"max_wait"`
+	Timeout string `json:"max_delay"`
+	MaxWait string `json:"give_up_after"`
 }
 
 type AuthenticatorOAuth2Introspection struct {

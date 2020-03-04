@@ -4,6 +4,22 @@
   "title": "ORY Oathkeeper Configuration",
   "type": "object",
   "definitions": {
+    "retry": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "give_up_after": {
+          "type": "string",
+          "default": "1s",
+          "pattern": "^[0-9]+(ns|us|ms|s|m|h)$"
+        },
+        "max_delay": {
+          "type": "string",
+          "pattern": "^[0-9]+(ns|us|ms|s|m|h)$",
+          "default": "100ms"
+        }
+      }
+    },
     "tlsxSource": {
       "type": "object",
       "additionalProperties": false,
@@ -680,33 +696,7 @@
           ]
         },
         "retry": {
-          "type": "object",
-          "properties": {
-            "conn_timeout": {
-              "title": "HTTP Connection Timeout",
-              "type": "string",
-              "default": "500ms",
-              "pattern": "^[0-9]+(ns|us|ms|s|m|h)$",
-              "description": "Sets the connection timeout. If reached, the request will canceled be retried.",
-              "examples": [
-                "5s",
-                "5m",
-                "5h"
-              ]
-            },
-            "max_wait": {
-              "title": "HTTP Max Wait",
-              "type": "string",
-              "default": "1s",
-              "pattern": "^[0-9]+(ns|us|ms|s|m|h)$",
-              "description": "The request fails after the specified amount of time was reached and no success response was received.",
-              "examples": [
-                "5s",
-                "5m",
-                "5h"
-              ]
-            }
-          }
+          "$ref": "#/definitions/retry"
         }
       },
       "required": [
@@ -821,20 +811,7 @@
               }
             },
             "retry": {
-              "type": "object",
-              "additionalProperties": false,
-              "properties": {
-                "give_up_after": {
-                  "type": "string",
-                  "default": "1s",
-                  "pattern": "^[0-9]+(ns|us|ms|s|m|h)$"
-                },
-                "max_delay": {
-                  "type": "string",
-                  "pattern": "^[0-9]+(ns|us|ms|s|m|h)$",
-                  "default": "100ms"
-                }
-              }
+              "$ref": "#/definitions/retry"
             }
           }
         }
