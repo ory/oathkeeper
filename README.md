@@ -70,7 +70,7 @@ documentation and upgrade instructions.
 ## Installation
 
 Head over to the
-[ORY Developer Documentation](https://www.ory.sh/docs/keto/install) to
+[ORY Developer Documentation](https://www.ory.sh/docs/oathkeeper/install) to
 learn how to install ORY Oathkeeper on Linux, macOS, Windows, and Docker and how
 to build ORY Oathkeeper from source.
 
