@@ -87,13 +87,17 @@
 
 **Closed issues:**
 
+- What is the format for the AUTHENTICATORS\_OAUTH2\_INTROSPECTION\_CONFIG\_INTROSPECTION\_REQUEST\_HEADERS environment variable in OathKeeper? [\#366](https://github.com/ory/oathkeeper/issues/366)
+- High Latency with `id\_token` mutator and RS256 keys [\#364](https://github.com/ory/oathkeeper/issues/364)
 - Log specified http request headers [\#360](https://github.com/ory/oathkeeper/issues/360)
+- Can't override `authenticators.oauth2\_introspection.config.from\_token` value from config file in API Access Rules file [\#359](https://github.com/ory/oathkeeper/issues/359)
 - Clean up docker compose file [\#324](https://github.com/ory/oathkeeper/issues/324)
 
 **Merged pull requests:**
 
 - feat: oauth intsropsection configurable timeout [\#370](https://github.com/ory/oathkeeper/pull/370) ([pike1212](https://github.com/pike1212))
 - Fix: link to Developer Install Guide [\#369](https://github.com/ory/oathkeeper/pull/369) ([jaredpreston](https://github.com/jaredpreston))
+- fix: Improve id\_token performance with caching [\#367](https://github.com/ory/oathkeeper/pull/367) ([aeneasr](https://github.com/aeneasr))
 - fix: Load config file only in serve command [\#365](https://github.com/ory/oathkeeper/pull/365) ([aeneasr](https://github.com/aeneasr))
 - fix\(config.schema.json\): fixed examples for some keys [\#363](https://github.com/ory/oathkeeper/pull/363) ([zepatrik](https://github.com/zepatrik))
 - Docker compose cleanup [\#325](https://github.com/ory/oathkeeper/pull/325) ([KarthikNayak](https://github.com/KarthikNayak))
@@ -123,6 +127,7 @@
 - ci: Bump orb versions [\#356](https://github.com/ory/oathkeeper/pull/356) ([aeneasr](https://github.com/aeneasr))
 - docs: Updates issue and pull request templates [\#355](https://github.com/ory/oathkeeper/pull/355) ([aeneasr](https://github.com/aeneasr))
 - feat\(ci\): Add nancy vuln scanner [\#354](https://github.com/ory/oathkeeper/pull/354) ([aeneasr](https://github.com/aeneasr))
+- Use integer instead of number in config JSON schema [\#350](https://github.com/ory/oathkeeper/pull/350) ([aeneasr](https://github.com/aeneasr))
 - \#321 [\#334](https://github.com/ory/oathkeeper/pull/334) ([ayzu](https://github.com/ayzu))
 
 ## [v0.35.5-beta.2](https://github.com/ory/oathkeeper/tree/v0.35.5-beta.2) (2020-01-31)
@@ -160,7 +165,7 @@
 
 **Merged pull requests:**
 
-- Use integer instead of number in config JSON schema [\#350](https://github.com/ory/oathkeeper/pull/350) ([aeneasr](https://github.com/aeneasr))
+- ci: Bump ory/sdk orb and Go version [\#349](https://github.com/ory/oathkeeper/pull/349) ([aeneasr](https://github.com/aeneasr))
 - Cache config to improve latencies [\#348](https://github.com/ory/oathkeeper/pull/348) ([ecktom](https://github.com/ecktom))
 - Set min/max for port range in config JSON Schema [\#345](https://github.com/ory/oathkeeper/pull/345) ([aeneasr](https://github.com/aeneasr))
 - Fix profiling env variable not being picked up [\#343](https://github.com/ory/oathkeeper/pull/343) ([ecktom](https://github.com/ecktom))
@@ -172,7 +177,6 @@
 
 **Merged pull requests:**
 
-- ci: Bump ory/sdk orb and Go version [\#349](https://github.com/ory/oathkeeper/pull/349) ([aeneasr](https://github.com/aeneasr))
 - ci: Move to goreleaser orb [\#338](https://github.com/ory/oathkeeper/pull/338) ([aeneasr](https://github.com/aeneasr))
 
 ## [v0.35.0-alpha.1](https://github.com/ory/oathkeeper/tree/v0.35.0-alpha.1) (2020-01-13)
@@ -770,6 +774,10 @@
 
 [Full Changelog](https://github.com/ory/oathkeeper/compare/v0.0.24...v0.0.25)
 
+**Closed issues:**
+
+- Document HYDRA\_JWK\_SET\_ID [\#34](https://github.com/ory/oathkeeper/issues/34)
+
 **Merged pull requests:**
 
 - Add extra data from token introspection to session [\#37](https://github.com/ory/oathkeeper/pull/37) ([aeneasr](https://github.com/aeneasr))
@@ -780,7 +788,6 @@
 
 **Closed issues:**
 
-- Document HYDRA\_JWK\_SET\_ID [\#34](https://github.com/ory/oathkeeper/issues/34)
 - Investigate if the issuer should be oathkeeper or hydra [\#27](https://github.com/ory/oathkeeper/issues/27)
 
 **Merged pull requests:**
