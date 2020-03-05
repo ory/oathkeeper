@@ -85,6 +85,10 @@
 
 [Full Changelog](https://github.com/ory/oathkeeper/compare/v0.36.0-beta.2...HEAD)
 
+**Fixed bugs:**
+
+- Investigate failing test case on master [\#371](https://github.com/ory/oathkeeper/issues/371)
+
 **Closed issues:**
 
 - What is the format for the AUTHENTICATORS\_OAUTH2\_INTROSPECTION\_CONFIG\_INTROSPECTION\_REQUEST\_HEADERS environment variable in OathKeeper? [\#366](https://github.com/ory/oathkeeper/issues/366)
@@ -95,6 +99,7 @@
 
 **Merged pull requests:**
 
+- fix: disable test that fails with low cache hit rate [\#372](https://github.com/ory/oathkeeper/pull/372) ([aeneasr](https://github.com/aeneasr))
 - feat: oauth intsropsection configurable timeout [\#370](https://github.com/ory/oathkeeper/pull/370) ([pike1212](https://github.com/pike1212))
 - Fix: link to Developer Install Guide [\#369](https://github.com/ory/oathkeeper/pull/369) ([jaredpreston](https://github.com/jaredpreston))
 - fix: Improve id\_token performance with caching [\#367](https://github.com/ory/oathkeeper/pull/367) ([aeneasr](https://github.com/aeneasr))
@@ -127,7 +132,7 @@
 - ci: Bump orb versions [\#356](https://github.com/ory/oathkeeper/pull/356) ([aeneasr](https://github.com/aeneasr))
 - docs: Updates issue and pull request templates [\#355](https://github.com/ory/oathkeeper/pull/355) ([aeneasr](https://github.com/aeneasr))
 - feat\(ci\): Add nancy vuln scanner [\#354](https://github.com/ory/oathkeeper/pull/354) ([aeneasr](https://github.com/aeneasr))
-- Use integer instead of number in config JSON schema [\#350](https://github.com/ory/oathkeeper/pull/350) ([aeneasr](https://github.com/aeneasr))
+- Hash enabled check to further improve performance [\#353](https://github.com/ory/oathkeeper/pull/353) ([ecktom](https://github.com/ecktom))
 - \#321 [\#334](https://github.com/ory/oathkeeper/pull/334) ([ayzu](https://github.com/ayzu))
 
 ## [v0.35.5-beta.2](https://github.com/ory/oathkeeper/tree/v0.35.5-beta.2) (2020-01-31)
@@ -140,7 +145,6 @@
 
 **Merged pull requests:**
 
-- Hash enabled check to further improve performance [\#353](https://github.com/ory/oathkeeper/pull/353) ([ecktom](https://github.com/ecktom))
 - ci: Bump sdk orb [\#352](https://github.com/ory/oathkeeper/pull/352) ([aeneasr](https://github.com/aeneasr))
 
 ## [v0.35.4-beta.1](https://github.com/ory/oathkeeper/tree/v0.35.4-beta.1) (2020-01-26)
@@ -165,6 +169,7 @@
 
 **Merged pull requests:**
 
+- Use integer instead of number in config JSON schema [\#350](https://github.com/ory/oathkeeper/pull/350) ([aeneasr](https://github.com/aeneasr))
 - ci: Bump ory/sdk orb and Go version [\#349](https://github.com/ory/oathkeeper/pull/349) ([aeneasr](https://github.com/aeneasr))
 - Cache config to improve latencies [\#348](https://github.com/ory/oathkeeper/pull/348) ([ecktom](https://github.com/ecktom))
 - Set min/max for port range in config JSON Schema [\#345](https://github.com/ory/oathkeeper/pull/345) ([aeneasr](https://github.com/aeneasr))
@@ -376,13 +381,13 @@
 
 [Full Changelog](https://github.com/ory/oathkeeper/compare/v0.17.2-beta.1...v0.17.3-beta.1)
 
-**Fixed bugs:**
-
-- rule: Resolve k8s configmap reload issue [\#231](https://github.com/ory/oathkeeper/pull/231) ([aeneasr](https://github.com/aeneasr))
-
 ## [v0.17.2-beta.1](https://github.com/ory/oathkeeper/tree/v0.17.2-beta.1) (2019-08-02)
 
 [Full Changelog](https://github.com/ory/oathkeeper/compare/v0.17.1-beta.1...v0.17.2-beta.1)
+
+**Fixed bugs:**
+
+- rule: Resolve k8s configmap reload issue [\#231](https://github.com/ory/oathkeeper/pull/231) ([aeneasr](https://github.com/aeneasr))
 
 **Closed issues:**
 
@@ -774,10 +779,6 @@
 
 [Full Changelog](https://github.com/ory/oathkeeper/compare/v0.0.24...v0.0.25)
 
-**Closed issues:**
-
-- Document HYDRA\_JWK\_SET\_ID [\#34](https://github.com/ory/oathkeeper/issues/34)
-
 **Merged pull requests:**
 
 - Add extra data from token introspection to session [\#37](https://github.com/ory/oathkeeper/pull/37) ([aeneasr](https://github.com/aeneasr))
@@ -788,6 +789,7 @@
 
 **Closed issues:**
 
+- Document HYDRA\_JWK\_SET\_ID [\#34](https://github.com/ory/oathkeeper/issues/34)
 - Investigate if the issuer should be oathkeeper or hydra [\#27](https://github.com/ory/oathkeeper/issues/27)
 
 **Merged pull requests:**
