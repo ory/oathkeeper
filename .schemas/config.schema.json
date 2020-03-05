@@ -4,6 +4,22 @@
   "title": "ORY Oathkeeper Configuration",
   "type": "object",
   "definitions": {
+    "retry": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "give_up_after": {
+          "type": "string",
+          "default": "1s",
+          "pattern": "^[0-9]+(ns|us|ms|s|m|h)$"
+        },
+        "max_delay": {
+          "type": "string",
+          "pattern": "^[0-9]+(ns|us|ms|s|m|h)$",
+          "default": "100ms"
+        }
+      }
+    },
     "tlsxSource": {
       "type": "object",
       "additionalProperties": false,
@@ -678,6 +694,9 @@
               }
             }
           ]
+        },
+        "retry": {
+          "$ref": "#/definitions/retry"
         }
       },
       "required": [
@@ -792,20 +811,7 @@
               }
             },
             "retry": {
-              "type": "object",
-              "additionalProperties": false,
-              "properties": {
-                "give_up_after": {
-                  "type": "string",
-                  "default": "1s",
-                  "pattern": "^[0-9]+(ns|us|ms|s|m|h)$"
-                },
-                "max_delay": {
-                  "type": "string",
-                  "pattern": "^[0-9]+(ns|us|ms|s|m|h)$",
-                  "default": "100ms"
-                }
-              }
+              "$ref": "#/definitions/retry"
             }
           }
         }

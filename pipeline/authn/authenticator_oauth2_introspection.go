@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+	"time"
 
 	"github.com/pkg/errors"
 	"golang.org/x/oauth2/clientcredentials"
@@ -28,6 +29,7 @@ type AuthenticatorOAuth2IntrospectionConfiguration struct {
 	IntrospectionURL            string                                                `json:"introspection_url"`
 	BearerTokenLocation         *helper.BearerTokenLocation                           `json:"token_from"`
 	IntrospectionRequestHeaders map[string]string                                     `json:"introspection_request_headers"`
+	Retry                       *AuthenticatorOAuth2IntrospectionRetryConfiguration   `json:"retry"`
 }
 
 type AuthenticatorOAuth2IntrospectionPreAuthConfiguration struct {
@@ -38,6 +40,11 @@ type AuthenticatorOAuth2IntrospectionPreAuthConfiguration struct {
 	TokenURL     string   `json:"token_url"`
 }
 
+type AuthenticatorOAuth2IntrospectionRetryConfiguration struct {
+	Timeout string `json:"max_delay"`
+	MaxWait string `json:"give_up_after"`
+}
+
 type AuthenticatorOAuth2Introspection struct {
 	c configuration.Provider
 
@@ -46,6 +53,7 @@ type AuthenticatorOAuth2Introspection struct {
 
 func NewAuthenticatorOAuth2Introspection(c configuration.Provider) *AuthenticatorOAuth2Introspection {
 	var rt http.RoundTripper
+
 	return &AuthenticatorOAuth2Introspection{c: c, client: httpx.NewResilientClientLatencyToleranceSmall(rt)}
 }
 
@@ -159,7 +167,28 @@ func (a *AuthenticatorOAuth2Introspection) Config(config json.RawMessage) (*Auth
 	}
 
 	if c.PreAuth != nil && c.PreAuth.Enabled {
-		a.client = httpx.NewResilientClientLatencyToleranceSmall(
+		if c.Retry == nil {
+			c.Retry = &AuthenticatorOAuth2IntrospectionRetryConfiguration{Timeout: "500ms", MaxWait: "1s"}
+		} else {
+			if c.Retry.Timeout == "" {
+				c.Retry.Timeout = "500ms"
+			}
+			if c.Retry.MaxWait == "" {
+				c.Retry.MaxWait = "1s"
+			}
+		}
+		duration, err := time.ParseDuration(c.Retry.Timeout)
+		if err != nil {
+			return nil, err
+		}
+		timeout := time.Millisecond * duration
+
+		maxWait, err := time.ParseDuration(c.Retry.MaxWait)
+		if err != nil {
+			return nil, err
+		}
+
+		a.client = httpx.NewResilientClientLatencyToleranceConfigurable(
 			(&clientcredentials.Config{
 				ClientID:     c.PreAuth.ClientID,
 				ClientSecret: c.PreAuth.ClientSecret,
@@ -168,6 +197,8 @@ func (a *AuthenticatorOAuth2Introspection) Config(config json.RawMessage) (*Auth
 			}).
 				Client(context.Background()).
 				Transport,
+			timeout,
+			maxWait,
 		)
 	}
 
