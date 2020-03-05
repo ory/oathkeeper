@@ -3,7 +3,6 @@ module github.com/ory/oathkeeper
 require (
 	github.com/Masterminds/goutils v1.1.0 // indirect
 	github.com/Masterminds/sprig v2.20.0+incompatible
-	github.com/allegro/bigcache v1.2.1 // indirect
 	github.com/asaskevich/govalidator v0.0.0-20190424111038-f61b66f89f4a
 	github.com/auth0/go-jwt-middleware v0.0.0-20170425171159-5493cabe49f7
 	github.com/blang/semver v3.5.1+incompatible
@@ -17,14 +16,12 @@ require (
 	github.com/go-openapi/runtime v0.19.5
 	github.com/go-openapi/strfmt v0.19.3
 	github.com/go-openapi/swag v0.19.5
-	github.com/go-openapi/validate v0.19.3
 	github.com/go-sql-driver/mysql v1.4.1
 	github.com/go-swagger/go-swagger v0.21.1-0.20200107003254-1c98855b472d
 	github.com/gobuffalo/httptest v1.0.2
 	github.com/gobuffalo/packr/v2 v2.0.0-rc.15
 	github.com/gobwas/glob v0.2.3
 	github.com/golang/gddo v0.0.0-20190904175337-72a348e765d2
-	github.com/golang/groupcache v0.0.0-20200121045136-8c9f03a8e57e // indirect
 	github.com/golang/mock v1.3.1
 	github.com/golang/protobuf v1.3.3 // indirect
 	github.com/google/uuid v1.1.1
@@ -66,8 +63,5 @@ require (
 	golang.org/x/tools v0.0.0-20200203215610-ab391d50b528
 	gopkg.in/square/go-jose.v2 v2.3.1
 )
-
-// Fix for https://github.com/golang/lint/issues/436
-replace github.com/golang/lint => github.com/golang/lint v0.0.0-20190227174305-8f45f776aaf1
 
 go 1.13

@@ -274,6 +274,7 @@ func TestMutatorIDToken(t *testing.T) {
 				Rule:    &rule.Rule{ID: "test-rule"},
 				Session: &authn.AuthenticationSession{Subject: "foo", Extra: map[string]interface{}{"abc": "value1", "def": "value2"}},
 				Config:  json.RawMessage([]byte(`{"claims": "{\"custom-claim\": \"{{ print .Extra.abc }}/{{ print .Extra.def }}\", \"aud\": [\"foo\", \"bar\"]}", "jwks_url": "file://../../test/stub/jwks-ecdsa.json"}`)),
+				K:       "file://../../test/stub/jwks-ecdsa.json",
 			}
 			cache := template.New("rules")
 
