@@ -92,6 +92,7 @@
 
 **Merged pull requests:**
 
+- feat: oauth intsropsection configurable timeout [\#370](https://github.com/ory/oathkeeper/pull/370) ([pike1212](https://github.com/pike1212))
 - Fix: link to Developer Install Guide [\#369](https://github.com/ory/oathkeeper/pull/369) ([jaredpreston](https://github.com/jaredpreston))
 - fix: Load config file only in serve command [\#365](https://github.com/ory/oathkeeper/pull/365) ([aeneasr](https://github.com/aeneasr))
 - fix\(config.schema.json\): fixed examples for some keys [\#363](https://github.com/ory/oathkeeper/pull/363) ([zepatrik](https://github.com/zepatrik))
@@ -160,7 +161,6 @@
 **Merged pull requests:**
 
 - Use integer instead of number in config JSON schema [\#350](https://github.com/ory/oathkeeper/pull/350) ([aeneasr](https://github.com/aeneasr))
-- ci: Bump ory/sdk orb and Go version [\#349](https://github.com/ory/oathkeeper/pull/349) ([aeneasr](https://github.com/aeneasr))
 - Cache config to improve latencies [\#348](https://github.com/ory/oathkeeper/pull/348) ([ecktom](https://github.com/ecktom))
 - Set min/max for port range in config JSON Schema [\#345](https://github.com/ory/oathkeeper/pull/345) ([aeneasr](https://github.com/aeneasr))
 - Fix profiling env variable not being picked up [\#343](https://github.com/ory/oathkeeper/pull/343) ([ecktom](https://github.com/ecktom))
@@ -172,6 +172,7 @@
 
 **Merged pull requests:**
 
+- ci: Bump ory/sdk orb and Go version [\#349](https://github.com/ory/oathkeeper/pull/349) ([aeneasr](https://github.com/aeneasr))
 - ci: Move to goreleaser orb [\#338](https://github.com/ory/oathkeeper/pull/338) ([aeneasr](https://github.com/aeneasr))
 
 ## [v0.35.0-alpha.1](https://github.com/ory/oathkeeper/tree/v0.35.0-alpha.1) (2020-01-13)
@@ -393,6 +394,10 @@
 
 [Full Changelog](https://github.com/ory/oathkeeper/compare/v0.17.0-beta.1...v0.17.1-beta.1)
 
+**Merged pull requests:**
+
+- Fix panic on send on closed channel [\#225](https://github.com/ory/oathkeeper/pull/225) ([hypnoglow](https://github.com/hypnoglow))
+
 ## [v0.17.0-beta.1](https://github.com/ory/oathkeeper/tree/v0.17.0-beta.1) (2019-07-18)
 
 [Full Changelog](https://github.com/ory/oathkeeper/compare/v0.16.0-beta.5...v0.17.0-beta.1)
@@ -404,7 +409,6 @@
 
 **Merged pull requests:**
 
-- Fix panic on send on closed channel [\#225](https://github.com/ory/oathkeeper/pull/225) ([hypnoglow](https://github.com/hypnoglow))
 - ci: Automate schema confiugration sync [\#222](https://github.com/ory/oathkeeper/pull/222) ([aeneasr](https://github.com/aeneasr))
 - Validate Configuration with JSON Schema [\#220](https://github.com/ory/oathkeeper/pull/220) ([aeneasr](https://github.com/aeneasr))
 - cmd: Do not fatal when immutable value is changed [\#218](https://github.com/ory/oathkeeper/pull/218) ([aeneasr](https://github.com/aeneasr))
@@ -468,7 +472,6 @@
 - docs: Updates issue and pull request templates [\#189](https://github.com/ory/oathkeeper/pull/189) ([aeneasr](https://github.com/aeneasr))
 - install.sh: fix install script [\#187](https://github.com/ory/oathkeeper/pull/187) ([mkontani](https://github.com/mkontani))
 - Reduce deployment complexity and refactor internals [\#185](https://github.com/ory/oathkeeper/pull/185) ([aeneasr](https://github.com/aeneasr))
-- vendor: Add go.sum [\#180](https://github.com/ory/oathkeeper/pull/180) ([aeneasr](https://github.com/aeneasr))
 
 ## [v0.15.2](https://github.com/ory/oathkeeper/tree/v0.15.2) (2019-05-04)
 
@@ -485,6 +488,10 @@
 ## [v0.15.1](https://github.com/ory/oathkeeper/tree/v0.15.1) (2019-04-29)
 
 [Full Changelog](https://github.com/ory/oathkeeper/compare/v0.15.0...v0.15.1)
+
+**Merged pull requests:**
+
+- vendor: Add go.sum [\#180](https://github.com/ory/oathkeeper/pull/180) ([aeneasr](https://github.com/aeneasr))
 
 ## [v0.15.0](https://github.com/ory/oathkeeper/tree/v0.15.0) (2019-04-29)
 
@@ -924,7 +931,6 @@
 **Merged pull requests:**
 
 - Added serve all command [\#12](https://github.com/ory/oathkeeper/pull/12) ([aeneasr](https://github.com/aeneasr))
-- Add cors handling to proxy [\#11](https://github.com/ory/oathkeeper/pull/11) ([aeneasr](https://github.com/aeneasr))
 
 ## [v0.0.5](https://github.com/ory/oathkeeper/tree/v0.0.5) (2017-11-01)
 
@@ -932,6 +938,7 @@
 
 **Merged pull requests:**
 
+- Add cors handling to proxy [\#11](https://github.com/ory/oathkeeper/pull/11) ([aeneasr](https://github.com/aeneasr))
 - Remove goveralls from circle build [\#10](https://github.com/ory/oathkeeper/pull/10) ([aeneasr](https://github.com/aeneasr))
 - Use circle ci build status badge [\#9](https://github.com/ory/oathkeeper/pull/9) ([aeneasr](https://github.com/aeneasr))
 - Switch from glide to golang/dep for vendoring [\#8](https://github.com/ory/oathkeeper/pull/8) ([aeneasr](https://github.com/aeneasr))
