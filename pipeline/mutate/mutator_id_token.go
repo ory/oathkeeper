@@ -22,13 +22,15 @@ package mutate
 
 import (
 	"bytes"
-	"crypto/sha256"
+	"crypto/md5"
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/url"
 	"text/template"
 	"time"
+
+	"github.com/dgraph-io/ristretto"
 
 	"github.com/dgrijalva/jwt-go"
 
@@ -46,9 +48,12 @@ type MutatorIDTokenRegistry interface {
 }
 
 type MutatorIDToken struct {
-	c configuration.Provider
-	r MutatorIDTokenRegistry
-	t *template.Template
+	c         configuration.Provider
+	r         MutatorIDTokenRegistry
+	templates *template.Template
+
+	tokenCache        *ristretto.Cache
+	tokenCacheEnabled bool
 }
 
 type CredentialsIDTokenConfig struct {
@@ -59,11 +64,16 @@ type CredentialsIDTokenConfig struct {
 }
 
 func (c *CredentialsIDTokenConfig) ClaimsTemplateID() string {
-	return fmt.Sprintf("%x", sha256.Sum256([]byte(c.Claims)))
+	return fmt.Sprintf("%x", md5.Sum([]byte(c.Claims)))
 }
 
 func NewMutatorIDToken(c configuration.Provider, r MutatorIDTokenRegistry) *MutatorIDToken {
-	return &MutatorIDToken{r: r, c: c, t: newTemplate("id_token")}
+	cache, _ := ristretto.NewCache(&ristretto.Config{
+		NumCounters: 10000,
+		MaxCost:     1 << 25,
+		BufferItems: 64,
+	})
+	return &MutatorIDToken{r: r, c: c, templates: newTemplate("id_token"), tokenCache: cache, tokenCacheEnabled: true}
 }
 
 func (a *MutatorIDToken) GetID() string {
@@ -71,7 +81,57 @@ func (a *MutatorIDToken) GetID() string {
 }
 
 func (a *MutatorIDToken) WithCache(t *template.Template) {
-	a.t = t
+	a.templates = t
+}
+
+func (a *MutatorIDToken) SetCaching(token bool) {
+	a.tokenCacheEnabled = token
+}
+
+type idTokenCacheContainer struct {
+	ExpiresAt time.Time
+	TTL       time.Duration
+	Token     string
+}
+
+func (a *MutatorIDToken) cacheKey(config *CredentialsIDTokenConfig, ttl time.Duration, claims []byte, session *authn.AuthenticationSession) string {
+	return fmt.Sprintf("%x",
+		md5.Sum([]byte(fmt.Sprintf("%s|%s|%s|%s|%s", config.IssuerURL, ttl, config.JWKSURL, claims, session.Subject))),
+	)
+}
+
+func (a *MutatorIDToken) tokenFromCache(config *CredentialsIDTokenConfig, session *authn.AuthenticationSession, claims []byte, ttl time.Duration) (string, bool) {
+	if !a.tokenCacheEnabled {
+		return "", false
+	}
+
+	key := a.cacheKey(config, ttl, claims, session)
+
+	item, found := a.tokenCache.Get(key)
+	if !found {
+		return "", false
+	}
+
+	container := item.(*idTokenCacheContainer)
+	if container.ExpiresAt.Before(time.Now().Add(ttl * 1 / 10)) {
+		a.tokenCache.Del(key)
+		return "", false
+	}
+
+	return container.Token, true
+}
+
+func (a *MutatorIDToken) tokenToCache(config *CredentialsIDTokenConfig, session *authn.AuthenticationSession, claims []byte, ttl time.Duration, expiresAt time.Time, token string) {
+	if !a.tokenCacheEnabled {
+		return
+	}
+
+	key := a.cacheKey(config, ttl, claims, session)
+	a.tokenCache.Set(key, &idTokenCacheContainer{
+		TTL:       ttl,
+		ExpiresAt: expiresAt,
+		Token:     token,
+	}, 0)
 }
 
 func (a *MutatorIDToken) Mutate(r *http.Request, session *authn.AuthenticationSession, config json.RawMessage, rl pipeline.Rule) error {
@@ -81,11 +141,17 @@ func (a *MutatorIDToken) Mutate(r *http.Request, session *authn.AuthenticationSe
 		return err
 	}
 
+	ttl, err := time.ParseDuration(c.TTL)
+	if err != nil {
+		return errors.WithStack(err)
+	}
+
+	var templateClaims []byte
 	if len(c.Claims) > 0 {
-		t := a.t.Lookup(c.ClaimsTemplateID())
+		t := a.templates.Lookup(c.ClaimsTemplateID())
 		if t == nil {
 			var err error
-			t, err = a.t.New(c.ClaimsTemplateID()).Parse(c.Claims)
+			t, err = a.templates.New(c.ClaimsTemplateID()).Parse(c.Claims)
 			if err != nil {
 				return errors.Wrapf(err, `error parsing claims template in rule "%s"`, rl.GetID())
 			}
@@ -96,22 +162,20 @@ func (a *MutatorIDToken) Mutate(r *http.Request, session *authn.AuthenticationSe
 			return errors.Wrapf(err, `error executing claims template in rule "%s"`, rl.GetID())
 		}
 
+		templateClaims = b.Bytes()
 		if err := json.NewDecoder(&b).Decode(&claims); err != nil {
 			return errors.WithStack(err)
 		}
 	}
 
-	if c.TTL == "" {
-		c.TTL = "1m"
-	}
-
-	ttl, err := time.ParseDuration(c.TTL)
-	if err != nil {
-		return errors.WithStack(err)
+	if token, ok := a.tokenFromCache(c, session, templateClaims, ttl); ok {
+		session.SetHeader("Authorization", "Bearer "+token)
+		return nil
 	}
 
 	now := time.Now().UTC()
-	claims["exp"] = now.Add(ttl).Unix()
+	exp := now.Add(ttl)
+	claims["exp"] = exp.Unix()
 	claims["jti"] = uuid.New()
 	claims["iat"] = now.Unix()
 	claims["iss"] = c.IssuerURL
@@ -123,15 +187,12 @@ func (a *MutatorIDToken) Mutate(r *http.Request, session *authn.AuthenticationSe
 		return errors.WithStack(err)
 	}
 
-	signed, err := a.r.CredentialsSigner().Sign(
-		r.Context(),
-		jwks,
-		claims,
-	)
+	signed, err := a.r.CredentialsSigner().Sign(r.Context(), jwks, claims)
 	if err != nil {
 		return err
 	}
 
+	a.tokenToCache(c, session, templateClaims, ttl, exp, signed)
 	session.SetHeader("Authorization", "Bearer "+signed)
 	return nil
 }
@@ -149,6 +210,10 @@ func (a *MutatorIDToken) Config(config json.RawMessage) (*CredentialsIDTokenConf
 	var c CredentialsIDTokenConfig
 	if err := a.c.MutatorConfig(a.GetID(), config, &c); err != nil {
 		return nil, NewErrMutatorMisconfigured(a, err)
+	}
+
+	if c.TTL == "" {
+		c.TTL = "15m"
 	}
 
 	return &c, nil

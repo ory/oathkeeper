@@ -132,6 +132,7 @@ func (s *FetcherDefault) ResolveKey(ctx context.Context, locations []url.URL, ki
 
 	return nil, errors.WithStack(herodot.
 		ErrInternalServerError.
+		WithDetail("jwks_urls", fmt.Sprintf("%v", locations)).
 		WithReasonf(`JSON Web Key ID "%s" with use "%s" could not be found in any of the provided URIs.`, kid, use).
 		WithDebug("Check that the provided JSON Web Key URIs contain a key that can verify the signature of the provided JSON Web Key ID."),
 	)

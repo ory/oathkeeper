@@ -52,7 +52,7 @@ func TestBearerTokenFromRequest(t *testing.T) {
 		customQueryParameterName := "Custom-Auth"
 		request := &http.Request{
 			Form: map[string][]string{
-				customQueryParameterName: []string{expectedToken},
+				customQueryParameterName: {expectedToken},
 			},
 		}
 		tokenLocation := helper.BearerTokenLocation{QueryParameter: &customQueryParameterName}

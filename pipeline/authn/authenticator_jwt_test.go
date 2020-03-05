@@ -109,7 +109,7 @@ func TestAuthenticatorJWT(t *testing.T) {
 				d: "should return error saying that authenticator is not responsible for validating the request, as the token was not provided in a proper location (custom query parameter)",
 				r: &http.Request{
 					Form: map[string][]string{
-						"someOtherQueryParam": []string{
+						"someOtherQueryParam": {
 							gen(keys[1], jwt.MapClaims{
 								"sub": "sub",
 								"exp": now.Add(time.Hour).Unix(),
@@ -148,7 +148,7 @@ func TestAuthenticatorJWT(t *testing.T) {
 				d: "should pass because the valid JWT token was provided in a proper location (custom query parameter)",
 				r: &http.Request{
 					Form: map[string][]string{
-						"token": []string{
+						"token": {
 							gen(keys[1], jwt.MapClaims{
 								"sub": "sub",
 								"exp": now.Add(time.Hour).Unix(),
