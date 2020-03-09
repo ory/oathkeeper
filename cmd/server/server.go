@@ -182,6 +182,11 @@ func RunServe(version, build, date string) func(cmd *cobra.Command, args []strin
 		adminmw.Use(metrics)
 		publicmw.Use(metrics)
 
+		if tracer := d.Registry().Tracer(); tracer.IsLoaded() {
+			adminmw.Use(tracer)
+			publicmw.Use(tracer)
+		}
+
 		var wg sync.WaitGroup
 		tasks := []func(){
 			runAPI(d, adminmw, logger),
