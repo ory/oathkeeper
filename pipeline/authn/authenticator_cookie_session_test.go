@@ -62,7 +62,7 @@ func TestAuthenticatorCookieSession(t *testing.T) {
 			require.NoError(t, err, "%#v", errors.Cause(err))
 			assert.Len(t, requestRecorder.requests, 1)
 			r := requestRecorder.requests[0]
-			assert.Equal(t, r.Method, "PUT")
+			assert.Equal(t, r.Method, "GET")
 			assert.Equal(t, r.URL.Path, "/users/123?query=string")
 			assert.Equal(t, r.Header.Get("Cookie"), "sessionid=zyx")
 			assert.Equal(t, &AuthenticationSession{Subject: "123"}, session)
@@ -78,7 +78,7 @@ func TestAuthenticatorCookieSession(t *testing.T) {
 			require.NoError(t, err, "%#v", errors.Cause(err))
 			assert.Len(t, requestRecorder.requests, 1)
 			r := requestRecorder.requests[0]
-			assert.Equal(t, r.Method, "PUT")
+			assert.Equal(t, r.Method, "GET")
 			assert.Equal(t, r.URL.Path, "/")
 			assert.Equal(t, r.Header.Get("Cookie"), "sessionid=zyx")
 			assert.Equal(t, &AuthenticationSession{Subject: "123"}, session)
