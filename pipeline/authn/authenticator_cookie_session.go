@@ -135,7 +135,7 @@ func forwardRequestToSessionStore(r *http.Request, checkSessionURL string, prese
 	}
 
 	res, err := http.DefaultClient.Do(&http.Request{
-		Method: r.Method,
+		Method: http.MethodGet,
 		URL:    reqUrl,
 		Header: r.Header,
 	})
