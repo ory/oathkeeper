@@ -35,7 +35,6 @@ import (
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/internal"
 
-	"github.com/ory/oathkeeper/pipeline"
 	"github.com/ory/oathkeeper/pipeline/authn"
 	. "github.com/ory/oathkeeper/pipeline/authz"
 
@@ -52,6 +51,8 @@ func TestAuthorizerKetoWarden(t *testing.T) {
 	conf := internal.NewConfigurationWithDefaults()
 	reg := internal.NewRegistry(conf)
 
+	rule := &rule.Rule{ID: "TestAuthorizer"}
+
 	a, err := reg.PipelineAuthorizer("keto_engine_acp_ory")
 	require.NoError(t, err)
 	assert.Equal(t, "keto_engine_acp_ory", a.GetID())
@@ -61,33 +62,20 @@ func TestAuthorizerKetoWarden(t *testing.T) {
 		r         *http.Request
 		session   *authn.AuthenticationSession
 		config    json.RawMessage
-		rule      pipeline.Rule
 		expectErr bool
 	}{
 		{
 			expectErr: true,
 		},
 		{
-			config: []byte(`{ "required_action": "action", "required_resource": "resource" }`),
-			rule: &rule.Rule{
-				Match: &rule.Match{
-					Methods: []string{"POST"},
-					URL:     "https://localhost/",
-				},
-			},
+			config:    []byte(`{ "required_action": "action", "required_resource": "resource" }`),
 			r:         &http.Request{URL: &url.URL{}},
 			session:   new(authn.AuthenticationSession),
 			expectErr: true,
 		},
 		{
 			config: []byte(`{ "required_action": "action", "required_resource": "resource", "flavor": "regex" }`),
-			rule: &rule.Rule{
-				Match: &rule.Match{
-					Methods: []string{"POST"},
-					URL:     "https://localhost/",
-				},
-			},
-			r: &http.Request{URL: &url.URL{}},
+			r:      &http.Request{URL: &url.URL{}},
 			setup: func(t *testing.T) *httptest.Server {
 				return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 					w.WriteHeader(http.StatusForbidden)
@@ -98,13 +86,7 @@ func TestAuthorizerKetoWarden(t *testing.T) {
 		},
 		{
 			config: []byte(`{ "required_action": "action", "required_resource": "resource", "flavor": "exact" }`),
-			rule: &rule.Rule{
-				Match: &rule.Match{
-					Methods: []string{"POST"},
-					URL:     "https://localhost/",
-				},
-			},
-			r: &http.Request{URL: &url.URL{}},
+			r:      &http.Request{URL: &url.URL{}},
 			setup: func(t *testing.T) *httptest.Server {
 				return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 					assert.Contains(t, r.Header, "Content-Type")
@@ -117,14 +99,8 @@ func TestAuthorizerKetoWarden(t *testing.T) {
 			expectErr: true,
 		},
 		{
-			config: []byte(`{ "required_action": "action:$1:$2", "required_resource": "resource:$1:$2" }`),
-			rule: &rule.Rule{
-				Match: &rule.Match{
-					Methods: []string{"POST"},
-					URL:     "https://localhost/api/users/<[0-9]+>/<[a-z]+>",
-				},
-			},
-			r: &http.Request{URL: urlx.ParseOrPanic("https://localhost/api/users/1234/abcde")},
+			config: []byte(`{ "required_action": "action:{{ printIndex .MatchContext.RegexpCaptureGroups (sub 1 1 | int)}}:{{ index .MatchContext.RegexpCaptureGroups (sub 2 1 | int)}}", "required_resource": "resource:{{ index .MatchContext.RegexpCaptureGroups 0}}:{{ index .MatchContext.RegexpCaptureGroups 1}}" }`),
+			r:      &http.Request{URL: urlx.ParseOrPanic("https://localhost/api/users/1234/abcde")},
 			setup: func(t *testing.T) *httptest.Server {
 				return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 					var ki AuthorizerKetoEngineACPORYRequestBody
@@ -139,18 +115,17 @@ func TestAuthorizerKetoWarden(t *testing.T) {
 					w.Write([]byte(`{"allowed":true}`))
 				}))
 			},
-			session:   &authn.AuthenticationSession{Subject: "peter"},
+			session: &authn.AuthenticationSession{
+				Subject: "peter",
+				MatchContext: authn.MatchContext{
+					RegexpCaptureGroups: []string{"1234", "abcde"},
+				},
+			},
 			expectErr: false,
 		},
 		{
-			config: []byte(`{ "required_action": "action:$1:$2", "required_resource": "resource:$1:$2", "subject": "{{ .Extra.name }}" }`),
-			rule: &rule.Rule{
-				Match: &rule.Match{
-					Methods: []string{"POST"},
-					URL:     "https://localhost/api/users/<[0-9]+>/<[a-z]+>",
-				},
-			},
-			r: &http.Request{URL: urlx.ParseOrPanic("https://localhost/api/users/1234/abcde")},
+			config: []byte(`{ "required_action": "action:{{ index .MatchContext.RegexpCaptureGroups 0}}:{{ index .MatchContext.RegexpCaptureGroups 1}}", "required_resource": "resource:{{ index .MatchContext.RegexpCaptureGroups 0}}:{{ index .MatchContext.RegexpCaptureGroups 1}}", "subject": "{{ .Extra.name }}" }`),
+			r:      &http.Request{URL: urlx.ParseOrPanic("https://localhost/api/users/1234/abcde")},
 			setup: func(t *testing.T) *httptest.Server {
 				return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 					var ki AuthorizerKetoEngineACPORYRequestBody
@@ -165,25 +140,23 @@ func TestAuthorizerKetoWarden(t *testing.T) {
 					w.Write([]byte(`{"allowed":true}`))
 				}))
 			},
-			session:   &authn.AuthenticationSession{Extra: map[string]interface{}{"name": "peter"}},
+			session: &authn.AuthenticationSession{
+				Extra: map[string]interface{}{"name": "peter"},
+				MatchContext: authn.MatchContext{
+					RegexpCaptureGroups: []string{"1234", "abcde"},
+				}},
 			expectErr: false,
 		},
 		{
-			config: []byte(`{ "required_action": "action:$1:$2", "required_resource": "resource:$1:$2", "subject": "{{ .Extra.name }}" }`),
-			rule: &rule.Rule{
-				Match: &rule.Match{
-					Methods: []string{"POST"},
-					URL:     "https://localhost/api/users/<[0-9]+>/<[a-z]+>",
-				},
-			},
-			r: &http.Request{URL: urlx.ParseOrPanic("https://localhost/api/users/1234/abcde?limit=10")},
+			config: []byte(`{ "required_action": "action:{{ index .MatchContext.RegexpCaptureGroups 0 }}:{{ .Extra.name }}", "required_resource": "resource:{{ index .MatchContext.RegexpCaptureGroups 0}}:{{ .Extra.apiVersion }}", "subject": "{{ .Extra.name }}" }`),
+			r:      &http.Request{URL: urlx.ParseOrPanic("https://localhost/api/users/1234/abcde?limit=10")},
 			setup: func(t *testing.T) *httptest.Server {
 				return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 					var ki AuthorizerKetoEngineACPORYRequestBody
 					require.NoError(t, json.NewDecoder(r.Body).Decode(&ki))
 					assert.EqualValues(t, AuthorizerKetoEngineACPORYRequestBody{
-						Action:   "action:1234:abcde",
-						Resource: "resource:1234:abcde",
+						Action:   "action:1234:peter",
+						Resource: "resource:1234:1.0",
 						Context:  map[string]interface{}{},
 						Subject:  "peter",
 					}, ki)
@@ -191,7 +164,12 @@ func TestAuthorizerKetoWarden(t *testing.T) {
 					w.Write([]byte(`{"allowed":true}`))
 				}))
 			},
-			session:   &authn.AuthenticationSession{Extra: map[string]interface{}{"name": "peter"}},
+			session: &authn.AuthenticationSession{
+				Extra: map[string]interface{}{
+					"name":       "peter",
+					"apiVersion": "1.0"},
+				MatchContext: authn.MatchContext{RegexpCaptureGroups: []string{"1234"}},
+			},
 			expectErr: false,
 		},
 	} {
@@ -211,7 +189,7 @@ func TestAuthorizerKetoWarden(t *testing.T) {
 			})
 
 			tc.config, _ = sjson.SetBytes(tc.config, "base_url", baseURL)
-			err := a.Authorize(tc.r, tc.session, tc.config, tc.rule)
+			err := a.Authorize(tc.r, tc.session, tc.config, rule)
 			if tc.expectErr {
 				require.Error(t, err)
 			} else {
@@ -224,15 +202,13 @@ func TestAuthorizerKetoWarden(t *testing.T) {
 		viper.Set(configuration.ViperKeyAuthorizerKetoEngineACPORYIsEnabled, false)
 		require.Error(t, a.Validate(json.RawMessage(`{"base_url":"","required_action":"foo","required_resource":"bar"}`)))
 
-		viper.Reset()
-		viper.Set(configuration.ViperKeyAuthorizerKetoEngineACPORYIsEnabled, true)
-		require.Error(t, a.Validate(json.RawMessage(`{"base_url":"","required_action":"foo","required_resource":"bar"}`)))
-
-		viper.Reset()
 		viper.Set(configuration.ViperKeyAuthorizerKetoEngineACPORYIsEnabled, false)
 		require.Error(t, a.Validate(json.RawMessage(`{"base_url":"http://foo/bar","required_action":"foo","required_resource":"bar"}`)))
 
 		viper.Reset()
+		viper.Set(configuration.ViperKeyAuthorizerKetoEngineACPORYIsEnabled, true)
+		require.Error(t, a.Validate(json.RawMessage(`{"base_url":"","required_action":"foo","required_resource":"bar"}`)))
+
 		viper.Set(configuration.ViperKeyAuthorizerKetoEngineACPORYIsEnabled, true)
 		require.NoError(t, a.Validate(json.RawMessage(`{"base_url":"http://foo/bar","required_action":"foo","required_resource":"bar"}`)))
 	})

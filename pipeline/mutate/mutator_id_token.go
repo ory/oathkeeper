@@ -41,6 +41,7 @@ import (
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/pipeline"
 	"github.com/ory/oathkeeper/pipeline/authn"
+	"github.com/ory/oathkeeper/x"
 )
 
 type MutatorIDTokenRegistry interface {
@@ -73,7 +74,7 @@ func NewMutatorIDToken(c configuration.Provider, r MutatorIDTokenRegistry) *Muta
 		MaxCost:     1 << 25,
 		BufferItems: 64,
 	})
-	return &MutatorIDToken{r: r, c: c, templates: newTemplate("id_token"), tokenCache: cache, tokenCacheEnabled: true}
+	return &MutatorIDToken{r: r, c: c, templates: x.NewTemplate("id_token"), tokenCache: cache, tokenCacheEnabled: true}
 }
 
 func (a *MutatorIDToken) GetID() string {

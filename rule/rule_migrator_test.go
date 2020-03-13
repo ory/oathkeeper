@@ -81,6 +81,38 @@ func TestRuleMigration(t *testing.T) {
 }`,
 			version: "v0.33.0-beta.1+oryOS.12",
 		},
+		{
+			d: "should migrate to 0.37.0",
+			in: `{
+				"version": "v0.33.0",
+				"authorizer":	
+				  {
+					"handler": "keto_engine_acp_ory",
+					"config": {
+						"required_action": "my:action:$1",
+						"required_resource": "my:resource:$2:foo:$1",
+						"flavor": "exact"
+					}
+				  }
+			  }`,
+			out: `{
+				"id": "",
+				"version": "v0.37.0",
+				"description":"","match":null,"authenticators":null,"errors":null,
+				"authorizer":	
+				  {
+					"handler": "keto_engine_acp_ory",
+					"config": {
+						"required_action": "my:action:{{ printIndex .MatchContext.RegexpCaptureGroups (sub 1 1 | int)}}",
+						"required_resource": "my:resource:{{ printIndex .MatchContext.RegexpCaptureGroups (sub 2 1 | int)}}:foo:{{ printIndex .MatchContext.RegexpCaptureGroups (sub 1 1 | int)}}",
+						"flavor": "exact"
+					}
+				  },
+				"mutators": null,
+				"upstream":{"preserve_host":false,"strip_path":"","url":""}
+			  }`,
+			version: "v0.37.0+oryOS.18",
+		},
 	} {
 		t.Run(fmt.Sprintf("case=%d/description=%s", k, tc.d), func(t *testing.T) {
 			var r Rule

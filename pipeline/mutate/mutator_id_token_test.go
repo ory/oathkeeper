@@ -141,6 +141,51 @@ var idTokenTestCases = []idTokenTestCase{
 		Match:   jwt.MapClaims{},
 		K:       "file://../../test/stub/jwks-ecdsa.json",
 	},
+	{
+		Rule: &rule.Rule{ID: "test-rule10"},
+		Session: &authn.AuthenticationSession{
+			Subject: "foo",
+			Extra:   map[string]interface{}{"abc": "value1", "def": "value2"},
+			MatchContext: authn.MatchContext{
+				RegexpCaptureGroups: []string{"user", "pass"},
+			}},
+		Config: json.RawMessage([]byte(`{"claims": "{\"custom-claim\": \"{{ print .Extra.abc }}\", \"custom-claim2\": \"{{ printIndex .MatchContext.RegexpCaptureGroups 1}}\", \"aud\": [\"foo\", \"bar\"]}"}`)),
+		Match: jwt.MapClaims{
+			"custom-claim":  "value1",
+			"custom-claim2": "pass",
+		},
+		K: "file://../../test/stub/jwks-ecdsa.json",
+	},
+	{
+		Rule: &rule.Rule{ID: "test-rule11"},
+		Session: &authn.AuthenticationSession{
+			Subject: "foo",
+			Extra:   map[string]interface{}{"abc": "value1", "def": "value2"},
+			MatchContext: authn.MatchContext{
+				RegexpCaptureGroups: []string{"user"},
+			}},
+		Config: json.RawMessage([]byte(`{"claims": "{\"custom-claim\": \"{{ print .Extra.abc }}\", \"custom-claim2\": \"{{ printIndex .MatchContext.RegexpCaptureGroups 1}}\", \"aud\": [\"foo\", \"bar\"]}"}`)),
+		Match: jwt.MapClaims{
+			"custom-claim":  "value1",
+			"custom-claim2": "",
+		},
+		K: "file://../../test/stub/jwks-ecdsa.json",
+	},
+	{
+		Rule: &rule.Rule{ID: "test-rule12"},
+		Session: &authn.AuthenticationSession{
+			Subject: "foo",
+			Extra:   map[string]interface{}{"abc": "value1", "def": "value2"},
+			MatchContext: authn.MatchContext{
+				RegexpCaptureGroups: []string{},
+			}},
+		Config: json.RawMessage([]byte(`{"claims": "{\"custom-claim\": \"{{ print .Extra.abc }}\", \"custom-claim2\": \"{{ printIndex .MatchContext.RegexpCaptureGroups 0}}\", \"aud\": [\"foo\", \"bar\"]}"}`)),
+		Match: jwt.MapClaims{
+			"custom-claim":  "value1",
+			"custom-claim2": "",
+		},
+		K: "file://../../test/stub/jwks-ecdsa.json",
+	},
 }
 
 func parseToken(h http.Header) string {

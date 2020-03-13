@@ -20,5 +20,6 @@ var (
 type MatchingEngine interface {
 	IsMatching(pattern, matchAgainst string) (bool, error)
 	ReplaceAllString(pattern, input, replacement string) (string, error)
+	FindStringSubmatch(pattern, matchAgainst string) ([]string, error)
 	Checksum() uint64
 }

@@ -217,3 +217,22 @@ func ensureMatchingEngine(rule *Rule, strategy configuration.MatchingStrategy) e
 
 	return errors.Wrap(ErrUnknownMatchingStrategy, string(strategy))
 }
+
+// ExtractRegexGroups returns the values matching the rule pattern
+func (r *Rule) ExtractRegexGroups(strategy configuration.MatchingStrategy, u *url.URL) ([]string, error) {
+	if err := ensureMatchingEngine(r, strategy); err != nil {
+		return nil, err
+	}
+
+	if r.Match == nil {
+		return []string{}, nil
+	}
+
+	matchAgainst := fmt.Sprintf("%s://%s%s", u.Scheme, u.Host, u.Path)
+	groups, err := r.matchingEngine.FindStringSubmatch(r.Match.URL, matchAgainst)
+	if err != nil {
+		return nil, err
+	}
+
+	return groups, nil
+}

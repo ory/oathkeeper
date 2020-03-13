@@ -73,22 +73,22 @@ type AuthenticatorOAuth2IntrospectionResult struct {
 	Scope     string                 `json:"scope,omitempty"`
 }
 
-func (a *AuthenticatorOAuth2Introspection) Authenticate(r *http.Request, config json.RawMessage, _ pipeline.Rule) (*AuthenticationSession, error) {
+func (a *AuthenticatorOAuth2Introspection) Authenticate(r *http.Request, session *AuthenticationSession, config json.RawMessage, _ pipeline.Rule) error {
 	var i AuthenticatorOAuth2IntrospectionResult
 	cf, err := a.Config(config)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	token := helper.BearerTokenFromRequest(r, cf.BearerTokenLocation)
 	if token == "" {
-		return nil, errors.WithStack(ErrAuthenticatorNotResponsible)
+		return errors.WithStack(ErrAuthenticatorNotResponsible)
 	}
 
 	body := url.Values{"token": {token}, "scope": {strings.Join(cf.Scopes, " ")}}
 	introspectReq, err := http.NewRequest(http.MethodPost, cf.IntrospectionURL, strings.NewReader(body.Encode()))
 	if err != nil {
-		return nil, errors.WithStack(err)
+		return errors.WithStack(err)
 	}
 	for key, value := range cf.IntrospectionRequestHeaders {
 		introspectReq.Header.Set(key, value)
@@ -97,42 +97,42 @@ func (a *AuthenticatorOAuth2Introspection) Authenticate(r *http.Request, config 
 	introspectReq.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	resp, err := a.client.Do(introspectReq)
 	if err != nil {
-		return nil, errors.WithStack(err)
+		return errors.WithStack(err)
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return nil, errors.Errorf("Introspection returned status code %d but expected %d", resp.StatusCode, http.StatusOK)
+		return errors.Errorf("Introspection returned status code %d but expected %d", resp.StatusCode, http.StatusOK)
 	}
 
 	if err := json.NewDecoder(resp.Body).Decode(&i); err != nil {
-		return nil, errors.WithStack(err)
+		return errors.WithStack(err)
 	}
 
 	if len(i.TokenType) > 0 && i.TokenType != "access_token" {
-		return nil, errors.WithStack(helper.ErrForbidden.WithReason(fmt.Sprintf("Introspected token is not an access token but \"%s\"", i.TokenType)))
+		return errors.WithStack(helper.ErrForbidden.WithReason(fmt.Sprintf("Introspected token is not an access token but \"%s\"", i.TokenType)))
 	}
 
 	if !i.Active {
-		return nil, errors.WithStack(helper.ErrUnauthorized.WithReason("Access token i says token is not active"))
+		return errors.WithStack(helper.ErrUnauthorized.WithReason("Access token i says token is not active"))
 	}
 
 	for _, audience := range cf.Audience {
 		if !stringslice.Has(i.Audience, audience) {
-			return nil, errors.WithStack(helper.ErrForbidden.WithReason(fmt.Sprintf("Token audience is not intended for target audience %s", audience)))
+			return errors.WithStack(helper.ErrForbidden.WithReason(fmt.Sprintf("Token audience is not intended for target audience %s", audience)))
 		}
 	}
 
 	if len(cf.Issuers) > 0 {
 		if !stringslice.Has(cf.Issuers, i.Issuer) {
-			return nil, errors.WithStack(helper.ErrForbidden.WithReason(fmt.Sprintf("Token issuer does not match any trusted issuer")))
+			return errors.WithStack(helper.ErrForbidden.WithReason(fmt.Sprintf("Token issuer does not match any trusted issuer")))
 		}
 	}
 
 	if ss := a.c.ToScopeStrategy(cf.ScopeStrategy, "authenticators.oauth2_introspection.scope_strategy"); ss != nil {
 		for _, scope := range cf.Scopes {
 			if !ss(strings.Split(i.Scope, " "), scope) {
-				return nil, errors.WithStack(helper.ErrForbidden.WithReason(fmt.Sprintf("Scope %s was not granted", scope)))
+				return errors.WithStack(helper.ErrForbidden.WithReason(fmt.Sprintf("Scope %s was not granted", scope)))
 			}
 		}
 	}
@@ -145,10 +145,10 @@ func (a *AuthenticatorOAuth2Introspection) Authenticate(r *http.Request, config 
 	i.Extra["client_id"] = i.ClientID
 	i.Extra["scope"] = i.Scope
 
-	return &AuthenticationSession{
-		Subject: i.Subject,
-		Extra:   i.Extra,
-	}, nil
+	session.Subject = i.Subject
+	session.Extra = i.Extra
+
+	return nil
 }
 
 func (a *AuthenticatorOAuth2Introspection) Validate(config json.RawMessage) error {

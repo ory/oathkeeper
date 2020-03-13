@@ -178,6 +178,9 @@ func (d *RequestHandler) HandleRequest(r *http.Request, rl *rule.Rule) (session 
 		"rule_id":         rl.ID,
 	}
 
+	// initialize the session used during all the flow
+	session = d.InitializeAuthnSession(r, rl)
+
 	if len(rl.Authenticators) == 0 {
 		err = errors.New("No authentication handler was set in the rule")
 		d.r.Logger().WithError(err).
@@ -210,7 +213,7 @@ func (d *RequestHandler) HandleRequest(r *http.Request, rl *rule.Rule) (session 
 			return nil, err
 		}
 
-		session, err = anh.Authenticate(r, a.Config, rl)
+		err = anh.Authenticate(r, session, a.Config, rl)
 		if err != nil {
 			switch errors.Cause(err).Error() {
 			case authn.ErrAuthenticatorNotResponsible.Error():
@@ -324,4 +327,28 @@ func (d *RequestHandler) HandleRequest(r *http.Request, rl *rule.Rule) (session 
 	}
 
 	return session, nil
+}
+
+// InitializeAuthnSession reates an authentication session and initializes it with a Match context if possible
+func (d *RequestHandler) InitializeAuthnSession(r *http.Request, rl *rule.Rule) *authn.AuthenticationSession {
+
+	session := &authn.AuthenticationSession{
+		Subject: "",
+	}
+
+	values, err := rl.ExtractRegexGroups(d.c.AccessRuleMatchingStrategy(), r.URL)
+	if err != nil {
+		d.r.Logger().WithError(err).
+			WithField("rule_id", rl.ID).
+			WithField("access_url", r.URL.String()).
+			WithField("reason_id", "capture_groups_error").
+			Warn("Unable to capture the groups for the MatchContext")
+	} else {
+		session.MatchContext = authn.MatchContext{
+			RegexpCaptureGroups: values,
+			URL:                 r.URL,
+		}
+	}
+
+	return session
 }

@@ -332,7 +332,8 @@ func TestAuthenticatorOAuth2Introspection(t *testing.T) {
 
 				tc.config, _ = sjson.SetBytes(tc.config, "introspection_url", ts.URL+"/oauth2/introspect")
 				tc.config, _ = sjson.SetBytes(tc.config, "scope_strategy", "exact")
-				sess, err := a.Authenticate(tc.r, tc.config, nil)
+				sess := new(AuthenticationSession)
+				err := a.Authenticate(tc.r, sess, tc.config, nil)
 				if tc.expectErr {
 					require.Error(t, err)
 					if tc.expectExactErr != nil {

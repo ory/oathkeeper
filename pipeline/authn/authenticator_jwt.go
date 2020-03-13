@@ -67,15 +67,15 @@ func (a *AuthenticatorJWT) Config(config json.RawMessage) (*AuthenticatorOAuth2J
 	return &c, nil
 }
 
-func (a *AuthenticatorJWT) Authenticate(r *http.Request, config json.RawMessage, _ pipeline.Rule) (*AuthenticationSession, error) {
+func (a *AuthenticatorJWT) Authenticate(r *http.Request, session *AuthenticationSession, config json.RawMessage, _ pipeline.Rule) error {
 	cf, err := a.Config(config)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	token := helper.BearerTokenFromRequest(r, cf.BearerTokenLocation)
 	if token == "" {
-		return nil, errors.WithStack(ErrAuthenticatorNotResponsible)
+		return errors.WithStack(ErrAuthenticatorNotResponsible)
 	}
 
 	if len(cf.AllowedAlgorithms) == 0 {
@@ -84,7 +84,7 @@ func (a *AuthenticatorJWT) Authenticate(r *http.Request, config json.RawMessage,
 
 	jwksu, err := a.c.ParseURLs(cf.JWKSURLs)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	pt, err := a.r.CredentialsVerifier().Verify(r.Context(), token, &credentials.ValidationContext{
@@ -96,17 +96,16 @@ func (a *AuthenticatorJWT) Authenticate(r *http.Request, config json.RawMessage,
 		ScopeStrategy: a.c.ToScopeStrategy(cf.ScopeStrategy, "authenticators.jwt.Config.scope_strategy"),
 	})
 	if err != nil {
-		return nil, helper.ErrUnauthorized.WithReason(err.Error()).WithTrace(err)
+		return helper.ErrUnauthorized.WithReason(err.Error()).WithTrace(err)
 	}
 
 	claims, ok := pt.Claims.(jwt.MapClaims)
 	if !ok {
-		return nil, errors.WithStack(herodot.ErrInternalServerError.WithReasonf("Expected JSON Web Token claims to be of type jwt.MapClaims but got: %T", pt.Claims))
+		return errors.WithStack(herodot.ErrInternalServerError.WithReasonf("Expected JSON Web Token claims to be of type jwt.MapClaims but got: %T", pt.Claims))
 	}
 
-	parsedClaims := jwtx.ParseMapStringInterfaceClaims(claims)
-	return &AuthenticationSession{
-		Subject: parsedClaims.Subject,
-		Extra:   claims,
-	}, nil
+	session.Subject = jwtx.ParseMapStringInterfaceClaims(claims).Subject
+	session.Extra = claims
+
+	return nil
 }

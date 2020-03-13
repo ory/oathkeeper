@@ -75,19 +75,19 @@ func (a *AuthenticatorCookieSession) Config(config json.RawMessage) (*Authentica
 	return &c, nil
 }
 
-func (a *AuthenticatorCookieSession) Authenticate(r *http.Request, config json.RawMessage, _ pipeline.Rule) (*AuthenticationSession, error) {
+func (a *AuthenticatorCookieSession) Authenticate(r *http.Request, session *AuthenticationSession, config json.RawMessage, _ pipeline.Rule) error {
 	cf, err := a.Config(config)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	if !cookieSessionResponsible(r, cf.Only) {
-		return nil, errors.WithStack(ErrAuthenticatorNotResponsible)
+		return errors.WithStack(ErrAuthenticatorNotResponsible)
 	}
 
 	body, err := forwardRequestToSessionStore(r, cf.CheckSessionURL, cf.PreservePath)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	var (
@@ -99,17 +99,16 @@ func (a *AuthenticatorCookieSession) Authenticate(r *http.Request, config json.R
 	)
 
 	if err = json.Unmarshal(subjectRaw, &subject); err != nil {
-		return nil, helper.ErrForbidden.WithReasonf("The configured subject_from GJSON path returned an error on JSON output: %s", err.Error()).WithDebugf("GJSON path: %s\nBody: %s\nResult: %s", cf.SubjectFrom, body, subjectRaw).WithTrace(err)
+		return helper.ErrForbidden.WithReasonf("The configured subject_from GJSON path returned an error on JSON output: %s", err.Error()).WithDebugf("GJSON path: %s\nBody: %s\nResult: %s", cf.SubjectFrom, body, subjectRaw).WithTrace(err)
 	}
 
 	if err = json.Unmarshal(extraRaw, &extra); err != nil {
-		return nil, helper.ErrForbidden.WithReasonf("The configured extra_from GJSON path returned an error on JSON output: %s", err.Error()).WithDebugf("GJSON path: %s\nBody: %s\nResult: %s", cf.ExtraFrom, body, extraRaw).WithTrace(err)
+		return helper.ErrForbidden.WithReasonf("The configured extra_from GJSON path returned an error on JSON output: %s", err.Error()).WithDebugf("GJSON path: %s\nBody: %s\nResult: %s", cf.ExtraFrom, body, extraRaw).WithTrace(err)
 	}
 
-	return &AuthenticationSession{
-		Subject: subject,
-		Extra:   extra,
-	}, nil
+	session.Subject = subject
+	session.Extra = extra
+	return nil
 }
 
 func cookieSessionResponsible(r *http.Request, only []string) bool {

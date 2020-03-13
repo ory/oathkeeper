@@ -10,6 +10,7 @@ import (
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/pipeline"
 	"github.com/ory/oathkeeper/pipeline/authn"
+	"github.com/ory/oathkeeper/x"
 
 	"github.com/pkg/errors"
 )
@@ -24,7 +25,7 @@ type MutatorHeader struct {
 }
 
 func NewMutatorHeader(c configuration.Provider) *MutatorHeader {
-	return &MutatorHeader{c: c, t: newTemplate("header")}
+	return &MutatorHeader{c: c, t: x.NewTemplate("header")}
 }
 
 func (a *MutatorHeader) GetID() string {

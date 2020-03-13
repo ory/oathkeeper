@@ -140,6 +140,23 @@ func TestCredentialsIssuerHeaders(t *testing.T) {
 				},
 				Err: nil,
 			},
+			"Use request captures to header": {
+				Session: &authn.AuthenticationSession{
+					Subject: "foo",
+					MatchContext: authn.MatchContext{
+						RegexpCaptureGroups: []string{"Foo", "Bar"},
+					},
+				},
+				Rule: &rule.Rule{ID: "test-rule10"},
+				Config: json.RawMessage([]byte(`{"headers":{
+					"Example-Claims": "{{ index .MatchContext.RegexpCaptureGroups 0}}"
+				}}`)),
+				Request: &http.Request{Header: http.Header{}},
+				Match: http.Header{
+					"Example-Claims": []string{"Foo"},
+				},
+				Err: nil,
+			},
 		}
 
 		t.Run("cache=disabled", func(t *testing.T) {
