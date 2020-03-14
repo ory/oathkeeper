@@ -10,6 +10,7 @@ import (
 	"github.com/ory/oathkeeper/proxy"
 
 	"github.com/ory/x/logrusx"
+	"github.com/ory/x/tracing"
 
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
@@ -38,6 +39,7 @@ type RegistryMemory struct {
 	logger       logrus.FieldLogger
 	writer       herodot.Writer
 	c            configuration.Provider
+	trc          *tracing.Tracer
 
 	ch *api.CredentialsHandler
 
@@ -389,4 +391,21 @@ func (r *RegistryMemory) prepareMutators() {
 			r.mutators[a.GetID()] = a
 		}
 	}
+}
+
+func (r *RegistryMemory) Tracer() *tracing.Tracer {
+	if r.trc == nil {
+		r.trc = &tracing.Tracer{
+			ServiceName:  r.c.TracingServiceName(),
+			JaegerConfig: r.c.TracingJaegerConfig(),
+			Provider:     r.c.TracingProvider(),
+			Logger:       r.Logger(),
+		}
+
+		if err := r.trc.Setup(); err != nil {
+			r.Logger().WithError(err).Fatalf("Unable to initialize Tracer.")
+		}
+	}
+
+	return r.trc
 }

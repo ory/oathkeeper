@@ -23,6 +23,7 @@ import (
 	"github.com/ory/fosite"
 	"github.com/ory/gojsonschema"
 	"github.com/ory/x/corsx"
+	"github.com/ory/x/tracing"
 	"github.com/ory/x/urlx"
 	"github.com/ory/x/viperx"
 
@@ -372,4 +373,25 @@ func (v *ViperProvider) MutatorConfig(id string, override json.RawMessage, dest 
 
 func (v *ViperProvider) JSONWebKeyURLs() []string {
 	return viperx.GetStringSlice(v.l, ViperKeyMutatorIDTokenJWKSURL, []string{})
+}
+
+func (v *ViperProvider) TracingServiceName() string {
+	return viperx.GetString(v.l, "tracing.service_name", "ORY Oathkeeper")
+}
+
+func (v *ViperProvider) TracingProvider() string {
+	return viperx.GetString(v.l, "tracing.provider", "", "TRACING_PROVIDER")
+}
+
+func (v *ViperProvider) TracingJaegerConfig() *tracing.JaegerConfig {
+	return &tracing.JaegerConfig{
+		LocalAgentHostPort: viperx.GetString(v.l, "tracing.providers.jaeger.local_agent_address", "", "TRACING_PROVIDER_JAEGER_LOCAL_AGENT_ADDRESS"),
+		SamplerType:        viperx.GetString(v.l, "tracing.providers.jaeger.sampling.type", "const", "TRACING_PROVIDER_JAEGER_SAMPLING_TYPE"),
+		SamplerValue:       viperx.GetFloat64(v.l, "tracing.providers.jaeger.sampling.value", float64(1), "TRACING_PROVIDER_JAEGER_SAMPLING_VALUE"),
+		SamplerServerURL:   viperx.GetString(v.l, "tracing.providers.jaeger.sampling.server_url", "", "TRACING_PROVIDER_JAEGER_SAMPLING_SERVER_URL"),
+		Propagation: stringsx.Coalesce(
+			viper.GetString("JAEGER_PROPAGATION"), // Standard Jaeger client config
+			viperx.GetString(v.l, "tracing.providers.jaeger.propagation", "", "TRACING_PROVIDER_JAEGER_PROPAGATION"),
+		),
+	}
 }

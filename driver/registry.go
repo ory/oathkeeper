@@ -15,6 +15,7 @@ import (
 	"github.com/ory/oathkeeper/rule"
 	"github.com/ory/oathkeeper/x"
 	"github.com/ory/x/healthx"
+	"github.com/ory/x/tracing"
 )
 
 type Registry interface {
@@ -34,6 +35,7 @@ type Registry interface {
 	CredentialHandler() *api.CredentialsHandler
 
 	Proxy() *proxy.Proxy
+	Tracer() *tracing.Tracer
 
 	authn.Registry
 	authz.Registry

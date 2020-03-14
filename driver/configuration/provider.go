@@ -9,6 +9,7 @@ import (
 	"github.com/sirupsen/logrus"
 
 	"github.com/ory/fosite"
+	"github.com/ory/x/tracing"
 
 	"github.com/rs/cors"
 )
@@ -51,6 +52,10 @@ type Provider interface {
 	ToScopeStrategy(value string, key string) fosite.ScopeStrategy
 	ParseURLs(sources []string) ([]url.URL, error)
 	JSONWebKeyURLs() []string
+
+	TracingServiceName() string
+	TracingProvider() string
+	TracingJaegerConfig() *tracing.JaegerConfig
 }
 
 type ProviderErrorHandlers interface {
