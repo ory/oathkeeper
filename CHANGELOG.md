@@ -105,6 +105,7 @@
 
 **Merged pull requests:**
 
+- feat: Enable tracing [\#376](https://github.com/ory/oathkeeper/pull/376) ([ptescher](https://github.com/ptescher))
 - fix: Update README.md to fix \#374 [\#375](https://github.com/ory/oathkeeper/pull/375) ([tricky42](https://github.com/tricky42))
 - fix: disable test that fails with low cache hit rate [\#372](https://github.com/ory/oathkeeper/pull/372) ([aeneasr](https://github.com/aeneasr))
 - feat: oauth intsropsection configurable timeout [\#370](https://github.com/ory/oathkeeper/pull/370) ([pike1212](https://github.com/pike1212))
