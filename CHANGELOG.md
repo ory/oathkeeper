@@ -96,6 +96,8 @@
 
 **Closed issues:**
 
+- Allow cookie\_session authentication to have configurable Method for request to the check\_session\_url [\#381](https://github.com/ory/oathkeeper/issues/381)
+- Hierarchic scope strategy not working for OAuth2 Introspection authn [\#377](https://github.com/ory/oathkeeper/issues/377)
 - README.md: Broken link to Envoy configuration page + missing link to AWS API Gateway [\#374](https://github.com/ory/oathkeeper/issues/374)
 - What is the format for the AUTHENTICATORS\_OAUTH2\_INTROSPECTION\_CONFIG\_INTROSPECTION\_REQUEST\_HEADERS environment variable in OathKeeper? [\#366](https://github.com/ory/oathkeeper/issues/366)
 - High Latency with `id\_token` mutator and RS256 keys [\#364](https://github.com/ory/oathkeeper/issues/364)
@@ -105,6 +107,7 @@
 
 **Merged pull requests:**
 
+- fix: Don't send scope with OAuth2 introspection request [\#379](https://github.com/ory/oathkeeper/pull/379) ([tleef](https://github.com/tleef))
 - feat: Enable tracing [\#376](https://github.com/ory/oathkeeper/pull/376) ([ptescher](https://github.com/ptescher))
 - fix: Update README.md to fix \#374 [\#375](https://github.com/ory/oathkeeper/pull/375) ([tricky42](https://github.com/tricky42))
 - fix: disable test that fails with low cache hit rate [\#372](https://github.com/ory/oathkeeper/pull/372) ([aeneasr](https://github.com/aeneasr))
