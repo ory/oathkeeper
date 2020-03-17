@@ -9,11 +9,12 @@ import (
 	"strconv"
 
 	"github.com/go-openapi/errors"
-	strfmt "github.com/go-openapi/strfmt"
+	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
 )
 
 // Rule swaggerRule is a single rule that will get checked on every HTTP request.
+//
 // swagger:model rule
 type Rule struct {
 

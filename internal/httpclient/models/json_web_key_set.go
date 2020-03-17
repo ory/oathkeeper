@@ -9,11 +9,12 @@ import (
 	"strconv"
 
 	"github.com/go-openapi/errors"
-	strfmt "github.com/go-openapi/strfmt"
+	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
 )
 
 // JSONWebKeySet json web key set
+//
 // swagger:model jsonWebKeySet
 type JSONWebKeySet struct {
 

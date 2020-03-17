@@ -6,9 +6,8 @@ package client
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
-	httptransport "github.com/go-openapi/runtime/client"
-
 	"github.com/go-openapi/runtime"
+	httptransport "github.com/go-openapi/runtime/client"
 	"github.com/go-openapi/strfmt"
 
 	apiops "github.com/ory/oathkeeper/internal/httpclient/client/api"
