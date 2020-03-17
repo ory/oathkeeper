@@ -198,7 +198,7 @@ func TestAuthenticatorOAuth2Introspection(t *testing.T) {
 				expectErr: false,
 			},
 			{
-				d:      "should pass because active and scope matching",
+				d:      "should pass because no scope strategy",
 				r:      &http.Request{Header: http.Header{"Authorization": {"bearer token"}}},
 				config: []byte(`{ "required_scope": ["scope-a", "scope-b"] }`),
 				setup: func(t *testing.T, m *httprouter.Router) {
@@ -213,6 +213,50 @@ func TestAuthenticatorOAuth2Introspection(t *testing.T) {
 							Issuer:   "issuer",
 							Username: "username",
 							Extra:    map[string]interface{}{"extra": "foo"},
+							Scope:    "scope-z",
+						}))
+					})
+				},
+				expectErr: false,
+			},
+			{
+				d:      "should pass because scope strategy is `none`",
+				r:      &http.Request{Header: http.Header{"Authorization": {"bearer token"}}},
+				config: []byte(`{ "scope_strategy": "none", "required_scope": ["scope-a", "scope-b"] }`),
+				setup: func(t *testing.T, m *httprouter.Router) {
+					m.POST("/oauth2/introspect", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+						require.NoError(t, r.ParseForm())
+						require.Equal(t, "token", r.Form.Get("token"))
+						require.Equal(t, "scope-a scope-b", r.Form.Get("scope"))
+						require.NoError(t, json.NewEncoder(w).Encode(&AuthenticatorOAuth2IntrospectionResult{
+							Active:   true,
+							Subject:  "subject",
+							Audience: []string{"audience"},
+							Issuer:   "issuer",
+							Username: "username",
+							Extra:    map[string]interface{}{"extra": "foo"},
+							Scope:    "scope-z",
+						}))
+					})
+				},
+				expectErr: false,
+			},
+			{
+				d:      "should pass because active and scope matching exactly",
+				r:      &http.Request{Header: http.Header{"Authorization": {"bearer token"}}},
+				config: []byte(`{ "scope_strategy": "exact", "required_scope": ["scope-a", "scope-b"] }`),
+				setup: func(t *testing.T, m *httprouter.Router) {
+					m.POST("/oauth2/introspect", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+						require.NoError(t, r.ParseForm())
+						require.Equal(t, "token", r.Form.Get("token"))
+						require.Equal(t, "", r.Form.Get("scope"))
+						require.NoError(t, json.NewEncoder(w).Encode(&AuthenticatorOAuth2IntrospectionResult{
+							Active:   true,
+							Subject:  "subject",
+							Audience: []string{"audience"},
+							Issuer:   "issuer",
+							Username: "username",
+							Extra:    map[string]interface{}{"extra": "foo"},
 							Scope:    "scope-a scope-b",
 						}))
 					})
@@ -220,14 +264,102 @@ func TestAuthenticatorOAuth2Introspection(t *testing.T) {
 				expectErr: false,
 			},
 			{
-				d:      "should fail because active but scope not matching",
+				d:      "should fail because active but scope not matching exactly",
 				r:      &http.Request{Header: http.Header{"Authorization": {"bearer token"}}},
-				config: []byte(`{ "required_scope": ["scope-a", "scope-b", "scope-c"] }`),
+				config: []byte(`{ "scope_strategy": "exact", "required_scope": ["scope-a", "scope-b", "scope-c"] }`),
 				setup: func(t *testing.T, m *httprouter.Router) {
 					m.POST("/oauth2/introspect", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 						require.NoError(t, r.ParseForm())
 						require.Equal(t, "token", r.Form.Get("token"))
-						require.Equal(t, "scope-a scope-b scope-c", r.Form.Get("scope"))
+						require.Equal(t, "", r.Form.Get("scope"))
+						require.NoError(t, json.NewEncoder(w).Encode(&AuthenticatorOAuth2IntrospectionResult{
+							Active:   true,
+							Subject:  "subject",
+							Audience: []string{"audience"},
+							Issuer:   "issuer",
+							Username: "username",
+							Extra:    map[string]interface{}{"extra": "foo"},
+							Scope:    "scope-a scope-b",
+						}))
+					})
+				},
+				expectErr: true,
+			},
+			{
+				d:      "should pass because active and scope matching hierarchically",
+				r:      &http.Request{Header: http.Header{"Authorization": {"bearer token"}}},
+				config: []byte(`{ "scope_strategy": "hierarchic", "required_scope": ["scope-a", "scope-b.foo", "scope-c.bar"] }`),
+				setup: func(t *testing.T, m *httprouter.Router) {
+					m.POST("/oauth2/introspect", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+						require.NoError(t, r.ParseForm())
+						require.Equal(t, "token", r.Form.Get("token"))
+						require.Equal(t, "", r.Form.Get("scope"))
+						require.NoError(t, json.NewEncoder(w).Encode(&AuthenticatorOAuth2IntrospectionResult{
+							Active:   true,
+							Subject:  "subject",
+							Audience: []string{"audience"},
+							Issuer:   "issuer",
+							Username: "username",
+							Extra:    map[string]interface{}{"extra": "foo"},
+							Scope:    "scope-a scope-b scope-c.bar",
+						}))
+					})
+				},
+				expectErr: false,
+			},
+			{
+				d:      "should fail because active but scope not matching hierarchically",
+				r:      &http.Request{Header: http.Header{"Authorization": {"bearer token"}}},
+				config: []byte(`{ "scope_strategy": "hierarchic", "required_scope": ["scope-a", "scope-b.foo", "scope-c.bar"] }`),
+				setup: func(t *testing.T, m *httprouter.Router) {
+					m.POST("/oauth2/introspect", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+						require.NoError(t, r.ParseForm())
+						require.Equal(t, "token", r.Form.Get("token"))
+						require.Equal(t, "", r.Form.Get("scope"))
+						require.NoError(t, json.NewEncoder(w).Encode(&AuthenticatorOAuth2IntrospectionResult{
+							Active:   true,
+							Subject:  "subject",
+							Audience: []string{"audience"},
+							Issuer:   "issuer",
+							Username: "username",
+							Extra:    map[string]interface{}{"extra": "foo"},
+							Scope:    "scope-a scope-b",
+						}))
+					})
+				},
+				expectErr: true,
+			},
+			{
+				d:      "should pass because active and scope matching wildcard",
+				r:      &http.Request{Header: http.Header{"Authorization": {"bearer token"}}},
+				config: []byte(`{ "scope_strategy": "wildcard", "required_scope": ["scope-a", "scope-b.foo", "scope-c.bar"] }`),
+				setup: func(t *testing.T, m *httprouter.Router) {
+					m.POST("/oauth2/introspect", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+						require.NoError(t, r.ParseForm())
+						require.Equal(t, "token", r.Form.Get("token"))
+						require.Equal(t, "", r.Form.Get("scope"))
+						require.NoError(t, json.NewEncoder(w).Encode(&AuthenticatorOAuth2IntrospectionResult{
+							Active:   true,
+							Subject:  "subject",
+							Audience: []string{"audience"},
+							Issuer:   "issuer",
+							Username: "username",
+							Extra:    map[string]interface{}{"extra": "foo"},
+							Scope:    "scope-a scope-b.* scope-c.bar",
+						}))
+					})
+				},
+				expectErr: false,
+			},
+			{
+				d:      "should fail because active but scope not matching wildcard",
+				r:      &http.Request{Header: http.Header{"Authorization": {"bearer token"}}},
+				config: []byte(`{ "scope_strategy": "wildcard", "required_scope": ["scope-a", "scope-b.foo", "scope-c.bar"] }`),
+				setup: func(t *testing.T, m *httprouter.Router) {
+					m.POST("/oauth2/introspect", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+						require.NoError(t, r.ParseForm())
+						require.Equal(t, "token", r.Form.Get("token"))
+						require.Equal(t, "", r.Form.Get("scope"))
 						require.NoError(t, json.NewEncoder(w).Encode(&AuthenticatorOAuth2IntrospectionResult{
 							Active:   true,
 							Subject:  "subject",
@@ -331,7 +463,6 @@ func TestAuthenticatorOAuth2Introspection(t *testing.T) {
 				defer ts.Close()
 
 				tc.config, _ = sjson.SetBytes(tc.config, "introspection_url", ts.URL+"/oauth2/introspect")
-				tc.config, _ = sjson.SetBytes(tc.config, "scope_strategy", "exact")
 				sess := new(AuthenticationSession)
 				err := a.Authenticate(tc.r, sess, tc.config, nil)
 				if tc.expectErr {
