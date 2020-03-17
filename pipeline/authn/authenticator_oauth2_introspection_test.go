@@ -70,7 +70,7 @@ func TestAuthenticatorOAuth2Introspection(t *testing.T) {
 					m.POST("/oauth2/introspect", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 						require.NoError(t, r.ParseForm())
 						require.Equal(t, "token", r.Form.Get("token"))
-						require.Equal(t, "scope-a scope-b", r.Form.Get("scope"))
+						require.Equal(t, "", r.Form.Get("scope"))
 						w.WriteHeader(http.StatusNotFound)
 					})
 				},
@@ -205,7 +205,7 @@ func TestAuthenticatorOAuth2Introspection(t *testing.T) {
 					m.POST("/oauth2/introspect", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 						require.NoError(t, r.ParseForm())
 						require.Equal(t, "token", r.Form.Get("token"))
-						require.Equal(t, "scope-a scope-b", r.Form.Get("scope"))
+						require.Equal(t, "", r.Form.Get("scope"))
 						require.NoError(t, json.NewEncoder(w).Encode(&AuthenticatorOAuth2IntrospectionResult{
 							Active:   true,
 							Subject:  "subject",
@@ -227,7 +227,7 @@ func TestAuthenticatorOAuth2Introspection(t *testing.T) {
 					m.POST("/oauth2/introspect", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 						require.NoError(t, r.ParseForm())
 						require.Equal(t, "token", r.Form.Get("token"))
-						require.Equal(t, "scope-a scope-b scope-c", r.Form.Get("scope"))
+						require.Equal(t, "", r.Form.Get("scope"))
 						require.NoError(t, json.NewEncoder(w).Encode(&AuthenticatorOAuth2IntrospectionResult{
 							Active:   true,
 							Subject:  "subject",
