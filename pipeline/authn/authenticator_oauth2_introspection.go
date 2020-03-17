@@ -86,6 +86,12 @@ func (a *AuthenticatorOAuth2Introspection) Authenticate(r *http.Request, session
 	}
 
 	body := url.Values{"token": {token}}
+
+	ss := a.c.ToScopeStrategy(cf.ScopeStrategy, "authenticators.oauth2_introspection.scope_strategy")
+	if ss == nil {
+		body.Add("scope", strings.Join(cf.Scopes, " "))
+	}
+
 	introspectReq, err := http.NewRequest(http.MethodPost, cf.IntrospectionURL, strings.NewReader(body.Encode()))
 	if err != nil {
 		return errors.WithStack(err)
@@ -129,7 +135,7 @@ func (a *AuthenticatorOAuth2Introspection) Authenticate(r *http.Request, session
 		}
 	}
 
-	if ss := a.c.ToScopeStrategy(cf.ScopeStrategy, "authenticators.oauth2_introspection.scope_strategy"); ss != nil {
+	if ss != nil {
 		for _, scope := range cf.Scopes {
 			if !ss(strings.Split(i.Scope, " "), scope) {
 				return errors.WithStack(helper.ErrForbidden.WithReason(fmt.Sprintf("Scope %s was not granted", scope)))
