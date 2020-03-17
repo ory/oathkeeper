@@ -85,7 +85,7 @@ func (a *AuthenticatorOAuth2Introspection) Authenticate(r *http.Request, session
 		return errors.WithStack(ErrAuthenticatorNotResponsible)
 	}
 
-	body := url.Values{"token": {token}, "scope": {strings.Join(cf.Scopes, " ")}}
+	body := url.Values{"token": {token}}
 	introspectReq, err := http.NewRequest(http.MethodPost, cf.IntrospectionURL, strings.NewReader(body.Encode()))
 	if err != nil {
 		return errors.WithStack(err)
