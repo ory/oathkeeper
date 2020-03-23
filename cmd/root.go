@@ -24,7 +24,6 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/fsnotify/fsnotify"
 	"github.com/gobuffalo/packr/v2"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -32,7 +31,6 @@ import (
 	_ "github.com/ory/jsonschema/v3/fileloader"
 	_ "github.com/ory/jsonschema/v3/httploader"
 
-	"github.com/ory/viper"
 	"github.com/ory/x/viperx"
 )
 
@@ -57,37 +55,4 @@ func Execute() {
 
 func init() {
 	viperx.RegisterConfigFlag(RootCmd, "oathkeeper")
-}
-
-func watchAndValidateViper() {
-	logger = viperx.InitializeConfig("oathkeeper", "", logger)
-
-	schema, err := schemas.Find("config.schema.json")
-	if err != nil {
-		logger.WithError(err).Fatal("Unable to open configuration JSON Schema.")
-	}
-
-	if err := viperx.Validate("config.schema.json", schema); err != nil {
-		viperx.LoggerWithValidationErrorFields(logger, err).
-			Fatal("The configuration is invalid and could not be loaded.")
-	}
-
-	viperx.AddWatcher(func(event fsnotify.Event) error {
-		if err := viperx.Validate("config.schema.json", schema); err != nil {
-			viperx.LoggerWithValidationErrorFields(logger, err).
-				Error("The changed configuration is invalid and could not be loaded. Rolling back to the last working configuration revision. Please address the validation errors before restarting ORY Oathkeeper.")
-			return viperx.ErrRollbackConfigurationChanges
-		}
-		return nil
-	})
-
-	viperx.WatchConfig(logger, &viperx.WatchOptions{
-		Immutables: []string{"serve", "profiling", "log"},
-		OnImmutableChange: func(key string) {
-			logger.
-				WithField("key", key).
-				WithField("reset_to", fmt.Sprintf("%v", viper.Get(key))).
-				Error("A configuration value marked as immutable has changed. Rolling back to the last working configuration revision. To reload the values please restart ORY Oathkeeper.")
-		},
-	})
 }
