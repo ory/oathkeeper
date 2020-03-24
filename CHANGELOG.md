@@ -94,6 +94,7 @@
 **Fixed bugs:**
 
 - Investigate failing test case on master [\#371](https://github.com/ory/oathkeeper/issues/371)
+- Unable to set array config options via environment variables [\#342](https://github.com/ory/oathkeeper/issues/342)
 
 **Closed issues:**
 
@@ -108,6 +109,7 @@
 
 **Merged pull requests:**
 
+- chore: moved WatchAndValidateViper to viperx [\#384](https://github.com/ory/oathkeeper/pull/384) ([zepatrik](https://github.com/zepatrik))
 - docs: Updates issue and pull request templates [\#382](https://github.com/ory/oathkeeper/pull/382) ([aeneasr](https://github.com/aeneasr))
 - fix: Don't send scope with OAuth2 introspection request [\#379](https://github.com/ory/oathkeeper/pull/379) ([tleef](https://github.com/tleef))
 - feat: Enable tracing [\#376](https://github.com/ory/oathkeeper/pull/376) ([ptescher](https://github.com/ptescher))
