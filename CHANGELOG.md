@@ -88,6 +88,7 @@
 **Implemented enhancements:**
 
 - Generalize the use of values extracted from the rule [\#292](https://github.com/ory/oathkeeper/issues/292)
+- fix: replace segment with our own sqa endpoint [\#385](https://github.com/ory/oathkeeper/pull/385) ([aeneasr](https://github.com/aeneasr))
 - Feature/global auth session [\#358](https://github.com/ory/oathkeeper/pull/358) ([Sbou](https://github.com/Sbou))
 
 **Fixed bugs:**
@@ -873,6 +874,10 @@
 
 [Full Changelog](https://github.com/ory/oathkeeper/compare/v0.0.16...v0.0.17)
 
+**Merged pull requests:**
+
+- Introduces surrogate\_id to SQLManager [\#21](https://github.com/ory/oathkeeper/pull/21) ([aeneasr](https://github.com/aeneasr))
+
 ## [v0.0.16](https://github.com/ory/oathkeeper/tree/v0.0.16) (2017-11-12)
 
 [Full Changelog](https://github.com/ory/oathkeeper/compare/v0.0.15...v0.0.16)
@@ -880,7 +885,6 @@
 **Merged pull requests:**
 
 - Replace MatchesPath with MatchesURL [\#20](https://github.com/ory/oathkeeper/pull/20) ([aeneasr](https://github.com/aeneasr))
-- Make refresh\_delay configurable and skip it on boot [\#18](https://github.com/ory/oathkeeper/pull/18) ([aeneasr](https://github.com/aeneasr))
 
 ## [v0.0.15](https://github.com/ory/oathkeeper/tree/v0.0.15) (2017-11-09)
 
@@ -888,12 +892,15 @@
 
 **Merged pull requests:**
 
-- Introduces surrogate\_id to SQLManager [\#21](https://github.com/ory/oathkeeper/pull/21) ([aeneasr](https://github.com/aeneasr))
 - Add HTTPS capabilities and document proxy/management commands [\#19](https://github.com/ory/oathkeeper/pull/19) ([aeneasr](https://github.com/aeneasr))
 
 ## [v0.0.14](https://github.com/ory/oathkeeper/tree/v0.0.14) (2017-11-07)
 
 [Full Changelog](https://github.com/ory/oathkeeper/compare/v0.0.13...v0.0.14)
+
+**Merged pull requests:**
+
+- Make refresh\_delay configurable and skip it on boot [\#18](https://github.com/ory/oathkeeper/pull/18) ([aeneasr](https://github.com/aeneasr))
 
 ## [v0.0.13](https://github.com/ory/oathkeeper/tree/v0.0.13) (2017-11-07)
 
@@ -967,11 +974,14 @@
 
 - Return arrays instead of null on rule creation [\#6](https://github.com/ory/oathkeeper/pull/6) ([aeneasr](https://github.com/aeneasr))
 - Add circleci configuration file [\#5](https://github.com/ory/oathkeeper/pull/5) ([aeneasr](https://github.com/aeneasr))
-- Fix unauthorized [\#4](https://github.com/ory/oathkeeper/pull/4) ([aeneasr](https://github.com/aeneasr))
 
 ## [v0.0.3](https://github.com/ory/oathkeeper/tree/v0.0.3) (2017-10-18)
 
 [Full Changelog](https://github.com/ory/oathkeeper/compare/v0.0.2...v0.0.3)
+
+**Merged pull requests:**
+
+- Fix unauthorized [\#4](https://github.com/ory/oathkeeper/pull/4) ([aeneasr](https://github.com/aeneasr))
 
 ## [v0.0.2](https://github.com/ory/oathkeeper/tree/v0.0.2) (2017-10-12)
 
