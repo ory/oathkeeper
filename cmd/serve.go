@@ -43,12 +43,7 @@ on configuration options, open the configuration documentation:
 >> https://www.ory.sh/docs/oathkeeper/configuration <<
 `,
 	Run: func(cmd *cobra.Command, args []string) {
-		logger = viperx.InitializeConfig("oathkeeper", "", logger)
-		schema, err := schemas.Find("config.schema.json")
-		if err != nil {
-			logger.WithError(err).Fatal("Unable to open configuration JSON Schema.")
-		}
-		viperx.WatchAndValidateViper(logger, schema, "ORY Oathkeeper", []string{"serve", "profiling", "log"})
+		watchAndValidateViper()
 		server.RunServe(x.Version, x.Commit, x.Date)(cmd, args)
 	},
 }
