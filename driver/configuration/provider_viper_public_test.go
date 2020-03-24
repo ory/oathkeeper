@@ -27,28 +27,32 @@ import (
 	"github.com/ory/oathkeeper/x"
 )
 
-func TestPipelineConfig(t *testing.T) {
+func setup(t *testing.T) *ViperProvider {
+	l := logrus.New()
 	viper.Reset()
 	viperx.InitializeConfig(
 		"oathkeeper",
 		"./../../docs/",
-		logrus.New(),
+		l,
 	)
 
 	err := viperx.ValidateFromURL("file://../../.schemas/config.schema.json")
 	if err != nil {
-		viperx.LoggerWithValidationErrorFields(logrus.New(), err).Error("unable to validate")
+		viperx.LoggerWithValidationErrorFields(l, err).Error("unable to validate")
 	}
 	require.NoError(t, err)
 
-	p := NewViperProvider(logrus.New())
+	return NewViperProvider(l)
+}
 
+func TestPipelineConfig(t *testing.T) {
 	t.Run("case=should use config from environment variables", func(t *testing.T) {
 		var res json.RawMessage
 		require.NoError(t, os.Setenv("AUTHENTICATORS_OAUTH2_INTROSPECTION_CONFIG_INTROSPECTION_URL", "https://override/path"))
+		p := setup(t)
 
 		require.NoError(t, p.PipelineConfig("authenticators", "oauth2_introspection", nil, &res))
-		assert.JSONEq(t, `{"introspection_request_headers":{},"introspection_url":"https://override/path","pre_authorization":{"client_id":"some_id","client_secret":"some_secret","enabled":true,"scope":["foo","bar"],"token_url":"https://my-website.com/oauth2/token"},"required_scope":[],"retry":{"max_delay":"100ms", "give_up_after":"1s"},"scope_strategy":"exact","target_audience":[],"trusted_issuers":[]}`, string(res), "%s", res)
+		assert.JSONEq(t, `{"introspection_url":"https://override/path","pre_authorization":{"client_id":"some_id","client_secret":"some_secret","enabled":true,"scope":["foo","bar"],"token_url":"https://my-website.com/oauth2/token"},"retry":{"max_delay":"100ms", "give_up_after":"1s"},"scope_strategy":"exact"}`, string(res), "%s", res)
 
 		// Cleanup
 		require.NoError(t, os.Setenv("AUTHENTICATORS_OAUTH2_INTROSPECTION_CONFIG_INTROSPECTION_URL", ""))
@@ -56,6 +60,7 @@ func TestPipelineConfig(t *testing.T) {
 	})
 
 	t.Run("case=should fail when invalid value is used in override", func(t *testing.T) {
+		p := setup(t)
 		res := json.RawMessage{}
 		require.Error(t, p.PipelineConfig("mutators", "hydrator", json.RawMessage(`{"not-api":"invalid"}`), &res))
 		assert.JSONEq(t, `{"api":{"url":"https://some-url/","retry":{"give_up_after":"1s","max_delay":"100ms"}},"not-api":"invalid"}`, string(res))
@@ -69,6 +74,7 @@ func TestPipelineConfig(t *testing.T) {
 
 	t.Run("case=should pass and override values", func(t *testing.T) {
 		var dec mutate.MutatorHydratorConfig
+		p := setup(t)
 		require.NoError(t, p.PipelineConfig("mutators", "hydrator", json.RawMessage(``), &dec))
 		assert.Equal(t, "https://some-url/", dec.Api.URL)
 
@@ -79,6 +85,7 @@ func TestPipelineConfig(t *testing.T) {
 
 	t.Run("case=should pass array values", func(t *testing.T) {
 		var dec authn.AuthenticatorOAuth2JWTConfiguration
+		p := setup(t)
 		require.NoError(t, p.PipelineConfig("authenticators", "jwt", json.RawMessage(`{}`), &dec))
 		assert.Equal(t,
 			[]string{"https://my-website.com/.well-known/jwks.json", "https://my-other-website.com/.well-known/jwks.json", "file://path/to/local/jwks.json"},
