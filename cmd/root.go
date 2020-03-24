@@ -54,9 +54,6 @@ func Execute() {
 }
 
 func watchAndValidateViper() {
-	if logger == nil {
-		logger = viperx.InitializeConfig("oathkeeper", "", logger)
-	}
 	schema, err := schemas.Find("config.schema.json")
 	if err != nil {
 		logger.WithError(err).Fatal("Unable to open configuration JSON Schema.")

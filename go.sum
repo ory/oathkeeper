@@ -518,6 +518,7 @@ github.com/lib/pq v0.0.0-20180327071824-d34b9ff171c2/go.mod h1:5WUZQaWbwv1U+lTRe
 github.com/lib/pq v1.0.0 h1:X5PMW56eZitiTeO7tKzZxFCSpbFZJtkMMooicw2us9A=
 github.com/lib/pq v1.0.0/go.mod h1:5WUZQaWbwv1U+lTReE5YruASi9Al49XbQIvNi/34Woo=
 github.com/lib/pq v1.1.0/go.mod h1:5WUZQaWbwv1U+lTReE5YruASi9Al49XbQIvNi/34Woo=
+github.com/lib/pq v1.2.0 h1:LXpIM/LZ5xGFhOpXAQUIMM1HdyqzVYM13zNdjCEEcA0=
 github.com/lib/pq v1.2.0/go.mod h1:5WUZQaWbwv1U+lTReE5YruASi9Al49XbQIvNi/34Woo=
 github.com/luna-duclos/instrumentedsql v0.0.0-20181127104832-b7d587d28109/go.mod h1:PWUIzhtavmOR965zfawVsHXbEuU1G29BPZ/CB3C7jXk=
 github.com/luna-duclos/instrumentedsql v1.1.2 h1:AZdd9TU/kFArfxF0Wi8PLNzniBUgo/c1vDhhjwZPANE=
