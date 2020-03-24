@@ -111,7 +111,7 @@ func (m *RepositoryMemory) Set(ctx context.Context, rules []Rule) error {
 	for _, check := range rules {
 		if err := m.r.RuleValidator().Validate(&check); err != nil {
 			viperx.LoggerWithValidationErrorFields(m.r.Logger(), err).WithError(err).
-				Errorf("A rule uses a malformed configuration and all URLs matching this rule will not work. You should resolve this issue now.")
+				Errorf("Rule %s uses a malformed configuration and all URLs matching this rule will not work. You should resolve this issue now.", check.ID)
 		}
 	}
 
