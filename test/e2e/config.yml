@@ -29,3 +29,10 @@ serve:
 
 log:
   level: debug
+
+errors:
+  handlers:
+    json:
+      enabled: true
+      config:
+        verbose: true
