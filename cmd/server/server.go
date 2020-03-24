@@ -10,6 +10,7 @@ import (
 	"sync"
 
 	"github.com/pkg/errors"
+	"github.com/segmentio/analytics-go"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/urfave/negroni"
@@ -161,7 +162,7 @@ func RunServe(version, build, date string) func(cmd *cobra.Command, args []strin
 		metrics := metricsx.New(cmd, logger,
 			&metricsx.Options{
 				Service:       "ory-oathkeeper",
-				ClusterID:     clusterID(d.Configuration()),
+				ClusterID:     metricsx.Hash(clusterID(d.Configuration())),
 				IsDevelopment: isDevelopment(d.Configuration()),
 				WriteKey:      "xRVRP48SAKw6ViJEnvB0u2PY8bVlsO6O",
 				WhitelistedPaths: []string{
@@ -176,6 +177,7 @@ func RunServe(version, build, date string) func(cmd *cobra.Command, args []strin
 				BuildVersion: version,
 				BuildTime:    build,
 				BuildHash:    date,
+				Config:       &analytics.Config{Endpoint: "https://sqa.ory.sh"},
 			},
 		)
 
