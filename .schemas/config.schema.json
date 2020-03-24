@@ -1279,7 +1279,6 @@
                 "enabled": {
                   "title": "Enabled",
                   "type": "boolean",
-                  "default": true,
                   "description": "En-/disables this component."
                 }
               },
@@ -1304,7 +1303,11 @@
                     }
                   }
                 }
-              ]
+              ],
+              "default": {
+                "enabled": true,
+                "config": {}
+              }
             }
           }
         }
