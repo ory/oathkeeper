@@ -121,7 +121,6 @@
 - fix: Improve id\_token performance with caching [\#367](https://github.com/ory/oathkeeper/pull/367) ([aeneasr](https://github.com/aeneasr))
 - fix: Load config file only in serve command [\#365](https://github.com/ory/oathkeeper/pull/365) ([aeneasr](https://github.com/aeneasr))
 - fix\(config.schema.json\): fixed examples for some keys [\#363](https://github.com/ory/oathkeeper/pull/363) ([zepatrik](https://github.com/zepatrik))
-- Hash enabled check to further improve performance [\#353](https://github.com/ory/oathkeeper/pull/353) ([ecktom](https://github.com/ecktom))
 - Docker compose cleanup [\#325](https://github.com/ory/oathkeeper/pull/325) ([KarthikNayak](https://github.com/KarthikNayak))
 
 ## [v0.36.0-beta.2](https://github.com/ory/oathkeeper/tree/v0.36.0-beta.2) (2020-02-14)
@@ -161,6 +160,7 @@
 
 **Merged pull requests:**
 
+- Hash enabled check to further improve performance [\#353](https://github.com/ory/oathkeeper/pull/353) ([ecktom](https://github.com/ecktom))
 - ci: Bump sdk orb [\#352](https://github.com/ory/oathkeeper/pull/352) ([aeneasr](https://github.com/aeneasr))
 
 ## [v0.35.4-beta.1](https://github.com/ory/oathkeeper/tree/v0.35.4-beta.1) (2020-01-26)
@@ -189,7 +189,6 @@
 - ci: Bump ory/sdk orb and Go version [\#349](https://github.com/ory/oathkeeper/pull/349) ([aeneasr](https://github.com/aeneasr))
 - Cache config to improve latencies [\#348](https://github.com/ory/oathkeeper/pull/348) ([ecktom](https://github.com/ecktom))
 - Set min/max for port range in config JSON Schema [\#345](https://github.com/ory/oathkeeper/pull/345) ([aeneasr](https://github.com/aeneasr))
-- Fix profiling env variable not being picked up [\#343](https://github.com/ory/oathkeeper/pull/343) ([ecktom](https://github.com/ecktom))
 - docs: Updates issue and pull request templates [\#341](https://github.com/ory/oathkeeper/pull/341) ([aeneasr](https://github.com/aeneasr))
 
 ## [v0.35.1-beta.1](https://github.com/ory/oathkeeper/tree/v0.35.1-beta.1) (2020-01-14)
@@ -216,6 +215,7 @@
 
 **Merged pull requests:**
 
+- Fix profiling env variable not being picked up [\#343](https://github.com/ory/oathkeeper/pull/343) ([ecktom](https://github.com/ecktom))
 - Update upgrade guide [\#337](https://github.com/ory/oathkeeper/pull/337) ([aeneasr](https://github.com/aeneasr))
 - authn/cookie\_session: Add subject\_from modifier [\#336](https://github.com/ory/oathkeeper/pull/336) ([aeneasr](https://github.com/aeneasr))
 - authn/cookie\_session: Add extra\_from modifier [\#335](https://github.com/ory/oathkeeper/pull/335) ([aeneasr](https://github.com/aeneasr))
@@ -774,7 +774,6 @@
 **Merged pull requests:**
 
 - Replaces key discovery with well-known feature [\#46](https://github.com/ory/oathkeeper/pull/46) ([aeneasr](https://github.com/aeneasr))
-- Update docs and add tests [\#32](https://github.com/ory/oathkeeper/pull/32) ([aeneasr](https://github.com/aeneasr))
 
 ## [v0.0.27](https://github.com/ory/oathkeeper/tree/v0.0.27) (2017-12-12)
 
@@ -826,6 +825,7 @@
 
 - Print formatted output string in rule management CLI [\#35](https://github.com/ory/oathkeeper/pull/35) ([aeneasr](https://github.com/aeneasr))
 - docs: Add JWK set docs [\#33](https://github.com/ory/oathkeeper/pull/33) ([aeneasr](https://github.com/aeneasr))
+- Update docs and add tests [\#32](https://github.com/ory/oathkeeper/pull/32) ([aeneasr](https://github.com/aeneasr))
 
 ## [v0.0.22](https://github.com/ory/oathkeeper/tree/v0.0.22) (2017-11-20)
 
