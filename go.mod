@@ -30,9 +30,9 @@ require (
 	github.com/imdario/mergo v0.3.7
 	github.com/julienschmidt/httprouter v1.2.0
 	github.com/lib/pq v1.2.0
-	github.com/mattn/goveralls v0.0.3
+	github.com/mattn/goveralls v0.0.5
 	github.com/ory/fosite v0.29.2
-	github.com/ory/go-acc v0.0.0-20181118080137-ddc355013f90
+	github.com/ory/go-acc v0.2.1
 	github.com/ory/go-convenience v0.1.0
 	github.com/ory/gojsonschema v1.2.0
 	github.com/ory/graceful v0.1.1
@@ -40,15 +40,15 @@ require (
 	github.com/ory/jsonschema/v3 v3.0.1
 	github.com/ory/ladon v1.1.0
 	github.com/ory/sdk/swagutil v0.0.0-20200202121523-307941feee4b
-	github.com/ory/viper v1.7.3
-	github.com/ory/x v0.0.106
+	github.com/ory/viper v1.7.4
+	github.com/ory/x v0.0.109
 	github.com/pborman/uuid v1.2.0
 	github.com/phayes/freeport v0.0.0-20180830031419-95f893ade6f2
 	github.com/pkg/errors v0.9.1
 	github.com/rs/cors v1.6.0
 	github.com/segmentio/analytics-go v3.1.0+incompatible
-	github.com/sirupsen/logrus v1.4.2
-	github.com/spf13/cobra v0.0.5
+	github.com/sirupsen/logrus v1.5.0
+	github.com/spf13/cobra v0.0.6
 	github.com/sqs/goreturns v0.0.0-20181028201513-538ac6014518
 	github.com/square/go-jose v2.3.1+incompatible
 	github.com/stretchr/testify v1.4.0
@@ -59,7 +59,7 @@ require (
 	github.com/xeipuuv/gojsonpointer v0.0.0-20190905194746-02993c407bfb // indirect
 	golang.org/x/crypto v0.0.0-20200320181102-891825fb96df
 	golang.org/x/oauth2 v0.0.0-20190604053449-0f29369cfe45
-	golang.org/x/tools v0.0.0-20200203215610-ab391d50b528
+	golang.org/x/tools v0.0.0-20200325203130-f53864d0dba1
 	gopkg.in/square/go-jose.v2 v2.3.1
 )
 
