@@ -738,6 +738,35 @@
       ],
       "additionalProperties": false
     },
+    "configAuthorizersRemoteJSON": {
+      "type": "object",
+      "title": "Remote JSON Configuration",
+      "description": "This section is optional when the authorizer is disabled.",
+      "properties": {
+        "remote": {
+          "title": "Remote Authorizer URL",
+          "type": "string",
+          "format": "uri",
+          "description": "The URL of the remote authorizer. The remote authorizer is expected to return either 200 OK or 403 Forbidden to allow/deny access.\n\n>If this authorizer is enabled, this value is required.",
+          "examples": [
+            "https://host/path"
+          ]
+        },
+        "payload": {
+          "title": "JSON Payload",
+          "type": "string",
+          "description": "The JSON payload of the request sent to the remote authorizer. The string will be parsed by the Go text/template package and applied to an AuthenticationSession object.\n\n>If this authorizer is enabled, this value is required.",
+          "examples": [
+            "{\"subject\":\"{{ .Subject }}\"}"
+          ]
+        }
+      },
+      "required": [
+        "remote",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
     "configMutatorsCookie": {
       "type": "object",
       "title": "Cookie Mutator Configuration",
@@ -1358,6 +1387,38 @@
                 },
                 "config": {
                   "$ref": "#/definitions/configAuthorizersKetoEngineAcpOry"
+                }
+              },
+              "required": [
+                "config"
+              ]
+            },
+            {
+              "properties": {
+                "enabled": {
+                  "const": false
+                }
+              }
+            }
+          ]
+        },
+        "remote_json": {
+          "title": "Remote JSON",
+          "description": "The [`remote_json` authorizer](https://www.ory.sh/docs/oathkeeper/pipeline/authz#remote_json).",
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "$ref": "#/definitions/handlerSwitch"
+            }
+          },
+          "oneOf": [
+            {
+              "properties": {
+                "enabled": {
+                  "const": true
+                },
+                "config": {
+                  "$ref": "#/definitions/configAuthorizersRemoteJSON"
                 }
               },
               "required": [
