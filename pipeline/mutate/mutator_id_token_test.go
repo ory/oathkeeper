@@ -186,6 +186,14 @@ var idTokenTestCases = []idTokenTestCase{
 		},
 		K: "file://../../test/stub/jwks-ecdsa.json",
 	},
+	{
+		Rule:    &rule.Rule{ID: "test-rule13"},
+		Session: &authn.AuthenticationSession{Subject: "foo"},
+		Config:  json.RawMessage([]byte(`{"claims": "{\"custom-claim\": \"{{ print .Subject }}\", \"aud\": [\"foo\", \"bar\"]}"}`)),
+		Match:   jwt.MapClaims{"custom-claim": "foo"},
+		Ttl:     30 * time.Second,
+		K:       "file://../../test/stub/jwks-hs.json",
+	},
 }
 
 func parseToken(h http.Header) string {
@@ -208,7 +216,9 @@ func TestMutatorIDToken(t *testing.T) {
 			for i, tc := range idTokenTestCases {
 				t.Run(fmt.Sprintf("case=%d", i), func(t *testing.T) {
 					tc.Config, _ = sjson.SetBytes(tc.Config, "jwks_url", tc.K)
-					tc.Config, _ = sjson.SetBytes(tc.Config, "ttl", tc.Ttl.String())
+					if tc.Ttl > 0 {
+						tc.Config, _ = sjson.SetBytes(tc.Config, "ttl", tc.Ttl.String())
+					}
 					err := a.Mutate(r, tc.Session, tc.Config, tc.Rule)
 					if tc.Err != nil {
 						assert.EqualError(t, err, tc.Err.Error())
@@ -224,7 +234,7 @@ func TestMutatorIDToken(t *testing.T) {
 					})
 					require.NoError(t, err, "token: %s", token)
 
-					ttl := time.Minute // default from config is time.Minute
+					ttl := 15 * time.Minute // default from config is 15 minutes
 					if tc.Ttl > 0 {
 						ttl = tc.Ttl
 					}
