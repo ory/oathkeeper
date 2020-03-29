@@ -333,6 +333,18 @@ func TestViperProvider(t *testing.T) {
 
 			assert.EqualValues(t, "http://my-keto/", config.BaseURL)
 		})
+
+		t.Run("authorizer=remote_json", func(t *testing.T) {
+			a := authz.NewAuthorizerRemoteJSON(p)
+			assert.True(t, p.AuthorizerIsEnabled(a.GetID()))
+			require.NoError(t, a.Validate(nil))
+
+			config, err := a.Config(nil)
+			require.NoError(t, err)
+
+			assert.EqualValues(t, "https://host/path", config.Remote)
+			assert.EqualValues(t, "{}", config.Payload)
+		})
 	})
 
 	t.Run("group=mutators", func(t *testing.T) {

@@ -56,6 +56,8 @@ const (
 	ViperKeyAuthorizerDenyIsEnabled = "authorizers.deny.enabled"
 
 	ViperKeyAuthorizerKetoEngineACPORYIsEnabled = "authorizers.keto_engine_acp_ory.enabled"
+
+	ViperKeyAuthorizerRemoteJSONIsEnabled = "authorizers.remote_json.enabled"
 )
 
 // Mutators
