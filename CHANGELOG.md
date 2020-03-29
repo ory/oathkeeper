@@ -88,6 +88,7 @@
 **Implemented enhancements:**
 
 - Generalize the use of values extracted from the rule [\#292](https://github.com/ory/oathkeeper/issues/292)
+- Implement generic JSON-RPC Authorizer `remote\_json` [\#201](https://github.com/ory/oathkeeper/issues/201)
 - fix: replace segment with our own sqa endpoint [\#385](https://github.com/ory/oathkeeper/pull/385) ([aeneasr](https://github.com/aeneasr))
 - Feature/global auth session [\#358](https://github.com/ory/oathkeeper/pull/358) ([Sbou](https://github.com/Sbou))
 
@@ -110,6 +111,7 @@
 **Merged pull requests:**
 
 - fix\(mutator/id\_token\): fix token expiration error in tests [\#390](https://github.com/ory/oathkeeper/pull/390) ([kaorimatz](https://github.com/kaorimatz))
+- feat\(authz\): Add remote\_json authorizer [\#389](https://github.com/ory/oathkeeper/pull/389) ([kaorimatz](https://github.com/kaorimatz))
 - chore: bump ory/x to have csv parsing for env vars [\#388](https://github.com/ory/oathkeeper/pull/388) ([zepatrik](https://github.com/zepatrik))
 - repository\_memory: Add rule id to malformed configuration error [\#386](https://github.com/ory/oathkeeper/pull/386) ([hefekranz](https://github.com/hefekranz))
 - chore: moved WatchAndValidateViper to viperx [\#384](https://github.com/ory/oathkeeper/pull/384) ([zepatrik](https://github.com/zepatrik))
@@ -223,7 +225,6 @@
 - authn/cookie\_session: Add extra\_from modifier [\#335](https://github.com/ory/oathkeeper/pull/335) ([aeneasr](https://github.com/aeneasr))
 - Move to new SDK pipeline [\#333](https://github.com/ory/oathkeeper/pull/333) ([aeneasr](https://github.com/aeneasr))
 - pipeline/authn: add unit test for token\_from-\>cookie for both jwt and oauth2\_introspection authenticators \(\#330\) [\#331](https://github.com/ory/oathkeeper/pull/331) ([ngrigoriev](https://github.com/ngrigoriev))
-- Properly merge env vars into pipeline configs [\#320](https://github.com/ory/oathkeeper/pull/320) ([aeneasr](https://github.com/aeneasr))
 
 ## [v0.34.0-beta.1](https://github.com/ory/oathkeeper/tree/v0.34.0-beta.1) (2019-12-26)
 
@@ -264,6 +265,7 @@
 
 **Merged pull requests:**
 
+- Properly merge env vars into pipeline configs [\#320](https://github.com/ory/oathkeeper/pull/320) ([aeneasr](https://github.com/aeneasr))
 - cmd: Add health check commands [\#319](https://github.com/ory/oathkeeper/pull/319) ([tleef](https://github.com/tleef))
 - Switch to alpine Docker base-image [\#318](https://github.com/ory/oathkeeper/pull/318) ([aeneasr](https://github.com/aeneasr))
 - Add more details to decision logging [\#316](https://github.com/ory/oathkeeper/pull/316) ([aeneasr](https://github.com/aeneasr))
