@@ -3,7 +3,7 @@
 **Table of Contents**
 
 - [Changelog](#changelog)
-  - [Unreleased](#unreleased)
+  - [v0.37.0-beta.1 (2020-04-02)](#v0370-beta1-2020-04-02)
   - [v0.36.0-beta.2 (2020-02-14)](#v0360-beta2-2020-02-14)
   - [v0.36.0-beta.3 (2020-02-14)](#v0360-beta3-2020-02-14)
   - [v0.36.0-beta.4 (2020-02-14)](#v0360-beta4-2020-02-14)
@@ -81,14 +81,15 @@
 
 # Changelog
 
-## [Unreleased](https://github.com/ory/oathkeeper/tree/HEAD)
+## [v0.37.0-beta.1](https://github.com/ory/oathkeeper/tree/v0.37.0-beta.1) (2020-04-02)
 
-[Full Changelog](https://github.com/ory/oathkeeper/compare/v0.36.0-beta.2...HEAD)
+[Full Changelog](https://github.com/ory/oathkeeper/compare/v0.36.0-beta.2...v0.37.0-beta.1)
 
 **Implemented enhancements:**
 
 - Generalize the use of values extracted from the rule [\#292](https://github.com/ory/oathkeeper/issues/292)
 - Implement generic JSON-RPC Authorizer `remote\_json` [\#201](https://github.com/ory/oathkeeper/issues/201)
+- Support alternate matching strategy for API routes [\#167](https://github.com/ory/oathkeeper/issues/167)
 - fix: replace segment with our own sqa endpoint [\#385](https://github.com/ory/oathkeeper/pull/385) ([aeneasr](https://github.com/aeneasr))
 - Feature/global auth session [\#358](https://github.com/ory/oathkeeper/pull/358) ([Sbou](https://github.com/Sbou))
 
@@ -96,6 +97,7 @@
 
 - Investigate failing test case on master [\#371](https://github.com/ory/oathkeeper/issues/371)
 - Unable to set array config options via environment variables [\#342](https://github.com/ory/oathkeeper/issues/342)
+- Use another Policy server than Keto [\#288](https://github.com/ory/oathkeeper/issues/288)
 
 **Closed issues:**
 
@@ -107,6 +109,7 @@
 - Log specified http request headers [\#360](https://github.com/ory/oathkeeper/issues/360)
 - Can't override `authenticators.oauth2\_introspection.config.from\_token` value from config file in API Access Rules file [\#359](https://github.com/ory/oathkeeper/issues/359)
 - Clean up docker compose file [\#324](https://github.com/ory/oathkeeper/issues/324)
+- Url matching should be available in authenticators [\#205](https://github.com/ory/oathkeeper/issues/205)
 
 **Merged pull requests:**
 
@@ -968,7 +971,6 @@
 **Merged pull requests:**
 
 - Add cors handling to proxy [\#11](https://github.com/ory/oathkeeper/pull/11) ([aeneasr](https://github.com/aeneasr))
-- Remove goveralls from circle build [\#10](https://github.com/ory/oathkeeper/pull/10) ([aeneasr](https://github.com/aeneasr))
 - Use circle ci build status badge [\#9](https://github.com/ory/oathkeeper/pull/9) ([aeneasr](https://github.com/aeneasr))
 - Switch from glide to golang/dep for vendoring [\#8](https://github.com/ory/oathkeeper/pull/8) ([aeneasr](https://github.com/aeneasr))
 - Resolve tests by replacing nil slice [\#7](https://github.com/ory/oathkeeper/pull/7) ([aeneasr](https://github.com/aeneasr))
@@ -979,6 +981,7 @@
 
 **Merged pull requests:**
 
+- Remove goveralls from circle build [\#10](https://github.com/ory/oathkeeper/pull/10) ([aeneasr](https://github.com/aeneasr))
 - Return arrays instead of null on rule creation [\#6](https://github.com/ory/oathkeeper/pull/6) ([aeneasr](https://github.com/aeneasr))
 - Add circleci configuration file [\#5](https://github.com/ory/oathkeeper/pull/5) ([aeneasr](https://github.com/aeneasr))
 
