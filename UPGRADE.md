@@ -9,6 +9,8 @@ before finalizing the upgrade process.
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
 
+- [v0.37](#v0370)
+- [v0.36](#v0360)
 - [v0.35.0-beta.1](#v0350-beta1)
 - [v0.34.0-beta.1+oryOS.14](#v0340-beta1oryos14)
 - [v0.33.0-beta.1+oryOS.13](#v0330-beta1oryos13)
@@ -45,6 +47,15 @@ before finalizing the upgrade process.
 - [0.11.12](#01112)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
+## v0.37
+
+BREAKING CHANGES:
+- This patch allows using the regex capture groups from the URL matcher to be used in several places, including the ID Token generator and elsewhere. To get this working, existing `keto_engine_acp_ory` authorizers are no longer able to use regex substition in the form of `my:action:$1` but instead must use the new format which is `{{ printIndex .MatchContext.RegexpCaptureGroups 0}}` (notice that the index changed by *-1*). A rule migrator exists which makes old rules compatible with the new format, if a version string is given. More details on the rule migration can be found here: https://github.com/ory/oathkeeper/commit/fd16ceb230a1b14ebb01a147d2d70acce77f9fbd#diff-6177fb19f1b7d7bc392f5062b838df15
+
+## v0.36
+
+The access rule matcher now supports the [Glob patterns](https://github.com/gobwas/glob)!
 
 ## v0.35.0-beta.1
 
