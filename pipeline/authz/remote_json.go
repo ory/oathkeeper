@@ -8,8 +8,9 @@ import (
 	"net/http"
 	"text/template"
 
-	"github.com/ory/x/httpx"
 	"github.com/pkg/errors"
+
+	"github.com/ory/x/httpx"
 
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/helper"

@@ -8,12 +8,14 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"sync"
+	"time"
 
 	"github.com/pkg/errors"
-	"github.com/segmentio/analytics-go"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/urfave/negroni"
+
+	"github.com/ory/analytics-go/v4"
 
 	"github.com/ory/x/reqlog"
 
@@ -177,7 +179,13 @@ func RunServe(version, build, date string) func(cmd *cobra.Command, args []strin
 				BuildVersion: version,
 				BuildTime:    build,
 				BuildHash:    date,
-				Config:       &analytics.Config{Endpoint: "https://sqa.ory.sh"},
+				Config: &analytics.Config{
+					Endpoint:             "https://sqa.ory.sh",
+					GzipCompressionLevel: 6,
+					BatchMaxSize:         500 * 1000,
+					BatchSize:            250,
+					Interval:             time.Hour * 24,
+				},
 			},
 		)
 
