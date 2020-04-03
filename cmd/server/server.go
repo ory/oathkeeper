@@ -184,7 +184,7 @@ func RunServe(version, build, date string) func(cmd *cobra.Command, args []strin
 					GzipCompressionLevel: 6,
 					BatchMaxSize:         500 * 1000,
 					BatchSize:            250,
-					Interval:  time.Hour * 24,
+					Interval:             time.Hour * 24,
 				},
 			},
 		)
