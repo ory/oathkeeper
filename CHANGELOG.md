@@ -3,6 +3,7 @@
 **Table of Contents**
 
 - [Changelog](#changelog)
+  - [v0.37.1-beta.1 (2020-04-03)](#v0371-beta1-2020-04-03)
   - [v0.37.0-beta.1 (2020-04-02)](#v0370-beta1-2020-04-02)
   - [v0.36.0-beta.2 (2020-02-14)](#v0360-beta2-2020-02-14)
   - [v0.36.0-beta.3 (2020-02-14)](#v0360-beta3-2020-02-14)
@@ -80,6 +81,14 @@
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 # Changelog
+
+## [v0.37.1-beta.1](https://github.com/ory/oathkeeper/tree/v0.37.1-beta.1) (2020-04-03)
+
+[Full Changelog](https://github.com/ory/oathkeeper/compare/v0.37.0-beta.1...v0.37.1-beta.1)
+
+**Merged pull requests:**
+
+- chore: replace segment with ory fork [\#391](https://github.com/ory/oathkeeper/pull/391) ([aeneasr](https://github.com/aeneasr))
 
 ## [v0.37.0-beta.1](https://github.com/ory/oathkeeper/tree/v0.37.0-beta.1) (2020-04-02)
 
@@ -971,6 +980,7 @@
 **Merged pull requests:**
 
 - Add cors handling to proxy [\#11](https://github.com/ory/oathkeeper/pull/11) ([aeneasr](https://github.com/aeneasr))
+- Remove goveralls from circle build [\#10](https://github.com/ory/oathkeeper/pull/10) ([aeneasr](https://github.com/aeneasr))
 - Use circle ci build status badge [\#9](https://github.com/ory/oathkeeper/pull/9) ([aeneasr](https://github.com/aeneasr))
 - Switch from glide to golang/dep for vendoring [\#8](https://github.com/ory/oathkeeper/pull/8) ([aeneasr](https://github.com/aeneasr))
 - Resolve tests by replacing nil slice [\#7](https://github.com/ory/oathkeeper/pull/7) ([aeneasr](https://github.com/aeneasr))
@@ -981,7 +991,6 @@
 
 **Merged pull requests:**
 
-- Remove goveralls from circle build [\#10](https://github.com/ory/oathkeeper/pull/10) ([aeneasr](https://github.com/aeneasr))
 - Return arrays instead of null on rule creation [\#6](https://github.com/ory/oathkeeper/pull/6) ([aeneasr](https://github.com/aeneasr))
 - Add circleci configuration file [\#5](https://github.com/ory/oathkeeper/pull/5) ([aeneasr](https://github.com/aeneasr))
 
