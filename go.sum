@@ -711,6 +711,8 @@ github.com/opentracing/opentracing-go v1.1.0 h1:pWlfV3Bxv7k65HYwkikxat0+s3pV4bsq
 github.com/opentracing/opentracing-go v1.1.0/go.mod h1:UkNAQd3GIcIGf0SeVgPpRdFStlNbqXla1AfSYxPUl2o=
 github.com/ory/analytics-go/v4 v4.0.0 h1:KQ2P00j9dbj4lDC/Albw/zn/scK67041RhqeW5ptsbw=
 github.com/ory/analytics-go/v4 v4.0.0/go.mod h1:FMx9cLRD9xN+XevPvZ5FDMfignpmcqPP6FUKnJ9/MmE=
+github.com/ory/analytics-go/v4 v4.0.1 h1:kKB2Mk8W0N23ZQCBHZ4wB6NQB6RxlxqzZB9LmSQ3Mho=
+github.com/ory/analytics-go/v4 v4.0.1/go.mod h1:FMx9cLRD9xN+XevPvZ5FDMfignpmcqPP6FUKnJ9/MmE=
 github.com/ory/dockertest v3.3.5+incompatible h1:iLLK6SQwIhcbrG783Dghaaa3WPzGc+4Emza6EbVUUGA=
 github.com/ory/dockertest v3.3.5+incompatible/go.mod h1:1vX4m9wsvi00u5bseYwXaSnhNrne+V0E6LAcBILJdPs=
 github.com/ory/dockertest/v3 v3.5.4 h1:rYijlJuraj8D4OgC1DpYpCV8SGXrkviT3RVrjFy7OFc=
