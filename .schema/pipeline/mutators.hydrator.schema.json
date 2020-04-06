@@ -1,5 +1,5 @@
 {
-  "$id": ".schema/mutators.hydrator.schema.json",
+  "$id": "/.schema/mutators.hydrator.schema.json",
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$ref": ".schema/config.schema.json#/definitions/configMutatorsHydrator"
+  "$ref": "/.schema/config.schema.json#/definitions/configMutatorsHydrator"
 }

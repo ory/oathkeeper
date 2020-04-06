@@ -1,5 +1,5 @@
 {
-  "$id": ".schema/authorizers.keto_engine_acp_ory.schema.json",
+  "$id": "/.schema/authorizers.keto_engine_acp_ory.schema.json",
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$ref": ".schema/config.schema.json#/definitions/configAuthorizersKetoEngineAcpOry"
+  "$ref": "/.schema/config.schema.json#/definitions/configAuthorizersKetoEngineAcpOry"
 }

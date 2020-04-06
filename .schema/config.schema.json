@@ -1,5 +1,5 @@
 {
-  "$id": ".schema/config.schema.json",
+  "$id": "/.schema/config.schema.json",
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "ORY Oathkeeper Configuration",
   "type": "object",

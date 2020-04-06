@@ -1,5 +1,5 @@
 {
-  "$id": ".schema/authenticators.unauthorized.schema.json",
+  "$id": "/.schema/authenticators.unauthorized.schema.json",
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$ref": ".schema/config.schema.json#/definitions/configAuthenticatorsAnonymous"
+  "$ref": "/.schema/config.schema.json#/definitions/configAuthenticatorsAnonymous"
 }

@@ -1,5 +1,5 @@
 {
-  "$id": ".schema/mutators.cookie.schema.json",
+  "$id": "/.schema/mutators.cookie.schema.json",
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$ref": ".schema/config.schema.json#/definitions/configErrorsJSON"
+  "$ref": "/.schema/config.schema.json#/definitions/configErrorsJSON"
 }

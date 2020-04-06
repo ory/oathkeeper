@@ -1,5 +1,5 @@
 {
-  "$id": ".schema/mutators.header.schema.json",
+  "$id": "/.schema/mutators.header.schema.json",
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$ref": ".schema/config.schema.json#/definitions/configMutatorsHeader"
+  "$ref": "/.schema/config.schema.json#/definitions/configMutatorsHeader"
 }

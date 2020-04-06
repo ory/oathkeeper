@@ -1,4 +1,4 @@
 {
-  "$id": ".schema/authorizers.allow.schema.json",
+  "$id": "/.schema/authorizers.allow.schema.json",
   "$schema": "http://json-schema.org/draft-07/schema#"
 }
