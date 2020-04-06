@@ -9,29 +9,6 @@ orbs:
   golangci: ory/golangci@0.0.4
 
 jobs:
-  format:
-    docker:
-    - image: circleci/golang:1.13
-    working_directory: /go/src/github.com/ory/oathkeeper
-    steps:
-      # This is disabled for now because goimports is really slow when go modules are used, see
-      # https://github.com/golang/go/issues/27287
-      #
-      #      - run:
-      #          name: Enable go1.12 modules
-      #          command: |
-      #            echo 'export GO111MODULE=on' >> $BASH_ENV
-      #            source $BASH_ENV
-      - checkout
-      - run:
-          name: Enable go1.13 modules
-          command: |
-            echo 'export GO111MODULE=on' >> $BASH_ENV
-            source $BASH_ENV
-      - run: curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | sh -s -- -b $(go env GOPATH)/bin latest
-      - run: go mod download
-      - run: golangci-lint run ./...
-
   test:
     docker:
       - image: circleci/golang:1.14
@@ -55,7 +32,7 @@ workflows:
         filters:
           tags:
             only: /.*/
-      - format:
+      - golangci/lint:
           filters:
             tags:
               only: /.*/
@@ -66,7 +43,7 @@ workflows:
       - changelog/generate:
           requires:
             - test
-            - format
+            - golangci/lint
           filters:
             tags:
               only: /.*/
@@ -76,11 +53,11 @@ workflows:
           appname: Ory_Oathkeeper
           requires:
             - test
-            - format
+            - golangci/lint
       - sdk/release:
           requires:
             - test
-            - format
+            - golangci/lint
             - goreleaser/release
           filters:
             tags:
@@ -95,7 +72,7 @@ workflows:
           requires:
             - goreleaser/test
             - test
-            - format
+            - golangci/lint
           filters:
             tags:
               only: /.*/
