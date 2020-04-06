@@ -87,9 +87,14 @@
 
 [Full Changelog](https://github.com/ory/oathkeeper/compare/v0.37.1-beta.1...HEAD)
 
+**Closed issues:**
+
+- Git changes prevent \<= v0.32.0-beta.1 from starting [\#397](https://github.com/ory/oathkeeper/issues/397)
+
 **Merged pull requests:**
 
 - chore: update docusaurus template [\#399](https://github.com/ory/oathkeeper/pull/399) ([aeneasr](https://github.com/aeneasr))
+- chore: rename schema IDs [\#398](https://github.com/ory/oathkeeper/pull/398) ([aeneasr](https://github.com/aeneasr))
 - refactor: move docs to this repository [\#396](https://github.com/ory/oathkeeper/pull/396) ([aeneasr](https://github.com/aeneasr))
 - docs: Updates issue and pull request templates [\#395](https://github.com/ory/oathkeeper/pull/395) ([aeneasr](https://github.com/aeneasr))
 - docs: Updates issue and pull request templates [\#394](https://github.com/ory/oathkeeper/pull/394) ([aeneasr](https://github.com/aeneasr))
@@ -197,10 +202,6 @@
 
 [Full Changelog](https://github.com/ory/oathkeeper/compare/v0.35.3-beta.1...v0.35.4-beta.1)
 
-**Merged pull requests:**
-
-- Update release pipeline and tests [\#351](https://github.com/ory/oathkeeper/pull/351) ([aeneasr](https://github.com/aeneasr))
-
 ## [v0.35.3-beta.1](https://github.com/ory/oathkeeper/tree/v0.35.3-beta.1) (2020-01-26)
 
 [Full Changelog](https://github.com/ory/oathkeeper/compare/v0.35.1-beta.1...v0.35.3-beta.1)
@@ -215,6 +216,7 @@
 
 **Merged pull requests:**
 
+- Update release pipeline and tests [\#351](https://github.com/ory/oathkeeper/pull/351) ([aeneasr](https://github.com/aeneasr))
 - Use integer instead of number in config JSON schema [\#350](https://github.com/ory/oathkeeper/pull/350) ([aeneasr](https://github.com/aeneasr))
 - ci: Bump ory/sdk orb and Go version [\#349](https://github.com/ory/oathkeeper/pull/349) ([aeneasr](https://github.com/aeneasr))
 - Cache config to improve latencies [\#348](https://github.com/ory/oathkeeper/pull/348) ([ecktom](https://github.com/ecktom))
@@ -459,7 +461,6 @@
 
 **Implemented enhancements:**
 
-- Add file watcher for access rules [\#216](https://github.com/ory/oathkeeper/issues/216)
 - Add file watcher for config file [\#215](https://github.com/ory/oathkeeper/issues/215)
 
 **Merged pull requests:**
@@ -505,6 +506,7 @@
 
 **Implemented enhancements:**
 
+- Add file watcher for access rules [\#216](https://github.com/ory/oathkeeper/issues/216)
 - Clean up environment variables and throw errors on misconfiguration [\#140](https://github.com/ory/oathkeeper/issues/140)
 - Missing serve all, both proxy/api using 4455 [\#122](https://github.com/ory/oathkeeper/issues/122)
 
@@ -715,7 +717,7 @@
 **Merged pull requests:**
 
 - proxy: Resolves potential panic in request handler [\#70](https://github.com/ory/oathkeeper/pull/70) ([aeneasr](https://github.com/aeneasr))
-- Minor improvements [\#69](https://github.com/ory/oathkeeper/pull/69) ([aeneasr](https://github.com/aeneasr))
+- Update README.md [\#58](https://github.com/ory/oathkeeper/pull/58) ([aeneasr](https://github.com/aeneasr))
 
 ## [v0.13.2+oryOS.2](https://github.com/ory/oathkeeper/tree/v0.13.2+oryOS.2) (2018-11-14)
 
@@ -775,7 +777,7 @@
 
 **Merged pull requests:**
 
-- Update README.md [\#58](https://github.com/ory/oathkeeper/pull/58) ([aeneasr](https://github.com/aeneasr))
+- Minor improvements [\#69](https://github.com/ory/oathkeeper/pull/69) ([aeneasr](https://github.com/aeneasr))
 - docs: Moves documentation to new repository [\#57](https://github.com/ory/oathkeeper/pull/57) ([aeneasr](https://github.com/aeneasr))
 - Update 2-EXECUTION.md [\#56](https://github.com/ory/oathkeeper/pull/56) ([maryoush](https://github.com/maryoush))
 - Update 2-EXECUTION.md [\#55](https://github.com/ory/oathkeeper/pull/55) ([taland](https://github.com/taland))
