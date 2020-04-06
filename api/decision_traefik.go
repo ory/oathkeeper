@@ -102,7 +102,7 @@ func (h *DecisionTraefikHandler) decisionTraefiks(w http.ResponseWriter, r *http
 		return
 	}
 
-	headers, err := h.r.ProxyRequestHandler().HandleRequest(r, rl)
+	s, err := h.r.ProxyRequestHandler().HandleRequest(r, rl)
 	if err != nil {
 		h.r.Logger().WithError(err).
 			WithField("granted", false).
@@ -117,8 +117,8 @@ func (h *DecisionTraefikHandler) decisionTraefiks(w http.ResponseWriter, r *http
 		WithField("access_url", urlToMatch.String()).
 		Warn("Access request granted")
 
-	for k := range headers {
-		w.Header().Set(k, headers.Get(k))
+	for k := range s.Header  {
+		w.Header().Set(k, s.Header.Get(k))
 	}
 
 	w.WriteHeader(http.StatusOK)
