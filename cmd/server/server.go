@@ -11,31 +11,30 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/urfave/negroni"
 
 	"github.com/ory/analytics-go/v4"
-
-	"github.com/ory/x/reqlog"
-
+	"github.com/ory/graceful"
 	"github.com/ory/viper"
 
-	"github.com/ory/x/healthx"
-
-	"github.com/ory/graceful"
 	"github.com/ory/x/corsx"
+	"github.com/ory/x/healthx"
 	"github.com/ory/x/logrusx"
-	"github.com/ory/x/metricsx"
+	telemetry "github.com/ory/x/metricsx"
+	"github.com/ory/x/reqlog"
 	"github.com/ory/x/tlsx"
 
 	"github.com/ory/oathkeeper/api"
 	"github.com/ory/oathkeeper/driver"
 	"github.com/ory/oathkeeper/driver/configuration"
+	"github.com/ory/oathkeeper/metrics"
 	"github.com/ory/oathkeeper/x"
 )
 
-func runProxy(d driver.Driver, n *negroni.Negroni, logger *logrus.Logger) func() {
+func runProxy(d driver.Driver, n *negroni.Negroni, logger *logrus.Logger, prom *metrics.PrometheusRepository) func() {
 	return func() {
 		proxy := d.Registry().Proxy()
 
@@ -44,6 +43,7 @@ func runProxy(d driver.Driver, n *negroni.Negroni, logger *logrus.Logger) func()
 			Transport: proxy,
 		}
 
+		n.Use(metrics.NewMiddleware(prom, "oathkeeper-proxy").ExcludePaths(healthx.ReadyCheckPath, healthx.AliveCheckPath))
 		n.Use(reqlog.NewMiddlewareFromLogger(logger, "oathkeeper-proxy").ExcludePaths(healthx.ReadyCheckPath, healthx.AliveCheckPath))
 		n.UseHandler(handler)
 
@@ -75,13 +75,14 @@ func runProxy(d driver.Driver, n *negroni.Negroni, logger *logrus.Logger) func()
 	}
 }
 
-func runAPI(d driver.Driver, n *negroni.Negroni, logger *logrus.Logger) func() {
+func runAPI(d driver.Driver, n *negroni.Negroni, logger *logrus.Logger, prom *metrics.PrometheusRepository) func() {
 	return func() {
 		router := x.NewAPIRouter()
 		d.Registry().RuleHandler().SetRoutes(router)
 		d.Registry().HealthHandler().SetRoutes(router.Router, true)
 		d.Registry().CredentialHandler().SetRoutes(router)
 
+		n.Use(metrics.NewMiddleware(prom, "oathkeeper-api").ExcludePaths(healthx.ReadyCheckPath, healthx.AliveCheckPath))
 		n.Use(reqlog.NewMiddlewareFromLogger(logger, "oathkeeper-api").ExcludePaths(healthx.ReadyCheckPath, healthx.AliveCheckPath))
 		n.Use(d.Registry().DecisionHandler()) // This needs to be the last entry, otherwise the judge API won't work
 
@@ -161,10 +162,10 @@ func RunServe(version, build, date string) func(cmd *cobra.Command, args []strin
 		adminmw := negroni.New()
 		publicmw := negroni.New()
 
-		metrics := metricsx.New(cmd, logger,
-			&metricsx.Options{
+		telemetry := telemetry.New(cmd, logger,
+			&telemetry.Options{
 				Service:       "ory-oathkeeper",
-				ClusterID:     metricsx.Hash(clusterID(d.Configuration())),
+				ClusterID:     telemetry.Hash(clusterID(d.Configuration())),
 				IsDevelopment: isDevelopment(d.Configuration()),
 				WriteKey:      "xRVRP48SAKw6ViJEnvB0u2PY8bVlsO6O",
 				WhitelistedPaths: []string{
@@ -189,18 +190,36 @@ func RunServe(version, build, date string) func(cmd *cobra.Command, args []strin
 			},
 		)
 
-		adminmw.Use(metrics)
-		publicmw.Use(metrics)
+		adminmw.Use(telemetry)
+		publicmw.Use(telemetry)
 
 		if tracer := d.Registry().Tracer(); tracer.IsLoaded() {
 			adminmw.Use(tracer)
 			publicmw.Use(tracer)
 		}
 
+		prometheusRepo, err := metrics.NewPrometheusRepository(logger)
+		if err != nil {
+			logger.Warnf("cannot create proemtehus repo: %+v", err)
+		}
+
+		// TODO: Make prom settings (port/path) configurable
+		promAddr := ":9124"
+		promPath := "/metrics"
+		go func() {
+			// Expose the registered metrics via HTTP.
+			httpServer := &http.Server{Handler: promhttp.HandlerFor(prometheusRepo.Registry, promhttp.HandlerOpts{}), Addr: promAddr}
+			http.Handle(promPath, promhttp.Handler())
+			logger.Infof("Proemtheus listening on %s%s...", promAddr, promPath)
+			if err := httpServer.ListenAndServe(); err != nil {
+				logger.Warnf("promhttp: %+v", err)
+			}
+		}()
+
 		var wg sync.WaitGroup
 		tasks := []func(){
-			runAPI(d, adminmw, logger),
-			runProxy(d, publicmw, logger),
+			runAPI(d, adminmw, logger, prometheusRepo),
+			runProxy(d, publicmw, logger, prometheusRepo),
 		}
 		wg.Add(len(tasks))
 		for _, t := range tasks {
