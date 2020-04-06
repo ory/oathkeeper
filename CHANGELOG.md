@@ -89,6 +89,7 @@
 
 **Merged pull requests:**
 
+- chore: update docusaurus template [\#399](https://github.com/ory/oathkeeper/pull/399) ([aeneasr](https://github.com/aeneasr))
 - refactor: move docs to this repository [\#396](https://github.com/ory/oathkeeper/pull/396) ([aeneasr](https://github.com/aeneasr))
 - docs: Updates issue and pull request templates [\#395](https://github.com/ory/oathkeeper/pull/395) ([aeneasr](https://github.com/aeneasr))
 - docs: Updates issue and pull request templates [\#394](https://github.com/ory/oathkeeper/pull/394) ([aeneasr](https://github.com/aeneasr))
@@ -146,6 +147,7 @@
 - fix: Update README.md to fix \#374 [\#375](https://github.com/ory/oathkeeper/pull/375) ([tricky42](https://github.com/tricky42))
 - fix: disable test that fails with low cache hit rate [\#372](https://github.com/ory/oathkeeper/pull/372) ([aeneasr](https://github.com/aeneasr))
 - feat: oauth intsropsection configurable timeout [\#370](https://github.com/ory/oathkeeper/pull/370) ([pike1212](https://github.com/pike1212))
+- Fix: link to Developer Install Guide [\#369](https://github.com/ory/oathkeeper/pull/369) ([jaredpreston](https://github.com/jaredpreston))
 - fix: Improve id\_token performance with caching [\#367](https://github.com/ory/oathkeeper/pull/367) ([aeneasr](https://github.com/aeneasr))
 - fix: Load config file only in serve command [\#365](https://github.com/ory/oathkeeper/pull/365) ([aeneasr](https://github.com/aeneasr))
 - fix\(config.schema.json\): fixed examples for some keys [\#363](https://github.com/ory/oathkeeper/pull/363) ([zepatrik](https://github.com/zepatrik))
@@ -173,7 +175,6 @@
 
 **Merged pull requests:**
 
-- Fix: link to Developer Install Guide [\#369](https://github.com/ory/oathkeeper/pull/369) ([jaredpreston](https://github.com/jaredpreston))
 - ci: Bump orb versions [\#356](https://github.com/ory/oathkeeper/pull/356) ([aeneasr](https://github.com/aeneasr))
 - docs: Updates issue and pull request templates [\#355](https://github.com/ory/oathkeeper/pull/355) ([aeneasr](https://github.com/aeneasr))
 - feat\(ci\): Add nancy vuln scanner [\#354](https://github.com/ory/oathkeeper/pull/354) ([aeneasr](https://github.com/aeneasr))
@@ -483,6 +484,7 @@
 - Add description into the name of subtest [\#212](https://github.com/ory/oathkeeper/pull/212) ([minchao](https://github.com/minchao))
 - Add cookie session authenticator [\#211](https://github.com/ory/oathkeeper/pull/211) ([alexdavid](https://github.com/alexdavid))
 - ci: Update golangci install script [\#210](https://github.com/ory/oathkeeper/pull/210) ([aeneasr](https://github.com/aeneasr))
+- docker: Use non-root user in image [\#209](https://github.com/ory/oathkeeper/pull/209) ([aeneasr](https://github.com/aeneasr))
 - Remove binary license [\#208](https://github.com/ory/oathkeeper/pull/208) ([aeneasr](https://github.com/aeneasr))
 - Update config.yaml [\#204](https://github.com/ory/oathkeeper/pull/204) ([haf](https://github.com/haf))
 
@@ -492,7 +494,6 @@
 
 **Merged pull requests:**
 
-- docker: Use non-root user in image [\#209](https://github.com/ory/oathkeeper/pull/209) ([aeneasr](https://github.com/aeneasr))
 - server: Properly declare negroni middleware [\#200](https://github.com/ory/oathkeeper/pull/200) ([aeneasr](https://github.com/aeneasr))
 - docs: Updates issue and pull request templates [\#198](https://github.com/ory/oathkeeper/pull/198) ([aeneasr](https://github.com/aeneasr))
 - docs: Updates issue and pull request templates [\#197](https://github.com/ory/oathkeeper/pull/197) ([aeneasr](https://github.com/aeneasr))
