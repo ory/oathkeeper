@@ -1,0 +1,155 @@
+{
+  "$id": "https://raw.githubusercontent.com/ory/oathkeeper/master/.schema/authenticators.oauth2_introspection.schema.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "title": "OAuth 2.0 Introspection Authenticator Configuration",
+  "description": "This section is optional when the authenticator is disabled.",
+  "properties": {
+    "introspection_url": {
+      "type": "string",
+      "format": "uri",
+      "examples": [
+        "https://my-website.com/oauth2/introspection"
+      ],
+      "title": "OAuth 2.0 Introspection URL",
+      "description": "The OAuth 2.0 Token Introspection endpoint URL.\n\n>If this authenticator is enabled, this value is required."
+    },
+    "scope_strategy": {
+      "$ref": "https://raw.githubusercontent.com/ory/oathkeeper/master/.schema/scope_strategy.schema.json#"
+    },
+    "pre_authorization": {
+      "title": "Pre-Authorization",
+      "description": "Enable pre-authorization in cases where the OAuth 2.0 Token Introspection endpoint is protected by OAuth 2.0 Bearer Tokens that can be retrieved using the OAuth 2.0 Client Credentials grant.",
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "title": "Enabled",
+              "const": false,
+              "default": false
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "client_id",
+            "client_secret",
+            "token_url"
+          ],
+          "properties": {
+            "enabled": {
+              "title": "Enabled",
+              "const": true,
+              "default": false
+            },
+            "client_id": {
+              "type": "string",
+              "title": "OAuth 2.0 Client ID",
+              "description": "The OAuth 2.0 Client ID to be used for the OAuth 2.0 Client Credentials Grant.\n\n>If pre-authorization is enabled, this value is required."
+            },
+            "client_secret": {
+              "type": "string",
+              "title": "OAuth 2.0 Client Secret",
+              "description": "The OAuth 2.0 Client Secret to be used for the OAuth 2.0 Client Credentials Grant.\n\n>If pre-authorization is enabled, this value is required."
+            },
+            "token_url": {
+              "type": "string",
+              "format": "uri",
+              "title": "OAuth 2.0 Token URL",
+              "description": "The OAuth 2.0 Token Endpoint where the OAuth 2.0 Client Credentials Grant will be performed.\n\n>If pre-authorization is enabled, this value is required."
+            },
+            "scope": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "title": "OAuth 2.0 Scope",
+              "description": "The OAuth 2.0 Scope to be requested during the OAuth 2.0 Client Credentials Grant.",
+              "examples": [
+                [
+                  "[\"foo\", \"bar\"]"
+                ]
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "required_scope": {
+      "title": "Required Scope",
+      "description": "An array of OAuth 2.0 scopes that are required when accessing an endpoint protected by this handler.\n If the token used in the Authorization header did not request that specific scope, the request is denied.",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "target_audience": {
+      "title": "Target Audience",
+      "description": "An array of audiences that are required when accessing an endpoint protected by this handler.\n If the token used in the Authorization header is not intended for any of the requested audiences, the request is denied.",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "trusted_issuers": {
+      "title": "Trusted Issuers",
+      "description": "The token must have been issued by one of the issuers listed in this array.",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "token_from": {
+      "title": "Token From",
+      "description": "The location of the token.\n If not configured, the token will be received from a default location - 'Authorization' header.\n One and only one location (header, query, or cookie) must be specified.",
+      "oneOf": [
+        {
+          "type": "object",
+          "required": [
+            "header"
+          ],
+          "properties": {
+            "header": {
+              "title": "Header",
+              "type": "string",
+              "description": "The header (case insensitive) that must contain a token for request authentication.\n It can't be set along with query_parameter or cookie."
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": [
+            "query_parameter"
+          ],
+          "properties": {
+            "query_parameter": {
+              "title": "Query Parameter",
+              "type": "string",
+              "description": "The query parameter (case sensitive) that must contain a token for request authentication.\n It can't be set along with header or cookie."
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": [
+            "cookie"
+          ],
+          "properties": {
+            "cookie": {
+              "title": "Cookie",
+              "type": "string",
+              "description": "The cookie (case sensitive) that must contain a token for request authentication.\n It can't be set along with header or query_parameter."
+            }
+          }
+        }
+      ]
+    }
+  },
+  "required": [
+    "introspection_url"
+  ],
+  "additionalProperties": false
+}

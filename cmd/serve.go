@@ -40,7 +40,7 @@ var serveCmd = &cobra.Command{
 ORY Oathkeeper can be configured using environment variables as well as a configuration file. For more information
 on configuration options, open the configuration documentation:
 
->> https://www.ory.sh/docs/oathkeeper/configuration <<
+>> https://www.ory.sh/oathkeeper/docs/configuration <<
 `,
 	Run: func(cmd *cobra.Command, args []string) {
 		logger = viperx.InitializeConfig("oathkeeper", "", logger)

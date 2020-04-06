@@ -36,7 +36,7 @@ import (
 
 var logger logrus.FieldLogger
 
-var schemas = packr.New("schemas", "../.schemas")
+var schemas = packr.New("schemas", "../.schema")
 
 // RootCmd represents the base command when called without any subcommands
 var RootCmd = &cobra.Command{

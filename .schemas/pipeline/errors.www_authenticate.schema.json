@@ -1,5 +1,0 @@
-{
-  "$id": "https://raw.githubusercontent.com/ory/oathkeeper/v0.34.0-beta.1/.schemas/mutators.cookie.schema.json",
-  "$schema": "http://json-schema.org/draft-07/schema#",
-  "$ref": "https://raw.githubusercontent.com/ory/oathkeeper/v0.34.0-beta.1/.schemas/config.schema.json#/definitions/configErrorsWWWAuthenticate"
-}
