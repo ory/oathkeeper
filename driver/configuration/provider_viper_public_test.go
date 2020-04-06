@@ -32,7 +32,7 @@ func setup(t *testing.T) *ViperProvider {
 	viper.Reset()
 	viperx.InitializeConfig(
 		"oathkeeper",
-		"./../../.schema/",
+		"./../../internal/config/",
 		l,
 	)
 
@@ -114,7 +114,7 @@ func BenchmarkPipelineConfig(b *testing.B) {
 	viper.Reset()
 	viperx.InitializeConfig(
 		"oathkeeper",
-"/../../internal/",
+		"./../../internal/config/",
 		logrus.New(),
 	)
 
@@ -146,7 +146,7 @@ func BenchmarkPipelineEnabled(b *testing.B) {
 	viper.Reset()
 	viperx.InitializeConfig(
 		"oathkeeper",
-		"/../../internal/",
+		"./../../internal/config/",
 		logrus.New(),
 	)
 
@@ -169,7 +169,7 @@ func TestViperProvider(t *testing.T) {
 	viper.Reset()
 	viperx.InitializeConfig(
 		"oathkeeper",
-		"/../../internal/",
+		"./../../internal/config/",
 		logrus.New(),
 	)
 
