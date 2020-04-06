@@ -1,0 +1,36 @@
+{
+  "$id": "https://raw.githubusercontent.com/ory/oathkeeper/master/.schemas/authorizers.keto_engine_acp_ory.schema.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "title": "ORY Keto Access Control Policy Authorizer Configuration",
+  "description": "This section is optional when the authorizer is disabled.",
+  "properties": {
+    "base_url": {
+      "title": "Base URL",
+      "type": "string",
+      "format": "uri",
+      "description": "The base URL of ORY Keto.\n\n>If this authorizer is enabled, this value is required.",
+      "examples": [
+        "http://my-keto/"
+      ]
+    },
+    "required_action": {
+      "type": "string"
+    },
+    "required_resource": {
+      "type": "string"
+    },
+    "subject": {
+      "type": "string"
+    },
+    "flavor": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "base_url",
+    "required_action",
+    "required_resource"
+  ],
+  "additionalProperties": false
+}
