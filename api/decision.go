@@ -31,7 +31,8 @@ import (
 )
 
 const (
-	DecisionPath = "/decisions/generic"
+	DecisionPath 				= "/decisions/generic"
+	LegacyDecisionPath 	= "/decisions"
 )
 
 type decisionHandlerRegistry interface {
@@ -51,13 +52,22 @@ func NewJudgeHandler(r decisionHandlerRegistry) *DecisionHandler {
 }
 
 func (h *DecisionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
-	if len(r.URL.Path) >= len(DecisionPath) && r.URL.Path[:len(DecisionPath)] == DecisionPath {
+	// Due to how the middleware is ordered, we'll only end up here if no other decision path has matched
+	// Therefore we can savely assume that this is a generic decision request
+	if len(r.URL.Path) >= len(LegacyDecisionPath) && r.URL.Path[:len(LegacyDecisionPath)] == LegacyDecisionPath {
 		r.URL.Scheme = "http"
 		r.URL.Host = r.Host
 		if r.TLS != nil {
 			r.URL.Scheme = "https"
 		}
-		r.URL.Path = r.URL.Path[len(DecisionPath):]
+
+		if len(r.URL.Path) >= len(DecisionPath) && r.URL.Path[:len(DecisionPath)] == DecisionPath {
+			r.URL.Path = r.URL.Path[len(DecisionPath):]
+		} else {
+			r.URL.Path = r.URL.Path[len(LegacyDecisionPath):]
+			h.r.Logger().
+				Warn("/decisions is deprecated, please use /decisions/generic")
+		}
 
 		h.decisions(w, r)
 	} else {
