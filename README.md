@@ -1,11 +1,11 @@
-<h1 align="center"><img src="./docs/images/banner_oathkeeper.png" alt="ORY Oathkeeper - Cloud Native Identity & Access Proxy"></h1>
+<h1 align="center"><img src=".github/banner_oathkeeper.png" alt="ORY Oathkeeper - Cloud Native Identity & Access Proxy"></h1>
 
 <h4 align="center">
     <a href="https://www.ory.sh/chat">Chat</a> |
     <a href="https://community.ory.sh/">Forums</a> |
     <a href="http://eepurl.com/di390P">Newsletter</a><br/><br/>
-    <a href="https://www.ory.sh/docs/oathkeeper/sdk/api">API Docs</a> |
-    <a href="https://www.ory.sh/docs/oathkeeper/">Guide</a> |
+    <a href="https://www.ory.sh/oathkeeper/docs/reference/api">API Docs</a> |
+    <a href="https://www.ory.sh/oathkeeper/docs/">Guide</a> |
     <a href="https://godoc.org/github.com/ory/oathkeeper">Code Docs</a><br/><br/>
     <a href="https://opencollective.com/ory">Support this project!</a>
 </h4>
@@ -70,7 +70,7 @@ documentation and upgrade instructions.
 ## Installation
 
 Head over to the
-[ORY Developer Documentation](https://www.ory.sh/docs/oathkeeper/install) to
+[ORY Developer Documentation](https://www.ory.sh/oathkeeper/docs/install) to
 learn how to install ORY Oathkeeper on Linux, macOS, Windows, and Docker and how
 to build ORY Oathkeeper from source.
 
@@ -260,12 +260,12 @@ more.
 ### Guide
 
 The Guide is available
-[here](https://www.ory.sh/docs/oathkeeper/).
+[here](https://www.ory.sh/oathkeeper/docs/).
 
 ### HTTP API documentation
 
 The HTTP API is documented
-[here](https://www.ory.sh/docs/oathkeeper/sdk/api).
+[here](https://www.ory.sh/oathkeeper/docs/reference/api).
 
 ### Upgrading and Changelog
 

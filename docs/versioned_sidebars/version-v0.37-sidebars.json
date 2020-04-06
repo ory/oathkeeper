@@ -1,0 +1,151 @@
+{
+  "version-v0.37/docs": [
+    {
+      "type": "category",
+      "label": "Introduction",
+      "items": [
+        {
+          "type": "doc",
+          "id": "version-v0.37/index"
+        },
+        {
+          "type": "doc",
+          "id": "version-v0.37/install"
+        }
+      ]
+    },
+    {
+      "type": "category",
+      "label": "Core Concepts",
+      "items": [
+        {
+          "type": "doc",
+          "id": "version-v0.37/api-access-rules"
+        },
+        {
+          "type": "category",
+          "label": "Handlers",
+          "items": [
+            {
+              "type": "doc",
+              "id": "version-v0.37/pipeline/index"
+            },
+            {
+              "type": "doc",
+              "id": "version-v0.37/pipeline/authn"
+            },
+            {
+              "type": "doc",
+              "id": "version-v0.37/pipeline/authz"
+            },
+            {
+              "type": "doc",
+              "id": "version-v0.37/pipeline/mutator"
+            },
+            {
+              "type": "doc",
+              "id": "version-v0.37/pipeline/error"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "category",
+      "label": "Guides",
+      "items": [
+        {
+          "type": "doc",
+          "id": "version-v0.37/configure-deploy"
+        }
+      ]
+    },
+    {
+      "type": "category",
+      "label": "Reference",
+      "items": [
+        {
+          "type": "doc",
+          "id": "version-v0.37/reference/configuration"
+        },
+        {
+          "type": "doc",
+          "id": "version-v0.37/reference/api"
+        }
+      ]
+    },
+    {
+      "type": "category",
+      "label": "SDKs",
+      "items": [
+        {
+          "type": "doc",
+          "id": "version-v0.37/sdk/index"
+        }
+      ]
+    },
+    {
+      "type": "category",
+      "label": "ORY Kratos",
+      "items": [
+        {
+          "type": "link",
+          "label": "Home",
+          "href": "https://www.ory.sh/kratos"
+        },
+        {
+          "type": "link",
+          "label": "Docs",
+          "href": "https://www.ory.sh/kratos/docs"
+        },
+        {
+          "type": "link",
+          "label": "GitHub",
+          "href": "https://github.com/ory/kratos"
+        }
+      ]
+    },
+    {
+      "type": "category",
+      "label": "ORY Hydra",
+      "items": [
+        {
+          "type": "link",
+          "label": "Home",
+          "href": "https://www.ory.sh/hydra"
+        },
+        {
+          "type": "link",
+          "label": "Docs",
+          "href": "https://www.ory.sh/hydra/docs"
+        },
+        {
+          "type": "link",
+          "label": "GitHub",
+          "href": "https://github.com/ory/hydra"
+        }
+      ]
+    },
+    {
+      "type": "category",
+      "label": "ORY Keto",
+      "items": [
+        {
+          "type": "link",
+          "label": "Home",
+          "href": "https://www.ory.sh/Keto"
+        },
+        {
+          "type": "link",
+          "label": "Docs",
+          "href": "https://www.ory.sh/Keto/docs"
+        },
+        {
+          "type": "link",
+          "label": "GitHub",
+          "href": "https://github.com/ory/Keto"
+        }
+      ]
+    }
+  ]
+}

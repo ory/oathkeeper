@@ -32,11 +32,11 @@ func setup(t *testing.T) *ViperProvider {
 	viper.Reset()
 	viperx.InitializeConfig(
 		"oathkeeper",
-		"./../../docs/",
+		"./../../internal/config/",
 		l,
 	)
 
-	err := viperx.ValidateFromURL("file://../../.schemas/config.schema.json")
+	err := viperx.ValidateFromURL("file://../../.schema/config.schema.json")
 	if err != nil {
 		viperx.LoggerWithValidationErrorFields(l, err).Error("unable to validate")
 	}
@@ -114,11 +114,11 @@ func BenchmarkPipelineConfig(b *testing.B) {
 	viper.Reset()
 	viperx.InitializeConfig(
 		"oathkeeper",
-		"./../../docs/",
+		"./../../internal/config/",
 		logrus.New(),
 	)
 
-	err := viperx.ValidateFromURL("file://../../.schemas/config.schema.json")
+	err := viperx.ValidateFromURL("file://../../.schema/config.schema.json")
 	if err != nil {
 		viperx.LoggerWithValidationErrorFields(logrus.New(), err).Error("unable to validate")
 	}
@@ -146,11 +146,11 @@ func BenchmarkPipelineEnabled(b *testing.B) {
 	viper.Reset()
 	viperx.InitializeConfig(
 		"oathkeeper",
-		"./../../docs/",
+		"./../../internal/config/",
 		logrus.New(),
 	)
 
-	err := viperx.ValidateFromURL("file://../../.schemas/config.schema.json")
+	err := viperx.ValidateFromURL("file://../../.schema/config.schema.json")
 	if err != nil {
 		viperx.LoggerWithValidationErrorFields(logrus.New(), err).Error("unable to validate")
 	}
@@ -169,11 +169,11 @@ func TestViperProvider(t *testing.T) {
 	viper.Reset()
 	viperx.InitializeConfig(
 		"oathkeeper",
-		"./../../docs/",
+		"./../../internal/config/",
 		logrus.New(),
 	)
 
-	err := viperx.ValidateFromURL("file://../../.schemas/config.schema.json")
+	err := viperx.ValidateFromURL("file://../../.schema/config.schema.json")
 	if err != nil {
 		viperx.LoggerWithValidationErrorFields(logrus.New(), err).Error("unable to validate")
 	}

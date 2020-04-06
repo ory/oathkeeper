@@ -248,7 +248,7 @@ ORY Oathkeeper was changed according to discussion
 [177](https://github.com/ory/oathkeeper/issues/177). Several issues have been
 resolved that could not be resolved before due to design decisions. We strongly
 encourage you to re-read the
-[documentation](https://www.ory.sh/docs/oathkeeper/) but to give you a short
+[documentation](https://www.ory.sh/oathkeeper/docs/) but to give you a short
 overview of the most important changes:
 
 1. Commands `oathkeeper serve api` and `oathkeeper serve proxy` have been
@@ -256,7 +256,7 @@ overview of the most important changes:
    API).
 1. ORY Oathkeeper can now be configured from a file and configuration keys where
    updated. Where appropriate, environment variables from previous versions
-   still work. Please check out [./docs/config.yml](docs/.oathkeeper.yaml) for a
+   still work. Please check out [./docs/config.yml](internal/config/.oathkeeper.yaml) for a
    fully annotated configuration file as several environment variables changed,
    for example (not exclusive): `HTTPS_TLS_CERT_PATH`, `HTTPS_TLS_KEY_PATH`,
    `HTTPS_TLS_CERT`, `HTTPS_TLS_KEY`.
