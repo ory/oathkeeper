@@ -89,6 +89,7 @@
 
 **Merged pull requests:**
 
+- refactor: move docs to this repository [\#396](https://github.com/ory/oathkeeper/pull/396) ([aeneasr](https://github.com/aeneasr))
 - docs: Updates issue and pull request templates [\#395](https://github.com/ory/oathkeeper/pull/395) ([aeneasr](https://github.com/aeneasr))
 - docs: Updates issue and pull request templates [\#394](https://github.com/ory/oathkeeper/pull/394) ([aeneasr](https://github.com/aeneasr))
 - docs: Updates issue and pull request templates [\#393](https://github.com/ory/oathkeeper/pull/393) ([aeneasr](https://github.com/aeneasr))
@@ -145,7 +146,6 @@
 - fix: Update README.md to fix \#374 [\#375](https://github.com/ory/oathkeeper/pull/375) ([tricky42](https://github.com/tricky42))
 - fix: disable test that fails with low cache hit rate [\#372](https://github.com/ory/oathkeeper/pull/372) ([aeneasr](https://github.com/aeneasr))
 - feat: oauth intsropsection configurable timeout [\#370](https://github.com/ory/oathkeeper/pull/370) ([pike1212](https://github.com/pike1212))
-- Fix: link to Developer Install Guide [\#369](https://github.com/ory/oathkeeper/pull/369) ([jaredpreston](https://github.com/jaredpreston))
 - fix: Improve id\_token performance with caching [\#367](https://github.com/ory/oathkeeper/pull/367) ([aeneasr](https://github.com/aeneasr))
 - fix: Load config file only in serve command [\#365](https://github.com/ory/oathkeeper/pull/365) ([aeneasr](https://github.com/aeneasr))
 - fix\(config.schema.json\): fixed examples for some keys [\#363](https://github.com/ory/oathkeeper/pull/363) ([zepatrik](https://github.com/zepatrik))
@@ -173,6 +173,7 @@
 
 **Merged pull requests:**
 
+- Fix: link to Developer Install Guide [\#369](https://github.com/ory/oathkeeper/pull/369) ([jaredpreston](https://github.com/jaredpreston))
 - ci: Bump orb versions [\#356](https://github.com/ory/oathkeeper/pull/356) ([aeneasr](https://github.com/aeneasr))
 - docs: Updates issue and pull request templates [\#355](https://github.com/ory/oathkeeper/pull/355) ([aeneasr](https://github.com/aeneasr))
 - feat\(ci\): Add nancy vuln scanner [\#354](https://github.com/ory/oathkeeper/pull/354) ([aeneasr](https://github.com/aeneasr))
@@ -297,7 +298,6 @@
 - cmd: Health endpoints now emit TRACE logs [\#314](https://github.com/ory/oathkeeper/pull/314) ([aeneasr](https://github.com/aeneasr))
 - rule: Resolve matcher cache [\#313](https://github.com/ory/oathkeeper/pull/313) ([aeneasr](https://github.com/aeneasr))
 - Use default logic if header is Authorization [\#311](https://github.com/ory/oathkeeper/pull/311) ([pike1212](https://github.com/pike1212))
-- add cookie as an option for oauth2\_introspection authenticator [\#301](https://github.com/ory/oathkeeper/pull/301) ([paulbdavis](https://github.com/paulbdavis))
 
 ## [v0.33.0-beta.1](https://github.com/ory/oathkeeper/tree/v0.33.0-beta.1) (2019-12-16)
 
@@ -322,6 +322,7 @@
 
 - Update documentation banner image [\#307](https://github.com/ory/oathkeeper/pull/307) ([jfcurran](https://github.com/jfcurran))
 - allow specifying additional headers for the oauth introspection request [\#302](https://github.com/ory/oathkeeper/pull/302) ([paulbdavis](https://github.com/paulbdavis))
+- add cookie as an option for oauth2\_introspection authenticator [\#301](https://github.com/ory/oathkeeper/pull/301) ([paulbdavis](https://github.com/paulbdavis))
 - add preserve\_path option for cookie session to not override the path [\#297](https://github.com/ory/oathkeeper/pull/297) ([paulbdavis](https://github.com/paulbdavis))
 - pipeline/mutator: Refactor hydrator retry config  [\#287](https://github.com/ory/oathkeeper/pull/287) ([aeneasr](https://github.com/aeneasr))
 
@@ -482,10 +483,8 @@
 - Add description into the name of subtest [\#212](https://github.com/ory/oathkeeper/pull/212) ([minchao](https://github.com/minchao))
 - Add cookie session authenticator [\#211](https://github.com/ory/oathkeeper/pull/211) ([alexdavid](https://github.com/alexdavid))
 - ci: Update golangci install script [\#210](https://github.com/ory/oathkeeper/pull/210) ([aeneasr](https://github.com/aeneasr))
-- docker: Use non-root user in image [\#209](https://github.com/ory/oathkeeper/pull/209) ([aeneasr](https://github.com/aeneasr))
 - Remove binary license [\#208](https://github.com/ory/oathkeeper/pull/208) ([aeneasr](https://github.com/aeneasr))
 - Update config.yaml [\#204](https://github.com/ory/oathkeeper/pull/204) ([haf](https://github.com/haf))
-- server: Properly declare negroni middleware [\#200](https://github.com/ory/oathkeeper/pull/200) ([aeneasr](https://github.com/aeneasr))
 
 ## [v0.16.0-beta.4](https://github.com/ory/oathkeeper/tree/v0.16.0-beta.4) (2019-05-28)
 
@@ -493,6 +492,8 @@
 
 **Merged pull requests:**
 
+- docker: Use non-root user in image [\#209](https://github.com/ory/oathkeeper/pull/209) ([aeneasr](https://github.com/aeneasr))
+- server: Properly declare negroni middleware [\#200](https://github.com/ory/oathkeeper/pull/200) ([aeneasr](https://github.com/aeneasr))
 - docs: Updates issue and pull request templates [\#198](https://github.com/ory/oathkeeper/pull/198) ([aeneasr](https://github.com/aeneasr))
 - docs: Updates issue and pull request templates [\#197](https://github.com/ory/oathkeeper/pull/197) ([aeneasr](https://github.com/aeneasr))
 - docs: Updates issue and pull request templates [\#196](https://github.com/ory/oathkeeper/pull/196) ([aeneasr](https://github.com/aeneasr))
@@ -1005,7 +1006,6 @@
 
 - Return arrays instead of null on rule creation [\#6](https://github.com/ory/oathkeeper/pull/6) ([aeneasr](https://github.com/aeneasr))
 - Add circleci configuration file [\#5](https://github.com/ory/oathkeeper/pull/5) ([aeneasr](https://github.com/aeneasr))
-- Prototype [\#1](https://github.com/ory/oathkeeper/pull/1) ([aeneasr](https://github.com/aeneasr))
 
 ## [v0.0.3](https://github.com/ory/oathkeeper/tree/v0.0.3) (2017-10-18)
 
@@ -1030,6 +1030,7 @@
 **Merged pull requests:**
 
 - travis: add goveralls report submission [\#2](https://github.com/ory/oathkeeper/pull/2) ([aeneasr](https://github.com/aeneasr))
+- Prototype [\#1](https://github.com/ory/oathkeeper/pull/1) ([aeneasr](https://github.com/aeneasr))
 
 
 
