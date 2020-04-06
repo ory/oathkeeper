@@ -31,8 +31,8 @@ import (
 )
 
 const (
-	DecisionPath 				= "/decisions/generic"
-	LegacyDecisionPath 	= "/decisions"
+	DecisionPath       = "/decisions/generic"
+	LegacyDecisionPath = "/decisions"
 )
 
 type decisionHandlerRegistry interface {

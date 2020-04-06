@@ -43,15 +43,15 @@ type RegistryMemory struct {
 
 	ch *api.CredentialsHandler
 
-	credentialsFetcher  		credentials.Fetcher
-	credentialsVerifier 		credentials.Verifier
-	credentialsSigner   		credentials.Signer
-	ruleValidator       		rule.Validator
-	ruleRepository      		*rule.RepositoryMemory
-	apiRuleHandler      		*api.RuleHandler
-	apiJudgeHandler     		*api.DecisionHandler
-	apiDecisionTraefikerHandler	*api.DecisionTraefikHandler
-	healthxHandler      		*healthx.Handler
+	credentialsFetcher          credentials.Fetcher
+	credentialsVerifier         credentials.Verifier
+	credentialsSigner           credentials.Signer
+	ruleValidator               rule.Validator
+	ruleRepository              *rule.RepositoryMemory
+	apiRuleHandler              *api.RuleHandler
+	apiJudgeHandler             *api.DecisionHandler
+	apiDecisionTraefikerHandler *api.DecisionTraefikHandler
+	healthxHandler              *healthx.Handler
 
 	proxyRequestHandler *proxy.RequestHandler
 	proxyProxy          *proxy.Proxy

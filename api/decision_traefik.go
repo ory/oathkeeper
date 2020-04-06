@@ -32,10 +32,10 @@ import (
 
 const (
 	DecisionTraefikPath = "/decisions/traefik"
-	xForwardedProto  	= "X-Forwarded-Proto"
-	xForwardedHost   	= "X-Forwarded-Host"
-	xForwardedURI    	= "X-Forwarded-Uri"
-	xForwardedMethod 	= "X-Forwarded-Method"
+	xForwardedProto     = "X-Forwarded-Proto"
+	xForwardedHost      = "X-Forwarded-Host"
+	xForwardedURI       = "X-Forwarded-Uri"
+	xForwardedMethod    = "X-Forwarded-Method"
 )
 
 type decisionTraefikHandlerRegistry interface {
@@ -87,8 +87,8 @@ func (h *DecisionTraefikHandler) ServeHTTP(w http.ResponseWriter, r *http.Reques
 func (h *DecisionTraefikHandler) decisionTraefiks(w http.ResponseWriter, r *http.Request) {
 	urlToMatch := url.URL{
 		Scheme: r.Header.Get(xForwardedProto),
-		Host: r.Header.Get(xForwardedHost),
-		Path: r.Header.Get(xForwardedURI),
+		Host:   r.Header.Get(xForwardedHost),
+		Path:   r.Header.Get(xForwardedURI),
 	}
 	methodToMatch := r.Header.Get(xForwardedMethod)
 
@@ -117,7 +117,7 @@ func (h *DecisionTraefikHandler) decisionTraefiks(w http.ResponseWriter, r *http
 		WithField("access_url", urlToMatch.String()).
 		Warn("Access request granted")
 
-	for k := range s.Header  {
+	for k := range s.Header {
 		w.Header().Set(k, s.Header.Get(k))
 	}
 
