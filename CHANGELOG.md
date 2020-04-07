@@ -94,6 +94,7 @@
 
 **Merged pull requests:**
 
+- chore: update docusaurus template [\#405](https://github.com/ory/oathkeeper/pull/405) ([aeneasr](https://github.com/aeneasr))
 - chore: update docusaurus template [\#403](https://github.com/ory/oathkeeper/pull/403) ([aeneasr](https://github.com/aeneasr))
 - chore: update docusaurus template [\#402](https://github.com/ory/oathkeeper/pull/402) ([aeneasr](https://github.com/aeneasr))
 - chore: update docusaurus template [\#401](https://github.com/ory/oathkeeper/pull/401) ([aeneasr](https://github.com/aeneasr))
@@ -230,11 +231,14 @@
 - Set min/max for port range in config JSON Schema [\#345](https://github.com/ory/oathkeeper/pull/345) ([aeneasr](https://github.com/aeneasr))
 - Fix profiling env variable not being picked up [\#343](https://github.com/ory/oathkeeper/pull/343) ([ecktom](https://github.com/ecktom))
 - docs: Updates issue and pull request templates [\#341](https://github.com/ory/oathkeeper/pull/341) ([aeneasr](https://github.com/aeneasr))
-- ci: Move to goreleaser orb [\#338](https://github.com/ory/oathkeeper/pull/338) ([aeneasr](https://github.com/aeneasr))
 
 ## [v0.35.1-beta.1](https://github.com/ory/oathkeeper/tree/v0.35.1-beta.1) (2020-01-14)
 
 [Full Changelog](https://github.com/ory/oathkeeper/compare/v0.35.0-alpha.1...v0.35.1-beta.1)
+
+**Merged pull requests:**
+
+- ci: Move to goreleaser orb [\#338](https://github.com/ory/oathkeeper/pull/338) ([aeneasr](https://github.com/aeneasr))
 
 ## [v0.35.0-alpha.1](https://github.com/ory/oathkeeper/tree/v0.35.0-alpha.1) (2020-01-13)
 
@@ -357,6 +361,7 @@
 - authz: Add Content-Type header in the call to Keto [\#290](https://github.com/ory/oathkeeper/pull/290) ([Sbou](https://github.com/Sbou))
 - Auto-kill test runner after 10 retries [\#286](https://github.com/ory/oathkeeper/pull/286) ([aeneasr](https://github.com/aeneasr))
 - Dereference config schema and resolve issues [\#282](https://github.com/ory/oathkeeper/pull/282) ([aeneasr](https://github.com/aeneasr))
+- Support alternative token location [\#271](https://github.com/ory/oathkeeper/pull/271) ([kubadz](https://github.com/kubadz))
 
 ## [v0.32.0-beta.1](https://github.com/ory/oathkeeper/tree/v0.32.0-beta.1) (2019-10-20)
 
@@ -385,9 +390,7 @@
 
 **Merged pull requests:**
 
-- Support alternative token location [\#271](https://github.com/ory/oathkeeper/pull/271) ([kubadz](https://github.com/kubadz))
 - authn: Force auth style in oauth2 client credentials authn [\#267](https://github.com/ory/oathkeeper/pull/267) ([aeneasr](https://github.com/aeneasr))
-- Resolve broken tests [\#262](https://github.com/ory/oathkeeper/pull/262) ([aeneasr](https://github.com/aeneasr))
 - fix \#256: change error code from 403 to 401 [\#259](https://github.com/ory/oathkeeper/pull/259) ([ngrigoriev](https://github.com/ngrigoriev))
 
 ## [v0.19.0-beta.1](https://github.com/ory/oathkeeper/tree/v0.19.0-beta.1) (2019-09-23)
@@ -402,6 +405,7 @@
 
 **Merged pull requests:**
 
+- Resolve broken tests [\#262](https://github.com/ory/oathkeeper/pull/262) ([aeneasr](https://github.com/aeneasr))
 - Homogenize configuration management [\#258](https://github.com/ory/oathkeeper/pull/258) ([aeneasr](https://github.com/aeneasr))
 - Fix \#250: Ignore query parameters to build payload for Keto engine [\#251](https://github.com/ory/oathkeeper/pull/251) ([GuillaumeSmaha](https://github.com/GuillaumeSmaha))
 
@@ -818,7 +822,6 @@
 **Merged pull requests:**
 
 - Adds cors capabilities to management server [\#40](https://github.com/ory/oathkeeper/pull/40) ([aeneasr](https://github.com/aeneasr))
-- docs: Add JWK set docs [\#33](https://github.com/ory/oathkeeper/pull/33) ([aeneasr](https://github.com/aeneasr))
 
 ## [v0.0.26](https://github.com/ory/oathkeeper/tree/v0.0.26) (2017-12-11)
 
@@ -861,6 +864,7 @@
 **Merged pull requests:**
 
 - Print formatted output string in rule management CLI [\#35](https://github.com/ory/oathkeeper/pull/35) ([aeneasr](https://github.com/aeneasr))
+- docs: Add JWK set docs [\#33](https://github.com/ory/oathkeeper/pull/33) ([aeneasr](https://github.com/aeneasr))
 - Update docs and add tests [\#32](https://github.com/ory/oathkeeper/pull/32) ([aeneasr](https://github.com/aeneasr))
 
 ## [v0.0.22](https://github.com/ory/oathkeeper/tree/v0.0.22) (2017-11-20)
