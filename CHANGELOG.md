@@ -94,6 +94,9 @@
 
 **Merged pull requests:**
 
+- chore: update docusaurus template [\#408](https://github.com/ory/oathkeeper/pull/408) ([aeneasr](https://github.com/aeneasr))
+- docs: update github templates [\#407](https://github.com/ory/oathkeeper/pull/407) ([aeneasr](https://github.com/aeneasr))
+- chore: update docusaurus template [\#406](https://github.com/ory/oathkeeper/pull/406) ([aeneasr](https://github.com/aeneasr))
 - chore: update docusaurus template [\#405](https://github.com/ory/oathkeeper/pull/405) ([aeneasr](https://github.com/aeneasr))
 - chore: update docusaurus template [\#403](https://github.com/ory/oathkeeper/pull/403) ([aeneasr](https://github.com/aeneasr))
 - chore: update docusaurus template [\#402](https://github.com/ory/oathkeeper/pull/402) ([aeneasr](https://github.com/aeneasr))
@@ -361,7 +364,6 @@
 - authz: Add Content-Type header in the call to Keto [\#290](https://github.com/ory/oathkeeper/pull/290) ([Sbou](https://github.com/Sbou))
 - Auto-kill test runner after 10 retries [\#286](https://github.com/ory/oathkeeper/pull/286) ([aeneasr](https://github.com/aeneasr))
 - Dereference config schema and resolve issues [\#282](https://github.com/ory/oathkeeper/pull/282) ([aeneasr](https://github.com/aeneasr))
-- Support alternative token location [\#271](https://github.com/ory/oathkeeper/pull/271) ([kubadz](https://github.com/kubadz))
 
 ## [v0.32.0-beta.1](https://github.com/ory/oathkeeper/tree/v0.32.0-beta.1) (2019-10-20)
 
@@ -390,6 +392,7 @@
 
 **Merged pull requests:**
 
+- Support alternative token location [\#271](https://github.com/ory/oathkeeper/pull/271) ([kubadz](https://github.com/kubadz))
 - authn: Force auth style in oauth2 client credentials authn [\#267](https://github.com/ory/oathkeeper/pull/267) ([aeneasr](https://github.com/aeneasr))
 - fix \#256: change error code from 403 to 401 [\#259](https://github.com/ory/oathkeeper/pull/259) ([ngrigoriev](https://github.com/ngrigoriev))
 
