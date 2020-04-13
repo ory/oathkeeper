@@ -94,6 +94,7 @@
 
 **Merged pull requests:**
 
+- docs: update github templates [\#409](https://github.com/ory/oathkeeper/pull/409) ([aeneasr](https://github.com/aeneasr))
 - chore: update docusaurus template [\#408](https://github.com/ory/oathkeeper/pull/408) ([aeneasr](https://github.com/aeneasr))
 - docs: update github templates [\#407](https://github.com/ory/oathkeeper/pull/407) ([aeneasr](https://github.com/aeneasr))
 - chore: update docusaurus template [\#406](https://github.com/ory/oathkeeper/pull/406) ([aeneasr](https://github.com/aeneasr))
@@ -394,7 +395,6 @@
 
 - Support alternative token location [\#271](https://github.com/ory/oathkeeper/pull/271) ([kubadz](https://github.com/kubadz))
 - authn: Force auth style in oauth2 client credentials authn [\#267](https://github.com/ory/oathkeeper/pull/267) ([aeneasr](https://github.com/aeneasr))
-- fix \#256: change error code from 403 to 401 [\#259](https://github.com/ory/oathkeeper/pull/259) ([ngrigoriev](https://github.com/ngrigoriev))
 
 ## [v0.19.0-beta.1](https://github.com/ory/oathkeeper/tree/v0.19.0-beta.1) (2019-09-23)
 
@@ -409,6 +409,7 @@
 **Merged pull requests:**
 
 - Resolve broken tests [\#262](https://github.com/ory/oathkeeper/pull/262) ([aeneasr](https://github.com/aeneasr))
+- fix \#256: change error code from 403 to 401 [\#259](https://github.com/ory/oathkeeper/pull/259) ([ngrigoriev](https://github.com/ngrigoriev))
 - Homogenize configuration management [\#258](https://github.com/ory/oathkeeper/pull/258) ([aeneasr](https://github.com/aeneasr))
 - Fix \#250: Ignore query parameters to build payload for Keto engine [\#251](https://github.com/ory/oathkeeper/pull/251) ([GuillaumeSmaha](https://github.com/GuillaumeSmaha))
 
@@ -850,6 +851,7 @@
 
 - Document HYDRA\_JWK\_SET\_ID [\#34](https://github.com/ory/oathkeeper/issues/34)
 - Investigate if the issuer should be oathkeeper or hydra [\#27](https://github.com/ory/oathkeeper/issues/27)
+- Rename bypass values for better clarity [\#13](https://github.com/ory/oathkeeper/issues/13)
 
 **Merged pull requests:**
 
@@ -862,7 +864,6 @@
 **Closed issues:**
 
 - Rename basicAuthorizationModeEnabled to something that does not clash with HTTP basic authorization [\#29](https://github.com/ory/oathkeeper/issues/29)
-- Rename bypass values for better clarity [\#13](https://github.com/ory/oathkeeper/issues/13)
 
 **Merged pull requests:**
 
@@ -873,10 +874,6 @@
 ## [v0.0.22](https://github.com/ory/oathkeeper/tree/v0.0.22) (2017-11-20)
 
 [Full Changelog](https://github.com/ory/oathkeeper/compare/v0.0.21...v0.0.22)
-
-**Merged pull requests:**
-
-- Renames bypass values for better clarity [\#31](https://github.com/ory/oathkeeper/pull/31) ([aeneasr](https://github.com/aeneasr))
 
 ## [v0.0.21](https://github.com/ory/oathkeeper/tree/v0.0.21) (2017-11-19)
 
@@ -892,6 +889,7 @@
 
 **Merged pull requests:**
 
+- Renames bypass values for better clarity [\#31](https://github.com/ory/oathkeeper/pull/31) ([aeneasr](https://github.com/aeneasr))
 - docs: Improve swagger documentation [\#28](https://github.com/ory/oathkeeper/pull/28) ([aeneasr](https://github.com/aeneasr))
 - cmd: Add rules management capabilities to the cli [\#26](https://github.com/ory/oathkeeper/pull/26) ([aeneasr](https://github.com/aeneasr))
 - unstaged [\#25](https://github.com/ory/oathkeeper/pull/25) ([aeneasr](https://github.com/aeneasr))
