@@ -172,41 +172,39 @@ func (a *AuthenticatorOAuth2Introspection) Config(config json.RawMessage) (*Auth
 		return nil, NewErrAuthenticatorMisconfigured(a, err)
 	}
 
+	var rt http.RoundTripper
+
 	if c.PreAuth != nil && c.PreAuth.Enabled {
-		if c.Retry == nil {
-			c.Retry = &AuthenticatorOAuth2IntrospectionRetryConfiguration{Timeout: "500ms", MaxWait: "1s"}
-		} else {
-			if c.Retry.Timeout == "" {
-				c.Retry.Timeout = "500ms"
-			}
-			if c.Retry.MaxWait == "" {
-				c.Retry.MaxWait = "1s"
-			}
-		}
-		duration, err := time.ParseDuration(c.Retry.Timeout)
-		if err != nil {
-			return nil, err
-		}
-		timeout := time.Millisecond * duration
-
-		maxWait, err := time.ParseDuration(c.Retry.MaxWait)
-		if err != nil {
-			return nil, err
-		}
-
-		a.client = httpx.NewResilientClientLatencyToleranceConfigurable(
-			(&clientcredentials.Config{
-				ClientID:     c.PreAuth.ClientID,
-				ClientSecret: c.PreAuth.ClientSecret,
-				Scopes:       c.PreAuth.Scope,
-				TokenURL:     c.PreAuth.TokenURL,
-			}).
-				Client(context.Background()).
-				Transport,
-			timeout,
-			maxWait,
-		)
+		rt = (&clientcredentials.Config{
+			ClientID:     c.PreAuth.ClientID,
+			ClientSecret: c.PreAuth.ClientSecret,
+			Scopes:       c.PreAuth.Scope,
+			TokenURL:     c.PreAuth.TokenURL,
+		}).Client(context.Background()).Transport
 	}
+
+	if c.Retry == nil {
+		c.Retry = &AuthenticatorOAuth2IntrospectionRetryConfiguration{Timeout: "500ms", MaxWait: "1s"}
+	} else {
+		if c.Retry.Timeout == "" {
+			c.Retry.Timeout = "500ms"
+		}
+		if c.Retry.MaxWait == "" {
+			c.Retry.MaxWait = "1s"
+		}
+	}
+	duration, err := time.ParseDuration(c.Retry.Timeout)
+	if err != nil {
+		return nil, err
+	}
+	timeout := time.Millisecond * duration
+
+	maxWait, err := time.ParseDuration(c.Retry.MaxWait)
+	if err != nil {
+		return nil, err
+	}
+
+	a.client = httpx.NewResilientClientLatencyToleranceConfigurable(rt, timeout, maxWait)
 
 	return &c, nil
 }
