@@ -33,6 +33,7 @@ import (
 	"github.com/tidwall/sjson"
 
 	"github.com/ory/oathkeeper/driver/configuration"
+	"github.com/ory/oathkeeper/helper"
 	"github.com/ory/oathkeeper/internal"
 	. "github.com/ory/oathkeeper/pipeline/authn"
 	"github.com/ory/viper"
@@ -175,7 +176,8 @@ func TestAuthenticatorOAuth2Introspection(t *testing.T) {
 						}))
 					})
 				},
-				expectErr: true,
+				expectErr:      true,
+				expectExactErr: helper.ErrForbidden,
 			},
 			{
 				d:      "should pass because active and no issuer / audience expected",
@@ -283,7 +285,8 @@ func TestAuthenticatorOAuth2Introspection(t *testing.T) {
 						}))
 					})
 				},
-				expectErr: true,
+				expectErr:      true,
+				expectExactErr: helper.ErrForbidden,
 			},
 			{
 				d:      "should pass because active and scope matching hierarchically",
@@ -327,7 +330,8 @@ func TestAuthenticatorOAuth2Introspection(t *testing.T) {
 						}))
 					})
 				},
-				expectErr: true,
+				expectErr:      true,
+				expectExactErr: helper.ErrForbidden,
 			},
 			{
 				d:      "should pass because active and scope matching wildcard",
@@ -371,7 +375,8 @@ func TestAuthenticatorOAuth2Introspection(t *testing.T) {
 						}))
 					})
 				},
-				expectErr: true,
+				expectErr:      true,
+				expectExactErr: helper.ErrForbidden,
 			},
 			{
 				d:      "should fail because active but issuer not matching",
@@ -391,7 +396,8 @@ func TestAuthenticatorOAuth2Introspection(t *testing.T) {
 						}))
 					})
 				},
-				expectErr: true,
+				expectErr:      true,
+				expectExactErr: helper.ErrForbidden,
 			},
 			{
 				d:      "should pass because active and issuer matching",
@@ -431,7 +437,8 @@ func TestAuthenticatorOAuth2Introspection(t *testing.T) {
 						}))
 					})
 				},
-				expectErr: true,
+				expectErr:      true,
+				expectExactErr: helper.ErrForbidden,
 			},
 			{
 				d:      "should pass",

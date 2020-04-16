@@ -120,7 +120,7 @@ func (a *AuthenticatorOAuth2Introspection) Authenticate(r *http.Request, session
 	}
 
 	if !i.Active {
-		return errors.WithStack(helper.ErrUnauthorized.WithReason("Access token i says token is not active"))
+		return errors.WithStack(helper.ErrForbidden.WithReason("Access token i says token is not active"))
 	}
 
 	for _, audience := range cf.Audience {
