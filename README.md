@@ -193,6 +193,7 @@ TheCrealm.
 
 
 
+
 ## Ecosystem
 
 <!--BEGIN ECOSYSTEM-->
@@ -243,6 +244,7 @@ determine whether a subject (user, application, service, car, ...) is authorized
 to perform a certain action on a resource.
 
 <!--END ECOSYSTEM-->
+
 
 
 
