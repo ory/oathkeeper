@@ -9,6 +9,12 @@ module.exports = {
         'docs/docs/install.md',
         'docs/docs/configure-deploy.md'
       ]
+    },
+    {
+      replacer: ({content, next}) => content.replace(/(v[0-9a-zA-Z\\.\\-]+)/gi, `${next}`),
+      files: [
+        'docs/docs/install.md',
+      ]
     }
   ],
   updateConfig: {
