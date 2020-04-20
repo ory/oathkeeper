@@ -7,8 +7,8 @@ env:
 
 before:
   hooks:
-    - "go mod download"
-    - "go install github.com/gobuffalo/packr/v2/packr2"
+    - go mod download
+    - go install github.com/gobuffalo/packr/v2/packr2
     - packr2
 
 builds:
@@ -16,7 +16,7 @@ builds:
     flags:
       - -a
     ldflags:
-      - -s -w -X github.com/ory/oathkeeper/x.Version={{.Env.RELEASE_NAME}} -X github.com/ory/oathkeeper/x.Commit={{.FullCommit}} -X github.com/ory/oathkeeper/x.Date={{.Date}}
+      - -s -w -X github.com/ory/oathkeeper/x.Version={{.Tag}} -X github.com/ory/oathkeeper/x.Commit={{.FullCommit}} -X github.com/ory/oathkeeper/x.Date={{.Date}}
     binary: oathkeeper
     env:
       - CGO_ENABLED=0
@@ -39,8 +39,6 @@ archives:
   -
     replacements:
       darwin: macOS
-      linux: Linux
-      windows: Windows
       386: 32-bit
       amd64: 64-bit
     format_overrides:
@@ -59,9 +57,10 @@ brews:
       owner: ory
       name: homebrew-oathkeeper
     homepage:  https://www.ory.sh
+    goarm: 6
     commit_author:
-      name: ory
-      email: hi@ory.sh
+      name: aeneasr
+      email: aeneas@ory.sh
 
 scoop:
   bucket:
@@ -69,8 +68,8 @@ scoop:
     name: scoop-oathkeeper
   homepage:  https://www.ory.sh
   commit_author:
-    name: ory
-    email: hi@ory.sh
+    name: aeneasr
+    email: aeneas@ory.sh
 
 dockers:
   - dockerfile: Dockerfile
@@ -80,7 +79,7 @@ dockers:
       - "oryd/oathkeeper:v{{ .Major }}"
       - "oryd/oathkeeper:v{{ .Major }}.{{ .Minor }}"
       - "oryd/oathkeeper:v{{ .Major }}.{{ .Minor }}.{{ .Patch }}"
-      - "oryd/oathkeeper:{{ .Env.DOCKER_SHORT_TAG }}"
+      - "oryd/oathkeeper:{{ .Tag }}"
       - "oryd/oathkeeper:latest"
   - dockerfile: Dockerfile-alpine
     binaries:
@@ -89,9 +88,8 @@ dockers:
       - "oryd/oathkeeper:v{{ .Major }}-alpine"
       - "oryd/oathkeeper:v{{ .Major }}.{{ .Minor }}-alpine"
       - "oryd/oathkeeper:v{{ .Major }}.{{ .Minor }}.{{ .Patch }}-alpine"
-      - "oryd/oathkeeper:{{ .Env.DOCKER_SHORT_TAG }}-alpine"
+      - "oryd/oathkeeper:{{ .Tag }}-alpine"
       - "oryd/oathkeeper:latest-alpine"
 
 release:
   prerelease: auto
-  name_template: "{{.Env.RELEASE_NAME}}"
