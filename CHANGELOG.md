@@ -95,6 +95,7 @@
 
 **Merged pull requests:**
 
+- ci: adopt new goreleaser pipeline [\#415](https://github.com/ory/oathkeeper/pull/415) ([aeneasr](https://github.com/aeneasr))
 - docs: update linux install guide [\#414](https://github.com/ory/oathkeeper/pull/414) ([aeneasr](https://github.com/aeneasr))
 - docs: update github templates [\#413](https://github.com/ory/oathkeeper/pull/413) ([aeneasr](https://github.com/aeneasr))
 - docs: update github templates [\#412](https://github.com/ory/oathkeeper/pull/412) ([aeneasr](https://github.com/aeneasr))
@@ -236,6 +237,7 @@
 
 - Use integer instead of number in config JSON schema [\#350](https://github.com/ory/oathkeeper/pull/350) ([aeneasr](https://github.com/aeneasr))
 - ci: Bump ory/sdk orb and Go version [\#349](https://github.com/ory/oathkeeper/pull/349) ([aeneasr](https://github.com/aeneasr))
+- Cache config to improve latencies [\#348](https://github.com/ory/oathkeeper/pull/348) ([ecktom](https://github.com/ecktom))
 - Set min/max for port range in config JSON Schema [\#345](https://github.com/ory/oathkeeper/pull/345) ([aeneasr](https://github.com/aeneasr))
 - Fix profiling env variable not being picked up [\#343](https://github.com/ory/oathkeeper/pull/343) ([ecktom](https://github.com/ecktom))
 - docs: Updates issue and pull request templates [\#341](https://github.com/ory/oathkeeper/pull/341) ([aeneasr](https://github.com/aeneasr))
@@ -263,7 +265,6 @@
 
 **Merged pull requests:**
 
-- Cache config to improve latencies [\#348](https://github.com/ory/oathkeeper/pull/348) ([ecktom](https://github.com/ecktom))
 - Update upgrade guide [\#337](https://github.com/ory/oathkeeper/pull/337) ([aeneasr](https://github.com/aeneasr))
 - authn/cookie\_session: Add subject\_from modifier [\#336](https://github.com/ory/oathkeeper/pull/336) ([aeneasr](https://github.com/aeneasr))
 - authn/cookie\_session: Add extra\_from modifier [\#335](https://github.com/ory/oathkeeper/pull/335) ([aeneasr](https://github.com/aeneasr))
@@ -716,6 +717,7 @@
 - cmd: Resolves recursive stack overflow [\#81](https://github.com/ory/oathkeeper/pull/81) ([aeneasr](https://github.com/aeneasr))
 - docs: Adds link to examples repository [\#79](https://github.com/ory/oathkeeper/pull/79) ([aeneasr](https://github.com/aeneasr))
 - docs: Adds gh templates & code of conduct [\#78](https://github.com/ory/oathkeeper/pull/78) ([aeneasr](https://github.com/aeneasr))
+- ci: Prevent pushes from forks to coveralls [\#74](https://github.com/ory/oathkeeper/pull/74) ([aeneasr](https://github.com/aeneasr))
 
 ## [v0.13.4+oryOS.4](https://github.com/ory/oathkeeper/tree/v0.13.4+oryOS.4) (2018-11-14)
 
@@ -792,7 +794,6 @@
 
 **Merged pull requests:**
 
-- ci: Prevent pushes from forks to coveralls [\#74](https://github.com/ory/oathkeeper/pull/74) ([aeneasr](https://github.com/aeneasr))
 - Update README.md [\#58](https://github.com/ory/oathkeeper/pull/58) ([aeneasr](https://github.com/aeneasr))
 - docs: Moves documentation to new repository [\#57](https://github.com/ory/oathkeeper/pull/57) ([aeneasr](https://github.com/aeneasr))
 - Update 2-EXECUTION.md [\#56](https://github.com/ory/oathkeeper/pull/56) ([maryoush](https://github.com/maryoush))
@@ -856,10 +857,6 @@
 - Document HYDRA\_JWK\_SET\_ID [\#34](https://github.com/ory/oathkeeper/issues/34)
 - Investigate if the issuer should be oathkeeper or hydra [\#27](https://github.com/ory/oathkeeper/issues/27)
 
-**Merged pull requests:**
-
-- Telemetry [\#36](https://github.com/ory/oathkeeper/pull/36) ([aeneasr](https://github.com/aeneasr))
-
 ## [v0.0.23](https://github.com/ory/oathkeeper/tree/v0.0.23) (2017-11-24)
 
 [Full Changelog](https://github.com/ory/oathkeeper/compare/v0.0.22...v0.0.23)
@@ -871,6 +868,7 @@
 
 **Merged pull requests:**
 
+- Telemetry [\#36](https://github.com/ory/oathkeeper/pull/36) ([aeneasr](https://github.com/aeneasr))
 - Print formatted output string in rule management CLI [\#35](https://github.com/ory/oathkeeper/pull/35) ([aeneasr](https://github.com/aeneasr))
 - docs: Add JWK set docs [\#33](https://github.com/ory/oathkeeper/pull/33) ([aeneasr](https://github.com/aeneasr))
 - Update docs and add tests [\#32](https://github.com/ory/oathkeeper/pull/32) ([aeneasr](https://github.com/aeneasr))
@@ -898,7 +896,6 @@
 **Merged pull requests:**
 
 - docs: Improve swagger documentation [\#28](https://github.com/ory/oathkeeper/pull/28) ([aeneasr](https://github.com/aeneasr))
-- cmd: Add rules management capabilities to the cli [\#26](https://github.com/ory/oathkeeper/pull/26) ([aeneasr](https://github.com/aeneasr))
 - unstaged [\#25](https://github.com/ory/oathkeeper/pull/25) ([aeneasr](https://github.com/aeneasr))
 
 ## [v0.0.19](https://github.com/ory/oathkeeper/tree/v0.0.19) (2017-11-13)
@@ -908,10 +905,6 @@
 **Closed issues:**
 
 - evaluator: token\[:5\] will cause panic [\#22](https://github.com/ory/oathkeeper/issues/22)
-
-**Merged pull requests:**
-
-- evaluator: Use full request URL [\#24](https://github.com/ory/oathkeeper/pull/24) ([aeneasr](https://github.com/aeneasr))
 
 ## [v0.0.18](https://github.com/ory/oathkeeper/tree/v0.0.18) (2017-11-13)
 
@@ -951,6 +944,7 @@
 
 **Merged pull requests:**
 
+- evaluator: Use full request URL [\#24](https://github.com/ory/oathkeeper/pull/24) ([aeneasr](https://github.com/aeneasr))
 - Make refresh\_delay configurable and skip it on boot [\#18](https://github.com/ory/oathkeeper/pull/18) ([aeneasr](https://github.com/aeneasr))
 
 ## [v0.0.13](https://github.com/ory/oathkeeper/tree/v0.0.13) (2017-11-07)
@@ -959,15 +953,12 @@
 
 **Merged pull requests:**
 
+- cmd: Add rules management capabilities to the cli [\#26](https://github.com/ory/oathkeeper/pull/26) ([aeneasr](https://github.com/aeneasr))
 - Store rules path match in plaintext [\#17](https://github.com/ory/oathkeeper/pull/17) ([aeneasr](https://github.com/aeneasr))
 
 ## [v0.0.12](https://github.com/ory/oathkeeper/tree/v0.0.12) (2017-11-07)
 
 [Full Changelog](https://github.com/ory/oathkeeper/compare/v0.0.11...v0.0.12)
-
-**Merged pull requests:**
-
-- Use ladon regex compiler for matches [\#16](https://github.com/ory/oathkeeper/pull/16) ([aeneasr](https://github.com/aeneasr))
 
 ## [v0.0.11](https://github.com/ory/oathkeeper/tree/v0.0.11) (2017-11-06)
 
@@ -1011,6 +1002,7 @@
 
 **Merged pull requests:**
 
+- Use ladon regex compiler for matches [\#16](https://github.com/ory/oathkeeper/pull/16) ([aeneasr](https://github.com/aeneasr))
 - Add cors handling to proxy [\#11](https://github.com/ory/oathkeeper/pull/11) ([aeneasr](https://github.com/aeneasr))
 - Remove goveralls from circle build [\#10](https://github.com/ory/oathkeeper/pull/10) ([aeneasr](https://github.com/aeneasr))
 - Use circle ci build status badge [\#9](https://github.com/ory/oathkeeper/pull/9) ([aeneasr](https://github.com/aeneasr))
