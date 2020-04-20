@@ -241,6 +241,15 @@ authorizers:
       required_action: unknown
       required_resource: unknown
 
+  # Configures the remote authorizer
+  remote:
+    # Set enabled to true if the authorizer should be enabled and false to disable the authorizer. Defaults to false.
+    enabled: true
+
+    config:
+      remote: https://host/path
+      headers: {}
+
   # Configures the remote_json authorizer
   remote_json:
     # Set enabled to true if the authorizer should be enabled and false to disable the authorizer. Defaults to false.
