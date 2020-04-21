@@ -183,6 +183,7 @@ errors:
         when:
           - error:
               - unauthorized
+              - authentication_handler_no_match
               - ...
               - ...
 ```
