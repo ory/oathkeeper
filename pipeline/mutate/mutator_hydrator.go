@@ -22,10 +22,14 @@ package mutate
 
 import (
 	"bytes"
+	"crypto/md5"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/url"
 	"time"
+
+	"github.com/dgraph-io/ristretto"
 
 	"github.com/ory/oathkeeper/pipeline/authn"
 	"github.com/ory/oathkeeper/x"
@@ -55,6 +59,9 @@ type MutatorHydrator struct {
 	c      configuration.Provider
 	client *http.Client
 	d      mutatorHydratorDependencies
+
+	hydrateCache        *ristretto.Cache
+	hydrateCacheEnabled bool
 }
 
 type BasicAuth struct {
@@ -85,12 +92,55 @@ type mutatorHydratorDependencies interface {
 	x.RegistryLogger
 }
 
+func (a *MutatorHydrator) SetCaching(cache bool) {
+	a.hydrateCacheEnabled = cache
+}
+
 func NewMutatorHydrator(c configuration.Provider, d mutatorHydratorDependencies) *MutatorHydrator {
-	return &MutatorHydrator{c: c, d: d, client: httpx.NewResilientClientLatencyToleranceSmall(nil)}
+	cache, _ := ristretto.NewCache(&ristretto.Config{
+		NumCounters: 10000,
+		MaxCost:     1 << 25,
+		BufferItems: 64,
+	})
+	return &MutatorHydrator{c: c, d: d, client: httpx.NewResilientClientLatencyToleranceSmall(nil), hydrateCache: cache, hydrateCacheEnabled: true}
 }
 
 func (a *MutatorHydrator) GetID() string {
 	return "hydrator"
+}
+
+func (a *MutatorHydrator) cacheKey(config *MutatorHydratorConfig, session *authn.AuthenticationSession) string {
+	return fmt.Sprintf("%x",
+		md5.Sum([]byte(fmt.Sprintf("%s|%s", config.Api.URL, session.Subject))),
+	)
+}
+
+func (a *MutatorHydrator) hydrateFromCache(config *MutatorHydratorConfig, session *authn.AuthenticationSession) (*authn.AuthenticationSession, bool) {
+	if !a.hydrateCacheEnabled {
+		return nil, false
+	}
+
+	key := a.cacheKey(config, session)
+
+	item, found := a.hydrateCache.Get(key)
+	if !found {
+		return nil, false
+	}
+
+	container := item.(*authn.AuthenticationSession)
+	return container, true
+}
+
+func (a *MutatorHydrator) hydrateToCache(config *MutatorHydratorConfig, session *authn.AuthenticationSession) {
+	if !a.hydrateCacheEnabled {
+		return
+	}
+
+	key := a.cacheKey(config, session)
+	cached := a.hydrateCache.SetWithTTL(key, session, 0, time.Minute*5)
+	if !cached {
+		a.d.Logger().Warn("Item not added to cache")
+	}
 }
 
 func (a *MutatorHydrator) Mutate(r *http.Request, session *authn.AuthenticationSession, config json.RawMessage, _ pipeline.Rule) error {
@@ -102,6 +152,11 @@ func (a *MutatorHydrator) Mutate(r *http.Request, session *authn.AuthenticationS
 	var b bytes.Buffer
 	if err := json.NewEncoder(&b).Encode(session); err != nil {
 		return errors.WithStack(err)
+	}
+
+	if cacheSession, ok := a.hydrateFromCache(cfg, session); ok {
+		*session = *cacheSession
+		return nil
 	}
 
 	if cfg.Api.URL == "" {
@@ -173,6 +228,9 @@ func (a *MutatorHydrator) Mutate(r *http.Request, session *authn.AuthenticationS
 		return errors.New(ErrMalformedResponseFromUpstreamAPI)
 	}
 	*session = sessionFromUpstream
+
+	// set in cache
+	a.hydrateToCache(cfg, session)
 
 	return nil
 }
