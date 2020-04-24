@@ -87,6 +87,10 @@
 
 [Full Changelog](https://github.com/ory/oathkeeper/compare/v0.37.1-beta.1...HEAD)
 
+**Implemented enhancements:**
+
+- Log Rule Id on malformed configuration error [\#383](https://github.com/ory/oathkeeper/issues/383)
+
 **Closed issues:**
 
 - Can't start version 0.19.0-beta.1 [\#400](https://github.com/ory/oathkeeper/issues/400)
@@ -95,6 +99,7 @@
 
 **Merged pull requests:**
 
+- Add new remote authorizer that uses request body and headers [\#416](https://github.com/ory/oathkeeper/pull/416) ([Marlinc](https://github.com/Marlinc))
 - ci: adopt new goreleaser pipeline [\#415](https://github.com/ory/oathkeeper/pull/415) ([aeneasr](https://github.com/aeneasr))
 - docs: update linux install guide [\#414](https://github.com/ory/oathkeeper/pull/414) ([aeneasr](https://github.com/aeneasr))
 - docs: update github templates [\#413](https://github.com/ory/oathkeeper/pull/413) ([aeneasr](https://github.com/aeneasr))
@@ -330,7 +335,6 @@
 **Fixed bugs:**
 
 - Missing Content-type [\#289](https://github.com/ory/oathkeeper/issues/289)
-- Should not fatal when rule configmap changes [\#229](https://github.com/ory/oathkeeper/issues/229)
 
 **Closed issues:**
 
@@ -388,6 +392,7 @@
 
 - Client Credentials Authenticators not compatible with Hydra? [\#260](https://github.com/ory/oathkeeper/issues/260)
 - "jwt" authenticator returns 403 instead of 401 [\#256](https://github.com/ory/oathkeeper/issues/256)
+- Should not fatal when rule configmap changes [\#229](https://github.com/ory/oathkeeper/issues/229)
 
 **Closed issues:**
 
@@ -682,7 +687,6 @@
 - Resolve various issues [\#99](https://github.com/ory/oathkeeper/pull/99) ([aeneasr](https://github.com/aeneasr))
 - Node sdk [\#94](https://github.com/ory/oathkeeper/pull/94) ([aeneasr](https://github.com/aeneasr))
 - judge: Add endpoint for answering access requests directly [\#91](https://github.com/ory/oathkeeper/pull/91) ([aeneasr](https://github.com/aeneasr))
-- health: Introduce health and version endpoint [\#90](https://github.com/ory/oathkeeper/pull/90) ([aeneasr](https://github.com/aeneasr))
 
 ## [v0.13.7+oryOS.7](https://github.com/ory/oathkeeper/tree/v0.13.7+oryOS.7) (2018-11-14)
 
@@ -690,6 +694,7 @@
 
 **Merged pull requests:**
 
+- health: Introduce health and version endpoint [\#90](https://github.com/ory/oathkeeper/pull/90) ([aeneasr](https://github.com/aeneasr))
 - docs: fix broken link [\#87](https://github.com/ory/oathkeeper/pull/87) ([orisano](https://github.com/orisano))
 - README: grammatical fix in stability sentence [\#86](https://github.com/ory/oathkeeper/pull/86) ([philips](https://github.com/philips))
 
@@ -857,6 +862,10 @@
 - Document HYDRA\_JWK\_SET\_ID [\#34](https://github.com/ory/oathkeeper/issues/34)
 - Investigate if the issuer should be oathkeeper or hydra [\#27](https://github.com/ory/oathkeeper/issues/27)
 
+**Merged pull requests:**
+
+- Telemetry [\#36](https://github.com/ory/oathkeeper/pull/36) ([aeneasr](https://github.com/aeneasr))
+
 ## [v0.0.23](https://github.com/ory/oathkeeper/tree/v0.0.23) (2017-11-24)
 
 [Full Changelog](https://github.com/ory/oathkeeper/compare/v0.0.22...v0.0.23)
@@ -868,7 +877,6 @@
 
 **Merged pull requests:**
 
-- Telemetry [\#36](https://github.com/ory/oathkeeper/pull/36) ([aeneasr](https://github.com/aeneasr))
 - Print formatted output string in rule management CLI [\#35](https://github.com/ory/oathkeeper/pull/35) ([aeneasr](https://github.com/aeneasr))
 - docs: Add JWK set docs [\#33](https://github.com/ory/oathkeeper/pull/33) ([aeneasr](https://github.com/aeneasr))
 - Update docs and add tests [\#32](https://github.com/ory/oathkeeper/pull/32) ([aeneasr](https://github.com/aeneasr))
@@ -888,6 +896,7 @@
 **Merged pull requests:**
 
 - Request hydra.keys scope and fix panic [\#30](https://github.com/ory/oathkeeper/pull/30) ([aeneasr](https://github.com/aeneasr))
+- Replace MatchesPath with MatchesURL [\#20](https://github.com/ory/oathkeeper/pull/20) ([aeneasr](https://github.com/aeneasr))
 
 ## [v0.0.20](https://github.com/ory/oathkeeper/tree/v0.0.20) (2017-11-18)
 
@@ -896,6 +905,7 @@
 **Merged pull requests:**
 
 - docs: Improve swagger documentation [\#28](https://github.com/ory/oathkeeper/pull/28) ([aeneasr](https://github.com/aeneasr))
+- cmd: Add rules management capabilities to the cli [\#26](https://github.com/ory/oathkeeper/pull/26) ([aeneasr](https://github.com/aeneasr))
 - unstaged [\#25](https://github.com/ory/oathkeeper/pull/25) ([aeneasr](https://github.com/aeneasr))
 
 ## [v0.0.19](https://github.com/ory/oathkeeper/tree/v0.0.19) (2017-11-13)
@@ -905,6 +915,10 @@
 **Closed issues:**
 
 - evaluator: token\[:5\] will cause panic [\#22](https://github.com/ory/oathkeeper/issues/22)
+
+**Merged pull requests:**
+
+- evaluator: Use full request URL [\#24](https://github.com/ory/oathkeeper/pull/24) ([aeneasr](https://github.com/aeneasr))
 
 ## [v0.0.18](https://github.com/ory/oathkeeper/tree/v0.0.18) (2017-11-13)
 
@@ -926,10 +940,6 @@
 
 [Full Changelog](https://github.com/ory/oathkeeper/compare/v0.0.15...v0.0.16)
 
-**Merged pull requests:**
-
-- Replace MatchesPath with MatchesURL [\#20](https://github.com/ory/oathkeeper/pull/20) ([aeneasr](https://github.com/aeneasr))
-
 ## [v0.0.15](https://github.com/ory/oathkeeper/tree/v0.0.15) (2017-11-09)
 
 [Full Changelog](https://github.com/ory/oathkeeper/compare/v0.0.14...v0.0.15)
@@ -944,7 +954,6 @@
 
 **Merged pull requests:**
 
-- evaluator: Use full request URL [\#24](https://github.com/ory/oathkeeper/pull/24) ([aeneasr](https://github.com/aeneasr))
 - Make refresh\_delay configurable and skip it on boot [\#18](https://github.com/ory/oathkeeper/pull/18) ([aeneasr](https://github.com/aeneasr))
 
 ## [v0.0.13](https://github.com/ory/oathkeeper/tree/v0.0.13) (2017-11-07)
@@ -953,12 +962,15 @@
 
 **Merged pull requests:**
 
-- cmd: Add rules management capabilities to the cli [\#26](https://github.com/ory/oathkeeper/pull/26) ([aeneasr](https://github.com/aeneasr))
 - Store rules path match in plaintext [\#17](https://github.com/ory/oathkeeper/pull/17) ([aeneasr](https://github.com/aeneasr))
 
 ## [v0.0.12](https://github.com/ory/oathkeeper/tree/v0.0.12) (2017-11-07)
 
 [Full Changelog](https://github.com/ory/oathkeeper/compare/v0.0.11...v0.0.12)
+
+**Merged pull requests:**
+
+- Use ladon regex compiler for matches [\#16](https://github.com/ory/oathkeeper/pull/16) ([aeneasr](https://github.com/aeneasr))
 
 ## [v0.0.11](https://github.com/ory/oathkeeper/tree/v0.0.11) (2017-11-06)
 
@@ -987,6 +999,7 @@
 **Merged pull requests:**
 
 - Build oathekeeper docker image statically [\#14](https://github.com/ory/oathkeeper/pull/14) ([aeneasr](https://github.com/aeneasr))
+- Use circle ci build status badge [\#9](https://github.com/ory/oathkeeper/pull/9) ([aeneasr](https://github.com/aeneasr))
 
 ## [v0.0.6](https://github.com/ory/oathkeeper/tree/v0.0.6) (2017-11-03)
 
@@ -1002,10 +1015,8 @@
 
 **Merged pull requests:**
 
-- Use ladon regex compiler for matches [\#16](https://github.com/ory/oathkeeper/pull/16) ([aeneasr](https://github.com/aeneasr))
 - Add cors handling to proxy [\#11](https://github.com/ory/oathkeeper/pull/11) ([aeneasr](https://github.com/aeneasr))
 - Remove goveralls from circle build [\#10](https://github.com/ory/oathkeeper/pull/10) ([aeneasr](https://github.com/aeneasr))
-- Use circle ci build status badge [\#9](https://github.com/ory/oathkeeper/pull/9) ([aeneasr](https://github.com/aeneasr))
 - Switch from glide to golang/dep for vendoring [\#8](https://github.com/ory/oathkeeper/pull/8) ([aeneasr](https://github.com/aeneasr))
 - Resolve tests by replacing nil slice [\#7](https://github.com/ory/oathkeeper/pull/7) ([aeneasr](https://github.com/aeneasr))
 
