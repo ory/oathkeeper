@@ -60,8 +60,7 @@ type MutatorHydrator struct {
 	client *http.Client
 	d      mutatorHydratorDependencies
 
-	hydrateCache        *ristretto.Cache
-	hydrateCacheEnabled bool
+	hydrateCache *ristretto.Cache
 }
 
 type BasicAuth struct {
@@ -85,15 +84,12 @@ type externalAPIConfig struct {
 }
 
 type MutatorHydratorConfig struct {
-	Api externalAPIConfig `json:"api"`
+	Api      externalAPIConfig `json:"api"`
+	CacheTtl string            `json:"cache_ttl"`
 }
 
 type mutatorHydratorDependencies interface {
 	x.RegistryLogger
-}
-
-func (a *MutatorHydrator) SetCaching(cache bool) {
-	a.hydrateCacheEnabled = cache
 }
 
 func NewMutatorHydrator(c configuration.Provider, d mutatorHydratorDependencies) *MutatorHydrator {
@@ -102,7 +98,7 @@ func NewMutatorHydrator(c configuration.Provider, d mutatorHydratorDependencies)
 		MaxCost:     1 << 25,
 		BufferItems: 64,
 	})
-	return &MutatorHydrator{c: c, d: d, client: httpx.NewResilientClientLatencyToleranceSmall(nil), hydrateCache: cache, hydrateCacheEnabled: true}
+	return &MutatorHydrator{c: c, d: d, client: httpx.NewResilientClientLatencyToleranceSmall(nil), hydrateCache: cache}
 }
 
 func (a *MutatorHydrator) GetID() string {
@@ -116,10 +112,6 @@ func (a *MutatorHydrator) cacheKey(config *MutatorHydratorConfig, session *authn
 }
 
 func (a *MutatorHydrator) hydrateFromCache(config *MutatorHydratorConfig, session *authn.AuthenticationSession) (*authn.AuthenticationSession, bool) {
-	if !a.hydrateCacheEnabled {
-		return nil, false
-	}
-
 	key := a.cacheKey(config, session)
 
 	item, found := a.hydrateCache.Get(key)
@@ -131,13 +123,9 @@ func (a *MutatorHydrator) hydrateFromCache(config *MutatorHydratorConfig, sessio
 	return container, true
 }
 
-func (a *MutatorHydrator) hydrateToCache(config *MutatorHydratorConfig, session *authn.AuthenticationSession) {
-	if !a.hydrateCacheEnabled {
-		return
-	}
-
+func (a *MutatorHydrator) hydrateToCache(config *MutatorHydratorConfig, session *authn.AuthenticationSession, ttl time.Duration) {
 	key := a.cacheKey(config, session)
-	cached := a.hydrateCache.SetWithTTL(key, session, 0, time.Minute*5)
+	cached := a.hydrateCache.SetWithTTL(key, session, 0, ttl)
 	if !cached {
 		a.d.Logger().Warn("Item not added to cache")
 	}
@@ -154,9 +142,11 @@ func (a *MutatorHydrator) Mutate(r *http.Request, session *authn.AuthenticationS
 		return errors.WithStack(err)
 	}
 
-	if cacheSession, ok := a.hydrateFromCache(cfg, session); ok {
-		*session = *cacheSession
-		return nil
+	if cfg.CacheTtl != "" {
+		if cacheSession, ok := a.hydrateFromCache(cfg, session); ok {
+			*session = *cacheSession
+			return nil
+		}
 	}
 
 	if cfg.Api.URL == "" {
@@ -229,8 +219,14 @@ func (a *MutatorHydrator) Mutate(r *http.Request, session *authn.AuthenticationS
 	}
 	*session = sessionFromUpstream
 
-	// set in cache
-	a.hydrateToCache(cfg, session)
+	if cfg.CacheTtl != "" {
+		d, err := time.ParseDuration(cfg.CacheTtl)
+		if err != nil {
+			a.d.Logger().WithError(err).Error("Unable to parse cache_ttl in the Hydrator Mutator.")
+			return errors.WithStack(err)
+		}
+		a.hydrateToCache(cfg, session, d)
+	}
 
 	return nil
 }
