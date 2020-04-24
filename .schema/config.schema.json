@@ -738,6 +738,32 @@
       ],
       "additionalProperties": false
     },
+    "configAuthorizersRemote": {
+      "type": "object",
+      "title": "Remote Configuration",
+      "description": "This section is optional when the authorizer is disabled.",
+      "properties": {
+        "remote": {
+          "title": "Remote Authorizer URL",
+          "type": "string",
+          "format": "uri",
+          "description": "The URL of the remote authorizer. The remote authorizer is expected to return either 200 OK or 403 Forbidden to allow/deny access.\n\n>If this authorizer is enabled, this value is required.",
+          "examples": [
+            "https://host/path"
+          ]
+        },
+        "headers": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "remote"
+      ],
+      "additionalProperties": false
+    },
     "configAuthorizersRemoteJSON": {
       "type": "object",
       "title": "Remote JSON Configuration",
@@ -1387,6 +1413,38 @@
                 },
                 "config": {
                   "$ref": "#/definitions/configAuthorizersKetoEngineAcpOry"
+                }
+              },
+              "required": [
+                "config"
+              ]
+            },
+            {
+              "properties": {
+                "enabled": {
+                  "const": false
+                }
+              }
+            }
+          ]
+        },
+        "remote": {
+          "title": "Remote",
+          "description": "The [`remote` authorizer](https://www.ory.sh/oathkeeper/docs/pipeline/authz#remote).",
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "$ref": "#/definitions/handlerSwitch"
+            }
+          },
+          "oneOf": [
+            {
+              "properties": {
+                "enabled": {
+                  "const": true
+                },
+                "config": {
+                  "$ref": "#/definitions/configAuthorizersRemote"
                 }
               },
               "required": [

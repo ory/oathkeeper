@@ -274,6 +274,87 @@ $ cat ./rules.json
 }]
 ```
 
+## `remote`
+
+This authorizer performs authorization using a remote authorizer. The authorizer
+makes a HTTP POST request to a remote endpoint with the original body request as
+body. If the endpoint returns a "200 OK" response code, the access is allowed,
+if it returns a "403 Forbidden" response code, the access is denied.
+
+### Configuration
+
+- `remote` (string, required) - The remote authorizer's URL. The remote
+  authorizer is expected to return either "200 OK" or "403 Forbidden" to
+  allow/deny access.
+- `headers` (map of strings, optional) - The HTTP headers sent to the remote
+  authorizer. The values will be parsed by the Go
+  [`text/template`](https://golang.org/pkg/text/template/) package and applied
+  to an
+  [`AuthenticationSession`](https://github.com/ory/oathkeeper/blob/master/pipeline/authn/authenticator.go#L40)
+  object. See [Session](index.md#session) for more details.
+
+#### Example
+
+```yaml
+# Global configuration file oathkeeper.yml
+authorizers:
+  remote:
+    # Set enabled to "true" to enable the authenticator, and "false" to disable the authenticator. Defaults to "false".
+    enabled: true
+
+    config:
+      remote: http://my-remote-authorizer/authorize
+      headers:
+        X-Subject: "{{ print .Subject }}"
+```
+
+```yaml
+# Some Access Rule: access-rule-1.yaml
+id: access-rule-1
+# match: ...
+# upstream: ...
+authorizers:
+  - handler: remote
+    config:
+      remote: http://my-remote-authorizer/authorize
+      headers:
+        X-Subject: "{{ print .Subject }}"
+```
+
+### Access Rule Example
+
+```shell
+{
+  "id": "some-id",
+  "upstream": {
+    "url": "http://my-backend-service"
+  },
+  "match": {
+    "url": "http://my-app/api/<.*>",
+    "methods": ["GET"]
+  },
+  "authenticators": [
+    {
+      "handler": "anonymous"
+    }
+  ],
+  "authorizer": {
+    "handler": "remote",
+    "config": {
+      "remote": "http://my-remote-authorizer/authorize",
+      "headers": {
+        "X-Subject": "{{ print .Subject }}"
+      }
+    }
+  }
+  "mutators": [
+    {
+      "handler": "noop"
+    }
+  ]
+}
+```
+
 ## `remote_json`
 
 This authorizer performs authorization using a remote authorizer. The authorizer

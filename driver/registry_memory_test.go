@@ -9,7 +9,7 @@ import (
 func TestRegistryMemoryAvailablePipelineAuthorizers(t *testing.T) {
 	r := NewRegistryMemory()
 	got := r.AvailablePipelineAuthorizers()
-	assert.ElementsMatch(t, got, []string{"allow", "deny", "keto_engine_acp_ory", "remote_json"})
+	assert.ElementsMatch(t, got, []string{"allow", "deny", "keto_engine_acp_ory", "remote", "remote_json"})
 }
 
 func TestRegistryMemoryPipelineAuthorizer(t *testing.T) {
@@ -20,6 +20,7 @@ func TestRegistryMemoryPipelineAuthorizer(t *testing.T) {
 		{id: "allow"},
 		{id: "deny"},
 		{id: "keto_engine_acp_ory"},
+		{id: "remote"},
 		{id: "remote_json"},
 		{id: "unregistered", wantErr: true},
 	}
