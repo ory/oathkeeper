@@ -338,7 +338,7 @@ credentials are valid.
 This authenticator will use the username from the HTTP Basic Authorization
 header as the subject for this request.
 
-> If you are unfamiliar with OAuth 2.0 Introspection we recommend
+> If you are unfamiliar with OAuth 2.0 Client Credentials we recommend
 > [reading this guide](https://www.oauth.com/oauth2-servers/access-tokens/client-credentials/).
 
 ### Configuration
