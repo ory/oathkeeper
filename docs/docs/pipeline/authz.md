@@ -305,7 +305,7 @@ authorizers:
     config:
       remote: http://my-remote-authorizer/authorize
       headers:
-        X-Subject: "{{ print .Subject }}"
+        X-Subject: '{{ print .Subject }}'
 ```
 
 ```yaml
@@ -318,7 +318,7 @@ authorizers:
     config:
       remote: http://my-remote-authorizer/authorize
       headers:
-        X-Subject: "{{ print .Subject }}"
+        X-Subject: '{{ print .Subject }}'
 ```
 
 ### Access Rule Example

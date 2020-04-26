@@ -27,7 +27,8 @@ $ oathkeeper help
 
 ## Linux
 
-On linux, you can use `bash <(curl ...)` to fetch the latest stable binary using:
+On linux, you can use `bash <(curl ...)` to fetch the latest stable binary
+using:
 
 ```shell
 $ bash <(curl https://raw.githubusercontent.com/ory/oathkeeper/master/install.sh) -b . v0.37.1-beta.1
