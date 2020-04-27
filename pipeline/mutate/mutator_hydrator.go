@@ -22,7 +22,6 @@ package mutate
 
 import (
 	"bytes"
-	"crypto/md5"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -110,9 +109,7 @@ func (a *MutatorHydrator) GetID() string {
 }
 
 func (a *MutatorHydrator) cacheKey(config *MutatorHydratorConfig, session *authn.AuthenticationSession) string {
-	return fmt.Sprintf("%x",
-		md5.Sum([]byte(fmt.Sprintf("%s|%s", config.Api.URL, session.Subject))),
-	)
+	return fmt.Sprintf("%s|%s", config.Api.URL, session.Subject)
 }
 
 func (a *MutatorHydrator) hydrateFromCache(config *MutatorHydratorConfig, session *authn.AuthenticationSession) (*authn.AuthenticationSession, bool) {
