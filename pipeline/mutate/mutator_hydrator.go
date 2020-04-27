@@ -83,9 +83,13 @@ type externalAPIConfig struct {
 	Retry *retryConfig `json:"retry"`
 }
 
+type cacheConfig struct {
+	Ttl string `json:"ttl"`
+}
+
 type MutatorHydratorConfig struct {
-	Api      externalAPIConfig `json:"api"`
-	CacheTtl string            `json:"cache_ttl"`
+	Api   externalAPIConfig `json:"api"`
+	Cache cacheConfig       `json:"cache"`
 }
 
 type mutatorHydratorDependencies interface {
@@ -142,7 +146,7 @@ func (a *MutatorHydrator) Mutate(r *http.Request, session *authn.AuthenticationS
 		return errors.WithStack(err)
 	}
 
-	if cfg.CacheTtl != "" {
+	if cfg.Cache.Ttl != "" {
 		if cacheSession, ok := a.hydrateFromCache(cfg, session); ok {
 			*session = *cacheSession
 			return nil
@@ -219,10 +223,10 @@ func (a *MutatorHydrator) Mutate(r *http.Request, session *authn.AuthenticationS
 	}
 	*session = sessionFromUpstream
 
-	if cfg.CacheTtl != "" {
-		d, err := time.ParseDuration(cfg.CacheTtl)
+	if cfg.Cache.Ttl != "" {
+		d, err := time.ParseDuration(cfg.Cache.Ttl)
 		if err != nil {
-			a.d.Logger().WithError(err).Error("Unable to parse cache_ttl in the Hydrator Mutator.")
+			a.d.Logger().WithError(err).Error("Unable to parse cache ttl in the Hydrator Mutator.")
 			return errors.WithStack(err)
 		}
 		a.hydrateToCache(cfg, session, d)
