@@ -163,12 +163,21 @@
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-# [Unreleased](https://github.com/ory/oathkeeper/compare/v0.37.1-beta.1...1401610dffc7bef5823199059a4d9fc25cbde264) (2020-04-28)
+# [Unreleased](https://github.com/ory/oathkeeper/compare/v0.37.1-beta.1...0e990459104c7683764f4ed0e0a6b7162b57cd57) (2020-04-28)
 
 
 ### Bug Fixes
 
 * Add old schemas to resolve issues with old versions ([b94c391](https://github.com/ory/oathkeeper/commit/b94c391446a694971fa54a53eb08f9d57ad5eb24)), closes [#400](https://github.com/ory/oathkeeper/issues/400)
+* Don't copy the decision endpoint request's Content-Length ([#422](https://github.com/ory/oathkeeper/issues/422)) ([0e99045](https://github.com/ory/oathkeeper/commit/0e990459104c7683764f4ed0e0a6b7162b57cd57)):
+  > We currently copy all original request headers send to the decission
+  > endpoint back. This can include the Content-Length header which
+  > describes the request body or response. Including the original
+  > request Content-Length causes issues for the decission endpoint
+  > client if the response body doesn't match the exact size.
+  > 
+  > This change makes sure the Content-Length doesn't get included in
+  > the response body and adds a test to prevent future regressions.
 * Respect retry in token introspection ([#410](https://github.com/ory/oathkeeper/issues/410)) ([88f7b69](https://github.com/ory/oathkeeper/commit/88f7b69c9ff252ddc3dbe960155883ec98115fd0))
 * Use semver-regex replacer func ([a13cdf5](https://github.com/ory/oathkeeper/commit/a13cdf5d9a518e3095545e30d15c7c4b7859752b))
 
