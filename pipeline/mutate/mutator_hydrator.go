@@ -101,7 +101,7 @@ func NewMutatorHydrator(c configuration.Provider, d mutatorHydratorDependencies)
 		// This will hold about 1000 unique mutation responses.
 		NumCounters: 10000,
 		// Allocate a max of 32MB
-		MaxCost:     1 << 25,
+		MaxCost: 1 << 25,
 		// This is a best-practice value.
 		BufferItems: 64,
 	})
