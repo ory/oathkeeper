@@ -97,8 +97,11 @@ type mutatorHydratorDependencies interface {
 
 func NewMutatorHydrator(c configuration.Provider, d mutatorHydratorDependencies) *MutatorHydrator {
 	cache, _ := ristretto.NewCache(&ristretto.Config{
+		// This will hold about 1000 unique mutation responses.
 		NumCounters: 10000,
+		// Allocate a max of 32MB
 		MaxCost:     1 << 25,
+		// This is a best-practice value.
 		BufferItems: 64,
 	})
 	return &MutatorHydrator{c: c, d: d, client: httpx.NewResilientClientLatencyToleranceSmall(nil), hydrateCache: cache}
