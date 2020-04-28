@@ -122,6 +122,11 @@ func (h *DecisionHandler) decisions(w http.ResponseWriter, r *http.Request) {
 		Info("Access request granted")
 
 	for k := range s.Header {
+		// Avoid copying the original Content-Length header from the client
+		if k == "content-length" {
+			continue
+		}
+
 		w.Header().Set(k, s.Header.Get(k))
 	}
 
