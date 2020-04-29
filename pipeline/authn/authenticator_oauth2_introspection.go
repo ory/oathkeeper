@@ -112,15 +112,15 @@ func (a *AuthenticatorOAuth2Introspection) tokenFromCache(config *AuthenticatorO
 	return i, true
 }
 
-func (a *AuthenticatorOAuth2Introspection) tokenToCache(config *AuthenticatorOAuth2IntrospectionConfiguration, i AuthenticatorOAuth2IntrospectionResult, token string) {
+func (a *AuthenticatorOAuth2Introspection) tokenToCache(config *AuthenticatorOAuth2IntrospectionConfiguration, i *AuthenticatorOAuth2IntrospectionResult, token string) {
 	if !config.Cache.Enabled {
 		return
 	}
 
 	if a.cacheTTL != nil {
-		a.tokenCache.SetWithTTL(token, &i, 0, *a.cacheTTL)
+		a.tokenCache.SetWithTTL(token, i, 0, *a.cacheTTL)
 	} else {
-		a.tokenCache.Set(token, &i, 0)
+		a.tokenCache.Set(token, i, 0)
 	}
 }
 
@@ -169,44 +169,44 @@ func (a *AuthenticatorOAuth2Introspection) Authenticate(r *http.Request, session
 			return errors.WithStack(err)
 		}
 
-		a.tokenToCache(cf, *i, token)
-	}
-
-	if len(i.TokenType) > 0 && i.TokenType != "access_token" {
-		return errors.WithStack(helper.ErrForbidden.WithReason(fmt.Sprintf("Introspected token is not an access token but \"%s\"", i.TokenType)))
-	}
-
-	if !i.Active {
-		return errors.WithStack(helper.ErrUnauthorized.WithReason("Access token i says token is not active"))
-	}
-
-	for _, audience := range cf.Audience {
-		if !stringslice.Has(i.Audience, audience) {
-			return errors.WithStack(helper.ErrForbidden.WithReason(fmt.Sprintf("Token audience is not intended for target audience %s", audience)))
+		if len(i.TokenType) > 0 && i.TokenType != "access_token" {
+			return errors.WithStack(helper.ErrForbidden.WithReason(fmt.Sprintf("Introspected token is not an access token but \"%s\"", i.TokenType)))
 		}
-	}
 
-	if len(cf.Issuers) > 0 {
-		if !stringslice.Has(cf.Issuers, i.Issuer) {
-			return errors.WithStack(helper.ErrForbidden.WithReason(fmt.Sprintf("Token issuer does not match any trusted issuer")))
+		if !i.Active {
+			return errors.WithStack(helper.ErrUnauthorized.WithReason("Access token i says token is not active"))
 		}
-	}
 
-	if ss != nil {
-		for _, scope := range cf.Scopes {
-			if !ss(strings.Split(i.Scope, " "), scope) {
-				return errors.WithStack(helper.ErrForbidden.WithReason(fmt.Sprintf("Scope %s was not granted", scope)))
+		for _, audience := range cf.Audience {
+			if !stringslice.Has(i.Audience, audience) {
+				return errors.WithStack(helper.ErrForbidden.WithReason(fmt.Sprintf("Token audience is not intended for target audience %s", audience)))
 			}
 		}
-	}
 
-	if len(i.Extra) == 0 {
-		i.Extra = map[string]interface{}{}
-	}
+		if len(cf.Issuers) > 0 {
+			if !stringslice.Has(cf.Issuers, i.Issuer) {
+				return errors.WithStack(helper.ErrForbidden.WithReason(fmt.Sprintf("Token issuer does not match any trusted issuer")))
+			}
+		}
 
-	i.Extra["username"] = i.Username
-	i.Extra["client_id"] = i.ClientID
-	i.Extra["scope"] = i.Scope
+		if ss != nil {
+			for _, scope := range cf.Scopes {
+				if !ss(strings.Split(i.Scope, " "), scope) {
+					return errors.WithStack(helper.ErrForbidden.WithReason(fmt.Sprintf("Scope %s was not granted", scope)))
+				}
+			}
+		}
+
+		if len(i.Extra) == 0 {
+			i.Extra = map[string]interface{}{}
+		}
+
+		i.Extra["username"] = i.Username
+		i.Extra["client_id"] = i.ClientID
+		i.Extra["scope"] = i.Scope
+
+		a.tokenToCache(cf, i, token)
+	}
 
 	session.Subject = i.Subject
 	session.Extra = i.Extra
