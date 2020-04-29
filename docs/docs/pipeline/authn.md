@@ -479,6 +479,9 @@ was granted the requested scope.
     with `header` or `query_parameter`
 - `introspection_request_headers` (object, optional) - Additional headers to add
   to the introspection request
+- `cache` (object, optional) - Enables caching of incoming tokens
+  - `enabled` (bool, optional) - Enable the cache, will use exp time of token to determine when to evict from cache. Defaults to false.
+  - `ttl` (string) - Can override the default behaviour of using the token exp time, and specify a set time to live for the token in the cache.
 
 ```yaml
 # Global configuration file oathkeeper.yml
@@ -508,6 +511,9 @@ authenticators:
         # cookie: auth-token
       introspection_request_headers:
         x-forwarded-proto: https
+      cache:
+        enabled: true
+        ttl: 60s
 ```
 
 ```yaml
