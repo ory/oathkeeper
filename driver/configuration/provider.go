@@ -48,6 +48,9 @@ type Provider interface {
 
 	ProxyServeAddress() string
 	APIServeAddress() string
+	PrometheusServeAddress() string
+
+	PrometheusMetricsPath() string
 
 	ToScopeStrategy(value string, key string) fosite.ScopeStrategy
 	ParseURLs(sources []string) ([]url.URL, error)

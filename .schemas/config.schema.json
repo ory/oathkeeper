@@ -616,7 +616,8 @@
                   "description": "The OAuth 2.0 Scope to be requested during the OAuth 2.0 Client Credentials Grant.",
                   "examples": [
                     [
-                      "foo", "bar"
+                      "foo",
+                      "bar"
                     ]
                   ]
                 }
@@ -1001,6 +1002,35 @@
               "$ref": "#/definitions/tlsx"
             }
           }
+        },
+        "prometheus": {
+          "type": "object",
+          "title": "Prometheus scraping endpoint",
+          "additionalProperties": false,
+          "properties": {
+            "port": {
+              "type": "integer",
+              "default": 9000,
+              "title": "Port",
+              "description": "The port to listen on."
+            },
+            "host": {
+              "type": "string",
+              "default": "",
+              "examples": [
+                "localhost",
+                "127.0.0.1"
+              ],
+              "title": "Host",
+              "description": "The network interface to listen on. Leave empty to listen on all interfaces."
+            },
+            "metrics_path": {
+              "type": "string",
+              "default": "/metrics",
+              "title": "Path",
+              "description": "The path to provide metrics on"
+            }
+          }
         }
       }
     },
@@ -1228,9 +1258,11 @@
           "default": [
             "json"
           ],
-          "examples": [[
-            "redirect"
-          ]]
+          "examples": [
+            [
+              "redirect"
+            ]
+          ]
         },
         "handlers": {
           "additionalProperties": false,

@@ -203,14 +203,13 @@ func RunServe(version, build, date string) func(cmd *cobra.Command, args []strin
 			logger.Warnf("cannot create proemtehus repo: %+v", err)
 		}
 
-		// TODO: Make prom settings (port/path) configurable
-		promAddr := ":9124"
-		promPath := "/metrics"
+		promPath := d.Configuration().PrometheusMetricsPath()
+		promAddr := d.Configuration().PrometheusServeAddress()
 		go func() {
 			// Expose the registered metrics via HTTP.
 			httpServer := &http.Server{Handler: promhttp.HandlerFor(prometheusRepo.Registry, promhttp.HandlerOpts{}), Addr: promAddr}
 			http.Handle(promPath, promhttp.Handler())
-			logger.Infof("Proemtheus listening on %s%s...", promAddr, promPath)
+			logger.Infof("Proemtheus listening on %s...", promAddr)
 			if err := httpServer.ListenAndServe(); err != nil {
 				logger.Warnf("promhttp: %+v", err)
 			}
