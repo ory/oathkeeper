@@ -697,6 +697,24 @@
         },
         "retry": {
           "$ref": "#/definitions/retry"
+        },
+        "cache": {
+          "additionalProperties": false,
+          "required": [
+            "enabled"
+          ],
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "$ref": "#/definitions/handlerSwitch"
+            },
+            "ttl": {
+              "type": "string",
+              "pattern": "^[0-9]+(ns|us|ms|s|m|h)$",
+              "title": "Cache Time to Live",
+              "description": "How long to cache hydrate calls"
+            }
+          }
         }
       },
       "required": [
