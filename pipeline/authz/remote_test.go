@@ -1,7 +1,6 @@
 package authz_test
 
 import (
-	"bytes"
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
@@ -72,6 +71,21 @@ func TestAuthorizerRemoteAuthorize(t *testing.T) {
 			wantErr: true,
 		},
 		{
+			name: "nobody",
+			setup: func(t *testing.T) *httptest.Server {
+				return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+					assert.Contains(t, r.Header, "Content-Type")
+					assert.Contains(t, r.Header["Content-Type"], "text/plain")
+					body, err := ioutil.ReadAll(r.Body)
+					require.NoError(t, err)
+					assert.Equal(t, "", string(body))
+					w.WriteHeader(http.StatusOK)
+				}))
+			},
+			body:   "",
+			config: json.RawMessage(`{}`),
+		},
+		{
 			name: "ok",
 			setup: func(t *testing.T) *httptest.Server {
 				return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -92,11 +106,11 @@ func TestAuthorizerRemoteAuthorize(t *testing.T) {
 				return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 					body, err := ioutil.ReadAll(r.Body)
 					require.NoError(t, err)
-					assert.Equal(t, bytes.Repeat([]byte("1"), 1024*1024*50), body)
+					assert.True(t, strings.Repeat("1", 1024*1024) == string(body))
 					w.WriteHeader(http.StatusOK)
 				}))
 			},
-			body:   strings.Repeat("1", 1024*1024*50),
+			body:   strings.Repeat("1", 1024*1024),
 			config: json.RawMessage(`{}`),
 		},
 		{
