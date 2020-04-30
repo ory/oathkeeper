@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"text/template"
 
@@ -54,13 +54,13 @@ func (a *AuthorizerRemote) Authorize(r *http.Request, session *authn.Authenticat
 		return err
 	}
 
-	var body bytes.Buffer
-	err = pipeRequestBody(r, &body)
-	if err != nil {
-		return errors.Wrapf(err, `could not pipe request body in rule "%s"`, rl.GetID())
-	}
+	read, write := io.Pipe()
+	go func() {
+		err := pipeRequestBody(r, write)
+		write.CloseWithError(errors.Wrapf(err, `could not pipe request body in rule "%s"`, rl.GetID()))
+	}()
 
-	req, err := http.NewRequest("POST", c.Remote, ioutil.NopCloser(&body))
+	req, err := http.NewRequest("POST", c.Remote, read)
 	if err != nil {
 		return errors.WithStack(err)
 	}

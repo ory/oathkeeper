@@ -13,7 +13,11 @@ func pipeRequestBody(r *http.Request, w io.Writer) error {
 	}
 
 	var body bytes.Buffer
+	defer r.Body.Close()
 	_, err := io.Copy(w, io.TeeReader(r.Body, &body))
+	if err != nil {
+		return err
+	}
 	r.Body = ioutil.NopCloser(&body)
 	return err
 }
