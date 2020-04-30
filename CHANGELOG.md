@@ -4,7 +4,7 @@
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 **Table of Contents**
 
-- [Unreleased (2020-04-28)](#unreleased-2020-04-28)
+- [Unreleased (2020-04-30)](#unreleased-2020-04-30)
     - [Bug Fixes](#bug-fixes)
     - [Code Refactoring](#code-refactoring)
     - [Documentation](#documentation)
@@ -163,7 +163,7 @@
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-# [Unreleased](https://github.com/ory/oathkeeper/compare/v0.37.1-beta.1...0e990459104c7683764f4ed0e0a6b7162b57cd57) (2020-04-28)
+# [Unreleased](https://github.com/ory/oathkeeper/compare/v0.37.1-beta.1...1a44087f424d8a01437769c6bce177eab36c195f) (2020-04-30)
 
 
 ### Bug Fixes
@@ -179,6 +179,8 @@
   > This change makes sure the Content-Length doesn't get included in
   > the response body and adds a test to prevent future regressions.
 * Respect retry in token introspection ([#410](https://github.com/ory/oathkeeper/issues/410)) ([88f7b69](https://github.com/ory/oathkeeper/commit/88f7b69c9ff252ddc3dbe960155883ec98115fd0))
+* Use pipe to pass body remote authorizer ([#426](https://github.com/ory/oathkeeper/issues/426)) ([1a44087](https://github.com/ory/oathkeeper/commit/1a44087f424d8a01437769c6bce177eab36c195f)):
+  > Resolves flaky tests.
 * Use semver-regex replacer func ([a13cdf5](https://github.com/ory/oathkeeper/commit/a13cdf5d9a518e3095545e30d15c7c4b7859752b))
 
 
