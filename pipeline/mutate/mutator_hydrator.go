@@ -156,7 +156,7 @@ func (a *MutatorHydrator) Mutate(r *http.Request, session *authn.AuthenticationS
 	}
 
 	if cacheSession, ok := a.hydrateFromCache(cfg, session); ok {
-		*session = *cacheSession
+		session = cacheSession
 		return nil
 	}
 
