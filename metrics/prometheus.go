@@ -13,7 +13,7 @@ var (
 	// RequestTotal provides the total number of requests
 	RequestTotal = prometheus.NewCounterVec(
 		prometheus.CounterOpts{
-			Name: "ory_oathkeeper_request_total",
+			Name: "ory_oathkeeper_requests_total",
 			Help: "Total number of requests",
 		},
 		[]string{"service", "method", "request", "status_code"},
@@ -21,9 +21,9 @@ var (
 	// HistogramRequestDuration provides the duration of requests
 	HistogramRequestDuration = prometheus.NewHistogramVec(
 		prometheus.HistogramOpts{
-			Name:    "ory_oathkeeper_request_duration_in_seconds",
+			Name:    "ory_oathkeeper_request_duration_seconds",
 			Help:    "Time spent serving requests.",
-			Buckets: []float64{.005, .01, .025, .05, .1, .25, .5, 1, 2.5, 5, 10},
+			Buckets: prometheus.DefBuckets,
 		},
 		[]string{"service", "method", "request", "status_code"},
 	)
@@ -45,7 +45,7 @@ type PrometheusRepository struct {
 }
 
 // NewPrometheusRepository creates a new prometheus repository with the given settings
-func NewPrometheusRepository(logger log.FieldLogger) (*PrometheusRepository, error) {
+func NewPrometheusRepository(logger log.FieldLogger) *PrometheusRepository {
 	m := []prometheus.Collector{
 		prometheus.NewGoCollector(),
 		prometheus.NewProcessCollector(prometheus.ProcessCollectorOpts{}),
@@ -67,7 +67,7 @@ func NewPrometheusRepository(logger log.FieldLogger) (*PrometheusRepository, err
 		metrics:  m,
 	}
 
-	return mr, nil
+	return mr
 }
 
 // RequestDurationObserve tracks request durations

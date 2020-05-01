@@ -112,6 +112,29 @@ func runAPI(d driver.Driver, n *negroni.Negroni, logger *logrus.Logger, prom *me
 	}
 }
 
+func runPrometheus(d driver.Driver, logger *logrus.Logger, prom *metrics.PrometheusRepository) func() {
+	return func() {
+		promPath := d.Configuration().PrometheusMetricsPath()
+		promAddr := d.Configuration().PrometheusServeAddress()
+
+		server := graceful.WithDefaults(&http.Server{
+			Addr:    promAddr,
+			Handler: promhttp.HandlerFor(prom.Registry, promhttp.HandlerOpts{}),
+		})
+
+		http.Handle(promPath, promhttp.Handler())
+		// Expose the registered metrics via HTTP.
+		if err := graceful.Graceful(func() error {
+			logger.Infof("Listening on http://%s", promAddr)
+			return server.ListenAndServe()
+		}, server.Shutdown); err != nil {
+			logger.Fatalf("Unable to gracefully shutdown HTTP(s) server because %v", err)
+			return
+		}
+		logger.Println("HTTP server was shutdown gracefully")
+	}
+}
+
 func cert(daemon string, logger logrus.FieldLogger) []tls.Certificate {
 	cert, err := tlsx.Certificate(
 		viper.GetString("serve."+daemon+".tls.cert.base64"),
@@ -198,27 +221,13 @@ func RunServe(version, build, date string) func(cmd *cobra.Command, args []strin
 			publicmw.Use(tracer)
 		}
 
-		prometheusRepo, err := metrics.NewPrometheusRepository(logger)
-		if err != nil {
-			logger.Warnf("cannot create proemtehus repo: %+v", err)
-		}
-
-		promPath := d.Configuration().PrometheusMetricsPath()
-		promAddr := d.Configuration().PrometheusServeAddress()
-		go func() {
-			// Expose the registered metrics via HTTP.
-			httpServer := &http.Server{Handler: promhttp.HandlerFor(prometheusRepo.Registry, promhttp.HandlerOpts{}), Addr: promAddr}
-			http.Handle(promPath, promhttp.Handler())
-			logger.Infof("Proemtheus listening on %s...", promAddr)
-			if err := httpServer.ListenAndServe(); err != nil {
-				logger.Warnf("promhttp: %+v", err)
-			}
-		}()
+		prometheusRepo := metrics.NewPrometheusRepository(logger)
 
 		var wg sync.WaitGroup
 		tasks := []func(){
 			runAPI(d, adminmw, logger, prometheusRepo),
 			runProxy(d, publicmw, logger, prometheusRepo),
+			runPrometheus(d, logger, prometheusRepo),
 		}
 		wg.Add(len(tasks))
 		for _, t := range tasks {
