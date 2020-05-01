@@ -491,6 +491,7 @@ in the `header` field will be added to the final request headers.
 - `api.url` (string - required) - The API URL.
 - `api.auth.basic.*` (optional) - Enables HTTP Basic Authorization.
 - `api.auth.retry.*` (optional) - Configures the retry logic.
+- `cache.ttl` (optional) - Configures how long to cache hydrate requests
 
 ```yaml
 # Global configuration file oathkeeper.yml
@@ -508,6 +509,8 @@ mutators:
         retry:
           give_up_after: 2s
           max_delay: 100ms
+      cache:
+        ttl: 60s
 ```
 
 ```yaml
@@ -527,6 +530,8 @@ mutators:
         retry:
           give_up_after: 2s
           max_delay: 100ms
+      cache:
+        ttl: 60s
 ```
 
 ### Access Rule Example
