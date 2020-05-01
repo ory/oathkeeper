@@ -57,7 +57,7 @@ func NewPrometheusRepository(logger log.FieldLogger) *PrometheusRepository {
 
 	for _, metric := range m {
 		if err := r.Register(metric); err != nil {
-			logger.Warnf("register prometheus metrics: %+v", err)
+			logger.WithError(err).Error("Unable to register prometheus metric.")
 		}
 	}
 
