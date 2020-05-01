@@ -4,7 +4,7 @@
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 **Table of Contents**
 
-- [Unreleased (2020-04-30)](#unreleased-2020-04-30)
+- [Unreleased (2020-05-01)](#unreleased-2020-05-01)
     - [Bug Fixes](#bug-fixes)
     - [Code Refactoring](#code-refactoring)
     - [Documentation](#documentation)
@@ -163,7 +163,7 @@
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-# [Unreleased](https://github.com/ory/oathkeeper/compare/v0.37.1-beta.1...1a44087f424d8a01437769c6bce177eab36c195f) (2020-04-30)
+# [Unreleased](https://github.com/ory/oathkeeper/compare/v0.37.1-beta.1...1ae6e7a958d602533f54cada5d231bcf1bace093) (2020-05-01)
 
 
 ### Bug Fixes
@@ -211,6 +211,8 @@
 
 ### Features
 
+* Add cache to hydrator ([#418](https://github.com/ory/oathkeeper/issues/418)) ([1ae6e7a](https://github.com/ory/oathkeeper/commit/1ae6e7a958d602533f54cada5d231bcf1bace093)), closes [#417](https://github.com/ory/oathkeeper/issues/417):
+  > This patch introduces new configuration parameters that allow the hydrator mutator to cache requests.
 * Add new remote authorizer that uses request body and headers ([#416](https://github.com/ory/oathkeeper/issues/416)) ([3a20637](https://github.com/ory/oathkeeper/commit/3a206376c0ec4d72d5d6ec66c2d738199a24e0c6)):
   > This pull request implements a new authorizer that sends the original request body as body to the remote endpoint. This allows the remote endpoint to take the body into account in its decision.
   > 
