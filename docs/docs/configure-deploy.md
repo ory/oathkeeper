@@ -369,3 +369,61 @@ $ docker rm -f ory-oathkeeper-demo
 $ docker rmi -f ory-oathkeeper-demo
 $ rm -rf oathkeeper-demo
 ```
+
+## Monitoring
+
+Oathkeeper provides an endpoint for Prometheus to scrape as a target. This endpoint can
+be accessed by default at:
+[http://localhost:9000/metrics](http://localhost:9000/metrics):
+
+You can adjust the settings within Oathkeeper's config.
+```shell
+$ cat << EOF > config.yaml
+serve:
+  prometheus:
+    port: 9000
+    host: localhost
+    metrics_path: /metrics
+EOF
+```
+
+Prometheus can easily be run as a docker container. More information are available on [https://github.com/prometheus/prometheus](https://github.com/prometheus/prometheus). Start with setting up a prometheus configuration:
+
+
+```shell
+$ cat << EOF > prometheus.yml
+global:
+  scrape_interval: 15s # By default, scrape targets every 15 seconds.
+
+scrape_configs:
+  - job_name: 'prometheus'
+    scrape_interval: 15s
+    static_configs:
+      - targets: ['localhost:9090']
+  - job_name: 'oathkeeper'
+    scrape_interval: 15s
+    metrics_path: /metrics
+    static_configs:
+      # The target needs to match what you've configured above
+      - targets: ['localhost:9000']
+```
+
+Then start the prometheus server and access it on [http://localhost:9090](http://localhost:9090).
+
+```shell
+$ docker run \
+  --config.file=/etc/prometheus/prometheus.yml \
+  -v ./prometheus.yml:/etc/prometheus/prometheus.yml \
+  --name prometheus \
+  -d \ 
+  --net=host
+  -p 9090:9090 \
+  prom/prometheus
+```
+
+Now where you have a basic monitoring setup running you can extend it by building up nice visualizations eg. using Grafana. More information are available on [https://prometheus.io/docs/visualization/grafana/](https://prometheus.io/docs/visualization/grafana/).
+
+We have a pre built Dashboard which you can use to get started quickly:
+[Oathkeeper-Dashboard.json](https://github.com/ory/oathkeeper/tree/master/contrib/grafana/Oathkeeper-Dashboard.json).
+
+<img alt="ORY Oathkeeper with Prometheus and Grafana" src={useBaseUrl('img/docs/grafana.png')} />
