@@ -236,7 +236,7 @@ HS256, ...). Let's generate a key for the RS256 algorithm that will be used by
 the id_token mutator:
 
 ```sh
-$ docker run oryd/oathkeeper:v0.38.0-beta.1 credentials generate --alg RS256 > jwks.json
+$ docker run oryd/oathkeeper:v0.38.0-beta.2 credentials generate --alg RS256 > jwks.json
 ```
 
 ### Dockerfile
@@ -246,7 +246,7 @@ files to the image:
 
 ```shell
 $ cat << EOF > Dockerfile
-FROM oryd/oathkeeper:v0.38.0-beta.1
+FROM oryd/oathkeeper:v0.38.0-beta.2
 
 ADD config.yaml /config.yaml
 ADD rules.json /rules.json
@@ -268,7 +268,7 @@ Before building the Docker Image, we need to make sure that the local ORY
 Oathkeeper Docker Image is on the most recent version:
 
 ```sh
-$ docker pull oryd/oathkeeper:v0.38.0-beta.1
+$ docker pull oryd/oathkeeper:v0.38.0-beta.2
 ```
 
 Next we will build our custom Docker Image
@@ -374,11 +374,12 @@ $ rm -rf oathkeeper-demo
 
 ## Monitoring
 
-Oathkeeper provides an endpoint for Prometheus to scrape as a target. This endpoint can
-be accessed by default at:
+Oathkeeper provides an endpoint for Prometheus to scrape as a target. This
+endpoint can be accessed by default at:
 [http://localhost:9000/metrics](http://localhost:9000/metrics):
 
 You can adjust the settings within Oathkeeper's config.
+
 ```shell
 $ cat << EOF > config.yaml
 serve:
@@ -389,8 +390,10 @@ serve:
 EOF
 ```
 
-Prometheus can easily be run as a docker container. More information are available on [https://github.com/prometheus/prometheus](https://github.com/prometheus/prometheus). Start with setting up a prometheus configuration:
-
+Prometheus can easily be run as a docker container. More information are
+available on
+[https://github.com/prometheus/prometheus](https://github.com/prometheus/prometheus).
+Start with setting up a prometheus configuration:
 
 ```shell
 $ cat << EOF > prometheus.yml
@@ -410,22 +413,27 @@ scrape_configs:
       - targets: ['localhost:9000']
 ```
 
-Then start the prometheus server and access it on [http://localhost:9090](http://localhost:9090).
+Then start the prometheus server and access it on
+[http://localhost:9090](http://localhost:9090).
 
 ```shell
 $ docker run \
   --config.file=/etc/prometheus/prometheus.yml \
   -v ./prometheus.yml:/etc/prometheus/prometheus.yml \
   --name prometheus \
-  -d \ 
+  -d \
   --net=host
   -p 9090:9090 \
   prom/prometheus
 ```
 
-Now where you have a basic monitoring setup running you can extend it by building up nice visualizations eg. using Grafana. More information are available on [https://prometheus.io/docs/visualization/grafana/](https://prometheus.io/docs/visualization/grafana/).
+Now where you have a basic monitoring setup running you can extend it by
+building up nice visualizations eg. using Grafana. More information are
+available on
+[https://prometheus.io/docs/visualization/grafana/](https://prometheus.io/docs/visualization/grafana/).
 
 We have a pre built Dashboard which you can use to get started quickly:
 [Oathkeeper-Dashboard.json](https://github.com/ory/oathkeeper/tree/master/contrib/grafana/Oathkeeper-Dashboard.json).
 
-<img alt="ORY Oathkeeper with Prometheus and Grafana" src={useBaseUrl('img/docs/grafana.png')} />
+<img alt="ORY Oathkeeper with Prometheus and Grafana"
+src={useBaseUrl('img/docs/grafana.png')} />
