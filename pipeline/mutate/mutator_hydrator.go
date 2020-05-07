@@ -39,6 +39,8 @@ import (
 
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/pipeline"
+
+	"github.com/mitchellh/copystructure"
 )
 
 const (
@@ -129,7 +131,12 @@ func (a *MutatorHydrator) hydrateFromCache(config *MutatorHydratorConfig, sessio
 	}
 
 	container := item.(*authn.AuthenticationSession)
-	return container, true
+	sessionCopy, err := copystructure.Copy(container)
+	if err != nil {
+		a.d.Logger().Errorf("Error copying session", err)
+		return nil, false
+	}
+	return sessionCopy.(*authn.AuthenticationSession), true
 }
 
 func (a *MutatorHydrator) hydrateToCache(config *MutatorHydratorConfig, session *authn.AuthenticationSession) {
@@ -138,7 +145,13 @@ func (a *MutatorHydrator) hydrateToCache(config *MutatorHydratorConfig, session 
 	}
 
 	key := a.cacheKey(config, session)
-	cached := a.hydrateCache.SetWithTTL(key, session, 0, *a.cacheTTL)
+	sessionCopy, err := copystructure.Copy(session)
+	if err != nil {
+		a.d.Logger().Errorf("Error copying session", err)
+		return
+	}
+
+	cached := a.hydrateCache.SetWithTTL(key, sessionCopy, 0, *a.cacheTTL)
 	if !cached {
 		a.d.Logger().Warn("Item not added to cache")
 	}

@@ -32,6 +32,7 @@ require (
 	github.com/julienschmidt/httprouter v1.2.0
 	github.com/lib/pq v1.3.0
 	github.com/mattn/goveralls v0.0.5
+	github.com/mitchellh/copystructure v1.0.0
 	github.com/ory/analytics-go/v4 v4.0.1
 	github.com/ory/fosite v0.29.2
 	github.com/ory/go-acc v0.2.1
