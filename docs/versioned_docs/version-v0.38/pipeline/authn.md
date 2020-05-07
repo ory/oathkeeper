@@ -480,10 +480,8 @@ was granted the requested scope.
 - `introspection_request_headers` (object, optional) - Additional headers to add
   to the introspection request
 - `cache` (object, optional) - Enables caching of incoming tokens
-  - `enabled` (bool, optional) - Enable the cache, will use exp time of token to
-    determine when to evict from cache. Defaults to false.
-  - `ttl` (string) - Can override the default behaviour of using the token exp
-    time, and specify a set time to live for the token in the cache.
+  - `enabled` (bool, optional) - Enable the cache, will use exp time of token to determine when to evict from cache. Defaults to false.
+  - `ttl` (string) - Can override the default behaviour of using the token exp time, and specify a set time to live for the token in the cache.
 
 ```yaml
 # Global configuration file oathkeeper.yml

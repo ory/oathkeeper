@@ -5,6 +5,7 @@
 **Table of Contents**
 
 - [Unreleased (2020-05-07)](#unreleased-2020-05-07)
+- [0.38.0-beta.1 (2020-05-07)](#0380-beta1-2020-05-07)
     - [Bug Fixes](#bug-fixes)
     - [Code Refactoring](#code-refactoring)
     - [Documentation](#documentation)
@@ -163,7 +164,12 @@
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-# [Unreleased](https://github.com/ory/oathkeeper/compare/v0.37.1-beta.1...fdaed46bcffbbdf593e94bc1784df88809e63fcd) (2020-05-07)
+# Unreleased (2020-05-07)
+
+No significant changes have been made for this release.
+
+
+# [0.38.0-beta.1](https://github.com/ory/oathkeeper/compare/v0.37.1-beta.1...v0.38.0-beta.1) (2020-05-07)
 
 
 ### Bug Fixes

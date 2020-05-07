@@ -7,32 +7,31 @@ title: Configuration
 OPEN AN ISSUE IF YOU WOULD LIKE TO MAKE ADJUSTMENTS HERE AND MAINTAINERS WILL HELP YOU LOCATE THE RIGHT
 FILE -->
 
-If file `$HOME/.oathkeeper.yaml` exists, it will be used as a configuration file
-which supports all configuration settings listed below.
+If file `$HOME/.oathkeeper.yaml` exists, it will be used as a configuration file which supports all
+configuration settings listed below.
 
-You can load the config file from another source using the
-`-c path/to/config.yaml` or `--config path/to/config.yaml` flag:
-`oathkeeper --config path/to/config.yaml`.
+You can load the config file from another source using the `-c path/to/config.yaml` or `--config path/to/config.yaml`
+flag: `oathkeeper --config path/to/config.yaml`.
 
-Config files can be formatted as JSON, YAML and TOML. Some configuration values
-support reloading without server restart. All configuration values can be set
-using environment variables, as documented below.
+Config files can be formatted as JSON, YAML and TOML. Some configuration values support reloading without server restart.
+All configuration values can be set using environment variables, as documented below.
 
-To find out more about edge cases like setting string array values through
-environmental variables head to the
-[Configuring ORY services](https://www.ory.sh/docs/ecosystem/configuring)
-section.
+To find out more about edge cases like setting string array values through environmental variables head to the
+[Configuring ORY services](https://www.ory.sh/docs/ecosystem/configuring) section.
 
 ```yaml
 ## ORY Oathkeeper Configuration
 #
 
+
 ## HTTP(s) ##
 #
 serve:
+  
   ## HTTP REST API ##
   #
   api:
+    
     ## Port ##
     #
     # The port to listen on.
@@ -54,20 +53,21 @@ serve:
     # Examples:
     # - localhost
     # - 127.0.0.1
-    #
+    # 
     # Set this value using environment variables on
     # - Linux/macOS:
     #    $ export SERVE_API_HOST=<value>
     # - Windows Command Line (CMD):
     #    > set SERVE_API_HOST=<value>
     #
-    host: ''
+    host: ""
 
     ## Cross Origin Resource Sharing (CORS) ##
     #
     # Configure [Cross Origin Resource Sharing (CORS)](http://www.w3.org/TR/cors/) using the following options.
     #
     cors:
+      
       ## Enable CORS ##
       #
       # If set to true, CORS will be enabled and preflight-requests (OPTION) will be answered.
@@ -92,7 +92,7 @@ serve:
       # - - https://example.com
       #   - https://*.example.com
       #   - https://*.foo.example.com
-      #
+      # 
       # Set this value using environment variables on
       # - Linux/macOS:
       #    $ export SERVE_API_CORS_ALLOWED_ORIGINS=<value>
@@ -100,7 +100,7 @@ serve:
       #    > set SERVE_API_CORS_ALLOWED_ORIGINS=<value>
       #
       allowed_origins:
-        - '*'
+        - "*"
 
       ## Allowed HTTP Methods ##
       #
@@ -197,9 +197,11 @@ serve:
     # Configure HTTP over TLS (HTTPS). All options can also be set using environment variables by replacing dots (`.`) with underscores (`_`) and uppercasing the key. For example, `some.prefix.tls.key.path` becomes `export SOME_PREFIX_TLS_KEY_PATH`. If all keys are left undefined, TLS will be disabled.
     #
     tls:
+      
       ## Private Key (PEM) ##
       #
       key:
+        
         ## path ##
         #
         # Set this value using environment variables on
@@ -223,6 +225,7 @@ serve:
       ## TLS Certificate (PEM) ##
       #
       cert:
+        
         ## path ##
         #
         # Set this value using environment variables on
@@ -246,6 +249,7 @@ serve:
   ## HTTP Reverse Proxy ##
   #
   proxy:
+    
     ## Port ##
     #
     # The port to listen on.
@@ -267,7 +271,7 @@ serve:
     # Examples:
     # - localhost
     # - 127.0.0.1
-    #
+    # 
     # Set this value using environment variables on
     # - Linux/macOS:
     #    $ export SERVE_PROXY_HOST=<value>
@@ -281,6 +285,7 @@ serve:
     # Control the reverse proxy's HTTP timeouts.
     #
     timeout:
+      
       ## HTTP Read Timeout ##
       #
       # The maximum duration for reading the entire request, including the body.
@@ -291,7 +296,7 @@ serve:
       # - 5s
       # - 5m
       # - 5h
-      #
+      # 
       # Set this value using environment variables on
       # - Linux/macOS:
       #    $ export SERVE_PROXY_TIMEOUT_READ=<value>
@@ -310,7 +315,7 @@ serve:
       # - 5s
       # - 5m
       # - 5h
-      #
+      # 
       # Set this value using environment variables on
       # - Linux/macOS:
       #    $ export SERVE_PROXY_TIMEOUT_WRITE=<value>
@@ -329,7 +334,7 @@ serve:
       # - 5s
       # - 5m
       # - 5h
-      #
+      # 
       # Set this value using environment variables on
       # - Linux/macOS:
       #    $ export SERVE_PROXY_TIMEOUT_IDLE=<value>
@@ -343,6 +348,7 @@ serve:
     # Configure [Cross Origin Resource Sharing (CORS)](http://www.w3.org/TR/cors/) using the following options.
     #
     cors:
+      
       ## Enable CORS ##
       #
       # If set to true, CORS will be enabled and preflight-requests (OPTION) will be answered.
@@ -367,7 +373,7 @@ serve:
       # - - https://example.com
       #   - https://*.example.com
       #   - https://*.foo.example.com
-      #
+      # 
       # Set this value using environment variables on
       # - Linux/macOS:
       #    $ export SERVE_PROXY_CORS_ALLOWED_ORIGINS=<value>
@@ -375,7 +381,7 @@ serve:
       #    > set SERVE_PROXY_CORS_ALLOWED_ORIGINS=<value>
       #
       allowed_origins:
-        - '*'
+        - "*"
 
       ## Allowed HTTP Methods ##
       #
@@ -475,9 +481,11 @@ serve:
     # Configure HTTP over TLS (HTTPS). All options can also be set using environment variables by replacing dots (`.`) with underscores (`_`) and uppercasing the key. For example, `some.prefix.tls.key.path` becomes `export SOME_PREFIX_TLS_KEY_PATH`. If all keys are left undefined, TLS will be disabled.
     #
     tls:
+      
       ## Private Key (PEM) ##
       #
       key:
+        
         ## path ##
         #
         # Set this value using environment variables on
@@ -501,6 +509,7 @@ serve:
       ## TLS Certificate (PEM) ##
       #
       cert:
+        
         ## path ##
         #
         # Set this value using environment variables on
@@ -526,10 +535,11 @@ serve:
 # Configure access rules. All sub-keys support configuration reloading without restarting.
 #
 access_rules:
+  
   ## Repositories ##
   #
   # Locations (list of URLs) where access rules should be fetched from on boot. It is expected that the documents at those locations return a JSON or YAML Array containing ORY Oathkeeper Access Rules:
-  #
+  # 
   # - If the URL Scheme is `file://`, the access rules (an array of access rules is expected) will be fetched from the local file system.
   # - If the URL Scheme is `inline://`, the access rules (an array of access rules is expected) are expected to be a base64 encoded (with padding!) JSON/YAML string (base64_encode(`[{"id":"foo-rule","authenticators":[....]}]`)).
   # - If the URL Scheme is `http://` or `https://`, the access rules (an array of access rules is expected) will be fetched from the provided HTTP(s) location.
@@ -538,7 +548,7 @@ access_rules:
   # - - file://path/to/rules.json
   #   - inline://W3siaWQiOiJmb28tcnVsZSIsImF1dGhlbnRpY2F0b3JzIjpbXX1d
   #   - https://path-to-my-rules/rules.json
-  #
+  # 
   # Set this value using environment variables on
   # - Linux/macOS:
   #    $ export ACCESS_RULES_REPOSITORIES=<value>
@@ -558,7 +568,7 @@ access_rules:
   #
   # Examples:
   # - glob
-  #
+  # 
   # Set this value using environment variables on
   # - Linux/macOS:
   #    $ export ACCESS_RULES_MATCHING_STRATEGY=<value>
@@ -572,11 +582,13 @@ access_rules:
 # For more information on authenticators head over to: https://www.ory.sh/oathkeeper/docs/pipeline/authn
 #
 authenticators:
+  
   ## Anonymous ##
   #
   # The [`anonymous` authenticator](https://www.ory.sh/oathkeeper/docs/pipeline/authn#anonymous).
   #
   anonymous:
+    
     ## Enabled ##
     #
     # En-/disables this component.
@@ -585,7 +597,7 @@ authenticators:
     #
     # Examples:
     # - true
-    #
+    # 
     # Set this value using environment variables on
     # - Linux/macOS:
     #    $ export AUTHENTICATORS_ANONYMOUS_ENABLED=<value>
@@ -599,6 +611,7 @@ authenticators:
     # This section is optional when the authenticator is disabled.
     #
     config:
+      
       ## Anonymous Subject ##
       #
       # Sets the anonymous username.
@@ -609,7 +622,7 @@ authenticators:
       # - guest
       # - anon
       # - unknown
-      #
+      # 
       # Set this value using environment variables on
       # - Linux/macOS:
       #    $ export AUTHENTICATORS_ANONYMOUS_CONFIG_SUBJECT=<value>
@@ -623,6 +636,7 @@ authenticators:
   # The [`noop` authenticator](https://www.ory.sh/oathkeeper/docs/pipeline/authn#noop).
   #
   noop:
+    
     ## Enabled ##
     #
     # En-/disables this component.
@@ -631,7 +645,7 @@ authenticators:
     #
     # Examples:
     # - true
-    #
+    # 
     # Set this value using environment variables on
     # - Linux/macOS:
     #    $ export AUTHENTICATORS_NOOP_ENABLED=<value>
@@ -645,6 +659,7 @@ authenticators:
   # The [`unauthorized` authenticator](https://www.ory.sh/oathkeeper/docs/pipeline/authn#unauthorized).
   #
   unauthorized:
+    
     ## Enabled ##
     #
     # En-/disables this component.
@@ -653,7 +668,7 @@ authenticators:
     #
     # Examples:
     # - true
-    #
+    # 
     # Set this value using environment variables on
     # - Linux/macOS:
     #    $ export AUTHENTICATORS_UNAUTHORIZED_ENABLED=<value>
@@ -667,6 +682,7 @@ authenticators:
   # The [`cookie_session` authenticator](https://www.ory.sh/oathkeeper/docs/pipeline/authn#cookie_session).
   #
   cookie_session:
+    
     ## Enabled ##
     #
     # En-/disables this component.
@@ -675,7 +691,7 @@ authenticators:
     #
     # Examples:
     # - true
-    #
+    # 
     # Set this value using environment variables on
     # - Linux/macOS:
     #    $ export AUTHENTICATORS_COOKIE_SESSION_ENABLED=<value>
@@ -689,9 +705,11 @@ authenticators:
   # The [`jwt` authenticator](https://www.ory.sh/oathkeeper/docs/pipeline/authn#jwt).
   #
   jwt:
+    
     ## config ##
     #
     config:
+      
       ## jwks_urls ##
       #
       # Set this value using environment variables on
@@ -784,7 +802,7 @@ authenticators:
     #
     # Examples:
     # - true
-    #
+    # 
     # Set this value using environment variables on
     # - Linux/macOS:
     #    $ export AUTHENTICATORS_JWT_ENABLED=<value>
@@ -798,6 +816,7 @@ authenticators:
   # The [`oauth2_client_credentials` authenticator](https://www.ory.sh/oathkeeper/docs/pipeline/authn#oauth2_client_credentials).
   #
   oauth2_client_credentials:
+    
     ## Enabled ##
     #
     # En-/disables this component.
@@ -806,7 +825,7 @@ authenticators:
     #
     # Examples:
     # - true
-    #
+    # 
     # Set this value using environment variables on
     # - Linux/macOS:
     #    $ export AUTHENTICATORS_OAUTH2_CLIENT_CREDENTIALS_ENABLED=<value>
@@ -820,9 +839,11 @@ authenticators:
   # The [`oauth2_introspection` authenticator](https://www.ory.sh/oathkeeper/docs/pipeline/authn#oauth2_introspection).
   #
   oauth2_introspection:
+    
     ## config ##
     #
     config:
+      
       ## introspection_url ##
       #
       # Set this value using environment variables on
@@ -846,6 +867,7 @@ authenticators:
       ## pre_authorization ##
       #
       pre_authorization:
+        
         ## client_id ##
         #
         # Set this value using environment variables on
@@ -940,6 +962,7 @@ authenticators:
       ## token_from ##
       #
       token_from:
+        
         ## cookie ##
         #
         # Set this value using environment variables on
@@ -953,6 +976,7 @@ authenticators:
       ## retry ##
       #
       retry:
+        
         ## give_up_after ##
         #
         # Set this value using environment variables on
@@ -976,6 +1000,7 @@ authenticators:
       ## cache ##
       #
       cache:
+        
         ## enabled ##
         #
         # Set this value using environment variables on
@@ -1004,7 +1029,7 @@ authenticators:
     #
     # Examples:
     # - true
-    #
+    # 
     # Set this value using environment variables on
     # - Linux/macOS:
     #    $ export AUTHENTICATORS_OAUTH2_INTROSPECTION_ENABLED=<value>
@@ -1016,6 +1041,7 @@ authenticators:
 ## Error Handling ##
 #
 errors:
+  
   ## Error Handling Fallback ##
   #
   # This array defines how to handle errors when no "when" clause matches. If you have, for example, enabled redirect and json in your access rule, you could tell ORY Oathkeeper to try sending JSON if the request does not match the access rule definition
@@ -1024,7 +1050,7 @@ errors:
   #
   # Examples:
   # - - redirect
-  #
+  # 
   # Set this value using environment variables on
   # - Linux/macOS:
   #    $ export ERRORS_FALLBACK=<value>
@@ -1037,14 +1063,17 @@ errors:
   ## Individual Error Handler Configuration ##
   #
   handlers:
+    
     ## HTTP WWW-Authenticate Handler ##
     #
     # Responds with the WWW-Authenticate HTTP Response
     #
     www_authenticate:
+      
       ## config ##
       #
       config:
+        
         ## realm ##
         #
         # Set this value using environment variables on
@@ -1085,7 +1114,7 @@ errors:
       #
       # Examples:
       # - true
-      #
+      # 
       # Set this value using environment variables on
       # - Linux/macOS:
       #    $ export ERRORS_HANDLERS_WWW_AUTHENTICATE_ENABLED=<value>
@@ -1099,6 +1128,7 @@ errors:
     # Responds with a 301/302 HTTP redirect.
     #
     redirect:
+      
       ## Enabled ##
       #
       # En-/disables this component.
@@ -1107,7 +1137,7 @@ errors:
       #
       # Examples:
       # - true
-      #
+      # 
       # Set this value using environment variables on
       # - Linux/macOS:
       #    $ export ERRORS_HANDLERS_REDIRECT_ENABLED=<value>
@@ -1123,6 +1153,7 @@ errors:
     # Default value: [object Object]
     #
     json:
+      
       ## Enabled ##
       #
       # En-/disables this component.
@@ -1140,11 +1171,13 @@ errors:
 # For more information on authorizers head over to: https://www.ory.sh/oathkeeper/docs/pipeline/authz
 #
 authorizers:
+  
   ## Allow ##
   #
   # The [`allow` authorizer](https://www.ory.sh/oathkeeper/docs/pipeline/authz#allow).
   #
   allow:
+    
     ## Enabled ##
     #
     # En-/disables this component.
@@ -1153,7 +1186,7 @@ authorizers:
     #
     # Examples:
     # - true
-    #
+    # 
     # Set this value using environment variables on
     # - Linux/macOS:
     #    $ export AUTHORIZERS_ALLOW_ENABLED=<value>
@@ -1167,6 +1200,7 @@ authorizers:
   # The [`deny` authorizer](https://www.ory.sh/oathkeeper/docs/pipeline/authz#allow).
   #
   deny:
+    
     ## Enabled ##
     #
     # En-/disables this component.
@@ -1175,7 +1209,7 @@ authorizers:
     #
     # Examples:
     # - true
-    #
+    # 
     # Set this value using environment variables on
     # - Linux/macOS:
     #    $ export AUTHORIZERS_DENY_ENABLED=<value>
@@ -1189,6 +1223,7 @@ authorizers:
   # The [`keto_engine_acp_ory` authorizer](https://www.ory.sh/oathkeeper/docs/pipeline/authz#keto_engine_acp_ory).
   #
   keto_engine_acp_ory:
+    
     ## Enabled ##
     #
     # En-/disables this component.
@@ -1197,7 +1232,7 @@ authorizers:
     #
     # Examples:
     # - true
-    #
+    # 
     # Set this value using environment variables on
     # - Linux/macOS:
     #    $ export AUTHORIZERS_KETO_ENGINE_ACP_ORY_ENABLED=<value>
@@ -1211,6 +1246,7 @@ authorizers:
   # The [`remote` authorizer](https://www.ory.sh/oathkeeper/docs/pipeline/authz#remote).
   #
   remote:
+    
     ## Enabled ##
     #
     # En-/disables this component.
@@ -1219,7 +1255,7 @@ authorizers:
     #
     # Examples:
     # - true
-    #
+    # 
     # Set this value using environment variables on
     # - Linux/macOS:
     #    $ export AUTHORIZERS_REMOTE_ENABLED=<value>
@@ -1233,6 +1269,7 @@ authorizers:
   # The [`remote_json` authorizer](https://www.ory.sh/oathkeeper/docs/pipeline/authz#remote_json).
   #
   remote_json:
+    
     ## Enabled ##
     #
     # En-/disables this component.
@@ -1241,7 +1278,7 @@ authorizers:
     #
     # Examples:
     # - true
-    #
+    # 
     # Set this value using environment variables on
     # - Linux/macOS:
     #    $ export AUTHORIZERS_REMOTE_JSON_ENABLED=<value>
@@ -1255,11 +1292,13 @@ authorizers:
 # For more information on mutators head over to: https://www.ory.sh/oathkeeper/docs/pipeline/mutator
 #
 mutators:
+  
   ## No Operation (noop) ##
   #
   # The [`noop` mutator](https://www.ory.sh/oathkeeper/docs/pipeline/mutator#noop).
   #
   noop:
+    
     ## Enabled ##
     #
     # En-/disables this component.
@@ -1268,7 +1307,7 @@ mutators:
     #
     # Examples:
     # - true
-    #
+    # 
     # Set this value using environment variables on
     # - Linux/macOS:
     #    $ export MUTATORS_NOOP_ENABLED=<value>
@@ -1282,6 +1321,7 @@ mutators:
   # The [`cookie` mutator](https://www.ory.sh/oathkeeper/docs/pipeline/mutator#cookie).
   #
   cookie:
+    
     ## config ##
     #
     # Set this value using environment variables on
@@ -1300,7 +1340,7 @@ mutators:
     #
     # Examples:
     # - true
-    #
+    # 
     # Set this value using environment variables on
     # - Linux/macOS:
     #    $ export MUTATORS_COOKIE_ENABLED=<value>
@@ -1314,6 +1354,7 @@ mutators:
   # The [`header` mutator](https://www.ory.sh/oathkeeper/docs/pipeline/mutator#header).
   #
   header:
+    
     ## Enabled ##
     #
     # En-/disables this component.
@@ -1322,7 +1363,7 @@ mutators:
     #
     # Examples:
     # - true
-    #
+    # 
     # Set this value using environment variables on
     # - Linux/macOS:
     #    $ export MUTATORS_HEADER_ENABLED=<value>
@@ -1336,12 +1377,15 @@ mutators:
   # The [`hydrator` mutator](https://www.ory.sh/oathkeeper/docs/pipeline/mutator#hydrator).
   #
   hydrator:
+    
     ## config ##
     #
     config:
+      
       ## api ##
       #
       api:
+        
         ## url ##
         #
         # Set this value using environment variables on
@@ -1355,9 +1399,11 @@ mutators:
         ## auth ##
         #
         auth:
+          
           ## basic ##
           #
           basic:
+            
             ## username ##
             #
             # Set this value using environment variables on
@@ -1381,6 +1427,7 @@ mutators:
         ## retry ##
         #
         retry:
+          
           ## give_up_after ##
           #
           # Set this value using environment variables on
@@ -1404,6 +1451,7 @@ mutators:
       ## cache ##
       #
       cache:
+        
         ## ttl ##
         #
         # Set this value using environment variables on
@@ -1422,7 +1470,7 @@ mutators:
     #
     # Examples:
     # - true
-    #
+    # 
     # Set this value using environment variables on
     # - Linux/macOS:
     #    $ export MUTATORS_HYDRATOR_ENABLED=<value>
@@ -1436,9 +1484,11 @@ mutators:
   # The [`id_token` mutator](https://www.ory.sh/oathkeeper/docs/pipeline/mutator#id_token).
   #
   id_token:
+    
     ## config ##
     #
     config:
+      
       ## jwks_url ##
       #
       # Set this value using environment variables on
@@ -1487,7 +1537,7 @@ mutators:
     #
     # Examples:
     # - true
-    #
+    # 
     # Set this value using environment variables on
     # - Linux/macOS:
     #    $ export MUTATORS_ID_TOKEN_ENABLED=<value>
@@ -1501,6 +1551,7 @@ mutators:
 # Configure logging using the following options. Logging will always be sent to stdout and stderr.
 #
 log:
+  
   ## Level ##
   #
   # Debug enables stack traces on errors. Can also be set using environment variable LOG_LEVEL.
@@ -1540,4 +1591,5 @@ log:
 #    > set PROFILING=<value>
 #
 profiling: cpu
+
 ```
