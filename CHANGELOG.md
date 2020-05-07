@@ -163,7 +163,7 @@
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-# [Unreleased](https://github.com/ory/oathkeeper/compare/v0.37.1-beta.1...d4557aeac69e84d36dfc2a1ab97c61188c93457f) (2020-05-07)
+# [Unreleased](https://github.com/ory/oathkeeper/compare/v0.37.1-beta.1...fdaed46bcffbbdf593e94bc1784df88809e63fcd) (2020-05-07)
 
 
 ### Bug Fixes
@@ -224,6 +224,16 @@
   > Providing the request body as part of the JSON payload won't always
   > work as JSON cannot handle binary data.
 * Add prometheus docs ([#427](https://github.com/ory/oathkeeper/issues/427)) ([117ee6a](https://github.com/ory/oathkeeper/commit/117ee6a4c53035651f41a5bb4a9afe3c8b0c7438))
+* Add prometheus endpoint providing basic request metrics ([#404](https://github.com/ory/oathkeeper/issues/404)) ([fdaed46](https://github.com/ory/oathkeeper/commit/fdaed46bcffbbdf593e94bc1784df88809e63fcd)):
+  > This patch adds basic prometheus metrics. The prometheus metrics are exposed at the default prometheus exporter port 9000 and is configurable with:
+  > 
+  > ```
+  >  serve:
+  >    prometheus:
+  >      port: 9000
+  >      host: localhost
+  >      metrics_path: /metrics
+  > ```
 * Oauth2_introspect cache introspection results ([#424](https://github.com/ory/oathkeeper/issues/424)) ([d4557ae](https://github.com/ory/oathkeeper/commit/d4557aeac69e84d36dfc2a1ab97c61188c93457f)), closes [#293](https://github.com/ory/oathkeeper/issues/293)
 
 
