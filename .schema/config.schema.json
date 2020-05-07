@@ -697,6 +697,23 @@
         },
         "retry": {
           "$ref": "#/definitions/retry"
+        },
+        "cache": {
+          "additionalProperties": false,
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "$ref": "#/definitions/handlerSwitch"
+            },
+            "ttl": {
+              "type": "string",
+              "pattern": "^[0-9]+(ns|us|ms|s|m|h)$",
+              "title": "Cache Time to Live",
+              "description": "Can override the default behaviour of using the token exp time, and specify a set time to live for the token in the cache.",
+              "examples": ["5s"],
+              "description": "How long to cache hydrate calls"
+            }
+          }
         }
       },
       "required": [
