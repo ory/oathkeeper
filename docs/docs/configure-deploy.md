@@ -3,6 +3,8 @@ id: configure-deploy
 title: Configure and Deploy
 ---
 
+import useBaseUrl from '@docusaurus/useBaseUrl'
+
 The ORY Oathkeeper HTTP serve process `oathkeeper serve` opens two ports
 exposing the
 
