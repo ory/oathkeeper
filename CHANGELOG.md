@@ -163,7 +163,7 @@
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-# [Unreleased](https://github.com/ory/oathkeeper/compare/v0.37.1-beta.1...117ee6a4c53035651f41a5bb4a9afe3c8b0c7438) (2020-05-07)
+# [Unreleased](https://github.com/ory/oathkeeper/compare/v0.37.1-beta.1...b76ee9c8b6cb07adf7b9cdd421712dfdcb5f8340) (2020-05-07)
 
 
 ### Bug Fixes
@@ -192,6 +192,7 @@
 ### Documentation
 
 * Add `authentication_handler_no_match` to error example ([ad182f4](https://github.com/ory/oathkeeper/commit/ad182f4af9723aff79c227431045444140c24f25))
+* Add missing import ([b76ee9c](https://github.com/ory/oathkeeper/commit/b76ee9c8b6cb07adf7b9cdd421712dfdcb5f8340))
 * Regenerate and update changelog ([7121f65](https://github.com/ory/oathkeeper/commit/7121f6514a0ba0d61831792972ed833117911551))
 * Regenerate and update changelog ([6fd7d66](https://github.com/ory/oathkeeper/commit/6fd7d667e3c7738bc7a4ab82c490a6d7343e85bd))
 * Regenerate and update changelog ([531200c](https://github.com/ory/oathkeeper/commit/531200cecae0bb8853ff9d5d557cb9176137545b))
