@@ -4,7 +4,7 @@
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 **Table of Contents**
 
-- [Unreleased (2020-05-01)](#unreleased-2020-05-01)
+- [Unreleased (2020-05-07)](#unreleased-2020-05-07)
     - [Bug Fixes](#bug-fixes)
     - [Code Refactoring](#code-refactoring)
     - [Documentation](#documentation)
@@ -163,7 +163,7 @@
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-# [Unreleased](https://github.com/ory/oathkeeper/compare/v0.37.1-beta.1...1ae6e7a958d602533f54cada5d231bcf1bace093) (2020-05-01)
+# [Unreleased](https://github.com/ory/oathkeeper/compare/v0.37.1-beta.1...117ee6a4c53035651f41a5bb4a9afe3c8b0c7438) (2020-05-07)
 
 
 ### Bug Fixes
@@ -222,6 +222,7 @@
   > 
   > Providing the request body as part of the JSON payload won't always
   > work as JSON cannot handle binary data.
+* Add prometheus docs ([#427](https://github.com/ory/oathkeeper/issues/427)) ([117ee6a](https://github.com/ory/oathkeeper/commit/117ee6a4c53035651f41a5bb4a9afe3c8b0c7438))
 
 
 
