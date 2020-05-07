@@ -45,6 +45,9 @@ const (
 	ViperKeyProxyServeAddressPort      = "serve.proxy.port"
 	ViperKeyAPIServeAddressHost        = "serve.api.host"
 	ViperKeyAPIServeAddressPort        = "serve.api.port"
+	ViperKeyPrometheusServeAddressHost = "serve.prometheus.host"
+	ViperKeyPrometheusServeAddressPort = "serve.prometheus.port"
+	ViperKeyPrometheusServeMetricsPath = "serve.prometheus.metrics_path"
 	ViperKeyAccessRuleRepositories     = "access_rules.repositories"
 	ViperKeyAccessRuleMatchingStrategy = "access_rules.matching_strategy"
 )
@@ -176,6 +179,18 @@ func (v *ViperProvider) APIServeAddress() string {
 		viperx.GetString(v.l, ViperKeyAPIServeAddressHost, ""),
 		viperx.GetInt(v.l, ViperKeyAPIServeAddressPort, 4456),
 	)
+}
+
+func (v *ViperProvider) PrometheusServeAddress() string {
+	return fmt.Sprintf(
+		"%s:%d",
+		viperx.GetString(v.l, ViperKeyPrometheusServeAddressHost, ""),
+		viperx.GetInt(v.l, ViperKeyPrometheusServeAddressPort, 9000),
+	)
+}
+
+func (v *ViperProvider) PrometheusMetricsPath() string {
+	return viperx.GetString(v.l, ViperKeyPrometheusServeMetricsPath, "/metrics")
 }
 
 func (v *ViperProvider) ParseURLs(sources []string) ([]url.URL, error) {
