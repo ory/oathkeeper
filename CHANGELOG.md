@@ -4,21 +4,22 @@
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 **Table of Contents**
 
-- [Unreleased (2020-05-07)](#unreleased-2020-05-07)
-- [0.38.0-beta.2 (2020-05-07)](#0380-beta2-2020-05-07)
+- [Unreleased (2020-05-08)](#unreleased-2020-05-08)
     - [Bug Fixes](#bug-fixes)
+- [0.38.0-beta.2 (2020-05-07)](#0380-beta2-2020-05-07)
+    - [Bug Fixes](#bug-fixes-1)
     - [Code Refactoring](#code-refactoring)
     - [Documentation](#documentation)
     - [Features](#features)
   - [0.37.1-beta.1 (2020-04-03)](#0371-beta1-2020-04-03)
     - [Documentation](#documentation-1)
 - [0.37.0-beta.1 (2020-04-02)](#0370-beta1-2020-04-02)
-    - [Bug Fixes](#bug-fixes-1)
+    - [Bug Fixes](#bug-fixes-2)
     - [Documentation](#documentation-2)
     - [Features](#features-1)
     - [BREAKING CHANGES](#breaking-changes)
 - [0.36.0-beta.4 (2020-02-14)](#0360-beta4-2020-02-14)
-    - [Bug Fixes](#bug-fixes-2)
+    - [Bug Fixes](#bug-fixes-3)
     - [Documentation](#documentation-3)
 - [0.36.0-beta.1 (2020-02-05)](#0360-beta1-2020-02-05)
     - [Documentation](#documentation-4)
@@ -164,9 +165,14 @@
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-# Unreleased (2020-05-07)
+# [Unreleased](https://github.com/ory/oathkeeper/compare/v0.38.0-beta.2...00470541fb3d5d2672ef068c9e02c20deaac3d0d) (2020-05-08)
 
-No significant changes have been made for this release.
+
+### Bug Fixes
+
+* Improve caching strategy and config for hydrator ([#433](https://github.com/ory/oathkeeper/issues/433)) ([0047054](https://github.com/ory/oathkeeper/commit/00470541fb3d5d2672ef068c9e02c20deaac3d0d)):
+  > To enable the hydrator cache you must now use the `cache.enabled` property. Also, the cache key strategy has been improved.
+
 
 
 # [0.38.0-beta.2](https://github.com/ory/oathkeeper/compare/v0.37.1-beta.1...v0.38.0-beta.2) (2020-05-07)
