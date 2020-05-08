@@ -5,6 +5,7 @@
 **Table of Contents**
 
 - [Unreleased (2020-05-08)](#unreleased-2020-05-08)
+  - [0.38.1-beta.1 (2020-05-08)](#0381-beta1-2020-05-08)
     - [Bug Fixes](#bug-fixes)
 - [0.38.0-beta.2 (2020-05-07)](#0380-beta2-2020-05-07)
     - [Bug Fixes](#bug-fixes-1)
@@ -165,7 +166,12 @@
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-# [Unreleased](https://github.com/ory/oathkeeper/compare/v0.38.0-beta.2...00470541fb3d5d2672ef068c9e02c20deaac3d0d) (2020-05-08)
+# Unreleased (2020-05-08)
+
+No significant changes have been made for this release.
+
+
+## [0.38.1-beta.1](https://github.com/ory/oathkeeper/compare/v0.38.0-beta.2...v0.38.1-beta.1) (2020-05-08)
 
 
 ### Bug Fixes
