@@ -1,7 +1,6 @@
 module github.com/ory/oathkeeper
 
 require (
-	github.com/Azure/go-autorest/logger v0.1.0 // indirect
 	github.com/Masterminds/goutils v1.1.0 // indirect
 	github.com/Masterminds/sprig v2.20.0+incompatible
 	github.com/asaskevich/govalidator v0.0.0-20190424111038-f61b66f89f4a
@@ -32,6 +31,7 @@ require (
 	github.com/julienschmidt/httprouter v1.2.0
 	github.com/lib/pq v1.3.0
 	github.com/mattn/goveralls v0.0.5
+	github.com/mitchellh/copystructure v1.0.0
 	github.com/ory/analytics-go/v4 v4.0.1
 	github.com/ory/fosite v0.29.2
 	github.com/ory/go-acc v0.2.1

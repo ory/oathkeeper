@@ -486,6 +486,18 @@ to the value received from an API.
 Setting `extra` field does not transform the HTTP request, whereas headers set
 in the `header` field will be added to the final request headers.
 
+### Cache
+
+This handler supports caching. If caching is enabled, the `api.url` configuration value
+and the the full `AuthenticationSession` payload.
+
+:::info
+
+Because the cache key is quite complex, the caching handler has a higher chance of cache misses.
+This will be improved in future versions.
+
+:::
+
 ### Configuration
 
 - `api.url` (string - required) - The API URL.

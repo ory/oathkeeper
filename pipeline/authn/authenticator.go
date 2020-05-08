@@ -9,6 +9,8 @@ import (
 
 	"github.com/ory/herodot"
 
+	"github.com/mitchellh/copystructure"
+
 	"github.com/ory/oathkeeper/pipeline"
 )
 
@@ -54,4 +56,8 @@ func (a *AuthenticationSession) SetHeader(key, val string) {
 		a.Header = map[string][]string{}
 	}
 	a.Header.Set(key, val)
+}
+
+func (a *AuthenticationSession) Copy() *AuthenticationSession {
+	return copystructure.Must(copystructure.Copy(a)).(*AuthenticationSession)
 }
