@@ -616,7 +616,8 @@
                   "description": "The OAuth 2.0 Scope to be requested during the OAuth 2.0 Client Credentials Grant.",
                   "examples": [
                     [
-                      "foo", "bar"
+                      "foo",
+                      "bar"
                     ]
                   ]
                 }
@@ -710,8 +711,9 @@
               "pattern": "^[0-9]+(ns|us|ms|s|m|h)$",
               "title": "Cache Time to Live",
               "description": "Can override the default behaviour of using the token exp time, and specify a set time to live for the token in the cache.",
-              "examples": ["5s"],
-              "description": "How long to cache hydrate calls"
+              "examples": [
+                "5s"
+              ]
             }
           }
         }
@@ -889,16 +891,17 @@
         },
         "cache": {
           "additionalProperties": false,
-          "required": [
-            "ttl"
-          ],
           "type": "object",
           "properties": {
+            "enabled": {
+              "$ref": "#/definitions/handlerSwitch"
+            },
             "ttl": {
               "type": "string",
               "pattern": "^[0-9]+(ns|us|ms|s|m|h)$",
               "title": "Cache Time to Live",
-              "description": "How long to cache hydrate calls"
+              "description": "How long to cache hydrate calls",
+              "default": "1m"
             }
           }
         }
@@ -1286,9 +1289,11 @@
           "default": [
             "json"
           ],
-          "examples": [[
-            "redirect"
-          ]]
+          "examples": [
+            [
+              "redirect"
+            ]
+          ]
         },
         "handlers": {
           "additionalProperties": false,

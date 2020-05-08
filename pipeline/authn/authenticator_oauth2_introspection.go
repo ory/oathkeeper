@@ -138,7 +138,6 @@ func (a *AuthenticatorOAuth2Introspection) Authenticate(r *http.Request, session
 	ss := a.c.ToScopeStrategy(cf.ScopeStrategy, "authenticators.oauth2_introspection.scope_strategy")
 
 	i, ok := a.tokenFromCache(cf, token)
-
 	if !ok {
 		body := url.Values{"token": {token}}
 
