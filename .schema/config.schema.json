@@ -4,6 +4,50 @@
   "title": "ORY Oathkeeper Configuration",
   "type": "object",
   "definitions": {
+    "serverTimeout": {
+      "title": "HTTP Timeouts",
+      "description": "Control the HTTP timeouts.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "read": {
+          "title": "HTTP Read Timeout",
+          "type": "string",
+          "default": "5s",
+          "pattern": "^[0-9]+(ns|us|ms|s|m|h)$",
+          "description": "The maximum duration for reading the entire request, including the body.",
+          "examples": [
+            "5s",
+            "5m",
+            "5h"
+          ]
+        },
+        "write": {
+          "title": "HTTP Write Timeout",
+          "type": "string",
+          "default": "120s",
+          "pattern": "^[0-9]+(ns|us|ms|s|m|h)$",
+          "description": "The maximum duration before timing out writes of the response. Increase this parameter to prevent unexpected closing a client connection if an upstream request is responding slowly.",
+          "examples": [
+            "5s",
+            "5m",
+            "5h"
+          ]
+        },
+        "idle": {
+          "title": "HTTP Idle Timeout",
+          "type": "string",
+          "default": "120s",
+          "pattern": "^[0-9]+(ns|us|ms|s|m|h)$",
+          "description": " The maximum amount of time to wait for any action of a request session, reading data or writing the response.",
+          "examples": [
+            "5s",
+            "5m",
+            "5h"
+          ]
+        }
+      }
+    },
     "retry": {
       "type": "object",
       "additionalProperties": false,
@@ -982,6 +1026,9 @@
               "title": "Host",
               "description": "The network interface to listen on."
             },
+            "timeout": {
+              "$ref": "#/definitions/serverTimeout"
+            },
             "cors": {
               "$ref": "#/definitions/cors"
             },
@@ -1012,48 +1059,7 @@
               "description": "The network interface to listen on. Leave empty to listen on all interfaces."
             },
             "timeout": {
-              "title": "HTTP Timeouts",
-              "description": "Control the reverse proxy's HTTP timeouts.",
-              "type": "object",
-              "additionalProperties": false,
-              "properties": {
-                "read": {
-                  "title": "HTTP Read Timeout",
-                  "type": "string",
-                  "default": "5s",
-                  "pattern": "^[0-9]+(ns|us|ms|s|m|h)$",
-                  "description": "The maximum duration for reading the entire request, including the body.",
-                  "examples": [
-                    "5s",
-                    "5m",
-                    "5h"
-                  ]
-                },
-                "write": {
-                  "title": "HTTP Write Timeout",
-                  "type": "string",
-                  "default": "120s",
-                  "pattern": "^[0-9]+(ns|us|ms|s|m|h)$",
-                  "description": "The maximum duration before timing out writes of the response. Increase this parameter to prevent unexpected closing a client connection if an upstream request is responding slowly.",
-                  "examples": [
-                    "5s",
-                    "5m",
-                    "5h"
-                  ]
-                },
-                "idle": {
-                  "title": "HTTP Idle Timeout",
-                  "type": "string",
-                  "default": "120s",
-                  "pattern": "^[0-9]+(ns|us|ms|s|m|h)$",
-                  "description": " The maximum amount of time to wait for any action of a request session, reading data or writing the response.",
-                  "examples": [
-                    "5s",
-                    "5m",
-                    "5h"
-                  ]
-                }
-              }
+              "$ref": "#/definitions/serverTimeout"
             },
             "cors": {
               "$ref": "#/definitions/cors"
