@@ -73,6 +73,11 @@ serve:
         path: /path/to/cert.pem
         base64: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tXG5NSUlEWlRDQ0FrMmdBd0lCQWdJRVY1eE90REFOQmdr...
 
+  prometheus:
+    port: 9000
+    host: localhost
+    metrics_path: /metrics
+
 # Configures Access Rules
 access_rules:
   # Locations (list of URLs) where access rules should be fetched from on boot.
