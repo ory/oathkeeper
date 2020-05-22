@@ -59,10 +59,12 @@ require (
 	github.com/tomasen/realip v0.0.0-20180522021738-f0c99a92ddce
 	github.com/urfave/negroni v1.0.0
 	github.com/xeipuuv/gojsonpointer v0.0.0-20190905194746-02993c407bfb // indirect
+	go.opentelemetry.io/otel v0.5.0
 	golang.org/x/crypto v0.0.0-20200323165209-0ec3e9974c59
 	golang.org/x/oauth2 v0.0.0-20190604053449-0f29369cfe45
 	golang.org/x/tools v0.0.0-20200325203130-f53864d0dba1
 	gopkg.in/square/go-jose.v2 v2.3.1
+	gotest.tools v2.2.0+incompatible
 )
 
 go 1.13

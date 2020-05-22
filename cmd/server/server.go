@@ -19,6 +19,7 @@ import (
 	"github.com/ory/analytics-go/v4"
 	"github.com/ory/graceful"
 	"github.com/ory/viper"
+	"go.opentelemetry.io/otel/plugin/httptrace"
 
 	"github.com/ory/x/corsx"
 	"github.com/ory/x/healthx"
@@ -44,7 +45,10 @@ func runProxy(d driver.Driver, n *negroni.Negroni, logger *logrus.Logger, prom *
 		}
 
 		n.Use(metrics.NewMiddleware(prom, "oathkeeper-proxy").ExcludePaths(healthx.ReadyCheckPath, healthx.AliveCheckPath))
-		n.Use(reqlog.NewMiddlewareFromLogger(logger, "oathkeeper-proxy").ExcludePaths(healthx.ReadyCheckPath, healthx.AliveCheckPath))
+		proxyLogger := addOpenTracingFields(
+			reqlog.NewMiddlewareFromLogger(logger, "oathkeeper-proxy").ExcludePaths(healthx.ReadyCheckPath, healthx.AliveCheckPath),
+		)
+		n.Use(proxyLogger)
 		n.UseHandler(handler)
 
 		h := corsx.Initialize(n, logger, "serve.proxy")
@@ -83,7 +87,10 @@ func runAPI(d driver.Driver, n *negroni.Negroni, logger *logrus.Logger, prom *me
 		d.Registry().CredentialHandler().SetRoutes(router)
 
 		n.Use(metrics.NewMiddleware(prom, "oathkeeper-api").ExcludePaths(healthx.ReadyCheckPath, healthx.AliveCheckPath))
-		n.Use(reqlog.NewMiddlewareFromLogger(logger, "oathkeeper-api").ExcludePaths(healthx.ReadyCheckPath, healthx.AliveCheckPath))
+		apiLogger := addOpenTracingFields(
+			reqlog.NewMiddlewareFromLogger(logger, "oathkeeper-api").ExcludePaths(healthx.ReadyCheckPath, healthx.AliveCheckPath),
+		)
+		n.Use(apiLogger)
 		n.Use(d.Registry().DecisionHandler()) // This needs to be the last entry, otherwise the judge API won't work
 
 		n.UseHandler(router)
@@ -172,6 +179,26 @@ func clusterID(c configuration.Provider) string {
 
 func isDevelopment(c configuration.Provider) bool {
 	return len(c.AccessRuleRepositories()) == 0
+}
+
+func addOpenTracingFields(logger *reqlog.Middleware) *reqlog.Middleware {
+	// To avoid cyclic execution
+	before := logger.Before
+	logger.Before = func(entry *logrus.Entry, r *http.Request, remoteAddr string) *logrus.Entry {
+		fields := before(entry, r, remoteAddr)
+
+		_, _, spanCtx := httptrace.Extract(r.Context(), r)
+
+		if spanCtx.HasTraceID() {
+			fields = fields.WithField("trace_id", spanCtx.TraceID)
+		}
+		if spanCtx.HasSpanID() {
+			fields = fields.WithField("span_id", spanCtx.SpanID)
+		}
+
+		return fields
+	}
+	return logger
 }
 
 func RunServe(version, build, date string) func(cmd *cobra.Command, args []string) {
