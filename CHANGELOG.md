@@ -4,29 +4,30 @@
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 **Table of Contents**
 
-- [Unreleased (2020-05-20)](#unreleased-2020-05-20)
+- [Unreleased (2020-05-23)](#unreleased-2020-05-23)
     - [Bug Fixes](#bug-fixes)
     - [Documentation](#documentation)
+    - [Features](#features)
   - [0.38.1-beta.1 (2020-05-08)](#0381-beta1-2020-05-08)
     - [Bug Fixes](#bug-fixes-1)
 - [0.38.0-beta.2 (2020-05-07)](#0380-beta2-2020-05-07)
     - [Bug Fixes](#bug-fixes-2)
     - [Code Refactoring](#code-refactoring)
     - [Documentation](#documentation-1)
-    - [Features](#features)
+    - [Features](#features-1)
   - [0.37.1-beta.1 (2020-04-03)](#0371-beta1-2020-04-03)
     - [Documentation](#documentation-2)
 - [0.37.0-beta.1 (2020-04-02)](#0370-beta1-2020-04-02)
     - [Bug Fixes](#bug-fixes-3)
     - [Documentation](#documentation-3)
-    - [Features](#features-1)
+    - [Features](#features-2)
     - [BREAKING CHANGES](#breaking-changes)
 - [0.36.0-beta.4 (2020-02-14)](#0360-beta4-2020-02-14)
     - [Bug Fixes](#bug-fixes-4)
     - [Documentation](#documentation-4)
 - [0.36.0-beta.1 (2020-02-05)](#0360-beta1-2020-02-05)
     - [Documentation](#documentation-5)
-    - [Features](#features-2)
+    - [Features](#features-3)
     - [Unclassified](#unclassified)
   - [0.35.5-beta.2 (2020-01-31)](#0355-beta2-2020-01-31)
     - [Unclassified](#unclassified-1)
@@ -168,7 +169,7 @@
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-# [Unreleased](https://github.com/ory/oathkeeper/compare/v0.38.1-beta.1...dcf3e14f2b4e09deb40260303061f27bcb55503c) (2020-05-20)
+# [Unreleased](https://github.com/ory/oathkeeper/compare/v0.38.1-beta.1...2462fa3f97601009aff9b45c7c288d7a1afdec45) (2020-05-23)
 
 
 ### Bug Fixes
@@ -179,6 +180,11 @@
 ### Documentation
 
 * Update github templates ([#434](https://github.com/ory/oathkeeper/issues/434)) ([37d34a3](https://github.com/ory/oathkeeper/commit/37d34a3a4f728a5ba39cef6118cd7e9f5e78bcd2))
+
+
+### Features
+
+* Timeout config for oauth2_client_credentials ([#443](https://github.com/ory/oathkeeper/issues/443)) ([2462fa3](https://github.com/ory/oathkeeper/commit/2462fa3f97601009aff9b45c7c288d7a1afdec45)), closes [#442](https://github.com/ory/oathkeeper/issues/442)
 
 
 
