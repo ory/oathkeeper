@@ -45,6 +45,9 @@ const (
 	ViperKeyProxyServeAddressPort      = "serve.proxy.port"
 	ViperKeyAPIServeAddressHost        = "serve.api.host"
 	ViperKeyAPIServeAddressPort        = "serve.api.port"
+	ViperKeyAPIReadTimeout             = "serve.api.timeout.read"
+	ViperKeyAPIWriteTimeout            = "serve.api.timeout.write"
+	ViperKeyAPIIdleTimeout             = "serve.api.timeout.idle"
 	ViperKeyPrometheusServeAddressHost = "serve.prometheus.host"
 	ViperKeyPrometheusServeAddressPort = "serve.prometheus.port"
 	ViperKeyPrometheusServeMetricsPath = "serve.prometheus.metrics_path"
@@ -171,6 +174,18 @@ func (v *ViperProvider) ProxyServeAddress() string {
 		viperx.GetString(v.l, ViperKeyProxyServeAddressHost, ""),
 		viperx.GetInt(v.l, ViperKeyProxyServeAddressPort, 4455),
 	)
+}
+
+func (v *ViperProvider) APIReadTimeout() time.Duration {
+	return viperx.GetDuration(v.l, ViperKeyAPIReadTimeout, time.Second*5)
+}
+
+func (v *ViperProvider) APIWriteTimeout() time.Duration {
+	return viperx.GetDuration(v.l, ViperKeyAPIWriteTimeout, time.Second*10)
+}
+
+func (v *ViperProvider) APIIdleTimeout() time.Duration {
+	return viperx.GetDuration(v.l, ViperKeyAPIIdleTimeout, time.Second*120)
 }
 
 func (v *ViperProvider) APIServeAddress() string {

@@ -43,6 +43,10 @@ type Provider interface {
 	ProxyWriteTimeout() time.Duration
 	ProxyIdleTimeout() time.Duration
 
+	APIReadTimeout() time.Duration
+	APIWriteTimeout() time.Duration
+	APIIdleTimeout() time.Duration
+
 	AccessRuleRepositories() []url.URL
 	AccessRuleMatchingStrategy() MatchingStrategy
 

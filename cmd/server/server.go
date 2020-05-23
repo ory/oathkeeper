@@ -92,9 +92,12 @@ func runAPI(d driver.Driver, n *negroni.Negroni, logger *logrus.Logger, prom *me
 		certs := cert("api", logger)
 		addr := d.Configuration().APIServeAddress()
 		server := graceful.WithDefaults(&http.Server{
-			Addr:      addr,
-			Handler:   h,
-			TLSConfig: &tls.Config{Certificates: certs},
+			Addr:         addr,
+			Handler:      h,
+			TLSConfig:    &tls.Config{Certificates: certs},
+			ReadTimeout:  d.Configuration().APIReadTimeout(),
+			WriteTimeout: d.Configuration().APIWriteTimeout(),
+			IdleTimeout:  d.Configuration().APIIdleTimeout(),
 		})
 
 		if err := graceful.Graceful(func() error {
