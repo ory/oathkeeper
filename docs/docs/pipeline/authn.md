@@ -345,6 +345,10 @@ header as the subject for this request.
 
 - `token_url` (string, required) - The OAuth 2.0 Token Endpoint that will be
   used to validate the client credentials.
+- `retry` (object, optional) - Configures timeout and delay settings for the
+  request against the token endpoint
+  - `give_up_after` (string) timeout
+  - `max_delay` (string) time to wait between retries
 - `required_scope` ([]string, optional) - Sets what scope is required by the URL
   and when making performing OAuth 2.0 Client Credentials request, the scope
   will be included in the request:

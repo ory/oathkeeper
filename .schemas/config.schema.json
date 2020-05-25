@@ -507,6 +507,9 @@
           "items": {
             "type": "string"
           }
+        },
+        "retry": {
+          "$ref": "#/definitions/retry"
         }
       },
       "required": [

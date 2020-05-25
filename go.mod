@@ -27,6 +27,7 @@ require (
 	github.com/google/go-jsonnet v0.15.0
 	github.com/google/uuid v1.1.1
 	github.com/gorilla/mux v1.7.1 // indirect
+	github.com/gorilla/websocket v1.4.2 // indirect
 	github.com/huandu/xstrings v1.2.0 // indirect
 	github.com/imdario/mergo v0.3.7
 	github.com/julienschmidt/httprouter v1.2.0

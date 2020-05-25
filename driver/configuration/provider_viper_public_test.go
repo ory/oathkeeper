@@ -183,6 +183,11 @@ func TestViperProvider(t *testing.T) {
 		assert.Equal(t, "127.0.0.1:1234", p.ProxyServeAddress())
 		assert.Equal(t, "127.0.0.2:1235", p.APIServeAddress())
 
+		t.Run("group=prometheus", func(t *testing.T) {
+			assert.Equal(t, "localhost:9000", p.PrometheusServeAddress())
+			assert.Equal(t, "/metrics", p.PrometheusMetricsPath())
+		})
+
 		t.Run("group=cors", func(t *testing.T) {
 			assert.True(t, p.CORSEnabled("proxy"))
 			assert.True(t, p.CORSEnabled("api"))

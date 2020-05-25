@@ -220,7 +220,7 @@ type DecisionsForbiddenBody struct {
 	Code int64 `json:"code,omitempty"`
 
 	// details
-	Details []map[string]interface{} `json:"details"`
+	Details []interface{} `json:"details"`
 
 	// message
 	Message string `json:"message,omitempty"`
@@ -267,7 +267,7 @@ type DecisionsInternalServerErrorBody struct {
 	Code int64 `json:"code,omitempty"`
 
 	// details
-	Details []map[string]interface{} `json:"details"`
+	Details []interface{} `json:"details"`
 
 	// message
 	Message string `json:"message,omitempty"`
@@ -314,7 +314,7 @@ type DecisionsNotFoundBody struct {
 	Code int64 `json:"code,omitempty"`
 
 	// details
-	Details []map[string]interface{} `json:"details"`
+	Details []interface{} `json:"details"`
 
 	// message
 	Message string `json:"message,omitempty"`
@@ -361,7 +361,7 @@ type DecisionsUnauthorizedBody struct {
 	Code int64 `json:"code,omitempty"`
 
 	// details
-	Details []map[string]interface{} `json:"details"`
+	Details []interface{} `json:"details"`
 
 	// message
 	Message string `json:"message,omitempty"`
