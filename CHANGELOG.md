@@ -4,7 +4,8 @@
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 **Table of Contents**
 
-- [Unreleased (2020-05-23)](#unreleased-2020-05-23)
+- [Unreleased (2020-05-25)](#unreleased-2020-05-25)
+  - [0.38.2-beta.1 (2020-05-25)](#0382-beta1-2020-05-25)
     - [Bug Fixes](#bug-fixes)
     - [Documentation](#documentation)
     - [Features](#features)
@@ -169,7 +170,12 @@
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-# [Unreleased](https://github.com/ory/oathkeeper/compare/v0.38.1-beta.1...2462fa3f97601009aff9b45c7c288d7a1afdec45) (2020-05-23)
+# Unreleased (2020-05-25)
+
+No significant changes have been made for this release.
+
+
+## [0.38.2-beta.1](https://github.com/ory/oathkeeper/compare/v0.38.1-beta.1...v0.38.2-beta.1) (2020-05-25)
 
 
 ### Bug Fixes
@@ -184,6 +190,7 @@
 
 ### Features
 
+* Add configurable timeouts to API server ([#440](https://github.com/ory/oathkeeper/issues/440)) ([0dc6292](https://github.com/ory/oathkeeper/commit/0dc6292eb4784505be5100c6b20ade6235e277ac))
 * Timeout config for oauth2_client_credentials ([#443](https://github.com/ory/oathkeeper/issues/443)) ([2462fa3](https://github.com/ory/oathkeeper/commit/2462fa3f97601009aff9b45c7c288d7a1afdec45)), closes [#442](https://github.com/ory/oathkeeper/issues/442)
 
 
