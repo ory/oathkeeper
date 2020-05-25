@@ -1,4 +1,4 @@
-<h1 align="center"><img src=".github/banner_oathkeeper.png" alt="ORY Oathkeeper - Cloud Native Identity & Access Proxy"></h1>
+<h1 align="center"><img src="https://raw.githubusercontent.com/ory/meta/master/static/banners/oathkeeper.svg" alt="ORY Oathkeeper - Cloud Native Identity & Access Proxy"></h1>
 
 <h4 align="center">
     <a href="https://www.ory.sh/chat">Chat</a> |
