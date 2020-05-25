@@ -50,7 +50,6 @@ Status Code **500**
 |---|---|---|---|---|
 |» code|integer(int64)|false|none|none|
 |» details|[object]|false|none|none|
-|»» **additionalProperties**|object|false|none|none|
 |» message|string|false|none|none|
 |» reason|string|false|none|none|
 |» request|string|false|none|none|
@@ -264,7 +263,6 @@ Status Code **401**
 |---|---|---|---|---|
 |» code|integer(int64)|false|none|none|
 |» details|[object]|false|none|none|
-|»» **additionalProperties**|object|false|none|none|
 |» message|string|false|none|none|
 |» reason|string|false|none|none|
 |» request|string|false|none|none|
@@ -276,7 +274,6 @@ Status Code **403**
 |---|---|---|---|---|
 |» code|integer(int64)|false|none|none|
 |» details|[object]|false|none|none|
-|»» **additionalProperties**|object|false|none|none|
 |» message|string|false|none|none|
 |» reason|string|false|none|none|
 |» request|string|false|none|none|
@@ -288,7 +285,6 @@ Status Code **404**
 |---|---|---|---|---|
 |» code|integer(int64)|false|none|none|
 |» details|[object]|false|none|none|
-|»» **additionalProperties**|object|false|none|none|
 |» message|string|false|none|none|
 |» reason|string|false|none|none|
 |» request|string|false|none|none|
@@ -300,7 +296,6 @@ Status Code **500**
 |---|---|---|---|---|
 |» code|integer(int64)|false|none|none|
 |» details|[object]|false|none|none|
-|»» **additionalProperties**|object|false|none|none|
 |» message|string|false|none|none|
 |» reason|string|false|none|none|
 |» request|string|false|none|none|
@@ -314,10 +309,7 @@ Status Code **500**
 {
   "code": 0,
   "details": [
-    {
-      "property1": {},
-      "property2": {}
-    }
+    {}
   ],
   "message": "string",
   "reason": "string",
@@ -525,7 +517,6 @@ Status Code **500**
 |---|---|---|---|---|
 |» code|integer(int64)|false|none|none|
 |» details|[object]|false|none|none|
-|»» **additionalProperties**|object|false|none|none|
 |» message|string|false|none|none|
 |» reason|string|false|none|none|
 |» request|string|false|none|none|
@@ -748,7 +739,6 @@ Status Code **404**
 |---|---|---|---|---|
 |» code|integer(int64)|false|none|none|
 |» details|[object]|false|none|none|
-|»» **additionalProperties**|object|false|none|none|
 |» message|string|false|none|none|
 |» reason|string|false|none|none|
 |» request|string|false|none|none|
@@ -760,7 +750,6 @@ Status Code **500**
 |---|---|---|---|---|
 |» code|integer(int64)|false|none|none|
 |» details|[object]|false|none|none|
-|»» **additionalProperties**|object|false|none|none|
 |» message|string|false|none|none|
 |» reason|string|false|none|none|
 |» request|string|false|none|none|
@@ -983,7 +972,6 @@ Status Code **500**
 |---|---|---|---|---|
 |» code|integer(int64)|false|none|none|
 |» details|[object]|false|none|none|
-|»» **additionalProperties**|object|false|none|none|
 |» message|string|false|none|none|
 |» reason|string|false|none|none|
 |» request|string|false|none|none|

@@ -42,7 +42,7 @@ require (
 	github.com/ory/herodot v0.7.0
 	github.com/ory/jsonschema/v3 v3.0.1
 	github.com/ory/ladon v1.1.0
-	github.com/ory/sdk/swagutil v0.0.0-20200508110558-16957df12672
+	github.com/ory/sdk/swagutil v0.0.0-20200523161155-efb49dc7bc74
 	github.com/ory/viper v1.7.4
 	github.com/ory/x v0.0.111
 	github.com/pborman/uuid v1.2.0

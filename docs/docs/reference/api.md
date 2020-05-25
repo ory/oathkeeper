@@ -3,8 +3,6 @@ title: REST API
 id: api
 ---
 
-
-
 ORY Oathkeeper is a reverse proxy that checks the HTTP Authorization for
 validity against a set of rules. This service uses Hydra to validate access
 tokens and policies.
@@ -55,15 +53,14 @@ verify signatures of ID Tokens.
 
 Status Code **500**
 
-| Name                        | Type           | Required | Restrictions | Description |
-| --------------------------- | -------------- | -------- | ------------ | ----------- |
-| » code                      | integer(int64) | false    | none         | none        |
-| » details                   | [object]       | false    | none         | none        |
-| »» **additionalProperties** | object         | false    | none         | none        |
-| » message                   | string         | false    | none         | none        |
-| » reason                    | string         | false    | none         | none        |
-| » request                   | string         | false    | none         | none        |
-| » status                    | string         | false    | none         | none        |
+| Name      | Type           | Required | Restrictions | Description |
+| --------- | -------------- | -------- | ------------ | ----------- |
+| » code    | integer(int64) | false    | none         | none        |
+| » details | [object]       | false    | none         | none        |
+| » message | string         | false    | none         | none        |
+| » reason  | string         | false    | none         | none        |
+| » request | string         | false    | none         | none        |
+| » status  | string         | false    | none         | none        |
 
 ##### Examples
 
@@ -272,51 +269,47 @@ Ambassador, Kong, Envoy, and many more.
 
 Status Code **401**
 
-| Name                        | Type           | Required | Restrictions | Description |
-| --------------------------- | -------------- | -------- | ------------ | ----------- |
-| » code                      | integer(int64) | false    | none         | none        |
-| » details                   | [object]       | false    | none         | none        |
-| »» **additionalProperties** | object         | false    | none         | none        |
-| » message                   | string         | false    | none         | none        |
-| » reason                    | string         | false    | none         | none        |
-| » request                   | string         | false    | none         | none        |
-| » status                    | string         | false    | none         | none        |
+| Name      | Type           | Required | Restrictions | Description |
+| --------- | -------------- | -------- | ------------ | ----------- |
+| » code    | integer(int64) | false    | none         | none        |
+| » details | [object]       | false    | none         | none        |
+| » message | string         | false    | none         | none        |
+| » reason  | string         | false    | none         | none        |
+| » request | string         | false    | none         | none        |
+| » status  | string         | false    | none         | none        |
 
 Status Code **403**
 
-| Name                        | Type           | Required | Restrictions | Description |
-| --------------------------- | -------------- | -------- | ------------ | ----------- |
-| » code                      | integer(int64) | false    | none         | none        |
-| » details                   | [object]       | false    | none         | none        |
-| »» **additionalProperties** | object         | false    | none         | none        |
-| » message                   | string         | false    | none         | none        |
-| » reason                    | string         | false    | none         | none        |
-| » request                   | string         | false    | none         | none        |
-| » status                    | string         | false    | none         | none        |
+| Name      | Type           | Required | Restrictions | Description |
+| --------- | -------------- | -------- | ------------ | ----------- |
+| » code    | integer(int64) | false    | none         | none        |
+| » details | [object]       | false    | none         | none        |
+| » message | string         | false    | none         | none        |
+| » reason  | string         | false    | none         | none        |
+| » request | string         | false    | none         | none        |
+| » status  | string         | false    | none         | none        |
 
 Status Code **404**
 
-| Name                        | Type           | Required | Restrictions | Description |
-| --------------------------- | -------------- | -------- | ------------ | ----------- |
-| » code                      | integer(int64) | false    | none         | none        |
-| » details                   | [object]       | false    | none         | none        |
-| »» **additionalProperties** | object         | false    | none         | none        |
-| » message                   | string         | false    | none         | none        |
-| » reason                    | string         | false    | none         | none        |
-| » request                   | string         | false    | none         | none        |
-| » status                    | string         | false    | none         | none        |
+| Name      | Type           | Required | Restrictions | Description |
+| --------- | -------------- | -------- | ------------ | ----------- |
+| » code    | integer(int64) | false    | none         | none        |
+| » details | [object]       | false    | none         | none        |
+| » message | string         | false    | none         | none        |
+| » reason  | string         | false    | none         | none        |
+| » request | string         | false    | none         | none        |
+| » status  | string         | false    | none         | none        |
 
 Status Code **500**
 
-| Name                        | Type           | Required | Restrictions | Description |
-| --------------------------- | -------------- | -------- | ------------ | ----------- |
-| » code                      | integer(int64) | false    | none         | none        |
-| » details                   | [object]       | false    | none         | none        |
-| »» **additionalProperties** | object         | false    | none         | none        |
-| » message                   | string         | false    | none         | none        |
-| » reason                    | string         | false    | none         | none        |
-| » request                   | string         | false    | none         | none        |
-| » status                    | string         | false    | none         | none        |
+| Name      | Type           | Required | Restrictions | Description |
+| --------- | -------------- | -------- | ------------ | ----------- |
+| » code    | integer(int64) | false    | none         | none        |
+| » details | [object]       | false    | none         | none        |
+| » message | string         | false    | none         | none        |
+| » reason  | string         | false    | none         | none        |
+| » request | string         | false    | none         | none        |
+| » status  | string         | false    | none         | none        |
 
 ##### Examples
 
@@ -325,12 +318,7 @@ Status Code **500**
 ```json
 {
   "code": 0,
-  "details": [
-    {
-      "property1": {},
-      "property2": {}
-    }
-  ],
+  "details": [{}],
   "message": "string",
   "reason": "string",
   "request": "string",
@@ -537,15 +525,14 @@ Status Code **200**
 
 Status Code **500**
 
-| Name                        | Type           | Required | Restrictions | Description |
-| --------------------------- | -------------- | -------- | ------------ | ----------- |
-| » code                      | integer(int64) | false    | none         | none        |
-| » details                   | [object]       | false    | none         | none        |
-| »» **additionalProperties** | object         | false    | none         | none        |
-| » message                   | string         | false    | none         | none        |
-| » reason                    | string         | false    | none         | none        |
-| » request                   | string         | false    | none         | none        |
-| » status                    | string         | false    | none         | none        |
+| Name      | Type           | Required | Restrictions | Description |
+| --------- | -------------- | -------- | ------------ | ----------- |
+| » code    | integer(int64) | false    | none         | none        |
+| » details | [object]       | false    | none         | none        |
+| » message | string         | false    | none         | none        |
+| » reason  | string         | false    | none         | none        |
+| » request | string         | false    | none         | none        |
+| » status  | string         | false    | none         | none        |
 
 ##### Examples
 
@@ -762,27 +749,25 @@ will receive a 404 error.
 
 Status Code **404**
 
-| Name                        | Type           | Required | Restrictions | Description |
-| --------------------------- | -------------- | -------- | ------------ | ----------- |
-| » code                      | integer(int64) | false    | none         | none        |
-| » details                   | [object]       | false    | none         | none        |
-| »» **additionalProperties** | object         | false    | none         | none        |
-| » message                   | string         | false    | none         | none        |
-| » reason                    | string         | false    | none         | none        |
-| » request                   | string         | false    | none         | none        |
-| » status                    | string         | false    | none         | none        |
+| Name      | Type           | Required | Restrictions | Description |
+| --------- | -------------- | -------- | ------------ | ----------- |
+| » code    | integer(int64) | false    | none         | none        |
+| » details | [object]       | false    | none         | none        |
+| » message | string         | false    | none         | none        |
+| » reason  | string         | false    | none         | none        |
+| » request | string         | false    | none         | none        |
+| » status  | string         | false    | none         | none        |
 
 Status Code **500**
 
-| Name                        | Type           | Required | Restrictions | Description |
-| --------------------------- | -------------- | -------- | ------------ | ----------- |
-| » code                      | integer(int64) | false    | none         | none        |
-| » details                   | [object]       | false    | none         | none        |
-| »» **additionalProperties** | object         | false    | none         | none        |
-| » message                   | string         | false    | none         | none        |
-| » reason                    | string         | false    | none         | none        |
-| » request                   | string         | false    | none         | none        |
-| » status                    | string         | false    | none         | none        |
+| Name      | Type           | Required | Restrictions | Description |
+| --------- | -------------- | -------- | ------------ | ----------- |
+| » code    | integer(int64) | false    | none         | none        |
+| » details | [object]       | false    | none         | none        |
+| » message | string         | false    | none         | none        |
+| » reason  | string         | false    | none         | none        |
+| » request | string         | false    | none         | none        |
+| » status  | string         | false    | none         | none        |
 
 ##### Examples
 
@@ -999,15 +984,14 @@ status will never refer to the cluster state, only to a single instance.
 
 Status Code **500**
 
-| Name                        | Type           | Required | Restrictions | Description |
-| --------------------------- | -------------- | -------- | ------------ | ----------- |
-| » code                      | integer(int64) | false    | none         | none        |
-| » details                   | [object]       | false    | none         | none        |
-| »» **additionalProperties** | object         | false    | none         | none        |
-| » message                   | string         | false    | none         | none        |
-| » reason                    | string         | false    | none         | none        |
-| » request                   | string         | false    | none         | none        |
-| » status                    | string         | false    | none         | none        |
+| Name      | Type           | Required | Restrictions | Description |
+| --------- | -------------- | -------- | ------------ | ----------- |
+| » code    | integer(int64) | false    | none         | none        |
+| » details | [object]       | false    | none         | none        |
+| » message | string         | false    | none         | none        |
+| » reason  | string         | false    | none         | none        |
+| » request | string         | false    | none         | none        |
+| » status  | string         | false    | none         | none        |
 
 ##### Examples
 
