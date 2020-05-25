@@ -24,6 +24,7 @@ require (
 	github.com/golang/gddo v0.0.0-20190904175337-72a348e765d2
 	github.com/golang/mock v1.3.1
 	github.com/golang/protobuf v1.3.3 // indirect
+	github.com/google/go-jsonnet v0.15.0
 	github.com/google/uuid v1.1.1
 	github.com/gorilla/mux v1.7.1 // indirect
 	github.com/huandu/xstrings v1.2.0 // indirect

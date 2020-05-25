@@ -187,7 +187,6 @@ func (a *AuthorizerKetoEngineACPORY) Authorize(r *http.Request, session *authn.A
 }
 
 func (a *AuthorizerKetoEngineACPORY) parseParameter(session *authn.AuthenticationSession, templateID, templateString string) (string, error) {
-
 	t := a.t.Lookup(templateID)
 	if t == nil {
 		var err error

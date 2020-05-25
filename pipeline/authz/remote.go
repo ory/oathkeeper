@@ -1,21 +1,19 @@
 package authz
 
 import (
-	"bytes"
 	"encoding/json"
-	"fmt"
 	"io"
 	"net/http"
-	"text/template"
-
-	"github.com/pkg/errors"
 
 	"github.com/ory/x/httpx"
+	"github.com/pkg/errors"
 
+	"github.com/ory/oathkeeper/driver"
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/helper"
 	"github.com/ory/oathkeeper/pipeline"
 	"github.com/ory/oathkeeper/pipeline/authn"
+	"github.com/ory/oathkeeper/template"
 	"github.com/ory/oathkeeper/x"
 )
 
@@ -28,17 +26,18 @@ type AuthorizerRemoteConfiguration struct {
 // AuthorizerRemote implements the Authorizer interface.
 type AuthorizerRemote struct {
 	c configuration.Provider
+	d driver.Registry
 
 	client *http.Client
-	t      *template.Template
+	t      *template.Renderer
 }
 
 // NewAuthorizerRemote creates a new AuthorizerRemote.
-func NewAuthorizerRemote(c configuration.Provider) *AuthorizerRemote {
+func NewAuthorizerRemote(c configuration.Provider,
+	d driver.Registry) *AuthorizerRemote {
 	return &AuthorizerRemote{
-		c:      c,
-		client: httpx.NewResilientClientLatencyToleranceSmall(nil),
-		t:      x.NewTemplate("remote"),
+		c: c, d: d, client: httpx.NewResilientClientLatencyToleranceSmall(nil),
+		t: template.NewRenderer(),
 	}
 }
 
@@ -54,6 +53,10 @@ func (a *AuthorizerRemote) Authorize(r *http.Request, session *authn.Authenticat
 		return err
 	}
 
+	logger := x.LogAccessRuleContext(a.d, a.c, rl, session).
+		WithField("config", string(config)).
+		WithField("handler", "authz/remote")
+
 	read, write := io.Pipe()
 	go func() {
 		err := pipeRequestBody(r, write)
@@ -66,44 +69,34 @@ func (a *AuthorizerRemote) Authorize(r *http.Request, session *authn.Authenticat
 	}
 	req.Header.Add("Content-Type", r.Header.Get("Content-Type"))
 
-	for hdr, templateString := range c.Headers {
-		var tmpl *template.Template
-		var err error
-
-		templateId := fmt.Sprintf("%s:%s", rl.GetID(), hdr)
-		tmpl = a.t.Lookup(templateId)
-		if tmpl == nil {
-			tmpl, err = a.t.New(templateId).Parse(templateString)
-			if err != nil {
-				return errors.Wrapf(err, `error parsing headers template "%s" in rule "%s"`, templateString, rl.GetID())
-			}
-		}
-
-		headerValue := bytes.Buffer{}
-		err = tmpl.Execute(&headerValue, session)
-		if err != nil {
-			return errors.Wrapf(err, `error executing headers template "%s" in rule "%s"`, templateString, rl.GetID())
-		}
-		// Don't send empty headers
-		if headerValue.String() == "" {
-			continue
-		}
-
-		req.Header.Set(hdr, headerValue.String())
+	if err := a.t.RenderHeaders(c.Headers, req.Header, session); err != nil {
+		return errors.Wrapf(err, `error parsing headers in rule "%s"`, source, rl.GetID())
 	}
+
+	logger.WithError(err).
+		WithField("header", req.Header).
+		Trace("Making request to remote with these HTTP Headers.")
 
 	res, err := a.client.Do(req)
 	if err != nil {
+		logger.WithError(err).
+			Debug("Unable to initiate request due to a network or timeout error.")
 		return errors.WithStack(err)
 	}
 	defer res.Body.Close()
 
 	if res.StatusCode == http.StatusForbidden {
+		logger.WithField("remote_status_code", res.StatusCode).
+			Trace("Remote replied with status code 403 indicating that the request must not be allowed.")
 		return errors.WithStack(helper.ErrForbidden)
 	} else if res.StatusCode != http.StatusOK {
+		logger.WithField("remote_status_code", res.StatusCode).
+			Debug("Remote replied with status code 403 indicating that the request must not be allowed.")
 		return errors.Errorf("expected status code %d but got %d", http.StatusOK, res.StatusCode)
 	}
 
+	logger.WithField("remote_status_code", res.StatusCode).
+		Trace("Remote replied with status code 200 indicating that the request should be allowed.")
 	return nil
 }
 

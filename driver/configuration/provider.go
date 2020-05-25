@@ -39,6 +39,8 @@ type Provider interface {
 	ProviderAuthorizers
 	ProviderMutators
 
+	IsInsecureDevMode() bool
+
 	ProxyReadTimeout() time.Duration
 	ProxyWriteTimeout() time.Duration
 	ProxyIdleTimeout() time.Duration

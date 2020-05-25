@@ -5,35 +5,34 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"text/template"
+
+	"github.com/pkg/errors"
 
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/pipeline"
 	"github.com/ory/oathkeeper/pipeline/authn"
-	"github.com/ory/oathkeeper/x"
-
-	"github.com/pkg/errors"
+	"github.com/ory/oathkeeper/template"
 )
 
 type MutatorHeaderConfig struct {
 	Headers map[string]string `json:"headers"`
 }
 
-type MutatorHeader struct {
-	c configuration.Provider
-	t *template.Template
+type mutatorHeaderDependencies interface {
+	template.RenderProvider
 }
 
-func NewMutatorHeader(c configuration.Provider) *MutatorHeader {
-	return &MutatorHeader{c: c, t: x.NewTemplate("header")}
+type MutatorHeader struct {
+	c configuration.Provider
+	d mutatorHeaderDependencies
+}
+
+func NewMutatorHeader(c configuration.Provider, d mutatorHeaderDependencies) *MutatorHeader {
+	return &MutatorHeader{c: c, d: d}
 }
 
 func (a *MutatorHeader) GetID() string {
 	return "header"
-}
-
-func (a *MutatorHeader) WithCache(t *template.Template) {
-	a.t = t
 }
 
 func (a *MutatorHeader) Mutate(r *http.Request, session *authn.AuthenticationSession, config json.RawMessage, rl pipeline.Rule) error {
@@ -42,25 +41,13 @@ func (a *MutatorHeader) Mutate(r *http.Request, session *authn.AuthenticationSes
 		return err
 	}
 
-	for hdr, templateString := range cfg.Headers {
-		var tmpl *template.Template
-		var err error
+	dest := http.Header{}
+	if err := a.d.Renderer().RenderHeaders(cfg.Headers,dest,session); err != nil {
+		return errors.Wrapf(err, `error parsing headers in rule "%s"`, source, rl.GetID())
+	}
 
-		templateId := fmt.Sprintf("%s:%s", rl.GetID(), hdr)
-		tmpl = a.t.Lookup(templateId)
-		if tmpl == nil {
-			tmpl, err = a.t.New(templateId).Parse(templateString)
-			if err != nil {
-				return errors.Wrapf(err, `error parsing headers template "%s" in rule "%s"`, templateString, rl.GetID())
-			}
-		}
-
-		headerValue := bytes.Buffer{}
-		err = tmpl.Execute(&headerValue, session)
-		if err != nil {
-			return errors.Wrapf(err, `error executing headers template "%s" in rule "%s"`, templateString, rl.GetID())
-		}
-		session.SetHeader(hdr, headerValue.String())
+	for k := range dest {
+		session.SetHeader(k, dest.Get(k))
 	}
 
 	return nil

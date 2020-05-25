@@ -21,13 +21,11 @@
 package mutate
 
 import (
-	"bytes"
 	"crypto/md5"
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/url"
-	"text/template"
 	"time"
 
 	"github.com/dgraph-io/ristretto"
@@ -41,7 +39,7 @@ import (
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/pipeline"
 	"github.com/ory/oathkeeper/pipeline/authn"
-	"github.com/ory/oathkeeper/x"
+	"github.com/ory/oathkeeper/template"
 )
 
 type MutatorIDTokenRegistry interface {
@@ -49,23 +47,20 @@ type MutatorIDTokenRegistry interface {
 }
 
 type MutatorIDToken struct {
-	c         configuration.Provider
-	r         MutatorIDTokenRegistry
-	templates *template.Template
+	c        configuration.Provider
+	r        MutatorIDTokenRegistry
+	template *template.Renderer
 
 	tokenCache        *ristretto.Cache
 	tokenCacheEnabled bool
 }
 
 type CredentialsIDTokenConfig struct {
-	Claims    string `json:"claims"`
-	IssuerURL string `json:"issuer_url"`
-	JWKSURL   string `json:"jwks_url"`
-	TTL       string `json:"ttl"`
-}
-
-func (c *CredentialsIDTokenConfig) ClaimsTemplateID() string {
-	return fmt.Sprintf("%x", md5.Sum([]byte(c.Claims)))
+	Claims    string                `json:"claims"`
+	IssuerURL string                `json:"issuer_url"`
+	JWKSURL   string                `json:"jwks_url"`
+	TTL       string                `json:"ttl"`
+	Renderer  template.RenderEngine `json:"template_engine"`
 }
 
 func NewMutatorIDToken(c configuration.Provider, r MutatorIDTokenRegistry) *MutatorIDToken {
@@ -74,15 +69,16 @@ func NewMutatorIDToken(c configuration.Provider, r MutatorIDTokenRegistry) *Muta
 		MaxCost:     1 << 25,
 		BufferItems: 64,
 	})
-	return &MutatorIDToken{r: r, c: c, templates: x.NewTemplate("id_token"), tokenCache: cache, tokenCacheEnabled: true}
+	return &MutatorIDToken{
+		r: r, c: c,
+		template:          template.NewRenderer(),
+		tokenCache:        cache,
+		tokenCacheEnabled: true,
+	}
 }
 
 func (a *MutatorIDToken) GetID() string {
 	return "id_token"
-}
-
-func (a *MutatorIDToken) WithCache(t *template.Template) {
-	a.templates = t
 }
 
 func (a *MutatorIDToken) SetCaching(token bool) {
@@ -95,7 +91,7 @@ type idTokenCacheContainer struct {
 	Token     string
 }
 
-func (a *MutatorIDToken) cacheKey(config *CredentialsIDTokenConfig, ttl time.Duration, claims []byte, session *authn.AuthenticationSession) string {
+func (a *MutatorIDToken) tokenCacheKey(config *CredentialsIDTokenConfig, ttl time.Duration, claims []byte, session *authn.AuthenticationSession) string {
 	return fmt.Sprintf("%x",
 		md5.Sum([]byte(fmt.Sprintf("%s|%s|%s|%s|%s", config.IssuerURL, ttl, config.JWKSURL, claims, session.Subject))),
 	)
@@ -106,7 +102,7 @@ func (a *MutatorIDToken) tokenFromCache(config *CredentialsIDTokenConfig, sessio
 		return "", false
 	}
 
-	key := a.cacheKey(config, ttl, claims, session)
+	key := a.tokenCacheKey(config, ttl, claims, session)
 
 	item, found := a.tokenCache.Get(key)
 	if !found {
@@ -127,7 +123,7 @@ func (a *MutatorIDToken) tokenToCache(config *CredentialsIDTokenConfig, session 
 		return
 	}
 
-	key := a.cacheKey(config, ttl, claims, session)
+	key := a.tokenCacheKey(config, ttl, claims, session)
 	a.tokenCache.Set(key, &idTokenCacheContainer{
 		TTL:       ttl,
 		ExpiresAt: expiresAt,
@@ -149,24 +145,12 @@ func (a *MutatorIDToken) Mutate(r *http.Request, session *authn.AuthenticationSe
 
 	var templateClaims []byte
 	if len(c.Claims) > 0 {
-		t := a.templates.Lookup(c.ClaimsTemplateID())
-		if t == nil {
-			var err error
-			t, err = a.templates.New(c.ClaimsTemplateID()).Parse(c.Claims)
-			if err != nil {
-				return errors.Wrapf(err, `error parsing claims template in rule "%s"`, rl.GetID())
-			}
+		value, err := a.template.Render(c.Claims, c.Renderer, session, template.ExpectJSON())
+		if err != nil {
+			return err
 		}
 
-		var b bytes.Buffer
-		if err := t.Execute(&b, session); err != nil {
-			return errors.Wrapf(err, `error executing claims template in rule "%s"`, rl.GetID())
-		}
-
-		templateClaims = b.Bytes()
-		if err := json.NewDecoder(&b).Decode(&claims); err != nil {
-			return errors.WithStack(err)
-		}
+		templateClaims = []byte(value)
 	}
 
 	if token, ok := a.tokenFromCache(c, session, templateClaims, ttl); ok {
