@@ -26,7 +26,6 @@ require (
 	github.com/golang/protobuf v1.3.3 // indirect
 	github.com/google/uuid v1.1.1
 	github.com/gorilla/mux v1.7.1 // indirect
-	github.com/gorilla/websocket v1.4.2 // indirect
 	github.com/huandu/xstrings v1.2.0 // indirect
 	github.com/imdario/mergo v0.3.7
 	github.com/julienschmidt/httprouter v1.2.0
@@ -39,19 +38,19 @@ require (
 	github.com/ory/go-convenience v0.1.0
 	github.com/ory/gojsonschema v1.2.0
 	github.com/ory/graceful v0.1.1
-	github.com/ory/herodot v0.7.0
+	github.com/ory/herodot v0.8.3
 	github.com/ory/jsonschema/v3 v3.0.1
 	github.com/ory/ladon v1.1.0
 	github.com/ory/sdk/swagutil v0.0.0-20200525104141-b009efcf4f04
-	github.com/ory/viper v1.7.4
-	github.com/ory/x v0.0.111
+	github.com/ory/viper v1.7.5
+	github.com/ory/x v0.0.124
 	github.com/pborman/uuid v1.2.0
 	github.com/phayes/freeport v0.0.0-20180830031419-95f893ade6f2
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.5.0
 	github.com/rs/cors v1.6.0
 	github.com/sirupsen/logrus v1.5.0
-	github.com/spf13/cobra v0.0.7
+	github.com/spf13/cobra v1.0.0
 	github.com/sqs/goreturns v0.0.0-20181028201513-538ac6014518
 	github.com/square/go-jose v2.3.1+incompatible
 	github.com/stretchr/testify v1.5.1
@@ -60,10 +59,10 @@ require (
 	github.com/tomasen/realip v0.0.0-20180522021738-f0c99a92ddce
 	github.com/urfave/negroni v1.0.0
 	github.com/xeipuuv/gojsonpointer v0.0.0-20190905194746-02993c407bfb // indirect
-	golang.org/x/crypto v0.0.0-20200323165209-0ec3e9974c59
+	golang.org/x/crypto v0.0.0-20200510223506-06a226fb4e37
 	golang.org/x/oauth2 v0.0.0-20190604053449-0f29369cfe45
 	golang.org/x/tools v0.0.0-20200325203130-f53864d0dba1
 	gopkg.in/square/go-jose.v2 v2.3.1
 )
 
-go 1.13
+go 1.14
