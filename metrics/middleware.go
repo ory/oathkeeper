@@ -27,7 +27,7 @@ func (rc *realClock) Since(t time.Time) time.Duration {
 type Middleware struct {
 	// Name is the name of the application as recorded in latency metrics
 	Name string
-	// Promtheus repository
+	// Prometheus repository
 	Prometheus *PrometheusRepository
 
 	clock timer
