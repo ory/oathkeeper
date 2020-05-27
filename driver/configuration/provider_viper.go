@@ -38,21 +38,22 @@ func init() {
 }
 
 const (
-	ViperKeyProxyReadTimeout           = "serve.proxy.timeout.read"
-	ViperKeyProxyWriteTimeout          = "serve.proxy.timeout.write"
-	ViperKeyProxyIdleTimeout           = "serve.proxy.timeout.idle"
-	ViperKeyProxyServeAddressHost      = "serve.proxy.host"
-	ViperKeyProxyServeAddressPort      = "serve.proxy.port"
-	ViperKeyAPIServeAddressHost        = "serve.api.host"
-	ViperKeyAPIServeAddressPort        = "serve.api.port"
-	ViperKeyAPIReadTimeout             = "serve.api.timeout.read"
-	ViperKeyAPIWriteTimeout            = "serve.api.timeout.write"
-	ViperKeyAPIIdleTimeout             = "serve.api.timeout.idle"
-	ViperKeyPrometheusServeAddressHost = "serve.prometheus.host"
-	ViperKeyPrometheusServeAddressPort = "serve.prometheus.port"
-	ViperKeyPrometheusServeMetricsPath = "serve.prometheus.metrics_path"
-	ViperKeyAccessRuleRepositories     = "access_rules.repositories"
-	ViperKeyAccessRuleMatchingStrategy = "access_rules.matching_strategy"
+	ViperKeyProxyReadTimeout                    = "serve.proxy.timeout.read"
+	ViperKeyProxyWriteTimeout                   = "serve.proxy.timeout.write"
+	ViperKeyProxyIdleTimeout                    = "serve.proxy.timeout.idle"
+	ViperKeyProxyServeAddressHost               = "serve.proxy.host"
+	ViperKeyProxyServeAddressPort               = "serve.proxy.port"
+	ViperKeyAPIServeAddressHost                 = "serve.api.host"
+	ViperKeyAPIServeAddressPort                 = "serve.api.port"
+	ViperKeyAPIReadTimeout                      = "serve.api.timeout.read"
+	ViperKeyAPIWriteTimeout                     = "serve.api.timeout.write"
+	ViperKeyAPIIdleTimeout                      = "serve.api.timeout.idle"
+	ViperKeyPrometheusServeAddressHost          = "serve.prometheus.host"
+	ViperKeyPrometheusServeAddressPort          = "serve.prometheus.port"
+	ViperKeyPrometheusServeMetricsPath          = "serve.prometheus.metrics_path"
+	ViperKeyPrometheusServeCollapseRequestPaths = "serve.prometheus.collapse_request_paths"
+	ViperKeyAccessRuleRepositories              = "access_rules.repositories"
+	ViperKeyAccessRuleMatchingStrategy          = "access_rules.matching_strategy"
 )
 
 // Authorizers
@@ -206,6 +207,10 @@ func (v *ViperProvider) PrometheusServeAddress() string {
 
 func (v *ViperProvider) PrometheusMetricsPath() string {
 	return viperx.GetString(v.l, ViperKeyPrometheusServeMetricsPath, "/metrics")
+}
+
+func (v *ViperProvider) PrometheusCollapseRequestPaths() bool {
+	return viperx.GetBool(v.l, ViperKeyPrometheusServeCollapseRequestPaths, true)
 }
 
 func (v *ViperProvider) ParseURLs(sources []string) ([]url.URL, error) {

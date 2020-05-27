@@ -186,6 +186,7 @@ func TestViperProvider(t *testing.T) {
 		t.Run("group=prometheus", func(t *testing.T) {
 			assert.Equal(t, "localhost:9000", p.PrometheusServeAddress())
 			assert.Equal(t, "/metrics", p.PrometheusMetricsPath())
+			assert.Equal(t, true, p.PrometheusCollapseRequestPaths())
 		})
 
 		t.Run("group=cors", func(t *testing.T) {
