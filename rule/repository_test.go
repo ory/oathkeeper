@@ -26,13 +26,13 @@ import (
 	"testing"
 
 	"github.com/bxcodec/faker"
-	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
-
 	_ "github.com/go-sql-driver/mysql"
 	_ "github.com/lib/pq"
+	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/ory/x/logrusx"
 
 	"github.com/ory/x/sqlcon/dockertest"
 
@@ -61,9 +61,9 @@ type mockRepositoryRegistry struct {
 func (r *mockRepositoryRegistry) RuleValidator() Validator {
 	return &r.v
 }
-func (r *mockRepositoryRegistry) Logger() logrus.FieldLogger {
+func (r *mockRepositoryRegistry) Logger() *logrusx.Logger {
 	r.loggerCalled++
-	return logrus.New()
+	return logrusx.New("", "")
 }
 
 func TestRepository(t *testing.T) {

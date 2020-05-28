@@ -8,9 +8,10 @@ import (
 	"testing"
 
 	"github.com/rs/cors"
-	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/ory/x/logrusx"
 
 	"github.com/ory/x/urlx"
 	"github.com/ory/x/viperx"
@@ -28,7 +29,7 @@ import (
 )
 
 func setup(t *testing.T) *ViperProvider {
-	l := logrus.New()
+	l := logrusx.New("", "")
 	viper.Reset()
 	viperx.InitializeConfig(
 		"oathkeeper",
@@ -38,7 +39,7 @@ func setup(t *testing.T) *ViperProvider {
 
 	err := viperx.ValidateFromURL("file://../../.schema/config.schema.json")
 	if err != nil {
-		viperx.LoggerWithValidationErrorFields(l, err).Error("unable to validate")
+		l.WithError(err).Error("unable to validate")
 	}
 	require.NoError(t, err)
 
@@ -112,19 +113,20 @@ v0.35.2
 
 func BenchmarkPipelineConfig(b *testing.B) {
 	viper.Reset()
+	l := logrusx.New("", "")
 	viperx.InitializeConfig(
 		"oathkeeper",
 		"./../../internal/config/",
-		logrus.New(),
+		l,
 	)
 
 	err := viperx.ValidateFromURL("file://../../.schema/config.schema.json")
 	if err != nil {
-		viperx.LoggerWithValidationErrorFields(logrus.New(), err).Error("unable to validate")
+		l.WithError(err).Error("unable to validate")
 	}
 	require.NoError(b, err)
 
-	p := NewViperProvider(logrus.New())
+	p := NewViperProvider(logrusx.New("", ""))
 
 	for n := 0; n < b.N; n++ {
 		res := json.RawMessage{}
@@ -144,19 +146,20 @@ v0.35.5
 
 func BenchmarkPipelineEnabled(b *testing.B) {
 	viper.Reset()
+	logger := logrusx.New("", "")
 	viperx.InitializeConfig(
 		"oathkeeper",
 		"./../../internal/config/",
-		logrus.New(),
+		logger,
 	)
 
 	err := viperx.ValidateFromURL("file://../../.schema/config.schema.json")
 	if err != nil {
-		viperx.LoggerWithValidationErrorFields(logrus.New(), err).Error("unable to validate")
+		logger.WithError(err).Error("unable to validate")
 	}
 	require.NoError(b, err)
 
-	p := NewViperProvider(logrus.New())
+	p := NewViperProvider(logrusx.New("", ""))
 
 	for n := 0; n < b.N; n++ {
 		p.AuthorizerIsEnabled("allow")
@@ -167,17 +170,18 @@ func BenchmarkPipelineEnabled(b *testing.B) {
 
 func TestViperProvider(t *testing.T) {
 	viper.Reset()
+	logger := logrusx.New("", "")
 	viperx.InitializeConfig(
 		"oathkeeper",
 		"./../../internal/config/",
-		logrus.New(),
+		logger,
 	)
 
 	err := viperx.ValidateFromURL("file://../../.schema/config.schema.json")
 	if err != nil {
-		viperx.LoggerWithValidationErrorFields(logrus.New(), err).Error("unable to validate")
+		logger.WithError(err).Error("unable to validate")
 	}
-	p := NewViperProvider(logrus.New())
+	p := NewViperProvider(logrusx.New("", ""))
 
 	t.Run("group=serve", func(t *testing.T) {
 		assert.Equal(t, "127.0.0.1:1234", p.ProxyServeAddress())
@@ -393,7 +397,7 @@ func TestViperProvider(t *testing.T) {
 }
 
 func TestToScopeStrategy(t *testing.T) {
-	v := NewViperProvider(logrus.New())
+	v := NewViperProvider(logrusx.New("", ""))
 
 	assert.True(t, v.ToScopeStrategy("exact", "foo")([]string{"foo"}, "foo"))
 	assert.True(t, v.ToScopeStrategy("hierarchic", "foo")([]string{"foo"}, "foo.bar"))
@@ -404,7 +408,7 @@ func TestToScopeStrategy(t *testing.T) {
 
 func TestAuthenticatorOAuth2TokenIntrospectionPreAuthorization(t *testing.T) {
 	viper.Reset()
-	v := NewViperProvider(logrus.New())
+	v := NewViperProvider(logrusx.New("", ""))
 	viper.Set("authenticators.oauth2_introspection.enabled", true)
 	viper.Set("authenticators.oauth2_introspection.config.introspection_url", "http://some-url/")
 

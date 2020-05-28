@@ -26,6 +26,7 @@ require (
 	github.com/golang/protobuf v1.3.3 // indirect
 	github.com/google/uuid v1.1.1
 	github.com/gorilla/mux v1.7.1 // indirect
+	github.com/gorilla/websocket v1.4.2
 	github.com/huandu/xstrings v1.2.0 // indirect
 	github.com/imdario/mergo v0.3.7
 	github.com/julienschmidt/httprouter v1.2.0
@@ -38,18 +39,18 @@ require (
 	github.com/ory/go-convenience v0.1.0
 	github.com/ory/gojsonschema v1.2.0
 	github.com/ory/graceful v0.1.1
-	github.com/ory/herodot v0.8.3
+	github.com/ory/herodot v0.8.4
 	github.com/ory/jsonschema/v3 v3.0.1
 	github.com/ory/ladon v1.1.0
 	github.com/ory/sdk/swagutil v0.0.0-20200525104141-b009efcf4f04
 	github.com/ory/viper v1.7.5
-	github.com/ory/x v0.0.124
+	github.com/ory/x v0.0.126
 	github.com/pborman/uuid v1.2.0
 	github.com/phayes/freeport v0.0.0-20180830031419-95f893ade6f2
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.5.0
 	github.com/rs/cors v1.6.0
-	github.com/sirupsen/logrus v1.5.0
+	github.com/sirupsen/logrus v1.6.0
 	github.com/spf13/cobra v1.0.0
 	github.com/sqs/goreturns v0.0.0-20181028201513-538ac6014518
 	github.com/square/go-jose v2.3.1+incompatible

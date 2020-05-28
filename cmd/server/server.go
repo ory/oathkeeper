@@ -12,7 +12,6 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/urfave/negroni"
 
@@ -34,7 +33,7 @@ import (
 	"github.com/ory/oathkeeper/x"
 )
 
-func runProxy(d driver.Driver, n *negroni.Negroni, logger *logrus.Logger, prom *metrics.PrometheusRepository) func() {
+func runProxy(d driver.Driver, n *negroni.Negroni, logger *logrusx.Logger, prom *metrics.PrometheusRepository) func() {
 	return func() {
 		proxy := d.Registry().Proxy()
 
@@ -75,7 +74,7 @@ func runProxy(d driver.Driver, n *negroni.Negroni, logger *logrus.Logger, prom *
 	}
 }
 
-func runAPI(d driver.Driver, n *negroni.Negroni, logger *logrus.Logger, prom *metrics.PrometheusRepository) func() {
+func runAPI(d driver.Driver, n *negroni.Negroni, logger *logrusx.Logger, prom *metrics.PrometheusRepository) func() {
 	return func() {
 		router := x.NewAPIRouter()
 		d.Registry().RuleHandler().SetRoutes(router)
@@ -115,7 +114,7 @@ func runAPI(d driver.Driver, n *negroni.Negroni, logger *logrus.Logger, prom *me
 	}
 }
 
-func runPrometheus(d driver.Driver, logger *logrus.Logger, prom *metrics.PrometheusRepository) func() {
+func runPrometheus(d driver.Driver, logger *logrusx.Logger, prom *metrics.PrometheusRepository) func() {
 	return func() {
 		promPath := d.Configuration().PrometheusMetricsPath()
 		promAddr := d.Configuration().PrometheusServeAddress()
@@ -138,7 +137,7 @@ func runPrometheus(d driver.Driver, logger *logrus.Logger, prom *metrics.Prometh
 	}
 }
 
-func cert(daemon string, logger logrus.FieldLogger) []tls.Certificate {
+func cert(daemon string, logger *logrusx.Logger) []tls.Certificate {
 	cert, err := tlsx.Certificate(
 		viper.GetString("serve."+daemon+".tls.cert.base64"),
 		viper.GetString("serve."+daemon+".tls.key.base64"),
@@ -181,8 +180,8 @@ func RunServe(version, build, date string) func(cmd *cobra.Command, args []strin
 	return func(cmd *cobra.Command, args []string) {
 		fmt.Println(banner(version))
 
-		logger := logrusx.New()
-		d := driver.NewDefaultDriver(logger, version, build, date, true)
+		logger := logrusx.New("ORY Oathkeeper", version)
+		d := driver.NewDefaultDriver(logger, version, build, date)
 		d.Registry().Init()
 
 		adminmw := negroni.New()

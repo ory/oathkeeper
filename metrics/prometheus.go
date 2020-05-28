@@ -6,7 +6,8 @@ import (
 	"strconv"
 
 	"github.com/prometheus/client_golang/prometheus"
-	log "github.com/sirupsen/logrus"
+
+	"github.com/ory/x/logrusx"
 )
 
 var (
@@ -37,7 +38,7 @@ type UpdateRequest func(counter *prometheus.CounterVec, service, request, method
 
 // PrometheusRepository provides methods to manage prometheus metrics
 type PrometheusRepository struct {
-	logger                 log.FieldLogger
+	logger                 *logrusx.Logger
 	requestDurationObserve RequestDurationObserve
 	updateRequest          UpdateRequest
 	Registry               *prometheus.Registry
@@ -45,7 +46,7 @@ type PrometheusRepository struct {
 }
 
 // NewPrometheusRepository creates a new prometheus repository with the given settings
-func NewPrometheusRepository(logger log.FieldLogger) *PrometheusRepository {
+func NewPrometheusRepository(logger *logrusx.Logger) *PrometheusRepository {
 	m := []prometheus.Collector{
 		prometheus.NewGoCollector(),
 		prometheus.NewProcessCollector(prometheus.ProcessCollectorOpts{}),

@@ -1,7 +1,7 @@
 package driver
 
 import (
-	"github.com/sirupsen/logrus"
+	"github.com/ory/x/logrusx"
 
 	"github.com/ory/oathkeeper/driver/configuration"
 )
@@ -11,13 +11,8 @@ type DefaultDriver struct {
 	r Registry
 }
 
-func NewDefaultDriver(l logrus.FieldLogger, version, build, date string, validate bool) Driver {
+func NewDefaultDriver(l *logrusx.Logger, version, build, date string) Driver {
 	c := configuration.NewViperProvider(l)
-
-	if validate {
-		configuration.MustValidate(l, c)
-	}
-
 	r := NewRegistry(c).WithLogger(l).WithBuildInfo(version, build, date)
 
 	return &DefaultDriver{r: r, c: c}

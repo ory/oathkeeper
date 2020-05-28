@@ -18,7 +18,7 @@ func ResetViper() {
 
 func NewConfigurationWithDefaults() *configuration.ViperProvider {
 	ResetViper()
-	return configuration.NewViperProvider(logrusx.New())
+	return configuration.NewViperProvider(logrusx.New("", ""))
 }
 
 func NewRegistry(c *configuration.ViperProvider) *driver.RegistryMemory {
