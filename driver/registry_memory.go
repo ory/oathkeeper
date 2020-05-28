@@ -8,12 +8,12 @@ import (
 	"github.com/ory/oathkeeper/pipeline"
 	pe "github.com/ory/oathkeeper/pipeline/errors"
 	"github.com/ory/oathkeeper/proxy"
+	"github.com/ory/oathkeeper/x"
 
 	"github.com/ory/x/logrusx"
 	"github.com/ory/x/tracing"
 
 	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
 
 	"github.com/ory/herodot"
 	"github.com/ory/x/healthx"
@@ -36,7 +36,7 @@ type RegistryMemory struct {
 	buildVersion string
 	buildHash    string
 	buildDate    string
-	logger       logrus.FieldLogger
+	logger       *logrusx.Logger
 	writer       herodot.Writer
 	c            configuration.Provider
 	trc          *tracing.Tracer
@@ -120,7 +120,7 @@ func (r *RegistryMemory) WithBuildInfo(version, hash, date string) Registry {
 	return r
 }
 
-func (r *RegistryMemory) WithLogger(l logrus.FieldLogger) Registry {
+func (r *RegistryMemory) WithLogger(l *logrusx.Logger) Registry {
 	r.logger = l
 	return r
 }
@@ -156,14 +156,14 @@ func (r *RegistryMemory) RuleRepository() rule.Repository {
 
 func (r *RegistryMemory) Writer() herodot.Writer {
 	if r.writer == nil {
-		r.writer = herodot.NewJSONWriter(r.Logger())
+		r.writer = herodot.NewJSONWriter(r.Logger().Logger)
 	}
 	return r.writer
 }
 
-func (r *RegistryMemory) Logger() logrus.FieldLogger {
+func (r *RegistryMemory) Logger() *logrusx.Logger {
 	if r.logger == nil {
-		r.logger = logrusx.New()
+		r.logger = logrusx.New("ORY Oathkeeper", x.Version)
 	}
 	return r.logger
 }

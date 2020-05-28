@@ -1,19 +1,19 @@
 package x
 
 import (
-	"github.com/sirupsen/logrus"
+	"github.com/ory/x/logrusx"
 
 	"github.com/ory/herodot"
 )
 
 type TestLoggerProvider struct{}
 
-func (lp *TestLoggerProvider) Logger() logrus.FieldLogger {
-	return logrus.New()
+func (lp *TestLoggerProvider) Logger() *logrusx.Logger {
+	return logrusx.New("", "")
 }
 
 type RegistryLogger interface {
-	Logger() logrus.FieldLogger
+	Logger() *logrusx.Logger
 }
 
 type RegistryWriter interface {

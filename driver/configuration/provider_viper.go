@@ -14,9 +14,9 @@ import (
 	"github.com/imdario/mergo"
 	"github.com/pkg/errors"
 	"github.com/rs/cors"
-	"github.com/sirupsen/logrus"
 
 	"github.com/ory/viper"
+	"github.com/ory/x/logrusx"
 
 	"github.com/ory/go-convenience/stringsx"
 
@@ -116,7 +116,7 @@ const (
 )
 
 type ViperProvider struct {
-	l logrus.FieldLogger
+	l *logrusx.Logger
 
 	enabledMutex sync.RWMutex
 	enabledCache map[uint64]bool
@@ -125,7 +125,7 @@ type ViperProvider struct {
 	configCache map[uint64]json.RawMessage
 }
 
-func NewViperProvider(l logrus.FieldLogger) *ViperProvider {
+func NewViperProvider(l *logrusx.Logger) *ViperProvider {
 	return &ViperProvider{
 		l:            l,
 		enabledCache: make(map[uint64]bool),

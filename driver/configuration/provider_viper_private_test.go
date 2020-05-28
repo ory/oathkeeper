@@ -23,12 +23,13 @@ package configuration
 import (
 	"testing"
 
-	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/ory/x/logrusx"
 )
 
 func TestGetURL(t *testing.T) {
-	v := NewViperProvider(logrus.New())
+	v := NewViperProvider(logrusx.New("", ""))
 	assert.Nil(t, v.getURL("", "key"))
 	assert.Nil(t, v.getURL("a", "key"))
 }

@@ -18,6 +18,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
+	"github.com/ory/x/logrusx"
+
 	"github.com/ory/viper"
 	"github.com/ory/x/stringslice"
 	"github.com/ory/x/viperx"
@@ -45,8 +47,7 @@ func TestFetcherReload(t *testing.T) {
 	configFile := filepath.Join(tempdir, ".oathkeeper-"+id+".yml")
 	require.NoError(t, ioutil.WriteFile(configFile, []byte(""), 0666))
 
-	l := logrus.New()
-	l.Level = logrus.TraceLevel
+	l := logrusx.New("", "", logrusx.ForceLevel(logrus.TraceLevel))
 	viperx.InitializeConfig("oathkeeper-"+id, tempdir, nil)
 	viperx.WatchConfig(l, nil)
 
@@ -145,8 +146,7 @@ func TestFetcherWatchConfig(t *testing.T) {
 	configFile := filepath.Join(tempdir, ".oathkeeper-"+id+".yml")
 	require.NoError(t, ioutil.WriteFile(configFile, []byte(""), 0666))
 
-	l := logrus.New()
-	l.Level = logrus.TraceLevel
+	l := logrusx.New("", "", logrusx.ForceLevel(logrus.TraceLevel))
 	viperx.InitializeConfig("oathkeeper-"+id, tempdir, nil)
 	viperx.WatchConfig(l, nil)
 
