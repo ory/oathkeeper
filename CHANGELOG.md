@@ -172,7 +172,7 @@
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-# [Unreleased](https://github.com/ory/oathkeeper/compare/v0.38.2-beta.1...a1a4610194558f1024d2409c6f1975b72a0f856e) (2020-05-29)
+# [Unreleased](https://github.com/ory/oathkeeper/compare/v0.38.2-beta.1...368f073a2d91b4fc9677436bcec63c6f339b0c93) (2020-05-29)
 
 
 ### Bug Fixes
@@ -186,6 +186,7 @@
 * Update repository templates ([edffc2e](https://github.com/ory/oathkeeper/commit/edffc2ee354ae4ec26e19e728b9f3117a0ec879c))
 * Update repository templates ([7af8749](https://github.com/ory/oathkeeper/commit/7af8749e949c48f5750950def62290f2694e1b09))
 * Use central banner repo for README ([04fe00c](https://github.com/ory/oathkeeper/commit/04fe00c0cd92c717ea2dc4149450f07206306f51))
+* Use mdx for api reference ([368f073](https://github.com/ory/oathkeeper/commit/368f073a2d91b4fc9677436bcec63c6f339b0c93))
 
 
 
