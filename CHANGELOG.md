@@ -4,7 +4,7 @@
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 **Table of Contents**
 
-- [Unreleased (2020-05-28)](#unreleased-2020-05-28)
+- [Unreleased (2020-05-29)](#unreleased-2020-05-29)
     - [Bug Fixes](#bug-fixes)
     - [Documentation](#documentation)
   - [0.38.2-beta.1 (2020-05-25)](#0382-beta1-2020-05-25)
@@ -172,7 +172,7 @@
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-# [Unreleased](https://github.com/ory/oathkeeper/compare/v0.38.2-beta.1...f15e38dc533010babd21aeaa91d48dd4abbbdddc) (2020-05-28)
+# [Unreleased](https://github.com/ory/oathkeeper/compare/v0.38.2-beta.1...a1a4610194558f1024d2409c6f1975b72a0f856e) (2020-05-29)
 
 
 ### Bug Fixes
@@ -182,6 +182,7 @@
 
 ### Documentation
 
+* Delete old redirect homepage ([a1a4610](https://github.com/ory/oathkeeper/commit/a1a4610194558f1024d2409c6f1975b72a0f856e))
 * Update repository templates ([edffc2e](https://github.com/ory/oathkeeper/commit/edffc2ee354ae4ec26e19e728b9f3117a0ec879c))
 * Update repository templates ([7af8749](https://github.com/ory/oathkeeper/commit/7af8749e949c48f5750950def62290f2694e1b09))
 * Use central banner repo for README ([04fe00c](https://github.com/ory/oathkeeper/commit/04fe00c0cd92c717ea2dc4149450f07206306f51))
