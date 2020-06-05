@@ -439,3 +439,98 @@ authorizers:
   ]
 }
 ```
+
+## `remote_opa`
+
+This authorizer performs authorization against an OPA policy document using the API
+of a remote OPA instance. The authorizer makes a HTTP POST request to the OPA instance
+with a JSON formatted policy input containing the authenticated subject (if present),
+the HTTP method, and path of the request. The OPA API always returns a "200 OK" response
+code and a JSON formatted body containing a policy result specifying "allow" as either
+true or false.
+
+If the "allow" value of the policy result is true then access is allowed, if it is false
+or undefined then access is denied. This authorizer is intended to be a drop-in alternative
+to the python middleware in the official Open Policy Agent documentation.
+
+See:
+[`OPA HTTP API Authorization Use Case](https://www.openpolicyagent.org/docs/v0.11.0/http-api-authorization/)
+[`OPA API Documentation - Get a Document (with Input)](https://www.openpolicyagent.org/docs/latest/rest-api/#get-a-document-with-input)
+
+### Configuration
+
+- `remote` (string, required) - The remote OPA policy document URL located
+  under the /v1/data API path.
+
+#### Example
+
+```yaml
+# Global configuration file oathkeeper.yml
+authorizers:
+  remote_json:
+    # Set enabled to "true" to enable the authenticator, and "false" to disable the authenticator. Defaults to "false".
+    enabled: true
+
+    config:
+      remote: http://opa-host:8181/v1/data/example/authz
+```
+
+```yaml
+# Some Access Rule: access-rule-1.yaml
+id: access-rule-1
+# match: ...
+# upstream: ...
+authorizers:
+  - handler: remote_json
+    config:
+      remote: http://opa-host:8181/v1/data/example/authz
+```
+
+### Access Rule Example
+```shell
+{
+  "id": "some-id",
+  "upstream": {
+    "url": "http://my-backend-service"
+  },
+  "match": {
+    "url": "http://my-app/api/<.*>",
+    "methods": ["GET"]
+  },
+  "authenticators": [
+    {
+      "handler": "anonymous"
+    }
+  ],
+  "authorizer": {
+    "handler": "remote_json",
+    "config": {
+      "remote": "http://opa-host:8181/v1/data/example/authz",
+    }
+  }
+  "mutators": [
+    {
+      "handler": "noop"
+    }
+  ]
+}
+
+### Generated JSON Payload Example
+```shell
+{
+  "input": {
+    "user": "Subject",
+    "path": ["request","url","split","into","an","array"]
+    "method": "GET"
+  }
+}
+```
+
+### Expected JSON Response Example
+```shell
+{
+  "result": {
+    "allow": true
+  }
+}
+```

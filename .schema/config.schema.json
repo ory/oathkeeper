@@ -859,6 +859,26 @@
       ],
       "additionalProperties": false
     },
+    "configAuthorizersRemoteOPA": {
+      "type": "object",
+      "title": "Remote OPA Configuration",
+      "description": "This section is optional when the authorizer is disabled.",
+      "properties": {
+        "remote": {
+          "title": "Remote Authorizer URL",
+          "type": "string",
+          "format": "uri",
+          "description": "The URL of the policy document to query on the remote OPA authorizer. The authorizer will POST an input to the document containing the fields user (subject if present), method (HTTP method) and path (the HTTP request path as an array). The policy should return a variable called allow in it's result with a boolean value.\n\n>If this authorizer is enabled, this value is required.",
+          "examples": [
+            "http://opa-host:8181/v1/data/example/authz"
+          ]
+        }
+      },
+      "required": [
+        "remote"
+      ],
+      "additionalProperties": false
+    },
     "configMutatorsCookie": {
       "type": "object",
       "title": "Cookie Mutator Configuration",
@@ -1552,6 +1572,38 @@
                 },
                 "config": {
                   "$ref": "#/definitions/configAuthorizersRemoteJSON"
+                }
+              },
+              "required": [
+                "config"
+              ]
+            },
+            {
+              "properties": {
+                "enabled": {
+                  "const": false
+                }
+              }
+            }
+          ]
+        },
+        "remote_opa": {
+          "title": "Remote OPA",
+          "description": "The remote_opa authorizer",
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "$ref": "#/definitions/handlerSwitch"
+            }
+          },
+          "oneOf": [
+            {
+              "properties": {
+                "enabled": {
+                  "const": true
+                },
+                "config": {
+                  "$ref": "#/definitions/configAuthorizersRemoteOPA"
                 }
               },
               "required": [

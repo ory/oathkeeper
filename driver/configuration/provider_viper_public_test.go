@@ -354,6 +354,18 @@ func TestViperProvider(t *testing.T) {
 			assert.EqualValues(t, "https://host/path", config.Remote)
 			assert.EqualValues(t, "{}", config.Payload)
 		})
+
+		t.Run("authorizer=remote_opa", func(t *testing.T) {
+			a := authz.NewAuthorizerRemoteOPA(p)
+			assert.True(t, p.AuthorizerIsEnabled(a.GetID()))
+			require.NoError(t, a.Validate(nil))
+
+			config, err := a.Config(nil)
+			require.NoError(t, err)
+
+			assert.EqualValues(t, "http://opa-host:8181/v1/data/example/authz", config.Remote)
+		})
+
 	})
 
 	t.Run("group=mutators", func(t *testing.T) {

@@ -347,6 +347,7 @@ func (d *RequestHandler) InitializeAuthnSession(r *http.Request, rl *rule.Rule) 
 		session.MatchContext = authn.MatchContext{
 			RegexpCaptureGroups: values,
 			URL:                 r.URL,
+			Method:              r.Method,
 		}
 	}
 
