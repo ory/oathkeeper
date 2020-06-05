@@ -172,7 +172,7 @@ match:
 authenticators:
   - handler: noop
 authorizer:
-  - handler: allow
+  handler: allow
 mutators:
   - handler: noop
 errors:
