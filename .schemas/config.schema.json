@@ -1468,6 +1468,38 @@
               }
             }
           ]
+        },
+        "remote_opa": {
+          "title": "Remote OPA",
+          "description": "The remote_opa authorizer.",
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "$ref": "#/definitions/handlerSwitch"
+            }
+          },
+          "oneOf": [
+            {
+              "properties": {
+                "enabled": {
+                  "const": true
+                },
+                "config": {
+                  "$ref": "#/definitions/configAuthorizersRemoteOPA"
+                }
+              },
+              "required": [
+                "config"
+              ]
+            },
+            {
+              "properties": {
+                "enabled": {
+                  "const": false
+                }
+              }
+            }
+          ]
         }
       }
     },

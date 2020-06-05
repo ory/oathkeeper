@@ -367,6 +367,7 @@ func (r *RegistryMemory) prepareAuthz() {
 			authz.NewAuthorizerKetoEngineACPORY(r.c),
 			authz.NewAuthorizerRemote(r.c),
 			authz.NewAuthorizerRemoteJSON(r.c),
+			authz.NewAuthorizerRemoteOPA(r.c),
 		}
 
 		r.authorizers = map[string]authz.Authorizer{}

@@ -73,4 +73,9 @@ var (
 		CodeField:   http.StatusBadRequest,
 		StatusField: http.StatusText(http.StatusBadRequest),
 	}
+	ErrBadAuthorizerResponse = &herodot.DefaultError{
+		ErrorField:  "The response from the authorizer is malformed or contains invalid data",
+		CodeField:   http.StatusBadGateway,
+		StatusField: http.StatusText(http.StatusBadGateway),
+	}
 )

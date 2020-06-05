@@ -270,6 +270,14 @@ authorizers:
       remote: https://host/path
       payload: "{}"
 
+  # Configures the remote_opa authorizer
+  remote_opa:
+    # Set enabled to true if the authorizer should be enabled and false to disable the authorizer. Defaults to false.
+    enabled: true
+
+    config:
+      remote: http://opa-host:8181/v1/data/example/authz
+
 # All mutators can be configured under this configuration key
 mutators:
   header:
