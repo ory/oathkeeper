@@ -172,12 +172,13 @@
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-# [Unreleased](https://github.com/ory/oathkeeper/compare/v0.38.2-beta.1...739f179ca2ca9d8ca42ca1995b3febac322bbeb2) (2020-06-08)
+# [Unreleased](https://github.com/ory/oathkeeper/compare/v0.38.2-beta.1...3fce382e83c95049b561a97365d0b4cc2f73bc54) (2020-06-08)
 
 
 ### Bug Fixes
 
 * Resolve build issues and bump herodot ([f15e38d](https://github.com/ory/oathkeeper/commit/f15e38dc533010babd21aeaa91d48dd4abbbdddc))
+* Use ory-dev instead of swagutil ([#465](https://github.com/ory/oathkeeper/issues/465)) ([3fce382](https://github.com/ory/oathkeeper/commit/3fce382e83c95049b561a97365d0b4cc2f73bc54))
 
 
 ### Documentation
