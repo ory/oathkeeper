@@ -42,9 +42,9 @@ require (
 	github.com/ory/herodot v0.8.4
 	github.com/ory/jsonschema/v3 v3.0.1
 	github.com/ory/ladon v1.1.0
-	github.com/ory/sdk/swagutil v0.0.0-20200525104141-b009efcf4f04
+	github.com/ory/meta/tools/ory-dev v0.0.0-20200608154018-9d325ca2087d
 	github.com/ory/viper v1.7.5
-	github.com/ory/x v0.0.126
+	github.com/ory/x v0.0.128
 	github.com/pborman/uuid v1.2.0
 	github.com/phayes/freeport v0.0.0-20180830031419-95f893ade6f2
 	github.com/pkg/errors v0.9.1
