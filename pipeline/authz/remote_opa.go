@@ -2,7 +2,9 @@ package authz
 
 import (
 	"bytes"
+	"crypto/sha256"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strings"
 	"text/template"
@@ -20,7 +22,13 @@ import (
 
 // AuthorizerRemoteOPAConfiguration represents a configuration for the remote_opa authorizer.
 type AuthorizerRemoteOPAConfiguration struct {
-	Remote string `json:"remote"`
+	Remote  string `json:"remote"`
+	Payload string `json:"payload"`
+}
+
+// PayloadTemplateID returns a string with which to associate the payload template.
+func (c *AuthorizerRemoteOPAConfiguration) PayloadTemplateID() string {
+	return fmt.Sprintf("%x", sha256.Sum256([]byte(c.Payload)))
 }
 
 // AuthorizerRemoteOPA implements the Authorizer interface.
@@ -48,16 +56,6 @@ type OPAResponse struct {
 	Decision_id string
 }
 
-// OPA Policy Input
-type OPAInput struct {
-	User   string   `json:"user"`
-	Path   []string `json:"path"`
-	Method string   `json:"method"`
-}
-type OPARequest struct {
-	Input OPAInput `json:"input"`
-}
-
 // GetID implements the Authorizer interface.
 func (a *AuthorizerRemoteOPA) GetID() string {
 	return "remote_opa"
@@ -70,17 +68,37 @@ func (a *AuthorizerRemoteOPA) Authorize(_ *http.Request, session *authn.Authenti
 		return err
 	}
 
-	var opareq OPARequest
-	opareq.Input.User = session.Subject
-	opareq.Input.Method = session.MatchContext.Method
-	opareq.Input.Path = strings.Split(session.MatchContext.URL.Path, "/")[1:]
+	// Substitute the PathArray data structure into the payload if present in the payload template
+	if strings.Contains(c.Payload, "{{ .PathArray }}") {
+		b, err := json.Marshal(strings.Split(session.MatchContext.URL.Path, "/")[1:])
+		if err != nil {
+			return errors.WithStack(err)
+		}
+		c.Payload = strings.ReplaceAll(c.Payload, "{{ .PathArray }}", string(b))
+	}
 
-	b, err := json.Marshal(opareq)
-	if err != nil {
+	// Evaluate the remaining template items against the AuthenticationSession struct
+	templateID := c.PayloadTemplateID()
+	t := a.t.Lookup(templateID)
+	if t == nil {
+		var err error
+		t, err = a.t.New(templateID).Parse(c.Payload)
+		if err != nil {
+			return errors.WithStack(err)
+		}
+	}
+
+	var body bytes.Buffer
+	if err := t.Execute(&body, session); err != nil {
 		return errors.WithStack(err)
 	}
 
-	req, err := http.NewRequest("POST", c.Remote, bytes.NewBuffer(b))
+	var j json.RawMessage
+	if err := json.Unmarshal(body.Bytes(), &j); err != nil {
+		return errors.Wrap(err, "payload is not a JSON text")
+	}
+
+	req, err := http.NewRequest("POST", c.Remote, &body)
 	if err != nil {
 		return errors.WithStack(err)
 	}

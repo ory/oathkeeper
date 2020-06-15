@@ -872,10 +872,19 @@
           "examples": [
             "http://opa-host:8181/v1/data/example/authz"
           ]
+        },
+        "payload": {
+          "title": "JSON Payload",
+          "type": "string",
+          "description": "The JSON payload of the request sent to the remote authorizer. The string will be parsed by the Go text/template package and applied to an AuthenticationSession object after being pre-parsed to handle the parameter PathArray which will insert the HTTP request path as a JSON array.\n\n>If this authorizer is enabled, this value is required.",
+          "examples": [
+            "{\"input\":{\"user\":\"{{ .Subject }}\",\"path\":{{ .PathArray }},\"method\":\"{{ .MatchContext.Method }}\"}}"
+          ]
         }
       },
       "required": [
-        "remote"
+        "remote",
+        "payload"
       ],
       "additionalProperties": false
     },

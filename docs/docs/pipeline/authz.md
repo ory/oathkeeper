@@ -444,10 +444,13 @@ authorizers:
 
 This authorizer performs authorization against an OPA policy document using the API
 of a remote OPA instance. The authorizer makes a HTTP POST request to the OPA instance
-with a JSON formatted policy input containing the authenticated subject (if present),
-the HTTP method, and path of the request. The OPA API always returns a "200 OK" response
-code and a JSON formatted body containing a policy result specifying "allow" as either
-true or false.
+with a JSON formatted policy input generated from a template.
+
+The template is populated from the AuthenticationSession struct and an addition parameter
+PathArray that populates the path of the HTTP request as a JSON array.
+
+The OPA API always returns a "200 OK" response code and a JSON formatted body containing a
+policy result specifying "allow" as either true or false.
 
 If the "allow" value of the policy result is true then access is allowed, if it is false
 or undefined then access is denied. This authorizer is intended to be a drop-in alternative
@@ -467,12 +470,13 @@ See:
 ```yaml
 # Global configuration file oathkeeper.yml
 authorizers:
-  remote_json:
+  remote_opa:
     # Set enabled to "true" to enable the authenticator, and "false" to disable the authenticator. Defaults to "false".
     enabled: true
 
     config:
       remote: http://opa-host:8181/v1/data/example/authz
+      payload: "{\"input\":{\"user\":\"{{ .Subject }}\",\"path\":{{ .PathArray }},\"method\":\"{{ .MatchContext.Method }}\"}}"
 ```
 
 ```yaml
@@ -481,7 +485,7 @@ id: access-rule-1
 # match: ...
 # upstream: ...
 authorizers:
-  - handler: remote_json
+  - handler: remote_opa
     config:
       remote: http://opa-host:8181/v1/data/example/authz
 ```
@@ -503,7 +507,7 @@ authorizers:
     }
   ],
   "authorizer": {
-    "handler": "remote_json",
+    "handler": "remote_opa",
     "config": {
       "remote": "http://opa-host:8181/v1/data/example/authz",
     }
