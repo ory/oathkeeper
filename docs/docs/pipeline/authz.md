@@ -464,6 +464,8 @@ See:
 
 - `remote` (string, required) - The remote OPA policy document URL located
   under the /v1/data API path.
+- `payload` (string, required) - The payload template to populate and POST
+  to the remote OPA server. 
 
 #### Example
 
@@ -488,6 +490,7 @@ authorizers:
   - handler: remote_opa
     config:
       remote: http://opa-host:8181/v1/data/example/authz
+      payload: "{\"input\":{\"user\":\"{{ .Subject }}\",\"path\":{{ .PathArray }},\"method\":\"{{ .MatchContext.Method }}\"}}"
 ```
 
 ### Access Rule Example
@@ -510,6 +513,7 @@ authorizers:
     "handler": "remote_opa",
     "config": {
       "remote": "http://opa-host:8181/v1/data/example/authz",
+      "payload": "{\"input\":{\"user\":\"{{ .Subject }}\",\"path\":{{ .PathArray }},\"method\":\"{{ .MatchContext.Method }}\"}}"
     }
   }
   "mutators": [

@@ -277,6 +277,7 @@ authorizers:
 
     config:
       remote: http://opa-host:8181/v1/data/example/authz
+      payload: "{\"input\":{\"user\":\"{{ .Subject }}\",\"path\":{{ .PathArray }},\"method\":\"{{ .MatchContext.Method }}\"}}"
 
 # All mutators can be configured under this configuration key
 mutators:
