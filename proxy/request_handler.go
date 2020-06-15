@@ -229,6 +229,7 @@ func (d *RequestHandler) HandleRequest(r *http.Request, rl *rule.Rule) (session 
 					WithField("granted", false).
 					WithField("authentication_handler", a.Handler).
 					WithField("reason_id", "authentication_handler_error").
+					WithField("error_reason", err.(*herodot.DefaultError).ReasonField).
 					Warn("The authentication handler encountered an error")
 				return nil, err
 			}
