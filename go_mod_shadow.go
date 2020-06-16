@@ -17,5 +17,5 @@ import (
 
 	_ "github.com/gobuffalo/packr/v2"
 
-	_ "github.com/ory/meta/tools/ory-dev"
+	_ "github.com/ory/cli"
 )

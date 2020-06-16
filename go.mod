@@ -33,6 +33,7 @@ require (
 	github.com/mattn/goveralls v0.0.5
 	github.com/mitchellh/copystructure v1.0.0
 	github.com/ory/analytics-go/v4 v4.0.1
+	github.com/ory/cli v0.0.10
 	github.com/ory/fosite v0.29.2
 	github.com/ory/go-acc v0.2.3
 	github.com/ory/go-convenience v0.1.0
@@ -41,7 +42,6 @@ require (
 	github.com/ory/herodot v0.8.4
 	github.com/ory/jsonschema/v3 v3.0.1
 	github.com/ory/ladon v1.1.0
-	github.com/ory/meta/tools/ory-dev v0.0.0-20200608154018-9d325ca2087d
 	github.com/ory/viper v1.7.5
 	github.com/ory/x v0.0.128
 	github.com/pborman/uuid v1.2.0
@@ -51,6 +51,7 @@ require (
 	github.com/rs/cors v1.6.0
 	github.com/sirupsen/logrus v1.6.0
 	github.com/spf13/cobra v1.0.0
+	github.com/spf13/viper v1.7.0 // indirect
 	github.com/sqs/goreturns v0.0.0-20181028201513-538ac6014518
 	github.com/square/go-jose v2.3.1+incompatible
 	github.com/stretchr/testify v1.5.1
