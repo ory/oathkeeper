@@ -2,6 +2,7 @@ package metrics
 
 import (
 	"net/http"
+	"strings"
 	"sync"
 	"time"
 
@@ -27,24 +28,26 @@ func (rc *realClock) Since(t time.Time) time.Duration {
 type Middleware struct {
 	// Name is the name of the application as recorded in latency metrics
 	Name string
-	// Promtheus repository
+	// Prometheus repository
 	Prometheus *PrometheusRepository
 
 	clock timer
 
 	// Silence metrics for specific URL paths
 	// it is protected by the mutex
-	mutex        sync.RWMutex
-	silencePaths map[string]bool
+	mutex         sync.RWMutex
+	silencePaths  map[string]bool
+	collapsePaths bool
 }
 
 // NewMiddleware returns a new *Middleware, yay!
 func NewMiddleware(prom *PrometheusRepository, name string) *Middleware {
 	return &Middleware{
-		Name:         name,
-		Prometheus:   prom,
-		clock:        &realClock{},
-		silencePaths: map[string]bool{},
+		Name:          name,
+		Prometheus:    prom,
+		clock:         &realClock{},
+		silencePaths:  map[string]bool{},
+		collapsePaths: true,
 	}
 }
 
@@ -58,6 +61,28 @@ func (m *Middleware) ExcludePaths(paths ...string) *Middleware {
 	return m
 }
 
+// CollapsePaths if set to true, forces the value of the "request" label
+// of the prometheus request metrics to be collapsed to the first context path segment only.
+// eg. (when set to true):
+//    - /decisions/service/my-service -> /decisions
+//    - /decisions -> /decisions
+func (m *Middleware) CollapsePaths(flag bool) *Middleware {
+	m.mutex.Lock()
+	m.collapsePaths = flag
+	m.mutex.Unlock()
+	return m
+}
+
+func (m *Middleware) getFirstPathSegment(requestURI string) string {
+	// Will split /my/example/uri in []string{"", "my", "example/uri"}
+	uriSegments := strings.SplitN(requestURI, "/", 3)
+	if len(uriSegments) > 1 {
+		return "/" + uriSegments[1]
+	}
+	return "/"
+
+}
+
 func (m *Middleware) ServeHTTP(rw http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
 	start := m.clock.Now()
 	next(rw, r)
@@ -65,7 +90,11 @@ func (m *Middleware) ServeHTTP(rw http.ResponseWriter, r *http.Request, next htt
 	res := rw.(negroni.ResponseWriter)
 
 	if _, silent := m.silencePaths[r.URL.Path]; !silent {
-		m.Prometheus.RequestDurationObserve(m.Name, r.RequestURI, r.Method, res.Status())(float64(latency.Seconds()))
-		m.Prometheus.UpdateRequest(m.Name, r.RequestURI, r.Method, res.Status())
+		requestURI := r.RequestURI
+		if m.collapsePaths {
+			requestURI = m.getFirstPathSegment(requestURI)
+		}
+		m.Prometheus.RequestDurationObserve(m.Name, requestURI, r.Method, res.Status())(float64(latency.Seconds()))
+		m.Prometheus.UpdateRequest(m.Name, requestURI, r.Method, res.Status())
 	}
 }

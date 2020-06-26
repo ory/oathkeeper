@@ -1098,6 +1098,12 @@
               "default": "/metrics",
               "title": "Path",
               "description": "The path to provide metrics on"
+            },
+            "collapse_request_paths": {
+              "type": "boolean",
+              "default": true,
+              "title": "CollapsePaths",
+              "description": "When set to true the request label will include just the first segment of the request path"
             }
           }
         }
