@@ -4,33 +4,34 @@
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 **Table of Contents**
 
-- [Unreleased (2020-06-16)](#unreleased-2020-06-16)
+- [Unreleased (2020-06-26)](#unreleased-2020-06-26)
     - [Bug Fixes](#bug-fixes)
     - [Documentation](#documentation)
+    - [Features](#features)
   - [0.38.2-beta.1 (2020-05-25)](#0382-beta1-2020-05-25)
     - [Bug Fixes](#bug-fixes-1)
     - [Documentation](#documentation-1)
-    - [Features](#features)
+    - [Features](#features-1)
   - [0.38.1-beta.1 (2020-05-08)](#0381-beta1-2020-05-08)
     - [Bug Fixes](#bug-fixes-2)
 - [0.38.0-beta.2 (2020-05-07)](#0380-beta2-2020-05-07)
     - [Bug Fixes](#bug-fixes-3)
     - [Code Refactoring](#code-refactoring)
     - [Documentation](#documentation-2)
-    - [Features](#features-1)
+    - [Features](#features-2)
   - [0.37.1-beta.1 (2020-04-03)](#0371-beta1-2020-04-03)
     - [Documentation](#documentation-3)
 - [0.37.0-beta.1 (2020-04-02)](#0370-beta1-2020-04-02)
     - [Bug Fixes](#bug-fixes-4)
     - [Documentation](#documentation-4)
-    - [Features](#features-2)
+    - [Features](#features-3)
     - [BREAKING CHANGES](#breaking-changes)
 - [0.36.0-beta.4 (2020-02-14)](#0360-beta4-2020-02-14)
     - [Bug Fixes](#bug-fixes-5)
     - [Documentation](#documentation-5)
 - [0.36.0-beta.1 (2020-02-05)](#0360-beta1-2020-02-05)
     - [Documentation](#documentation-6)
-    - [Features](#features-3)
+    - [Features](#features-4)
     - [Unclassified](#unclassified)
   - [0.35.5-beta.2 (2020-01-31)](#0355-beta2-2020-01-31)
     - [Unclassified](#unclassified-1)
@@ -172,7 +173,7 @@
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-# [Unreleased](https://github.com/ory/oathkeeper/compare/v0.38.2-beta.1...3fce382e83c95049b561a97365d0b4cc2f73bc54) (2020-06-16)
+# [Unreleased](https://github.com/ory/oathkeeper/compare/v0.38.2-beta.1...ddcb2262e6edc417c69bf2d713fa67f235481d32) (2020-06-26)
 
 
 ### Bug Fixes
@@ -190,6 +191,11 @@
 * Update repository templates ([7af8749](https://github.com/ory/oathkeeper/commit/7af8749e949c48f5750950def62290f2694e1b09))
 * Use central banner repo for README ([04fe00c](https://github.com/ory/oathkeeper/commit/04fe00c0cd92c717ea2dc4149450f07206306f51))
 * Use mdx for api reference ([368f073](https://github.com/ory/oathkeeper/commit/368f073a2d91b4fc9677436bcec63c6f339b0c93))
+
+
+### Features
+
+* Improve configurability of prometheus metrics ([#450](https://github.com/ory/oathkeeper/issues/450)) ([ddcb226](https://github.com/ory/oathkeeper/commit/ddcb2262e6edc417c69bf2d713fa67f235481d32)), closes [#446](https://github.com/ory/oathkeeper/issues/446)
 
 
 
