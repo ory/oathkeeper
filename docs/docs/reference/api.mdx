@@ -7,17 +7,24 @@ ORY Oathkeeper is a reverse proxy that checks the HTTP Authorization for
 validity against a set of rules. This service uses Hydra to validate access
 tokens and policies.
 
-> You are viewing REST API documentation. This documentation is auto-generated
-> from a swagger specification which itself is generated from annotations in the
-> source code of the project. It is possible that this documentation includes
-> bugs and that code samples are incomplete or wrong.
->
-> If you find issues in the respective documentation, please do not edit the
-> Markdown files directly (as they are generated) but raise an issue on the
-> project's GitHub presence instead. This documentation will improve over time
-> with your help! If you have ideas how to improve this part of the
-> documentation, feel free to share them in a
-> [GitHub issue](https://github.com/ory/docs/issues/new) any time.
+import Tabs from '@theme/Tabs'
+import TabItem from '@theme/TabItem'
+
+:::info
+
+You are viewing REST API documentation. This documentation is auto-generated
+from a swagger specification which itself is generated from annotations in the
+source code of the project. It is possible that this documentation includes bugs
+and that code samples are incomplete or wrong.
+
+If you find issues in the respective documentation, please do not edit the
+Markdown files directly (as they are generated) but raise an issue on the
+project's GitHub presence instead. This documentation will improve over time
+with your help! If you have ideas how to improve this part of the documentation,
+feel free to share them in a
+[GitHub issue](https://github.com/ory/docs/issues/new) any time.
+
+:::
 
 <a id="ory-oathkeeper-api"></a>
 
@@ -48,7 +55,6 @@ verify signatures of ID Tokens.
 | 500    | [Internal Server Error](https://tools.ietf.org/html/rfc7231#section-6.6.1) | The standard error format | Inline                                |
 
 <a id="lists-cryptographic-keys-responseschema"></a>
-
 ##### Response Schema
 
 Status Code **500**
@@ -92,33 +98,22 @@ Status Code **500**
 }
 ```
 
-<aside class="success">
-This operation does not require authentication
-</aside>
+<aside class="success">This operation does not require authentication</aside>
 
 #### Code samples
 
-<div class="tabs" id="tab-getWellKnownJSONWebKeys">
-<nav class="tabs-nav">
-<ul class="nav nav-tabs au-link-list au-link-list--inline">
-<li class="nav-item"><a class="nav-link active" role="tab" href="#tab-getWellKnownJSONWebKeys-shell">Shell</a></li>
-<li class="nav-item"><a class="nav-link" role="tab" href="#tab-getWellKnownJSONWebKeys-go">Go</a></li>
-<li class="nav-item"><a class="nav-link" role="tab" href="#tab-getWellKnownJSONWebKeys-node">Node.js</a></li>
-<li class="nav-item"><a class="nav-link" role="tab" href="#tab-getWellKnownJSONWebKeys-java">Java</a></li>
-<li class="nav-item"><a class="nav-link" role="tab" href="#tab-getWellKnownJSONWebKeys-python">Python</a></li>
-<li class="nav-item"><a class="nav-link" role="tab" href="#tab-getWellKnownJSONWebKeys-ruby">Ruby</a></li>
-</ul>
-</nav>
-<div class="tab-content">
-<div class="tab-pane active" role="tabpanel" id="tab-getWellKnownJSONWebKeys-shell">
+<Tabs groupId="code-samples" defaultValue="shell"
+  values={[{label: 'Shell', value: 'shell'}, {label: 'Go', value: 'go'}, {label: 'Node', value: 'node'},
+    {label: 'Java', value: 'java'}, {label: 'Python', value: 'python'}, {label: 'Ruby', value: 'ruby'}]}>
+<TabItem value="shell">
 
 ```shell
 curl -X GET /.well-known/jwks.json \
   -H 'Accept: application/json'
 ```
 
-</div>
-<div class="tab-pane" role="tabpanel"  id="tab-getWellKnownJSONWebKeys-go">
+</TabItem>
+<TabItem value="go">
 
 ```go
 package main
@@ -145,28 +140,28 @@ func main() {
 }
 ```
 
-</div>
-<div class="tab-pane" role="tabpanel"  id="tab-getWellKnownJSONWebKeys-node">
+</TabItem>
+<TabItem value="node">
 
-```nodejs
-const fetch = require('node-fetch');
+```javascript
+const fetch = require('node-fetch')
 
 const headers = {
-  'Accept': 'application/json'
+  Accept: 'application/json'
 }
 
 fetch('/.well-known/jwks.json', {
   method: 'GET',
   headers
 })
-.then(r => r.json())
-.then((body) => {
+  .then((r) => r.json())
+  .then((body) => {
     console.log(body)
-})
+  })
 ```
 
-</div>
-<div class="tab-pane" role="tabpanel"  id="tab-getWellKnownJSONWebKeys-java">
+</TabItem>
+<TabItem value="java">
 
 ```java
 // This sample needs improvement.
@@ -191,8 +186,8 @@ in.close();
 System.out.println(response.toString());
 ```
 
-</div>
-<div class="tab-pane" role="tabpanel"  id="tab-getWellKnownJSONWebKeys-python">
+</TabItem>
+<TabItem value="python">
 
 ```python
 import requests
@@ -209,8 +204,8 @@ r = requests.get(
 print r.json()
 ```
 
-</div>
-<div class="tab-pane" role="tabpanel"  id="tab-getWellKnownJSONWebKeys-ruby">
+</TabItem>
+<TabItem value="ruby">
 
 ```ruby
 require 'rest-client'
@@ -226,9 +221,8 @@ result = RestClient.get '/.well-known/jwks.json',
 p JSON.parse(result)
 ```
 
-</div>
-</div>
-</div>
+</TabItem>
+</Tabs>
 
 <a id="opIddecisions"></a>
 
@@ -264,7 +258,6 @@ Ambassador, Kong, Envoy, and many more.
 | 500    | [Internal Server Error](https://tools.ietf.org/html/rfc7231#section-6.6.1) | The standard error format | Inline |
 
 <a id="access-control-decision-api-responseschema"></a>
-
 ##### Response Schema
 
 Status Code **401**
@@ -326,33 +319,22 @@ Status Code **500**
 }
 ```
 
-<aside class="success">
-This operation does not require authentication
-</aside>
+<aside class="success">This operation does not require authentication</aside>
 
 #### Code samples
 
-<div class="tabs" id="tab-decisions">
-<nav class="tabs-nav">
-<ul class="nav nav-tabs au-link-list au-link-list--inline">
-<li class="nav-item"><a class="nav-link active" role="tab" href="#tab-decisions-shell">Shell</a></li>
-<li class="nav-item"><a class="nav-link" role="tab" href="#tab-decisions-go">Go</a></li>
-<li class="nav-item"><a class="nav-link" role="tab" href="#tab-decisions-node">Node.js</a></li>
-<li class="nav-item"><a class="nav-link" role="tab" href="#tab-decisions-java">Java</a></li>
-<li class="nav-item"><a class="nav-link" role="tab" href="#tab-decisions-python">Python</a></li>
-<li class="nav-item"><a class="nav-link" role="tab" href="#tab-decisions-ruby">Ruby</a></li>
-</ul>
-</nav>
-<div class="tab-content">
-<div class="tab-pane active" role="tabpanel" id="tab-decisions-shell">
+<Tabs groupId="code-samples" defaultValue="shell"
+  values={[{label: 'Shell', value: 'shell'}, {label: 'Go', value: 'go'}, {label: 'Node', value: 'node'},
+    {label: 'Java', value: 'java'}, {label: 'Python', value: 'python'}, {label: 'Ruby', value: 'ruby'}]}>
+<TabItem value="shell">
 
 ```shell
 curl -X GET /decisions \
   -H 'Accept: application/json'
 ```
 
-</div>
-<div class="tab-pane" role="tabpanel"  id="tab-decisions-go">
+</TabItem>
+<TabItem value="go">
 
 ```go
 package main
@@ -379,28 +361,28 @@ func main() {
 }
 ```
 
-</div>
-<div class="tab-pane" role="tabpanel"  id="tab-decisions-node">
+</TabItem>
+<TabItem value="node">
 
-```nodejs
-const fetch = require('node-fetch');
+```javascript
+const fetch = require('node-fetch')
 
 const headers = {
-  'Accept': 'application/json'
+  Accept: 'application/json'
 }
 
 fetch('/decisions', {
   method: 'GET',
   headers
 })
-.then(r => r.json())
-.then((body) => {
+  .then((r) => r.json())
+  .then((body) => {
     console.log(body)
-})
+  })
 ```
 
-</div>
-<div class="tab-pane" role="tabpanel"  id="tab-decisions-java">
+</TabItem>
+<TabItem value="java">
 
 ```java
 // This sample needs improvement.
@@ -425,8 +407,8 @@ in.close();
 System.out.println(response.toString());
 ```
 
-</div>
-<div class="tab-pane" role="tabpanel"  id="tab-decisions-python">
+</TabItem>
+<TabItem value="python">
 
 ```python
 import requests
@@ -443,8 +425,8 @@ r = requests.get(
 print r.json()
 ```
 
-</div>
-<div class="tab-pane" role="tabpanel"  id="tab-decisions-ruby">
+</TabItem>
+<TabItem value="ruby">
 
 ```ruby
 require 'rest-client'
@@ -460,9 +442,8 @@ result = RestClient.get '/decisions',
 p JSON.parse(result)
 ```
 
-</div>
-</div>
-</div>
+</TabItem>
+</Tabs>
 
 <a id="opIdlistRules"></a>
 
@@ -480,7 +461,7 @@ place.
 
 <a id="list-all-rules-parameters"></a>
 
-##### Parameters
+#### Parameters
 
 | Parameter | In    | Type           | Required | Description                             |
 | --------- | ----- | -------------- | -------- | --------------------------------------- |
@@ -499,7 +480,6 @@ place.
 | 500    | [Internal Server Error](https://tools.ietf.org/html/rfc7231#section-6.6.1) | The standard error format | Inline |
 
 <a id="list-all-rules-responseschema"></a>
-
 ##### Response Schema
 
 Status Code **200**
@@ -572,33 +552,22 @@ Status Code **500**
 ]
 ```
 
-<aside class="success">
-This operation does not require authentication
-</aside>
+<aside class="success">This operation does not require authentication</aside>
 
 #### Code samples
 
-<div class="tabs" id="tab-listRules">
-<nav class="tabs-nav">
-<ul class="nav nav-tabs au-link-list au-link-list--inline">
-<li class="nav-item"><a class="nav-link active" role="tab" href="#tab-listRules-shell">Shell</a></li>
-<li class="nav-item"><a class="nav-link" role="tab" href="#tab-listRules-go">Go</a></li>
-<li class="nav-item"><a class="nav-link" role="tab" href="#tab-listRules-node">Node.js</a></li>
-<li class="nav-item"><a class="nav-link" role="tab" href="#tab-listRules-java">Java</a></li>
-<li class="nav-item"><a class="nav-link" role="tab" href="#tab-listRules-python">Python</a></li>
-<li class="nav-item"><a class="nav-link" role="tab" href="#tab-listRules-ruby">Ruby</a></li>
-</ul>
-</nav>
-<div class="tab-content">
-<div class="tab-pane active" role="tabpanel" id="tab-listRules-shell">
+<Tabs groupId="code-samples" defaultValue="shell"
+  values={[{label: 'Shell', value: 'shell'}, {label: 'Go', value: 'go'}, {label: 'Node', value: 'node'},
+    {label: 'Java', value: 'java'}, {label: 'Python', value: 'python'}, {label: 'Ruby', value: 'ruby'}]}>
+<TabItem value="shell">
 
 ```shell
 curl -X GET /rules \
   -H 'Accept: application/json'
 ```
 
-</div>
-<div class="tab-pane" role="tabpanel"  id="tab-listRules-go">
+</TabItem>
+<TabItem value="go">
 
 ```go
 package main
@@ -625,28 +594,28 @@ func main() {
 }
 ```
 
-</div>
-<div class="tab-pane" role="tabpanel"  id="tab-listRules-node">
+</TabItem>
+<TabItem value="node">
 
-```nodejs
-const fetch = require('node-fetch');
+```javascript
+const fetch = require('node-fetch')
 
 const headers = {
-  'Accept': 'application/json'
+  Accept: 'application/json'
 }
 
 fetch('/rules', {
   method: 'GET',
   headers
 })
-.then(r => r.json())
-.then((body) => {
+  .then((r) => r.json())
+  .then((body) => {
     console.log(body)
-})
+  })
 ```
 
-</div>
-<div class="tab-pane" role="tabpanel"  id="tab-listRules-java">
+</TabItem>
+<TabItem value="java">
 
 ```java
 // This sample needs improvement.
@@ -671,8 +640,8 @@ in.close();
 System.out.println(response.toString());
 ```
 
-</div>
-<div class="tab-pane" role="tabpanel"  id="tab-listRules-python">
+</TabItem>
+<TabItem value="python">
 
 ```python
 import requests
@@ -689,8 +658,8 @@ r = requests.get(
 print r.json()
 ```
 
-</div>
-<div class="tab-pane" role="tabpanel"  id="tab-listRules-ruby">
+</TabItem>
+<TabItem value="ruby">
 
 ```ruby
 require 'rest-client'
@@ -706,9 +675,8 @@ result = RestClient.get '/rules',
 p JSON.parse(result)
 ```
 
-</div>
-</div>
-</div>
+</TabItem>
+</Tabs>
 
 <a id="opIdgetRule"></a>
 
@@ -725,7 +693,7 @@ will receive a 404 error.
 
 <a id="retrieve-a-rule-parameters"></a>
 
-##### Parameters
+#### Parameters
 
 | Parameter | In   | Type   | Required | Description |
 | --------- | ---- | ------ | -------- | ----------- |
@@ -744,7 +712,6 @@ will receive a 404 error.
 | 500    | [Internal Server Error](https://tools.ietf.org/html/rfc7231#section-6.6.1) | The standard error format | Inline              |
 
 <a id="retrieve-a-rule-responseschema"></a>
-
 ##### Response Schema
 
 Status Code **404**
@@ -805,33 +772,22 @@ Status Code **500**
 }
 ```
 
-<aside class="success">
-This operation does not require authentication
-</aside>
+<aside class="success">This operation does not require authentication</aside>
 
 #### Code samples
 
-<div class="tabs" id="tab-getRule">
-<nav class="tabs-nav">
-<ul class="nav nav-tabs au-link-list au-link-list--inline">
-<li class="nav-item"><a class="nav-link active" role="tab" href="#tab-getRule-shell">Shell</a></li>
-<li class="nav-item"><a class="nav-link" role="tab" href="#tab-getRule-go">Go</a></li>
-<li class="nav-item"><a class="nav-link" role="tab" href="#tab-getRule-node">Node.js</a></li>
-<li class="nav-item"><a class="nav-link" role="tab" href="#tab-getRule-java">Java</a></li>
-<li class="nav-item"><a class="nav-link" role="tab" href="#tab-getRule-python">Python</a></li>
-<li class="nav-item"><a class="nav-link" role="tab" href="#tab-getRule-ruby">Ruby</a></li>
-</ul>
-</nav>
-<div class="tab-content">
-<div class="tab-pane active" role="tabpanel" id="tab-getRule-shell">
+<Tabs groupId="code-samples" defaultValue="shell"
+  values={[{label: 'Shell', value: 'shell'}, {label: 'Go', value: 'go'}, {label: 'Node', value: 'node'},
+    {label: 'Java', value: 'java'}, {label: 'Python', value: 'python'}, {label: 'Ruby', value: 'ruby'}]}>
+<TabItem value="shell">
 
 ```shell
 curl -X GET /rules/{id} \
   -H 'Accept: application/json'
 ```
 
-</div>
-<div class="tab-pane" role="tabpanel"  id="tab-getRule-go">
+</TabItem>
+<TabItem value="go">
 
 ```go
 package main
@@ -858,28 +814,28 @@ func main() {
 }
 ```
 
-</div>
-<div class="tab-pane" role="tabpanel"  id="tab-getRule-node">
+</TabItem>
+<TabItem value="node">
 
-```nodejs
-const fetch = require('node-fetch');
+```javascript
+const fetch = require('node-fetch')
 
 const headers = {
-  'Accept': 'application/json'
+  Accept: 'application/json'
 }
 
 fetch('/rules/{id}', {
   method: 'GET',
   headers
 })
-.then(r => r.json())
-.then((body) => {
+  .then((r) => r.json())
+  .then((body) => {
     console.log(body)
-})
+  })
 ```
 
-</div>
-<div class="tab-pane" role="tabpanel"  id="tab-getRule-java">
+</TabItem>
+<TabItem value="java">
 
 ```java
 // This sample needs improvement.
@@ -904,8 +860,8 @@ in.close();
 System.out.println(response.toString());
 ```
 
-</div>
-<div class="tab-pane" role="tabpanel"  id="tab-getRule-python">
+</TabItem>
+<TabItem value="python">
 
 ```python
 import requests
@@ -922,8 +878,8 @@ r = requests.get(
 print r.json()
 ```
 
-</div>
-<div class="tab-pane" role="tabpanel"  id="tab-getRule-ruby">
+</TabItem>
+<TabItem value="ruby">
 
 ```ruby
 require 'rest-client'
@@ -939,9 +895,8 @@ result = RestClient.get '/rules/{id}',
 p JSON.parse(result)
 ```
 
-</div>
-</div>
-</div>
+</TabItem>
+</Tabs>
 
 <a id="ory-oathkeeper-health"></a>
 
@@ -979,7 +934,6 @@ status will never refer to the cluster state, only to a single instance.
 | 500    | [Internal Server Error](https://tools.ietf.org/html/rfc7231#section-6.6.1) | The standard error format | Inline                              |
 
 <a id="check-alive-status-responseschema"></a>
-
 ##### Response Schema
 
 Status Code **500**
@@ -1003,33 +957,22 @@ Status Code **500**
 }
 ```
 
-<aside class="success">
-This operation does not require authentication
-</aside>
+<aside class="success">This operation does not require authentication</aside>
 
 #### Code samples
 
-<div class="tabs" id="tab-isInstanceAlive">
-<nav class="tabs-nav">
-<ul class="nav nav-tabs au-link-list au-link-list--inline">
-<li class="nav-item"><a class="nav-link active" role="tab" href="#tab-isInstanceAlive-shell">Shell</a></li>
-<li class="nav-item"><a class="nav-link" role="tab" href="#tab-isInstanceAlive-go">Go</a></li>
-<li class="nav-item"><a class="nav-link" role="tab" href="#tab-isInstanceAlive-node">Node.js</a></li>
-<li class="nav-item"><a class="nav-link" role="tab" href="#tab-isInstanceAlive-java">Java</a></li>
-<li class="nav-item"><a class="nav-link" role="tab" href="#tab-isInstanceAlive-python">Python</a></li>
-<li class="nav-item"><a class="nav-link" role="tab" href="#tab-isInstanceAlive-ruby">Ruby</a></li>
-</ul>
-</nav>
-<div class="tab-content">
-<div class="tab-pane active" role="tabpanel" id="tab-isInstanceAlive-shell">
+<Tabs groupId="code-samples" defaultValue="shell"
+  values={[{label: 'Shell', value: 'shell'}, {label: 'Go', value: 'go'}, {label: 'Node', value: 'node'},
+    {label: 'Java', value: 'java'}, {label: 'Python', value: 'python'}, {label: 'Ruby', value: 'ruby'}]}>
+<TabItem value="shell">
 
 ```shell
 curl -X GET /health/alive \
   -H 'Accept: application/json'
 ```
 
-</div>
-<div class="tab-pane" role="tabpanel"  id="tab-isInstanceAlive-go">
+</TabItem>
+<TabItem value="go">
 
 ```go
 package main
@@ -1056,28 +999,28 @@ func main() {
 }
 ```
 
-</div>
-<div class="tab-pane" role="tabpanel"  id="tab-isInstanceAlive-node">
+</TabItem>
+<TabItem value="node">
 
-```nodejs
-const fetch = require('node-fetch');
+```javascript
+const fetch = require('node-fetch')
 
 const headers = {
-  'Accept': 'application/json'
+  Accept: 'application/json'
 }
 
 fetch('/health/alive', {
   method: 'GET',
   headers
 })
-.then(r => r.json())
-.then((body) => {
+  .then((r) => r.json())
+  .then((body) => {
     console.log(body)
-})
+  })
 ```
 
-</div>
-<div class="tab-pane" role="tabpanel"  id="tab-isInstanceAlive-java">
+</TabItem>
+<TabItem value="java">
 
 ```java
 // This sample needs improvement.
@@ -1102,8 +1045,8 @@ in.close();
 System.out.println(response.toString());
 ```
 
-</div>
-<div class="tab-pane" role="tabpanel"  id="tab-isInstanceAlive-python">
+</TabItem>
+<TabItem value="python">
 
 ```python
 import requests
@@ -1120,8 +1063,8 @@ r = requests.get(
 print r.json()
 ```
 
-</div>
-<div class="tab-pane" role="tabpanel"  id="tab-isInstanceAlive-ruby">
+</TabItem>
+<TabItem value="ruby">
 
 ```ruby
 require 'rest-client'
@@ -1137,9 +1080,8 @@ result = RestClient.get '/health/alive',
 p JSON.parse(result)
 ```
 
-</div>
-</div>
-</div>
+</TabItem>
+</Tabs>
 
 <a id="opIdisInstanceReady"></a>
 
@@ -1181,33 +1123,22 @@ status will never refer to the cluster state, only to a single instance.
 }
 ```
 
-<aside class="success">
-This operation does not require authentication
-</aside>
+<aside class="success">This operation does not require authentication</aside>
 
 #### Code samples
 
-<div class="tabs" id="tab-isInstanceReady">
-<nav class="tabs-nav">
-<ul class="nav nav-tabs au-link-list au-link-list--inline">
-<li class="nav-item"><a class="nav-link active" role="tab" href="#tab-isInstanceReady-shell">Shell</a></li>
-<li class="nav-item"><a class="nav-link" role="tab" href="#tab-isInstanceReady-go">Go</a></li>
-<li class="nav-item"><a class="nav-link" role="tab" href="#tab-isInstanceReady-node">Node.js</a></li>
-<li class="nav-item"><a class="nav-link" role="tab" href="#tab-isInstanceReady-java">Java</a></li>
-<li class="nav-item"><a class="nav-link" role="tab" href="#tab-isInstanceReady-python">Python</a></li>
-<li class="nav-item"><a class="nav-link" role="tab" href="#tab-isInstanceReady-ruby">Ruby</a></li>
-</ul>
-</nav>
-<div class="tab-content">
-<div class="tab-pane active" role="tabpanel" id="tab-isInstanceReady-shell">
+<Tabs groupId="code-samples" defaultValue="shell"
+  values={[{label: 'Shell', value: 'shell'}, {label: 'Go', value: 'go'}, {label: 'Node', value: 'node'},
+    {label: 'Java', value: 'java'}, {label: 'Python', value: 'python'}, {label: 'Ruby', value: 'ruby'}]}>
+<TabItem value="shell">
 
 ```shell
 curl -X GET /health/ready \
   -H 'Accept: application/json'
 ```
 
-</div>
-<div class="tab-pane" role="tabpanel"  id="tab-isInstanceReady-go">
+</TabItem>
+<TabItem value="go">
 
 ```go
 package main
@@ -1234,28 +1165,28 @@ func main() {
 }
 ```
 
-</div>
-<div class="tab-pane" role="tabpanel"  id="tab-isInstanceReady-node">
+</TabItem>
+<TabItem value="node">
 
-```nodejs
-const fetch = require('node-fetch');
+```javascript
+const fetch = require('node-fetch')
 
 const headers = {
-  'Accept': 'application/json'
+  Accept: 'application/json'
 }
 
 fetch('/health/ready', {
   method: 'GET',
   headers
 })
-.then(r => r.json())
-.then((body) => {
+  .then((r) => r.json())
+  .then((body) => {
     console.log(body)
-})
+  })
 ```
 
-</div>
-<div class="tab-pane" role="tabpanel"  id="tab-isInstanceReady-java">
+</TabItem>
+<TabItem value="java">
 
 ```java
 // This sample needs improvement.
@@ -1280,8 +1211,8 @@ in.close();
 System.out.println(response.toString());
 ```
 
-</div>
-<div class="tab-pane" role="tabpanel"  id="tab-isInstanceReady-python">
+</TabItem>
+<TabItem value="python">
 
 ```python
 import requests
@@ -1298,8 +1229,8 @@ r = requests.get(
 print r.json()
 ```
 
-</div>
-<div class="tab-pane" role="tabpanel"  id="tab-isInstanceReady-ruby">
+</TabItem>
+<TabItem value="ruby">
 
 ```ruby
 require 'rest-client'
@@ -1315,9 +1246,8 @@ result = RestClient.get '/health/ready',
 p JSON.parse(result)
 ```
 
-</div>
-</div>
-</div>
+</TabItem>
+</Tabs>
 
 <a id="ory-oathkeeper-version"></a>
 
@@ -1362,33 +1292,22 @@ status will never refer to the cluster state, only to a single instance.
 }
 ```
 
-<aside class="success">
-This operation does not require authentication
-</aside>
+<aside class="success">This operation does not require authentication</aside>
 
 #### Code samples
 
-<div class="tabs" id="tab-getVersion">
-<nav class="tabs-nav">
-<ul class="nav nav-tabs au-link-list au-link-list--inline">
-<li class="nav-item"><a class="nav-link active" role="tab" href="#tab-getVersion-shell">Shell</a></li>
-<li class="nav-item"><a class="nav-link" role="tab" href="#tab-getVersion-go">Go</a></li>
-<li class="nav-item"><a class="nav-link" role="tab" href="#tab-getVersion-node">Node.js</a></li>
-<li class="nav-item"><a class="nav-link" role="tab" href="#tab-getVersion-java">Java</a></li>
-<li class="nav-item"><a class="nav-link" role="tab" href="#tab-getVersion-python">Python</a></li>
-<li class="nav-item"><a class="nav-link" role="tab" href="#tab-getVersion-ruby">Ruby</a></li>
-</ul>
-</nav>
-<div class="tab-content">
-<div class="tab-pane active" role="tabpanel" id="tab-getVersion-shell">
+<Tabs groupId="code-samples" defaultValue="shell"
+  values={[{label: 'Shell', value: 'shell'}, {label: 'Go', value: 'go'}, {label: 'Node', value: 'node'},
+    {label: 'Java', value: 'java'}, {label: 'Python', value: 'python'}, {label: 'Ruby', value: 'ruby'}]}>
+<TabItem value="shell">
 
 ```shell
 curl -X GET /version \
   -H 'Accept: application/json'
 ```
 
-</div>
-<div class="tab-pane" role="tabpanel"  id="tab-getVersion-go">
+</TabItem>
+<TabItem value="go">
 
 ```go
 package main
@@ -1415,28 +1334,28 @@ func main() {
 }
 ```
 
-</div>
-<div class="tab-pane" role="tabpanel"  id="tab-getVersion-node">
+</TabItem>
+<TabItem value="node">
 
-```nodejs
-const fetch = require('node-fetch');
+```javascript
+const fetch = require('node-fetch')
 
 const headers = {
-  'Accept': 'application/json'
+  Accept: 'application/json'
 }
 
 fetch('/version', {
   method: 'GET',
   headers
 })
-.then(r => r.json())
-.then((body) => {
+  .then((r) => r.json())
+  .then((body) => {
     console.log(body)
-})
+  })
 ```
 
-</div>
-<div class="tab-pane" role="tabpanel"  id="tab-getVersion-java">
+</TabItem>
+<TabItem value="java">
 
 ```java
 // This sample needs improvement.
@@ -1461,8 +1380,8 @@ in.close();
 System.out.println(response.toString());
 ```
 
-</div>
-<div class="tab-pane" role="tabpanel"  id="tab-getVersion-python">
+</TabItem>
+<TabItem value="python">
 
 ```python
 import requests
@@ -1479,8 +1398,8 @@ r = requests.get(
 print r.json()
 ```
 
-</div>
-<div class="tab-pane" role="tabpanel"  id="tab-getVersion-ruby">
+</TabItem>
+<TabItem value="ruby">
 
 ```ruby
 require 'rest-client'
@@ -1496,14 +1415,12 @@ result = RestClient.get '/version',
 p JSON.parse(result)
 ```
 
-</div>
-</div>
-</div>
+</TabItem>
+</Tabs>
 
 ## Schemas
 
 <a id="tocSupstream">Upstream</a>
-
 #### Upstream
 
 <a id="schemaupstream"></a>
@@ -1525,7 +1442,6 @@ p JSON.parse(result)
 | url           | string  | false    | none         | URL is the URL the request will be proxied to.                                                                                                                                                                     |
 
 <a id="tocShealthnotreadystatus">healthNotReadyStatus</a>
-
 #### healthNotReadyStatus
 
 <a id="schemahealthnotreadystatus"></a>
@@ -1547,7 +1463,6 @@ p JSON.parse(result)
 | » **additionalProperties** | string | false    | none         | none                                                               |
 
 <a id="tocShealthstatus">healthStatus</a>
-
 #### healthStatus
 
 <a id="schemahealthstatus"></a>
@@ -1565,7 +1480,6 @@ p JSON.parse(result)
 | status | string | false    | none         | Status always contains "ok". |
 
 <a id="tocSjsonwebkey">jsonWebKey</a>
-
 #### jsonWebKey
 
 <a id="schemajsonwebkey"></a>
@@ -1615,7 +1529,6 @@ p JSON.parse(result)
 | y    | string   | false    | none         | none                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
 
 <a id="tocSjsonwebkeyset">jsonWebKeySet</a>
-
 #### jsonWebKeySet
 
 <a id="schemajsonwebkeyset"></a>
@@ -1653,7 +1566,6 @@ p JSON.parse(result)
 | keys | [[jsonWebKey](#schemajsonwebkey)] | false    | none         | The value of the "keys" parameter is an array of JWK values. By default, the order of the JWK values within the array does not imply an order of preference among them, although applications of JWK Sets can choose to assign a meaning to the order for their purposes, if desired. |
 
 <a id="tocSrule">rule</a>
-
 #### rule
 
 <a id="schemarule"></a>
@@ -1705,7 +1617,6 @@ _swaggerRule is a single rule that will get checked on every HTTP request._
 | upstream       | [Upstream](#schemaupstream)         | false    | none         | none                                                                                                                                                                                                                                                                                                                                                                                                         |
 
 <a id="tocSrulehandler">ruleHandler</a>
-
 #### ruleHandler
 
 <a id="schemarulehandler"></a>
@@ -1725,7 +1636,6 @@ _swaggerRule is a single rule that will get checked on every HTTP request._
 | handler | string | false    | none         | Handler identifies the implementation which will be used to handle this specific request. Please read the user guide for a complete list of available handlers. |
 
 <a id="tocSrulematch">ruleMatch</a>
-
 #### ruleMatch
 
 <a id="schemarulematch"></a>
@@ -1745,7 +1655,6 @@ _swaggerRule is a single rule that will get checked on every HTTP request._
 | url     | string   | false    | none         | This field represents the URL pattern this rule matches. When ORY Oathkeeper searches for rules to decide what to do with an incoming request to the proxy server, it compares the full request URL (e.g. https://mydomain.com/api/resource) without query parameters of the incoming request with this field. If a match is found, the rule is considered a partial match. If the matchesMethods field is satisfied as well, the rule is considered a full match. You can use regular expressions in this field to match more than one url. Regular expressions are encapsulated in brackets < and >. The following example matches all paths of the domain `mydomain.com`: `https://mydomain.com/<.*>`. |
 
 <a id="tocSversion">version</a>
-
 #### version
 
 <a id="schemaversion"></a>
