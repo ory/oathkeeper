@@ -4,7 +4,7 @@
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 **Table of Contents**
 
-- [Unreleased (2020-07-03)](#unreleased-2020-07-03)
+- [Unreleased (2020-07-07)](#unreleased-2020-07-07)
     - [Bug Fixes](#bug-fixes)
     - [Documentation](#documentation)
     - [Features](#features)
@@ -173,11 +173,12 @@
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-# [Unreleased](https://github.com/ory/oathkeeper/compare/v0.38.2-beta.1...ddcb2262e6edc417c69bf2d713fa67f235481d32) (2020-07-03)
+# [Unreleased](https://github.com/ory/oathkeeper/compare/v0.38.2-beta.1...bf8a88884fa575c6ed397c92598c7436461028c6) (2020-07-07)
 
 
 ### Bug Fixes
 
+* Remove HTTP method restrictions ([#472](https://github.com/ory/oathkeeper/issues/472)) ([bf8a888](https://github.com/ory/oathkeeper/commit/bf8a88884fa575c6ed397c92598c7436461028c6))
 * Resolve build issues and bump herodot ([f15e38d](https://github.com/ory/oathkeeper/commit/f15e38dc533010babd21aeaa91d48dd4abbbdddc))
 * Use ory-dev instead of swagutil ([#465](https://github.com/ory/oathkeeper/issues/465)) ([3fce382](https://github.com/ory/oathkeeper/commit/3fce382e83c95049b561a97365d0b4cc2f73bc54))
 
