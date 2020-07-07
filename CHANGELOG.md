@@ -4,7 +4,7 @@
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 **Table of Contents**
 
-- [Unreleased (2020-06-26)](#unreleased-2020-06-26)
+- [Unreleased (2020-07-03)](#unreleased-2020-07-03)
     - [Bug Fixes](#bug-fixes)
     - [Documentation](#documentation)
     - [Features](#features)
@@ -173,7 +173,7 @@
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-# [Unreleased](https://github.com/ory/oathkeeper/compare/v0.38.2-beta.1...ddcb2262e6edc417c69bf2d713fa67f235481d32) (2020-06-26)
+# [Unreleased](https://github.com/ory/oathkeeper/compare/v0.38.2-beta.1...ddcb2262e6edc417c69bf2d713fa67f235481d32) (2020-07-03)
 
 
 ### Bug Fixes
