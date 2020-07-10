@@ -167,6 +167,12 @@ func (a *MutatorHydrator) Mutate(r *http.Request, session *authn.AuthenticationS
 	if err != nil {
 		return errors.WithStack(err)
 	}
+
+	if r.URL != nil {
+		q := r.URL.Query()
+		req.URL.RawQuery = q.Encode()
+	}
+
 	for key, values := range r.Header {
 		for _, value := range values {
 			req.Header.Add(key, value)
