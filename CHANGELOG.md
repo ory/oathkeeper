@@ -4,7 +4,7 @@
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 **Table of Contents**
 
-- [Unreleased (2020-07-07)](#unreleased-2020-07-07)
+- [Unreleased (2020-07-10)](#unreleased-2020-07-10)
     - [Bug Fixes](#bug-fixes)
     - [Documentation](#documentation)
     - [Features](#features)
@@ -173,7 +173,7 @@
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-# [Unreleased](https://github.com/ory/oathkeeper/compare/v0.38.2-beta.1...bf8a88884fa575c6ed397c92598c7436461028c6) (2020-07-07)
+# [Unreleased](https://github.com/ory/oathkeeper/compare/v0.38.2-beta.1...48603a1ac484b6571706021f2667f770604256b6) (2020-07-10)
 
 
 ### Bug Fixes
@@ -197,6 +197,7 @@
 ### Features
 
 * Improve configurability of prometheus metrics ([#450](https://github.com/ory/oathkeeper/issues/450)) ([ddcb226](https://github.com/ory/oathkeeper/commit/ddcb2262e6edc417c69bf2d713fa67f235481d32)), closes [#446](https://github.com/ory/oathkeeper/issues/446)
+* Pass query parameters to the hydrators ([#479](https://github.com/ory/oathkeeper/issues/479)) ([48603a1](https://github.com/ory/oathkeeper/commit/48603a1ac484b6571706021f2667f770604256b6))
 
 
 
