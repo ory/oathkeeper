@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/dgraph-io/ristretto"
@@ -53,13 +54,41 @@ type cacheConfig struct {
 	TTL     string `json:"ttl"`
 }
 
+type PreAuthCache struct {
+	sync.RWMutex
+
+	client *http.Client
+	config *clientcredentials.Config
+}
+
+func (c *PreAuthCache) Client(ctx context.Context, preAuthConfig *AuthenticatorOAuth2IntrospectionPreAuthConfiguration) *http.Client {
+	c.Lock()
+	defer c.Unlock()
+
+	config := clientcredentials.Config{
+		ClientID:     preAuthConfig.ClientID,
+		ClientSecret: preAuthConfig.ClientSecret,
+		Scopes:       preAuthConfig.Scope,
+		TokenURL:     preAuthConfig.TokenURL,
+	}
+
+	if c.config == &config {
+		return c.client
+	}
+
+	client := config.Client(ctx)
+	c.client = client
+	return client
+}
+
 type AuthenticatorOAuth2Introspection struct {
 	c configuration.Provider
 
 	client *http.Client
 
-	tokenCache *ristretto.Cache
-	cacheTTL   *time.Duration
+	preAuthCache *PreAuthCache
+	tokenCache   *ristretto.Cache
+	cacheTTL     *time.Duration
 }
 
 func NewAuthenticatorOAuth2Introspection(c configuration.Provider) *AuthenticatorOAuth2Introspection {
@@ -231,12 +260,7 @@ func (a *AuthenticatorOAuth2Introspection) Config(config json.RawMessage) (*Auth
 	var rt http.RoundTripper
 
 	if c.PreAuth != nil && c.PreAuth.Enabled {
-		rt = (&clientcredentials.Config{
-			ClientID:     c.PreAuth.ClientID,
-			ClientSecret: c.PreAuth.ClientSecret,
-			Scopes:       c.PreAuth.Scope,
-			TokenURL:     c.PreAuth.TokenURL,
-		}).Client(context.Background()).Transport
+		rt = a.preAuthCache.Client(context.Background(), c.PreAuth).Transport
 	}
 
 	if c.Retry == nil {
