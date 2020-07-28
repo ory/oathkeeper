@@ -126,6 +126,9 @@ func (m *RepositoryMemory) Match(_ context.Context, method string, u *url.URL) (
 	var rules []Rule
 	for k := range m.rules {
 		r := &m.rules[k]
+		if u == nil {
+			return nil, errors.WithStack(errors.New("nil URL provided"))
+		}
 		if matched, err := r.IsMatching(m.matchingStrategy, method, u); err != nil {
 			return nil, errors.WithStack(err)
 		} else if matched {
