@@ -120,15 +120,16 @@ func (m *RepositoryMemory) Set(ctx context.Context, rules []Rule) error {
 }
 
 func (m *RepositoryMemory) Match(_ context.Context, method string, u *url.URL) (*Rule, error) {
+	if u == nil {
+		return nil, errors.WithStack(errors.New("nil URL provided"))
+	}
+
 	m.Lock()
 	defer m.Unlock()
 
 	var rules []Rule
 	for k := range m.rules {
 		r := &m.rules[k]
-		if u == nil {
-			return nil, errors.WithStack(errors.New("nil URL provided"))
-		}
 		if matched, err := r.IsMatching(m.matchingStrategy, method, u); err != nil {
 			return nil, errors.WithStack(err)
 		} else if matched {
