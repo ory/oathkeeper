@@ -2,12 +2,13 @@ version: '3.7'
 
 services:
 
-  volume-populate: # this is just used to copy the content
+  volume-populate: 
+  # this is just used to copy the content of ./.docker_compose to oathkeeper-volume
     image: busybox
-    command: cp -r /tmp/src/. /data
+    command: cp -r /src/. /dest
     volumes:
-      - ./.docker_compose:/tmp/src:Z
-      - oathkeeper-volume:/data
+      - ./.docker_compose:/src:Z
+      - oathkeeper-volume:/dest
 
   oathkeeper:
     build:
