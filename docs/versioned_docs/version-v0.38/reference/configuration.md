@@ -44,7 +44,7 @@ serve:
     # - Windows Command Line (CMD):
     #    > set SERVE_API_PORT=<value>
     #
-    port: -93513000
+    port: 60433381
 
     ## Host ##
     #
@@ -60,7 +60,7 @@ serve:
     # - Windows Command Line (CMD):
     #    > set SERVE_API_HOST=<value>
     #
-    host: localhost
+    host: ""
 
     ## HTTP Timeouts ##
     #
@@ -85,7 +85,7 @@ serve:
       # - Windows Command Line (CMD):
       #    > set SERVE_API_TIMEOUT_READ=<value>
       #
-      read: 5s
+      read: 5m
 
       ## HTTP Write Timeout ##
       #
@@ -104,7 +104,7 @@ serve:
       # - Windows Command Line (CMD):
       #    > set SERVE_API_TIMEOUT_WRITE=<value>
       #
-      write: 5s
+      write: 5h
 
       ## HTTP Idle Timeout ##
       #
@@ -123,7 +123,7 @@ serve:
       # - Windows Command Line (CMD):
       #    > set SERVE_API_TIMEOUT_IDLE=<value>
       #
-      idle: 5m
+      idle: 120s
 
     ## Cross Origin Resource Sharing (CORS) ##
     #
@@ -143,7 +143,7 @@ serve:
       # - Windows Command Line (CMD):
       #    > set SERVE_API_CORS_ENABLED=<value>
       #
-      enabled: false
+      enabled: true
 
       ## Allowed Origins ##
       #
@@ -163,9 +163,7 @@ serve:
       #    > set SERVE_API_CORS_ALLOWED_ORIGINS=<value>
       #
       allowed_origins:
-        - https://example.com
-        - https://*.example.com
-        - https://*.foo.example.com
+        - "*"
 
       ## Allowed HTTP Methods ##
       #
@@ -180,11 +178,10 @@ serve:
       #    > set SERVE_API_CORS_ALLOWED_METHODS=<value>
       #
       allowed_methods:
-        - CONNECT
         - PATCH
+        - HEAD
         - TRACE
         - POST
-        - PUT
 
       ## Allowed Request HTTP Headers ##
       #
@@ -199,8 +196,7 @@ serve:
       #    > set SERVE_API_CORS_ALLOWED_HEADERS=<value>
       #
       allowed_headers:
-        - occaecat Ut nisi
-        - incididunt elit nulla
+        - adipisicing anim occaecat do Ut
 
       ## Allowed Response HTTP Headers ##
       #
@@ -215,7 +211,7 @@ serve:
       #    > set SERVE_API_CORS_EXPOSED_HEADERS=<value>
       #
       exposed_headers:
-        - laborum
+        - dolore
 
       ## Allow HTTP Credentials ##
       #
@@ -241,7 +237,7 @@ serve:
       # - Windows Command Line (CMD):
       #    > set SERVE_API_CORS_MAX_AGE=<value>
       #
-      max_age: 21616631
+      max_age: 28831280
 
       ## Enable Debugging ##
       #
@@ -255,7 +251,7 @@ serve:
       # - Windows Command Line (CMD):
       #    > set SERVE_API_CORS_DEBUG=<value>
       #
-      debug: false
+      debug: true
 
     ## HTTPS ##
     #
@@ -327,7 +323,7 @@ serve:
     # - Windows Command Line (CMD):
     #    > set SERVE_PROXY_PORT=<value>
     #
-    port: -63563216
+    port: -2352108
 
     ## Host ##
     #
@@ -343,7 +339,7 @@ serve:
     # - Windows Command Line (CMD):
     #    > set SERVE_PROXY_HOST=<value>
     #
-    host: ""
+    host: 127.0.0.1
 
     ## HTTP Timeouts ##
     #
@@ -368,7 +364,7 @@ serve:
       # - Windows Command Line (CMD):
       #    > set SERVE_PROXY_TIMEOUT_READ=<value>
       #
-      read: 5m
+      read: 5s
 
       ## HTTP Write Timeout ##
       #
@@ -387,7 +383,7 @@ serve:
       # - Windows Command Line (CMD):
       #    > set SERVE_PROXY_TIMEOUT_WRITE=<value>
       #
-      write: 5m
+      write: 120s
 
       ## HTTP Idle Timeout ##
       #
@@ -406,7 +402,7 @@ serve:
       # - Windows Command Line (CMD):
       #    > set SERVE_PROXY_TIMEOUT_IDLE=<value>
       #
-      idle: 5m
+      idle: 120s
 
     ## Cross Origin Resource Sharing (CORS) ##
     #
@@ -426,7 +422,7 @@ serve:
       # - Windows Command Line (CMD):
       #    > set SERVE_PROXY_CORS_ENABLED=<value>
       #
-      enabled: true
+      enabled: false
 
       ## Allowed Origins ##
       #
@@ -446,7 +442,9 @@ serve:
       #    > set SERVE_PROXY_CORS_ALLOWED_ORIGINS=<value>
       #
       allowed_origins:
-        - "*"
+        - https://example.com
+        - https://*.example.com
+        - https://*.foo.example.com
 
       ## Allowed HTTP Methods ##
       #
@@ -461,8 +459,10 @@ serve:
       #    > set SERVE_PROXY_CORS_ALLOWED_METHODS=<value>
       #
       allowed_methods:
-        - HEAD
-        - DELETE
+        - CONNECT
+        - TRACE
+        - PUT
+        - POST
 
       ## Allowed Request HTTP Headers ##
       #
@@ -477,8 +477,8 @@ serve:
       #    > set SERVE_PROXY_CORS_ALLOWED_HEADERS=<value>
       #
       allowed_headers:
-        - minim Lorem
-        - qui proident in anim
+        - amet enim fugiat aliqua incididunt
+        - aliquip
 
       ## Allowed Response HTTP Headers ##
       #
@@ -493,11 +493,8 @@ serve:
       #    > set SERVE_PROXY_CORS_EXPOSED_HEADERS=<value>
       #
       exposed_headers:
-        - mollit elit in veniam nulla
-        - esse
-        - qui sed laborum Duis
-        - id veniam ad eiusmod
-        - nisi Duis deserunt aute
+        - cillum anim exercitation qui proident
+        - eiusmod
 
       ## Allow HTTP Credentials ##
       #
@@ -523,7 +520,7 @@ serve:
       # - Windows Command Line (CMD):
       #    > set SERVE_PROXY_CORS_MAX_AGE=<value>
       #
-      max_age: -95819525
+      max_age: 49483990
 
       ## Enable Debugging ##
       #
@@ -609,7 +606,7 @@ serve:
     # - Windows Command Line (CMD):
     #    > set SERVE_PROMETHEUS_PORT=<value>
     #
-    port: -936716
+    port: -27848329
 
     ## Host ##
     #
@@ -639,7 +636,21 @@ serve:
     # - Windows Command Line (CMD):
     #    > set SERVE_PROMETHEUS_METRICS_PATH=<value>
     #
-    metrics_path: esse ullamco deserunt in
+    metrics_path: ullamco dolore
+
+    ## CollapsePaths ##
+    #
+    # When set to true the request label will include just the first segment of the request path
+    #
+    # Default value: true
+    #
+    # Set this value using environment variables on
+    # - Linux/macOS:
+    #    $ export SERVE_PROMETHEUS_COLLAPSE_REQUEST_PATHS=<value>
+    # - Windows Command Line (CMD):
+    #    > set SERVE_PROMETHEUS_COLLAPSE_REQUEST_PATHS=<value>
+    #
+    collapse_request_paths: true
 
 ## Access Rules ##
 #
@@ -677,6 +688,10 @@ access_rules:
   #
   # Default value: regexp
   #
+  # One of:
+  # - glob
+  # - regexp
+  # 
   # Examples:
   # - glob
   # 
@@ -715,7 +730,7 @@ authenticators:
     # - Windows Command Line (CMD):
     #    > set AUTHENTICATORS_ANONYMOUS_ENABLED=<value>
     #
-    enabled: false
+    enabled: true
 
     ## Anonymous Authenticator Configuration ##
     #
@@ -794,6 +809,63 @@ authenticators:
   #
   cookie_session:
     
+    ## config ##
+    #
+    config:
+      
+      ## check_session_url ##
+      #
+      # Set this value using environment variables on
+      # - Linux/macOS:
+      #    $ export AUTHENTICATORS_COOKIE_SESSION_CONFIG_CHECK_SESSION_URL=<value>
+      # - Windows Command Line (CMD):
+      #    > set AUTHENTICATORS_COOKIE_SESSION_CONFIG_CHECK_SESSION_URL=<value>
+      #
+      check_session_url: https://session-store-host
+
+      ## only ##
+      #
+      # Set this value using environment variables on
+      # - Linux/macOS:
+      #    $ export AUTHENTICATORS_COOKIE_SESSION_CONFIG_ONLY=<value>
+      # - Windows Command Line (CMD):
+      #    > set AUTHENTICATORS_COOKIE_SESSION_CONFIG_ONLY=<value>
+      #
+      only:
+        - exercitation non aliquip consequat nulla
+        - aliquip
+        - in non aliquip
+
+      ## preserve_path ##
+      #
+      # Set this value using environment variables on
+      # - Linux/macOS:
+      #    $ export AUTHENTICATORS_COOKIE_SESSION_CONFIG_PRESERVE_PATH=<value>
+      # - Windows Command Line (CMD):
+      #    > set AUTHENTICATORS_COOKIE_SESSION_CONFIG_PRESERVE_PATH=<value>
+      #
+      preserve_path: false
+
+      ## extra_from ##
+      #
+      # Set this value using environment variables on
+      # - Linux/macOS:
+      #    $ export AUTHENTICATORS_COOKIE_SESSION_CONFIG_EXTRA_FROM=<value>
+      # - Windows Command Line (CMD):
+      #    > set AUTHENTICATORS_COOKIE_SESSION_CONFIG_EXTRA_FROM=<value>
+      #
+      extra_from: reprehenderit dolore
+
+      ## subject_from ##
+      #
+      # Set this value using environment variables on
+      # - Linux/macOS:
+      #    $ export AUTHENTICATORS_COOKIE_SESSION_CONFIG_SUBJECT_FROM=<value>
+      # - Windows Command Line (CMD):
+      #    > set AUTHENTICATORS_COOKIE_SESSION_CONFIG_SUBJECT_FROM=<value>
+      #
+      subject_from: sunt
+
     ## Enabled ##
     #
     # En-/disables this component.
@@ -809,7 +881,7 @@ authenticators:
     # - Windows Command Line (CMD):
     #    > set AUTHENTICATORS_COOKIE_SESSION_ENABLED=<value>
     #
-    enabled: false
+    enabled: true
 
   ## JSON Web Token (jwt) ##
   #
@@ -817,100 +889,6 @@ authenticators:
   #
   jwt:
     
-    ## config ##
-    #
-    config:
-      
-      ## jwks_urls ##
-      #
-      # Set this value using environment variables on
-      # - Linux/macOS:
-      #    $ export AUTHENTICATORS_JWT_CONFIG_JWKS_URLS=<value>
-      # - Windows Command Line (CMD):
-      #    > set AUTHENTICATORS_JWT_CONFIG_JWKS_URLS=<value>
-      #
-      jwks_urls:
-        - https://my-website.com/.well-known/jwks.json
-        - https://my-other-website.com/.well-known/jwks.json
-        - file://path/to/local/jwks.json
-
-      ## required_scope ##
-      #
-      # Set this value using environment variables on
-      # - Linux/macOS:
-      #    $ export AUTHENTICATORS_JWT_CONFIG_REQUIRED_SCOPE=<value>
-      # - Windows Command Line (CMD):
-      #    > set AUTHENTICATORS_JWT_CONFIG_REQUIRED_SCOPE=<value>
-      #
-      required_scope:
-        - cupidatat velit sit est
-        - dolore aliqua incididunt Excepteur
-        - sit adipisicing
-
-      ## target_audience ##
-      #
-      # Set this value using environment variables on
-      # - Linux/macOS:
-      #    $ export AUTHENTICATORS_JWT_CONFIG_TARGET_AUDIENCE=<value>
-      # - Windows Command Line (CMD):
-      #    > set AUTHENTICATORS_JWT_CONFIG_TARGET_AUDIENCE=<value>
-      #
-      target_audience:
-        - Ut
-        - est occaecat Excepteur incididunt
-        - voluptate sed reprehenderit
-
-      ## trusted_issuers ##
-      #
-      # Set this value using environment variables on
-      # - Linux/macOS:
-      #    $ export AUTHENTICATORS_JWT_CONFIG_TRUSTED_ISSUERS=<value>
-      # - Windows Command Line (CMD):
-      #    > set AUTHENTICATORS_JWT_CONFIG_TRUSTED_ISSUERS=<value>
-      #
-      trusted_issuers:
-        - in Duis mollit quis sed
-        - est enim
-        - eu sed consectetur fugiat consequat
-        - ut Lorem
-
-      ## allowed_algorithms ##
-      #
-      # Set this value using environment variables on
-      # - Linux/macOS:
-      #    $ export AUTHENTICATORS_JWT_CONFIG_ALLOWED_ALGORITHMS=<value>
-      # - Windows Command Line (CMD):
-      #    > set AUTHENTICATORS_JWT_CONFIG_ALLOWED_ALGORITHMS=<value>
-      #
-      allowed_algorithms:
-        - sed est reprehenderit
-        - enim in pariatur voluptate ipsum
-        - nisi
-
-      ## scope_strategy ##
-      #
-      # Set this value using environment variables on
-      # - Linux/macOS:
-      #    $ export AUTHENTICATORS_JWT_CONFIG_SCOPE_STRATEGY=<value>
-      # - Windows Command Line (CMD):
-      #    > set AUTHENTICATORS_JWT_CONFIG_SCOPE_STRATEGY=<value>
-      #
-      scope_strategy: hierarchic
-
-      ## token_from ##
-      #
-      token_from:
-        
-        ## cookie ##
-        #
-        # Set this value using environment variables on
-        # - Linux/macOS:
-        #    $ export AUTHENTICATORS_JWT_CONFIG_TOKEN_FROM_COOKIE=<value>
-        # - Windows Command Line (CMD):
-        #    > set AUTHENTICATORS_JWT_CONFIG_TOKEN_FROM_COOKIE=<value>
-        #
-        cookie: fugiat in voluptate
-
     ## Enabled ##
     #
     # En-/disables this component.
@@ -926,7 +904,7 @@ authenticators:
     # - Windows Command Line (CMD):
     #    > set AUTHENTICATORS_JWT_ENABLED=<value>
     #
-    enabled: true
+    enabled: false
 
   ## OAuth 2.0 Client Credentials ##
   #
@@ -949,7 +927,7 @@ authenticators:
     # - Windows Command Line (CMD):
     #    > set AUTHENTICATORS_OAUTH2_CLIENT_CREDENTIALS_ENABLED=<value>
     #
-    enabled: true
+    enabled: false
 
   ## OAuth 2.0 Token Introspection ##
   #
@@ -1006,79 +984,6 @@ errors:
     #
     www_authenticate:
       
-      ## config ##
-      #
-      config:
-        
-        ## realm ##
-        #
-        # Set this value using environment variables on
-        # - Linux/macOS:
-        #    $ export ERRORS_HANDLERS_WWW_AUTHENTICATE_CONFIG_REALM=<value>
-        # - Windows Command Line (CMD):
-        #    > set ERRORS_HANDLERS_WWW_AUTHENTICATE_CONFIG_REALM=<value>
-        #
-        realm: eiusmod
-
-        ## when ##
-        #
-        # Set this value using environment variables on
-        # - Linux/macOS:
-        #    $ export ERRORS_HANDLERS_WWW_AUTHENTICATE_CONFIG_WHEN=<value>
-        # - Windows Command Line (CMD):
-        #    > set ERRORS_HANDLERS_WWW_AUTHENTICATE_CONFIG_WHEN=<value>
-        #
-        when:
-          - error:
-              - unauthorized
-              - not_found
-              - unauthorized
-              - not_found
-              - internal_server_error
-            request:
-              cidr:
-                - voluptate
-                - commodo dolore qui id magna
-              header:
-                content_type: []
-                accept: []
-          - error:
-              - unauthorized
-              - forbidden
-            request:
-              cidr:
-                - cupidatat consectetur
-                - qui cupidatat
-                - cupidatat id consequat
-                - officia sunt
-              header:
-                content_type: []
-                accept: []
-          - error:
-              - unauthorized
-              - internal_server_error
-              - unauthorized
-            request:
-              cidr:
-                - velit
-                - aliquip dolore ullamco
-                - non ex
-                - magna proident eu laboris
-                - laboris sed velit ipsum
-              header:
-                content_type: []
-                accept: []
-          - error:
-              - unauthorized
-              - not_found
-              - unauthorized
-            request:
-              cidr:
-                - dolore consectetur dolor
-              header:
-                content_type: []
-                accept: []
-
       ## Enabled ##
       #
       # En-/disables this component.
@@ -1114,7 +1019,7 @@ errors:
         # - Windows Command Line (CMD):
         #    > set ERRORS_HANDLERS_REDIRECT_CONFIG_TO=<value>
         #
-        to: https://rSEaneUkoXiTIeQgS.poMI2Am,xcFzt+VJCyGo.4oa
+        to: https://qHUxyAmonNwhXiMJKtfVcgOA.gaEj02iIPT59CjsgFoEe0.as9O
 
         ## code ##
         #
@@ -1137,36 +1042,16 @@ errors:
         when:
           - error:
               - unauthorized
-              - not_found
-              - forbidden
-            request:
-              cidr:
-                - Duis minim velit aliqua
-                - ad adipisicing dolore occaecat Ut
-              header:
-                content_type: []
-                accept: []
-          - error:
-              - not_found
-              - internal_server_error
-              - not_found
               - forbidden
               - forbidden
+              - not_found
             request:
               cidr:
-                - sed irure reprehenderit sit
-                - aliquip
-              header:
-                content_type: []
-                accept: []
-          - error:
-              - unauthorized
-              - unauthorized
-              - unauthorized
-              - unauthorized
-            request:
-              cidr:
-                - ex
+                - Ut tempor nostrud sint sit
+                - in magna Lorem Excepteur esse
+                - id qui in cillum
+                - labore nostrud
+                - tempor incididunt cupidatat
               header:
                 content_type: []
                 accept: []
@@ -1174,21 +1059,48 @@ errors:
               - unauthorized
             request:
               cidr:
-                - mollit officia pariatur amet
-                - dolor id Excepteur aliquip et
-                - nisi in Lorem nulla
-                - culpa
+                - Lorem eu dolore et
+              header:
+                content_type: []
+                accept: []
+          - error:
+              - not_found
+              - forbidden
+              - not_found
+              - not_found
+            request:
+              cidr:
+                - ullamco dolor deserunt nulla
+                - amet esse non
+                - pariatur ex veniam
+                - ut sit
+                - minim Excepteur id
               header:
                 content_type: []
                 accept: []
           - error:
               - internal_server_error
+              - internal_server_error
+              - forbidden
             request:
               cidr:
-                - eu officia in laboris eiusmod
-                - exercitation
-                - ex Duis laboris qui
-                - proident dolore Excepteur
+                - aliquip deserunt exercitation Excepteur mollit
+              header:
+                content_type: []
+                accept: []
+          - error:
+              - not_found
+              - unauthorized
+              - internal_server_error
+              - forbidden
+              - unauthorized
+            request:
+              cidr:
+                - anim occaecat consequat
+                - dolor
+                - ex proident ullamco ipsum
+                - aliqua
+                - in ipsum dolor consectetur
               header:
                 content_type: []
                 accept: []
@@ -1208,7 +1120,7 @@ errors:
       # - Windows Command Line (CMD):
       #    > set ERRORS_HANDLERS_REDIRECT_ENABLED=<value>
       #
-      enabled: false
+      enabled: true
 
     ## JSON Error Handler ##
     #
@@ -1218,6 +1130,89 @@ errors:
     #
     json:
       
+      ## config ##
+      #
+      config:
+        
+        ## verbose ##
+        #
+        # Set this value using environment variables on
+        # - Linux/macOS:
+        #    $ export ERRORS_HANDLERS_JSON_CONFIG_VERBOSE=<value>
+        # - Windows Command Line (CMD):
+        #    > set ERRORS_HANDLERS_JSON_CONFIG_VERBOSE=<value>
+        #
+        verbose: true
+
+        ## when ##
+        #
+        # Set this value using environment variables on
+        # - Linux/macOS:
+        #    $ export ERRORS_HANDLERS_JSON_CONFIG_WHEN=<value>
+        # - Windows Command Line (CMD):
+        #    > set ERRORS_HANDLERS_JSON_CONFIG_WHEN=<value>
+        #
+        when:
+          - error:
+              - forbidden
+              - unauthorized
+              - unauthorized
+              - internal_server_error
+            request:
+              cidr:
+                - ullamco sit nostrud ut
+                - eu
+                - Excepteur
+                - laborum cillum enim amet
+                - in enim pariatur
+              header:
+                content_type: []
+                accept: []
+          - error:
+              - not_found
+              - not_found
+            request:
+              cidr:
+                - est in exercitation eiusmod aliquip
+                - amet aliqua
+              header:
+                content_type: []
+                accept: []
+          - error:
+              - unauthorized
+              - unauthorized
+              - unauthorized
+              - internal_server_error
+              - not_found
+            request:
+              cidr:
+                - et ullamco enim incididunt
+                - nisi
+              header:
+                content_type: []
+                accept: []
+          - error:
+              - not_found
+            request:
+              cidr:
+                - magna
+                - pariatur veniam mollit
+              header:
+                content_type: []
+                accept: []
+          - error:
+              - internal_server_error
+              - forbidden
+              - internal_server_error
+            request:
+              cidr:
+                - ut proident exercitation in aliqua
+                - mollit aliqua aliquip
+                - in eu ipsum cillum Duis
+              header:
+                content_type: []
+                accept: []
+
       ## Enabled ##
       #
       # En-/disables this component.
@@ -1228,7 +1223,7 @@ errors:
       # - Windows Command Line (CMD):
       #    > set ERRORS_HANDLERS_JSON_ENABLED=<value>
       #
-      enabled: false
+      enabled: true
 
 ## Authorizers ##
 #
@@ -1257,7 +1252,7 @@ authorizers:
     # - Windows Command Line (CMD):
     #    > set AUTHORIZERS_ALLOW_ENABLED=<value>
     #
-    enabled: false
+    enabled: true
 
   ## Deny ##
   #
@@ -1310,7 +1305,7 @@ authorizers:
       # - Windows Command Line (CMD):
       #    > set AUTHORIZERS_KETO_ENGINE_ACP_ORY_CONFIG_REQUIRED_ACTION=<value>
       #
-      required_action: ullamco sed minim culpa ut
+      required_action: velit do
 
       ## required_resource ##
       #
@@ -1320,7 +1315,7 @@ authorizers:
       # - Windows Command Line (CMD):
       #    > set AUTHORIZERS_KETO_ENGINE_ACP_ORY_CONFIG_REQUIRED_RESOURCE=<value>
       #
-      required_resource: pariatur velit proident adipisicing sit
+      required_resource: magna
 
       ## subject ##
       #
@@ -1330,7 +1325,7 @@ authorizers:
       # - Windows Command Line (CMD):
       #    > set AUTHORIZERS_KETO_ENGINE_ACP_ORY_CONFIG_SUBJECT=<value>
       #
-      subject: voluptate proident consequat
+      subject: sunt anim nulla elit
 
       ## flavor ##
       #
@@ -1340,7 +1335,7 @@ authorizers:
       # - Windows Command Line (CMD):
       #    > set AUTHORIZERS_KETO_ENGINE_ACP_ORY_CONFIG_FLAVOR=<value>
       #
-      flavor: esse culpa ad
+      flavor: ad minim reprehenderit voluptate ea
 
     ## Enabled ##
     #
@@ -1402,6 +1397,30 @@ authorizers:
   #
   remote_json:
     
+    ## config ##
+    #
+    config:
+      
+      ## remote ##
+      #
+      # Set this value using environment variables on
+      # - Linux/macOS:
+      #    $ export AUTHORIZERS_REMOTE_JSON_CONFIG_REMOTE=<value>
+      # - Windows Command Line (CMD):
+      #    > set AUTHORIZERS_REMOTE_JSON_CONFIG_REMOTE=<value>
+      #
+      remote: https://host/path
+
+      ## payload ##
+      #
+      # Set this value using environment variables on
+      # - Linux/macOS:
+      #    $ export AUTHORIZERS_REMOTE_JSON_CONFIG_PAYLOAD=<value>
+      # - Windows Command Line (CMD):
+      #    > set AUTHORIZERS_REMOTE_JSON_CONFIG_PAYLOAD=<value>
+      #
+      payload: '{"subject":"{{ .Subject }}"}'
+
     ## Enabled ##
     #
     # En-/disables this component.
@@ -1417,7 +1436,7 @@ authorizers:
     # - Windows Command Line (CMD):
     #    > set AUTHORIZERS_REMOTE_JSON_ENABLED=<value>
     #
-    enabled: false
+    enabled: true
 
 ## Mutators ##
 #
@@ -1454,6 +1473,16 @@ mutators:
   #
   cookie:
     
+    ## config ##
+    #
+    # Set this value using environment variables on
+    # - Linux/macOS:
+    #    $ export MUTATORS_COOKIE_CONFIG=<value>
+    # - Windows Command Line (CMD):
+    #    > set MUTATORS_COOKIE_CONFIG=<value>
+    #
+    config: {}
+
     ## Enabled ##
     #
     # En-/disables this component.
@@ -1477,16 +1506,6 @@ mutators:
   #
   header:
     
-    ## config ##
-    #
-    # Set this value using environment variables on
-    # - Linux/macOS:
-    #    $ export MUTATORS_HEADER_CONFIG=<value>
-    # - Windows Command Line (CMD):
-    #    > set MUTATORS_HEADER_CONFIG=<value>
-    #
-    config: {}
-
     ## Enabled ##
     #
     # En-/disables this component.
@@ -1526,7 +1545,7 @@ mutators:
         # - Windows Command Line (CMD):
         #    > set MUTATORS_HYDRATOR_CONFIG_API_URL=<value>
         #
-        url: https://tCCDaRLAoEthiRugsYUJlNqAHpv.tifvPk.8-.sKOB6znD3CFfGZJlscrYjcDYLPBvM4MvvxmdeGY7uSnOl7,,iV
+        url: https://khgnNbLvMFl.mbIrRId2uBEe73HvujQuar,c+4buHeC4M,oWFZ2MSmDiYa.Nk,uBrgv2wXjY
 
         ## auth ##
         #
@@ -1544,7 +1563,7 @@ mutators:
             # - Windows Command Line (CMD):
             #    > set MUTATORS_HYDRATOR_CONFIG_API_AUTH_BASIC_USERNAME=<value>
             #
-            username: do
+            username: qui velit dolor dolore
 
             ## password ##
             #
@@ -1554,7 +1573,7 @@ mutators:
             # - Windows Command Line (CMD):
             #    > set MUTATORS_HYDRATOR_CONFIG_API_AUTH_BASIC_PASSWORD=<value>
             #
-            password: et enim
+            password: Duis quis consectetur velit eu
 
         ## retry ##
         #
@@ -1568,7 +1587,7 @@ mutators:
           # - Windows Command Line (CMD):
           #    > set MUTATORS_HYDRATOR_CONFIG_API_RETRY_GIVE_UP_AFTER=<value>
           #
-          give_up_after: 95ns
+          give_up_after: 3461ns
 
           ## max_delay ##
           #
@@ -1578,7 +1597,7 @@ mutators:
           # - Windows Command Line (CMD):
           #    > set MUTATORS_HYDRATOR_CONFIG_API_RETRY_MAX_DELAY=<value>
           #
-          max_delay: 26153h
+          max_delay: 6816678441ns
 
       ## cache ##
       #
@@ -1602,7 +1621,7 @@ mutators:
         # - Windows Command Line (CMD):
         #    > set MUTATORS_HYDRATOR_CONFIG_CACHE_TTL=<value>
         #
-        ttl: 94495h
+        ttl: 7522us
 
     ## Enabled ##
     #
@@ -1619,7 +1638,7 @@ mutators:
     # - Windows Command Line (CMD):
     #    > set MUTATORS_HYDRATOR_ENABLED=<value>
     #
-    enabled: true
+    enabled: false
 
   ## ID Token (JSON Web Token) ##
   #
@@ -1627,6 +1646,50 @@ mutators:
   #
   id_token:
     
+    ## config ##
+    #
+    config:
+      
+      ## jwks_url ##
+      #
+      # Set this value using environment variables on
+      # - Linux/macOS:
+      #    $ export MUTATORS_ID_TOKEN_CONFIG_JWKS_URL=<value>
+      # - Windows Command Line (CMD):
+      #    > set MUTATORS_ID_TOKEN_CONFIG_JWKS_URL=<value>
+      #
+      jwks_url: file://../from/this/relative/location.json
+
+      ## issuer_url ##
+      #
+      # Set this value using environment variables on
+      # - Linux/macOS:
+      #    $ export MUTATORS_ID_TOKEN_CONFIG_ISSUER_URL=<value>
+      # - Windows Command Line (CMD):
+      #    > set MUTATORS_ID_TOKEN_CONFIG_ISSUER_URL=<value>
+      #
+      issuer_url: id qui eiusmod enim
+
+      ## claims ##
+      #
+      # Set this value using environment variables on
+      # - Linux/macOS:
+      #    $ export MUTATORS_ID_TOKEN_CONFIG_CLAIMS=<value>
+      # - Windows Command Line (CMD):
+      #    > set MUTATORS_ID_TOKEN_CONFIG_CLAIMS=<value>
+      #
+      claims: occaecat
+
+      ## ttl ##
+      #
+      # Set this value using environment variables on
+      # - Linux/macOS:
+      #    $ export MUTATORS_ID_TOKEN_CONFIG_TTL=<value>
+      # - Windows Command Line (CMD):
+      #    > set MUTATORS_ID_TOKEN_CONFIG_TTL=<value>
+      #
+      ttl: 30s
+
     ## Enabled ##
     #
     # En-/disables this component.
@@ -1642,7 +1705,7 @@ mutators:
     # - Windows Command Line (CMD):
     #    > set MUTATORS_ID_TOKEN_ENABLED=<value>
     #
-    enabled: true
+    enabled: false
 
 ## Log ##
 #
@@ -1656,13 +1719,21 @@ log:
   #
   # Default value: info
   #
+  # One of:
+  # - panic
+  # - fatal
+  # - error
+  # - warn
+  # - info
+  # - debug
+  # 
   # Set this value using environment variables on
   # - Linux/macOS:
   #    $ export LOG_LEVEL=<value>
   # - Windows Command Line (CMD):
   #    > set LOG_LEVEL=<value>
   #
-  level: info
+  level: warn
 
   ## Format ##
   #
@@ -1670,24 +1741,33 @@ log:
   #
   # Default value: text
   #
+  # One of:
+  # - text
+  # - json
+  # 
   # Set this value using environment variables on
   # - Linux/macOS:
   #    $ export LOG_FORMAT=<value>
   # - Windows Command Line (CMD):
   #    > set LOG_FORMAT=<value>
   #
-  format: text
+  format: json
 
 ## Profiling ##
 #
 # Enables CPU or memory profiling if set. For more details on profiling Go programs read [Profiling Go Programs](https://blog.golang.org/profiling-go-programs).
 #
+# One of:
+# - cpu
+# - mem
+# - ""
+# 
 # Set this value using environment variables on
 # - Linux/macOS:
 #    $ export PROFILING=<value>
 # - Windows Command Line (CMD):
 #    > set PROFILING=<value>
 #
-profiling: mem
+profiling: ""
 
 ```

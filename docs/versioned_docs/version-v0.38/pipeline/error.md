@@ -65,10 +65,10 @@ This is the same for all handlers!
   config: {
     when: [
       {
-        error: ['unauthorized', '...', '...'],
-      },
-    ],
-  },
+        error: ['unauthorized', '...', '...']
+      }
+    ]
+  }
 }
 ```
 
@@ -166,10 +166,10 @@ in the global config and in the access rule:
   config: {
     when: [
       {
-        error: ['unauthorized', '...', '...'],
-      },
-    ],
-  },
+        error: ['unauthorized', '...', '...']
+      }
+    ]
+  }
 }
 ```
 
@@ -402,8 +402,8 @@ conditions under the `when` key.
     verbose: true, // defaults to false
     when: [
       // ...
-    ],
-  },
+    ]
+  }
 }
 ```
 
@@ -424,8 +424,8 @@ conditions under the `when` key.
     code: 301, // defaults to 302 - only 301 and 302 are supported.
     when: [
       // ...
-    ],
-  },
+    ]
+  }
 }
 ```
 
@@ -454,7 +454,7 @@ conditions under the `when` key.
     realm: 'Please enter your username and password', // Defaults to `Please authenticate.`
     when: [
       // ...
-    ],
-  },
+    ]
+  }
 }
 ```

@@ -1,6 +1,7 @@
 {
   "version-v0.38/docs": [
     {
+      "collapsed": true,
       "type": "category",
       "label": "Introduction",
       "items": [
@@ -15,6 +16,7 @@
       ]
     },
     {
+      "collapsed": true,
       "type": "category",
       "label": "Core Concepts",
       "items": [
@@ -23,6 +25,7 @@
           "id": "version-v0.38/api-access-rules"
         },
         {
+          "collapsed": true,
           "type": "category",
           "label": "Handlers",
           "items": [
@@ -51,6 +54,7 @@
       ]
     },
     {
+      "collapsed": true,
       "type": "category",
       "label": "Guides",
       "items": [
@@ -61,6 +65,7 @@
       ]
     },
     {
+      "collapsed": true,
       "type": "category",
       "label": "Reference",
       "items": [
@@ -75,6 +80,7 @@
       ]
     },
     {
+      "collapsed": true,
       "type": "category",
       "label": "SDKs",
       "items": [
@@ -85,6 +91,7 @@
       ]
     },
     {
+      "collapsed": true,
       "type": "category",
       "label": "ORY Kratos",
       "items": [
@@ -106,6 +113,7 @@
       ]
     },
     {
+      "collapsed": true,
       "type": "category",
       "label": "ORY Hydra",
       "items": [
@@ -127,6 +135,7 @@
       ]
     },
     {
+      "collapsed": true,
       "type": "category",
       "label": "ORY Keto",
       "items": [

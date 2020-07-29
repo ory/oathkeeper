@@ -7,16 +7,24 @@ id: api
 
 ORY Oathkeeper is a reverse proxy that checks the HTTP Authorization for validity against a set of rules. This service uses Hydra to validate access tokens and policies.
 
-> You are viewing REST API documentation. This documentation is auto-generated from a swagger specification which
+import Tabs from '@theme/Tabs'
+import TabItem from '@theme/TabItem'
+
+:::info
+
+You are viewing REST API documentation. This documentation is auto-generated from a swagger specification which
 itself is generated from annotations in the source code of the project. It is possible that this documentation includes
 bugs and that code samples are incomplete or wrong.
->
-> If you find issues in the respective documentation, please do not edit the
+
+If you find issues in the respective documentation, please do not edit the
 Markdown files directly (as they are generated) but raise an issue on the project's GitHub presence instead. This documentation
 will improve over time with your help! If you have ideas how to improve this part of the documentation, feel free to
 share them in a [GitHub issue](https://github.com/ory/docs/issues/new) any time.
 
+:::
+
 <a id="ory-oathkeeper-api"></a>
+
 ## api
 
 <a id="opIdgetWellKnownJSONWebKeys"></a>
@@ -34,6 +42,7 @@ This endpoint returns cryptographic keys that are required to, for example, veri
 #### Responses
 
 <a id="lists-cryptographic-keys-responses"></a>
+
 ##### Overview
 
 |Status|Meaning|Description|Schema|
@@ -93,27 +102,18 @@ This operation does not require authentication
 
 #### Code samples
 
-<div class="tabs" id="tab-getWellKnownJSONWebKeys">
-<nav class="tabs-nav">
-<ul class="nav nav-tabs au-link-list au-link-list--inline">
-<li class="nav-item"><a class="nav-link active" role="tab" href="#tab-getWellKnownJSONWebKeys-shell">Shell</a></li>
-<li class="nav-item"><a class="nav-link" role="tab" href="#tab-getWellKnownJSONWebKeys-go">Go</a></li>
-<li class="nav-item"><a class="nav-link" role="tab" href="#tab-getWellKnownJSONWebKeys-node">Node.js</a></li>
-<li class="nav-item"><a class="nav-link" role="tab" href="#tab-getWellKnownJSONWebKeys-java">Java</a></li>
-<li class="nav-item"><a class="nav-link" role="tab" href="#tab-getWellKnownJSONWebKeys-python">Python</a></li>
-<li class="nav-item"><a class="nav-link" role="tab" href="#tab-getWellKnownJSONWebKeys-ruby">Ruby</a></li>
-</ul>
-</nav>
-<div class="tab-content">
-<div class="tab-pane active" role="tabpanel" id="tab-getWellKnownJSONWebKeys-shell">
+<Tabs groupId="code-samples" defaultValue="shell"
+  values={[{label: 'Shell', value: 'shell'}, {label: 'Go', value: 'go'}, {label: 'Node', value: 'node'},
+    {label: 'Java', value: 'java'}, {label: 'Python', value: 'python'}, {label: 'Ruby', value: 'ruby'}]}>
+<TabItem value="shell">
 
 ```shell
 curl -X GET /.well-known/jwks.json \
   -H 'Accept: application/json'
 ```
 
-</div>
-<div class="tab-pane" role="tabpanel"  id="tab-getWellKnownJSONWebKeys-go">
+</TabItem>
+<TabItem value="go">
 
 ```go
 package main
@@ -140,10 +140,10 @@ func main() {
 }
 ```
 
-</div>
-<div class="tab-pane" role="tabpanel"  id="tab-getWellKnownJSONWebKeys-node">
+</TabItem>
+<TabItem value="node">
 
-```nodejs
+```javascript
 const fetch = require('node-fetch');
 
 const headers = {
@@ -160,8 +160,8 @@ fetch('/.well-known/jwks.json', {
 })
 ```
 
-</div>
-<div class="tab-pane" role="tabpanel"  id="tab-getWellKnownJSONWebKeys-java">
+</TabItem>
+<TabItem value="java">
 
 ```java
 // This sample needs improvement.
@@ -186,8 +186,8 @@ in.close();
 System.out.println(response.toString());
 ```
 
-</div>
-<div class="tab-pane" role="tabpanel"  id="tab-getWellKnownJSONWebKeys-python">
+</TabItem>
+<TabItem value="python">
 
 ```python
 import requests
@@ -204,8 +204,8 @@ r = requests.get(
 print r.json()
 ```
 
-</div>
-<div class="tab-pane" role="tabpanel"  id="tab-getWellKnownJSONWebKeys-ruby">
+</TabItem>
+<TabItem value="ruby">
 
 ```ruby
 require 'rest-client'
@@ -221,9 +221,8 @@ result = RestClient.get '/.well-known/jwks.json',
 p JSON.parse(result)
 ```
 
-</div>
-</div>
-</div>
+</TabItem>
+</Tabs>
 
 <a id="opIddecisions"></a>
 
@@ -244,6 +243,7 @@ status codes. This endpoint can be used to integrate with other API Proxies like
 #### Responses
 
 <a id="access-control-decision-api-responses"></a>
+
 ##### Overview
 
 |Status|Meaning|Description|Schema|
@@ -324,27 +324,18 @@ This operation does not require authentication
 
 #### Code samples
 
-<div class="tabs" id="tab-decisions">
-<nav class="tabs-nav">
-<ul class="nav nav-tabs au-link-list au-link-list--inline">
-<li class="nav-item"><a class="nav-link active" role="tab" href="#tab-decisions-shell">Shell</a></li>
-<li class="nav-item"><a class="nav-link" role="tab" href="#tab-decisions-go">Go</a></li>
-<li class="nav-item"><a class="nav-link" role="tab" href="#tab-decisions-node">Node.js</a></li>
-<li class="nav-item"><a class="nav-link" role="tab" href="#tab-decisions-java">Java</a></li>
-<li class="nav-item"><a class="nav-link" role="tab" href="#tab-decisions-python">Python</a></li>
-<li class="nav-item"><a class="nav-link" role="tab" href="#tab-decisions-ruby">Ruby</a></li>
-</ul>
-</nav>
-<div class="tab-content">
-<div class="tab-pane active" role="tabpanel" id="tab-decisions-shell">
+<Tabs groupId="code-samples" defaultValue="shell"
+  values={[{label: 'Shell', value: 'shell'}, {label: 'Go', value: 'go'}, {label: 'Node', value: 'node'},
+    {label: 'Java', value: 'java'}, {label: 'Python', value: 'python'}, {label: 'Ruby', value: 'ruby'}]}>
+<TabItem value="shell">
 
 ```shell
 curl -X GET /decisions \
   -H 'Accept: application/json'
 ```
 
-</div>
-<div class="tab-pane" role="tabpanel"  id="tab-decisions-go">
+</TabItem>
+<TabItem value="go">
 
 ```go
 package main
@@ -371,10 +362,10 @@ func main() {
 }
 ```
 
-</div>
-<div class="tab-pane" role="tabpanel"  id="tab-decisions-node">
+</TabItem>
+<TabItem value="node">
 
-```nodejs
+```javascript
 const fetch = require('node-fetch');
 
 const headers = {
@@ -391,8 +382,8 @@ fetch('/decisions', {
 })
 ```
 
-</div>
-<div class="tab-pane" role="tabpanel"  id="tab-decisions-java">
+</TabItem>
+<TabItem value="java">
 
 ```java
 // This sample needs improvement.
@@ -417,8 +408,8 @@ in.close();
 System.out.println(response.toString());
 ```
 
-</div>
-<div class="tab-pane" role="tabpanel"  id="tab-decisions-python">
+</TabItem>
+<TabItem value="python">
 
 ```python
 import requests
@@ -435,8 +426,8 @@ r = requests.get(
 print r.json()
 ```
 
-</div>
-<div class="tab-pane" role="tabpanel"  id="tab-decisions-ruby">
+</TabItem>
+<TabItem value="ruby">
 
 ```ruby
 require 'rest-client'
@@ -452,9 +443,8 @@ result = RestClient.get '/decisions',
 p JSON.parse(result)
 ```
 
-</div>
-</div>
-</div>
+</TabItem>
+</Tabs>
 
 <a id="opIdlistRules"></a>
 
@@ -470,7 +460,8 @@ This method returns an array of all rules that are stored in the backend. This i
 view of what rules you have currently in place.
 
 <a id="list-all-rules-parameters"></a>
-##### Parameters
+
+#### Parameters
 
 |Parameter|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -480,6 +471,7 @@ view of what rules you have currently in place.
 #### Responses
 
 <a id="list-all-rules-responses"></a>
+
 ##### Overview
 
 |Status|Meaning|Description|Schema|
@@ -568,27 +560,18 @@ This operation does not require authentication
 
 #### Code samples
 
-<div class="tabs" id="tab-listRules">
-<nav class="tabs-nav">
-<ul class="nav nav-tabs au-link-list au-link-list--inline">
-<li class="nav-item"><a class="nav-link active" role="tab" href="#tab-listRules-shell">Shell</a></li>
-<li class="nav-item"><a class="nav-link" role="tab" href="#tab-listRules-go">Go</a></li>
-<li class="nav-item"><a class="nav-link" role="tab" href="#tab-listRules-node">Node.js</a></li>
-<li class="nav-item"><a class="nav-link" role="tab" href="#tab-listRules-java">Java</a></li>
-<li class="nav-item"><a class="nav-link" role="tab" href="#tab-listRules-python">Python</a></li>
-<li class="nav-item"><a class="nav-link" role="tab" href="#tab-listRules-ruby">Ruby</a></li>
-</ul>
-</nav>
-<div class="tab-content">
-<div class="tab-pane active" role="tabpanel" id="tab-listRules-shell">
+<Tabs groupId="code-samples" defaultValue="shell"
+  values={[{label: 'Shell', value: 'shell'}, {label: 'Go', value: 'go'}, {label: 'Node', value: 'node'},
+    {label: 'Java', value: 'java'}, {label: 'Python', value: 'python'}, {label: 'Ruby', value: 'ruby'}]}>
+<TabItem value="shell">
 
 ```shell
 curl -X GET /rules \
   -H 'Accept: application/json'
 ```
 
-</div>
-<div class="tab-pane" role="tabpanel"  id="tab-listRules-go">
+</TabItem>
+<TabItem value="go">
 
 ```go
 package main
@@ -615,10 +598,10 @@ func main() {
 }
 ```
 
-</div>
-<div class="tab-pane" role="tabpanel"  id="tab-listRules-node">
+</TabItem>
+<TabItem value="node">
 
-```nodejs
+```javascript
 const fetch = require('node-fetch');
 
 const headers = {
@@ -635,8 +618,8 @@ fetch('/rules', {
 })
 ```
 
-</div>
-<div class="tab-pane" role="tabpanel"  id="tab-listRules-java">
+</TabItem>
+<TabItem value="java">
 
 ```java
 // This sample needs improvement.
@@ -661,8 +644,8 @@ in.close();
 System.out.println(response.toString());
 ```
 
-</div>
-<div class="tab-pane" role="tabpanel"  id="tab-listRules-python">
+</TabItem>
+<TabItem value="python">
 
 ```python
 import requests
@@ -679,8 +662,8 @@ r = requests.get(
 print r.json()
 ```
 
-</div>
-<div class="tab-pane" role="tabpanel"  id="tab-listRules-ruby">
+</TabItem>
+<TabItem value="ruby">
 
 ```ruby
 require 'rest-client'
@@ -696,9 +679,8 @@ result = RestClient.get '/rules',
 p JSON.parse(result)
 ```
 
-</div>
-</div>
-</div>
+</TabItem>
+</Tabs>
 
 <a id="opIdgetRule"></a>
 
@@ -713,7 +695,8 @@ Accept: application/json
 Use this method to retrieve a rule from the storage. If it does not exist you will receive a 404 error.
 
 <a id="retrieve-a-rule-parameters"></a>
-##### Parameters
+
+#### Parameters
 
 |Parameter|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -722,6 +705,7 @@ Use this method to retrieve a rule from the storage. If it does not exist you wi
 #### Responses
 
 <a id="retrieve-a-rule-responses"></a>
+
 ##### Overview
 
 |Status|Meaning|Description|Schema|
@@ -799,27 +783,18 @@ This operation does not require authentication
 
 #### Code samples
 
-<div class="tabs" id="tab-getRule">
-<nav class="tabs-nav">
-<ul class="nav nav-tabs au-link-list au-link-list--inline">
-<li class="nav-item"><a class="nav-link active" role="tab" href="#tab-getRule-shell">Shell</a></li>
-<li class="nav-item"><a class="nav-link" role="tab" href="#tab-getRule-go">Go</a></li>
-<li class="nav-item"><a class="nav-link" role="tab" href="#tab-getRule-node">Node.js</a></li>
-<li class="nav-item"><a class="nav-link" role="tab" href="#tab-getRule-java">Java</a></li>
-<li class="nav-item"><a class="nav-link" role="tab" href="#tab-getRule-python">Python</a></li>
-<li class="nav-item"><a class="nav-link" role="tab" href="#tab-getRule-ruby">Ruby</a></li>
-</ul>
-</nav>
-<div class="tab-content">
-<div class="tab-pane active" role="tabpanel" id="tab-getRule-shell">
+<Tabs groupId="code-samples" defaultValue="shell"
+  values={[{label: 'Shell', value: 'shell'}, {label: 'Go', value: 'go'}, {label: 'Node', value: 'node'},
+    {label: 'Java', value: 'java'}, {label: 'Python', value: 'python'}, {label: 'Ruby', value: 'ruby'}]}>
+<TabItem value="shell">
 
 ```shell
 curl -X GET /rules/{id} \
   -H 'Accept: application/json'
 ```
 
-</div>
-<div class="tab-pane" role="tabpanel"  id="tab-getRule-go">
+</TabItem>
+<TabItem value="go">
 
 ```go
 package main
@@ -846,10 +821,10 @@ func main() {
 }
 ```
 
-</div>
-<div class="tab-pane" role="tabpanel"  id="tab-getRule-node">
+</TabItem>
+<TabItem value="node">
 
-```nodejs
+```javascript
 const fetch = require('node-fetch');
 
 const headers = {
@@ -866,8 +841,8 @@ fetch('/rules/{id}', {
 })
 ```
 
-</div>
-<div class="tab-pane" role="tabpanel"  id="tab-getRule-java">
+</TabItem>
+<TabItem value="java">
 
 ```java
 // This sample needs improvement.
@@ -892,8 +867,8 @@ in.close();
 System.out.println(response.toString());
 ```
 
-</div>
-<div class="tab-pane" role="tabpanel"  id="tab-getRule-python">
+</TabItem>
+<TabItem value="python">
 
 ```python
 import requests
@@ -910,8 +885,8 @@ r = requests.get(
 print r.json()
 ```
 
-</div>
-<div class="tab-pane" role="tabpanel"  id="tab-getRule-ruby">
+</TabItem>
+<TabItem value="ruby">
 
 ```ruby
 require 'rest-client'
@@ -927,11 +902,11 @@ result = RestClient.get '/rules/{id}',
 p JSON.parse(result)
 ```
 
-</div>
-</div>
-</div>
+</TabItem>
+</Tabs>
 
 <a id="ory-oathkeeper-health"></a>
+
 ## health
 
 <a id="opIdisInstanceAlive"></a>
@@ -956,6 +931,7 @@ refer to the cluster state, only to a single instance.
 #### Responses
 
 <a id="check-alive-status-responses"></a>
+
 ##### Overview
 
 |Status|Meaning|Description|Schema|
@@ -993,27 +969,18 @@ This operation does not require authentication
 
 #### Code samples
 
-<div class="tabs" id="tab-isInstanceAlive">
-<nav class="tabs-nav">
-<ul class="nav nav-tabs au-link-list au-link-list--inline">
-<li class="nav-item"><a class="nav-link active" role="tab" href="#tab-isInstanceAlive-shell">Shell</a></li>
-<li class="nav-item"><a class="nav-link" role="tab" href="#tab-isInstanceAlive-go">Go</a></li>
-<li class="nav-item"><a class="nav-link" role="tab" href="#tab-isInstanceAlive-node">Node.js</a></li>
-<li class="nav-item"><a class="nav-link" role="tab" href="#tab-isInstanceAlive-java">Java</a></li>
-<li class="nav-item"><a class="nav-link" role="tab" href="#tab-isInstanceAlive-python">Python</a></li>
-<li class="nav-item"><a class="nav-link" role="tab" href="#tab-isInstanceAlive-ruby">Ruby</a></li>
-</ul>
-</nav>
-<div class="tab-content">
-<div class="tab-pane active" role="tabpanel" id="tab-isInstanceAlive-shell">
+<Tabs groupId="code-samples" defaultValue="shell"
+  values={[{label: 'Shell', value: 'shell'}, {label: 'Go', value: 'go'}, {label: 'Node', value: 'node'},
+    {label: 'Java', value: 'java'}, {label: 'Python', value: 'python'}, {label: 'Ruby', value: 'ruby'}]}>
+<TabItem value="shell">
 
 ```shell
 curl -X GET /health/alive \
   -H 'Accept: application/json'
 ```
 
-</div>
-<div class="tab-pane" role="tabpanel"  id="tab-isInstanceAlive-go">
+</TabItem>
+<TabItem value="go">
 
 ```go
 package main
@@ -1040,10 +1007,10 @@ func main() {
 }
 ```
 
-</div>
-<div class="tab-pane" role="tabpanel"  id="tab-isInstanceAlive-node">
+</TabItem>
+<TabItem value="node">
 
-```nodejs
+```javascript
 const fetch = require('node-fetch');
 
 const headers = {
@@ -1060,8 +1027,8 @@ fetch('/health/alive', {
 })
 ```
 
-</div>
-<div class="tab-pane" role="tabpanel"  id="tab-isInstanceAlive-java">
+</TabItem>
+<TabItem value="java">
 
 ```java
 // This sample needs improvement.
@@ -1086,8 +1053,8 @@ in.close();
 System.out.println(response.toString());
 ```
 
-</div>
-<div class="tab-pane" role="tabpanel"  id="tab-isInstanceAlive-python">
+</TabItem>
+<TabItem value="python">
 
 ```python
 import requests
@@ -1104,8 +1071,8 @@ r = requests.get(
 print r.json()
 ```
 
-</div>
-<div class="tab-pane" role="tabpanel"  id="tab-isInstanceAlive-ruby">
+</TabItem>
+<TabItem value="ruby">
 
 ```ruby
 require 'rest-client'
@@ -1121,9 +1088,8 @@ result = RestClient.get '/health/alive',
 p JSON.parse(result)
 ```
 
-</div>
-</div>
-</div>
+</TabItem>
+</Tabs>
 
 <a id="opIdisInstanceReady"></a>
 
@@ -1147,6 +1113,7 @@ refer to the cluster state, only to a single instance.
 #### Responses
 
 <a id="check-readiness-status-responses"></a>
+
 ##### Overview
 
 |Status|Meaning|Description|Schema|
@@ -1170,27 +1137,18 @@ This operation does not require authentication
 
 #### Code samples
 
-<div class="tabs" id="tab-isInstanceReady">
-<nav class="tabs-nav">
-<ul class="nav nav-tabs au-link-list au-link-list--inline">
-<li class="nav-item"><a class="nav-link active" role="tab" href="#tab-isInstanceReady-shell">Shell</a></li>
-<li class="nav-item"><a class="nav-link" role="tab" href="#tab-isInstanceReady-go">Go</a></li>
-<li class="nav-item"><a class="nav-link" role="tab" href="#tab-isInstanceReady-node">Node.js</a></li>
-<li class="nav-item"><a class="nav-link" role="tab" href="#tab-isInstanceReady-java">Java</a></li>
-<li class="nav-item"><a class="nav-link" role="tab" href="#tab-isInstanceReady-python">Python</a></li>
-<li class="nav-item"><a class="nav-link" role="tab" href="#tab-isInstanceReady-ruby">Ruby</a></li>
-</ul>
-</nav>
-<div class="tab-content">
-<div class="tab-pane active" role="tabpanel" id="tab-isInstanceReady-shell">
+<Tabs groupId="code-samples" defaultValue="shell"
+  values={[{label: 'Shell', value: 'shell'}, {label: 'Go', value: 'go'}, {label: 'Node', value: 'node'},
+    {label: 'Java', value: 'java'}, {label: 'Python', value: 'python'}, {label: 'Ruby', value: 'ruby'}]}>
+<TabItem value="shell">
 
 ```shell
 curl -X GET /health/ready \
   -H 'Accept: application/json'
 ```
 
-</div>
-<div class="tab-pane" role="tabpanel"  id="tab-isInstanceReady-go">
+</TabItem>
+<TabItem value="go">
 
 ```go
 package main
@@ -1217,10 +1175,10 @@ func main() {
 }
 ```
 
-</div>
-<div class="tab-pane" role="tabpanel"  id="tab-isInstanceReady-node">
+</TabItem>
+<TabItem value="node">
 
-```nodejs
+```javascript
 const fetch = require('node-fetch');
 
 const headers = {
@@ -1237,8 +1195,8 @@ fetch('/health/ready', {
 })
 ```
 
-</div>
-<div class="tab-pane" role="tabpanel"  id="tab-isInstanceReady-java">
+</TabItem>
+<TabItem value="java">
 
 ```java
 // This sample needs improvement.
@@ -1263,8 +1221,8 @@ in.close();
 System.out.println(response.toString());
 ```
 
-</div>
-<div class="tab-pane" role="tabpanel"  id="tab-isInstanceReady-python">
+</TabItem>
+<TabItem value="python">
 
 ```python
 import requests
@@ -1281,8 +1239,8 @@ r = requests.get(
 print r.json()
 ```
 
-</div>
-<div class="tab-pane" role="tabpanel"  id="tab-isInstanceReady-ruby">
+</TabItem>
+<TabItem value="ruby">
 
 ```ruby
 require 'rest-client'
@@ -1298,11 +1256,11 @@ result = RestClient.get '/health/ready',
 p JSON.parse(result)
 ```
 
-</div>
-</div>
-</div>
+</TabItem>
+</Tabs>
 
 <a id="ory-oathkeeper-version"></a>
+
 ## version
 
 <a id="opIdgetVersion"></a>
@@ -1326,6 +1284,7 @@ refer to the cluster state, only to a single instance.
 #### Responses
 
 <a id="get-service-version-responses"></a>
+
 ##### Overview
 
 |Status|Meaning|Description|Schema|
@@ -1348,27 +1307,18 @@ This operation does not require authentication
 
 #### Code samples
 
-<div class="tabs" id="tab-getVersion">
-<nav class="tabs-nav">
-<ul class="nav nav-tabs au-link-list au-link-list--inline">
-<li class="nav-item"><a class="nav-link active" role="tab" href="#tab-getVersion-shell">Shell</a></li>
-<li class="nav-item"><a class="nav-link" role="tab" href="#tab-getVersion-go">Go</a></li>
-<li class="nav-item"><a class="nav-link" role="tab" href="#tab-getVersion-node">Node.js</a></li>
-<li class="nav-item"><a class="nav-link" role="tab" href="#tab-getVersion-java">Java</a></li>
-<li class="nav-item"><a class="nav-link" role="tab" href="#tab-getVersion-python">Python</a></li>
-<li class="nav-item"><a class="nav-link" role="tab" href="#tab-getVersion-ruby">Ruby</a></li>
-</ul>
-</nav>
-<div class="tab-content">
-<div class="tab-pane active" role="tabpanel" id="tab-getVersion-shell">
+<Tabs groupId="code-samples" defaultValue="shell"
+  values={[{label: 'Shell', value: 'shell'}, {label: 'Go', value: 'go'}, {label: 'Node', value: 'node'},
+    {label: 'Java', value: 'java'}, {label: 'Python', value: 'python'}, {label: 'Ruby', value: 'ruby'}]}>
+<TabItem value="shell">
 
 ```shell
 curl -X GET /version \
   -H 'Accept: application/json'
 ```
 
-</div>
-<div class="tab-pane" role="tabpanel"  id="tab-getVersion-go">
+</TabItem>
+<TabItem value="go">
 
 ```go
 package main
@@ -1395,10 +1345,10 @@ func main() {
 }
 ```
 
-</div>
-<div class="tab-pane" role="tabpanel"  id="tab-getVersion-node">
+</TabItem>
+<TabItem value="node">
 
-```nodejs
+```javascript
 const fetch = require('node-fetch');
 
 const headers = {
@@ -1415,8 +1365,8 @@ fetch('/version', {
 })
 ```
 
-</div>
-<div class="tab-pane" role="tabpanel"  id="tab-getVersion-java">
+</TabItem>
+<TabItem value="java">
 
 ```java
 // This sample needs improvement.
@@ -1441,8 +1391,8 @@ in.close();
 System.out.println(response.toString());
 ```
 
-</div>
-<div class="tab-pane" role="tabpanel"  id="tab-getVersion-python">
+</TabItem>
+<TabItem value="python">
 
 ```python
 import requests
@@ -1459,8 +1409,8 @@ r = requests.get(
 print r.json()
 ```
 
-</div>
-<div class="tab-pane" role="tabpanel"  id="tab-getVersion-ruby">
+</TabItem>
+<TabItem value="ruby">
 
 ```ruby
 require 'rest-client'
@@ -1476,9 +1426,8 @@ result = RestClient.get '/version',
 p JSON.parse(result)
 ```
 
-</div>
-</div>
-</div>
+</TabItem>
+</Tabs>
 
 ## Schemas
 
