@@ -61,10 +61,6 @@ func TestValidateRule(t *testing.T) {
 			expectErr: `Value "" of "match.url" field is not a valid url.`,
 		},
 		{
-			r:         &Rule{Match: &Match{URL: "https://www.ory.sh", Methods: []string{"FOO"}}},
-			expectErr: `Value "FOO" of "match.methods" is not a valid HTTP method, valid methods are:`,
-		},
-		{
 			r: &Rule{
 				Match:    &Match{URL: "https://www.ory.sh", Methods: []string{"POST"}},
 				Upstream: Upstream{URL: "https://www.ory.sh"},
@@ -133,6 +129,16 @@ func TestValidateRule(t *testing.T) {
 			setup: prep(true, true, true),
 			r: &Rule{
 				Match:          &Match{URL: "https://www.ory.sh", Methods: []string{"POST"}},
+				Upstream:       Upstream{URL: "https://www.ory.sh"},
+				Authenticators: []Handler{{Handler: "noop"}},
+				Authorizer:     Handler{Handler: "allow"},
+				Mutators:       []Handler{{Handler: "noop"}},
+			},
+		},
+		{
+			setup: prep(true, true, true),
+			r: &Rule{
+				Match:          &Match{URL: "https://www.ory.sh", Methods: []string{"MKCOL"}},
 				Upstream:       Upstream{URL: "https://www.ory.sh"},
 				Authenticators: []Handler{{Handler: "noop"}},
 				Authorizer:     Handler{Handler: "allow"},

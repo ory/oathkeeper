@@ -47,6 +47,12 @@ serve:
   api:
     port: 1235
     host: 127.0.0.2
+
+    timeout:
+      read: 1s
+      write: 2s
+      idle: 3s
+
     cors:
       enabled: true
       allowed_origins:
@@ -72,6 +78,12 @@ serve:
       cert:
         path: /path/to/cert.pem
         base64: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tXG5NSUlEWlRDQ0FrMmdBd0lCQWdJRVY1eE90REFOQmdr...
+
+  prometheus:
+    port: 9000
+    host: localhost
+    metrics_path: /metrics
+    collapse_request_paths: true
 
 # Configures Access Rules
 access_rules:
@@ -240,6 +252,15 @@ authorizers:
       base_url: http://my-keto/
       required_action: unknown
       required_resource: unknown
+
+  # Configures the remote authorizer
+  remote:
+    # Set enabled to true if the authorizer should be enabled and false to disable the authorizer. Defaults to false.
+    enabled: true
+
+    config:
+      remote: https://host/path
+      headers: {}
 
   # Configures the remote_json authorizer
   remote_json:

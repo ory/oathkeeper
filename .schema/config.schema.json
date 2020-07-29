@@ -1,9 +1,53 @@
 {
-  "$id": "https://raw.githubusercontent.com/ory/oathkeeper/master/.schema/config.schema.json",
+  "$id": "/.schema/config.schema.json",
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "ORY Oathkeeper Configuration",
   "type": "object",
   "definitions": {
+    "serverTimeout": {
+      "title": "HTTP Timeouts",
+      "description": "Control the HTTP timeouts.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "read": {
+          "title": "HTTP Read Timeout",
+          "type": "string",
+          "default": "5s",
+          "pattern": "^[0-9]+(ns|us|ms|s|m|h)$",
+          "description": "The maximum duration for reading the entire request, including the body.",
+          "examples": [
+            "5s",
+            "5m",
+            "5h"
+          ]
+        },
+        "write": {
+          "title": "HTTP Write Timeout",
+          "type": "string",
+          "default": "120s",
+          "pattern": "^[0-9]+(ns|us|ms|s|m|h)$",
+          "description": "The maximum duration before timing out writes of the response. Increase this parameter to prevent unexpected closing a client connection if an upstream request is responding slowly.",
+          "examples": [
+            "5s",
+            "5m",
+            "5h"
+          ]
+        },
+        "idle": {
+          "title": "HTTP Idle Timeout",
+          "type": "string",
+          "default": "120s",
+          "pattern": "^[0-9]+(ns|us|ms|s|m|h)$",
+          "description": " The maximum amount of time to wait for any action of a request session, reading data or writing the response.",
+          "examples": [
+            "5s",
+            "5m",
+            "5h"
+          ]
+        }
+      }
+    },
     "retry": {
       "type": "object",
       "additionalProperties": false,
@@ -507,6 +551,9 @@
           "items": {
             "type": "string"
           }
+        },
+        "retry": {
+          "$ref": "#/definitions/retry"
         }
       },
       "required": [
@@ -616,7 +663,8 @@
                   "description": "The OAuth 2.0 Scope to be requested during the OAuth 2.0 Client Credentials Grant.",
                   "examples": [
                     [
-                      "foo", "bar"
+                      "foo",
+                      "bar"
                     ]
                   ]
                 }
@@ -697,6 +745,24 @@
         },
         "retry": {
           "$ref": "#/definitions/retry"
+        },
+        "cache": {
+          "additionalProperties": false,
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "$ref": "#/definitions/handlerSwitch"
+            },
+            "ttl": {
+              "type": "string",
+              "pattern": "^[0-9]+(ns|us|ms|s|m|h)$",
+              "title": "Cache Time to Live",
+              "description": "Can override the default behaviour of using the token exp time, and specify a set time to live for the token in the cache.",
+              "examples": [
+                "5s"
+              ]
+            }
+          }
         }
       },
       "required": [
@@ -735,6 +801,32 @@
         "base_url",
         "required_action",
         "required_resource"
+      ],
+      "additionalProperties": false
+    },
+    "configAuthorizersRemote": {
+      "type": "object",
+      "title": "Remote Configuration",
+      "description": "This section is optional when the authorizer is disabled.",
+      "properties": {
+        "remote": {
+          "title": "Remote Authorizer URL",
+          "type": "string",
+          "format": "uri",
+          "description": "The URL of the remote authorizer. The remote authorizer is expected to return either 200 OK or 403 Forbidden to allow/deny access.\n\n>If this authorizer is enabled, this value is required.",
+          "examples": [
+            "https://host/path"
+          ]
+        },
+        "headers": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "remote"
       ],
       "additionalProperties": false
     },
@@ -843,6 +935,22 @@
               "$ref": "#/definitions/retry"
             }
           }
+        },
+        "cache": {
+          "additionalProperties": false,
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "$ref": "#/definitions/handlerSwitch"
+            },
+            "ttl": {
+              "type": "string",
+              "pattern": "^[0-9]+(ns|us|ms|s|m|h)$",
+              "title": "Cache Time to Live",
+              "description": "How long to cache hydrate calls",
+              "default": "1m"
+            }
+          }
         }
       },
       "required": [
@@ -921,6 +1029,9 @@
               "title": "Host",
               "description": "The network interface to listen on."
             },
+            "timeout": {
+              "$ref": "#/definitions/serverTimeout"
+            },
             "cors": {
               "$ref": "#/definitions/cors"
             },
@@ -951,54 +1062,48 @@
               "description": "The network interface to listen on. Leave empty to listen on all interfaces."
             },
             "timeout": {
-              "title": "HTTP Timeouts",
-              "description": "Control the reverse proxy's HTTP timeouts.",
-              "type": "object",
-              "additionalProperties": false,
-              "properties": {
-                "read": {
-                  "title": "HTTP Read Timeout",
-                  "type": "string",
-                  "default": "5s",
-                  "pattern": "^[0-9]+(ns|us|ms|s|m|h)$",
-                  "description": "The maximum duration for reading the entire request, including the body.",
-                  "examples": [
-                    "5s",
-                    "5m",
-                    "5h"
-                  ]
-                },
-                "write": {
-                  "title": "HTTP Write Timeout",
-                  "type": "string",
-                  "default": "120s",
-                  "pattern": "^[0-9]+(ns|us|ms|s|m|h)$",
-                  "description": "The maximum duration before timing out writes of the response. Increase this parameter to prevent unexpected closing a client connection if an upstream request is responding slowly.",
-                  "examples": [
-                    "5s",
-                    "5m",
-                    "5h"
-                  ]
-                },
-                "idle": {
-                  "title": "HTTP Idle Timeout",
-                  "type": "string",
-                  "default": "120s",
-                  "pattern": "^[0-9]+(ns|us|ms|s|m|h)$",
-                  "description": " The maximum amount of time to wait for any action of a request session, reading data or writing the response.",
-                  "examples": [
-                    "5s",
-                    "5m",
-                    "5h"
-                  ]
-                }
-              }
+              "$ref": "#/definitions/serverTimeout"
             },
             "cors": {
               "$ref": "#/definitions/cors"
             },
             "tls": {
               "$ref": "#/definitions/tlsx"
+            }
+          }
+        },
+        "prometheus": {
+          "type": "object",
+          "title": "Prometheus scraping endpoint",
+          "additionalProperties": false,
+          "properties": {
+            "port": {
+              "type": "integer",
+              "default": 9000,
+              "title": "Port",
+              "description": "The port to listen on."
+            },
+            "host": {
+              "type": "string",
+              "default": "",
+              "examples": [
+                "localhost",
+                "127.0.0.1"
+              ],
+              "title": "Host",
+              "description": "The network interface to listen on. Leave empty to listen on all interfaces."
+            },
+            "metrics_path": {
+              "type": "string",
+              "default": "/metrics",
+              "title": "Path",
+              "description": "The path to provide metrics on"
+            },
+            "collapse_request_paths": {
+              "type": "boolean",
+              "default": true,
+              "title": "CollapsePaths",
+              "description": "When set to true the request label will include just the first segment of the request path"
             }
           }
         }
@@ -1228,9 +1333,11 @@
           "default": [
             "json"
           ],
-          "examples": [[
-            "redirect"
-          ]]
+          "examples": [
+            [
+              "redirect"
+            ]
+          ]
         },
         "handlers": {
           "additionalProperties": false,
@@ -1387,6 +1494,38 @@
                 },
                 "config": {
                   "$ref": "#/definitions/configAuthorizersKetoEngineAcpOry"
+                }
+              },
+              "required": [
+                "config"
+              ]
+            },
+            {
+              "properties": {
+                "enabled": {
+                  "const": false
+                }
+              }
+            }
+          ]
+        },
+        "remote": {
+          "title": "Remote",
+          "description": "The [`remote` authorizer](https://www.ory.sh/oathkeeper/docs/pipeline/authz#remote).",
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "$ref": "#/definitions/handlerSwitch"
+            }
+          },
+          "oneOf": [
+            {
+              "properties": {
+                "enabled": {
+                  "const": true
+                },
+                "config": {
+                  "$ref": "#/definitions/configAuthorizersRemote"
                 }
               },
               "required": [

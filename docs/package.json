@@ -1,23 +1,29 @@
 {
-  "name": "keto",
+  "name": "docusaurus-template",
   "version": "0.0.0",
   "private": true,
   "scripts": {
+    "gen": "cd .. && node ./docs/scripts/fix-api.js ./docs/docs/reference/api.mdx && node ./docs/scripts/config.js docs/config.js",
     "docusaurus": "docusaurus",
     "start": "docusaurus start",
     "build": "docusaurus build",
     "swizzle": "docusaurus swizzle",
     "deploy": "docusaurus deploy",
-    "generate:api": "widdershins -u ../.widdershins/templates -e ../.widdershins/config.json ../api.swagger.json -o ../docs/oathkeeper/sdk/api.md",
-    "format": "prettier --write '{docs/**,docs,scripts,static,contrib}/*.{md,json,js,css,html}' || true"
+    "format": "prettier --write '{docs/**,docs,scripts,static,contrib}/*.{md,mdx,json,js,css,html}' --no-semi --single-quote --trailing-comma none || true"
   },
   "dependencies": {
-    "@docusaurus/core": "2.0.0-alpha.50",
-    "@docusaurus/preset-classic": "2.0.0-alpha.50",
-    "classnames": "^2.2.6",
-    "node-fetch": "^2.6.0",
-    "react": "^16.8.4",
-    "react-dom": "^16.8.4"
+    "@docusaurus/core": "2.0.0-alpha.58",
+    "@docusaurus/plugin-content-docs": "2.0.0-alpha.58",
+    "@docusaurus/plugin-content-pages": "2.0.0-alpha.58",
+    "@docusaurus/plugin-google-analytics": "2.0.0-alpha.58",
+    "@docusaurus/plugin-sitemap": "2.0.0-alpha.58",
+    "@docusaurus/theme-classic": "2.0.0-alpha.58",
+    "@docusaurus/theme-search-algolia": "2.0.0-alpha.58",
+    "classnames": "2.2.6",
+    "mermaid": "8.5.2",
+    "node-fetch": "2.6.0",
+    "react": "16.8.4",
+    "react-dom": "16.8.4"
   },
   "browserslist": {
     "production": [
@@ -32,10 +38,11 @@
     ]
   },
   "devDependencies": {
-    "json-schema-faker": "^0.5.0-rcv.24",
-    "json-schema-ref-parser": "^8.0.0",
-    "prettier": "^2.0.2",
-    "ramda": "^0.27.0",
-    "yaml": "^1.8.3"
+    "json-schema-faker": "0.5.0-rcv.25",
+    "json-schema-ref-parser": "8.0.0",
+    "prettier": "2.0.2",
+    "ramda": "0.27.0",
+    "remark-admonitions": "1.2.1",
+    "yaml": "1.8.3"
   }
 }

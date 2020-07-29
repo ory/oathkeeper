@@ -1,0 +1,22 @@
+{
+  "$id": "https://raw.githubusercontent.com/ory/oathkeeper/master/.schemas/authenticators.anonymous.schema.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "title": "Anonymous Authenticator Configuration",
+  "description": "This section is optional when the authenticator is disabled.",
+  "properties": {
+    "subject": {
+      "type": "string",
+      "title": "Anonymous Subject",
+      "examples": [
+        "guest",
+        "anon",
+        "anonymous",
+        "unknown"
+      ],
+      "default": "anonymous",
+      "description": "Sets the anonymous username."
+    }
+  },
+  "additionalProperties": false
+}

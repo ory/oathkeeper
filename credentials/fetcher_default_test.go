@@ -13,6 +13,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
+	"github.com/ory/x/logrusx"
+
 	"github.com/ory/herodot"
 	"github.com/ory/x/urlx"
 )
@@ -27,10 +29,8 @@ var sets = [...]json.RawMessage{
 func TestFetcherDefault(t *testing.T) {
 	const maxWait = time.Millisecond * 100
 
-	l := logrus.New()
-	l.Level = logrus.DebugLevel
-
-	w := herodot.NewJSONWriter(l)
+	l := logrusx.New("", "", logrusx.ForceLevel(logrus.DebugLevel))
+	w := herodot.NewJSONWriter(l.Logger)
 	s := NewFetcherDefault(l, maxWait, maxWait*7)
 
 	timeOutServer := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {

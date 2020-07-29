@@ -27,8 +27,6 @@ import (
 
 	"github.com/pkg/errors"
 
-	"github.com/ory/x/viperx"
-
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/helper"
 	"github.com/ory/oathkeeper/x"
@@ -110,8 +108,7 @@ func (m *RepositoryMemory) Get(ctx context.Context, id string) (*Rule, error) {
 func (m *RepositoryMemory) Set(ctx context.Context, rules []Rule) error {
 	for _, check := range rules {
 		if err := m.r.RuleValidator().Validate(&check); err != nil {
-			viperx.LoggerWithValidationErrorFields(m.r.Logger(), err).WithError(err).
-				WithField("rule_id", check.ID).
+			m.r.Logger().WithError(err).WithField("rule_id", check.ID).
 				Errorf("A Rule uses a malformed configuration and all URLs matching this rule will not work. You should resolve this issue now.")
 		}
 	}
@@ -123,6 +120,10 @@ func (m *RepositoryMemory) Set(ctx context.Context, rules []Rule) error {
 }
 
 func (m *RepositoryMemory) Match(_ context.Context, method string, u *url.URL) (*Rule, error) {
+	if u == nil {
+		return nil, errors.WithStack(errors.New("nil URL provided"))
+	}
+
 	m.Lock()
 	defer m.Unlock()
 

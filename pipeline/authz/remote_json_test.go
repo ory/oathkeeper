@@ -7,10 +7,11 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/tidwall/sjson"
+
+	"github.com/ory/x/logrusx"
 
 	"github.com/ory/viper"
 
@@ -136,7 +137,7 @@ func TestAuthorizerRemoteJSONAuthorize(t *testing.T) {
 				tt.config, _ = sjson.SetBytes(tt.config, "remote", server.URL)
 			}
 
-			p := configuration.NewViperProvider(logrus.New())
+			p := configuration.NewViperProvider(logrusx.New("", ""))
 			a := NewAuthorizerRemoteJSON(p)
 			if err := a.Authorize(&http.Request{}, tt.session, tt.config, &rule.Rule{}); (err != nil) != tt.wantErr {
 				t.Errorf("Authorize() error = %v, wantErr %v", err, tt.wantErr)
@@ -189,7 +190,7 @@ func TestAuthorizerRemoteJSONValidate(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			p := configuration.NewViperProvider(logrus.New())
+			p := configuration.NewViperProvider(logrusx.New("", ""))
 			a := NewAuthorizerRemoteJSON(p)
 			viper.Set(configuration.ViperKeyAuthorizerRemoteJSONIsEnabled, tt.enabled)
 			if err := a.Validate(tt.config); (err != nil) != tt.wantErr {

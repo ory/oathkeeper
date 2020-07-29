@@ -8,9 +8,10 @@ import (
 	"testing"
 
 	"github.com/rs/cors"
-	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/ory/x/logrusx"
 
 	"github.com/ory/x/urlx"
 	"github.com/ory/x/viperx"
@@ -28,7 +29,7 @@ import (
 )
 
 func setup(t *testing.T) *ViperProvider {
-	l := logrus.New()
+	l := logrusx.New("", "")
 	viper.Reset()
 	viperx.InitializeConfig(
 		"oathkeeper",
@@ -38,7 +39,7 @@ func setup(t *testing.T) *ViperProvider {
 
 	err := viperx.ValidateFromURL("file://../../.schema/config.schema.json")
 	if err != nil {
-		viperx.LoggerWithValidationErrorFields(l, err).Error("unable to validate")
+		l.WithError(err).Error("unable to validate")
 	}
 	require.NoError(t, err)
 
@@ -52,7 +53,7 @@ func TestPipelineConfig(t *testing.T) {
 		p := setup(t)
 
 		require.NoError(t, p.PipelineConfig("authenticators", "oauth2_introspection", nil, &res))
-		assert.JSONEq(t, `{"introspection_url":"https://override/path","pre_authorization":{"client_id":"some_id","client_secret":"some_secret","enabled":true,"scope":["foo","bar"],"token_url":"https://my-website.com/oauth2/token"},"retry":{"max_delay":"100ms", "give_up_after":"1s"},"scope_strategy":"exact"}`, string(res), "%s", res)
+		assert.JSONEq(t, `{"cache":{"enabled":false},"introspection_url":"https://override/path","pre_authorization":{"client_id":"some_id","client_secret":"some_secret","enabled":true,"scope":["foo","bar"],"token_url":"https://my-website.com/oauth2/token"},"retry":{"max_delay":"100ms", "give_up_after":"1s"},"scope_strategy":"exact"}`, string(res), "%s", res)
 
 		// Cleanup
 		require.NoError(t, os.Setenv("AUTHENTICATORS_OAUTH2_INTROSPECTION_CONFIG_INTROSPECTION_URL", ""))
@@ -63,13 +64,13 @@ func TestPipelineConfig(t *testing.T) {
 		p := setup(t)
 		res := json.RawMessage{}
 		require.Error(t, p.PipelineConfig("mutators", "hydrator", json.RawMessage(`{"not-api":"invalid"}`), &res))
-		assert.JSONEq(t, `{"api":{"url":"https://some-url/","retry":{"give_up_after":"1s","max_delay":"100ms"}},"not-api":"invalid"}`, string(res))
+		assert.JSONEq(t, `{"cache":{"enabled":false,"ttl":"1m"},"api":{"url":"https://some-url/","retry":{"give_up_after":"1s","max_delay":"100ms"}},"not-api":"invalid"}`, string(res))
 
 		require.Error(t, p.PipelineConfig("mutators", "hydrator", json.RawMessage(`{"api":{"this-key-does-not-exist":true}}`), &res))
-		assert.JSONEq(t, `{"api":{"url":"https://some-url/","this-key-does-not-exist":true,"retry":{"give_up_after":"1s","max_delay":"100ms"}}}`, string(res))
+		assert.JSONEq(t, `{"cache":{"enabled":false,"ttl":"1m"},"api":{"url":"https://some-url/","this-key-does-not-exist":true,"retry":{"give_up_after":"1s","max_delay":"100ms"}}}`, string(res))
 
 		require.Error(t, p.PipelineConfig("mutators", "hydrator", json.RawMessage(`{"api":{"url":"not-a-url"}}`), &res))
-		assert.JSONEq(t, `{"api":{"url":"not-a-url","retry":{"give_up_after":"1s","max_delay":"100ms"}}}`, string(res))
+		assert.JSONEq(t, `{"cache":{"enabled":false,"ttl":"1m"},"api":{"url":"not-a-url","retry":{"give_up_after":"1s","max_delay":"100ms"}}}`, string(res))
 	})
 
 	t.Run("case=should pass and override values", func(t *testing.T) {
@@ -112,19 +113,20 @@ v0.35.2
 
 func BenchmarkPipelineConfig(b *testing.B) {
 	viper.Reset()
+	l := logrusx.New("", "")
 	viperx.InitializeConfig(
 		"oathkeeper",
 		"./../../internal/config/",
-		logrus.New(),
+		l,
 	)
 
 	err := viperx.ValidateFromURL("file://../../.schema/config.schema.json")
 	if err != nil {
-		viperx.LoggerWithValidationErrorFields(logrus.New(), err).Error("unable to validate")
+		l.WithError(err).Error("unable to validate")
 	}
 	require.NoError(b, err)
 
-	p := NewViperProvider(logrus.New())
+	p := NewViperProvider(logrusx.New("", ""))
 
 	for n := 0; n < b.N; n++ {
 		res := json.RawMessage{}
@@ -144,19 +146,20 @@ v0.35.5
 
 func BenchmarkPipelineEnabled(b *testing.B) {
 	viper.Reset()
+	logger := logrusx.New("", "")
 	viperx.InitializeConfig(
 		"oathkeeper",
 		"./../../internal/config/",
-		logrus.New(),
+		logger,
 	)
 
 	err := viperx.ValidateFromURL("file://../../.schema/config.schema.json")
 	if err != nil {
-		viperx.LoggerWithValidationErrorFields(logrus.New(), err).Error("unable to validate")
+		logger.WithError(err).Error("unable to validate")
 	}
 	require.NoError(b, err)
 
-	p := NewViperProvider(logrus.New())
+	p := NewViperProvider(logrusx.New("", ""))
 
 	for n := 0; n < b.N; n++ {
 		p.AuthorizerIsEnabled("allow")
@@ -167,21 +170,28 @@ func BenchmarkPipelineEnabled(b *testing.B) {
 
 func TestViperProvider(t *testing.T) {
 	viper.Reset()
+	logger := logrusx.New("", "")
 	viperx.InitializeConfig(
 		"oathkeeper",
 		"./../../internal/config/",
-		logrus.New(),
+		logger,
 	)
 
 	err := viperx.ValidateFromURL("file://../../.schema/config.schema.json")
 	if err != nil {
-		viperx.LoggerWithValidationErrorFields(logrus.New(), err).Error("unable to validate")
+		logger.WithError(err).Error("unable to validate")
 	}
-	p := NewViperProvider(logrus.New())
+	p := NewViperProvider(logrusx.New("", ""))
 
 	t.Run("group=serve", func(t *testing.T) {
 		assert.Equal(t, "127.0.0.1:1234", p.ProxyServeAddress())
 		assert.Equal(t, "127.0.0.2:1235", p.APIServeAddress())
+
+		t.Run("group=prometheus", func(t *testing.T) {
+			assert.Equal(t, "localhost:9000", p.PrometheusServeAddress())
+			assert.Equal(t, "/metrics", p.PrometheusMetricsPath())
+			assert.Equal(t, true, p.PrometheusCollapseRequestPaths())
+		})
 
 		t.Run("group=cors", func(t *testing.T) {
 			assert.True(t, p.CORSEnabled("proxy"))
@@ -388,7 +398,7 @@ func TestViperProvider(t *testing.T) {
 }
 
 func TestToScopeStrategy(t *testing.T) {
-	v := NewViperProvider(logrus.New())
+	v := NewViperProvider(logrusx.New("", ""))
 
 	assert.True(t, v.ToScopeStrategy("exact", "foo")([]string{"foo"}, "foo"))
 	assert.True(t, v.ToScopeStrategy("hierarchic", "foo")([]string{"foo"}, "foo.bar"))
@@ -399,7 +409,7 @@ func TestToScopeStrategy(t *testing.T) {
 
 func TestAuthenticatorOAuth2TokenIntrospectionPreAuthorization(t *testing.T) {
 	viper.Reset()
-	v := NewViperProvider(logrus.New())
+	v := NewViperProvider(logrusx.New("", ""))
 	viper.Set("authenticators.oauth2_introspection.enabled", true)
 	viper.Set("authenticators.oauth2_introspection.config.introspection_url", "http://some-url/")
 

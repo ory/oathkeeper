@@ -24,26 +24,12 @@ import (
 	"github.com/asaskevich/govalidator"
 	"github.com/pkg/errors"
 
-	"github.com/ory/go-convenience/stringslice"
 	"github.com/ory/herodot"
-
 	"github.com/ory/oathkeeper/pipeline/authn"
 	"github.com/ory/oathkeeper/pipeline/authz"
 	pe "github.com/ory/oathkeeper/pipeline/errors"
 	"github.com/ory/oathkeeper/pipeline/mutate"
 )
-
-var methods = []string{
-	"GET",
-	"POST",
-	"PUT",
-	"HEAD",
-	"DELETE",
-	"PATCH",
-	"OPTIONS",
-	"TRACE",
-	"CONNECT",
-}
 
 type validatorRegistry interface {
 	authn.Registry
@@ -141,12 +127,6 @@ func (v *ValidatorDefault) Validate(r *Rule) error {
 
 	if r.Match.URL == "" {
 		return errors.WithStack(herodot.ErrInternalServerError.WithReasonf(`Value "%s" of "match.url" field is not a valid url.`, r.Match.URL))
-	}
-
-	for _, m := range r.Match.Methods {
-		if !stringslice.Has(methods, m) {
-			return errors.WithStack(herodot.ErrInternalServerError.WithReasonf(`Value "%s" of "match.methods" is not a valid HTTP method, valid methods are: %v`, m, methods))
-		}
 	}
 
 	if r.Upstream.URL == "" {

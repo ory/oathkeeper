@@ -33,8 +33,9 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
 	"gopkg.in/square/go-jose.v2"
+
+	"github.com/ory/x/logrusx"
 
 	"github.com/ory/herodot"
 	"github.com/ory/x/httpx"
@@ -54,7 +55,7 @@ type FetcherDefault struct {
 	client      *http.Client
 	keys        map[string]jose.JSONWebKeySet
 	fetchedAt   map[string]time.Time
-	l           logrus.FieldLogger
+	l           *logrusx.Logger
 }
 
 // NewFetcherDefault returns a new JWKS Fetcher with:
@@ -62,7 +63,7 @@ type FetcherDefault struct {
 // - cancelAfter: If reached, the fetcher will stop waiting for responses and return an error.
 // - waitForResponse: While the fetcher might stop waiting for responses, we will give the server more time to respond
 //		and add the keys to the registry unless waitForResponse is reached in which case we'll terminate the request.
-func NewFetcherDefault(l logrus.FieldLogger, cancelAfter time.Duration, ttl time.Duration) *FetcherDefault {
+func NewFetcherDefault(l *logrusx.Logger, cancelAfter time.Duration, ttl time.Duration) *FetcherDefault {
 	return &FetcherDefault{
 		cancelAfter: cancelAfter,
 		l:           l,

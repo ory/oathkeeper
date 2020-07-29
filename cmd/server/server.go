@@ -11,31 +11,29 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/spf13/cobra"
 	"github.com/urfave/negroni"
 
 	"github.com/ory/analytics-go/v4"
-
-	"github.com/ory/x/reqlog"
-
+	"github.com/ory/graceful"
 	"github.com/ory/viper"
 
-	"github.com/ory/x/healthx"
-
-	"github.com/ory/graceful"
 	"github.com/ory/x/corsx"
+	"github.com/ory/x/healthx"
 	"github.com/ory/x/logrusx"
-	"github.com/ory/x/metricsx"
+	telemetry "github.com/ory/x/metricsx"
+	"github.com/ory/x/reqlog"
 	"github.com/ory/x/tlsx"
 
 	"github.com/ory/oathkeeper/api"
 	"github.com/ory/oathkeeper/driver"
 	"github.com/ory/oathkeeper/driver/configuration"
+	"github.com/ory/oathkeeper/metrics"
 	"github.com/ory/oathkeeper/x"
 )
 
-func runProxy(d driver.Driver, n *negroni.Negroni, logger *logrus.Logger) func() {
+func runProxy(d driver.Driver, n *negroni.Negroni, logger *logrusx.Logger, prom *metrics.PrometheusRepository) func() {
 	return func() {
 		proxy := d.Registry().Proxy()
 
@@ -44,6 +42,9 @@ func runProxy(d driver.Driver, n *negroni.Negroni, logger *logrus.Logger) func()
 			Transport: proxy,
 		}
 
+		promCollapsePaths := d.Configuration().PrometheusCollapseRequestPaths()
+
+		n.Use(metrics.NewMiddleware(prom, "oathkeeper-proxy").ExcludePaths(healthx.ReadyCheckPath, healthx.AliveCheckPath).CollapsePaths(promCollapsePaths))
 		n.Use(reqlog.NewMiddlewareFromLogger(logger, "oathkeeper-proxy").ExcludePaths(healthx.ReadyCheckPath, healthx.AliveCheckPath))
 		n.UseHandler(handler)
 
@@ -75,13 +76,16 @@ func runProxy(d driver.Driver, n *negroni.Negroni, logger *logrus.Logger) func()
 	}
 }
 
-func runAPI(d driver.Driver, n *negroni.Negroni, logger *logrus.Logger) func() {
+func runAPI(d driver.Driver, n *negroni.Negroni, logger *logrusx.Logger, prom *metrics.PrometheusRepository) func() {
 	return func() {
 		router := x.NewAPIRouter()
 		d.Registry().RuleHandler().SetRoutes(router)
 		d.Registry().HealthHandler().SetRoutes(router.Router, true)
 		d.Registry().CredentialHandler().SetRoutes(router)
 
+		promCollapsePaths := d.Configuration().PrometheusCollapseRequestPaths()
+
+		n.Use(metrics.NewMiddleware(prom, "oathkeeper-api").ExcludePaths(healthx.ReadyCheckPath, healthx.AliveCheckPath).CollapsePaths(promCollapsePaths))
 		n.Use(reqlog.NewMiddlewareFromLogger(logger, "oathkeeper-api").ExcludePaths(healthx.ReadyCheckPath, healthx.AliveCheckPath))
 		n.Use(d.Registry().DecisionTraefikHandler())
 		n.Use(d.Registry().DecisionHandler()) // This needs to be the last entry, otherwise the judge API won't work
@@ -92,9 +96,12 @@ func runAPI(d driver.Driver, n *negroni.Negroni, logger *logrus.Logger) func() {
 		certs := cert("api", logger)
 		addr := d.Configuration().APIServeAddress()
 		server := graceful.WithDefaults(&http.Server{
-			Addr:      addr,
-			Handler:   h,
-			TLSConfig: &tls.Config{Certificates: certs},
+			Addr:         addr,
+			Handler:      h,
+			TLSConfig:    &tls.Config{Certificates: certs},
+			ReadTimeout:  d.Configuration().APIReadTimeout(),
+			WriteTimeout: d.Configuration().APIWriteTimeout(),
+			IdleTimeout:  d.Configuration().APIIdleTimeout(),
 		})
 
 		if err := graceful.Graceful(func() error {
@@ -112,7 +119,30 @@ func runAPI(d driver.Driver, n *negroni.Negroni, logger *logrus.Logger) func() {
 	}
 }
 
-func cert(daemon string, logger logrus.FieldLogger) []tls.Certificate {
+func runPrometheus(d driver.Driver, logger *logrusx.Logger, prom *metrics.PrometheusRepository) func() {
+	return func() {
+		promPath := d.Configuration().PrometheusMetricsPath()
+		promAddr := d.Configuration().PrometheusServeAddress()
+
+		server := graceful.WithDefaults(&http.Server{
+			Addr:    promAddr,
+			Handler: promhttp.HandlerFor(prom.Registry, promhttp.HandlerOpts{}),
+		})
+
+		http.Handle(promPath, promhttp.Handler())
+		// Expose the registered metrics via HTTP.
+		if err := graceful.Graceful(func() error {
+			logger.Infof("Listening on http://%s", promAddr)
+			return server.ListenAndServe()
+		}, server.Shutdown); err != nil {
+			logger.Fatalf("Unable to gracefully shutdown HTTP(s) server because %v", err)
+			return
+		}
+		logger.Println("HTTP server was shutdown gracefully")
+	}
+}
+
+func cert(daemon string, logger *logrusx.Logger) []tls.Certificate {
 	cert, err := tlsx.Certificate(
 		viper.GetString("serve."+daemon+".tls.cert.base64"),
 		viper.GetString("serve."+daemon+".tls.key.base64"),
@@ -155,17 +185,17 @@ func RunServe(version, build, date string) func(cmd *cobra.Command, args []strin
 	return func(cmd *cobra.Command, args []string) {
 		fmt.Println(banner(version))
 
-		logger := logrusx.New()
-		d := driver.NewDefaultDriver(logger, version, build, date, true)
+		logger := logrusx.New("ORY Oathkeeper", version)
+		d := driver.NewDefaultDriver(logger, version, build, date)
 		d.Registry().Init()
 
 		adminmw := negroni.New()
 		publicmw := negroni.New()
 
-		metrics := metricsx.New(cmd, logger,
-			&metricsx.Options{
+		telemetry := telemetry.New(cmd, logger,
+			&telemetry.Options{
 				Service:       "ory-oathkeeper",
-				ClusterID:     metricsx.Hash(clusterID(d.Configuration())),
+				ClusterID:     telemetry.Hash(clusterID(d.Configuration())),
 				IsDevelopment: isDevelopment(d.Configuration()),
 				WriteKey:      "xRVRP48SAKw6ViJEnvB0u2PY8bVlsO6O",
 				WhitelistedPaths: []string{
@@ -191,18 +221,21 @@ func RunServe(version, build, date string) func(cmd *cobra.Command, args []strin
 			},
 		)
 
-		adminmw.Use(metrics)
-		publicmw.Use(metrics)
+		adminmw.Use(telemetry)
+		publicmw.Use(telemetry)
 
 		if tracer := d.Registry().Tracer(); tracer.IsLoaded() {
 			adminmw.Use(tracer)
 			publicmw.Use(tracer)
 		}
 
+		prometheusRepo := metrics.NewPrometheusRepository(logger)
+
 		var wg sync.WaitGroup
 		tasks := []func(){
-			runAPI(d, adminmw, logger),
-			runProxy(d, publicmw, logger),
+			runAPI(d, adminmw, logger, prometheusRepo),
+			runProxy(d, publicmw, logger, prometheusRepo),
+			runPrometheus(d, logger, prometheusRepo),
 		}
 		wg.Add(len(tasks))
 		for _, t := range tasks {

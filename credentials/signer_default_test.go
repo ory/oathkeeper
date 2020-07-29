@@ -9,8 +9,9 @@ import (
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/require"
+
+	"github.com/ory/x/logrusx"
 
 	"github.com/ory/x/urlx"
 )
@@ -20,7 +21,7 @@ type defaultSignerMockRegistry struct {
 }
 
 func newDefaultSignerMockRegistry() *defaultSignerMockRegistry {
-	return &defaultSignerMockRegistry{f: NewFetcherDefault(logrus.New(), time.Millisecond*100, time.Millisecond*500)}
+	return &defaultSignerMockRegistry{f: NewFetcherDefault(logrusx.New("", ""), time.Millisecond*100, time.Millisecond*500)}
 }
 
 func (m *defaultSignerMockRegistry) CredentialsFetcher() Fetcher {
@@ -39,7 +40,7 @@ func TestSignerDefault(t *testing.T) {
 			token, err := signer.Sign(context.Background(), urlx.ParseOrPanic(src), jwt.MapClaims{"sub": "foo"})
 			require.NoError(t, err)
 
-			fetcher := NewFetcherDefault(logrus.New(), time.Second, time.Second)
+			fetcher := NewFetcherDefault(logrusx.New("", ""), time.Second, time.Second)
 
 			_, err = verify(t, token, fetcher, src)
 			require.NoError(t, err)

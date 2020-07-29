@@ -23,8 +23,10 @@ package api_test
 import (
 	"context"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
+	"strconv"
 	"testing"
 
 	"github.com/ory/viper"
@@ -284,6 +286,29 @@ func TestDecisionAPI(t *testing.T) {
 			}},
 			code: http.StatusUnauthorized,
 		},
+		{
+			d:   "should not pass Content-Length from client",
+			url: ts.URL + "/decisions" + "/authn-anon/authz-allow/cred-noop/1234",
+			rulesRegexp: []rule.Rule{{
+				Match:          &rule.Match{Methods: []string{"GET"}, URL: ts.URL + "/authn-anon/authz-allow/cred-noop/<[0-9]+>"},
+				Authenticators: []rule.Handler{{Handler: "anonymous"}},
+				Authorizer:     rule.Handler{Handler: "allow"},
+				Mutators:       []rule.Handler{{Handler: "noop"}},
+				Upstream:       rule.Upstream{URL: ""},
+			}},
+			rulesGlob: []rule.Rule{{
+				Match:          &rule.Match{Methods: []string{"GET"}, URL: ts.URL + "/authn-anon/authz-allow/cred-noop/<[0-9]*>"},
+				Authenticators: []rule.Handler{{Handler: "anonymous"}},
+				Authorizer:     rule.Handler{Handler: "allow"},
+				Mutators:       []rule.Handler{{Handler: "noop"}},
+				Upstream:       rule.Upstream{URL: ""},
+			}},
+			transform: func(r *http.Request) {
+				r.Header.Add("Content-Length", "1337")
+			},
+			code:  http.StatusOK,
+			authz: "",
+		},
 	} {
 		t.Run(fmt.Sprintf("case=%d/description=%s", k, tc.d), func(t *testing.T) {
 			testFunc := func(strategy configuration.MatchingStrategy) {
@@ -296,10 +321,14 @@ func TestDecisionAPI(t *testing.T) {
 
 				res, err := http.DefaultClient.Do(req)
 				require.NoError(t, err)
+
+				entireBody, err := ioutil.ReadAll(res.Body)
+				require.NoError(t, err)
 				defer res.Body.Close()
 
 				assert.Equal(t, tc.authz, res.Header.Get("Authorization"))
 				assert.Equal(t, tc.code, res.StatusCode)
+				assert.Equal(t, strconv.Itoa(len(entireBody)), res.Header.Get("Content-Length"))
 			}
 			t.Run("regexp", func(t *testing.T) {
 				reg.RuleRepository().(*rule.RepositoryMemory).WithRules(tc.rulesRegexp)

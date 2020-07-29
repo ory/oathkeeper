@@ -57,9 +57,7 @@
                   "type": "array",
                   "items": {
                     "type": "object",
-                    "additionalProperties": {
-                      "type": "object"
-                    }
+                    "additionalProperties": true
                   }
                 },
                 "message": {
@@ -109,9 +107,7 @@
                   "type": "array",
                   "items": {
                     "type": "object",
-                    "additionalProperties": {
-                      "type": "object"
-                    }
+                    "additionalProperties": true
                   }
                 },
                 "message": {
@@ -142,9 +138,7 @@
                   "type": "array",
                   "items": {
                     "type": "object",
-                    "additionalProperties": {
-                      "type": "object"
-                    }
+                    "additionalProperties": true
                   }
                 },
                 "message": {
@@ -175,9 +169,7 @@
                   "type": "array",
                   "items": {
                     "type": "object",
-                    "additionalProperties": {
-                      "type": "object"
-                    }
+                    "additionalProperties": true
                   }
                 },
                 "message": {
@@ -208,9 +200,7 @@
                   "type": "array",
                   "items": {
                     "type": "object",
-                    "additionalProperties": {
-                      "type": "object"
-                    }
+                    "additionalProperties": true
                   }
                 },
                 "message": {
@@ -262,9 +252,7 @@
                   "type": "array",
                   "items": {
                     "type": "object",
-                    "additionalProperties": {
-                      "type": "object"
-                    }
+                    "additionalProperties": true
                   }
                 },
                 "message": {
@@ -369,9 +357,7 @@
                   "type": "array",
                   "items": {
                     "type": "object",
-                    "additionalProperties": {
-                      "type": "object"
-                    }
+                    "additionalProperties": true
                   }
                 },
                 "message": {
@@ -438,9 +424,7 @@
                   "type": "array",
                   "items": {
                     "type": "object",
-                    "additionalProperties": {
-                      "type": "object"
-                    }
+                    "additionalProperties": true
                   }
                 },
                 "message": {
@@ -471,9 +455,7 @@
                   "type": "array",
                   "items": {
                     "type": "object",
-                    "additionalProperties": {
-                      "type": "object"
-                    }
+                    "additionalProperties": true
                   }
                 },
                 "message": {
