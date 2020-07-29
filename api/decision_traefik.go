@@ -32,10 +32,10 @@ import (
 
 const (
 	DecisionTraefikPath = "/decisions/traefik"
-	xForwardedProto     = "X-Forwarded-Proto"
-	xForwardedHost      = "X-Forwarded-Host"
-	xForwardedURI       = "X-Forwarded-Uri"
-	xForwardedMethod    = "X-Forwarded-Method"
+	TraefikProto        = "X-Forwarded-Proto"
+	TraefikHost         = "X-Forwarded-Host"
+	TraefikURI          = "X-Forwarded-Uri"
+	TraefikMethod       = "X-Forwarded-Method"
 )
 
 type decisionTraefikHandlerRegistry interface {
@@ -62,15 +62,15 @@ func (h *DecisionTraefikHandler) ServeHTTP(w http.ResponseWriter, r *http.Reques
 			r.URL.Scheme = "https"
 		}
 
-		h.decisionTraefiks(w, r)
+		h.decisionTraefik(w, r)
 	} else {
 		next(w, r)
 	}
 }
 
-// swagger:route GET /decisions/traefik api decisionTraefiks
+// swagger:route GET /decisions/traefik api makeTraefikDecision
 //
-// Access Control DecisionTraefik API
+// Access Control Decision Traefik API
 //
 // This endpoint mirrors the proxy capability of ORY Oathkeeper's proxy functionality but instead of forwarding the
 // request to the upstream server, returns 200 (request should be allowed), 401 (unauthorized), or 403 (forbidden)
@@ -84,13 +84,13 @@ func (h *DecisionTraefikHandler) ServeHTTP(w http.ResponseWriter, r *http.Reques
 //       403: genericError
 //       404: genericError
 //       500: genericError
-func (h *DecisionTraefikHandler) decisionTraefiks(w http.ResponseWriter, r *http.Request) {
+func (h *DecisionTraefikHandler) decisionTraefik(w http.ResponseWriter, r *http.Request) {
 	urlToMatch := url.URL{
-		Scheme: r.Header.Get(xForwardedProto),
-		Host:   r.Header.Get(xForwardedHost),
-		Path:   r.Header.Get(xForwardedURI),
+		Scheme: r.Header.Get(TraefikProto),
+		Host:   r.Header.Get(TraefikHost),
+		Path:   r.Header.Get(TraefikURI),
 	}
-	methodToMatch := r.Header.Get(xForwardedMethod)
+	methodToMatch := r.Header.Get(TraefikMethod)
 
 	rl, err := h.r.RuleMatcher().Match(r.Context(), methodToMatch, &urlToMatch)
 	if err != nil {
@@ -98,7 +98,7 @@ func (h *DecisionTraefikHandler) decisionTraefiks(w http.ResponseWriter, r *http
 			WithField("granted", false).
 			WithField("access_url", urlToMatch.String()).
 			Warn("Access request denied")
-		h.r.Writer().WriteError(w, r, err)
+		h.r.ProxyRequestHandler().HandleError(w, r, rl, err)
 		return
 	}
 
@@ -108,7 +108,7 @@ func (h *DecisionTraefikHandler) decisionTraefiks(w http.ResponseWriter, r *http
 			WithField("granted", false).
 			WithField("access_url", urlToMatch.String()).
 			Warn("Access request denied")
-		h.r.Writer().WriteError(w, r, err)
+		h.r.ProxyRequestHandler().HandleError(w, r, rl, err)
 		return
 	}
 
@@ -118,6 +118,11 @@ func (h *DecisionTraefikHandler) decisionTraefiks(w http.ResponseWriter, r *http
 		Warn("Access request granted")
 
 	for k := range s.Header {
+		// Avoid copying the original Content-Length header from the client
+		if k == "content-length" {
+			continue
+		}
+
 		w.Header().Set(k, s.Header.Get(k))
 	}
 

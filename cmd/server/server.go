@@ -201,8 +201,8 @@ func RunServe(version, build, date string) func(cmd *cobra.Command, args []strin
 				WhitelistedPaths: []string{
 					"/",
 					api.DecisionTraefikPath,
-					api.CredentialsPath,
 					api.DecisionPath,
+					api.CredentialsPath,
 					api.RulesPath,
 					healthx.VersionPath,
 					healthx.AliveCheckPath,

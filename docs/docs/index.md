@@ -104,12 +104,12 @@ request to ORY Oathkeeper.
 
 The ORY Oathkeeper Access Control Decision API follows best-practices and works
 with most (if not all) modern API gateways and reverse proxies. To verify a
-request, send it to the `decisions` endpoint located at the Ory Authkeeper API
+request, send it to the `decisions` endpoint located at the Ory Oathkeeper API
 port. It matches every sub-path and HTTP Method:
 
-- `GET /decisions/v1/api`
-- `PUT /decisions/my/other/api`
-- `DELETE /decisions/users?foo=?bar`
+- `GET /decisions/generic/v1/api`
+- `PUT /decisions/generic/my/other/api`
+- `DELETE /decisions/generic/users?foo=?bar`
 
 When matching a rule, the `/decision` prefix is stripped from the matching path.
 

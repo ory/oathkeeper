@@ -31,11 +31,10 @@ import (
 )
 
 const (
-	DecisionPath       = "/decisions/generic"
-	LegacyDecisionPath = "/decisions"
+	DecisionPath = "/decisions/generic"
 )
 
-type decisionHandlerRegistry interface {
+type decisionGenericHandlerDependencies interface {
 	x.RegistryWriter
 	x.RegistryLogger
 
@@ -43,31 +42,22 @@ type decisionHandlerRegistry interface {
 	ProxyRequestHandler() *proxy.RequestHandler
 }
 
-type DecisionHandler struct {
-	r decisionHandlerRegistry
+type DecisionGenericHandler struct {
+	r decisionGenericHandlerDependencies
 }
 
-func NewJudgeHandler(r decisionHandlerRegistry) *DecisionHandler {
-	return &DecisionHandler{r: r}
+func NewDecisionGenericHandler(r decisionGenericHandlerDependencies) *DecisionGenericHandler {
+	return &DecisionGenericHandler{r: r}
 }
 
-func (h *DecisionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
-	// Due to how the middleware is ordered, we'll only end up here if no other decision path has matched
-	// Therefore we can savely assume that this is a generic decision request
-	if len(r.URL.Path) >= len(LegacyDecisionPath) && r.URL.Path[:len(LegacyDecisionPath)] == LegacyDecisionPath {
+func (h *DecisionGenericHandler) ServeHTTP(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
+	if len(r.URL.Path) >= len(DecisionPath) && r.URL.Path[:len(DecisionPath)] == DecisionPath {
 		r.URL.Scheme = "http"
 		r.URL.Host = r.Host
 		if r.TLS != nil {
 			r.URL.Scheme = "https"
 		}
-
-		if len(r.URL.Path) >= len(DecisionPath) && r.URL.Path[:len(DecisionPath)] == DecisionPath {
-			r.URL.Path = r.URL.Path[len(DecisionPath):]
-		} else {
-			r.URL.Path = r.URL.Path[len(LegacyDecisionPath):]
-			h.r.Logger().
-				Warn("/decisions is deprecated, please use /decisions/generic")
-		}
+		r.URL.Path = r.URL.Path[len(DecisionPath):]
 
 		h.decisions(w, r)
 	} else {
@@ -75,9 +65,9 @@ func (h *DecisionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request, next
 	}
 }
 
-// swagger:route GET /decisions api decisions
+// swagger:route GET /decisions/generic api makeGenericDecision
 //
-// Access Control Decision API
+// Access Control Generic Decision API
 //
 // > This endpoint works with all HTTP Methods (GET, POST, PUT, ...) and matches every path prefixed with /decision.
 //
@@ -93,7 +83,7 @@ func (h *DecisionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request, next
 //       403: genericError
 //       404: genericError
 //       500: genericError
-func (h *DecisionHandler) decisions(w http.ResponseWriter, r *http.Request) {
+func (h *DecisionGenericHandler) decisions(w http.ResponseWriter, r *http.Request) {
 	fields := map[string]interface{}{
 		"http_method":     r.Method,
 		"http_url":        r.URL.String(),
