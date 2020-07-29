@@ -43,14 +43,15 @@ type RegistryMemory struct {
 
 	ch *api.CredentialsHandler
 
-	credentialsFetcher  credentials.Fetcher
-	credentialsVerifier credentials.Verifier
-	credentialsSigner   credentials.Signer
-	ruleValidator       rule.Validator
-	ruleRepository      *rule.RepositoryMemory
-	apiRuleHandler      *api.RuleHandler
-	apiJudgeHandler     *api.DecisionHandler
-	healthxHandler      *healthx.Handler
+	credentialsFetcher          credentials.Fetcher
+	credentialsVerifier         credentials.Verifier
+	credentialsSigner           credentials.Signer
+	ruleValidator               rule.Validator
+	ruleRepository              *rule.RepositoryMemory
+	apiRuleHandler              *api.RuleHandler
+	apiJudgeHandler             *api.DecisionGenericHandler
+	apiDecisionTraefikerHandler *api.DecisionTraefikHandler
+	healthxHandler              *healthx.Handler
 
 	proxyRequestHandler *proxy.RequestHandler
 	proxyProxy          *proxy.Proxy
@@ -175,11 +176,18 @@ func (r *RegistryMemory) RuleHandler() *api.RuleHandler {
 	return r.apiRuleHandler
 }
 
-func (r *RegistryMemory) DecisionHandler() *api.DecisionHandler {
+func (r *RegistryMemory) DecisionHandler() *api.DecisionGenericHandler {
 	if r.apiJudgeHandler == nil {
-		r.apiJudgeHandler = api.NewJudgeHandler(r)
+		r.apiJudgeHandler = api.NewDecisionGenericHandler(r)
 	}
 	return r.apiJudgeHandler
+}
+
+func (r *RegistryMemory) DecisionTraefikHandler() *api.DecisionTraefikHandler {
+	if r.apiDecisionTraefikerHandler == nil {
+		r.apiDecisionTraefikerHandler = api.NewDecisionTraefikerHandler(r)
+	}
+	return r.apiDecisionTraefikerHandler
 }
 
 func (r *RegistryMemory) CredentialsFetcher() credentials.Fetcher {

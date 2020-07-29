@@ -78,7 +78,7 @@
         }
       }
     },
-    "/decisions": {
+    "/decisions/generic": {
       "get": {
         "description": "\u003e This endpoint works with all HTTP Methods (GET, POST, PUT, ...) and matches every path prefixed with /decision.\n\nThis endpoint mirrors the proxy capability of ORY Oathkeeper's proxy functionality but instead of forwarding the\nrequest to the upstream server, returns 200 (request should be allowed), 401 (unauthorized), or 403 (forbidden)\nstatus codes. This endpoint can be used to integrate with other API Proxies like Ambassador, Kong, Envoy, and many more.",
         "schemes": [
@@ -88,8 +88,151 @@
         "tags": [
           "api"
         ],
-        "summary": "Access Control Decision API",
-        "operationId": "decisions",
+        "summary": "Access Control Generic Decision API",
+        "operationId": "makeGenericDecision",
+        "responses": {
+          "200": {
+            "description": "An empty response"
+          },
+          "401": {
+            "description": "The standard error format",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "integer",
+                  "format": "int64"
+                },
+                "details": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": true
+                  }
+                },
+                "message": {
+                  "type": "string"
+                },
+                "reason": {
+                  "type": "string"
+                },
+                "request": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The standard error format",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "integer",
+                  "format": "int64"
+                },
+                "details": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": true
+                  }
+                },
+                "message": {
+                  "type": "string"
+                },
+                "reason": {
+                  "type": "string"
+                },
+                "request": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The standard error format",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "integer",
+                  "format": "int64"
+                },
+                "details": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": true
+                  }
+                },
+                "message": {
+                  "type": "string"
+                },
+                "reason": {
+                  "type": "string"
+                },
+                "request": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "The standard error format",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "integer",
+                  "format": "int64"
+                },
+                "details": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": true
+                  }
+                },
+                "message": {
+                  "type": "string"
+                },
+                "reason": {
+                  "type": "string"
+                },
+                "request": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/decisions/traefik": {
+      "get": {
+        "description": "This endpoint mirrors the proxy capability of ORY Oathkeeper's proxy functionality but instead of forwarding the\nrequest to the upstream server, returns 200 (request should be allowed), 401 (unauthorized), or 403 (forbidden)\nstatus codes. This endpoint can be used to integrate with the Traefik proxy.",
+        "schemes": [
+          "http",
+          "https"
+        ],
+        "tags": [
+          "api"
+        ],
+        "summary": "Access Control Decision Traefik API",
+        "operationId": "makeTraefikDecision",
         "responses": {
           "200": {
             "description": "An empty response"

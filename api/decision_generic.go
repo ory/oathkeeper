@@ -31,10 +31,10 @@ import (
 )
 
 const (
-	DecisionPath = "/decisions"
+	DecisionPath = "/decisions/generic"
 )
 
-type decisionHandlerRegistry interface {
+type decisionGenericHandlerDependencies interface {
 	x.RegistryWriter
 	x.RegistryLogger
 
@@ -42,15 +42,15 @@ type decisionHandlerRegistry interface {
 	ProxyRequestHandler() *proxy.RequestHandler
 }
 
-type DecisionHandler struct {
-	r decisionHandlerRegistry
+type DecisionGenericHandler struct {
+	r decisionGenericHandlerDependencies
 }
 
-func NewJudgeHandler(r decisionHandlerRegistry) *DecisionHandler {
-	return &DecisionHandler{r: r}
+func NewDecisionGenericHandler(r decisionGenericHandlerDependencies) *DecisionGenericHandler {
+	return &DecisionGenericHandler{r: r}
 }
 
-func (h *DecisionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
+func (h *DecisionGenericHandler) ServeHTTP(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
 	if len(r.URL.Path) >= len(DecisionPath) && r.URL.Path[:len(DecisionPath)] == DecisionPath {
 		r.URL.Scheme = "http"
 		r.URL.Host = r.Host
@@ -65,9 +65,9 @@ func (h *DecisionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request, next
 	}
 }
 
-// swagger:route GET /decisions api decisions
+// swagger:route GET /decisions/generic api makeGenericDecision
 //
-// Access Control Decision API
+// Access Control Generic Decision API
 //
 // > This endpoint works with all HTTP Methods (GET, POST, PUT, ...) and matches every path prefixed with /decision.
 //
@@ -83,7 +83,7 @@ func (h *DecisionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request, next
 //       403: genericError
 //       404: genericError
 //       500: genericError
-func (h *DecisionHandler) decisions(w http.ResponseWriter, r *http.Request) {
+func (h *DecisionGenericHandler) decisions(w http.ResponseWriter, r *http.Request) {
 	fields := map[string]interface{}{
 		"http_method":     r.Method,
 		"http_url":        r.URL.String(),
