@@ -140,6 +140,11 @@ func TestMatcher(t *testing.T) {
 				assert.NotEmpty(t, got.matchingEngine.Checksum())
 			})
 
+			t.Run("case=nil url", func(t *testing.T) {
+				_, err := matcher.Match(context.Background(), "GET", nil)
+				require.Error(t, err)
+			})
+
 			require.NoError(t, matcher.Set(context.Background(), testRules[1:]))
 
 			t.Run("case=updated", func(t *testing.T) {
