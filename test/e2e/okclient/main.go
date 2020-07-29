@@ -88,7 +88,7 @@ func requestWithJWT(token string) (*http.Response, string) {
 
 func decisionWithJWT(token string) (*http.Response, string) {
 	pu := urlx.ParseOrPanic(os.Getenv("OATHKEEPER_API"))
-	req, err := http.NewRequest("GET", urlx.AppendPaths(pu, "decisions", "jwt").String(), nil)
+	req, err := http.NewRequest("GET", urlx.AppendPaths(pu, "decisions", "generic", "jwt").String(), nil)
 	cmdx.Must(err, "%s", err)
 	req.Header.Set("Authorization", "Bearer "+token)
 	res, err := http.DefaultClient.Do(req)
