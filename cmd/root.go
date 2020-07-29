@@ -59,7 +59,7 @@ func watchAndValidateViper() {
 	if err != nil {
 		logger.WithError(err).Fatal("Unable to open configuration JSON Schema.")
 	}
-	viperx.WatchAndValidateViper(logger, schema, "ORY Oathkeeper", []string{"serve", "profiling", "log"})
+	viperx.WatchAndValidateViper(logger, schema, "ORY Oathkeeper", []string{"serve", "profiling", "log"}, "")
 }
 
 func init() {

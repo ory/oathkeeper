@@ -312,7 +312,7 @@ func (r *RegistryMemory) AvailablePipelineMutators() (available []string) {
 
 func (r *RegistryMemory) Proxy() *proxy.Proxy {
 	if r.proxyProxy == nil {
-		r.proxyProxy = proxy.NewProxy(r)
+		r.proxyProxy = proxy.NewProxy(r, r.trc)
 	}
 
 	return r.proxyProxy

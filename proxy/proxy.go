@@ -27,8 +27,10 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/opentracing/opentracing-go"
 	"github.com/ory/oathkeeper/pipeline/authn"
 	"github.com/ory/oathkeeper/x"
+	"github.com/ory/x/tracing"
 
 	"github.com/pkg/errors"
 
@@ -43,12 +45,13 @@ type proxyRegistry interface {
 	RuleMatcher() rule.Matcher
 }
 
-func NewProxy(r proxyRegistry) *Proxy {
-	return &Proxy{r: r}
+func NewProxy(r proxyRegistry, t *tracing.Tracer) *Proxy {
+	return &Proxy{r: r, t: t}
 }
 
 type Proxy struct {
 	r proxyRegistry
+	t *tracing.Tracer
 }
 
 type key int
@@ -88,6 +91,22 @@ func (d *Proxy) RoundTrip(r *http.Request) (*http.Response, error) {
 			Header:     rw.header,
 		}, nil
 	} else if err == nil {
+		if d.t.IsLoaded() {
+			var sp opentracing.Span
+			spanName := "forwarding_" + r.URL.Path
+
+			parentSpan := opentracing.SpanFromContext(r.Context())
+
+			if parentSpan == nil {
+				sp = opentracing.StartSpan(spanName)
+			} else {
+				sp = opentracing.StartSpan(spanName, opentracing.ChildOf(parentSpan.Context()))
+			}
+
+			defer sp.Finish()
+			d.t.HTTPInject(sp.Context(), r)
+		}
+
 		res, err := http.DefaultTransport.RoundTrip(r)
 		if err != nil {
 			d.r.Logger().

@@ -1,12 +1,16 @@
 module github.com/ory/oathkeeper
 
+replace github.com/ory/x => ../x
+
 require (
 	github.com/Masterminds/goutils v1.1.0 // indirect
 	github.com/Masterminds/sprig v2.20.0+incompatible
 	github.com/asaskevich/govalidator v0.0.0-20190424111038-f61b66f89f4a
 	github.com/auth0/go-jwt-middleware v0.0.0-20170425171159-5493cabe49f7
 	github.com/blang/semver v3.5.1+incompatible
+	github.com/bmizerany/assert v0.0.0-20160611221934-b7ed37b82869 // indirect
 	github.com/bxcodec/faker v2.0.1+incompatible
+	github.com/codahale/hdrhistogram v0.0.0-20161010025455-3a0bb77429bd // indirect
 	github.com/dgraph-io/ristretto v0.0.2
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/dlclark/regexp2 v1.2.0
@@ -24,7 +28,6 @@ require (
 	github.com/golang/gddo v0.0.0-20190904175337-72a348e765d2
 	github.com/golang/mock v1.3.1
 	github.com/google/uuid v1.1.1
-	github.com/gorilla/mux v1.7.1 // indirect
 	github.com/gorilla/websocket v1.4.2
 	github.com/huandu/xstrings v1.2.0 // indirect
 	github.com/imdario/mergo v0.3.7
@@ -32,6 +35,7 @@ require (
 	github.com/lib/pq v1.3.0
 	github.com/mattn/goveralls v0.0.5
 	github.com/mitchellh/copystructure v1.0.0
+	github.com/opentracing/opentracing-go v1.1.1-0.20190913142402-a7454ce5950e
 	github.com/ory/analytics-go/v4 v4.0.1
 	github.com/ory/cli v0.0.10
 	github.com/ory/fosite v0.29.2
@@ -58,6 +62,7 @@ require (
 	github.com/tidwall/gjson v1.6.0
 	github.com/tidwall/sjson v1.1.1
 	github.com/tomasen/realip v0.0.0-20180522021738-f0c99a92ddce
+	github.com/uber/jaeger-lib v2.2.0+incompatible // indirect
 	github.com/urfave/negroni v1.0.0
 	github.com/xeipuuv/gojsonpointer v0.0.0-20190905194746-02993c407bfb // indirect
 	golang.org/x/crypto v0.0.0-20200510223506-06a226fb4e37
