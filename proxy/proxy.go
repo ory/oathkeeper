@@ -93,7 +93,7 @@ func (d *Proxy) RoundTrip(r *http.Request) (*http.Response, error) {
 	} else if err == nil {
 		if d.t.IsLoaded() {
 			var sp opentracing.Span
-			spanName := "forwarding_" + r.URL.Path
+			spanName := "forwarding_to:" + r.URL.String()
 
 			parentSpan := opentracing.SpanFromContext(r.Context())
 
