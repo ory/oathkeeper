@@ -1,22 +1,13 @@
 version: '3.7'
 
 services:
-
-  volume-populate: 
-  # this is just used to copy the content of ./.docker_compose to oathkeeper-volume
-    image: busybox
-    command: cp -r /src/. /dest
-    volumes:
-      - ./.docker_compose:/src:Z
-      - oathkeeper-volume:/dest
-
   oathkeeper:
     build:
       context: .
       dockerfile: Dockerfile-dc
     ports:
-      - 4455:4455
-      - 4456:4456
+      - "4455:4455"
+      - "4456:4456"
     command:
       serve --config=/etc/config/oathkeeper/config.yaml
     environment:
@@ -26,13 +17,17 @@ services:
       - TRACING_PROVIDER_JAEGER_SAMPLING_TYPE=const
       - TRACING_PROVIDER_JAEGER_SAMPLING_VALUE=1
     volumes:
-      - oathkeeper-volume:/etc/config/oathkeeper
+      - ./.docker_compose:/etc/config/oathkeeper:Z
     restart: on-failure
 
   jaeger:
     image: jaegertracing/all-in-one
     ports:
-      - 16686:16686 # The UI port
-
-volumes:
-  oathkeeper-volume:
+      - "16686:16686" # The UI port
+#      These are ports for collecting, sampling, agents, ...
+#      - "5775:5775/udp"
+#      - "6831:6831/udp"
+#      - "6832:6832/udp"
+#      - "5778:5778"
+#      - "14268:14268"
+#      - "9411:9411"
