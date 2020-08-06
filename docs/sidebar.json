@@ -1,28 +1,30 @@
-module.exports = {
-  Introduction:[
+{
+  "Introduction": [
     "index",
-    "install",
+    "install"
   ],
-  "Core Concepts":[
+  "Core Concepts": [
     "api-access-rules",
     {
-      type: "category",
-      label: "Handlers",
-      items:[
+      "type": "category",
+      "label": "Handlers",
+      "items": [
         "pipeline/index",
         "pipeline/authn",
         "pipeline/authz",
         "pipeline/mutator",
         "pipeline/error"
       ]
-    },
+    }
   ],
-  "Guides":["configure-deploy"],
-  "Reference":[
+  "Guides": [
+    "configure-deploy"
+  ],
+  "Reference": [
     "reference/configuration",
     "reference/api"
   ],
-  "SDKs":[
+  "SDKs": [
     "sdk/index"
-  ],
-};
+  ]
+}
