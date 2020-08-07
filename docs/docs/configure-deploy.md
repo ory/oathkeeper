@@ -21,7 +21,7 @@ For this guide we are using Docker. ORY Oathkeeper however can be
 
 ORY Oathkeeper can be configured via the filesystem as well as environment
 variables. For more information on mapping the keys to environment variables
-please head over to the [configuration chapter](configuration.md).
+please head over to the [configuration chapter](reference/configuration.md).
 
 First, create an empty directory and `cd` into it:
 
