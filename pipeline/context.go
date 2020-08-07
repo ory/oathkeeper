@@ -22,7 +22,7 @@ type ContextResponse struct {
 	Host       string      `json:"host"`
 	RemoteAddr string      `json:"remote_address"`
 
-	RegexpCaptureGroups []string  `json:"regexp_capture_groups"`
+	RegexpCaptureGroups []string `json:"regexp_capture_groups"`
 }
 
 type AuthenticationSession struct {
