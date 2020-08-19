@@ -102,6 +102,12 @@ title: Milestones and Roadmap
 
 #### Pull Requests
 
+### [Label Cloud/M2](https://github.com/ory/oathkeeper/labels/cloud%2FM2)
+
+#### Issues
+
+#### Pull Requests
+
 ## [unplanned](https://github.com/ory/oathkeeper/milestone/3)
 
 ### [Label Bug](https://github.com/ory/oathkeeper/labels/bug)
@@ -198,6 +204,12 @@ title: Milestones and Roadmap
 
 #### Pull Requests
 
+### [Label Cloud/M2](https://github.com/ory/oathkeeper/labels/cloud%2FM2)
+
+#### Issues
+
+#### Pull Requests
+
 ## [v1.0.0](https://github.com/ory/oathkeeper/milestone/2)
 
 ### [Label Bug](https://github.com/ory/oathkeeper/labels/bug)
@@ -283,6 +295,12 @@ title: Milestones and Roadmap
 #### Pull Requests
 
 ### [Label Await feedback](https://github.com/ory/oathkeeper/labels/await%20feedback)
+
+#### Issues
+
+#### Pull Requests
+
+### [Label Cloud/M2](https://github.com/ory/oathkeeper/labels/cloud%2FM2)
 
 #### Issues
 
