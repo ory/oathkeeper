@@ -4,7 +4,7 @@
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 **Table of Contents**
 
-- [Unreleased (2020-08-19)](#unreleased-2020-08-19)
+- [Unreleased (2020-08-20)](#unreleased-2020-08-20)
     - [Documentation](#documentation)
     - [Unclassified](#unclassified)
   - [0.38.3-beta.1 (2020-07-29)](#0383-beta1-2020-07-29)
@@ -176,12 +176,13 @@
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-# [Unreleased](https://github.com/ory/oathkeeper/compare/v0.38.3-beta.1...2aaf766444cb9ae9b794c9638553a32931276a39) (2020-08-19)
+# [Unreleased](https://github.com/ory/oathkeeper/compare/v0.38.3-beta.1...582a4d0e880649cc64aa647b2c35e432b3f234e2) (2020-08-20)
 
 
 ### Documentation
 
 * Fix broken links ([dd3bfbe](https://github.com/ory/oathkeeper/commit/dd3bfbe01ed450ff88a492c041affeaaf17027c9))
+* Move development section ([582a4d0](https://github.com/ory/oathkeeper/commit/582a4d0e880649cc64aa647b2c35e432b3f234e2))
 * Move to json sidebar ([b67230d](https://github.com/ory/oathkeeper/commit/b67230d038ef0b101c6362ab3e1c34a6924cfc96))
 * Update repository templates ([2aaf766](https://github.com/ory/oathkeeper/commit/2aaf766444cb9ae9b794c9638553a32931276a39))
 
