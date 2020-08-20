@@ -26,5 +26,8 @@
   ],
   "SDKs": [
     "sdk/index"
-  ]
+  ],
+  "Development": [
+    "milestones"
+  ],
 }
