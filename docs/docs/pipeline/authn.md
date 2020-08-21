@@ -464,10 +464,10 @@ was granted the requested scope.
     used for the OAuth 2.0 Client Credentials Grant.
   - `client_secret` (string, required if enabled) - The OAuth 2.0 Client Secret
     to be used for the OAuth 2.0 Client Credentials Grant.
-  - `token_url` (string, required if enabled) - The OAuth 2.0 Scope to be
-    requested during the OAuth 2.0 Client Credentials Grant.
-  - `scope` ([]string, optional) - The OAuth 2.0 Token Endpoint where the OAuth
+  - `token_url` (string, required if enabled) - The OAuth 2.0 Token Endpoint where the OAuth
     2.0 Client Credentials Grant will be performed.
+  - `scope` ([]string, optional) - The OAuth 2.0 Scope to be
+    requested during the OAuth 2.0 Client Credentials Grant.
 - `token_from` (object, optional) - The location of the bearer token. If not
   configured, the token will be received from a default location -
   'Authorization' header. One and only one location (header, query, or cookie)
