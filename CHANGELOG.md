@@ -4,37 +4,39 @@
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 **Table of Contents**
 
-- [Unreleased (2020-08-21)](#unreleased-2020-08-21)
+- [Unreleased (2020-08-24)](#unreleased-2020-08-24)
+    - [Bug Fixes](#bug-fixes)
     - [Documentation](#documentation)
+    - [Features](#features)
     - [Unclassified](#unclassified)
   - [0.38.3-beta.1 (2020-07-29)](#0383-beta1-2020-07-29)
-    - [Bug Fixes](#bug-fixes)
-    - [Documentation](#documentation-1)
-    - [Features](#features)
-  - [0.38.2-beta.1 (2020-05-25)](#0382-beta1-2020-05-25)
     - [Bug Fixes](#bug-fixes-1)
-    - [Documentation](#documentation-2)
+    - [Documentation](#documentation-1)
     - [Features](#features-1)
-  - [0.38.1-beta.1 (2020-05-08)](#0381-beta1-2020-05-08)
+  - [0.38.2-beta.1 (2020-05-25)](#0382-beta1-2020-05-25)
     - [Bug Fixes](#bug-fixes-2)
-- [0.38.0-beta.2 (2020-05-07)](#0380-beta2-2020-05-07)
+    - [Documentation](#documentation-2)
+    - [Features](#features-2)
+  - [0.38.1-beta.1 (2020-05-08)](#0381-beta1-2020-05-08)
     - [Bug Fixes](#bug-fixes-3)
+- [0.38.0-beta.2 (2020-05-07)](#0380-beta2-2020-05-07)
+    - [Bug Fixes](#bug-fixes-4)
     - [Code Refactoring](#code-refactoring)
     - [Documentation](#documentation-3)
-    - [Features](#features-2)
+    - [Features](#features-3)
   - [0.37.1-beta.1 (2020-04-03)](#0371-beta1-2020-04-03)
     - [Documentation](#documentation-4)
 - [0.37.0-beta.1 (2020-04-02)](#0370-beta1-2020-04-02)
-    - [Bug Fixes](#bug-fixes-4)
+    - [Bug Fixes](#bug-fixes-5)
     - [Documentation](#documentation-5)
-    - [Features](#features-3)
+    - [Features](#features-4)
     - [BREAKING CHANGES](#breaking-changes)
 - [0.36.0-beta.4 (2020-02-14)](#0360-beta4-2020-02-14)
-    - [Bug Fixes](#bug-fixes-5)
+    - [Bug Fixes](#bug-fixes-6)
     - [Documentation](#documentation-6)
 - [0.36.0-beta.1 (2020-02-05)](#0360-beta1-2020-02-05)
     - [Documentation](#documentation-7)
-    - [Features](#features-4)
+    - [Features](#features-5)
     - [Unclassified](#unclassified-1)
   - [0.35.5-beta.2 (2020-01-31)](#0355-beta2-2020-01-31)
     - [Unclassified](#unclassified-2)
@@ -176,7 +178,12 @@
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-# [Unreleased](https://github.com/ory/oathkeeper/compare/v0.38.3-beta.1...28247fcf53ed5c47879ada62456ab39b29c5752a) (2020-08-21)
+# [Unreleased](https://github.com/ory/oathkeeper/compare/v0.38.3-beta.1...2a4f90127e66917dfaa72f8089efa5149631434d) (2020-08-24)
+
+
+### Bug Fixes
+
+* Deprecated key in goreleaser config ([2a4f901](https://github.com/ory/oathkeeper/commit/2a4f90127e66917dfaa72f8089efa5149631434d))
 
 
 ### Documentation
@@ -189,6 +196,11 @@
 * Move development section ([582a4d0](https://github.com/ory/oathkeeper/commit/582a4d0e880649cc64aa647b2c35e432b3f234e2))
 * Move to json sidebar ([b67230d](https://github.com/ory/oathkeeper/commit/b67230d038ef0b101c6362ab3e1c34a6924cfc96))
 * Update repository templates ([2aaf766](https://github.com/ory/oathkeeper/commit/2aaf766444cb9ae9b794c9638553a32931276a39))
+
+
+### Features
+
+* Add and automate version schema ([7ab4012](https://github.com/ory/oathkeeper/commit/7ab40128352eb4e6639fe4828da7bdd3690e327e))
 
 
 ### Unclassified
