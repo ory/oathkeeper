@@ -1763,6 +1763,12 @@
         "mem",
         ""
       ]
+    },
+    "version": {
+      "type": "string",
+      "title": "The Oathkeeper version this config is written for.",
+      "description": "SemVer according to https://semver.org/ prefixed with `v` as in our releases.",
+      "pattern": "^v(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-((?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\\+([0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?$"
     }
   },
   "required": [],
