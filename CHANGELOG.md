@@ -4,7 +4,7 @@
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 **Table of Contents**
 
-- [Unreleased (2020-08-24)](#unreleased-2020-08-24)
+- [Unreleased (2020-08-26)](#unreleased-2020-08-26)
     - [Bug Fixes](#bug-fixes)
     - [Documentation](#documentation)
     - [Features](#features)
@@ -178,7 +178,7 @@
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-# [Unreleased](https://github.com/ory/oathkeeper/compare/v0.38.3-beta.1...2a4f90127e66917dfaa72f8089efa5149631434d) (2020-08-24)
+# [Unreleased](https://github.com/ory/oathkeeper/compare/v0.38.3-beta.1...e1b175183b8ce9e7d2befae3269d2c5cd959e3e0) (2020-08-26)
 
 
 ### Bug Fixes
@@ -193,6 +193,7 @@
 
     > Switch the definitions for the pre-authorisation fields 'scope' and 'token endpoint' in the documentation.
 * Fix sidebar ([28247fc](https://github.com/ory/oathkeeper/commit/28247fcf53ed5c47879ada62456ab39b29c5752a))
+* Guide for integrating with ORY Hydra ([#497](https://github.com/ory/oathkeeper/issues/497)) ([e1b1751](https://github.com/ory/oathkeeper/commit/e1b175183b8ce9e7d2befae3269d2c5cd959e3e0))
 * Move development section ([582a4d0](https://github.com/ory/oathkeeper/commit/582a4d0e880649cc64aa647b2c35e432b3f234e2))
 * Move to json sidebar ([b67230d](https://github.com/ory/oathkeeper/commit/b67230d038ef0b101c6362ab3e1c34a6924cfc96))
 * Update repository templates ([2aaf766](https://github.com/ory/oathkeeper/commit/2aaf766444cb9ae9b794c9638553a32931276a39))
