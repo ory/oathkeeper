@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/base64"
 	"encoding/json"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -15,6 +16,8 @@ import (
 	"reflect"
 	"strings"
 	"sync"
+
+	"github.com/ory/x/watcherx"
 
 	"github.com/fsnotify/fsnotify"
 
@@ -41,7 +44,6 @@ type eventType int
 
 const (
 	eventRepositoryConfigChanged eventType = iota
-	eventFileChanged
 	eventMatchingStrategyChanged
 )
 
@@ -59,8 +61,7 @@ type FetcherDefault struct {
 
 	cache map[string][]Rule
 
-	directoriesBeingWatched []string
-	filesBeingWatched       []string
+	wChans map[string]watcherx.EventChannel
 
 	lock sync.Mutex
 	wg   sync.WaitGroup
@@ -78,7 +79,7 @@ func NewFetcherDefault(
 	}
 }
 
-func (f *FetcherDefault) configUpdate(ctx context.Context, watcher *fsnotify.Watcher, replace []url.URL, events chan event) error {
+func (f *FetcherDefault) configUpdate(ctx context.Context, replace []url.URL, events chan event) error {
 	var directoriesToWatch []string
 	var filesBeingWatched []string
 	for _, fileToWatch := range replace {
@@ -172,23 +173,34 @@ func (f *FetcherDefault) sourceUpdate(e event) ([]Rule, error) {
 }
 
 func (f *FetcherDefault) Watch(ctx context.Context) error {
-	watcher, err := fsnotify.NewWatcher()
-	if err != nil {
+	contentEvents := make(watcherx.EventChannel)
+	if err := f.watchRepositories(ctx); err != nil {
 		return err
 	}
-	defer watcher.Close()
 
-	events := make(chan event)
-	err = f.watch(ctx, watcher, events)
+	configEvents := make(chan event)
+	f.watchConfig(configEvents)
 
-	// Close the channel only when all child goroutines exit
-	f.wg.Wait()
-	close(events)
+	go f.handleEvents(ctx, contentEvents, configEvents)
 
-	return err
+	return nil
 }
 
-func (f *FetcherDefault) watch(ctx context.Context, watcher *fsnotify.Watcher, events chan event) error {
+func (f *FetcherDefault) watchRepositories(ctx context.Context) error {
+	f.lock.Lock()
+	defer f.lock.Unlock()
+
+	for _, u := range f.c.AccessRuleRepositories() {
+		c := make(watcherx.EventChannel)
+		if err := watcherx.Watch(ctx, &u, c); err != nil {
+			return err
+		}
+		f.wChans[u.String()] = c
+	}
+	return nil
+}
+
+func (f *FetcherDefault) watchConfig(c chan event) {
 	var pc map[string]interface{}
 
 	viperx.AddWatcher(func(e fsnotify.Event) error {
@@ -198,11 +210,10 @@ func (f *FetcherDefault) watch(ctx context.Context, watcher *fsnotify.Watcher, e
 			return nil
 		}
 
-		f.enqueueEvent(events, event{et: eventRepositoryConfigChanged, source: "viper_watcher"})
-
+		f.enqueueEvent(c, event{et: eventRepositoryConfigChanged, source: "viper_watcher"})
 		return nil
 	})
-	f.enqueueEvent(events, event{et: eventRepositoryConfigChanged, source: "entrypoint"})
+	f.enqueueEvent(c, event{et: eventRepositoryConfigChanged, source: "entrypoint"})
 
 	var strategy map[string]interface{}
 	viperx.AddWatcher(func(e fsnotify.Event) error {
@@ -212,51 +223,46 @@ func (f *FetcherDefault) watch(ctx context.Context, watcher *fsnotify.Watcher, e
 			return nil
 		}
 
-		f.enqueueEvent(events, event{et: eventMatchingStrategyChanged, source: "viper_watcher"})
+		f.enqueueEvent(c, event{et: eventMatchingStrategyChanged, source: "viper_watcher"})
 		return nil
 	})
-	f.enqueueEvent(events, event{et: eventMatchingStrategyChanged, source: "entrypoint"})
+	f.enqueueEvent(c, event{et: eventMatchingStrategyChanged, source: "entrypoint"})
+}
 
+func (f *FetcherDefault) handleEvents(ctx context.Context, configEvents chan event) {
 	for {
-		select {
-		case e, ok := <-watcher.Events:
+		cases := make([]reflect.SelectCase, 2, len(f.wChans)+2)
+		cases[0] = reflect.SelectCase{
+			Dir:  reflect.SelectRecv,
+			Chan: reflect.ValueOf(ctx.Done()),
+		}
+		cases[1] = reflect.SelectCase{
+			Dir:  reflect.SelectRecv,
+			Chan: reflect.ValueOf(configEvents),
+		}
+		for _, c := range f.wChans {
+			cases = append(cases, reflect.SelectCase{
+				Dir:  reflect.SelectRecv,
+				Chan: reflect.ValueOf(c),
+			})
+		}
+
+		chosen, recv, ok := reflect.Select(cases)
+		if chosen == 0 && !ok {
+			// context got canceled
+			return
+		}
+
+		if chosen == 1 {
 			if !ok {
-				// channel was closed
-				return nil
+				// configEvents channel was closed
+				f.r.Logger().Debug("The config event channel was closed")
+				return
 			}
 
-			clean := filepath.Clean(e.Name)
-
-			f.lock.Lock()
-			var changed bool
-			for _, watching := range f.filesBeingWatched {
-				if filepath.Clean(watching) == clean {
-					changed = true
-				}
-			}
-			f.lock.Unlock()
-
-			if strings.Contains(clean, "..") && (e.Op&fsnotify.Remove == fsnotify.Remove || e.Op&fsnotify.Rename == fsnotify.Rename) {
-				// This covers the k8s AtomicWriter
-				changed = true
-			}
-
-			if !changed {
-				continue
-			}
-
-			f.r.Logger().
-				WithField("event", "fsnotify").
-				WithField("file", e.Name).
-				WithField("op", e.Op.String()).
-				Debugf("Detected file change in directory containing access rules. Triggering a reload.")
-
-			f.enqueueEvent(events, event{et: eventRepositoryConfigChanged, source: "fsnotify"})
-		case e, ok := <-events:
+			e, ok := recv.Interface().(event)
 			if !ok {
-				// channel was closed
-				f.r.Logger().Debug("The events channel was closed")
-				return nil
+				f.r.Logger().Debugf("Received unexpected event %+v of type %s on configEvents channel", recv.Interface(), recv.Type().String())
 			}
 
 			switch e.et {
@@ -265,8 +271,9 @@ func (f *FetcherDefault) watch(ctx context.Context, watcher *fsnotify.Watcher, e
 					WithField("event", "config_change").
 					WithField("source", e.source).
 					Debugf("Viper detected a configuration change, reloading config.")
-				if err := f.configUpdate(ctx, watcher, f.c.AccessRuleRepositories(), events); err != nil {
-					return err
+				if err := f.configUpdate(ctx, f.c.AccessRuleRepositories()); err != nil {
+					f.r.Logger().WithError(err).Error()
+					continue
 				}
 			case eventMatchingStrategyChanged:
 				f.r.Logger().
@@ -295,6 +302,86 @@ func (f *FetcherDefault) watch(ctx context.Context, watcher *fsnotify.Watcher, e
 					return errors.Wrapf(err, "unable to reset access rule repository")
 				}
 			}
+		}
+
+		e, ok := recv.Interface().(watcherx.Event)
+		if !ok {
+			// received unknow event type
+		}
+		f.r.Logger().
+			WithField("source", "watcherx").
+			WithField("file", e.Source()).
+			WithField("type", fmt.Sprintf("%T", e)).
+			Debugf("Detected file change in directory containing access rules. Triggering a reload.")
+
+		switch te := e.(type) {
+		case *watcherx.ChangeEvent:
+			rules, err := f.decode(e.Reader())
+			if err != nil {
+				f.r.Logger().WithError(err).
+					WithField("file", e.Source()).
+					Error("Unable to update access rules from given location, changes will be ignored. Check the configuration or restart the service if the issue persists.")
+				continue
+			}
+
+			if err := f.r.RuleRepository().Set(ctx, rules); err != nil {
+				f.r.Logger().WithError(err).
+					WithField("file", e.Source()).
+					Error("Unable to reset access rule repository.")
+				return
+			}
+		case *watcherx.RemoveEvent:
+		// TODO implement rule removal in repository
+		case *watcherx.ErrorEvent:
+			f.r.Logger().
+				WithField("file", e.Source()).
+				Error(te.Error())
+			continue
+		}
+
+		select {
+		case <-ctx.Done():
+			return
+		case e, ok := <-contentEvents:
+			if !ok {
+				// channel was closed
+				f.r.Logger().Debug("The content channel was closed")
+				return
+			}
+
+			f.r.Logger().
+				WithField("source", "watcherx").
+				WithField("file", e.Source()).
+				WithField("type", fmt.Sprintf("%T", e)).
+				Debugf("Detected file change in directory containing access rules. Triggering a reload.")
+
+			switch te := e.(type) {
+			case *watcherx.ChangeEvent:
+				rules, err := f.decode(e.Reader())
+				if err != nil {
+					f.r.Logger().WithError(err).
+						WithField("file", e.Source()).
+						Error("Unable to update access rules from given location, changes will be ignored. Check the configuration or restart the service if the issue persists.")
+					continue
+				}
+
+				if err := f.r.RuleRepository().Set(ctx, rules); err != nil {
+					f.r.Logger().WithError(err).
+						WithField("file", e.Source()).
+						Error("Unable to reset access rule repository.")
+					return
+				}
+			case *watcherx.RemoveEvent:
+			// TODO implement rule removal in repository
+			case *watcherx.ErrorEvent:
+				f.r.Logger().
+					WithField("file", e.Source()).
+					Error(te.Error())
+				continue
+			}
+
+		case e, ok := <-configEvents:
+
 		}
 	}
 }

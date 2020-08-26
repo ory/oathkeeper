@@ -21,7 +21,7 @@ endif
 
 # Formats the code
 .PHONY: format
-format: deps
+format:
 		goreturns -w -local github.com/ory $$(listx .)
 
 .PHONY: gen
