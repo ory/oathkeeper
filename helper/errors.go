@@ -73,4 +73,24 @@ var (
 		CodeField:   http.StatusBadRequest,
 		StatusField: http.StatusText(http.StatusBadRequest),
 	}
+	ErrUpstreamServiceNotAvailable = &herodot.DefaultError{
+		ErrorField:  "The upstream service is not available",
+		CodeField:   http.StatusServiceUnavailable,
+		StatusField: http.StatusText(http.StatusServiceUnavailable),
+	}
+	ErrUpstreamServiceTimeout = &herodot.DefaultError{
+		ErrorField:  "The upstream service is timing out",
+		CodeField:   http.StatusGatewayTimeout,
+		StatusField: http.StatusText(http.StatusGatewayTimeout),
+	}
+	ErrUpstreamServiceInternalServerError = &herodot.DefaultError{
+		ErrorField:  "The upstream service encountered an unexpected error",
+		CodeField:   http.StatusInternalServerError,
+		StatusField: http.StatusText(http.StatusInternalServerError),
+	}
+	ErrUpstreamServiceNotFound = &herodot.DefaultError{
+		ErrorField:  "Upstream service not found",
+		CodeField:   http.StatusNotFound,
+		StatusField: http.StatusText(http.StatusNotFound),
+	}
 )
