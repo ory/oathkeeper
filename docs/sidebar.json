@@ -19,6 +19,7 @@
   ],
   "Guides": [
     "configure-deploy"
+    "oauth2-token-introspection-hydra"
   ],
   "Reference": [
     "reference/configuration",
