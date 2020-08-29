@@ -4,7 +4,7 @@
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 **Table of Contents**
 
-- [Unreleased (2020-08-26)](#unreleased-2020-08-26)
+- [Unreleased (2020-08-29)](#unreleased-2020-08-29)
     - [Bug Fixes](#bug-fixes)
     - [Documentation](#documentation)
     - [Features](#features)
@@ -178,7 +178,7 @@
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-# [Unreleased](https://github.com/ory/oathkeeper/compare/v0.38.3-beta.1...e1b175183b8ce9e7d2befae3269d2c5cd959e3e0) (2020-08-26)
+# [Unreleased](https://github.com/ory/oathkeeper/compare/v0.38.3-beta.1...01550b4e28b45b4deb1c1a3f685a1962f7633833) (2020-08-29)
 
 
 ### Bug Fixes
@@ -196,7 +196,9 @@
 * Guide for integrating with ORY Hydra ([#497](https://github.com/ory/oathkeeper/issues/497)) ([e1b1751](https://github.com/ory/oathkeeper/commit/e1b175183b8ce9e7d2befae3269d2c5cd959e3e0))
 * Move development section ([582a4d0](https://github.com/ory/oathkeeper/commit/582a4d0e880649cc64aa647b2c35e432b3f234e2))
 * Move to json sidebar ([b67230d](https://github.com/ory/oathkeeper/commit/b67230d038ef0b101c6362ab3e1c34a6924cfc96))
+* Remove duplicate template ([01550b4](https://github.com/ory/oathkeeper/commit/01550b4e28b45b4deb1c1a3f685a1962f7633833))
 * Update repository templates ([2aaf766](https://github.com/ory/oathkeeper/commit/2aaf766444cb9ae9b794c9638553a32931276a39))
+* Update repository templates ([#506](https://github.com/ory/oathkeeper/issues/506)) ([cb53d79](https://github.com/ory/oathkeeper/commit/cb53d79f4ee36266ed7d2c5a1de6147884cbb3cf))
 
 
 ### Features
