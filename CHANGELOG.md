@@ -4,7 +4,7 @@
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 **Table of Contents**
 
-- [Unreleased (2020-08-29)](#unreleased-2020-08-29)
+- [Unreleased (2020-08-31)](#unreleased-2020-08-31)
     - [Bug Fixes](#bug-fixes)
     - [Documentation](#documentation)
     - [Features](#features)
@@ -178,12 +178,13 @@
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-# [Unreleased](https://github.com/ory/oathkeeper/compare/v0.38.3-beta.1...01550b4e28b45b4deb1c1a3f685a1962f7633833) (2020-08-29)
+# [Unreleased](https://github.com/ory/oathkeeper/compare/v0.38.3-beta.1...0f65631af61e6a4098745f0149b0154d5dd7386c) (2020-08-31)
 
 
 ### Bug Fixes
 
 * Deprecated key in goreleaser config ([2a4f901](https://github.com/ory/oathkeeper/commit/2a4f90127e66917dfaa72f8089efa5149631434d))
+* Misleading HTTP status code for oauth2_client_credentials authenticator ([#504](https://github.com/ory/oathkeeper/issues/504)) ([0f65631](https://github.com/ory/oathkeeper/commit/0f65631af61e6a4098745f0149b0154d5dd7386c)), closes [#496](https://github.com/ory/oathkeeper/issues/496)
 
 
 ### Documentation
