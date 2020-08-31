@@ -123,8 +123,24 @@ func (a *AuthenticatorOAuth2ClientCredentials) Authenticate(r *http.Request, ses
 		oauth2.HTTPClient,
 		c.Client,
 	))
+
 	if err != nil {
-		return errors.Wrapf(helper.ErrUnauthorized, err.Error())
+		if rErr, ok := err.(*oauth2.RetrieveError); ok {
+			switch httpStatusCode := rErr.Response.StatusCode; httpStatusCode {
+			case http.StatusServiceUnavailable:
+				return errors.Wrapf(helper.ErrUpstreamServiceNotAvailable, err.Error())
+			case http.StatusInternalServerError:
+				return errors.Wrapf(helper.ErrUpstreamServiceInternalServerError, err.Error())
+			case http.StatusGatewayTimeout:
+				return errors.Wrapf(helper.ErrUpstreamServiceTimeout, err.Error())
+			case http.StatusNotFound:
+				return errors.Wrapf(helper.ErrUpstreamServiceNotFound, err.Error())
+			default:
+				return errors.Wrapf(helper.ErrUnauthorized, err.Error())
+			}
+		} else {
+			return errors.Wrapf(helper.ErrUpstreamServiceNotAvailable, err.Error())
+		}
 	}
 
 	if token.AccessToken == "" {
