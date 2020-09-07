@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -84,6 +85,16 @@ func TestErrorRedirect(t *testing.T) {
 				assert: func(t *testing.T, rw *httptest.ResponseRecorder) {
 					assert.Equal(t, 301, rw.Code)
 					assert.Equal(t, "/test", rw.Header().Get("Location"))
+				},
+			},
+			{
+				d:          "should redirect with return_to param",
+				givenError: &herodot.ErrNotFound,
+				config:     `{"to":"http://test/signin","url_param":"return_to"}`,
+				assert: func(t *testing.T, rw *httptest.ResponseRecorder) {
+					assert.Equal(t, 302, rw.Code)
+					location, _ := url.Parse(rw.Header().Get("Location"))
+					assert.Equal(t, "/test", location.Query().Get("return_to"))
 				},
 			},
 		} {

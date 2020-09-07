@@ -265,6 +265,13 @@
           ],
           "default": 302
         },
+        "url_param": {
+          "title": "URL query parameter",
+          "description": "Name of query parameter, where current url will be added to redirect url",
+          "type": "string",
+          "pattern": "^[A-Za-z0-9,._~-]*$",
+          "default": ""
+        },
         "when": {
           "$ref": "#/definitions/configErrorsWhen"
         }
