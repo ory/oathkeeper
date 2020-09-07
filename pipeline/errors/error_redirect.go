@@ -2,8 +2,8 @@ package errors
 
 import (
 	"encoding/json"
-	"net/url"
 	"net/http"
+	"net/url"
 
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/pipeline"
@@ -14,8 +14,8 @@ var _ Handler = new(ErrorRedirect)
 
 type (
 	ErrorRedirectConfig struct {
-		To   string     `json:"to"`
-		Code int        `json:"code"`
+		To       string `json:"to"`
+		Code     int    `json:"code"`
 		UrlParam string `json:"url_param"`
 	}
 	ErrorRedirect struct {
