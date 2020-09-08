@@ -69,7 +69,7 @@ func (a *ErrorRedirect) GetID() string {
 	return "redirect"
 }
 
-func (a *ErrorRedirect) RedirectUrl(r *http.Request, c *ErrorRedirectConfig) string {
+func (a *ErrorRedirect) RedirectURL(r *http.Request, c *ErrorRedirectConfig) string {
 	if c.UrlParam == "" {
 		return c.To
 	}
