@@ -94,7 +94,7 @@ func TestErrorRedirect(t *testing.T) {
 				assert: func(t *testing.T, rw *httptest.ResponseRecorder) {
 					assert.Equal(t, 302, rw.Code)
 					location, err := url.Parse(rw.Header().Get("Location"))
-					require.NoErr(t, err)
+					require.NoError(t, err)
 					assert.Equal(t, "/test", location.Query().Get("return_to"))
 				},
 			},
