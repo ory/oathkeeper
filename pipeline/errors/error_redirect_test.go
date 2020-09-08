@@ -93,7 +93,8 @@ func TestErrorRedirect(t *testing.T) {
 				config:     `{"to":"http://test/signin","url_param":"return_to"}`,
 				assert: func(t *testing.T, rw *httptest.ResponseRecorder) {
 					assert.Equal(t, 302, rw.Code)
-					location, _ := url.Parse(rw.Header().Get("Location"))
+					location, err := url.Parse(rw.Header().Get("Location"))
+					require.NoErr(t, err)
 					assert.Equal(t, "/test", location.Query().Get("return_to"))
 				},
 			},
