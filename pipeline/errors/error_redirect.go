@@ -70,7 +70,7 @@ func (a *ErrorRedirect) GetID() string {
 }
 
 func (a *ErrorRedirect) RedirectURL(r *http.Request, c *ErrorRedirectConfig) string {
-	if c.UrlParam == "" {
+	if c.URLParam == "" {
 		return c.To
 	}
 
