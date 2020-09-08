@@ -40,7 +40,7 @@ func (a *ErrorRedirect) Handle(w http.ResponseWriter, r *http.Request, config js
 		return err
 	}
 
-	http.Redirect(w, r, a.RedirectUrl(r, c), c.Code)
+	http.Redirect(w, r, a.RedirectURL(r, c), c.Code)
 	return nil
 }
 
