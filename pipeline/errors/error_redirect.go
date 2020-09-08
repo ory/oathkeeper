@@ -16,7 +16,7 @@ type (
 	ErrorRedirectConfig struct {
 		To       string `json:"to"`
 		Code     int    `json:"code"`
-		UrlParam string `json:"url_param"`
+		URLParam string `json:"url_param"`
 	}
 	ErrorRedirect struct {
 		c configuration.Provider
