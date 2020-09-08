@@ -75,12 +75,11 @@ func (a *ErrorRedirect) RedirectURL(r *http.Request, c *ErrorRedirectConfig) str
 	}
 
 	url, err := url.Parse(c.To)
-	if err == nil {
-		query := url.Query()
-		query.Set(c.UrlParam, r.URL.String())
-		url.RawQuery = query.Encode()
-		return url.String()
-	} else {
+	if err != nil {
 		return c.To
 	}
+	q := u.Query()
+	q.Set(c.UrlParam, r.URL.String())
+	u.RawQuery = q.Encode()
+	return u.String()
 }
