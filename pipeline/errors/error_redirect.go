@@ -79,7 +79,7 @@ func (a *ErrorRedirect) RedirectURL(r *http.Request, c *ErrorRedirectConfig) str
 		return c.To
 	}
 	q := u.Query()
-	q.Set(c.UrlParam, r.URL.String())
+	q.Set(c.URLParam, r.URL.String())
 	u.RawQuery = q.Encode()
 	return u.String()
 }
