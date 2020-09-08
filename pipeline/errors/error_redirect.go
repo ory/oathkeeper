@@ -74,7 +74,7 @@ func (a *ErrorRedirect) RedirectURL(r *http.Request, c *ErrorRedirectConfig) str
 		return c.To
 	}
 
-	url, err := url.Parse(c.To)
+	u, err := url.Parse(c.To)
 	if err != nil {
 		return c.To
 	}
