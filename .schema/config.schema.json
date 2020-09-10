@@ -262,7 +262,7 @@
         },
         "url_param": {
           "title": "URL query parameter",
-          "description": "Name of query parameter, where current url will be added to redirect url",
+          "description": "Adds the original URL the request tried to access to the query parameter.",
           "type": "string",
           "pattern": "^[A-Za-z0-9,._~-]*$",
           "default": ""
