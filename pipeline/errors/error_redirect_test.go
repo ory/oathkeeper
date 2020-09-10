@@ -90,7 +90,7 @@ func TestErrorRedirect(t *testing.T) {
 			{
 				d:          "should redirect with return_to param",
 				givenError: &herodot.ErrNotFound,
-				config:     `{"to":"http://test/signin","url_param":"return_to"}`,
+				config:     `{"to":"http://test/signin","return_to_query_param":"return_to"}`,
 				assert: func(t *testing.T, rw *httptest.ResponseRecorder) {
 					assert.Equal(t, 302, rw.Code)
 					location, err := url.Parse(rw.Header().Get("Location"))

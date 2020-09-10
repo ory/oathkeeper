@@ -14,9 +14,9 @@ var _ Handler = new(ErrorRedirect)
 
 type (
 	ErrorRedirectConfig struct {
-		To       string `json:"to"`
-		Code     int    `json:"code"`
-		URLParam string `json:"url_param"`
+		To                 string `json:"to"`
+		Code               int    `json:"code"`
+		ReturnToQueryParam string `json:"return_to_query_param"`
 	}
 	ErrorRedirect struct {
 		c configuration.Provider
@@ -70,7 +70,7 @@ func (a *ErrorRedirect) GetID() string {
 }
 
 func (a *ErrorRedirect) RedirectURL(r *http.Request, c *ErrorRedirectConfig) string {
-	if c.URLParam == "" {
+	if c.ReturnToQueryParam == "" {
 		return c.To
 	}
 
@@ -79,7 +79,7 @@ func (a *ErrorRedirect) RedirectURL(r *http.Request, c *ErrorRedirectConfig) str
 		return c.To
 	}
 	q := u.Query()
-	q.Set(c.URLParam, r.URL.String())
+	q.Set(c.ReturnToQueryParam, r.URL.String())
 	u.RawQuery = q.Encode()
 	return u.String()
 }
