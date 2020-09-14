@@ -144,14 +144,15 @@ func (f *FetcherDefault) configUpdate(ctx context.Context, watcher *fsnotify.Wat
 }
 
 func (f *FetcherDefault) sourceUpdate(e event) ([]Rule, error) {
-	if e.path.Scheme == "file" {
-		u, err := url.Parse("file://" + filepath.Clean(strings.TrimPrefix(e.path.String(), "file://")))
-		if err != nil {
-			return nil, err
-		}
-
-		e.path = *u
-	}
+// unnecessary code will make an error on windows machine 
+//	if e.path.Scheme == "file" {
+//		u, err := url.Parse("file://" + filepath.Clean(strings.TrimPrefix(e.path.String(), "file://")))
+//		if err != nil {
+//			return nil, err
+//		}
+//
+//		e.path = *u
+//	}
 
 	rules, err := f.fetch(e.path)
 	if err != nil {
