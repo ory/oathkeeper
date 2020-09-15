@@ -223,6 +223,8 @@ func (d *RequestHandler) HandleRequest(r *http.Request, rl *rule.Rule) (session 
 			// The authentication handler says that no further authentication/authorization is required, and the request should
 			// be forwarded to its final destination.
 			// return nil
+			case helper.ErrUnauthorized.ErrorField:
+				d.r.Logger().Info(err)
 			default:
 				d.r.Logger().WithError(err).
 					WithFields(fields).
@@ -242,11 +244,15 @@ func (d *RequestHandler) HandleRequest(r *http.Request, rl *rule.Rule) (session 
 
 	if !found {
 		err := errors.WithStack(helper.ErrUnauthorized)
-		d.r.Logger().WithError(err).
-			WithFields(fields).
-			WithField("granted", false).
-			WithField("reason_id", "authentication_handler_no_match").
-			Warn("No authentication handler was responsible for handling the authentication request")
+		// found will only be true if an authenticator was found AND authorisation was granted so check
+		// that this wasn't just a problem with the request
+		if err.Error() != helper.ErrUnauthorized.ErrorField {
+			d.r.Logger().WithError(err).
+				WithFields(fields).
+				WithField("granted", false).
+				WithField("reason_id", "authentication_handler_no_match").
+				Warn("No authentication handler was responsible for handling the authentication request")
+		}
 		return nil, err
 	}
 
