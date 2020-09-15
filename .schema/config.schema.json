@@ -250,7 +250,7 @@
           "type": "string",
           "format": "uri-reference",
           "examples": [
-            "https://my-app.com/dashboard",
+            "http://my-app.com/dashboard",
             "https://my-app.com/dashboard",
             "/dashboard"
           ]
