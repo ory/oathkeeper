@@ -246,9 +246,9 @@
       "properties": {
         "to": {
           "title": "Redirect to",
-          "description": "Set the redirect target. Must be a http/https URL.",
+          "description": "Set the redirect target. Can either be a http/https URL, or a relative URL.",
           "type": "string",
-          "format": "uri-relative",
+          "format": "uri-reference",
           "examples": [
             "https://my-app.com/dashboard",
             "https://my-app.com/dashboard",
