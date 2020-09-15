@@ -53,10 +53,10 @@ func TestErrorRedirect(t *testing.T) {
 			{
 				d:          "should redirect with 301 - absolute",
 				givenError: &herodot.ErrNotFound,
-				config:     `{"to":"/test","code":301}`,
+				config:     `{"to":"http://test/test","code":301}`,
 				assert: func(t *testing.T, rw *httptest.ResponseRecorder) {
 					assert.Equal(t, 301, rw.Code)
-					assert.Equal(t, "/test", rw.Header().Get("Location"))
+					assert.Equal(t, "http://test/test", rw.Header().Get("Location"))
 				},
 			},
 			{
