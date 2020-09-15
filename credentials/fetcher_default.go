@@ -39,6 +39,11 @@ import (
 
 	"github.com/ory/herodot"
 	"github.com/ory/x/httpx"
+
+	"gocloud.dev/blob"
+	_ "gocloud.dev/blob/azureblob"
+	_ "gocloud.dev/blob/gcsblob"
+	_ "gocloud.dev/blob/s3blob"
 )
 
 type reasoner interface {
@@ -196,6 +201,41 @@ func (s *FetcherDefault) resolve(wg *sync.WaitGroup, errs chan error, location u
 	var reader io.Reader
 
 	switch location.Scheme {
+	case "azblob":
+		fallthrough
+	case "gs":
+		fallthrough
+	case "s3":
+		ctx := context.Background()
+		bucket, err := blob.OpenBucket(ctx, location.Scheme+"://"+location.Host)
+		if err != nil {
+			errs <- errors.WithStack(herodot.
+				ErrInternalServerError.
+				WithReasonf(
+					`Unable to fetch JSON Web Keys from location "%s" because "%s".`,
+					location.String(),
+					err,
+				),
+			)
+			return
+		}
+		defer bucket.Close()
+
+		r, err := bucket.NewReader(ctx, location.Path, nil)
+		if err != nil {
+			errs <- errors.WithStack(herodot.
+				ErrInternalServerError.
+				WithReasonf(
+					`Unable to fetch JSON Web Keys from location "%s" because "%s".`,
+					location.String(),
+					err,
+				),
+			)
+			return
+		}
+		defer r.Close()
+
+		reader = r
 	case "file":
 		f, err := os.Open(strings.Replace(location.String(), "file://", "", 1))
 		if err != nil {
