@@ -248,7 +248,12 @@
           "title": "Redirect to",
           "description": "Set the redirect target. Must be a http/https URL.",
           "type": "string",
-          "format": "uri"
+          "format": "uri-relative",
+          "examples": [
+            "https://my-app.com/dashboard",
+            "https://my-app.com/dashboard",
+            "/dashboard"
+          ]
         },
         "code": {
           "title": "HTTP Redirect Status Code",
