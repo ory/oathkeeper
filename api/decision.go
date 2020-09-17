@@ -110,7 +110,7 @@ func (h *DecisionHandler) decisions(w http.ResponseWriter, r *http.Request) {
 		h.r.Logger().WithError(err).
 			WithFields(fields).
 			WithField("granted", false).
-			Warn("Access request denied")
+			Info("Access request denied")
 
 		h.r.ProxyRequestHandler().HandleError(w, r, rl, err)
 		return
