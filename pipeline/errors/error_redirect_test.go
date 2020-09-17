@@ -33,7 +33,7 @@ func TestErrorRedirect(t *testing.T) {
 			assert      func(t *testing.T, recorder *httptest.ResponseRecorder)
 		}{
 			{
-				d:          "should redirect with 302",
+				d:          "should redirect with 302 - absolute (HTTP)",
 				givenError: &herodot.ErrNotFound,
 				config:     `{"to":"http://test/test"}`,
 				assert: func(t *testing.T, rw *httptest.ResponseRecorder) {
@@ -42,12 +42,48 @@ func TestErrorRedirect(t *testing.T) {
 				},
 			},
 			{
-				d:          "should redirect with 301",
+				d:          "should redirect with 302 - absolute (HTTPS)",
+				givenError: &herodot.ErrNotFound,
+				config:     `{"to":"https://test/test"}`,
+				assert: func(t *testing.T, rw *httptest.ResponseRecorder) {
+					assert.Equal(t, 302, rw.Code)
+					assert.Equal(t, "https://test/test", rw.Header().Get("Location"))
+				},
+			},
+			{
+				d:          "should redirect with 302 - relative",
+				givenError: &herodot.ErrNotFound,
+				config:     `{"to":"/test"}`,
+				assert: func(t *testing.T, rw *httptest.ResponseRecorder) {
+					assert.Equal(t, 302, rw.Code)
+					assert.Equal(t, "/test", rw.Header().Get("Location"))
+				},
+			},
+			{
+				d:          "should redirect with 301 - absolute (HTTP)",
 				givenError: &herodot.ErrNotFound,
 				config:     `{"to":"http://test/test","code":301}`,
 				assert: func(t *testing.T, rw *httptest.ResponseRecorder) {
 					assert.Equal(t, 301, rw.Code)
 					assert.Equal(t, "http://test/test", rw.Header().Get("Location"))
+				},
+			},
+			{
+				d:          "should redirect with 301 - absolute (HTTPS)",
+				givenError: &herodot.ErrNotFound,
+				config:     `{"to":"https://test/test","code":301}`,
+				assert: func(t *testing.T, rw *httptest.ResponseRecorder) {
+					assert.Equal(t, 301, rw.Code)
+					assert.Equal(t, "https://test/test", rw.Header().Get("Location"))
+				},
+			},
+			{
+				d:          "should redirect with 301 - relative",
+				givenError: &herodot.ErrNotFound,
+				config:     `{"to":"/test", "code":301}`,
+				assert: func(t *testing.T, rw *httptest.ResponseRecorder) {
+					assert.Equal(t, 301, rw.Code)
+					assert.Equal(t, "/test", rw.Header().Get("Location"))
 				},
 			},
 		} {

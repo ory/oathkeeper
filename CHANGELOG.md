@@ -4,7 +4,7 @@
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 **Table of Contents**
 
-- [Unreleased (2020-08-31)](#unreleased-2020-08-31)
+- [Unreleased (2020-09-16)](#unreleased-2020-09-16)
     - [Bug Fixes](#bug-fixes)
     - [Documentation](#documentation)
     - [Features](#features)
@@ -178,7 +178,7 @@
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-# [Unreleased](https://github.com/ory/oathkeeper/compare/v0.38.3-beta.1...0f65631af61e6a4098745f0149b0154d5dd7386c) (2020-08-31)
+# [Unreleased](https://github.com/ory/oathkeeper/compare/v0.38.3-beta.1...0d3967409786c23de8e97f5c588cc4e9837a1550) (2020-09-16)
 
 
 ### Bug Fixes
@@ -205,6 +205,7 @@
 ### Features
 
 * Add and automate version schema ([7ab4012](https://github.com/ory/oathkeeper/commit/7ab40128352eb4e6639fe4828da7bdd3690e327e))
+* Use uri-reference for errors redirect to allow relative urls ([#516](https://github.com/ory/oathkeeper/issues/516)) ([0d39674](https://github.com/ory/oathkeeper/commit/0d3967409786c23de8e97f5c588cc4e9837a1550))
 
 
 ### Unclassified
