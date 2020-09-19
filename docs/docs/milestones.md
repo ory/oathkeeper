@@ -29,9 +29,9 @@ New feature or request.
 - [ ] Pass query parameters to the hydrator ([oathkeeper#339](https://github.com/ory/oathkeeper/issues/339))
 - [ ] Switch to go-jose key generation lib ([oathkeeper#419](https://github.com/ory/oathkeeper/issues/419))
 - [ ] Oathkeeper behind ssl terminating balancer ([oathkeeper#153](https://github.com/ory/oathkeeper/issues/153))
-- [ ] Clean up logging in case of invalid credentials ([oathkeeper#505](https://github.com/ory/oathkeeper/issues/505))
 - [ ] Fetch JWKs from object storage (S3) ([oathkeeper#518](https://github.com/ory/oathkeeper/issues/518))
 - [ ] remote_json: Enable timeout configuration for calls to authorization endpoint ([oathkeeper#515](https://github.com/ory/oathkeeper/issues/515))
+- [x] Clean up logging in case of invalid credentials ([oathkeeper#505](https://github.com/ory/oathkeeper/issues/505))
 
 #### Pull Requests
 
