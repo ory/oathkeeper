@@ -178,7 +178,7 @@
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-# [Unreleased](https://github.com/ory/oathkeeper/compare/v0.38.3-beta.1...a372b5f833305ad85451cfb99b1db9e10ae8b8dc) (2020-09-21)
+# [Unreleased](https://github.com/ory/oathkeeper/compare/v0.38.3-beta.1...b5bb3bc6b88ea8b26d53f03477fce1b74f113b97) (2020-09-21)
 
 
 ### Bug Fixes
@@ -205,6 +205,14 @@
 ### Features
 
 * Add and automate version schema ([7ab4012](https://github.com/ory/oathkeeper/commit/7ab40128352eb4e6639fe4828da7bdd3690e327e))
+* Add url_param config option to redirect error handler. ([#520](https://github.com/ory/oathkeeper/issues/520)) ([b5bb3bc](https://github.com/ory/oathkeeper/commit/b5bb3bc6b88ea8b26d53f03477fce1b74f113b97)), closes [#511](https://github.com/ory/oathkeeper/issues/511):
+
+    > This change introduces a url_param config option for redirect error handler.
+    > If it contains a url paramter name, the redirect url will have this parameter
+    > set, containing the current url (from which Oathkeeper has redirected the user).
+    > 
+    > This can be useful in passing the return_to url to Kratos, so user can be
+    > redirected to the page they initially wanted to access after a successfull sign in.
 * Log invalid credentials on info level instead of error/warning ([#517](https://github.com/ory/oathkeeper/issues/517)) ([a372b5f](https://github.com/ory/oathkeeper/commit/a372b5f833305ad85451cfb99b1db9e10ae8b8dc)), closes [#505](https://github.com/ory/oathkeeper/issues/505)
 * Use uri-reference for errors redirect to allow relative urls ([#516](https://github.com/ory/oathkeeper/issues/516)) ([0d39674](https://github.com/ory/oathkeeper/commit/0d3967409786c23de8e97f5c588cc4e9837a1550))
 
