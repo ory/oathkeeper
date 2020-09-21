@@ -3,6 +3,7 @@ package errors
 import (
 	"encoding/json"
 	"net/http"
+	"net/url"
 
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/pipeline"
@@ -13,8 +14,9 @@ var _ Handler = new(ErrorRedirect)
 
 type (
 	ErrorRedirectConfig struct {
-		To   string `json:"to"`
-		Code int    `json:"code"`
+		To                 string `json:"to"`
+		Code               int    `json:"code"`
+		ReturnToQueryParam string `json:"return_to_query_param"`
 	}
 	ErrorRedirect struct {
 		c configuration.Provider
@@ -38,7 +40,7 @@ func (a *ErrorRedirect) Handle(w http.ResponseWriter, r *http.Request, config js
 		return err
 	}
 
-	http.Redirect(w, r, c.To, c.Code)
+	http.Redirect(w, r, a.RedirectURL(r, c), c.Code)
 	return nil
 }
 
@@ -65,4 +67,19 @@ func (a *ErrorRedirect) Config(config json.RawMessage) (*ErrorRedirectConfig, er
 
 func (a *ErrorRedirect) GetID() string {
 	return "redirect"
+}
+
+func (a *ErrorRedirect) RedirectURL(r *http.Request, c *ErrorRedirectConfig) string {
+	if c.ReturnToQueryParam == "" {
+		return c.To
+	}
+
+	u, err := url.Parse(c.To)
+	if err != nil {
+		return c.To
+	}
+	q := u.Query()
+	q.Set(c.ReturnToQueryParam, r.URL.String())
+	u.RawQuery = q.Encode()
+	return u.String()
 }
