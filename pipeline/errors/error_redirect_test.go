@@ -50,6 +50,7 @@ func TestErrorRedirect(t *testing.T) {
 					assert.Equal(t, 302, rw.Code)
 					location, err := url.Parse(rw.Header().Get("Location"))
 					require.NoError(t, err)
+					assert.Equal(t, "http://test/signin?return_to=%2Ftest", rw.Header().Get("Location"))
 					assert.Equal(t, "/test", location.Query().Get("return_to"))
 				},
 			},
@@ -70,6 +71,7 @@ func TestErrorRedirect(t *testing.T) {
 					assert.Equal(t, 302, rw.Code)
 					location, err := url.Parse(rw.Header().Get("Location"))
 					require.NoError(t, err)
+					assert.Equal(t, "https://test/signin?return_to=%2Ftest", rw.Header().Get("Location"))
 					assert.Equal(t, "/test", location.Query().Get("return_to"))
 				},
 			},
@@ -90,6 +92,7 @@ func TestErrorRedirect(t *testing.T) {
 					assert.Equal(t, 302, rw.Code)
 					location, err := url.Parse(rw.Header().Get("Location"))
 					require.NoError(t, err)
+					assert.Equal(t, "/test/signin?return_to=%2Ftest", rw.Header().Get("Location"))
 					assert.Equal(t, "/test", location.Query().Get("return_to"))
 				},
 			},
@@ -110,6 +113,7 @@ func TestErrorRedirect(t *testing.T) {
 					assert.Equal(t, 301, rw.Code)
 					location, err := url.Parse(rw.Header().Get("Location"))
 					require.NoError(t, err)
+					assert.Equal(t, "http://test/signin?return_to=%2Ftest", rw.Header().Get("Location"))
 					assert.Equal(t, "/test", location.Query().Get("return_to"))
 				},
 			},
@@ -130,6 +134,7 @@ func TestErrorRedirect(t *testing.T) {
 					assert.Equal(t, 301, rw.Code)
 					location, err := url.Parse(rw.Header().Get("Location"))
 					require.NoError(t, err)
+					assert.Equal(t, "https://test/signin?return_to=%2Ftest", rw.Header().Get("Location"))
 					assert.Equal(t, "/test", location.Query().Get("return_to"))
 				},
 			},
@@ -150,6 +155,7 @@ func TestErrorRedirect(t *testing.T) {
 					assert.Equal(t, 301, rw.Code)
 					location, err := url.Parse(rw.Header().Get("Location"))
 					require.NoError(t, err)
+					assert.Equal(t, "/test/signin?return_to=%2Ftest", rw.Header().Get("Location"))
 					assert.Equal(t, "/test", location.Query().Get("return_to"))
 				},
 			},
