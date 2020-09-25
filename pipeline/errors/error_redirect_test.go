@@ -43,12 +43,34 @@ func TestErrorRedirect(t *testing.T) {
 				},
 			},
 			{
+				d:          "redirect with 302 should contain a return_to param - absolute (HTTP) ",
+				givenError: &herodot.ErrNotFound,
+				config:     `{"to":"http://test/signin","return_to_query_param":"return_to"}`,
+				assert: func(t *testing.T, rw *httptest.ResponseRecorder) {
+					assert.Equal(t, 302, rw.Code)
+					location, err := url.Parse(rw.Header().Get("Location"))
+					require.NoError(t, err)
+					assert.Equal(t, "/test", location.Query().Get("return_to"))
+				},
+			},
+			{
 				d:          "should redirect with 302 - absolute (HTTPS)",
 				givenError: &herodot.ErrNotFound,
 				config:     `{"to":"https://test/test"}`,
 				assert: func(t *testing.T, rw *httptest.ResponseRecorder) {
 					assert.Equal(t, 302, rw.Code)
 					assert.Equal(t, "https://test/test", rw.Header().Get("Location"))
+				},
+			},
+			{
+				d:          "redirect with 302 should contain a return_to param - absolute (HTTPS) ",
+				givenError: &herodot.ErrNotFound,
+				config:     `{"to":"https://test/signin","return_to_query_param":"return_to"}`,
+				assert: func(t *testing.T, rw *httptest.ResponseRecorder) {
+					assert.Equal(t, 302, rw.Code)
+					location, err := url.Parse(rw.Header().Get("Location"))
+					require.NoError(t, err)
+					assert.Equal(t, "/test", location.Query().Get("return_to"))
 				},
 			},
 			{
@@ -61,12 +83,34 @@ func TestErrorRedirect(t *testing.T) {
 				},
 			},
 			{
+				d:          "redirect with 302 should contain a return_to param - relative ",
+				givenError: &herodot.ErrNotFound,
+				config:     `{"to":"/test/signin","return_to_query_param":"return_to"}`,
+				assert: func(t *testing.T, rw *httptest.ResponseRecorder) {
+					assert.Equal(t, 302, rw.Code)
+					location, err := url.Parse(rw.Header().Get("Location"))
+					require.NoError(t, err)
+					assert.Equal(t, "/test", location.Query().Get("return_to"))
+				},
+			},
+			{
 				d:          "should redirect with 301 - absolute (HTTP)",
 				givenError: &herodot.ErrNotFound,
 				config:     `{"to":"http://test/test","code":301}`,
 				assert: func(t *testing.T, rw *httptest.ResponseRecorder) {
 					assert.Equal(t, 301, rw.Code)
 					assert.Equal(t, "http://test/test", rw.Header().Get("Location"))
+				},
+			},
+			{
+				d:          "redirect with 301 should contain a return_to param - absolute (HTTP) ",
+				givenError: &herodot.ErrNotFound,
+				config:     `{"to":"http://test/signin","return_to_query_param":"return_to","code":301}`,
+				assert: func(t *testing.T, rw *httptest.ResponseRecorder) {
+					assert.Equal(t, 301, rw.Code)
+					location, err := url.Parse(rw.Header().Get("Location"))
+					require.NoError(t, err)
+					assert.Equal(t, "/test", location.Query().Get("return_to"))
 				},
 			},
 			{
@@ -79,6 +123,17 @@ func TestErrorRedirect(t *testing.T) {
 				},
 			},
 			{
+				d:          "redirect with 301 should contain a return_to param - absolute (HTTPS) ",
+				givenError: &herodot.ErrNotFound,
+				config:     `{"to":"https://test/signin","return_to_query_param":"return_to","code":301}`,
+				assert: func(t *testing.T, rw *httptest.ResponseRecorder) {
+					assert.Equal(t, 301, rw.Code)
+					location, err := url.Parse(rw.Header().Get("Location"))
+					require.NoError(t, err)
+					assert.Equal(t, "/test", location.Query().Get("return_to"))
+				},
+			},
+			{
 				d:          "should redirect with 301 - relative",
 				givenError: &herodot.ErrNotFound,
 				config:     `{"to":"/test", "code":301}`,
@@ -88,11 +143,11 @@ func TestErrorRedirect(t *testing.T) {
 				},
 			},
 			{
-				d:          "should redirect with return_to param",
+				d:          "redirect with 301 should contain a return_to param - relative ",
 				givenError: &herodot.ErrNotFound,
-				config:     `{"to":"http://test/signin","return_to_query_param":"return_to"}`,
+				config:     `{"to":"/test/signin","return_to_query_param":"return_to","code":301}`,
 				assert: func(t *testing.T, rw *httptest.ResponseRecorder) {
-					assert.Equal(t, 302, rw.Code)
+					assert.Equal(t, 301, rw.Code)
 					location, err := url.Parse(rw.Header().Get("Location"))
 					require.NoError(t, err)
 					assert.Equal(t, "/test", location.Query().Get("return_to"))
