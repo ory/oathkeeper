@@ -4,7 +4,7 @@
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 **Table of Contents**
 
-- [Unreleased (2020-09-25)](#unreleased-2020-09-25)
+- [Unreleased (2020-09-28)](#unreleased-2020-09-28)
     - [Bug Fixes](#bug-fixes)
     - [Documentation](#documentation)
     - [Features](#features)
@@ -178,11 +178,14 @@
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-# [Unreleased](https://github.com/ory/oathkeeper/compare/v0.38.3-beta.1...bc8a32c9fcf8cbd9fc6b46b9c8d607745fb05a1e) (2020-09-25)
+# [Unreleased](https://github.com/ory/oathkeeper/compare/v0.38.3-beta.1...24bdd9bdc56a46953a393d503ccfd2416cf11bcf) (2020-09-28)
 
 
 ### Bug Fixes
 
+* Add tests in error_redirect_test.go ([#522](https://github.com/ory/oathkeeper/issues/522)) ([24bdd9b](https://github.com/ory/oathkeeper/commit/24bdd9bdc56a46953a393d503ccfd2416cf11bcf)):
+
+    > Increased tests coverage to cover for all the three valid scenarios - http absolute, https absolute, relative. Explicitly checked Location path to ensure that correct uri scheme was returned
 * Deprecated key in goreleaser config ([2a4f901](https://github.com/ory/oathkeeper/commit/2a4f90127e66917dfaa72f8089efa5149631434d))
 * Ignore x/net false positives ([bc8a32c](https://github.com/ory/oathkeeper/commit/bc8a32c9fcf8cbd9fc6b46b9c8d607745fb05a1e))
 * Misleading HTTP status code for oauth2_client_credentials authenticator ([#504](https://github.com/ory/oathkeeper/issues/504)) ([0f65631](https://github.com/ory/oathkeeper/commit/0f65631af61e6a4098745f0149b0154d5dd7386c)), closes [#496](https://github.com/ory/oathkeeper/issues/496)
