@@ -22,6 +22,7 @@ package api
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/ory/oathkeeper/pipeline/authn"
 	"github.com/ory/oathkeeper/x"
@@ -123,7 +124,7 @@ func (h *DecisionHandler) decisions(w http.ResponseWriter, r *http.Request) {
 
 	for k := range s.Header {
 		// Avoid copying the original Content-Length header from the client
-		if k == "content-length" {
+		if strings.ToLower(k) == "content-length" {
 			continue
 		}
 
