@@ -4,7 +4,7 @@
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 **Table of Contents**
 
-- [Unreleased (2020-09-28)](#unreleased-2020-09-28)
+- [Unreleased (2020-09-29)](#unreleased-2020-09-29)
     - [Documentation](#documentation)
   - [0.38.4-beta.1 (2020-09-28)](#0384-beta1-2020-09-28)
     - [Bug Fixes](#bug-fixes)
@@ -180,12 +180,13 @@
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-# [Unreleased](https://github.com/ory/oathkeeper/compare/v0.38.4-beta.1...34e2077e872dcf7b23129623434a8ff0656da9fc) (2020-09-28)
+# [Unreleased](https://github.com/ory/oathkeeper/compare/v0.38.4-beta.1...82008b2a6a60583856c436b1adae2f6d306bf836) (2020-09-29)
 
 
 ### Documentation
 
 * Correct sidebar.json ([#524](https://github.com/ory/oathkeeper/issues/524)) ([34e2077](https://github.com/ory/oathkeeper/commit/34e2077e872dcf7b23129623434a8ff0656da9fc))
+* Resolve regression issues ([82008b2](https://github.com/ory/oathkeeper/commit/82008b2a6a60583856c436b1adae2f6d306bf836))
 
 
 
