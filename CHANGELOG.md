@@ -4,37 +4,38 @@
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 **Table of Contents**
 
-- [Unreleased (2020-09-29)](#unreleased-2020-09-29)
+- [Unreleased (2020-09-30)](#unreleased-2020-09-30)
+    - [Bug Fixes](#bug-fixes)
     - [Documentation](#documentation)
   - [0.38.4-beta.1 (2020-09-28)](#0384-beta1-2020-09-28)
-    - [Bug Fixes](#bug-fixes)
+    - [Bug Fixes](#bug-fixes-1)
     - [Documentation](#documentation-1)
     - [Features](#features)
     - [Unclassified](#unclassified)
   - [0.38.3-beta.1 (2020-07-29)](#0383-beta1-2020-07-29)
-    - [Bug Fixes](#bug-fixes-1)
+    - [Bug Fixes](#bug-fixes-2)
     - [Documentation](#documentation-2)
     - [Features](#features-1)
   - [0.38.2-beta.1 (2020-05-25)](#0382-beta1-2020-05-25)
-    - [Bug Fixes](#bug-fixes-2)
+    - [Bug Fixes](#bug-fixes-3)
     - [Documentation](#documentation-3)
     - [Features](#features-2)
   - [0.38.1-beta.1 (2020-05-08)](#0381-beta1-2020-05-08)
-    - [Bug Fixes](#bug-fixes-3)
-- [0.38.0-beta.2 (2020-05-07)](#0380-beta2-2020-05-07)
     - [Bug Fixes](#bug-fixes-4)
+- [0.38.0-beta.2 (2020-05-07)](#0380-beta2-2020-05-07)
+    - [Bug Fixes](#bug-fixes-5)
     - [Code Refactoring](#code-refactoring)
     - [Documentation](#documentation-4)
     - [Features](#features-3)
   - [0.37.1-beta.1 (2020-04-03)](#0371-beta1-2020-04-03)
     - [Documentation](#documentation-5)
 - [0.37.0-beta.1 (2020-04-02)](#0370-beta1-2020-04-02)
-    - [Bug Fixes](#bug-fixes-5)
+    - [Bug Fixes](#bug-fixes-6)
     - [Documentation](#documentation-6)
     - [Features](#features-4)
     - [BREAKING CHANGES](#breaking-changes)
 - [0.36.0-beta.4 (2020-02-14)](#0360-beta4-2020-02-14)
-    - [Bug Fixes](#bug-fixes-6)
+    - [Bug Fixes](#bug-fixes-7)
     - [Documentation](#documentation-7)
 - [0.36.0-beta.1 (2020-02-05)](#0360-beta1-2020-02-05)
     - [Documentation](#documentation-8)
@@ -180,7 +181,16 @@
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-# [Unreleased](https://github.com/ory/oathkeeper/compare/v0.38.4-beta.1...82008b2a6a60583856c436b1adae2f6d306bf836) (2020-09-29)
+# [Unreleased](https://github.com/ory/oathkeeper/compare/v0.38.4-beta.1...a68fc8aa3892311960c4e818fa413caf189b9f8d) (2020-09-30)
+
+
+### Bug Fixes
+
+* Check content-length header in lowercase ([#530](https://github.com/ory/oathkeeper/issues/530)) ([a68fc8a](https://github.com/ory/oathkeeper/commit/a68fc8aa3892311960c4e818fa413caf189b9f8d)):
+
+    > Issue #422 didn't fix the problem with the requests' Content-Length
+    > being copied in the responses because the check was case-sensitive and
+    > unit tests didn't cover it.
 
 
 ### Documentation
