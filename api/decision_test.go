@@ -21,6 +21,7 @@
 package api_test
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"io/ioutil"
@@ -95,6 +96,7 @@ func TestDecisionAPI(t *testing.T) {
 	for k, tc := range []struct {
 		url         string
 		code        int
+		reqBody     []byte
 		messages    []string
 		rulesRegexp []rule.Rule
 		rulesGlob   []rule.Rule
@@ -303,6 +305,7 @@ func TestDecisionAPI(t *testing.T) {
 				Mutators:       []rule.Handler{{Handler: "noop"}},
 				Upstream:       rule.Upstream{URL: ""},
 			}},
+			reqBody: []byte("non-empty body"),
 			transform: func(r *http.Request) {
 				r.Header.Add("Content-Length", "1337")
 			},
@@ -313,7 +316,7 @@ func TestDecisionAPI(t *testing.T) {
 		t.Run(fmt.Sprintf("case=%d/description=%s", k, tc.d), func(t *testing.T) {
 			testFunc := func(strategy configuration.MatchingStrategy) {
 				require.NoError(t, reg.RuleRepository().SetMatchingStrategy(context.Background(), strategy))
-				req, err := http.NewRequest("GET", tc.url, nil)
+				req, err := http.NewRequest("GET", tc.url, bytes.NewBuffer(tc.reqBody))
 				require.NoError(t, err)
 				if tc.transform != nil {
 					tc.transform(req)
