@@ -18,6 +18,7 @@ Something is not working.
 - [ ] Log specified http request headers ([oathkeeper#361](https://github.com/ory/oathkeeper/issues/361))
 - [ ] Timeout in oauth2_client_credentials when using self-signed certificates ([oathkeeper#368](https://github.com/ory/oathkeeper/issues/368))
 - [ ] oauth2_introspection not parsing single string aud valie ([oathkeeper#491](https://github.com/ory/oathkeeper/issues/491))
+- [ ] JWT validation sometimes appends trailing slash to issuer ([oathkeeper#527](https://github.com/ory/oathkeeper/issues/527))
 
 ### [Feat](https://github.com/ory/oathkeeper/labels/feat)
 
@@ -31,6 +32,7 @@ New feature or request.
 - [ ] Oathkeeper behind ssl terminating balancer ([oathkeeper#153](https://github.com/ory/oathkeeper/issues/153))
 - [ ] Fetch JWKs from object storage (S3) ([oathkeeper#518](https://github.com/ory/oathkeeper/issues/518))
 - [ ] remote_json: Enable timeout configuration for calls to authorization endpoint ([oathkeeper#515](https://github.com/ory/oathkeeper/issues/515))
+- [ ] Enable forwarding of original authorization header to (remote) authorizer ([oathkeeper#528](https://github.com/ory/oathkeeper/issues/528)) - [@hackerman](https://github.com/aeneasr)
 - [x] Clean up logging in case of invalid credentials ([oathkeeper#505](https://github.com/ory/oathkeeper/issues/505))
 
 #### Pull Requests
