@@ -84,7 +84,10 @@ func (a *AuthorizerRemoteJSON) Authorize(r *http.Request, session *authn.Authent
 		return errors.WithStack(err)
 	}
 	req.Header.Add("Content-Type", "application/json")
-	req.Header.Add("Authorization", r.Header.Get("Authorization"))
+	authz := r.Header.Get("Authorization")
+	if authz != "" {
+		req.Header.Add("Authorization", authz)
+	}
 
 	res, err := a.client.Do(req)
 	if err != nil {
