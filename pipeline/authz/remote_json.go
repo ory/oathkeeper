@@ -53,7 +53,7 @@ func (a *AuthorizerRemoteJSON) GetID() string {
 }
 
 // Authorize implements the Authorizer interface.
-func (a *AuthorizerRemoteJSON) Authorize(_ *http.Request, session *authn.AuthenticationSession, config json.RawMessage, _ pipeline.Rule) error {
+func (a *AuthorizerRemoteJSON) Authorize(r *http.Request, session *authn.AuthenticationSession, config json.RawMessage, _ pipeline.Rule) error {
 	c, err := a.Config(config)
 	if err != nil {
 		return err
@@ -84,6 +84,7 @@ func (a *AuthorizerRemoteJSON) Authorize(_ *http.Request, session *authn.Authent
 		return errors.WithStack(err)
 	}
 	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Authorization", r.Header.Get("Authorization"))
 
 	res, err := a.client.Do(req)
 	if err != nil {

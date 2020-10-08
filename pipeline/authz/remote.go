@@ -65,6 +65,7 @@ func (a *AuthorizerRemote) Authorize(r *http.Request, session *authn.Authenticat
 		return errors.WithStack(err)
 	}
 	req.Header.Add("Content-Type", r.Header.Get("Content-Type"))
+	req.Header.Add("Authorization", r.Header.Get("Authorization"))
 
 	for hdr, templateString := range c.Headers {
 		var tmpl *template.Template

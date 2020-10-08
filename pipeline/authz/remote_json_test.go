@@ -87,6 +87,8 @@ func TestAuthorizerRemoteJSONAuthorize(t *testing.T) {
 				return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 					assert.Contains(t, r.Header, "Content-Type")
 					assert.Contains(t, r.Header["Content-Type"], "application/json")
+					assert.Contains(t, r.Header, "Authorization")
+					assert.Contains(t, r.Header["Authorization"], "Bearer token")
 					body, err := ioutil.ReadAll(r.Body)
 					require.NoError(t, err)
 					assert.Equal(t, string(body), "{}")
@@ -139,7 +141,11 @@ func TestAuthorizerRemoteJSONAuthorize(t *testing.T) {
 
 			p := configuration.NewViperProvider(logrusx.New("", ""))
 			a := NewAuthorizerRemoteJSON(p)
-			if err := a.Authorize(&http.Request{}, tt.session, tt.config, &rule.Rule{}); (err != nil) != tt.wantErr {
+			if err := a.Authorize(&http.Request{
+				Header: map[string][]string{
+					"Authorization": {"Bearer token"},
+				},
+			}, tt.session, tt.config, &rule.Rule{}); (err != nil) != tt.wantErr {
 				t.Errorf("Authorize() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
