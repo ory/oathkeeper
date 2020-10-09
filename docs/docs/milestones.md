@@ -20,6 +20,7 @@ Something is not working.
 - [ ] oauth2_introspection not parsing single string aud valie ([oathkeeper#491](https://github.com/ory/oathkeeper/issues/491))
 - [ ] JWT validation sometimes appends trailing slash to issuer ([oathkeeper#527](https://github.com/ory/oathkeeper/issues/527))
 - [ ] "fatal error: concurrent map writes" panic, unable to reproduce ([oathkeeper#551](https://github.com/ory/oathkeeper/issues/551)) - [@hackerman](https://github.com/aeneasr)
+- [ ] Authenticator oauth2_introspection only works if token_type returned is an "access_token" ([oathkeeper#553](https://github.com/ory/oathkeeper/issues/553))
 
 ### [Feat](https://github.com/ory/oathkeeper/labels/feat)
 
