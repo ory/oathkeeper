@@ -92,8 +92,7 @@ func TestAuthorizerRemoteAuthorize(t *testing.T) {
 				return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 					assert.Contains(t, r.Header, "Content-Type")
 					assert.Contains(t, r.Header["Content-Type"], "text/plain")
-					assert.Contains(t, r.Header, "Authorization")
-					assert.Contains(t, r.Header["Authorization"], "Bearer token")
+					assert.Nil(t, r.Header["Authorization"])
 					body, err := ioutil.ReadAll(r.Body)
 					require.NoError(t, err)
 					assert.Equal(t, "testtest", string(body))
@@ -147,9 +146,8 @@ func TestAuthorizerRemoteAuthorize(t *testing.T) {
 			a := NewAuthorizerRemote(p)
 			r := &http.Request{
 				Header: map[string][]string{
-					"Content-Type":  {"text/plain"},
-					"User-Agent":    {"Fancy Browser 5.1"},
-					"Authorization": {"Bearer token"},
+					"Content-Type": {"text/plain"},
+					"User-Agent":   {"Fancy Browser 5.1"},
 				},
 			}
 			if tt.body != "" {
