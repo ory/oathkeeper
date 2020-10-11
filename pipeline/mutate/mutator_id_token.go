@@ -27,6 +27,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"sync"
 	"text/template"
 	"time"
 
@@ -49,9 +50,10 @@ type MutatorIDTokenRegistry interface {
 }
 
 type MutatorIDToken struct {
-	c         configuration.Provider
-	r         MutatorIDTokenRegistry
-	templates *template.Template
+	c             configuration.Provider
+	r             MutatorIDTokenRegistry
+	templates     *template.Template
+	templatesLock sync.Mutex
 
 	tokenCache        *ristretto.Cache
 	tokenCacheEnabled bool
@@ -152,7 +154,9 @@ func (a *MutatorIDToken) Mutate(r *http.Request, session *authn.AuthenticationSe
 		t := a.templates.Lookup(c.ClaimsTemplateID())
 		if t == nil {
 			var err error
+			a.templatesLock.Lock()
 			t, err = a.templates.New(c.ClaimsTemplateID()).Parse(c.Claims)
+			a.templatesLock.Unlock()
 			if err != nil {
 				return errors.Wrapf(err, `error parsing claims template in rule "%s"`, rl.GetID())
 			}
