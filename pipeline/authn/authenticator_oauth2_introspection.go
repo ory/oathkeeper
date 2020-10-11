@@ -168,10 +168,6 @@ func (a *AuthenticatorOAuth2Introspection) Authenticate(r *http.Request, session
 			return errors.WithStack(err)
 		}
 
-		if len(i.TokenType) > 0 && i.TokenType != "access_token" {
-			return errors.WithStack(helper.ErrForbidden.WithReason(fmt.Sprintf("Introspected token is not an access token but \"%s\"", i.TokenType)))
-		}
-
 		if !i.Active {
 			return errors.WithStack(helper.ErrUnauthorized.WithReason("Access token i says token is not active"))
 		}
