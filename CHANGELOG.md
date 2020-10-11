@@ -4,7 +4,7 @@
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 **Table of Contents**
 
-- [Unreleased (2020-10-02)](#unreleased-2020-10-02)
+- [Unreleased (2020-10-11)](#unreleased-2020-10-11)
     - [Bug Fixes](#bug-fixes)
     - [Documentation](#documentation)
   - [0.38.4-beta.1 (2020-09-28)](#0384-beta1-2020-09-28)
@@ -181,7 +181,7 @@
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-# [Unreleased](https://github.com/ory/oathkeeper/compare/v0.38.4-beta.1...a68fc8aa3892311960c4e818fa413caf189b9f8d) (2020-10-02)
+# [Unreleased](https://github.com/ory/oathkeeper/compare/v0.38.4-beta.1...4f504d9032a5be9ea6f82c723a655a0f9028c45a) (2020-10-11)
 
 
 ### Bug Fixes
@@ -191,6 +191,7 @@
     > Issue #422 didn't fix the problem with the requests' Content-Length
     > being copied in the responses because the check was case-sensitive and
     > unit tests didn't cover it.
+* Never construct id token claim templates in parallel ([#552](https://github.com/ory/oathkeeper/issues/552)) ([4f504d9](https://github.com/ory/oathkeeper/commit/4f504d9032a5be9ea6f82c723a655a0f9028c45a)), closes [#551](https://github.com/ory/oathkeeper/issues/551)
 
 
 ### Documentation
