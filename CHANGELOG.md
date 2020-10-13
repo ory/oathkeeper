@@ -4,42 +4,43 @@
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 **Table of Contents**
 
-- [Unreleased (2020-10-11)](#unreleased-2020-10-11)
+- [Unreleased (2020-10-13)](#unreleased-2020-10-13)
     - [Bug Fixes](#bug-fixes)
     - [Documentation](#documentation)
+    - [Features](#features)
   - [0.38.4-beta.1 (2020-09-28)](#0384-beta1-2020-09-28)
     - [Bug Fixes](#bug-fixes-1)
     - [Documentation](#documentation-1)
-    - [Features](#features)
+    - [Features](#features-1)
     - [Unclassified](#unclassified)
   - [0.38.3-beta.1 (2020-07-29)](#0383-beta1-2020-07-29)
     - [Bug Fixes](#bug-fixes-2)
     - [Documentation](#documentation-2)
-    - [Features](#features-1)
+    - [Features](#features-2)
   - [0.38.2-beta.1 (2020-05-25)](#0382-beta1-2020-05-25)
     - [Bug Fixes](#bug-fixes-3)
     - [Documentation](#documentation-3)
-    - [Features](#features-2)
+    - [Features](#features-3)
   - [0.38.1-beta.1 (2020-05-08)](#0381-beta1-2020-05-08)
     - [Bug Fixes](#bug-fixes-4)
 - [0.38.0-beta.2 (2020-05-07)](#0380-beta2-2020-05-07)
     - [Bug Fixes](#bug-fixes-5)
     - [Code Refactoring](#code-refactoring)
     - [Documentation](#documentation-4)
-    - [Features](#features-3)
+    - [Features](#features-4)
   - [0.37.1-beta.1 (2020-04-03)](#0371-beta1-2020-04-03)
     - [Documentation](#documentation-5)
 - [0.37.0-beta.1 (2020-04-02)](#0370-beta1-2020-04-02)
     - [Bug Fixes](#bug-fixes-6)
     - [Documentation](#documentation-6)
-    - [Features](#features-4)
+    - [Features](#features-5)
     - [BREAKING CHANGES](#breaking-changes)
 - [0.36.0-beta.4 (2020-02-14)](#0360-beta4-2020-02-14)
     - [Bug Fixes](#bug-fixes-7)
     - [Documentation](#documentation-7)
 - [0.36.0-beta.1 (2020-02-05)](#0360-beta1-2020-02-05)
     - [Documentation](#documentation-8)
-    - [Features](#features-5)
+    - [Features](#features-6)
     - [Unclassified](#unclassified-1)
   - [0.35.5-beta.2 (2020-01-31)](#0355-beta2-2020-01-31)
     - [Unclassified](#unclassified-2)
@@ -181,7 +182,7 @@
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-# [Unreleased](https://github.com/ory/oathkeeper/compare/v0.38.4-beta.1...4f504d9032a5be9ea6f82c723a655a0f9028c45a) (2020-10-11)
+# [Unreleased](https://github.com/ory/oathkeeper/compare/v0.38.4-beta.1...f4f781e5ec998e3656b6cf3c46c83c0faf6527ef) (2020-10-13)
 
 
 ### Bug Fixes
@@ -198,6 +199,11 @@
 
 * Correct sidebar.json ([#524](https://github.com/ory/oathkeeper/issues/524)) ([34e2077](https://github.com/ory/oathkeeper/commit/34e2077e872dcf7b23129623434a8ff0656da9fc))
 * Resolve regression issues ([82008b2](https://github.com/ory/oathkeeper/commit/82008b2a6a60583856c436b1adae2f6d306bf836))
+
+
+### Features
+
+* Forward original authorization header when using remote (json) authorizer ([#554](https://github.com/ory/oathkeeper/issues/554)) ([f4f781e](https://github.com/ory/oathkeeper/commit/f4f781e5ec998e3656b6cf3c46c83c0faf6527ef)), closes [#528](https://github.com/ory/oathkeeper/issues/528)
 
 
 
