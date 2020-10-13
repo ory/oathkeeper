@@ -90,7 +90,7 @@ type AuthenticatorOAuth2IntrospectionResult struct {
 	ClientID  string                 `json:"client_id,omitempty"`
 	Scope     string                 `json:"scope,omitempty"`
 	Expires   int64                  `json:"exp"`
-	TokenUse string                 `json:"token_use"`
+	TokenUse  string                 `json:"token_use"`
 }
 
 func (a *AuthenticatorOAuth2Introspection) tokenFromCache(config *AuthenticatorOAuth2IntrospectionConfiguration, token string) (*AuthenticatorOAuth2IntrospectionResult, bool) {
