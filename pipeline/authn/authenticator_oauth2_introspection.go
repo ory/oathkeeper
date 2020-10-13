@@ -90,6 +90,7 @@ type AuthenticatorOAuth2IntrospectionResult struct {
 	ClientID  string                 `json:"client_id,omitempty"`
 	Scope     string                 `json:"scope,omitempty"`
 	Expires   int64                  `json:"exp"`
+	TokenUse string                 `json:"token_use"`
 }
 
 func (a *AuthenticatorOAuth2Introspection) tokenFromCache(config *AuthenticatorOAuth2IntrospectionConfiguration, token string) (*AuthenticatorOAuth2IntrospectionResult, bool) {
@@ -166,6 +167,10 @@ func (a *AuthenticatorOAuth2Introspection) Authenticate(r *http.Request, session
 
 		if err := json.NewDecoder(resp.Body).Decode(&i); err != nil {
 			return errors.WithStack(err)
+		}
+
+		if len(i.TokenUse) > 0 && (i.TokenUse != "access_token" && i.TokenUse != "refresh_token") {
+			return errors.WithStack(helper.ErrForbidden.WithReason(fmt.Sprintf("Use of introspected token is not an access token or a refresh token but \"%s\"", i.TokenUse)))
 		}
 
 		if !i.Active {

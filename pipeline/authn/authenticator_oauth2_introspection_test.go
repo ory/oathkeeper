@@ -434,6 +434,27 @@ func TestAuthenticatorOAuth2Introspection(t *testing.T) {
 				expectErr: true,
 			},
 			{
+				d:      "should fail because token use not matching",
+				r:      &http.Request{Header: http.Header{"Authorization": {"bearer token"}}},
+				config: []byte(`{}`),
+				setup: func(t *testing.T, m *httprouter.Router) {
+					m.POST("/oauth2/introspect", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+						require.NoError(t, r.ParseForm())
+						require.Equal(t, "token", r.Form.Get("token"))
+						require.NoError(t, json.NewEncoder(w).Encode(&AuthenticatorOAuth2IntrospectionResult{
+							Active:   true,
+							Subject:  "subject",
+							Audience: []string{"audience"},
+							Issuer:   "issuer",
+							Username: "username",
+							Extra:    map[string]interface{}{"extra": "foo"},
+							TokenUse: "any-token-use",
+						}))
+					})
+				},
+				expectErr: true,
+			},
+			{
 				d:      "should pass",
 				r:      &http.Request{Header: http.Header{"Authorization": {"bearer token"}}},
 				config: []byte(`{ "required_scope": ["scope-a"], "trusted_issuers": ["foo", "bar"], "target_audience": ["audience"] }`),
