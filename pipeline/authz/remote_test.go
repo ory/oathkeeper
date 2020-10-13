@@ -92,6 +92,7 @@ func TestAuthorizerRemoteAuthorize(t *testing.T) {
 				return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 					assert.Contains(t, r.Header, "Content-Type")
 					assert.Contains(t, r.Header["Content-Type"], "text/plain")
+					assert.Nil(t, r.Header["Authorization"])
 					body, err := ioutil.ReadAll(r.Body)
 					require.NoError(t, err)
 					assert.Equal(t, "testtest", string(body))
