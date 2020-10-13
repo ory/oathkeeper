@@ -170,7 +170,7 @@ func (a *AuthenticatorOAuth2Introspection) Authenticate(r *http.Request, session
 		}
 
 		if len(i.TokenUse) > 0 && i.TokenUse != "access_token" {
-			return errors.WithStack(helper.ErrForbidden.WithReason(fmt.Sprintf("Use of introspected token is not an access token or a refresh token but \"%s\"", i.TokenUse)))
+			return errors.WithStack(helper.ErrForbidden.WithReason(fmt.Sprintf("Use of introspected token is not an access token but \"%s\"", i.TokenUse)))
 		}
 
 		if !i.Active {
