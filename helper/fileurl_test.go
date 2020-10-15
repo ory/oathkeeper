@@ -19,6 +19,7 @@ var testURLs = []testData{
 	{"file:/home/test/file2.txt", "/home/test/file2.txt", "home\\test\\file2.txt"},                                                     // File variant without slashes
 	{"file:///../test/update/file3.txt", "../test/update/file3.txt", "..\\test\\update\\file3.txt"},                                    // Special case relative path
 	{"file://../test/update/file4.txt", "../test/update/file4.txt", "..\\test\\update\\file4.txt"},                                     // Invalid relative path
+	{"file://C:/users/test/file5.txt", "C:/users/test/file5.txt", "C:\\users\\test\\file5.txt"},                                        // Non standard Windows style
 	{"file:///C:/users/test/file5.txt", "/C:/users/test/file5.txt", "C:\\users\\test\\file5.txt"},                                      // Windows style
 	{"file://anotherhost/share/users/test/file6.txt", "/share/users/test/file6.txt", "\\\\anotherhost\\share\\users\\test\\file6.txt"}, // Windows style with hostname
 }

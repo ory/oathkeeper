@@ -11,7 +11,8 @@ func GetURLFilePath(u url.URL) string {
 	fPath := u.Path
 	sep := string(filepath.Separator)
 	// Special case for malformed file urls (file://../relative/path)
-	if u.Host == "." || u.Host == ".." {
+	driveLetterMatch, _ := filepath.Match("[A-Za-z]:", u.Host)
+	if u.Host == "." || u.Host == ".." || driveLetterMatch {
 		fPath = u.Host + fPath
 		u.Host = ""
 	}
