@@ -240,7 +240,7 @@ func TestFetcherWatchRepositoryFromFS(t *testing.T) {
 	require.NoError(t, ioutil.WriteFile(filepath.Join(os.TempDir(), ".oathkeeper-"+id+".yml"), []byte(`
 access_rules:
   repositories:
-  - file://`+repository+`
+  - file:///`+repository+`
 `), 0777))
 
 	viperx.InitializeConfig("oathkeeper-"+id, os.TempDir(), nil)
