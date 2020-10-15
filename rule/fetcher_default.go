@@ -25,6 +25,7 @@ import (
 	"github.com/ory/x/viperx"
 
 	"github.com/ory/oathkeeper/driver/configuration"
+	"github.com/ory/oathkeeper/helper"
 	"github.com/ory/oathkeeper/x"
 
 	"github.com/ghodss/yaml"
@@ -83,7 +84,7 @@ func (f *FetcherDefault) configUpdate(ctx context.Context, watcher *fsnotify.Wat
 	var filesBeingWatched []string
 	for _, fileToWatch := range replace {
 		if fileToWatch.Scheme == "file" {
-			p := filepath.Clean(strings.Replace(fileToWatch.String(), "file://", "", 1))
+			p := helper.GetURLFilePath(fileToWatch)
 			filesBeingWatched = append(filesBeingWatched, p)
 			directoryToWatch, _ := filepath.Split(p)
 			directoriesToWatch = append(directoriesToWatch, directoryToWatch)
@@ -144,15 +145,6 @@ func (f *FetcherDefault) configUpdate(ctx context.Context, watcher *fsnotify.Wat
 }
 
 func (f *FetcherDefault) sourceUpdate(e event) ([]Rule, error) {
-	if e.path.Scheme == "file" {
-		u, err := url.Parse("file://" + filepath.Clean(strings.TrimPrefix(e.path.String(), "file://")))
-		if err != nil {
-			return nil, err
-		}
-
-		e.path = *u
-	}
-
 	rules, err := f.fetch(e.path)
 	if err != nil {
 		return nil, err
@@ -319,7 +311,7 @@ func (f *FetcherDefault) fetch(source url.URL) ([]Rule, error) {
 	case "https":
 		return f.fetchRemote(source.String())
 	case "file":
-		p := strings.Replace(source.String(), "file://", "", 1)
+		p := helper.GetURLFilePath(source)
 		if path.Ext(p) == ".json" || path.Ext(p) == ".yaml" || path.Ext(p) == ".yml" {
 			return f.fetchFile(p)
 		}
