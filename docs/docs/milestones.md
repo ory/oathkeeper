@@ -19,8 +19,8 @@ Something is not working.
 - [ ] Timeout in oauth2_client_credentials when using self-signed certificates ([oathkeeper#368](https://github.com/ory/oathkeeper/issues/368))
 - [ ] oauth2_introspection not parsing single string aud valie ([oathkeeper#491](https://github.com/ory/oathkeeper/issues/491))
 - [ ] JWT validation sometimes appends trailing slash to issuer ([oathkeeper#527](https://github.com/ory/oathkeeper/issues/527))
-- [ ] Authenticator oauth2_introspection only works if token_type returned is an "access_token" ([oathkeeper#553](https://github.com/ory/oathkeeper/issues/553))
 - [x] "fatal error: concurrent map writes" panic, unable to reproduce ([oathkeeper#551](https://github.com/ory/oathkeeper/issues/551)) - [@hackerman](https://github.com/aeneasr)
+- [x] Authenticator oauth2_introspection only works if token_type returned is an "access_token" ([oathkeeper#553](https://github.com/ory/oathkeeper/issues/553))
 
 ### [Feat](https://github.com/ory/oathkeeper/labels/feat)
 
