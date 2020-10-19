@@ -10,21 +10,12 @@ import (
 func GetURLFilePath(u url.URL) string {
 	fPath := u.Path
 	sep := string(filepath.Separator)
-	// Special case for malformed file urls (file://../relative/path)
-	driveLetterMatch, _ := filepath.Match("[A-Za-z]:", u.Host)
-	if u.Host == "." || u.Host == ".." || driveLetterMatch {
-		fPath = u.Host + fPath
-		u.Host = ""
-	}
+	// Special case for malformed file urls (file://../relative/path, file://path)
+	// this means we cannot support the hostname part of the URL as an actual hostname
+	fPath = u.Host + fPath
 	if runtime.GOOS == "windows" {
-		hostname := u.Hostname()
-		if hostname != "" {
-			// Make windows style UNC path
-			fPath = sep + sep + hostname + fPath
-		} else {
-			// Strip any path initial separator on windows
-			fPath = stripFistPathSeparators(fPath)
-		}
+		// Strip any path initial separator on windows
+		fPath = stripFistPathSeparators(fPath)
 	}
 	fPath = filepath.FromSlash(fPath)
 
