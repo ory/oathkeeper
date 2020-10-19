@@ -25,7 +25,6 @@ import (
 	"github.com/ory/x/viperx"
 
 	"github.com/ory/oathkeeper/driver/configuration"
-	"github.com/ory/oathkeeper/helper"
 	"github.com/ory/oathkeeper/x"
 
 	"github.com/ghodss/yaml"
@@ -84,7 +83,7 @@ func (f *FetcherDefault) configUpdate(ctx context.Context, watcher *fsnotify.Wat
 	var filesBeingWatched []string
 	for _, fileToWatch := range replace {
 		if fileToWatch.Scheme == "file" {
-			p := helper.GetURLFilePath(fileToWatch)
+			p := x.GetURLFilePath(fileToWatch)
 			filesBeingWatched = append(filesBeingWatched, p)
 			directoryToWatch, _ := filepath.Split(p)
 			directoriesToWatch = append(directoriesToWatch, directoryToWatch)
@@ -311,7 +310,7 @@ func (f *FetcherDefault) fetch(source url.URL) ([]Rule, error) {
 	case "https":
 		return f.fetchRemote(source.String())
 	case "file":
-		p := helper.GetURLFilePath(source)
+		p := x.GetURLFilePath(source)
 		if path.Ext(p) == ".json" || path.Ext(p) == ".yaml" || path.Ext(p) == ".yml" {
 			return f.fetchFile(p)
 		}
