@@ -8,7 +8,6 @@ orbs:
   nancy: ory/nancy@0.0.10
   docs: ory/docs@0.0.4
   golangci: ory/golangci@0.0.4
-  win: circleci/windows@2.4.0
 
 jobs:
   test:
@@ -27,14 +26,6 @@ jobs:
       - run: ./test/e2e/run.sh
       - run: ./test/reload/run.sh
 
-  test-windows:
-    executor: win/default
-    working_directory: /go/src/github.com/ory/oathkeeper
-    steps:
-      - checkout
-      - run: go mod download
-      - run: go test -failfast -timeout=20m ./...
-
 workflows:
   "test, build, and relase":
     jobs:
@@ -47,10 +38,6 @@ workflows:
             tags:
               only: /.*/
       - test:
-          filters:
-            tags:
-              only: /.*/
-      - test-windows:
           filters:
             tags:
               only: /.*/

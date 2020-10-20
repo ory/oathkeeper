@@ -1,0 +1,16 @@
+name: Windows go test
+
+on:
+  pull_request:
+    branches:
+      - master
+  push:
+    branches:
+      - *
+
+jobs:
+  test:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v2
+      - run: go test -failfast -timeout=20m ./...
