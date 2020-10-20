@@ -50,6 +50,10 @@ workflows:
           filters:
             tags:
               only: /.*/
+      - test-windows:
+          filters:
+            tags:
+              only: /.*/
       - changelog/generate:
           requires:
             - test
