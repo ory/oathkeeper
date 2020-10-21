@@ -196,6 +196,8 @@ func (s *FetcherDefault) resolve(wg *sync.WaitGroup, errs chan error, location u
 	var reader io.Reader
 
 	switch location.Scheme {
+	case "":
+		fallthrough
 	case "file":
 		f, err := os.Open(x.GetURLFilePath(&location))
 		if err != nil {

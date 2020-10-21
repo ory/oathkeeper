@@ -309,6 +309,8 @@ func (f *FetcherDefault) fetch(source url.URL) ([]Rule, error) {
 		fallthrough
 	case "https":
 		return f.fetchRemote(source.String())
+	case "":
+		fallthrough
 	case "file":
 		p := x.GetURLFilePath(&source)
 		if path.Ext(p) == ".json" || path.Ext(p) == ".yaml" || path.Ext(p) == ".yml" {
