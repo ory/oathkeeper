@@ -26,7 +26,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"net/url"
 	"sync"
 	"text/template"
 	"time"
@@ -187,7 +186,7 @@ func (a *MutatorIDToken) Mutate(r *http.Request, session *authn.AuthenticationSe
 	claims["nbf"] = now.Unix()
 	claims["sub"] = session.Subject
 
-	jwks, err := url.Parse(c.JWKSURL)
+	jwks, err := x.ParseURL(c.JWKSURL)
 	if err != nil {
 		return errors.WithStack(err)
 	}

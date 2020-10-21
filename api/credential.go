@@ -102,7 +102,7 @@ func (h *CredentialsHandler) jwksURLs() ([]url.URL, error) {
 	result := make([]url.URL, len(t))
 	i := 0
 	for u := range t {
-		uu, err := url.Parse(u)
+		uu, err := x.ParseURL(u)
 		if err != nil {
 			return nil, err
 		}

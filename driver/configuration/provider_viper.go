@@ -216,7 +216,7 @@ func (v *ViperProvider) PrometheusCollapseRequestPaths() bool {
 func (v *ViperProvider) ParseURLs(sources []string) ([]url.URL, error) {
 	r := make([]url.URL, len(sources))
 	for k, u := range sources {
-		p, err := url.Parse(u)
+		p, err := x.ParseURL(u)
 		if err != nil {
 			return nil, err
 		}
