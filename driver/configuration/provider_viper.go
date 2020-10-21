@@ -24,7 +24,6 @@ import (
 	"github.com/ory/gojsonschema"
 	"github.com/ory/x/corsx"
 	"github.com/ory/x/tracing"
-	"github.com/ory/x/urlx"
 	"github.com/ory/x/viperx"
 
 	"github.com/ory/oathkeeper/x"
@@ -138,7 +137,7 @@ func (v *ViperProvider) AccessRuleRepositories() []url.URL {
 	sources := viperx.GetStringSlice(v.l, ViperKeyAccessRuleRepositories, []string{})
 	repositories := make([]url.URL, len(sources))
 	for k, source := range sources {
-		repositories[k] = *urlx.ParseOrFatal(v.l, source)
+		repositories[k] = *x.ParseOrFatal(v.l, source)
 	}
 
 	return repositories

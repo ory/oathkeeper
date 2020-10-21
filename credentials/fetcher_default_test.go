@@ -13,10 +13,10 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
+	"github.com/ory/oathkeeper/x"
 	"github.com/ory/x/logrusx"
 
 	"github.com/ory/herodot"
-	"github.com/ory/x/urlx"
 )
 
 var sets = [...]json.RawMessage{
@@ -57,13 +57,13 @@ func TestFetcherDefault(t *testing.T) {
 	defer invalidServer.Close()
 
 	uris := []url.URL{
-		*urlx.ParseOrPanic(timeOutServer.URL),
-		*urlx.ParseOrPanic(slowServer.URL),
-		*urlx.ParseOrPanic(fastServer.URL),
-		*urlx.ParseOrPanic(invalidServer.URL),
-		*urlx.ParseOrPanic("file://../test/stub/jwks-hs.json"),
-		*urlx.ParseOrPanic("file://../test/stub/jwks-rsa-single.json"),
-		*urlx.ParseOrPanic("file://../test/stub/jwks-rsa-multiple.json"),
+		*x.ParseOrPanic(timeOutServer.URL),
+		*x.ParseOrPanic(slowServer.URL),
+		*x.ParseOrPanic(fastServer.URL),
+		*x.ParseOrPanic(invalidServer.URL),
+		*x.ParseOrPanic("file://../test/stub/jwks-hs.json"),
+		*x.ParseOrPanic("file://../test/stub/jwks-rsa-single.json"),
+		*x.ParseOrPanic("file://../test/stub/jwks-rsa-multiple.json"),
 	}
 
 	t.Run("name=should result in error because server times out", func(t *testing.T) {
