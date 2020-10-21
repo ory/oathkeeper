@@ -85,6 +85,15 @@ func ParseURL(rawurl string) (*url.URL, error) {
 	return u, nil
 }
 
+// ParseOrPanic parses a url or panics.
+func ParseOrPanic(in string) *url.URL {
+	out, err := ParseURL(in)
+	if err != nil {
+		panic(err.Error())
+	}
+	return out
+}
+
 // ParseOrFatal parses a url or fatals.
 func ParseOrFatal(l *logrusx.Logger, in string) *url.URL {
 	out, err := ParseURL(in)
