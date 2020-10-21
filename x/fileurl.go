@@ -33,7 +33,7 @@ func GetURLFilePath(u *url.URL) string {
 		if u.Host != "" {
 			// Make UNC Path
 			s := string(filepath.Separator)
-			fPath = s + s + u.Host + filepath.Clean(filepath.FromSlash(fPath))
+			fPath = s + s + u.Host + filepath.FromSlash(fPath)
 			return fPath
 		}
 		if winPathRegex.MatchString(fPath[1:]) {
@@ -42,7 +42,7 @@ func GetURLFilePath(u *url.URL) string {
 			fPath = stripFistPathSeparators(fPath)
 		}
 	}
-	return filepath.Clean(filepath.FromSlash(fPath))
+	return filepath.FromSlash(fPath)
 }
 
 // ParseURL parses rawurl into a URL structure with special handling for file:// URLs
