@@ -29,7 +29,7 @@ func TestGetURLFilePath(t *testing.T) {
 		{"../file9.txt", "../file9.txt", "..\\file9.txt", true},
 		{"..\\file10.txt", "../file10.txt", "..\\file10.txt", true},
 		{"C:\\file11.txt", "/C:/file11.txt", "C:\\file11.txt", true},
-		{"\\\\hostname\\share\\file12.txt", "//hostname/share/file12.txt", "\\\\hostname\\share\\file12.txt", true},
+		{"\\\\hostname\\share\\file12.txt", "/share/file12.txt", "\\\\hostname\\share\\file12.txt", true},
 		{"file:///home/test/file 13.txt", "/home/test/file 13.txt", "\\home\\test\\file 13.txt", true},
 		{"file:///home/test/file%2014.txt", "/home/test/file 14.txt", "\\home\\test\\file 14.txt", true},
 		{"http://server:80/test/file%2015.txt", "/test/file 15.txt", "/test/file 15.txt", true},

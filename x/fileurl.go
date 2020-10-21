@@ -29,17 +29,18 @@ func GetURLFilePath(u *url.URL) string {
 		return u.Path
 	}
 	fPath := u.Path
-	if u.Host != "" {
-		// On POSIX systems this will return a UNC style path like //host/share/path
-		// this will probably not be very useful
-		s := string(filepath.Separator)
-		fPath = s + s + u.Host + filepath.Clean(filepath.FromSlash(fPath))
-		return fPath
-	}
-	if runtime.GOOS == "windows" && winPathRegex.MatchString(fPath[1:]) {
-		// On Windows we should remove the initial path separator in case this
-		// is a normal path (for example: "\c:\" -> "c:\"")
-		fPath = stripFistPathSeparators(fPath)
+	if runtime.GOOS == "windows" {
+		if u.Host != "" {
+			// Make UNC Path
+			s := string(filepath.Separator)
+			fPath = s + s + u.Host + filepath.Clean(filepath.FromSlash(fPath))
+			return fPath
+		}
+		if winPathRegex.MatchString(fPath[1:]) {
+			// On Windows we should remove the initial path separator in case this
+			// is a normal path (for example: "\c:\" -> "c:\"")
+			fPath = stripFistPathSeparators(fPath)
+		}
 	}
 	return filepath.Clean(filepath.FromSlash(fPath))
 }
