@@ -197,7 +197,7 @@ func (s *FetcherDefault) resolve(wg *sync.WaitGroup, errs chan error, location u
 
 	switch location.Scheme {
 	case "file":
-		f, err := os.Open(x.GetURLFilePath(location))
+		f, err := os.Open(x.GetURLFilePath(&location))
 		if err != nil {
 			errs <- errors.WithStack(herodot.
 				ErrInternalServerError.

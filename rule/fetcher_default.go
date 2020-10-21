@@ -83,7 +83,7 @@ func (f *FetcherDefault) configUpdate(ctx context.Context, watcher *fsnotify.Wat
 	var filesBeingWatched []string
 	for _, fileToWatch := range replace {
 		if fileToWatch.Scheme == "file" {
-			p := x.GetURLFilePath(fileToWatch)
+			p := x.GetURLFilePath(&fileToWatch)
 			filesBeingWatched = append(filesBeingWatched, p)
 			directoryToWatch, _ := filepath.Split(p)
 			directoriesToWatch = append(directoriesToWatch, directoryToWatch)
@@ -310,7 +310,7 @@ func (f *FetcherDefault) fetch(source url.URL) ([]Rule, error) {
 	case "https":
 		return f.fetchRemote(source.String())
 	case "file":
-		p := x.GetURLFilePath(source)
+		p := x.GetURLFilePath(&source)
 		if path.Ext(p) == ".json" || path.Ext(p) == ".yaml" || path.Ext(p) == ".yml" {
 			return f.fetchFile(p)
 		}
