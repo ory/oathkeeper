@@ -18,64 +18,55 @@ func GetURLFilePath(u *url.URL) string {
 	if u == nil {
 		return ""
 	}
-
-	if u.Scheme != "file" && u.Scheme != "" {
+	if !(u.Scheme == "file" || u.Scheme == "") {
 		return u.Path
 	}
+
 	fPath := u.Path
 	if runtime.GOOS == "windows" {
 		if u.Host != "" {
 			// Make UNC Path
-			s := string(filepath.Separator)
-			fPath = s + s + u.Host + filepath.FromSlash(fPath)
+			fPath = "\\\\" + u.Host + filepath.FromSlash(fPath)
 			return fPath
 		}
-		if winPathRegex.MatchString(fPath[1:]) {
+		fPathTrimmed := strings.TrimLeft(fPath, "/")
+		if winPathRegex.MatchString(fPathTrimmed) {
 			// On Windows we should remove the initial path separator in case this
 			// is a normal path (for example: "\c:\" -> "c:\"")
-			fPath = stripFistPathSeparators(fPath)
+			fPath = fPathTrimmed
 		}
 	}
 	return filepath.FromSlash(fPath)
 }
 
-// ParseURL parses rawurl into a URL structure with special handling for file:// URLs
+// ParseURL parses rawURL into a URL structure with special handling for file:// URLs
 func ParseURL(rawURL string) (*url.URL, error) {
-	lcRawurl := strings.ToLower(rawurl)
-	if strings.HasPrefix(lcRawurl, "file:///") {
-		return url.Parse("file:///" + toSlash(rawurl[8:]))
+	lcRawURL := strings.ToLower(rawURL)
+	if strings.HasPrefix(lcRawURL, "file:///") {
+		return url.Parse("file:///" + rawURL[8:])
 	}
-	if strings.Index(lcRawurl, "file://") == 0 {
+	if strings.HasPrefix(lcRawURL, "file://") {
 		// Normally the first part after file:// is a hostname, but since
 		// this is often misused we interpret the URL like a normal path
 		// by removing the "file://" from the beginning
-		rawurl = rawurl[7:]
+		rawURL = rawURL[7:]
 	}
-	if winPathRegex.MatchString(rawurl) {
+	if winPathRegex.MatchString(rawURL) {
 		// Windows path
-		return url.Parse("file:///" + toSlash(rawurl))
+		return url.Parse("file:///" + rawURL)
 	}
-	if strings.Index(lcRawurl, "\\\\") == 0 {
+	if strings.HasPrefix(lcRawURL, "\\\\") {
 		// Windows UNC path
-		// We extract the hostname and creates an appropriate file:// URL
+		// We extract the hostname and create an appropriate file:// URL
 		// based on the hostname and the path
-		parts := strings.Split(filepath.FromSlash(rawurl), "\\")
-		host := ""
-		if len(parts) > 2 {
-			host = parts[2]
-		}
-		p := "/"
-		if len(parts) > 4 {
-			p += strings.Join(parts[3:], "/")
-		}
-		return url.Parse("file://" + host + p)
+		host, path := extractUNCPathParts(rawURL)
+		// It is safe to replace the \ with / here because this is POSIX style path
+		return url.Parse("file://" + host + strings.ReplaceAll(path, "\\", "/"))
 	}
-	u, err := url.Parse(rawurl)
+	//fmt.Println("PARSE", rawURL)
+	u, err := url.Parse(rawURL)
 	if err != nil {
 		return nil, err
-	}
-	if u.Scheme == "file" || u.Scheme == "" {
-		u.Path = toSlash(u.Path)
 	}
 	return u, nil
 }
@@ -105,6 +96,11 @@ func stripFistPathSeparators(fPath string) string {
 	return fPath
 }
 
-func toSlash(path string) string {
-	return strings.ReplaceAll(path, "\\", "/")
+func extractUNCPathParts(uncPath string) (host, path string) {
+	parts := strings.Split(strings.TrimPrefix(uncPath, "\\\\"), "\\")
+	host = parts[0]
+	if len(parts) > 0 {
+		path = "\\" + strings.Join(parts[1:], "\\")
+	}
+	return host, path
 }
