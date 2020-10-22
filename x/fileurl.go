@@ -13,12 +13,6 @@ import (
 // winPathRegex is a regex for [DRIVE-LETTER]:
 var winPathRegex = regexp.MustCompile("^[A-Za-z]:.*")
 
-// winUNCRegex is a regex for UNC path (starts with \\)
-var winUNCRegex = regexp.MustCompile("^\\\\\\\\.*")
-
-// winUNCRegex is a regex for file://
-var fileRegex = regexp.MustCompile("^(?i)file://")
-
 // GetURLFilePath returns the path of a URL that is compatible with the runtime os filesystem
 func GetURLFilePath(u *url.URL) string {
 	if u == nil {
@@ -49,9 +43,9 @@ func GetURLFilePath(u *url.URL) string {
 func ParseURL(rawurl string) (*url.URL, error) {
 	lcRawurl := strings.ToLower(rawurl)
 	if strings.Index(lcRawurl, "file:///") == 0 {
-		return url.Parse(rawurl)
+		return url.Parse("file:///" + toSlash(rawurl[8:]))
 	}
-	if fileRegex.MatchString(rawurl) {
+	if strings.Index(lcRawurl, "file://") == 0 {
 		// Normally the first part after file:// is a hostname, but since
 		// this is often misused we interpret the URL like a normal path
 		// by removing the "file://" from the beginning
@@ -61,7 +55,7 @@ func ParseURL(rawurl string) (*url.URL, error) {
 		// Windows path
 		return url.Parse("file:///" + toSlash(rawurl))
 	}
-	if winUNCRegex.MatchString(rawurl) {
+	if strings.Index(lcRawurl, "\\\\") == 0 {
 		// Windows UNC path
 		// We extract the hostname and creates an appropriate file:// URL
 		// based on the hostname and the path

@@ -25,9 +25,12 @@ func TestGetURLFilePath(t *testing.T) {
 		{"file://file7.txt", "file7.txt", "file7.txt", true},
 		{"file://path/file8.txt", "path/file8.txt", "path\\file8.txt", true},
 		{"file://C:\\Users\\RUNNER~1\\AppData\\Local\\Temp\\9ccf9f68-121c-451a-8a73-2aa360925b5a386398343/access-rules.json", "/C:/Users/RUNNER~1/AppData/Local/Temp/9ccf9f68-121c-451a-8a73-2aa360925b5a386398343/access-rules.json", "C:\\Users\\RUNNER~1\\AppData\\Local\\Temp\\9ccf9f68-121c-451a-8a73-2aa360925b5a386398343\\access-rules.json", true},
+		{"file:///C:\\Users\\RUNNER~1\\AppData\\Local\\Temp\\9ccf9f68-121c-451a-8a73-2aa360925b5a386398343/access-rules.json", "/C:/Users/RUNNER~1/AppData/Local/Temp/9ccf9f68-121c-451a-8a73-2aa360925b5a386398343/access-rules.json", "C:\\Users\\RUNNER~1\\AppData\\Local\\Temp\\9ccf9f68-121c-451a-8a73-2aa360925b5a386398343\\access-rules.json", true},
 		{"file8.txt", "file8.txt", "file8.txt", true},
 		{"../file9.txt", "../file9.txt", "..\\file9.txt", true},
 		{"./file9b.txt", "./file9b.txt", ".\\file9b.txt", true},
+		{"file://./file9c.txt", "./file9c.txt", ".\\file9c.txt", true},
+		{"file://./folder/.././file9d.txt", "./folder/.././file9d.txt", ".\\folder\\..\\.\\file9d.txt", true},
 		{"..\\file10.txt", "../file10.txt", "..\\file10.txt", true},
 		{"C:\\file11.txt", "/C:/file11.txt", "C:\\file11.txt", true},
 		{"\\\\hostname\\share\\file12.txt", "/share/file12.txt", "\\\\hostname\\share\\file12.txt", true},
@@ -72,10 +75,13 @@ func TestParseURL(t *testing.T) {
 		{"file://file7.txt", "file7.txt", "file7.txt"},
 		{"file://path/file8.txt", "path/file8.txt", "path/file8.txt"},
 		{"file://C:\\Users\\RUNNER~1\\AppData\\Local\\Temp\\9ccf9f68-121c-451a-8a73-2aa360925b5a386398343/access-rules.json", "/C:/Users/RUNNER~1/AppData/Local/Temp/9ccf9f68-121c-451a-8a73-2aa360925b5a386398343/access-rules.json", "file:///C:/Users/RUNNER~1/AppData/Local/Temp/9ccf9f68-121c-451a-8a73-2aa360925b5a386398343/access-rules.json"},
+		{"file:///C:\\Users\\RUNNER~1\\AppData\\Local\\Temp\\9ccf9f68-121c-451a-8a73-2aa360925b5a386398343/access-rules.json", "/C:/Users/RUNNER~1/AppData/Local/Temp/9ccf9f68-121c-451a-8a73-2aa360925b5a386398343/access-rules.json", "file:///C:/Users/RUNNER~1/AppData/Local/Temp/9ccf9f68-121c-451a-8a73-2aa360925b5a386398343/access-rules.json"},
 		{"file://C:\\Users\\path with space\\file.txt", "/C:/Users/path with space/file.txt", "file:///C:/Users/path%20with%20space/file.txt"},
 		{"file8b.txt", "file8b.txt", "file8b.txt"},
 		{"../file9.txt", "../file9.txt", "../file9.txt"},
 		{"./file9b.txt", "./file9b.txt", "./file9b.txt"},
+		{"file://./file9c.txt", "./file9c.txt", "./file9c.txt"},
+		{"file://./folder/.././file9d.txt", "./folder/.././file9d.txt", "./folder/.././file9d.txt"},
 		{"..\\file10.txt", "../file10.txt", "../file10.txt"},
 		{"C:\\file11.txt", "/C:/file11.txt", "file:///C:/file11.txt"},
 		{"\\\\hostname\\share\\file12.txt", "/share/file12.txt", "file://hostname/share/file12.txt"},
@@ -90,7 +96,7 @@ func TestParseURL(t *testing.T) {
 	for _, td := range testURLs {
 		u, err := ParseURL(td.urlStr)
 		assert.NoError(t, err)
-		assert.Equal(t, td.expectedPath, u.Path)
-		assert.Equal(t, td.expectedStr, u.String())
+		assert.Equal(t, td.expectedPath, u.Path, "expected path for %s", td.urlStr)
+		assert.Equal(t, td.expectedStr, u.String(), "expected URL string for %s", td.urlStr)
 	}
 }
