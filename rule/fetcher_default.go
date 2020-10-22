@@ -82,8 +82,8 @@ func (f *FetcherDefault) configUpdate(ctx context.Context, watcher *fsnotify.Wat
 	var directoriesToWatch []string
 	var filesBeingWatched []string
 	for _, fileToWatch := range replace {
-		if fileToWatch.Scheme == "file" {
-			p := x.GetURLFilePath(&fileToWatch)
+		if fileToWatch.Scheme == "file" || fileToWatch.Scheme == "" {
+			p := filepath.Clean(x.GetURLFilePath(&fileToWatch))
 			filesBeingWatched = append(filesBeingWatched, p)
 			directoryToWatch, _ := filepath.Split(p)
 			directoriesToWatch = append(directoriesToWatch, directoryToWatch)
