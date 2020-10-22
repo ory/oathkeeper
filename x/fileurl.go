@@ -42,7 +42,7 @@ func GetURLFilePath(u *url.URL) string {
 // ParseURL parses rawurl into a URL structure with special handling for file:// URLs
 func ParseURL(rawurl string) (*url.URL, error) {
 	lcRawurl := strings.ToLower(rawurl)
-	if strings.Index(lcRawurl, "file:///") == 0 {
+	if strings.HasPrefix(lcRawurl, "file:///") {
 		return url.Parse("file:///" + toSlash(rawurl[8:]))
 	}
 	if strings.Index(lcRawurl, "file://") == 0 {
