@@ -43,18 +43,21 @@ func GetURLFilePath(u *url.URL) string {
 func ParseURL(rawURL string) (*url.URL, error) {
 	lcRawURL := strings.ToLower(rawURL)
 	if strings.HasPrefix(lcRawURL, "file:///") {
-		return url.Parse("file:///" + rawURL[8:])
+		return url.Parse(rawURL)
 	}
+
 	if strings.HasPrefix(lcRawURL, "file://") {
 		// Normally the first part after file:// is a hostname, but since
 		// this is often misused we interpret the URL like a normal path
 		// by removing the "file://" from the beginning
 		rawURL = rawURL[7:]
 	}
+
 	if winPathRegex.MatchString(rawURL) {
 		// Windows path
 		return url.Parse("file:///" + rawURL)
 	}
+
 	if strings.HasPrefix(lcRawURL, "\\\\") {
 		// Windows UNC path
 		// We extract the hostname and create an appropriate file:// URL
@@ -63,7 +66,7 @@ func ParseURL(rawURL string) (*url.URL, error) {
 		// It is safe to replace the \ with / here because this is POSIX style path
 		return url.Parse("file://" + host + strings.ReplaceAll(path, "\\", "/"))
 	}
-	//fmt.Println("PARSE", rawURL)
+
 	u, err := url.Parse(rawURL)
 	if err != nil {
 		return nil, err
