@@ -92,13 +92,6 @@ func ParseOrFatal(l *logrusx.Logger, in string) *url.URL {
 	return out
 }
 
-func stripFistPathSeparators(fPath string) string {
-	for len(fPath) > 0 && (fPath[0] == '/' || fPath[0] == '\\') {
-		fPath = fPath[1:]
-	}
-	return fPath
-}
-
 func extractUNCPathParts(uncPath string) (host, path string) {
 	parts := strings.Split(strings.TrimPrefix(uncPath, "\\\\"), "\\")
 	host = parts[0]
