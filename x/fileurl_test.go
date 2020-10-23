@@ -128,3 +128,19 @@ func TestParseURL(t *testing.T) {
 	_, err = ParseURL(":///path/file")
 	assert.Error(t, err)
 }
+
+func TestTrimPrefixIC(t *testing.T) {
+	for _, td := range []struct {
+		s        string
+		prefix   string
+		expected string
+	}{
+		{"file://test", "file://", "test"},
+		{"FILE://test", "file://", "test"},
+		{"FiLe://test", "file://", "test"},
+		{"http://test", "file://", "http://test"},
+		{"files://test", "file://", "files://test"},
+	} {
+		assert.Equal(t, td.expected, trimPrefixIC(td.s, td.prefix))
+	}
+}

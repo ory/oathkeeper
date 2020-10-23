@@ -46,12 +46,10 @@ func ParseURL(rawURL string) (*url.URL, error) {
 		return url.Parse(rawURL)
 	}
 
-	if strings.HasPrefix(lcRawURL, "file://") {
-		// Normally the first part after file:// is a hostname, but since
-		// this is often misused we interpret the URL like a normal path
-		// by removing the "file://" from the beginning
-		rawURL = rawURL[7:]
-	}
+	// Normally the first part after file:// is a hostname, but since
+	// this is often misused we interpret the URL like a normal path
+	// by removing the "file://" from the beginning (if it exists)
+	rawURL = trimPrefixIC(rawURL, "file://")
 
 	if winPathRegex.MatchString(rawURL) {
 		// Windows path
@@ -67,11 +65,7 @@ func ParseURL(rawURL string) (*url.URL, error) {
 		return url.Parse("file://" + host + strings.ReplaceAll(path, "\\", "/"))
 	}
 
-	u, err := url.Parse(rawURL)
-	if err != nil {
-		return nil, err
-	}
-	return u, nil
+	return url.Parse(rawURL)
 }
 
 // ParseOrPanic parses a url or panics.
@@ -99,4 +93,14 @@ func extractUNCPathParts(uncPath string) (host, path string) {
 		path = "\\" + strings.Join(parts[1:], "\\")
 	}
 	return host, path
+}
+
+// trimPrefixIC returns s without the provided leading prefix string using
+// case insensitive matching.
+// If s doesn't start with prefix, s is returned unchanged.
+func trimPrefixIC(s, prefix string) string {
+	if strings.HasPrefix(strings.ToLower(s), prefix) {
+		return s[len(prefix):]
+	}
+	return s
 }
