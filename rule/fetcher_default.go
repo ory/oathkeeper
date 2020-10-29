@@ -16,6 +16,8 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/ory/oathkeeper/internal/cloudstorage"
+
 	"github.com/fsnotify/fsnotify"
 
 	"github.com/ory/x/stringslice"
@@ -58,9 +60,10 @@ type fetcherRegistry interface {
 }
 
 type FetcherDefault struct {
-	c  configuration.Provider
-	r  fetcherRegistry
-	hc *http.Client
+	c   configuration.Provider
+	r   fetcherRegistry
+	hc  *http.Client
+	mux *blob.URLMux
 
 	cache map[string][]Rule
 
@@ -78,6 +81,7 @@ func NewFetcherDefault(
 	return &FetcherDefault{
 		r:     r,
 		c:     c,
+		mux:   cloudstorage.NewURLMux(),
 		hc:    httpx.NewResilientClientLatencyToleranceHigh(nil),
 		cache: map[string][]Rule{},
 	}
@@ -418,13 +422,13 @@ func (f *FetcherDefault) decode(r io.Reader) ([]Rule, error) {
 
 func (f *FetcherDefault) fetchFromStorage(source url.URL) ([]Rule, error) {
 	ctx := context.Background()
-	bucket, err := blob.OpenBucket(ctx, source.Scheme+"://"+source.Host)
+	bucket, err := f.mux.OpenBucket(ctx, source.Scheme+"://"+source.Host)
 	if err != nil {
 		return nil, err
 	}
 	defer bucket.Close()
 
-	r, err := bucket.NewReader(ctx, source.Path, nil)
+	r, err := bucket.NewReader(ctx, source.Path[1:], nil)
 	if err != nil {
 		return nil, err
 	}

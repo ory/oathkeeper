@@ -80,6 +80,11 @@ func (r *RegistryMemory) RuleFetcher() rule.Fetcher {
 	return r.ruleFetcher
 }
 
+func (r *RegistryMemory) WithRuleFetcher(fetcher rule.Fetcher) Registry {
+	r.ruleFetcher = fetcher
+	return r
+}
+
 func (r *RegistryMemory) ProxyRequestHandler() *proxy.RequestHandler {
 	if r.proxyRequestHandler == nil {
 		r.proxyRequestHandler = proxy.NewRequestHandler(r, r.c)

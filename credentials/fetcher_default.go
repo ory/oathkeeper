@@ -32,6 +32,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/ory/oathkeeper/internal/cloudstorage"
+
 	"github.com/pkg/errors"
 	"gopkg.in/square/go-jose.v2"
 
@@ -61,6 +63,7 @@ type FetcherDefault struct {
 	keys        map[string]jose.JSONWebKeySet
 	fetchedAt   map[string]time.Time
 	l           *logrusx.Logger
+	mux         *blob.URLMux
 }
 
 // NewFetcherDefault returns a new JWKS Fetcher with:
@@ -76,6 +79,7 @@ func NewFetcherDefault(l *logrusx.Logger, cancelAfter time.Duration, ttl time.Du
 		keys:        make(map[string]jose.JSONWebKeySet),
 		fetchedAt:   make(map[string]time.Time),
 		client:      httpx.NewResilientClientLatencyToleranceHigh(nil),
+		mux:         cloudstorage.NewURLMux(),
 	}
 }
 
@@ -207,7 +211,7 @@ func (s *FetcherDefault) resolve(wg *sync.WaitGroup, errs chan error, location u
 		fallthrough
 	case "s3":
 		ctx := context.Background()
-		bucket, err := blob.OpenBucket(ctx, location.Scheme+"://"+location.Host)
+		bucket, err := s.mux.OpenBucket(ctx, location.Scheme+"://"+location.Host)
 		if err != nil {
 			errs <- errors.WithStack(herodot.
 				ErrInternalServerError.
@@ -221,7 +225,7 @@ func (s *FetcherDefault) resolve(wg *sync.WaitGroup, errs chan error, location u
 		}
 		defer bucket.Close()
 
-		r, err := bucket.NewReader(ctx, location.Path, nil)
+		r, err := bucket.NewReader(ctx, location.Path[1:], nil)
 		if err != nil {
 			errs <- errors.WithStack(herodot.
 				ErrInternalServerError.
