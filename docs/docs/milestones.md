@@ -34,6 +34,7 @@ New feature or request.
 - [ ] Oathkeeper behind ssl terminating balancer ([oathkeeper#153](https://github.com/ory/oathkeeper/issues/153))
 - [ ] Fetch JWKs from object storage (S3) ([oathkeeper#518](https://github.com/ory/oathkeeper/issues/518))
 - [ ] remote_json: Enable timeout configuration for calls to authorization endpoint ([oathkeeper#515](https://github.com/ory/oathkeeper/issues/515))
+- [ ] Start as Envoy AuthService ([oathkeeper#560](https://github.com/ory/oathkeeper/issues/560))
 - [x] Clean up logging in case of invalid credentials ([oathkeeper#505](https://github.com/ory/oathkeeper/issues/505))
 - [x] Enable forwarding of original authorization header to (remote) authorizer ([oathkeeper#528](https://github.com/ory/oathkeeper/issues/528)) - [@hackerman](https://github.com/aeneasr)
 
