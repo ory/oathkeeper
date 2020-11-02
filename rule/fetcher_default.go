@@ -16,6 +16,8 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/ory/oathkeeper/internal/cloudstorage"
+
 	"github.com/fsnotify/fsnotify"
 
 	"github.com/ory/x/stringslice"
@@ -29,6 +31,11 @@ import (
 
 	"github.com/ghodss/yaml"
 	"github.com/pkg/errors"
+
+	"gocloud.dev/blob"
+	_ "gocloud.dev/blob/azureblob"
+	_ "gocloud.dev/blob/gcsblob"
+	_ "gocloud.dev/blob/s3blob"
 )
 
 type event struct {
@@ -53,9 +60,10 @@ type fetcherRegistry interface {
 }
 
 type FetcherDefault struct {
-	c  configuration.Provider
-	r  fetcherRegistry
-	hc *http.Client
+	c   configuration.Provider
+	r   fetcherRegistry
+	hc  *http.Client
+	mux *blob.URLMux
 
 	cache map[string][]Rule
 
@@ -73,6 +81,7 @@ func NewFetcherDefault(
 	return &FetcherDefault{
 		r:     r,
 		c:     c,
+		mux:   cloudstorage.NewURLMux(),
 		hc:    httpx.NewResilientClientLatencyToleranceHigh(nil),
 		cache: map[string][]Rule{},
 	}
@@ -314,6 +323,12 @@ func (f *FetcherDefault) fetch(source url.URL) ([]Rule, error) {
 		Debugf("Fetching access rules from given location because something changed.")
 
 	switch source.Scheme {
+	case "azblob":
+		fallthrough
+	case "gs":
+		fallthrough
+	case "s3":
+		return f.fetchFromStorage(source)
 	case "http":
 		fallthrough
 	case "https":
@@ -403,4 +418,21 @@ func (f *FetcherDefault) decode(r io.Reader) ([]Rule, error) {
 	}
 
 	return ks, nil
+}
+
+func (f *FetcherDefault) fetchFromStorage(source url.URL) ([]Rule, error) {
+	ctx := context.Background()
+	bucket, err := f.mux.OpenBucket(ctx, source.Scheme+"://"+source.Host)
+	if err != nil {
+		return nil, err
+	}
+	defer bucket.Close()
+
+	r, err := bucket.NewReader(ctx, source.Path[1:], nil)
+	if err != nil {
+		return nil, err
+	}
+	defer r.Close()
+
+	return f.decode(r)
 }

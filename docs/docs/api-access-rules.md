@@ -23,6 +23,15 @@ access_rules:
     # If the URL Scheme is `http://` or `https://`, the access rules (an array of access rules is expected) will be
     # fetched from the provided HTTP(s) location.
     - https://path-to-my-rules/rules.json
+    # If the URL Scheme is `s3://`, `gs://` or `azblob://`, the access rules (an array of access rules is expected)
+    # will be fetched by an object storage (AWS S3, Google Cloud Storage, Azure Blob Storage).
+    #
+    # S3 storage also supports S3-compatible endpoints served by Minio or Ceph.
+    # See aws.ConfigFromURLParams (https://godoc.org/gocloud.dev/aws#ConfigFromURLParams) for more details on supported URL options for S3.
+    - s3://my-bucket-name/rules.json
+    - s3://my-bucket-name/rules.json?endpoint=minio.my-server.net
+    - gs://gcp-bucket-name/rules.json
+    - azblob://my-blob-container/rules.json
   # Determines a matching strategy for the access rules . Currently supported values are `glob` and `regexp`. Empty string defaults to regexp.
   matching_strategy: glob
 ```
