@@ -4,7 +4,7 @@
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 **Table of Contents**
 
-- [Unreleased (2020-10-27)](#unreleased-2020-10-27)
+- [Unreleased (2020-11-02)](#unreleased-2020-11-02)
     - [Bug Fixes](#bug-fixes)
     - [Documentation](#documentation)
     - [Features](#features)
@@ -182,7 +182,7 @@
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-# [Unreleased](https://github.com/ory/oathkeeper/compare/v0.38.4-beta.1...b18d90a94f2016b541164cf30654032628e4bc01) (2020-10-27)
+# [Unreleased](https://github.com/ory/oathkeeper/compare/v0.38.4-beta.1...666b9514ec37acfe2bb90ce62d5ee845853528fd) (2020-11-02)
 
 
 ### Bug Fixes
@@ -205,6 +205,7 @@
 ### Features
 
 * Forward original authorization header when using remote (json) authorizer ([#554](https://github.com/ory/oathkeeper/issues/554)) ([f4f781e](https://github.com/ory/oathkeeper/commit/f4f781e5ec998e3656b6cf3c46c83c0faf6527ef)), closes [#528](https://github.com/ory/oathkeeper/issues/528)
+* Use google/go-cloud to fetch rules and credentials from object storage ([#562](https://github.com/ory/oathkeeper/issues/562)) ([666b951](https://github.com/ory/oathkeeper/commit/666b9514ec37acfe2bb90ce62d5ee845853528fd)), closes [#518](https://github.com/ory/oathkeeper/issues/518) [#518](https://github.com/ory/oathkeeper/issues/518)
 
 
 
