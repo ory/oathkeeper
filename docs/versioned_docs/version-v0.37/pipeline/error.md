@@ -296,7 +296,7 @@ As discussed previously, if this configuration key is left empty, then all
 remote IPs will match!
 
 HTTP Requests that include one of the matching IP Addresses in the
-`X-Forwaded-For` HTTP Header, for example
+`X-Forwarded-For` HTTP Header, for example
 `X-Forwarded-For: 123.123.123.123, ..., 192.168.1.1, ...`, now match this error
 handler.
 
