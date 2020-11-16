@@ -418,7 +418,7 @@ conditions under the `when` key.
 ```json5
 // access-rule.json
 {
-  handler: 'json',
+  handler: 'redirect',
   config: {
     to: 'http://my-website/login', // required!!
     code: 301, // defaults to 302 - only 301 and 302 are supported.
@@ -449,7 +449,7 @@ conditions under the `when` key.
 ```json5
 // access-rule.json
 {
-  handler: 'json',
+  handler: 'www_authenticate',
   config: {
     realm: 'Please enter your username and password', // Defaults to `Please authenticate.`
     when: [
