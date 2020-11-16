@@ -4,7 +4,7 @@
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 **Table of Contents**
 
-- [Unreleased (2020-11-02)](#unreleased-2020-11-02)
+- [Unreleased (2020-11-16)](#unreleased-2020-11-16)
     - [Bug Fixes](#bug-fixes)
     - [Documentation](#documentation)
     - [Features](#features)
@@ -182,7 +182,7 @@
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-# [Unreleased](https://github.com/ory/oathkeeper/compare/v0.38.4-beta.1...666b9514ec37acfe2bb90ce62d5ee845853528fd) (2020-11-02)
+# [Unreleased](https://github.com/ory/oathkeeper/compare/v0.38.4-beta.1...5d04c6b30ccc1bbb1407f1f82123aa2e82372c36) (2020-11-16)
 
 
 ### Bug Fixes
@@ -199,6 +199,7 @@
 ### Documentation
 
 * Correct sidebar.json ([#524](https://github.com/ory/oathkeeper/issues/524)) ([34e2077](https://github.com/ory/oathkeeper/commit/34e2077e872dcf7b23129623434a8ff0656da9fc))
+* Fix typo in pipeline/error.md ([#568](https://github.com/ory/oathkeeper/issues/568)) ([5d04c6b](https://github.com/ory/oathkeeper/commit/5d04c6b30ccc1bbb1407f1f82123aa2e82372c36))
 * Resolve regression issues ([82008b2](https://github.com/ory/oathkeeper/commit/82008b2a6a60583856c436b1adae2f6d306bf836))
 
 
