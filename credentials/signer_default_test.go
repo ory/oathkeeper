@@ -36,7 +36,7 @@ func TestSignerDefault(t *testing.T) {
 		"file://../test/stub/jwks-rsa-single.json",
 	} {
 		t.Run(fmt.Sprintf("src=%s", src), func(t *testing.T) {
-			token, err := signer.Sign(context.Background(), x.ParseOrPanic(src), jwt.MapClaims{"sub": "foo"})
+			token, err := signer.Sign(context.Background(), x.ParseURLOrPanic(src), jwt.MapClaims{"sub": "foo"})
 			require.NoError(t, err)
 
 			fetcher := NewFetcherDefault(logrusx.New("", ""), time.Second, time.Second)
@@ -57,7 +57,7 @@ func verify(t *testing.T, token string, f Fetcher, u string) (*jwt.Token, error)
 
 		t.Logf("Looking up kid: %s", kid)
 
-		key, err := f.ResolveKey(context.Background(), []url.URL{*x.ParseOrPanic(u)}, kid, "sig")
+		key, err := f.ResolveKey(context.Background(), []url.URL{*x.ParseURLOrPanic(u)}, kid, "sig")
 		if err != nil {
 			t.Logf("erri erro: %+v", err)
 			return nil, errors.WithStack(err)

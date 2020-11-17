@@ -57,7 +57,7 @@ func TestAuthenticatorJWT(t *testing.T) {
 	assert.Equal(t, "jwt", a.GetID())
 
 	var gen = func(l string, c jwt.Claims) string {
-		token, err := reg.CredentialsSigner().Sign(context.Background(), x.ParseOrPanic(l), c)
+		token, err := reg.CredentialsSigner().Sign(context.Background(), x.ParseURLOrPanic(l), c)
 		require.NoError(t, err)
 		return token
 	}

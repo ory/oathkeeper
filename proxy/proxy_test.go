@@ -137,7 +137,7 @@ func TestProxy(t *testing.T) {
 			messages: []string{
 				"authorization=bearer token",
 				"url=/authn-noop/1234",
-				"host=" + x.ParseOrPanic(backend.URL).Host,
+				"host=" + x.ParseURLOrPanic(backend.URL).Host,
 			},
 		},
 		{
@@ -152,7 +152,7 @@ func TestProxy(t *testing.T) {
 			messages: []string{
 				"authorization=bearer token",
 				"url=/authn-noop/1234",
-				"host=" + x.ParseOrPanic(ts.URL).Host,
+				"host=" + x.ParseURLOrPanic(ts.URL).Host,
 			},
 		},
 		{
@@ -211,7 +211,7 @@ func TestProxy(t *testing.T) {
 			messages: []string{
 				"authorization=",
 				"url=/authn-anon/authz-allow/cred-noop/1234",
-				"host=" + x.ParseOrPanic(backend.URL).Host,
+				"host=" + x.ParseURLOrPanic(backend.URL).Host,
 			},
 		},
 		{

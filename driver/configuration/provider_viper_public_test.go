@@ -233,9 +233,9 @@ func TestViperProvider(t *testing.T) {
 
 	t.Run("group=access_rules", func(t *testing.T) {
 		assert.Equal(t, []url.URL{
-			*x.ParseOrPanic("file://path/to/rules.json"),
-			*x.ParseOrPanic("inline://W3siaWQiOiJmb28tcnVsZSIsImF1dGhlbnRpY2F0b3JzIjpbXX1d"),
-			*x.ParseOrPanic("https://path-to-my-rules/rules.json"),
+			*x.ParseURLOrPanic("file://path/to/rules.json"),
+			*x.ParseURLOrPanic("inline://W3siaWQiOiJmb28tcnVsZSIsImF1dGhlbnRpY2F0b3JzIjpbXX1d"),
+			*x.ParseURLOrPanic("https://path-to-my-rules/rules.json"),
 		}, p.AccessRuleRepositories())
 
 	})

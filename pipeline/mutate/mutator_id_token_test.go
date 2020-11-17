@@ -229,7 +229,7 @@ func TestMutatorIDToken(t *testing.T) {
 					result, err := reg.CredentialsVerifier().Verify(context.Background(), token, &credentials.ValidationContext{
 						Algorithms: []string{"RS256", "HS256", "ES256"},
 						Audiences:  []string{"foo", "bar"},
-						KeyURLs:    []url.URL{*x.ParseOrPanic(tc.K)},
+						KeyURLs:    []url.URL{*x.ParseURLOrPanic(tc.K)},
 					})
 					require.NoError(t, err, "token: %s", token)
 
@@ -347,7 +347,7 @@ func TestMutatorIDToken(t *testing.T) {
 			result, err := reg.CredentialsVerifier().Verify(context.Background(), token, &credentials.ValidationContext{
 				Algorithms: []string{"RS256", "HS256", "ES256"},
 				Audiences:  []string{"override"},
-				KeyURLs:    []url.URL{*x.ParseOrPanic(tc.K)},
+				KeyURLs:    []url.URL{*x.ParseURLOrPanic(tc.K)},
 			})
 			require.NoError(t, err, "token: %s (%s) %v", token, cfg.ClaimsTemplateID(), cache.Lookup(cfg.ClaimsTemplateID()))
 

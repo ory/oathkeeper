@@ -63,13 +63,13 @@ func TestFetcherDefault(t *testing.T) {
 	defer invalidServer.Close()
 
 	uris := []url.URL{
-		*x.ParseOrPanic(timeOutServer.URL),
-		*x.ParseOrPanic(slowServer.URL),
-		*x.ParseOrPanic(fastServer.URL),
-		*x.ParseOrPanic(invalidServer.URL),
-		*x.ParseOrPanic("file://../test/stub/jwks-hs.json"),
-		*x.ParseOrPanic("file://../test/stub/jwks-rsa-single.json"),
-		*x.ParseOrPanic("file://../test/stub/jwks-rsa-multiple.json"),
+		*x.ParseURLOrPanic(timeOutServer.URL),
+		*x.ParseURLOrPanic(slowServer.URL),
+		*x.ParseURLOrPanic(fastServer.URL),
+		*x.ParseURLOrPanic(invalidServer.URL),
+		*x.ParseURLOrPanic("file://../test/stub/jwks-hs.json"),
+		*x.ParseURLOrPanic("file://../test/stub/jwks-rsa-single.json"),
+		*x.ParseURLOrPanic("file://../test/stub/jwks-rsa-multiple.json"),
 	}
 
 	t.Run("name=should result in error because server times out", func(t *testing.T) {

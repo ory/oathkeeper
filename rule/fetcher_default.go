@@ -21,6 +21,7 @@ import (
 	"github.com/fsnotify/fsnotify"
 
 	"github.com/ory/x/stringslice"
+	"github.com/ory/x/urlx"
 
 	"github.com/ory/viper"
 	"github.com/ory/x/httpx"
@@ -92,7 +93,7 @@ func (f *FetcherDefault) configUpdate(ctx context.Context, watcher *fsnotify.Wat
 	var filesBeingWatched []string
 	for _, fileToWatch := range replace {
 		if fileToWatch.Scheme == "file" || fileToWatch.Scheme == "" {
-			p := filepath.Clean(x.GetURLFilePath(&fileToWatch))
+			p := filepath.Clean(urlx.GetURLFilePath(&fileToWatch))
 			filesBeingWatched = append(filesBeingWatched, p)
 			directoryToWatch, _ := filepath.Split(p)
 			directoriesToWatch = append(directoriesToWatch, directoryToWatch)
@@ -327,7 +328,7 @@ func (f *FetcherDefault) fetch(source url.URL) ([]Rule, error) {
 	case "":
 		fallthrough
 	case "file":
-		p := x.GetURLFilePath(&source)
+		p := urlx.GetURLFilePath(&source)
 		if path.Ext(p) == ".json" || path.Ext(p) == ".yaml" || path.Ext(p) == ".yml" {
 			return f.fetchFile(p)
 		}

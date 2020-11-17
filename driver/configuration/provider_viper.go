@@ -17,6 +17,7 @@ import (
 
 	"github.com/ory/viper"
 	"github.com/ory/x/logrusx"
+	"github.com/ory/x/urlx"
 
 	"github.com/ory/go-convenience/stringsx"
 
@@ -137,7 +138,7 @@ func (v *ViperProvider) AccessRuleRepositories() []url.URL {
 	sources := viperx.GetStringSlice(v.l, ViperKeyAccessRuleRepositories, []string{})
 	repositories := make([]url.URL, len(sources))
 	for k, source := range sources {
-		repositories[k] = *x.ParseOrFatal(v.l, source)
+		repositories[k] = *x.ParseURLOrFatal(v.l, source)
 	}
 
 	return repositories
@@ -215,7 +216,7 @@ func (v *ViperProvider) PrometheusCollapseRequestPaths() bool {
 func (v *ViperProvider) ParseURLs(sources []string) ([]url.URL, error) {
 	r := make([]url.URL, len(sources))
 	for k, u := range sources {
-		p, err := x.ParseURL(u)
+		p, err := urlx.Parse(u)
 		if err != nil {
 			return nil, err
 		}

@@ -42,6 +42,7 @@ import (
 	"github.com/ory/oathkeeper/pipeline"
 	"github.com/ory/oathkeeper/pipeline/authn"
 	"github.com/ory/oathkeeper/x"
+	"github.com/ory/x/urlx"
 )
 
 type MutatorIDTokenRegistry interface {
@@ -186,7 +187,7 @@ func (a *MutatorIDToken) Mutate(r *http.Request, session *authn.AuthenticationSe
 	claims["nbf"] = now.Unix()
 	claims["sub"] = session.Subject
 
-	jwks, err := x.ParseURL(c.JWKSURL)
+	jwks, err := urlx.Parse(c.JWKSURL)
 	if err != nil {
 		return errors.WithStack(err)
 	}

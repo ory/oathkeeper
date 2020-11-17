@@ -49,7 +49,7 @@ func TestCopy(t *testing.T) {
 		Header:  http.Header{"foo": {"bar", "baz"}},
 		MatchContext: authn.MatchContext{
 			RegexpCaptureGroups: []string{"a", "b"},
-			URL:                 x.ParseOrPanic("https://foo/bar"),
+			URL:                 x.ParseURLOrPanic("https://foo/bar"),
 		},
 	}
 

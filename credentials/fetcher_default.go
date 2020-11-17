@@ -36,8 +36,8 @@ import (
 	"github.com/pkg/errors"
 	"gopkg.in/square/go-jose.v2"
 
-	"github.com/ory/oathkeeper/x"
 	"github.com/ory/x/logrusx"
+	"github.com/ory/x/urlx"
 
 	"github.com/ory/herodot"
 	"github.com/ory/x/httpx"
@@ -243,7 +243,7 @@ func (s *FetcherDefault) resolve(wg *sync.WaitGroup, errs chan error, location u
 	case "":
 		fallthrough
 	case "file":
-		f, err := os.Open(x.GetURLFilePath(&location))
+		f, err := os.Open(urlx.GetURLFilePath(&location))
 		if err != nil {
 			errs <- errors.WithStack(herodot.
 				ErrInternalServerError.
