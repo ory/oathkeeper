@@ -17,6 +17,9 @@ import (
 	"github.com/ory/x/logrusx"
 
 	"github.com/ory/herodot"
+	"github.com/ory/x/urlx"
+
+	"github.com/ory/oathkeeper/internal/cloudstorage"
 )
 
 var sets = [...]json.RawMessage{
@@ -28,6 +31,9 @@ var sets = [...]json.RawMessage{
 
 func TestFetcherDefault(t *testing.T) {
 	const maxWait = time.Millisecond * 100
+	t.Cleanup(func() {
+		cloudstorage.SetCurrentTest(nil)
+	})
 
 	l := logrusx.New("", "", logrusx.ForceLevel(logrus.DebugLevel))
 	w := herodot.NewJSONWriter(l.Logger)
@@ -145,5 +151,44 @@ func TestFetcherDefault(t *testing.T) {
 		// Check if some random keys exists
 		assert.True(t, check("f4190122-ae96-4c29-8b79-56024e459d80"))
 		assert.True(t, check("8e884167-1300-4f58-8cc1-81af68f878a8"))
+	})
+
+	t.Run("name=should fetch from s3 object storage", func(t *testing.T) {
+		ctx := context.Background()
+		cloudstorage.SetCurrentTest(t)
+
+		s := NewFetcherDefault(l, maxWait, maxWait*7)
+
+		key, err := s.ResolveKey(ctx, []url.URL{
+			*urlx.ParseOrPanic("s3://oathkeeper-test-bucket/path/prefix/jwks.json"),
+		}, "81be3441-5303-4c52-b00d-bbdfadc75633", "sig")
+		require.NoError(t, err)
+		assert.Equal(t, "81be3441-5303-4c52-b00d-bbdfadc75633", key.KeyID)
+	})
+
+	t.Run("name=should fetch from gs object storage", func(t *testing.T) {
+		ctx := context.Background()
+		cloudstorage.SetCurrentTest(t)
+
+		s := NewFetcherDefault(l, maxWait, maxWait*7)
+
+		key, err := s.ResolveKey(ctx, []url.URL{
+			*urlx.ParseOrPanic("gs://oathkeeper-test-bucket/path/prefix/jwks.json"),
+		}, "81be3441-5303-4c52-b00d-bbdfadc75633", "sig")
+		require.NoError(t, err)
+		assert.Equal(t, "81be3441-5303-4c52-b00d-bbdfadc75633", key.KeyID)
+	})
+
+	t.Run("name=should fetch from azure object storage", func(t *testing.T) {
+		ctx := context.Background()
+		cloudstorage.SetCurrentTest(t)
+
+		s := NewFetcherDefault(l, maxWait, maxWait*7)
+
+		jwkKey, err := s.ResolveKey(ctx, []url.URL{
+			*urlx.ParseOrPanic("azblob://path/prefix/jwks.json"),
+		}, "81be3441-5303-4c52-b00d-bbdfadc75633", "sig")
+		require.NoError(t, err)
+		assert.Equal(t, "81be3441-5303-4c52-b00d-bbdfadc75633", jwkKey.KeyID)
 	})
 }

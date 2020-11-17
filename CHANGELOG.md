@@ -4,7 +4,7 @@
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 **Table of Contents**
 
-- [Unreleased (2020-10-13)](#unreleased-2020-10-13)
+- [Unreleased (2020-11-16)](#unreleased-2020-11-16)
     - [Bug Fixes](#bug-fixes)
     - [Documentation](#documentation)
     - [Features](#features)
@@ -182,7 +182,7 @@
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-# [Unreleased](https://github.com/ory/oathkeeper/compare/v0.38.4-beta.1...f4f781e5ec998e3656b6cf3c46c83c0faf6527ef) (2020-10-13)
+# [Unreleased](https://github.com/ory/oathkeeper/compare/v0.38.4-beta.1...5d04c6b30ccc1bbb1407f1f82123aa2e82372c36) (2020-11-16)
 
 
 ### Bug Fixes
@@ -193,17 +193,20 @@
     > being copied in the responses because the check was case-sensitive and
     > unit tests didn't cover it.
 * Never construct id token claim templates in parallel ([#552](https://github.com/ory/oathkeeper/issues/552)) ([4f504d9](https://github.com/ory/oathkeeper/commit/4f504d9032a5be9ea6f82c723a655a0f9028c45a)), closes [#551](https://github.com/ory/oathkeeper/issues/551)
+* Remove token_type validation from introspection handler ([#556](https://github.com/ory/oathkeeper/issues/556)) ([b18d90a](https://github.com/ory/oathkeeper/commit/b18d90a94f2016b541164cf30654032628e4bc01)), closes [#553](https://github.com/ory/oathkeeper/issues/553)
 
 
 ### Documentation
 
 * Correct sidebar.json ([#524](https://github.com/ory/oathkeeper/issues/524)) ([34e2077](https://github.com/ory/oathkeeper/commit/34e2077e872dcf7b23129623434a8ff0656da9fc))
+* Fix typo in pipeline/error.md ([#568](https://github.com/ory/oathkeeper/issues/568)) ([5d04c6b](https://github.com/ory/oathkeeper/commit/5d04c6b30ccc1bbb1407f1f82123aa2e82372c36))
 * Resolve regression issues ([82008b2](https://github.com/ory/oathkeeper/commit/82008b2a6a60583856c436b1adae2f6d306bf836))
 
 
 ### Features
 
 * Forward original authorization header when using remote (json) authorizer ([#554](https://github.com/ory/oathkeeper/issues/554)) ([f4f781e](https://github.com/ory/oathkeeper/commit/f4f781e5ec998e3656b6cf3c46c83c0faf6527ef)), closes [#528](https://github.com/ory/oathkeeper/issues/528)
+* Use google/go-cloud to fetch rules and credentials from object storage ([#562](https://github.com/ory/oathkeeper/issues/562)) ([666b951](https://github.com/ory/oathkeeper/commit/666b9514ec37acfe2bb90ce62d5ee845853528fd)), closes [#518](https://github.com/ory/oathkeeper/issues/518) [#518](https://github.com/ory/oathkeeper/issues/518)
 
 
 

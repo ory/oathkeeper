@@ -19,8 +19,8 @@ Something is not working.
 - [ ] Timeout in oauth2_client_credentials when using self-signed certificates ([oathkeeper#368](https://github.com/ory/oathkeeper/issues/368))
 - [ ] oauth2_introspection not parsing single string aud valie ([oathkeeper#491](https://github.com/ory/oathkeeper/issues/491))
 - [ ] JWT validation sometimes appends trailing slash to issuer ([oathkeeper#527](https://github.com/ory/oathkeeper/issues/527))
-- [ ] Authenticator oauth2_introspection only works if token_type returned is an "access_token" ([oathkeeper#553](https://github.com/ory/oathkeeper/issues/553))
 - [x] "fatal error: concurrent map writes" panic, unable to reproduce ([oathkeeper#551](https://github.com/ory/oathkeeper/issues/551)) - [@hackerman](https://github.com/aeneasr)
+- [x] Authenticator oauth2_introspection only works if token_type returned is an "access_token" ([oathkeeper#553](https://github.com/ory/oathkeeper/issues/553))
 
 ### [Feat](https://github.com/ory/oathkeeper/labels/feat)
 
@@ -32,9 +32,11 @@ New feature or request.
 - [ ] Pass query parameters to the hydrator ([oathkeeper#339](https://github.com/ory/oathkeeper/issues/339))
 - [ ] Switch to go-jose key generation lib ([oathkeeper#419](https://github.com/ory/oathkeeper/issues/419))
 - [ ] Oathkeeper behind ssl terminating balancer ([oathkeeper#153](https://github.com/ory/oathkeeper/issues/153))
-- [ ] Fetch JWKs from object storage (S3) ([oathkeeper#518](https://github.com/ory/oathkeeper/issues/518))
 - [ ] remote_json: Enable timeout configuration for calls to authorization endpoint ([oathkeeper#515](https://github.com/ory/oathkeeper/issues/515))
+- [ ] Start as Envoy AuthService ([oathkeeper#560](https://github.com/ory/oathkeeper/issues/560))
+- [ ] Hydator Mutator Client Credential ([oathkeeper#565](https://github.com/ory/oathkeeper/issues/565))
 - [x] Clean up logging in case of invalid credentials ([oathkeeper#505](https://github.com/ory/oathkeeper/issues/505))
+- [x] Fetch JWKs from object storage (S3) ([oathkeeper#518](https://github.com/ory/oathkeeper/issues/518))
 - [x] Enable forwarding of original authorization header to (remote) authorizer ([oathkeeper#528](https://github.com/ory/oathkeeper/issues/528)) - [@hackerman](https://github.com/aeneasr)
 
 #### Pull Requests
