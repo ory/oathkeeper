@@ -1,10 +1,8 @@
 module github.com/ory/oathkeeper
 
 require (
-	cloud.google.com/go v0.58.0
 	github.com/Azure/azure-pipeline-go v0.2.2
 	github.com/Azure/azure-storage-blob-go v0.9.0
-	github.com/Masterminds/goutils v1.1.0 // indirect
 	github.com/Masterminds/sprig/v3 v3.1.0
 	github.com/asaskevich/govalidator v0.0.0-20200428143746-21a406dcc535
 	github.com/auth0/go-jwt-middleware v0.0.0-20170425171159-5493cabe49f7
@@ -29,7 +27,6 @@ require (
 	github.com/golang/mock v1.4.3
 	github.com/google/go-replayers/httpreplay v0.1.0
 	github.com/google/uuid v1.1.1
-	github.com/gorilla/mux v1.7.1 // indirect
 	github.com/gorilla/websocket v1.4.2
 	github.com/imdario/mergo v0.3.8
 	github.com/julienschmidt/httprouter v1.2.0
@@ -57,7 +54,6 @@ require (
 	github.com/rs/cors v1.6.0
 	github.com/sirupsen/logrus v1.7.0
 	github.com/spf13/cobra v1.1.1
-	github.com/spf13/viper v1.7.0 // indirect
 	github.com/sqs/goreturns v0.0.0-20181028201513-538ac6014518
 	github.com/square/go-jose v2.3.1+incompatible
 	github.com/stretchr/testify v1.6.1
@@ -72,7 +68,6 @@ require (
 	golang.org/x/sys v0.0.0-20201029080932-201ba4db2418 // indirect
 	golang.org/x/tools v0.0.0-20201029135353-690a3c245f28
 	google.golang.org/api v0.26.0
-	google.golang.org/grpc v1.29.1 // indirect
 	gopkg.in/square/go-jose.v2 v2.5.1
 )
 
