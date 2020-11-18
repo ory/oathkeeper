@@ -13,12 +13,13 @@ import (
 	"github.com/urfave/negroni"
 	"gopkg.in/square/go-jose.v2"
 
+	"github.com/ory/oathkeeper/x"
 	"github.com/ory/x/urlx"
 )
 
 var jwtm = jwtmiddleware.New(jwtmiddleware.Options{
 	ValidationKeyGetter: func(token *jwt.Token) (interface{}, error) {
-		u := urlx.ParseOrPanic(os.Getenv("OATHKEEPER_API"))
+		u := x.ParseURLOrPanic(os.Getenv("OATHKEEPER_API"))
 		res, err := http.Get(urlx.AppendPaths(u, "/.well-known/jwks.json").String())
 		if err != nil {
 			panic(err)

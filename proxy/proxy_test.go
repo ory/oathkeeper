@@ -33,11 +33,10 @@ import (
 
 	"github.com/ory/viper"
 
-	"github.com/ory/x/urlx"
-
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/internal"
 	"github.com/ory/oathkeeper/proxy"
+	"github.com/ory/oathkeeper/x"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -138,7 +137,7 @@ func TestProxy(t *testing.T) {
 			messages: []string{
 				"authorization=bearer token",
 				"url=/authn-noop/1234",
-				"host=" + urlx.ParseOrPanic(backend.URL).Host,
+				"host=" + x.ParseURLOrPanic(backend.URL).Host,
 			},
 		},
 		{
@@ -153,7 +152,7 @@ func TestProxy(t *testing.T) {
 			messages: []string{
 				"authorization=bearer token",
 				"url=/authn-noop/1234",
-				"host=" + urlx.ParseOrPanic(ts.URL).Host,
+				"host=" + x.ParseURLOrPanic(ts.URL).Host,
 			},
 		},
 		{
@@ -212,7 +211,7 @@ func TestProxy(t *testing.T) {
 			messages: []string{
 				"authorization=",
 				"url=/authn-anon/authz-allow/cred-noop/1234",
-				"host=" + urlx.ParseOrPanic(backend.URL).Host,
+				"host=" + x.ParseURLOrPanic(backend.URL).Host,
 			},
 		},
 		{

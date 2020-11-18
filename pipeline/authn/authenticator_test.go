@@ -7,9 +7,8 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/ory/x/urlx"
-
 	"github.com/ory/oathkeeper/pipeline/authn"
+	"github.com/ory/oathkeeper/x"
 )
 
 const (
@@ -50,7 +49,7 @@ func TestCopy(t *testing.T) {
 		Header:  http.Header{"foo": {"bar", "baz"}},
 		MatchContext: authn.MatchContext{
 			RegexpCaptureGroups: []string{"a", "b"},
-			URL:                 urlx.ParseOrPanic("https://foo/bar"),
+			URL:                 x.ParseURLOrPanic("https://foo/bar"),
 		},
 	}
 

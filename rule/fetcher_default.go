@@ -21,6 +21,7 @@ import (
 	"github.com/fsnotify/fsnotify"
 
 	"github.com/ory/x/stringslice"
+	"github.com/ory/x/urlx"
 
 	"github.com/ory/viper"
 	"github.com/ory/x/httpx"
@@ -91,8 +92,8 @@ func (f *FetcherDefault) configUpdate(ctx context.Context, watcher *fsnotify.Wat
 	var directoriesToWatch []string
 	var filesBeingWatched []string
 	for _, fileToWatch := range replace {
-		if fileToWatch.Scheme == "file" {
-			p := filepath.Clean(strings.Replace(fileToWatch.String(), "file://", "", 1))
+		if fileToWatch.Scheme == "file" || fileToWatch.Scheme == "" {
+			p := filepath.Clean(urlx.GetURLFilePath(&fileToWatch))
 			filesBeingWatched = append(filesBeingWatched, p)
 			directoryToWatch, _ := filepath.Split(p)
 			directoriesToWatch = append(directoriesToWatch, directoryToWatch)
@@ -153,15 +154,6 @@ func (f *FetcherDefault) configUpdate(ctx context.Context, watcher *fsnotify.Wat
 }
 
 func (f *FetcherDefault) sourceUpdate(e event) ([]Rule, error) {
-	if e.path.Scheme == "file" {
-		u, err := url.Parse("file://" + filepath.Clean(strings.TrimPrefix(e.path.String(), "file://")))
-		if err != nil {
-			return nil, err
-		}
-
-		e.path = *u
-	}
-
 	rules, err := f.fetch(e.path)
 	if err != nil {
 		return nil, err
@@ -333,8 +325,10 @@ func (f *FetcherDefault) fetch(source url.URL) ([]Rule, error) {
 		fallthrough
 	case "https":
 		return f.fetchRemote(source.String())
+	case "":
+		fallthrough
 	case "file":
-		p := strings.Replace(source.String(), "file://", "", 1)
+		p := urlx.GetURLFilePath(&source)
 		if path.Ext(p) == ".json" || path.Ext(p) == ".yaml" || path.Ext(p) == ".yml" {
 			return f.fetchFile(p)
 		}

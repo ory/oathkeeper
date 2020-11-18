@@ -28,7 +28,6 @@ import (
 	"net/http"
 	"net/url"
 	"os"
-	"strings"
 	"sync"
 	"time"
 
@@ -38,6 +37,7 @@ import (
 	"gopkg.in/square/go-jose.v2"
 
 	"github.com/ory/x/logrusx"
+	"github.com/ory/x/urlx"
 
 	"github.com/ory/herodot"
 	"github.com/ory/x/httpx"
@@ -240,8 +240,10 @@ func (s *FetcherDefault) resolve(wg *sync.WaitGroup, errs chan error, location u
 		defer r.Close()
 
 		reader = r
+	case "":
+		fallthrough
 	case "file":
-		f, err := os.Open(strings.Replace(location.String(), "file://", "", 1))
+		f, err := os.Open(urlx.GetURLFilePath(&location))
 		if err != nil {
 			errs <- errors.WithStack(herodot.
 				ErrInternalServerError.

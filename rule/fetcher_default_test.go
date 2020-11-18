@@ -10,6 +10,7 @@ import (
 	"os/exec"
 	"path"
 	"path/filepath"
+	"runtime"
 	"testing"
 	"time"
 
@@ -281,6 +282,9 @@ access_rules:
 }
 
 func TestFetcherWatchRepositoryFromKubernetesConfigMap(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip()
+	}
 	viper.Reset()
 	conf := internal.NewConfigurationWithDefaults() // this must be at the top because it resets viper
 	r := internal.NewRegistry(conf)

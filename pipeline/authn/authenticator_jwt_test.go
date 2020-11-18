@@ -31,11 +31,10 @@ import (
 	"github.com/dgrijalva/jwt-go"
 	"github.com/tidwall/sjson"
 
-	"github.com/ory/x/urlx"
-
 	"github.com/ory/herodot"
 	"github.com/ory/oathkeeper/internal"
 	. "github.com/ory/oathkeeper/pipeline/authn"
+	"github.com/ory/oathkeeper/x"
 
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
@@ -58,7 +57,7 @@ func TestAuthenticatorJWT(t *testing.T) {
 	assert.Equal(t, "jwt", a.GetID())
 
 	var gen = func(l string, c jwt.Claims) string {
-		token, err := reg.CredentialsSigner().Sign(context.Background(), urlx.ParseOrPanic(l), c)
+		token, err := reg.CredentialsSigner().Sign(context.Background(), x.ParseURLOrPanic(l), c)
 		require.NoError(t, err)
 		return token
 	}

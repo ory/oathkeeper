@@ -13,7 +13,6 @@ import (
 
 	"github.com/ory/x/logrusx"
 
-	"github.com/ory/x/urlx"
 	"github.com/ory/x/viperx"
 
 	"github.com/ory/viper"
@@ -234,9 +233,9 @@ func TestViperProvider(t *testing.T) {
 
 	t.Run("group=access_rules", func(t *testing.T) {
 		assert.Equal(t, []url.URL{
-			*urlx.ParseOrPanic("file://path/to/rules.json"),
-			*urlx.ParseOrPanic("inline://W3siaWQiOiJmb28tcnVsZSIsImF1dGhlbnRpY2F0b3JzIjpbXX1d"),
-			*urlx.ParseOrPanic("https://path-to-my-rules/rules.json"),
+			*x.ParseURLOrPanic("file://path/to/rules.json"),
+			*x.ParseURLOrPanic("inline://W3siaWQiOiJmb28tcnVsZSIsImF1dGhlbnRpY2F0b3JzIjpbXX1d"),
+			*x.ParseURLOrPanic("https://path-to-my-rules/rules.json"),
 		}, p.AccessRuleRepositories())
 
 	})
