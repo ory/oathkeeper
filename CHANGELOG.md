@@ -4,7 +4,7 @@
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 **Table of Contents**
 
-- [Unreleased (2020-11-17)](#unreleased-2020-11-17)
+- [Unreleased (2020-11-18)](#unreleased-2020-11-18)
     - [Bug Fixes](#bug-fixes)
     - [Documentation](#documentation)
     - [Features](#features)
@@ -182,7 +182,7 @@
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-# [Unreleased](https://github.com/ory/oathkeeper/compare/v0.38.4-beta.1...5d04c6b30ccc1bbb1407f1f82123aa2e82372c36) (2020-11-17)
+# [Unreleased](https://github.com/ory/oathkeeper/compare/v0.38.4-beta.1...6a05682dca21181db9e052300edf14fb40815bd3) (2020-11-18)
 
 
 ### Bug Fixes
@@ -194,6 +194,7 @@
     > unit tests didn't cover it.
 * Never construct id token claim templates in parallel ([#552](https://github.com/ory/oathkeeper/issues/552)) ([4f504d9](https://github.com/ory/oathkeeper/commit/4f504d9032a5be9ea6f82c723a655a0f9028c45a)), closes [#551](https://github.com/ory/oathkeeper/issues/551)
 * Remove token_type validation from introspection handler ([#556](https://github.com/ory/oathkeeper/issues/556)) ([b18d90a](https://github.com/ory/oathkeeper/commit/b18d90a94f2016b541164cf30654032628e4bc01)), closes [#553](https://github.com/ory/oathkeeper/issues/553)
+* Support windows file paths ([#557](https://github.com/ory/oathkeeper/issues/557)) ([6a05682](https://github.com/ory/oathkeeper/commit/6a05682dca21181db9e052300edf14fb40815bd3)), closes [#514](https://github.com/ory/oathkeeper/issues/514) [#332](https://github.com/ory/oathkeeper/issues/332)
 
 
 ### Documentation
