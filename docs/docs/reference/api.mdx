@@ -3,21 +3,26 @@ title: REST API
 id: api
 ---
 
-ORY Oathkeeper is a reverse proxy that checks the HTTP Authorization for validity against a set of rules. This service uses Hydra to validate access tokens and policies.
+ORY Oathkeeper is a reverse proxy that checks the HTTP Authorization for
+validity against a set of rules. This service uses Hydra to validate access
+tokens and policies.
 
 import Tabs from '@theme/Tabs'
 import TabItem from '@theme/TabItem'
 
 :::info
 
-You are viewing REST API documentation. This documentation is auto-generated from a swagger specification which
-itself is generated from annotations in the source code of the project. It is possible that this documentation includes
-bugs and that code samples are incomplete or wrong.
+You are viewing REST API documentation. This documentation is auto-generated
+from a swagger specification which itself is generated from annotations in the
+source code of the project. It is possible that this documentation includes bugs
+and that code samples are incomplete or wrong.
 
 If you find issues in the respective documentation, please do not edit the
-Markdown files directly (as they are generated) but raise an issue on the project's GitHub presence instead. This documentation
-will improve over time with your help! If you have ideas how to improve this part of the documentation, feel free to
-share them in a [GitHub issue](https://github.com/ory/docs/issues/new) any time.
+Markdown files directly (as they are generated) but raise an issue on the
+project's GitHub presence instead. This documentation will improve over time
+with your help! If you have ideas how to improve this part of the documentation,
+feel free to share them in a
+[GitHub issue](https://github.com/ory/docs/issues/new) any time.
 
 :::
 
@@ -35,7 +40,8 @@ Accept: application/json
 
 ```
 
-This endpoint returns cryptographic keys that are required to, for example, verify signatures of ID Tokens.
+This endpoint returns cryptographic keys that are required to, for example,
+verify signatures of ID Tokens.
 
 #### Responses
 
@@ -229,11 +235,14 @@ Accept: application/json
 
 ```
 
-> This endpoint works with all HTTP Methods (GET, POST, PUT, ...) and matches every path prefixed with /decision.
+> This endpoint works with all HTTP Methods (GET, POST, PUT, ...) and matches
+> every path prefixed with /decision.
 
-This endpoint mirrors the proxy capability of ORY Oathkeeper's proxy functionality but instead of forwarding the
-request to the upstream server, returns 200 (request should be allowed), 401 (unauthorized), or 403 (forbidden)
-status codes. This endpoint can be used to integrate with other API Proxies like Ambassador, Kong, Envoy, and many more.
+This endpoint mirrors the proxy capability of ORY Oathkeeper's proxy
+functionality but instead of forwarding the request to the upstream server,
+returns 200 (request should be allowed), 401 (unauthorized), or 403 (forbidden)
+status codes. This endpoint can be used to integrate with other API Proxies like
+Ambassador, Kong, Envoy, and many more.
 
 #### Responses
 
@@ -448,8 +457,9 @@ Accept: application/json
 
 ```
 
-This method returns an array of all rules that are stored in the backend. This is useful if you want to get a full
-view of what rules you have currently in place.
+This method returns an array of all rules that are stored in the backend. This
+is useful if you want to get a full view of what rules you have currently in
+place.
 
 <a id="list-all-rules-parameters"></a>
 
@@ -681,7 +691,8 @@ Accept: application/json
 
 ```
 
-Use this method to retrieve a rule from the storage. If it does not exist you will receive a 404 error.
+Use this method to retrieve a rule from the storage. If it does not exist you
+will receive a 404 error.
 
 <a id="retrieve-a-rule-parameters"></a>
 
@@ -905,14 +916,15 @@ Accept: application/json
 
 ```
 
-This endpoint returns a 200 status code when the HTTP server is up running.
-This status does currently not include checks whether the database connection is working.
+This endpoint returns a 200 status code when the HTTP server is up running. This
+status does currently not include checks whether the database connection is
+working.
 
 If the service supports TLS Edge Termination, this endpoint does not require the
 `X-Forwarded-Proto` header to be set.
 
-Be aware that if you are running multiple nodes of this service, the health status will never
-refer to the cluster state, only to a single instance.
+Be aware that if you are running multiple nodes of this service, the health
+status will never refer to the cluster state, only to a single instance.
 
 #### Responses
 
@@ -1086,14 +1098,14 @@ Accept: application/json
 
 ```
 
-This endpoint returns a 200 status code when the HTTP server is up running and the environment dependencies (e.g.
-the database) are responsive as well.
+This endpoint returns a 200 status code when the HTTP server is up running and
+the environment dependencies (e.g. the database) are responsive as well.
 
 If the service supports TLS Edge Termination, this endpoint does not require the
 `X-Forwarded-Proto` header to be set.
 
-Be aware that if you are running multiple nodes of this service, the health status will never
-refer to the cluster state, only to a single instance.
+Be aware that if you are running multiple nodes of this service, the health
+status will never refer to the cluster state, only to a single instance.
 
 #### Responses
 
@@ -1256,13 +1268,14 @@ Accept: application/json
 
 ```
 
-This endpoint returns the service version typically notated using semantic versioning.
+This endpoint returns the service version typically notated using semantic
+versioning.
 
 If the service supports TLS Edge Termination, this endpoint does not require the
 `X-Forwarded-Proto` header to be set.
 
-Be aware that if you are running multiple nodes of this service, the health status will never
-refer to the cluster state, only to a single instance.
+Be aware that if you are running multiple nodes of this service, the health
+status will never refer to the cluster state, only to a single instance.
 
 #### Responses
 

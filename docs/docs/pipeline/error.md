@@ -413,7 +413,9 @@ The `redirect` Error Handler returns a HTTP 302/301 response with a `Location`
 Header. As discussed in the previous section, you can define error matching
 conditions under the `when` key.
 
-If you want to append the current url (where the error happened) to address redirected to, You can specify `return_to_query_param` to set the name of parameter that will hold the url.
+If you want to append the current url (where the error happened) to address
+redirected to, You can specify `return_to_query_param` to set the name of
+parameter that will hold the url.
 
 **Example**
 
@@ -432,7 +434,11 @@ If you want to append the current url (where the error happened) to address redi
 }
 ```
 
-When the user accesses a protected url `http://my-website/settings`, they will be redirected to `http://my-website/login?return_to=http%3A%2F%2Fmy-website%2Fsettings`. The login page can use the `return_to` paramter to return user to intended page after a successful login.
+When the user accesses a protected url `http://my-website/settings`, they will
+be redirected to
+`http://my-website/login?return_to=http%3A%2F%2Fmy-website%2Fsettings`. The
+login page can use the `return_to` paramter to return user to intended page
+after a successful login.
 
 ### `www_authenticate`
 
