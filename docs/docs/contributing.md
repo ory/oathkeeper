@@ -88,8 +88,8 @@ There are many other ways you can contribute without writing any code. Here are
 a few things you can do to help out:
 
 - **Give us a star.** It may not seem like much, but it really makes a
-  difference. This is something that everyone can do to help out ORY
-  Oathkeeper. Github stars help the project gain visibility and stand out.
+  difference. This is something that everyone can do to help out ORY Oathkeeper.
+  Github stars help the project gain visibility and stand out.
 
 - **Join the community.** Sometimes helping people can be as easy as listening
   to their problems and offering a different perspective. Join our Slack, have a
