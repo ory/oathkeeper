@@ -1,7 +1,8 @@
 {
   "Introduction": [
     "index",
-    "install"
+    "install",
+    "contributing"
   ],
   "Core Concepts": [
     "api-access-rules",
