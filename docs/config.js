@@ -1,6 +1,8 @@
 module.exports = {
   projectName: 'ORY Oathkeeper',
   projectSlug: 'oathkeeper',
+  newsletter:
+    'https://ory.us10.list-manage.com/subscribe?u=ffb1a878e4ec6c0ed312a3480&id=f605a41b53&group[17097][16]=1',
   projectTagLine:
     'A cloud native Identity & Access Proxy / API (IAP) and Access Control Decision API that authenticates, authorizes, and mutates incoming HTTP(s) requests. Inspired by the BeyondCorp / Zero Trust white paper. Written in Go.',
   updateTags: [
