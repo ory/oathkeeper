@@ -4,7 +4,7 @@
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 **Table of Contents**
 
-- [Unreleased (2020-12-01)](#unreleased-2020-12-01)
+- [Unreleased (2020-12-03)](#unreleased-2020-12-03)
     - [Bug Fixes](#bug-fixes)
     - [Documentation](#documentation)
     - [Features](#features)
@@ -182,7 +182,7 @@
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-# [Unreleased](https://github.com/ory/oathkeeper/compare/v0.38.4-beta.1...6a05682dca21181db9e052300edf14fb40815bd3) (2020-12-01)
+# [Unreleased](https://github.com/ory/oathkeeper/compare/v0.38.4-beta.1...3c02e22c398b5a573883b6c1cceb05aff15dcbea) (2020-12-03)
 
 
 ### Bug Fixes
@@ -199,6 +199,10 @@
 
 ### Documentation
 
+* Add contributing to sidebar ([#595](https://github.com/ory/oathkeeper/issues/595)) ([a3c9584](https://github.com/ory/oathkeeper/commit/a3c9584e848b3e71b33073c89299bc60c6d0b3ee)):
+
+    > The same change as in https://github.com/ory/hydra/pull/2209
+* Add newsletter to config ([3c02e22](https://github.com/ory/oathkeeper/commit/3c02e22c398b5a573883b6c1cceb05aff15dcbea))
 * Correct sidebar.json ([#524](https://github.com/ory/oathkeeper/issues/524)) ([34e2077](https://github.com/ory/oathkeeper/commit/34e2077e872dcf7b23129623434a8ff0656da9fc))
 * Fix typo in pipeline/error.md ([#568](https://github.com/ory/oathkeeper/issues/568)) ([5d04c6b](https://github.com/ory/oathkeeper/commit/5d04c6b30ccc1bbb1407f1f82123aa2e82372c36))
 * Resolve regression issues ([82008b2](https://github.com/ory/oathkeeper/commit/82008b2a6a60583856c436b1adae2f6d306bf836))
