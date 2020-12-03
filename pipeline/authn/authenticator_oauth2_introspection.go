@@ -79,12 +79,32 @@ func (a *AuthenticatorOAuth2Introspection) GetID() string {
 	return "oauth2_introspection"
 }
 
+type multiStringArray []string
+
+func (ms *multiStringArray) UnmarshalJSON(data []byte) error {
+	if len(data) > 0 {
+		switch data[0] {
+		case '"':
+			var s string
+			if err := json.Unmarshal(data, &s); err != nil {
+				return err
+			}
+			*ms = multiStringArray{s}
+		case '[':
+			if err := json.Unmarshal(data, (*[]string)(ms)); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
 type AuthenticatorOAuth2IntrospectionResult struct {
 	Active    bool                   `json:"active"`
 	Extra     map[string]interface{} `json:"ext"`
 	Subject   string                 `json:"sub,omitempty"`
 	Username  string                 `json:"username"`
-	Audience  []string               `json:"aud"`
+	Audience  multiStringArray       `json:"aud"`
 	TokenType string                 `json:"token_type"`
 	Issuer    string                 `json:"iss"`
 	ClientID  string                 `json:"client_id,omitempty"`
