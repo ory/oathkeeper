@@ -86,7 +86,7 @@ type AuthenticatorOAuth2IntrospectionResult struct {
 	Extra     map[string]interface{} `json:"ext"`
 	Subject   string                 `json:"sub,omitempty"`
 	Username  string                 `json:"username"`
-	Audience  []string               `json:"aud"`
+	Audience  multiStringArray       `json:"aud"`
 	TokenType string                 `json:"token_type"`
 	Issuer    string                 `json:"iss"`
 	ClientID  string                 `json:"client_id,omitempty"`
