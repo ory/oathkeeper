@@ -62,6 +62,8 @@ type AuthenticatorOAuth2Introspection struct {
 	cacheTTL   *time.Duration
 }
 
+type multiStringArray []string
+
 func NewAuthenticatorOAuth2Introspection(c configuration.Provider) *AuthenticatorOAuth2Introspection {
 	var rt http.RoundTripper
 	cache, _ := ristretto.NewCache(&ristretto.Config{
@@ -91,6 +93,24 @@ type AuthenticatorOAuth2IntrospectionResult struct {
 	Scope     string                 `json:"scope,omitempty"`
 	Expires   int64                  `json:"exp"`
 	TokenUse  string                 `json:"token_use"`
+}
+
+func (ms *multiStringArray) UnmarshalJSON(data []byte) error {
+	if len(data) > 0 {
+		switch data[0] {
+		case '"':
+			var s string
+			if err := json.Unmarshal(data, &s); err != nil {
+				return err
+			}
+			*ms = multiStringArray{s}
+		case '[':
+			if err := json.Unmarshal(data, (*[]string)(ms)); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
 }
 
 func (a *AuthenticatorOAuth2Introspection) tokenFromCache(config *AuthenticatorOAuth2IntrospectionConfiguration, token string) (*AuthenticatorOAuth2IntrospectionResult, bool) {
