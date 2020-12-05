@@ -99,13 +99,13 @@ service echoes incoming HTTP Requests and is perfect for seeing how ORY
 Oathkeeper works. Let's define three rules:
 
 1. An access rule that allowing anonymous access to
-   `https://httpbin.org/anything/cookie` and using the `cookie` mutator.
+   `https://httpbin.org/anything/header` and using the `header` mutator.
 2. An access rule denying every access to `https://httpbin.org/anything/deny`.
    If the request header has `Accept: application/json`, we will receive a JSON
    response. If however the accept header has `Accept: text/*`, a HTTP Redirect
    will be sent (to `https://www.ory.sh/docs` as configured above).
 3. An access rule allowing anonymous access to
-   `https://httpbin.org/anything/id_token` and using the `id_token` mutator.
+   `https://httpbin.org/anything/id_token` using the `id_token` mutator.
 
 ```shell
 $ cat << EOF > rules.json
