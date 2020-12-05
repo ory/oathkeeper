@@ -105,7 +105,7 @@ Oathkeeper works. Let's define three rules:
    response. If however the accept header has `Accept: text/*`, a HTTP Redirect
    will be sent (to `https://www.ory.sh/docs` as configured above).
 3. An access rule allowing anonymous access to
-   `https://httpbin.org/anything/id_token` and using the `id_token` mutator.
+   `https://httpbin.org/anything/id_token` using the `id_token` mutator.
 
 ```shell
 $ cat << EOF > rules.json
