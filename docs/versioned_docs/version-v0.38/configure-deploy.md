@@ -99,7 +99,7 @@ service echoes incoming HTTP Requests and is perfect for seeing how ORY
 Oathkeeper works. Let's define three rules:
 
 1. An access rule that allowing anonymous access to
-   `https://httpbin.org/anything/cookie` and using the `cookie` mutator.
+   `https://httpbin.org/anything/header` and using the `header` mutator.
 2. An access rule denying every access to `https://httpbin.org/anything/deny`.
    If the request header has `Accept: application/json`, we will receive a JSON
    response. If however the accept header has `Accept: text/*`, a HTTP Redirect
