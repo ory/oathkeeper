@@ -12,6 +12,10 @@
         {
           "type": "doc",
           "id": "version-v0.38/install"
+        },
+        {
+          "type": "doc",
+          "id": "version-v0.38/contributing"
         }
       ]
     },
@@ -61,6 +65,10 @@
         {
           "type": "doc",
           "id": "version-v0.38/configure-deploy"
+        },
+        {
+          "type": "doc",
+          "id": "version-v0.38/oauth2-token-introspection-hydra"
         }
       ]
     },
@@ -87,6 +95,17 @@
         {
           "type": "doc",
           "id": "version-v0.38/sdk/index"
+        }
+      ]
+    },
+    {
+      "collapsed": true,
+      "type": "category",
+      "label": "Development",
+      "items": [
+        {
+          "type": "doc",
+          "id": "version-v0.38/milestones"
         }
       ]
     },

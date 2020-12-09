@@ -163,8 +163,8 @@ The ID Token Claims are as follows:
 
 - `issuer_url` (string, required) - Sets the "iss" value of the ID Token.
 - `jwks_url` (string, required) - Sets the URL where keys should be fetched
-  from. Supports remote locations (http, https) as well as local filesystem
-  paths.
+  from. Supports remote locations (http, https, s3, gs, azblob) as well as local
+  filesystem paths.
 - `ttl` (string, optional) - Sets the time-to-live of the ID token. Defaults to
   one minute. Valid time units are: s (second), m (minute), h (hour).
 - `claims` (string, optional) - Allows you to customize the ID Token claims and

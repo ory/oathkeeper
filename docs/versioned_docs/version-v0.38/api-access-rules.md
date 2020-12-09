@@ -23,6 +23,15 @@ access_rules:
     # If the URL Scheme is `http://` or `https://`, the access rules (an array of access rules is expected) will be
     # fetched from the provided HTTP(s) location.
     - https://path-to-my-rules/rules.json
+    # If the URL Scheme is `s3://`, `gs://` or `azblob://`, the access rules (an array of access rules is expected)
+    # will be fetched by an object storage (AWS S3, Google Cloud Storage, Azure Blob Storage).
+    #
+    # S3 storage also supports S3-compatible endpoints served by Minio or Ceph.
+    # See aws.ConfigFromURLParams (https://godoc.org/gocloud.dev/aws#ConfigFromURLParams) for more details on supported URL options for S3.
+    - s3://my-bucket-name/rules.json
+    - s3://my-bucket-name/rules.json?endpoint=minio.my-server.net
+    - gs://gcp-bucket-name/rules.json
+    - azblob://my-blob-container/rules.json
   # Determines a matching strategy for the access rules . Currently supported values are `glob` and `regexp`. Empty string defaults to regexp.
   matching_strategy: glob
 ```
@@ -81,6 +90,7 @@ Access Rules have four principal keys:
     - unset: Incoming HTTP Request at `/api/v1/users` -> Forwarding HTTP Request
       at `/api/v1/users`.
 - `match` (object): Defines the URL(s) this Access Rule should match.
+
   - `methods` (string[]): Array of HTTP methods (e.g. GET, POST, PUT, DELETE,
     ...).
   - `url` (string): The URL that should be matched. You can use regular
@@ -91,6 +101,7 @@ Access Rules have four principal keys:
     brackets `<` and `>`.
 
     Regular expressions examples:
+
     - `https://mydomain.com/` matches `https://mydomain.com/` and does not match
       `https://mydomain.com/foo` or `https://mydomain.com`.
     - `<https|http>://mydomain.com/<.*>` matches:`https://mydomain.com/` or
@@ -102,12 +113,14 @@ Access Rules have four principal keys:
       `http://mydomain.com/resource` and does not match
       `http://mydomain.com/protected`
 
-    [Glob](http://tldp.org/LDP/GNU-Linux-Tools-Summary/html/x11655.htm)
-      patterns examples:
+    [Glob](http://tldp.org/LDP/GNU-Linux-Tools-Summary/html/x11655.htm) patterns
+    examples:
+
     - `https://mydomain.com/<m?n>` matches `https://mydomain.com/man` and does
       not match `http://mydomain.com/foo`.
     - `https://mydomain.com/<{foo*,bar*}>` matches `https://mydomain.com/foo` or
       `https://mydomain.com/bar` and does not match `https://mydomain.com/any`.
+
 - `authenticators`: A list of authentication handlers that authenticate the
   provided credentials. Authenticators are checked iteratively from index `0` to
   `n` and the first authenticator to return a positive result will be the one
