@@ -2,9 +2,10 @@ package authn
 
 import (
 	"encoding/json"
+	"net/http"
+
 	"github.com/pkg/errors"
 	"github.com/tidwall/gjson"
-	"net/http"
 
 	"github.com/ory/go-convenience/stringsx"
 
