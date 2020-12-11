@@ -20,10 +20,10 @@ func init() {
 	})
 }
 
-type AuthenticatorSimpleBearerFilter struct {
+type AuthenticatorBearerTokenFilter struct {
 }
 
-type AuthenticatorSimpleBearerConfiguration struct {
+type AuthenticatorBearerTokenConfiguration struct {
 	CheckTokenURL       string                      `json:"check_token_url"`
 	BearerTokenLocation *helper.BearerTokenLocation `json:"token_from"`
 	PreservePath        bool                        `json:"preserve_path"`
@@ -31,21 +31,21 @@ type AuthenticatorSimpleBearerConfiguration struct {
 	SubjectFrom         string                      `json:"subject_from"`
 }
 
-type AuthenticatorSimpleBearer struct {
+type AuthenticatorBearerToken struct {
 	c configuration.Provider
 }
 
-func NewAuthenticatorSimpleBearer(c configuration.Provider) *AuthenticatorSimpleBearer {
-	return &AuthenticatorSimpleBearer{
+func NewAuthenticatorBearerToken(c configuration.Provider) *AuthenticatorBearerToken {
+	return &AuthenticatorBearerToken{
 		c: c,
 	}
 }
 
-func (a *AuthenticatorSimpleBearer) GetID() string {
-	return "simple_bearer"
+func (a *AuthenticatorBearerToken) GetID() string {
+	return "bearer_token"
 }
 
-func (a *AuthenticatorSimpleBearer) Validate(config json.RawMessage) error {
+func (a *AuthenticatorBearerToken) Validate(config json.RawMessage) error {
 	if !a.c.AuthenticatorIsEnabled(a.GetID()) {
 		return NewErrAuthenticatorNotEnabled(a)
 	}
@@ -54,8 +54,8 @@ func (a *AuthenticatorSimpleBearer) Validate(config json.RawMessage) error {
 	return err
 }
 
-func (a *AuthenticatorSimpleBearer) Config(config json.RawMessage) (*AuthenticatorSimpleBearerConfiguration, error) {
-	var c AuthenticatorSimpleBearerConfiguration
+func (a *AuthenticatorBearerToken) Config(config json.RawMessage) (*AuthenticatorBearerTokenConfiguration, error) {
+	var c AuthenticatorBearerTokenConfiguration
 	if err := a.c.AuthenticatorConfig(a.GetID(), config, &c); err != nil {
 		return nil, NewErrAuthenticatorMisconfigured(a, err)
 	}
@@ -71,7 +71,7 @@ func (a *AuthenticatorSimpleBearer) Config(config json.RawMessage) (*Authenticat
 	return &c, nil
 }
 
-func (a *AuthenticatorSimpleBearer) Authenticate(r *http.Request, session *AuthenticationSession, config json.RawMessage, _ pipeline.Rule) error {
+func (a *AuthenticatorBearerToken) Authenticate(r *http.Request, session *AuthenticationSession, config json.RawMessage, _ pipeline.Rule) error {
 	cf, err := a.Config(config)
 	if err != nil {
 		return err

@@ -22,11 +22,11 @@ import (
 	. "github.com/ory/oathkeeper/pipeline/authn"
 )
 
-func TestAuthenticatorSimpleBearer(t *testing.T) {
+func TestAuthenticatorBearerToken(t *testing.T) {
 	conf := internal.NewConfigurationWithDefaults()
 	reg := internal.NewRegistry(conf)
 
-	pipelineAuthenticator, err := reg.PipelineAuthenticator("simple_bearer")
+	pipelineAuthenticator, err := reg.PipelineAuthenticator("bearer_token")
 	require.NoError(t, err)
 
 	t.Run("method=authenticate", func(t *testing.T) {

@@ -443,9 +443,9 @@
       ],
       "additionalProperties": false
     },
-    "configAuthenticatorsSimpleBearer": {
+    "configAuthenticatorsBearerToken": {
       "type": "object",
-      "title": "Simple Bearer Authenticator Configuration",
+      "title": "Bearer Token Authenticator Configuration",
       "description": "This section is optional when the authenticator is disabled.",
       "properties": {
         "check_token_url": {
@@ -1311,9 +1311,9 @@
             }
           ]
         },
-        "simple_bearer": {
-          "title": "Simple Bearer",
-          "description": "The [`simple_bearer` authenticator](https://www.ory.sh/oathkeeper/docs/pipeline/authn#simple_bearer).",
+        "bearer_token": {
+          "title": "Bearer Token",
+          "description": "The [`bearer_token` authenticator](https://www.ory.sh/oathkeeper/docs/pipeline/authn#bearer_token).",
           "type": "object",
           "properties": {
             "enabled": {
@@ -1327,7 +1327,7 @@
                   "const": true
                 },
                 "config": {
-                  "$ref": "#/definitions/configAuthenticatorsSimpleBearer"
+                  "$ref": "#/definitions/configAuthenticatorsBearerToken"
                 }
               },
               "required": [
