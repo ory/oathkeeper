@@ -184,7 +184,7 @@ func TestAuthenticatorBearerToken(t *testing.T) {
 				}
 				defer ts.Close()
 
-				tc.config, _ = sjson.SetBytes(tc.config, "check_token_url", ts.URL)
+				tc.config, _ = sjson.SetBytes(tc.config, "check_session_url", ts.URL)
 				sess := new(AuthenticationSession)
 				err := pipelineAuthenticator.Authenticate(tc.r, sess, tc.config, nil)
 				if tc.expectErr {
