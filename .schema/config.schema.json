@@ -448,7 +448,7 @@
       "title": "Bearer Token Authenticator Configuration",
       "description": "This section is optional when the authenticator is disabled.",
       "properties": {
-        "check_token_url": {
+        "check_session_url": {
           "title": "Token Check URL",
           "type": "string",
           "format": "uri",
@@ -518,7 +518,7 @@
         }
       },
       "required": [
-        "check_token_url"
+        "check_session_url"
       ],
       "additionalProperties": false
     },
