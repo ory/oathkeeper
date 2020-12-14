@@ -4,7 +4,8 @@
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 **Table of Contents**
 
-- [Unreleased (2020-12-05)](#unreleased-2020-12-05)
+- [Unreleased (2020-12-14)](#unreleased-2020-12-14)
+  - [0.38.5-beta.1 (2020-12-10)](#0385-beta1-2020-12-10)
     - [Bug Fixes](#bug-fixes)
     - [Documentation](#documentation)
     - [Features](#features)
@@ -183,7 +184,12 @@
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-# [Unreleased](https://github.com/ory/oathkeeper/compare/v0.38.4-beta.1...1c2241c1cbf615a07b483a3bb51fc3be9a50ae40) (2020-12-05)
+# Unreleased (2020-12-14)
+
+No significant changes have been made for this release.
+
+
+## [0.38.5-beta.1](https://github.com/ory/oathkeeper/compare/v0.38.4-beta.1...v0.38.5-beta.1) (2020-12-10)
 
 
 ### Bug Fixes
@@ -196,6 +202,7 @@
 * Never construct id token claim templates in parallel ([#552](https://github.com/ory/oathkeeper/issues/552)) ([4f504d9](https://github.com/ory/oathkeeper/commit/4f504d9032a5be9ea6f82c723a655a0f9028c45a)), closes [#551](https://github.com/ory/oathkeeper/issues/551)
 * Remove token_type validation from introspection handler ([#556](https://github.com/ory/oathkeeper/issues/556)) ([b18d90a](https://github.com/ory/oathkeeper/commit/b18d90a94f2016b541164cf30654032628e4bc01)), closes [#553](https://github.com/ory/oathkeeper/issues/553)
 * Support windows file paths ([#557](https://github.com/ory/oathkeeper/issues/557)) ([6a05682](https://github.com/ory/oathkeeper/commit/6a05682dca21181db9e052300edf14fb40815bd3)), closes [#514](https://github.com/ory/oathkeeper/issues/514) [#332](https://github.com/ory/oathkeeper/issues/332)
+* Update dd-trace to fix build ([2e571fa](https://github.com/ory/oathkeeper/commit/2e571fa98880b62a174dbcfcdde2bb1a339cc7a3))
 
 
 ### Documentation
