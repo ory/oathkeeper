@@ -347,7 +347,7 @@ appropriately.
   to the `extra` field. This defaults to `extra`, but it could also be `@this`
   (for the root element), `session.foo.bar` for
   `{ "subject": "...", "session": { "foo": {"bar": "whatever"} } }`, and so on.
-- `subject_from` (string, optional - defaults to `subject`) - A
+- `subject_from` (string, optional - defaults to `sub`) - A
   [GJSON Path](https://github.com/tidwall/gjson/blob/master/SYNTAX.md) pointing
   to the `subject` field. This defaults to `sub`. Example: `identity.id` for
   `{ "identity": { "id": "1234" } }`.
