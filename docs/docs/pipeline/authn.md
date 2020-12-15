@@ -349,7 +349,7 @@ appropriately.
   `{ "subject": "...", "session": { "foo": {"bar": "whatever"} } }`, and so on.
 - `subject_from` (string, optional - defaults to `subject`) - A
   [GJSON Path](https://github.com/tidwall/gjson/blob/master/SYNTAX.md) pointing
-  to the `subject` field. This defaults to `subject`. Example: `identity.id` for
+  to the `subject` field. This defaults to `sub`. Example: `identity.id` for
   `{ "identity": { "id": "1234" } }`.
 - `token_from` (object, optional) - The location of the bearer token. If not
   configured, the token will be received from a default location -

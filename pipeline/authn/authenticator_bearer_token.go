@@ -65,7 +65,7 @@ func (a *AuthenticatorBearerToken) Config(config json.RawMessage) (*Authenticato
 	}
 
 	if len(c.SubjectFrom) == 0 {
-		c.SubjectFrom = "subject"
+		c.SubjectFrom = "sub"
 	}
 
 	return &c, nil
