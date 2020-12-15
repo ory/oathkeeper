@@ -4,7 +4,7 @@
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 **Table of Contents**
 
-- [Unreleased (2020-12-14)](#unreleased-2020-12-14)
+- [Unreleased (2020-12-15)](#unreleased-2020-12-15)
   - [0.38.5-beta.1 (2020-12-10)](#0385-beta1-2020-12-10)
     - [Bug Fixes](#bug-fixes)
     - [Documentation](#documentation)
@@ -184,7 +184,7 @@
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-# Unreleased (2020-12-14)
+# Unreleased (2020-12-15)
 
 No significant changes have been made for this release.
 
