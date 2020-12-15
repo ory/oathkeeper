@@ -514,7 +514,7 @@
           "title": "Subject JSON Path",
           "description": "The `subject` field in the ORY Oathkeeper authentication session is set using this JSON Path. Defaults to `subject`. See [GSJON Syntax](https://github.com/tidwall/gjson/blob/master/SYNTAX.md) for reference.",
           "type": "string",
-          "default": "subject"
+          "default": "sub"
         }
       },
       "required": [
