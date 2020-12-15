@@ -5,44 +5,45 @@
 **Table of Contents**
 
 - [Unreleased (2020-12-15)](#unreleased-2020-12-15)
+    - [Features](#features)
   - [0.38.5-beta.1 (2020-12-10)](#0385-beta1-2020-12-10)
     - [Bug Fixes](#bug-fixes)
     - [Documentation](#documentation)
-    - [Features](#features)
+    - [Features](#features-1)
     - [Unclassified](#unclassified)
   - [0.38.4-beta.1 (2020-09-28)](#0384-beta1-2020-09-28)
     - [Bug Fixes](#bug-fixes-1)
     - [Documentation](#documentation-1)
-    - [Features](#features-1)
+    - [Features](#features-2)
     - [Unclassified](#unclassified-1)
   - [0.38.3-beta.1 (2020-07-29)](#0383-beta1-2020-07-29)
     - [Bug Fixes](#bug-fixes-2)
     - [Documentation](#documentation-2)
-    - [Features](#features-2)
+    - [Features](#features-3)
   - [0.38.2-beta.1 (2020-05-25)](#0382-beta1-2020-05-25)
     - [Bug Fixes](#bug-fixes-3)
     - [Documentation](#documentation-3)
-    - [Features](#features-3)
+    - [Features](#features-4)
   - [0.38.1-beta.1 (2020-05-08)](#0381-beta1-2020-05-08)
     - [Bug Fixes](#bug-fixes-4)
 - [0.38.0-beta.2 (2020-05-07)](#0380-beta2-2020-05-07)
     - [Bug Fixes](#bug-fixes-5)
     - [Code Refactoring](#code-refactoring)
     - [Documentation](#documentation-4)
-    - [Features](#features-4)
+    - [Features](#features-5)
   - [0.37.1-beta.1 (2020-04-03)](#0371-beta1-2020-04-03)
     - [Documentation](#documentation-5)
 - [0.37.0-beta.1 (2020-04-02)](#0370-beta1-2020-04-02)
     - [Bug Fixes](#bug-fixes-6)
     - [Documentation](#documentation-6)
-    - [Features](#features-5)
+    - [Features](#features-6)
     - [BREAKING CHANGES](#breaking-changes)
 - [0.36.0-beta.4 (2020-02-14)](#0360-beta4-2020-02-14)
     - [Bug Fixes](#bug-fixes-7)
     - [Documentation](#documentation-7)
 - [0.36.0-beta.1 (2020-02-05)](#0360-beta1-2020-02-05)
     - [Documentation](#documentation-8)
-    - [Features](#features-6)
+    - [Features](#features-7)
     - [Unclassified](#unclassified-2)
   - [0.35.5-beta.2 (2020-01-31)](#0355-beta2-2020-01-31)
     - [Unclassified](#unclassified-3)
@@ -184,9 +185,18 @@
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-# Unreleased (2020-12-15)
+# [Unreleased](https://github.com/ory/oathkeeper/compare/v0.38.5-beta.1...b623ae7f68aac948f8e584fb9254e43a7272adf6) (2020-12-15)
 
-No significant changes have been made for this release.
+
+### Features
+
+* Add bearer_token authenticator ([#613](https://github.com/ory/oathkeeper/issues/613)) ([b623ae7](https://github.com/ory/oathkeeper/commit/b623ae7f68aac948f8e584fb9254e43a7272adf6)):
+
+    > Adds a new authenticator to work with Kratos' new API token.
+    > Works the same as the cookie_session authenticator but checks for a
+    > bearer token in the Authorization header (unless overwritten by
+    > token_from)
+
 
 
 ## [0.38.5-beta.1](https://github.com/ory/oathkeeper/compare/v0.38.4-beta.1...v0.38.5-beta.1) (2020-12-10)
