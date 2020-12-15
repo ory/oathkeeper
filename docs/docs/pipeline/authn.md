@@ -328,6 +328,129 @@ HTTP/1.0 401 Status Unauthorized
 The request is not authorized because the provided credentials are invalid.
 ```
 
+## `bearer_token`
+
+The `bearer_token` authenticator will forward the request method, path and
+headers to a session store. If the session store returns `200 OK` and body
+`{ "subject": "...", "extra": {} }` then the authenticator will set the subject
+appropriately.
+
+### Configuration
+
+- `check_session_url` (string, required) - The session store to forward request
+  method/path/headers to for validation.
+- `preserve_path` (boolean, optional) - If set, any path in `check_session_url`
+  will be preserved instead of replacing the path with the path of the request
+  being checked.
+- `extra_from` (string, optional - defaults to `extra`) - A
+  [GJSON Path](https://github.com/tidwall/gjson/blob/master/SYNTAX.md) pointing
+  to the `extra` field. This defaults to `extra`, but it could also be `@this`
+  (for the root element), `session.foo.bar` for
+  `{ "subject": "...", "session": { "foo": {"bar": "whatever"} } }`, and so on.
+- `subject_from` (string, optional - defaults to `sub`) - A
+  [GJSON Path](https://github.com/tidwall/gjson/blob/master/SYNTAX.md) pointing
+  to the `sub` field. This defaults to `sub`. Example: `identity.id` for
+  `{ "identity": { "id": "1234" } }`.
+- `token_from` (object, optional) - The location of the bearer token. If not
+  configured, the token will be received from a default location -
+  'Authorization' header. One and only one location (header, query, or cookie)
+  must be specified.
+  - `header` (string, required, one of) - The header (case insensitive) that
+    must contain a Bearer token for request authentication. It can't be set
+    along with `query_parameter` or `cookie`.
+  - `query_parameter` (string, required, one of) - The query parameter (case
+    sensitive) that must contain a Bearer token for request authentication. It
+    can't be set along with `header` or `cookie`.
+  - `cookie` (string, required, one of) - The cookie (case sensitive) that must
+    contain a Bearer token for request authentication. It can't be set along
+    with `header` or `query_parameter`
+
+```yaml
+# Global configuration file oathkeeper.yml
+authenticators:
+  bearer_token:
+    # Set enabled to true if the authenticator should be enabled and false to disable the authenticator. Defaults to false.
+    enabled: true
+
+    config:
+      check_session_url: https://session-store-host
+      token_from:
+        header: Custom-Authorization-Header
+        # or
+        # query_parameter: auth-token
+        # or
+        # cookie: auth-token
+```
+
+```yaml
+# Some Access Rule: access-rule-1.yaml
+id: access-rule-1
+# match: ...
+# upstream: ...
+authenticators:
+  - handler: bearer_token
+    config:
+      check_session_url: https://session-store-host
+      token_from:
+        query_parameter: auth-token
+        # or
+        # header: Custom-Authorization-Header
+        # or
+        # cookie: auth-token
+```
+
+```yaml
+# Some Access Rule Preserving Path: access-rule-2.yaml
+id: access-rule-2
+# match: ...
+# upstream: ...
+authenticators:
+  - handler: bearer_token
+    config:
+      check_session_url: https://session-store-host/check-session
+      token_from:
+        query_parameter: auth-token
+        # or
+        # header: Custom-Authorization-Header
+        # or
+        # cookie: auth-token
+      preserve_path: true
+```
+
+### Access Rule Example
+
+```shell
+$ cat ./rules.json
+
+[{
+  "id": "some-id",
+  "upstream": {
+    "url": "http://my-backend-service"
+  },
+  "match": {
+    "url": "http://my-app/some-route",
+    "methods": [
+      "GET"
+    ]
+  },
+  "authenticators": [{
+    "handler": "bearer_token"
+  }],
+  "authorizer": { "handler": "allow" },
+  "mutators": [{ "handler": "noop" }]
+}]
+
+$ curl -X GET -H 'Authorization: Bearer valid-token' http://my-app/some-route
+
+HTTP/1.0 200 OK
+The request has been allowed! The subject is: "peter"
+
+$ curl -X GET -H 'Authorization: Bearer invalid-token' http://my-app/some-route
+
+HTTP/1.0 401 Status Unauthorized
+The request is not authorized because the provided credentials are invalid.
+```
+
 ## `oauth2_client_credentials`
 
 This `oauth2_client_credentials` uses the username and password from HTTP Basic
