@@ -224,7 +224,7 @@ represent names of claims and the values are arbitrary data structures which
 will be parsed by the Go [text/template](https://golang.org/pkg/text/template/)
 package for value substitution, receiving the `AuthenticationSession` struct.
 
-For more details please check [Session variables](index.md#session)
+For more details please check [Session variables](../pipeline.md#session)
 
 The claims configuration expects a string which is expected to be valid JSON:
 
@@ -322,7 +322,7 @@ field. The keys are the header name and the values are a string which will be
 parsed by the Go [`text/template`](https://golang.org/pkg/text/template/)
 package for value substitution, receiving the `AuthenticationSession` struct.
 
-For more details please check [Session variables](index.md#session)
+For more details please check [Session variables](../pipeline.md#session)
 
 ### Access Rule Example
 
@@ -401,7 +401,7 @@ field. The keys are the cookie name and the values are a string which will be
 parsed by the Go [`text/template`](https://golang.org/pkg/text/template/)
 package for value substitution, receiving the `AuthenticationSession` struct.
 
-For more details please check [Session variables](index.md#session)
+For more details please check [Session variables](../pipeline.md#session)
 
 ##### Example
 

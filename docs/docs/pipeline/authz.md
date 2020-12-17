@@ -202,7 +202,7 @@ If `subject` is not specified it will default to
 `AuthenticationSession.Subject`.
 
 For more details about supported Go template substitution, see.
-[How to use session variables](index.md#session)
+[How to use session variables](../pipeline.md#session)
 
 #### Example
 
@@ -291,7 +291,7 @@ if it returns a "403 Forbidden" response code, the access is denied.
   [`text/template`](https://golang.org/pkg/text/template/) package and applied
   to an
   [`AuthenticationSession`](https://github.com/ory/oathkeeper/blob/master/pipeline/authn/authenticator.go#L40)
-  object. See [Session](index.md#session) for more details.
+  object. See [Session](../pipeline.md#session) for more details.
 
 #### Example
 
@@ -372,7 +372,7 @@ Forbidden" response code, the access is denied.
   [`text/template`](https://golang.org/pkg/text/template/) package and applied
   to an
   [`AuthenticationSession`](https://github.com/ory/oathkeeper/blob/master/pipeline/authn/authenticator.go#L40)
-  object. See [Session](index.md#session) for more details.
+  object. See [Session](../pipeline.md#session) for more details.
 
 #### Example
 

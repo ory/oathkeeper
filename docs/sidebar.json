@@ -10,7 +10,7 @@
       "type": "category",
       "label": "Handlers",
       "items": [
-        "pipeline/index",
+        "pipeline",
         "pipeline/authn",
         "pipeline/authz",
         "pipeline/mutator",
@@ -27,7 +27,7 @@
     "reference/api"
   ],
   "SDKs": [
-    "sdk/index"
+    "sdk"
   ],
   "Development": [
     "milestones"
