@@ -133,11 +133,12 @@ func forwardRequestToSessionStore(r *http.Request, checkSessionURL string, prese
 		reqUrl.Path = r.URL.Path
 	}
 
-	res, err := http.DefaultClient.Do(&http.Request{
+	req := http.Request{
 		Method: r.Method,
 		URL:    reqUrl,
 		Header: r.Header,
-	})
+	}
+	res, err := http.DefaultClient.Do(req.WithContext(r.Context()))
 	if err != nil {
 		return nil, helper.ErrForbidden.WithReason(err.Error()).WithTrace(err)
 	}
