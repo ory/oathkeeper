@@ -65,7 +65,7 @@ languages and published them on their respective package repositories:
 - [Python](https://pypi.org/project/ory-oathkeeper-client/)
 - [PHP](https://packagist.org/packages/ory/oathkeeper-client)
 - [Go](https://github.com/ory/oathkeeper-client-go)
-- [NodeJS](https://www.npmjs.com/package/@ory/oathkeeper-client) (with TypeScript)
+- [NodeJS](https://www.npmjs.com/package/@oryd/oathkeeper-client) (with TypeScript)
 - [Java](https://search.maven.org/artifact/sh.ory.oathkeeper/oathkeeper-client)
 - [Ruby](https://rubygems.org/gems/ory-oathkeeper-client)
 
