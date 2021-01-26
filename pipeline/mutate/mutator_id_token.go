@@ -32,7 +32,7 @@ import (
 
 	"github.com/dgraph-io/ristretto"
 
-	"github.com/dgrijalva/jwt-go"
+	"github.com/form3tech-oss/jwt-go"
 
 	"github.com/pborman/uuid"
 	"github.com/pkg/errors"
