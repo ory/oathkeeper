@@ -4,7 +4,7 @@
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 **Table of Contents**
 
-- [Unreleased (2021-01-21)](#unreleased-2021-01-21)
+- [Unreleased (2021-01-26)](#unreleased-2021-01-26)
     - [Documentation](#documentation)
     - [Features](#features)
   - [0.38.5-beta.1 (2020-12-10)](#0385-beta1-2020-12-10)
@@ -186,11 +186,14 @@
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-# [Unreleased](https://github.com/ory/oathkeeper/compare/v0.38.5-beta.1...c339fee771877dbc3e362d4656af53fe492cd58e) (2021-01-21)
+# [Unreleased](https://github.com/ory/oathkeeper/compare/v0.38.5-beta.1...1524fed70b4b5c8d3ca8d23e5ab46bc32f073d53) (2021-01-26)
 
 
 ### Documentation
 
+* Add Rust and Dart SDKs ([1524fed](https://github.com/ory/oathkeeper/commit/1524fed70b4b5c8d3ca8d23e5ab46bc32f073d53)):
+
+    > We now support for Rust and Dart SDKs!
 * Fix js npm links ([#634](https://github.com/ory/oathkeeper/issues/634)) ([c339fee](https://github.com/ory/oathkeeper/commit/c339fee771877dbc3e362d4656af53fe492cd58e))
 * Rename index documents ([7de0ac3](https://github.com/ory/oathkeeper/commit/7de0ac34f572d6da56cac482eda364514500a866))
 
