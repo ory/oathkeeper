@@ -18,13 +18,14 @@ each REST endpoint.
 We publish our SDKs for popular languages in their respective package
 repositories:
 
-- [Python](https://pypi.org/project/ory-oathkeeper-client/)
-- [PHP](https://packagist.org/packages/ory/oathkeeper-client)
+- [Dart](https://pub.dev/packages/ory_oathkeeper_client)
 - [Go](https://github.com/ory/oathkeeper-client-go)
-- [NodeJS](https://www.npmjs.com/package/@ory/oathkeeper-client) (with
-  TypeScript)
 - [Java](https://search.maven.org/artifact/sh.ory.oathkeeper/oathkeeper-client)
+- [JavaScript](https://www.npmjs.com/package/@ory/oathkeeper-client) with TypeScript definitions and compatible with: NodeJS, ReactJS, AnuglarJS, Vue.js, and many more.
+- [PHP](https://packagist.org/packages/ory/oathkeeper-client)
+- [Python](https://pypi.org/project/ory-oathkeeper-client/)
 - [Ruby](https://rubygems.org/gems/ory-oathkeeper-client)
+- [Rust](https://crates.io/crates/ory-oathkeeper-client)
 
 Missing your programming language?
 [Create an issue](https://github.com/ory/oathkeeper/issues) and help us build,
