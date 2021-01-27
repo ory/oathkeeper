@@ -208,6 +208,81 @@ authenticators:
     #
     enabled: true
 
+  ## Bearer Token ##
+  #
+  # The [`bearer_token` authenticator](https://www.ory.sh/oathkeeper/docs/pipeline/authn#bearer_token).
+  #
+  bearer_token:
+    ## config ##
+    #
+    config:
+      ## check_session_url ##
+      #
+      # Set this value using environment variables on
+      # - Linux/macOS:
+      #    $ export AUTHENTICATORS_BEARER_TOKEN_CONFIG_CHECK_SESSION_URL=<value>
+      # - Windows Command Line (CMD):
+      #    > set AUTHENTICATORS_BEARER_TOKEN_CONFIG_CHECK_SESSION_URL=<value>
+      #
+      check_session_url: https://session-store-host
+
+      ## preserve_path ##
+      #
+      # Set this value using environment variables on
+      # - Linux/macOS:
+      #    $ export AUTHENTICATORS_BEARER_TOKEN_CONFIG_PRESERVE_PATH=<value>
+      # - Windows Command Line (CMD):
+      #    > set AUTHENTICATORS_BEARER_TOKEN_CONFIG_PRESERVE_PATH=<value>
+      #
+      preserve_path: false
+
+      ## extra_from ##
+      #
+      # Set this value using environment variables on
+      # - Linux/macOS:
+      #    $ export AUTHENTICATORS_BEARER_TOKEN_CONFIG_EXTRA_FROM=<value>
+      # - Windows Command Line (CMD):
+      #    > set AUTHENTICATORS_BEARER_TOKEN_CONFIG_EXTRA_FROM=<value>
+      #
+      extra_from: ''
+
+      ## subject_from ##
+      #
+      # Set this value using environment variables on
+      # - Linux/macOS:
+      #    $ export AUTHENTICATORS_BEARER_TOKEN_CONFIG_SUBJECT_FROM=<value>
+      # - Windows Command Line (CMD):
+      #    > set AUTHENTICATORS_BEARER_TOKEN_CONFIG_SUBJECT_FROM=<value>
+      #
+      subject_from: ''
+
+      ## token_from ##
+      #
+      # Set this value using environment variables on
+      # - Linux/macOS:
+      #    $ export AUTHENTICATORS_BEARER_TOKEN_CONFIG_TOKEN_FROM=<value>
+      # - Windows Command Line (CMD):
+      #    > set AUTHENTICATORS_BEARER_TOKEN_CONFIG_TOKEN_FROM=<value>
+      #
+      token_from: null
+
+    ## Enabled ##
+    #
+    # En-/disables this component.
+    #
+    # Default value: false
+    #
+    # Examples:
+    # - true
+    #
+    # Set this value using environment variables on
+    # - Linux/macOS:
+    #    $ export AUTHENTICATORS_BEARER_TOKEN_ENABLED=<value>
+    # - Windows Command Line (CMD):
+    #    > set AUTHENTICATORS_BEARER_TOKEN_ENABLED=<value>
+    #
+    enabled: true
+
   ## JSON Web Token (jwt) ##
   #
   # The [`jwt` authenticator](https://www.ory.sh/oathkeeper/docs/pipeline/authn#jwt).
