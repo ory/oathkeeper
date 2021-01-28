@@ -89,7 +89,7 @@ func (a *AuthorizerRemoteJSON) Authorize(r *http.Request, session *authn.Authent
 		req.Header.Add("Authorization", authz)
 	}
 
-	res, err := a.client.Do(req)
+	res, err := a.client.Do(req.WithContext(r.Context()))
 	if err != nil {
 		return errors.WithStack(err)
 	}

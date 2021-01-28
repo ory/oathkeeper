@@ -96,7 +96,7 @@ func (a *AuthorizerRemote) Authorize(r *http.Request, session *authn.Authenticat
 		req.Header.Set(hdr, headerValue.String())
 	}
 
-	res, err := a.client.Do(req)
+	res, err := a.client.Do(req.WithContext(r.Context()))
 	if err != nil {
 		return errors.WithStack(err)
 	}

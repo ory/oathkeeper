@@ -155,7 +155,7 @@ func (a *AuthenticatorOAuth2Introspection) Authenticate(r *http.Request, session
 		}
 		// set/override the content-type header
 		introspectReq.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-		resp, err := a.client.Do(introspectReq)
+		resp, err := a.client.Do(introspectReq.WithContext(r.Context()))
 		if err != nil {
 			return errors.WithStack(err)
 		}

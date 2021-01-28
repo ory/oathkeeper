@@ -119,7 +119,7 @@ func (a *AuthenticatorOAuth2ClientCredentials) Authenticate(r *http.Request, ses
 	}
 
 	token, err := c.Token(context.WithValue(
-		context.Background(),
+		r.Context(),
 		oauth2.HTTPClient,
 		c.Client,
 	))
