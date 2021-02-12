@@ -75,7 +75,7 @@ the [ORY Chat](https://www.ory.sh/chat).
 
 - I would like to know what I am agreeing to when I contribute to ORY
   Oathkeeper. Does ORY have
-  [a Contributors License Agreement?](https://cla-assistant.io/ory/)
+  [a Contributors License Agreement?](https://cla-assistant.io/ory/oathkeeper)
 
 - I would like updates about new versions of ORY Oathkeeper.
   [How are new releases announced?](https://ory.us10.list-manage.com/subscribe?u=ffb1a878e4ec6c0ed312a3480&id=f605a41b53)
@@ -150,7 +150,7 @@ At least one review from a maintainer is required for all patches (even patches
 from maintainers).
 
 Before your contributions can be merged you need to sign our
-[Contributor License Agreement](https://cla-assistant.io/ory/).
+[Contributor License Agreement](https://cla-assistant.io/ory/oathkeeper).
 
 This agreement defines the terms under which your code is contributed to ORY.
 More specifically it declares that you have the right to, and actually do, grant
@@ -213,10 +213,10 @@ please include a note in your commit message explaining why.
 
 ```
 # First you clone the original repository
-git clone git@github.com:ory/Oathkeeper.git
+git clone git@github.com:ory/ory/oathkeeper.git
 
 # Next you add a git remote that is your fork:
-git remote add fork git@github.com:<YOUR-GITHUB-USERNAME-HERE>/Oathkeeper.git
+git remote add fork git@github.com:<YOUR-GITHUB-USERNAME-HERE>/ory/oathkeeper.git
 
 # Next you fetch the latest changes from origin for master:
 git fetch origin
