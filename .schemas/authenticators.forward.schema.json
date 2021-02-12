@@ -1,0 +1,27 @@
+{
+  "$id": "https://raw.githubusercontent.com/ory/oathkeeper/master/.schemas/authenticators.cookie_session.schema.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "title": "Forward Authenticator Configuration",
+  "description": "This section is optional when the authenticator is disabled.",
+  "properties": {
+    "service_url": {
+      "title": "Service URL",
+      "type": "string",
+      "format": "uri",
+      "description": "The origin to proxy requests to. If the response is a 200 with body `{ \"subject\": \"...\", \"extra\": {} }`. The request will pass the subject through successfully, otherwise it will be marked as unauthorized.\n\n>If this authenticator is enabled, this value is required.",
+      "examples": [
+        "https://service-host"
+      ]
+    },
+    "preserve_path": {
+      "title": "Preserve Path",
+      "type": "boolean",
+      "description": "When set to true, any path specified in `check_session_url` will be preserved instead of overwriting the path with the path from the original request"
+    }
+  },
+  "required": [
+    "service_url"
+  ],
+  "additionalProperties": false
+}
