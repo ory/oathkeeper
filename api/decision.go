@@ -55,7 +55,7 @@ func (h *DecisionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request, next
 	if len(r.URL.Path) >= len(DecisionPath) && r.URL.Path[:len(DecisionPath)] == DecisionPath {
 		r.URL.Scheme = "http"
 		r.URL.Host = r.Host
-		if r.TLS != nil {
+		if r.TLS != nil || strings.EqualFold(r.Header.Get("X-Forwarded-Proto"), "https") {
 			r.URL.Scheme = "https"
 		}
 		r.URL.Path = r.URL.Path[len(DecisionPath):]
