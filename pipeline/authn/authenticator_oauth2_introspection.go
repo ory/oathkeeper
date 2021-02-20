@@ -11,6 +11,9 @@ import (
 
 	"github.com/dgraph-io/ristretto"
 
+	"github.com/opentracing/opentracing-go"
+	"github.com/opentracing/opentracing-go/ext"
+
 	"github.com/pkg/errors"
 	"golang.org/x/oauth2/clientcredentials"
 
@@ -125,6 +128,29 @@ func (a *AuthenticatorOAuth2Introspection) tokenToCache(config *AuthenticatorOAu
 	}
 }
 
+func (a *AuthenticatorOAuth2Introspection) traceRequest(ctx context.Context, req *http.Request) func(){
+	tracer := opentracing.GlobalTracer()
+	if tracer == nil {
+		return func(){}
+	}
+
+	parentSpan := opentracing.SpanFromContext(ctx)
+	opts := make([]opentracing.StartSpanOption, 0, 1)
+	if parentSpan != nil {
+		opts = append(opts, opentracing.ChildOf(parentSpan.Context()))
+	}
+
+	urlStr := req.URL.String()
+	clientSpan := tracer.StartSpan(req.Method + " " + urlStr, opts...)
+
+	ext.SpanKindRPCClient.Set(clientSpan)
+	ext.HTTPUrl.Set(clientSpan, urlStr)
+	ext.HTTPMethod.Set(clientSpan, req.Method)
+
+	tracer.Inject(clientSpan.Context(), opentracing.HTTPHeaders, opentracing.HTTPHeadersCarrier(req.Header))
+	return clientSpan.Finish
+}
+
 func (a *AuthenticatorOAuth2Introspection) Authenticate(r *http.Request, session *AuthenticationSession, config json.RawMessage, _ pipeline.Rule) error {
 	cf, err := a.Config(config)
 	if err != nil {
@@ -155,7 +181,14 @@ func (a *AuthenticatorOAuth2Introspection) Authenticate(r *http.Request, session
 		}
 		// set/override the content-type header
 		introspectReq.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+
+		// add tracing
+		closeSpan := a.traceRequest(r.Context(), introspectReq)
+
 		resp, err := a.client.Do(introspectReq.WithContext(r.Context()))
+
+		// close the span so it represents just the http request
+		closeSpan()
 		if err != nil {
 			return errors.WithStack(err)
 		}
