@@ -1851,28 +1851,28 @@
       "type": "object",
       "properties": {
         "level": {
+          "description": "Debug enables stack traces on errors. Can also be set using environment variable LOG_LEVEL.",
           "type": "string",
           "default": "info",
           "enum": [
-            "panic",
-            "fatal",
-            "error",
-            "warn",
+            "trace",
+            "debug",
             "info",
-            "debug"
-          ],
-          "title": "Level",
-          "description": "Debug enables stack traces on errors. Can also be set using environment variable LOG_LEVEL."
+            "warning",
+            "error",
+            "fatal",
+            "panic"
+          ]
+        },
+        "leak_sensitive_values": {
+          "type": "boolean",
+          "title": "Leak Sensitive Log Values",
+          "description": "If set will leak sensitive values (e.g. emails) in the logs."
         },
         "format": {
+          "description": "The log format can either be text or JSON.",
           "type": "string",
-          "default": "text",
-          "enum": [
-            "text",
-            "json"
-          ],
-          "title": "Format",
-          "description": "The log format can either be text or JSON."
+          "enum": ["json", "text"]
         }
       },
       "additionalProperties": false
