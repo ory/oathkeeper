@@ -54,7 +54,7 @@ require (
 	github.com/prometheus/client_golang v1.5.0
 	github.com/rogpeppe/go-internal v1.6.2 // indirect
 	github.com/rs/cors v1.6.0
-	github.com/sirupsen/logrus v1.7.0
+	github.com/sirupsen/logrus v1.8.0
 	github.com/spf13/cobra v1.1.1
 	github.com/sqs/goreturns v0.0.0-20181028201513-538ac6014518
 	github.com/square/go-jose v2.3.1+incompatible
