@@ -59,7 +59,7 @@ func BearerTokenFromRequest(r *http.Request, tokenLocation *BearerTokenLocation)
 func DefaultBearerTokenFromRequest(r *http.Request) string {
 	token := r.Header.Get(defaultAuthorizationHeader)
 	split := strings.SplitN(token, " ", 2)
-	if len(split) != 2 || !strings.EqualFold(split[0], "bearer") {
+	if len(split) != 2 || !strings.EqualFold(strings.ToLower(split[0]), "bearer") {
 		return ""
 	}
 	return split[1]
