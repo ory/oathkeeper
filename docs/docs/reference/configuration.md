@@ -1334,15 +1334,25 @@ mutators:
 # Configure logging using the following options. Logging will always be sent to stdout and stderr.
 #
 log:
-  ## Format ##
+  ## Leak Sensitive Log Values ##
+  #
+  # If set will leak sensitive values (e.g. emails) in the logs.
+  #
+  # Set this value using environment variables on
+  # - Linux/macOS:
+  #    $ export LOG_LEAK_SENSITIVE_VALUES=<value>
+  # - Windows Command Line (CMD):
+  #    > set LOG_LEAK_SENSITIVE_VALUES=<value>
+  #
+  leak_sensitive_values: false
+
+  ## format ##
   #
   # The log format can either be text or JSON.
   #
-  # Default value: text
-  #
   # One of:
-  # - text
   # - json
+  # - text
   #
   # Set this value using environment variables on
   # - Linux/macOS:
@@ -1350,21 +1360,22 @@ log:
   # - Windows Command Line (CMD):
   #    > set LOG_FORMAT=<value>
   #
-  format: text
+  format: json
 
-  ## Level ##
+  ## level ##
   #
   # Debug enables stack traces on errors. Can also be set using environment variable LOG_LEVEL.
   #
   # Default value: info
   #
   # One of:
-  # - panic
-  # - fatal
-  # - error
-  # - warn
-  # - info
+  # - trace
   # - debug
+  # - info
+  # - warning
+  # - error
+  # - fatal
+  # - panic
   #
   # Set this value using environment variables on
   # - Linux/macOS:
@@ -1372,7 +1383,7 @@ log:
   # - Windows Command Line (CMD):
   #    > set LOG_LEVEL=<value>
   #
-  level: panic
+  level: trace
 
 ## Profiling ##
 #
