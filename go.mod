@@ -12,7 +12,6 @@ require (
 	github.com/blang/semver v3.5.1+incompatible
 	github.com/bxcodec/faker v2.0.1+incompatible
 	github.com/dgraph-io/ristretto v0.0.2
-	github.com/dgrijalva/jwt-go v3.2.0+incompatible // indirect
 	github.com/dlclark/regexp2 v1.2.0
 	github.com/form3tech-oss/jwt-go v3.2.2+incompatible
 	github.com/fsnotify/fsnotify v1.4.9
@@ -74,4 +73,4 @@ require (
 	gopkg.in/square/go-jose.v2 v2.5.1
 )
 
-go 1.14
+go 1.16
