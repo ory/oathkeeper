@@ -12,7 +12,6 @@ require (
 	github.com/blang/semver v3.5.1+incompatible
 	github.com/bxcodec/faker v2.0.1+incompatible
 	github.com/dgraph-io/ristretto v0.0.2
-	github.com/dgrijalva/jwt-go v3.2.0+incompatible // indirect
 	github.com/dlclark/regexp2 v1.2.0
 	github.com/form3tech-oss/jwt-go v3.2.2+incompatible
 	github.com/fsnotify/fsnotify v1.4.9
@@ -56,7 +55,7 @@ require (
 	github.com/prometheus/client_golang v1.5.0
 	github.com/rogpeppe/go-internal v1.6.2 // indirect
 	github.com/rs/cors v1.6.0
-	github.com/sirupsen/logrus v1.7.0
+	github.com/sirupsen/logrus v1.8.0
 	github.com/spf13/cobra v1.1.1
 	github.com/sqs/goreturns v0.0.0-20181028201513-538ac6014518
 	github.com/square/go-jose v2.3.1+incompatible
@@ -75,4 +74,4 @@ require (
 	gopkg.in/square/go-jose.v2 v2.5.1
 )
 
-go 1.14
+go 1.16

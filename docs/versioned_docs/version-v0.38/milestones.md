@@ -46,14 +46,14 @@ New feature or request.
       ([oathkeeper#339](https://github.com/ory/oathkeeper/issues/339))
 - [ ] Switch to go-jose key generation lib
       ([oathkeeper#419](https://github.com/ory/oathkeeper/issues/419))
-- [ ] Oathkeeper behind ssl terminating balancer
-      ([oathkeeper#153](https://github.com/ory/oathkeeper/issues/153))
 - [ ] remote_json: Enable timeout configuration for calls to authorization
       endpoint ([oathkeeper#515](https://github.com/ory/oathkeeper/issues/515))
 - [ ] Start as Envoy AuthService
       ([oathkeeper#560](https://github.com/ory/oathkeeper/issues/560))
 - [ ] Hydator Mutator Client Credential
       ([oathkeeper#565](https://github.com/ory/oathkeeper/issues/565))
+- [x] Oathkeeper behind ssl terminating balancer
+      ([oathkeeper#153](https://github.com/ory/oathkeeper/issues/153))
 - [x] Clean up logging in case of invalid credentials
       ([oathkeeper#505](https://github.com/ory/oathkeeper/issues/505))
 - [x] Fetch JWKs from object storage (S3)

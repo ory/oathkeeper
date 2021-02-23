@@ -4,49 +4,51 @@
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 **Table of Contents**
 
-- [Unreleased (2021-01-28)](#unreleased-2021-01-28)
+- [Unreleased (2021-02-22)](#unreleased-2021-02-22)
+  - [0.38.7-beta.1 (2021-02-22)](#0387-beta1-2021-02-22)
     - [Bug Fixes](#bug-fixes)
+    - [Features](#features)
   - [0.38.6-beta.1 (2021-01-27)](#0386-beta1-2021-01-27)
     - [Documentation](#documentation)
-    - [Features](#features)
+    - [Features](#features-1)
   - [0.38.5-beta.1 (2020-12-10)](#0385-beta1-2020-12-10)
     - [Bug Fixes](#bug-fixes-1)
     - [Documentation](#documentation-1)
-    - [Features](#features-1)
+    - [Features](#features-2)
     - [Unclassified](#unclassified)
   - [0.38.4-beta.1 (2020-09-28)](#0384-beta1-2020-09-28)
     - [Bug Fixes](#bug-fixes-2)
     - [Documentation](#documentation-2)
-    - [Features](#features-2)
+    - [Features](#features-3)
     - [Unclassified](#unclassified-1)
   - [0.38.3-beta.1 (2020-07-29)](#0383-beta1-2020-07-29)
     - [Bug Fixes](#bug-fixes-3)
     - [Documentation](#documentation-3)
-    - [Features](#features-3)
+    - [Features](#features-4)
   - [0.38.2-beta.1 (2020-05-25)](#0382-beta1-2020-05-25)
     - [Bug Fixes](#bug-fixes-4)
     - [Documentation](#documentation-4)
-    - [Features](#features-4)
+    - [Features](#features-5)
   - [0.38.1-beta.1 (2020-05-08)](#0381-beta1-2020-05-08)
     - [Bug Fixes](#bug-fixes-5)
 - [0.38.0-beta.2 (2020-05-07)](#0380-beta2-2020-05-07)
     - [Bug Fixes](#bug-fixes-6)
     - [Code Refactoring](#code-refactoring)
     - [Documentation](#documentation-5)
-    - [Features](#features-5)
+    - [Features](#features-6)
   - [0.37.1-beta.1 (2020-04-03)](#0371-beta1-2020-04-03)
     - [Documentation](#documentation-6)
 - [0.37.0-beta.1 (2020-04-02)](#0370-beta1-2020-04-02)
     - [Bug Fixes](#bug-fixes-7)
     - [Documentation](#documentation-7)
-    - [Features](#features-6)
+    - [Features](#features-7)
     - [BREAKING CHANGES](#breaking-changes)
 - [0.36.0-beta.4 (2020-02-14)](#0360-beta4-2020-02-14)
     - [Bug Fixes](#bug-fixes-8)
     - [Documentation](#documentation-8)
 - [0.36.0-beta.1 (2020-02-05)](#0360-beta1-2020-02-05)
     - [Documentation](#documentation-9)
-    - [Features](#features-7)
+    - [Features](#features-8)
     - [Unclassified](#unclassified-2)
   - [0.35.5-beta.2 (2020-01-31)](#0355-beta2-2020-01-31)
     - [Unclassified](#unclassified-3)
@@ -188,14 +190,29 @@
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-# [Unreleased](https://github.com/ory/oathkeeper/compare/v0.38.6-beta.1...ee251976537ade1e06399a3d5b2883620e3407eb) (2021-01-28)
+# Unreleased (2021-02-22)
+
+No significant changes have been made for this release.
+
+
+## [0.38.7-beta.1](https://github.com/ory/oathkeeper/compare/v0.38.6-beta.1...v0.38.7-beta.1) (2021-02-22)
 
 
 ### Bug Fixes
 
+* Accept lower and uppercase in bearer token handler ([6e46d4a](https://github.com/ory/oathkeeper/commit/6e46d4a3831ae86beb9b8a5850faf20cb5a759e2))
+* Add support for  X-Forwarded-Proto header ([#638](https://github.com/ory/oathkeeper/issues/638)) ([6eb83fd](https://github.com/ory/oathkeeper/commit/6eb83fd03ed46c388dfe4aaeeaa7c331c9d3685d)), closes [#153](https://github.com/ory/oathkeeper/issues/153)
 * Pass context through to external requests ([#627](https://github.com/ory/oathkeeper/issues/627)) ([ee25197](https://github.com/ory/oathkeeper/commit/ee251976537ade1e06399a3d5b2883620e3407eb)):
 
     > Enables proper tracing through Jaeger etc
+* Update goreleaser config ([9689f45](https://github.com/ory/oathkeeper/commit/9689f45db1ec0a974a109a6b28314cddaba2b2de))
+* Update log schema ([78e654d](https://github.com/ory/oathkeeper/commit/78e654df3b81d3ab3f8f946033ee5f1fe45afded))
+
+
+### Features
+
+* Bump to go 1.16 ([e74d4a2](https://github.com/ory/oathkeeper/commit/e74d4a21efeac7aa7b6c7ae8e39daab17ef4f470))
+* Resolve go mod issues ([6a3f5d3](https://github.com/ory/oathkeeper/commit/6a3f5d39c2326a49c694624ff2d35b8e3beccc2e))
 
 
 
