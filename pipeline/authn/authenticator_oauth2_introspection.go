@@ -128,10 +128,10 @@ func (a *AuthenticatorOAuth2Introspection) tokenToCache(config *AuthenticatorOAu
 	}
 }
 
-func (a *AuthenticatorOAuth2Introspection) traceRequest(ctx context.Context, req *http.Request) func(){
+func (a *AuthenticatorOAuth2Introspection) traceRequest(ctx context.Context, req *http.Request) func() {
 	tracer := opentracing.GlobalTracer()
 	if tracer == nil {
-		return func(){}
+		return func() {}
 	}
 
 	parentSpan := opentracing.SpanFromContext(ctx)
@@ -141,7 +141,7 @@ func (a *AuthenticatorOAuth2Introspection) traceRequest(ctx context.Context, req
 	}
 
 	urlStr := req.URL.String()
-	clientSpan := tracer.StartSpan(req.Method + " " + urlStr, opts...)
+	clientSpan := tracer.StartSpan(req.Method+" "+urlStr, opts...)
 
 	ext.SpanKindRPCClient.Set(clientSpan)
 	ext.HTTPUrl.Set(clientSpan, urlStr)
