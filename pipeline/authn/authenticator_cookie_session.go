@@ -112,14 +112,16 @@ func (a *AuthenticatorCookieSession) Authenticate(r *http.Request, session *Auth
 }
 
 func cookieSessionResponsible(r *http.Request, only []string) bool {
-	if len(only) == 0 {
+	if len(only) == 0 && len(r.Cookies()) > 0 {
 		return true
 	}
+
 	for _, cookieName := range only {
 		if _, err := r.Cookie(cookieName); err == nil {
 			return true
 		}
 	}
+
 	return false
 }
 
