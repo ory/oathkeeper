@@ -40,7 +40,7 @@ require (
 	github.com/ory/analytics-go/v4 v4.0.1
 	github.com/ory/cli v0.0.10
 	github.com/ory/fosite v0.36.1
-	github.com/ory/go-acc v0.2.5
+	github.com/ory/go-acc v0.2.6
 	github.com/ory/go-convenience v0.1.0
 	github.com/ory/gojsonschema v1.2.0
 	github.com/ory/graceful v0.1.1
