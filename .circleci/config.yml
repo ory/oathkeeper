@@ -8,6 +8,7 @@ orbs:
   nancy: ory/nancy@0.0.18
   docs: ory/docs@0.0.10
   golangci: ory/golangci@0.0.18
+  go: circleci/go@1.5.0
 
 jobs:
   test:
