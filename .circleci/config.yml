@@ -71,6 +71,7 @@ workflows:
               only: master
       -
         goreleaser/release:
+          no_output_timeout: 30m
           requires:
             - test
           filters:
