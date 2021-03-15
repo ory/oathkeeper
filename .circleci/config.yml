@@ -52,7 +52,6 @@ workflows:
           appname: Ory_Oathkeeper
           requires:
             - test
-            - golangci/lint
       - sdk/release:
           requires:
             - test
