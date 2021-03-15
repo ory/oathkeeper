@@ -576,8 +576,8 @@ was granted the requested scope.
   validate/match the token scope. Supports "hierarchic", "exact", "wildcard",
   "none". Defaults to "none".
 - `required_scope` ([]string, optional) - Sets what scope is required by the URL
-  and when performing OAuth 2.0 Client Credentials request, the scope
-  will be included in the request.
+  and when performing OAuth 2.0 Client Credentials request, the scope will be
+  included in the request.
 - `target_audience` ([]string, optional) - Sets what audience is required by the
   URL.
 - `trusted_issuers` ([]string, optional) - Sets a list of trusted token issuers.
@@ -610,10 +610,10 @@ was granted the requested scope.
 - `introspection_request_headers` (object, optional) - Additional headers to add
   to the introspection request.
 - `retry` (object, optional) - Configure the retry policy
-  - `max_delay` (string, optional, default to 500ms) - Maximum delay to wait before
-    retrying the request
-  - `give_up_after` (string, optional, default to 1s) - Maximum delay allowed for
-    retries
+  - `max_delay` (string, optional, default to 500ms) - Maximum delay to wait
+    before retrying the request
+  - `give_up_after` (string, optional, default to 1s) - Maximum delay allowed
+    for retries
 - `cache` (object, optional) - Enables caching of incoming tokens
   - `enabled` (bool, optional) - Enable the cache, will use exp time of token to
     determine when to evict from cache. Defaults to false.
