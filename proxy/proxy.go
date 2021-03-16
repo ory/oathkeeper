@@ -156,7 +156,7 @@ func (d *Proxy) Director(r *http.Request) {
 func EnrichRequestedURL(r *http.Request) {
 	r.URL.Scheme = "http"
 	r.URL.Host = r.Host
-	if r.TLS != nil {
+	if r.TLS != nil || strings.EqualFold(r.Header.Get("X-Forwarded-Proto"), "https") {
 		r.URL.Scheme = "https"
 	}
 }
