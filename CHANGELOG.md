@@ -5,6 +5,7 @@
 **Table of Contents**
 
 - [Unreleased (2021-03-17)](#unreleased-2021-03-17)
+  - [0.38.9-beta.1.pre.4 (2021-03-17)](#0389-beta1pre4-2021-03-17)
   - [0.38.9-beta.1.pre.3 (2021-03-16)](#0389-beta1pre3-2021-03-16)
     - [Bug Fixes](#bug-fixes)
   - [0.38.9-beta.1.pre.2 (2021-03-15)](#0389-beta1pre2-2021-03-15)
@@ -200,6 +201,11 @@
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 # Unreleased (2021-03-17)
+
+No significant changes have been made for this release.
+
+
+## [0.38.9-beta.1.pre.4](https://github.com/ory/oathkeeper/compare/v0.38.9-beta.1.pre.3...v0.38.9-beta.1.pre.4) (2021-03-17)
 
 No significant changes have been made for this release.
 
