@@ -4,51 +4,56 @@
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 **Table of Contents**
 
-- [Unreleased (2021-03-02)](#unreleased-2021-03-02)
+- [Unreleased (2021-03-17)](#unreleased-2021-03-17)
+  - [0.38.9-beta.1.pre.3 (2021-03-16)](#0389-beta1pre3-2021-03-16)
+    - [Bug Fixes](#bug-fixes)
+  - [0.38.9-beta.1.pre.2 (2021-03-15)](#0389-beta1pre2-2021-03-15)
+  - [0.38.9-beta.1.pre.1 (2021-03-15)](#0389-beta1pre1-2021-03-15)
+    - [Bug Fixes](#bug-fixes-1)
     - [Unclassified](#unclassified)
   - [0.38.8-beta.1 (2021-02-25)](#0388-beta1-2021-02-25)
-    - [Bug Fixes](#bug-fixes)
+    - [Bug Fixes](#bug-fixes-2)
     - [Unclassified](#unclassified-1)
   - [0.38.7-beta.1 (2021-02-22)](#0387-beta1-2021-02-22)
-    - [Bug Fixes](#bug-fixes-1)
+    - [Bug Fixes](#bug-fixes-3)
     - [Features](#features)
   - [0.38.6-beta.1 (2021-01-27)](#0386-beta1-2021-01-27)
     - [Documentation](#documentation)
     - [Features](#features-1)
   - [0.38.5-beta.1 (2020-12-10)](#0385-beta1-2020-12-10)
-    - [Bug Fixes](#bug-fixes-2)
+    - [Bug Fixes](#bug-fixes-4)
     - [Documentation](#documentation-1)
     - [Features](#features-2)
     - [Unclassified](#unclassified-2)
   - [0.38.4-beta.1 (2020-09-28)](#0384-beta1-2020-09-28)
-    - [Bug Fixes](#bug-fixes-3)
+    - [Bug Fixes](#bug-fixes-5)
     - [Documentation](#documentation-2)
     - [Features](#features-3)
     - [Unclassified](#unclassified-3)
   - [0.38.3-beta.1 (2020-07-29)](#0383-beta1-2020-07-29)
-    - [Bug Fixes](#bug-fixes-4)
+    - [Bug Fixes](#bug-fixes-6)
     - [Documentation](#documentation-3)
     - [Features](#features-4)
   - [0.38.2-beta.1 (2020-05-25)](#0382-beta1-2020-05-25)
-    - [Bug Fixes](#bug-fixes-5)
+    - [Bug Fixes](#bug-fixes-7)
     - [Documentation](#documentation-4)
     - [Features](#features-5)
   - [0.38.1-beta.1 (2020-05-08)](#0381-beta1-2020-05-08)
-    - [Bug Fixes](#bug-fixes-6)
+    - [Bug Fixes](#bug-fixes-8)
 - [0.38.0-beta.2 (2020-05-07)](#0380-beta2-2020-05-07)
-    - [Bug Fixes](#bug-fixes-7)
+    - [Bug Fixes](#bug-fixes-9)
     - [Code Refactoring](#code-refactoring)
     - [Documentation](#documentation-5)
     - [Features](#features-6)
   - [0.37.1-beta.1 (2020-04-03)](#0371-beta1-2020-04-03)
     - [Documentation](#documentation-6)
 - [0.37.0-beta.1 (2020-04-02)](#0370-beta1-2020-04-02)
-    - [Bug Fixes](#bug-fixes-8)
+    - [Bug Fixes](#bug-fixes-10)
     - [Documentation](#documentation-7)
     - [Features](#features-7)
     - [BREAKING CHANGES](#breaking-changes)
 - [0.36.0-beta.4 (2020-02-14)](#0360-beta4-2020-02-14)
-    - [Bug Fixes](#bug-fixes-9)
+    - [Bug Fixes](#bug-fixes-11)
     - [Documentation](#documentation-8)
 - [0.36.0-beta.1 (2020-02-05)](#0360-beta1-2020-02-05)
     - [Documentation](#documentation-9)
@@ -194,7 +199,33 @@
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-# [Unreleased](https://github.com/ory/oathkeeper/compare/v0.38.8-beta.1...34cf38c0fe431eb375fab4dbfa9cb9098961943d) (2021-03-02)
+# Unreleased (2021-03-17)
+
+No significant changes have been made for this release.
+
+
+## [0.38.9-beta.1.pre.3](https://github.com/ory/oathkeeper/compare/v0.38.9-beta.1.pre.2...v0.38.9-beta.1.pre.3) (2021-03-16)
+
+
+### Bug Fixes
+
+* Make glob patterns match only one path segment. ([#664](https://github.com/ory/oathkeeper/issues/664)) ([c711aac](https://github.com/ory/oathkeeper/commit/c711aacc5fc29664e3825e087557e7baf4e47aa8)), closes [#630](https://github.com/ory/oathkeeper/issues/630):
+
+    > This makes `/` also a separator as well as the presumably default value of `.`. This allows using <*> for matching only one path segment.
+
+
+
+## [0.38.9-beta.1.pre.2](https://github.com/ory/oathkeeper/compare/v0.38.9-beta.1.pre.1...v0.38.9-beta.1.pre.2) (2021-03-15)
+
+No significant changes have been made for this release.
+
+
+## [0.38.9-beta.1.pre.1](https://github.com/ory/oathkeeper/compare/v0.38.8-beta.1...v0.38.9-beta.1.pre.1) (2021-03-15)
+
+
+### Bug Fixes
+
+* Resolve goreleaser issues and bump golang ([7291df9](https://github.com/ory/oathkeeper/commit/7291df9f2745b4dfc178d81b65fc837f58b34206))
 
 
 ### Unclassified
