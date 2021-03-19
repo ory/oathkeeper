@@ -16,9 +16,11 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/ory/oathkeeper/internal/cloudstorage"
-
 	"github.com/fsnotify/fsnotify"
+
+	"github.com/ory/oathkeeper/driver/health"
+	"github.com/ory/oathkeeper/internal/cloudstorage"
+	"github.com/ory/oathkeeper/rule/readiness"
 
 	"github.com/ory/x/stringslice"
 	"github.com/ory/x/urlx"
@@ -63,6 +65,7 @@ type fetcherRegistry interface {
 type FetcherDefault struct {
 	c   configuration.Provider
 	r   fetcherRegistry
+	hem health.EventManager
 	hc  *http.Client
 	mux *blob.URLMux
 
@@ -78,10 +81,12 @@ type FetcherDefault struct {
 func NewFetcherDefault(
 	c configuration.Provider,
 	r fetcherRegistry,
+	hem health.EventManager,
 ) *FetcherDefault {
 	return &FetcherDefault{
 		r:     r,
 		c:     c,
+		hem:   hem,
 		mux:   cloudstorage.NewURLMux(),
 		hc:    httpx.NewResilientClientLatencyToleranceHigh(nil),
 		cache: map[string][]Rule{},
@@ -314,6 +319,9 @@ func (f *FetcherDefault) fetch(source url.URL) ([]Rule, error) {
 		WithField("location", source.String()).
 		Debugf("Fetching access rules from given location because something changed.")
 
+	defer func() {
+		f.hem.Dispatch(&readiness.RuleLoadedEvent{})
+	}()
 	switch source.Scheme {
 	case "azblob":
 		fallthrough

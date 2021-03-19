@@ -5,6 +5,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/ory/oathkeeper/driver/health"
 	"github.com/ory/oathkeeper/pipeline"
 	pe "github.com/ory/oathkeeper/pipeline/errors"
 	"github.com/ory/oathkeeper/proxy"
@@ -26,6 +27,7 @@ import (
 	ep "github.com/ory/oathkeeper/pipeline/errors"
 	"github.com/ory/oathkeeper/pipeline/mutate"
 	"github.com/ory/oathkeeper/rule"
+	rulereadiness "github.com/ory/oathkeeper/rule/readiness"
 )
 
 var _ Registry = new(RegistryMemory)
@@ -61,6 +63,8 @@ type RegistryMemory struct {
 	mutators       map[string]mutate.Mutator
 	errors         map[string]ep.Handler
 
+	healthEventManager   *health.DefaultHealthEventManager
+
 	ruleRepositoryLock sync.Mutex
 }
 
@@ -70,12 +74,15 @@ func (r *RegistryMemory) Init() {
 			r.Logger().WithError(err).Fatal("Access rule watcher terminated with an error.")
 		}
 	}()
+	go func() {
+		r.HealthEventManager().Watch(context.Background())
+	}()
 	_ = r.RuleRepository()
 }
 
 func (r *RegistryMemory) RuleFetcher() rule.Fetcher {
 	if r.ruleFetcher == nil {
-		r.ruleFetcher = rule.NewFetcherDefault(r.c, r)
+		r.ruleFetcher = rule.NewFetcherDefault(r.c, r, r.HealthEventManager())
 	}
 	return r.ruleFetcher
 }
@@ -138,9 +145,28 @@ func (r *RegistryMemory) CredentialHandler() *api.CredentialsHandler {
 	return r.ch
 }
 
+func (r *RegistryMemory) HealthEventManager() health.EventManager {
+	if r.healthEventManager == nil {
+		r.healthEventManager = health.NewDefaultHealthEventManager()
+	}
+	return r.healthEventManager
+}
+
 func (r *RegistryMemory) HealthHandler() *healthx.Handler {
+	r.RLock()
+	defer r.RUnlock()
+
 	if r.healthxHandler == nil {
-		r.healthxHandler = healthx.NewHandler(r.Writer(), r.BuildVersion(), healthx.ReadyCheckers{})
+		rulesReadinessChecker := rulereadiness.NewReadinessHealthChecker()
+
+		healthCheckers := []health.Readiness{rulesReadinessChecker}
+
+		handlers := healthx.ReadyCheckers{}
+		for _, checker := range healthCheckers {
+			handlers[checker.Name()] = checker.Validate
+			r.HealthEventManager().AddListener(checker)
+		}
+		r.healthxHandler = healthx.NewHandler(r.Writer(), r.BuildVersion(), handlers)
 	}
 	return r.healthxHandler
 }
