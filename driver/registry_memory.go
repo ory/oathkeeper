@@ -82,7 +82,7 @@ func (r *RegistryMemory) Init() {
 
 func (r *RegistryMemory) RuleFetcher() rule.Fetcher {
 	if r.ruleFetcher == nil {
-		r.ruleFetcher = rule.NewFetcherDefault(r.c, r, r.HealthEventManager())
+		r.ruleFetcher = rule.NewFetcherDefault(r.c, r)
 	}
 	return r.ruleFetcher
 }
@@ -180,7 +180,7 @@ func (r *RegistryMemory) RuleValidator() rule.Validator {
 
 func (r *RegistryMemory) RuleRepository() rule.Repository {
 	if r.ruleRepository == nil {
-		r.ruleRepository = rule.NewRepositoryMemory(r)
+		r.ruleRepository = rule.NewRepositoryMemory(r, r.HealthEventManager())
 	}
 	return r.ruleRepository
 }
