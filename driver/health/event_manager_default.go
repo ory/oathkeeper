@@ -20,7 +20,10 @@ func NewDefaultHealthEventManager() *DefaultHealthEventManager {
 }
 
 func (h *DefaultHealthEventManager) Dispatch(event interface{}) {
-	h.evtChan <- event
+	select {
+	case h.evtChan <- event:
+	default:
+	}
 }
 
 func (h *DefaultHealthEventManager) AddListener(listener Readiness) {
