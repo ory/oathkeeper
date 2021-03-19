@@ -6,14 +6,16 @@ import (
 )
 
 type DefaultHealthEventManager struct {
-	evtChan   chan interface{}
-	listeners []Readiness
+	evtChan                 chan interface{}
+	listeners               []Readiness
+	listenerEventTypesCache map[Readiness][]reflect.Type
 }
 
 func NewDefaultHealthEventManager() *DefaultHealthEventManager {
 	return &DefaultHealthEventManager{
-		evtChan: make(chan interface{}),
-		listeners: []Readiness{},
+		evtChan:                 make(chan interface{}),
+		listeners:               []Readiness{},
+		listenerEventTypesCache: make(map[Readiness][]reflect.Type),
 	}
 }
 
@@ -23,6 +25,24 @@ func (h *DefaultHealthEventManager) Dispatch(event interface{}) {
 
 func (h *DefaultHealthEventManager) AddListener(listener Readiness) {
 	h.listeners = append(h.listeners, listener)
+	var typesCache []reflect.Type
+	for _, evtType := range listener.EventTypes() {
+		typesCache = append(typesCache, reflect.TypeOf(evtType))
+	}
+	h.listenerEventTypesCache[listener] = typesCache
+}
+
+func (h *DefaultHealthEventManager) internalDispatcher(evt interface{}, sourceEvtType reflect.Type) {
+	for _, listener := range h.listeners {
+		if evtTypesCache, ok := h.listenerEventTypesCache[listener]; ok {
+			for _, evtType := range evtTypesCache {
+				if sourceEvtType == evtType {
+					listener.EventsReceiver(evt)
+					return
+				}
+			}
+		}
+	}
 }
 
 func (h *DefaultHealthEventManager) Watch(ctx context.Context) {
@@ -34,12 +54,6 @@ func (h *DefaultHealthEventManager) Watch(ctx context.Context) {
 			return
 		}
 		sourceEvtType := reflect.TypeOf(evt)
-		for _, listener := range h.listeners {
-			for _, evtType := range listener.EventTypes() {
-				if sourceEvtType == reflect.TypeOf(evtType) {
-					listener.EventsReceiver(evt)
-				}
-			}
-		}
+		h.internalDispatcher(evt, sourceEvtType)
 	}
 }
