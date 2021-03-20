@@ -2,20 +2,19 @@ package health
 
 import (
 	"context"
+	"errors"
 	"reflect"
 )
 
 type DefaultHealthEventManager struct {
-	evtChan                 chan interface{}
-	listeners               []Readiness
-	listenerEventTypesCache map[Readiness][]reflect.Type
+	evtChan                chan interface{}
+	listenerEventTypeCache map[reflect.Type]Readiness
 }
 
 func NewDefaultHealthEventManager() *DefaultHealthEventManager {
 	return &DefaultHealthEventManager{
-		evtChan:                 make(chan interface{}),
-		listeners:               []Readiness{},
-		listenerEventTypesCache: make(map[Readiness][]reflect.Type),
+		evtChan:                make(chan interface{}),
+		listenerEventTypeCache: make(map[reflect.Type]Readiness),
 	}
 }
 
@@ -26,26 +25,15 @@ func (h *DefaultHealthEventManager) Dispatch(event interface{}) {
 	}
 }
 
-func (h *DefaultHealthEventManager) AddListener(listener Readiness) {
-	h.listeners = append(h.listeners, listener)
-	var typesCache []reflect.Type
+func (h *DefaultHealthEventManager) AddListener(listener Readiness) error {
 	for _, evtType := range listener.EventTypes() {
-		typesCache = append(typesCache, reflect.TypeOf(evtType))
-	}
-	h.listenerEventTypesCache[listener] = typesCache
-}
-
-func (h *DefaultHealthEventManager) internalDispatcher(evt interface{}, sourceEvtType reflect.Type) {
-	for _, listener := range h.listeners {
-		if evtTypesCache, ok := h.listenerEventTypesCache[listener]; ok {
-			for _, evtType := range evtTypesCache {
-				if sourceEvtType == evtType {
-					listener.EventsReceiver(evt)
-					return
-				}
-			}
+		evtTypeVal := reflect.TypeOf(evtType)
+		if _, ok := h.listenerEventTypeCache[evtTypeVal]; ok {
+			return errors.New("event type already registered")
 		}
+		h.listenerEventTypeCache[reflect.TypeOf(evtType)] = listener
 	}
+	return nil
 }
 
 func (h *DefaultHealthEventManager) Watch(ctx context.Context) {
@@ -56,7 +44,8 @@ func (h *DefaultHealthEventManager) Watch(ctx context.Context) {
 		case <-ctx.Done():
 			return
 		}
-		sourceEvtType := reflect.TypeOf(evt)
-		h.internalDispatcher(evt, sourceEvtType)
+		if listener, ok := h.listenerEventTypeCache[reflect.TypeOf(evt)]; ok {
+			listener.EventsReceiver(evt)
+		}
 	}
 }

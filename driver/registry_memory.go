@@ -164,7 +164,9 @@ func (r *RegistryMemory) HealthHandler() *healthx.Handler {
 		handlers := healthx.ReadyCheckers{}
 		for _, checker := range healthCheckers {
 			handlers[checker.Name()] = checker.Validate
-			r.HealthEventManager().AddListener(checker)
+			if err := r.HealthEventManager().AddListener(checker); err != nil {
+				r.Logger().WithError(err).Fatalf("Unable to register health checker listener.")
+			}
 		}
 		r.healthxHandler = healthx.NewHandler(r.Writer(), r.BuildVersion(), handlers)
 	}
