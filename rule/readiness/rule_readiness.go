@@ -12,6 +12,8 @@ type (
 	RuleLoadedEvent struct {}
 )
 
+var ErrRuleNotYetLoaded = errors.New("rules have not been loaded yet")
+
 func NewReadinessHealthChecker() *RuleReadinessChecker {
 	return &RuleReadinessChecker{
 		hasFirstRuleLoad: false,
@@ -24,7 +26,7 @@ func (r *RuleReadinessChecker) Name() string {
 
 func (r *RuleReadinessChecker) Validate() error {
 	if !r.hasFirstRuleLoad {
-		return errors.New("rules have not been loaded yet")
+		return ErrRuleNotYetLoaded
 	}
 	return nil
 }
