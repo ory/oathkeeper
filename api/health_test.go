@@ -37,7 +37,7 @@ func TestHealth(t *testing.T) {
 	res, err = server.Client().Get(server.URL + "/health/ready")
 	require.NoError(t, err)
 	defer res.Body.Close()
-	require.Equal(t, http.StatusOK, res.StatusCode)
+	require.Equal(t, http.StatusServiceUnavailable, res.StatusCode)
 	require.NoError(t, json.NewDecoder(res.Body).Decode(&result))
 	assert.Equal(t, "ok", result.Status)
 }
