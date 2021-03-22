@@ -5,6 +5,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/stretchr/testify/require"
+
 	rulereadiness "github.com/ory/oathkeeper/rule/readiness"
 )
 
@@ -13,19 +15,25 @@ func TestNewDefaultHealthEventManager(t *testing.T) {
 	defer cancel()
 	t.Run("health event manager", func(t *testing.T) {
 		ruleReadinessProbe := rulereadiness.NewReadinessHealthChecker()
-		hem := NewDefaultHealthEventManager()
 
-		if err := hem.AddListener(ruleReadinessProbe); err != nil {
-			t.Errorf("AddListener() error = %v", err)
-			return
-		}
+		// Create a new default health event manager with twice same probe
+		_, err := NewDefaultHealthEventManager(ruleReadinessProbe, ruleReadinessProbe)
+		require.Error(t, err)
 
-		if err := hem.AddListener(ruleReadinessProbe); err == nil {
-			t.Errorf("AddListener() was able to register twice the same listener")
-			return
-		}
+		// Create a new default health event manager
+		hem, err := NewDefaultHealthEventManager(ruleReadinessProbe)
+		require.NoError(t, err)
 
-		// Dispatch event without watching
+		// Test healthx ready checkers generation
+		checkers := hem.HealthxReadyCheckers()
+		require.Len(t, checkers, 1)
+		_, ok := checkers[ruleReadinessProbe.Name()]
+		require.True(t, ok)
+
+		// Rule readiness probe must return an error before event dispatch
+		require.Error(t, ruleReadinessProbe.Validate())
+
+		// Dispatch event without watching (should not block)
 		hem.Dispatch(&rulereadiness.RuleLoadedEvent{})
 
 		// Watching for incoming events
@@ -40,10 +48,7 @@ func TestNewDefaultHealthEventManager(t *testing.T) {
 		// Wait for event propagation
 		time.Sleep(100 * time.Millisecond)
 
-		if err := ruleReadinessProbe.Validate(); err != nil {
-			t.Errorf("Validate() returned an unexpected error, err = %v", err)
-			return
-		}
+		require.NoError(t, ruleReadinessProbe.Validate())
 		cancel()
 	})
 }

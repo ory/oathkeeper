@@ -28,6 +28,7 @@ import (
 	"github.com/bxcodec/faker"
 	_ "github.com/go-sql-driver/mysql"
 	_ "github.com/lib/pq"
+	"github.com/ory/x/healthx"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -37,7 +38,6 @@ import (
 	"github.com/ory/x/sqlcon/dockertest"
 
 	"github.com/ory/oathkeeper/driver/configuration"
-	"github.com/ory/oathkeeper/driver/health"
 )
 
 func TestMain(m *testing.M) {
@@ -61,12 +61,12 @@ func (m *mockHealthEventManager) Dispatch(evt interface{}) {
 
 }
 
-func (m *mockHealthEventManager) AddListener(listener health.Readiness) error {
-	return nil
-}
-
 func (m *mockHealthEventManager) Watch(ctx context.Context) {
 
+}
+
+func (m *mockHealthEventManager) HealthxReadyCheckers() healthx.ReadyCheckers {
+	return nil
 }
 
 type mockRepositoryRegistry struct {

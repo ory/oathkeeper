@@ -74,9 +74,7 @@ func (r *RegistryMemory) Init() {
 			r.Logger().WithError(err).Fatal("Access rule watcher terminated with an error.")
 		}
 	}()
-	go func() {
-		r.HealthEventManager().Watch(context.Background())
-	}()
+	r.HealthEventManager().Watch(context.Background())
 	_ = r.RuleRepository()
 }
 
@@ -147,7 +145,11 @@ func (r *RegistryMemory) CredentialHandler() *api.CredentialsHandler {
 
 func (r *RegistryMemory) HealthEventManager() health.EventManager {
 	if r.healthEventManager == nil {
-		r.healthEventManager = health.NewDefaultHealthEventManager()
+		var err error
+		rulesReadinessChecker := rulereadiness.NewReadinessHealthChecker()
+		if r.healthEventManager, err = health.NewDefaultHealthEventManager(rulesReadinessChecker); err != nil {
+			r.logger.WithError(err).Error("unable to instantiate new health event manager")
+		}
 	}
 	return r.healthEventManager
 }
@@ -157,18 +159,7 @@ func (r *RegistryMemory) HealthHandler() *healthx.Handler {
 	defer r.RUnlock()
 
 	if r.healthxHandler == nil {
-		rulesReadinessChecker := rulereadiness.NewReadinessHealthChecker()
-
-		healthCheckers := []health.Readiness{rulesReadinessChecker}
-
-		handlers := healthx.ReadyCheckers{}
-		for _, checker := range healthCheckers {
-			handlers[checker.Name()] = checker.Validate
-			if err := r.HealthEventManager().AddListener(checker); err != nil {
-				r.Logger().WithError(err).Fatalf("Unable to register health checker listener.")
-			}
-		}
-		r.healthxHandler = healthx.NewHandler(r.Writer(), r.BuildVersion(), handlers)
+		r.healthxHandler = healthx.NewHandler(r.Writer(), r.BuildVersion(), r.HealthEventManager().HealthxReadyCheckers())
 	}
 	return r.healthxHandler
 }
