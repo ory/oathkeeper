@@ -63,7 +63,7 @@ type RegistryMemory struct {
 	mutators       map[string]mutate.Mutator
 	errors         map[string]ep.Handler
 
-	healthEventManager   *health.DefaultHealthEventManager
+	healthEventManager *health.DefaultHealthEventManager
 
 	ruleRepositoryLock sync.Mutex
 }

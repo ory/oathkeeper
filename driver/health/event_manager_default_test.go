@@ -34,11 +34,11 @@ func TestNewDefaultHealthEventManager(t *testing.T) {
 		}()
 
 		// Waiting for watcher to be ready
-		time.Sleep(100*time.Millisecond)
+		time.Sleep(100 * time.Millisecond)
 		// Dispatch event
 		hem.Dispatch(&rulereadiness.RuleLoadedEvent{})
 		// Wait for event propagation
-		time.Sleep(100*time.Millisecond)
+		time.Sleep(100 * time.Millisecond)
 
 		if err := ruleReadinessProbe.Validate(); err != nil {
 			t.Errorf("Validate() returned an unexpected error, err = %v", err)

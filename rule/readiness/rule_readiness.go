@@ -9,7 +9,7 @@ type (
 		hasFirstRuleLoad bool
 	}
 
-	RuleLoadedEvent struct {}
+	RuleLoadedEvent struct{}
 )
 
 var ErrRuleNotYetLoaded = errors.New("rules have not been loaded yet")
