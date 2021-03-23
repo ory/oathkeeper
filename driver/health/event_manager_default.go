@@ -22,7 +22,7 @@ func NewDefaultHealthEventManager(listeners ...Readiness) (*DefaultHealthEventMa
 			if _, ok := listenerEventTypeCache[evtTypeVal]; ok {
 				return nil, errors.WithStack(ErrEventTypeAlreadyRegistered)
 			}
-			listenerEventTypeCache[reflect.TypeOf(evtType)] = listener
+			listenerEventTypeCache[evtTypeVal] = listener
 		}
 	}
 	return &DefaultHealthEventManager{
