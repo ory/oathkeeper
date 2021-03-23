@@ -44,7 +44,7 @@ import (
 )
 
 func newTestRequest(u string) *http.Request {
-	return &http.Request{URL: x.ParseURLOrPanic(u)}
+	return &http.Request{URL: x.ParseURLOrPanic(u), Method: "GET"}
 }
 
 func TestHandleError(t *testing.T) {
@@ -472,8 +472,7 @@ func TestInitializeSession(t *testing.T) {
 			r:                newTestRequest("http://localhost"),
 			matchingStrategy: configuration.Regexp,
 			ruleMatch: rule.Match{
-				URL:    "http://localhost",
-				Method: "GET",
+				URL: "http://localhost",
 			},
 			expectContext: authn.MatchContext{
 				RegexpCaptureGroups: []string{},
