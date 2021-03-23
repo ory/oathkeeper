@@ -42,6 +42,7 @@ type AuthenticatorOAuth2IntrospectionPreAuthConfiguration struct {
 	Enabled      bool     `json:"enabled"`
 	ClientID     string   `json:"client_id"`
 	ClientSecret string   `json:"client_secret"`
+	Audience     string   `json:"target_audience"`
 	Scope        []string `json:"scope"`
 	TokenURL     string   `json:"token_url"`
 }
@@ -265,11 +266,18 @@ func (a *AuthenticatorOAuth2Introspection) Config(config json.RawMessage) (*Auth
 	var rt http.RoundTripper
 
 	if c.PreAuth != nil && c.PreAuth.Enabled {
+		var ep url.Values
+
+		if c.PreAuth.Audience != "" {
+			ep = url.Values{"audience": {c.PreAuth.Audience}}
+		}
+
 		rt = (&clientcredentials.Config{
-			ClientID:     c.PreAuth.ClientID,
-			ClientSecret: c.PreAuth.ClientSecret,
-			Scopes:       c.PreAuth.Scope,
-			TokenURL:     c.PreAuth.TokenURL,
+			ClientID:       c.PreAuth.ClientID,
+			ClientSecret:   c.PreAuth.ClientSecret,
+			Scopes:         c.PreAuth.Scope,
+			EndpointParams: ep,
+			TokenURL:       c.PreAuth.TokenURL,
 		}).Client(context.Background()).Transport
 	}
 
