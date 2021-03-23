@@ -148,7 +148,7 @@ func (r *RegistryMemory) HealthEventManager() health.EventManager {
 		var err error
 		rulesReadinessChecker := rulereadiness.NewReadinessHealthChecker()
 		if r.healthEventManager, err = health.NewDefaultHealthEventManager(rulesReadinessChecker); err != nil {
-			r.logger.WithError(err).Error("unable to instantiate new health event manager")
+			r.logger.WithError(err).Fatal("unable to instantiate new health event manager")
 		}
 	}
 	return r.healthEventManager

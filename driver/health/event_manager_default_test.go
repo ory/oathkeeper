@@ -5,6 +5,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/pkg/errors"
 	"github.com/stretchr/testify/require"
 
 	rulereadiness "github.com/ory/oathkeeper/rule/readiness"
@@ -28,18 +29,16 @@ func TestNewDefaultHealthEventManager(t *testing.T) {
 		checkers := hem.HealthxReadyCheckers()
 		require.Len(t, checkers, 1)
 		_, ok := checkers[ruleReadinessProbe.Name()]
-		require.True(t, ok)
+		require.True(t, ok, "health checker was not found")
 
 		// Rule readiness probe must return an error before event dispatch
-		require.Error(t, ruleReadinessProbe.Validate())
+		require.True(t, errors.Is(ruleReadinessProbe.Validate(), rulereadiness.ErrRuleNotYetLoaded))
 
 		// Dispatch event without watching (should not block)
 		hem.Dispatch(&rulereadiness.RuleLoadedEvent{})
 
 		// Watching for incoming events
-		go func() {
-			hem.Watch(ctx)
-		}()
+		hem.Watch(ctx)
 
 		// Waiting for watcher to be ready
 		time.Sleep(100 * time.Millisecond)

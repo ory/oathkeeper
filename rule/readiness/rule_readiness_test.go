@@ -2,38 +2,27 @@ package readiness
 
 import (
 	"testing"
+
+	"github.com/pkg/errors"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestReadinessHealthChecker(t *testing.T) {
 	t.Run("rule readiness probe", func(t *testing.T) {
 		ruleReadinessProbe := NewReadinessHealthChecker()
 
-		if name := ruleReadinessProbe.Name(); name != "rule-first-load" {
-			t.Errorf("Name() did not returned expected name, name = %s", name)
-			return
-		}
+		assert.Equal(t, ruleReadinessProbe.Name(), probeName)
 
-		if err := ruleReadinessProbe.Validate(); err != ErrRuleNotYetLoaded {
-			t.Errorf("Validate() did not returned expected error, error = %v", err)
-			return
-		}
+		assert.True(t, errors.Is(ruleReadinessProbe.Validate(), ErrRuleNotYetLoaded))
 
 		evtTypes := ruleReadinessProbe.EventTypes()
-		if len(evtTypes) != 1 {
-			t.Errorf("EventTypes() returned either 0 or multiple event type, evtTypes = %v", evtTypes)
-			return
-		}
-		if _, ok := evtTypes[0].(*RuleLoadedEvent); !ok {
-			t.Errorf("EventTypes() returned an unkown event type, evtTypes = %v", evtTypes)
-			return
-		}
+		assert.Len(t, evtTypes, 1)
+		_, ok := evtTypes[0].(*RuleLoadedEvent)
+		assert.True(t, ok, "actual type %T", evtTypes[0])
 
 		// Dispatch fake event
 		ruleReadinessProbe.EventsReceiver(&RuleLoadedEvent{})
 
-		if err := ruleReadinessProbe.Validate(); err != nil {
-			t.Errorf("Validate() returned an error, error = %v", err)
-			return
-		}
+		assert.NoError(t, ruleReadinessProbe.Validate())
 	})
 }
