@@ -42,7 +42,7 @@ type AuthenticatorOAuth2IntrospectionPreAuthConfiguration struct {
 	Enabled      bool     `json:"enabled"`
 	ClientID     string   `json:"client_id"`
 	ClientSecret string   `json:"client_secret"`
-	Audience     string   `json:"target_audience"`
+	Audience     string   `json:"audience"`
 	Scope        []string `json:"scope"`
 	TokenURL     string   `json:"token_url"`
 }
