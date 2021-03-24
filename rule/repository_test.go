@@ -38,6 +38,7 @@ import (
 	"github.com/ory/x/sqlcon/dockertest"
 
 	"github.com/ory/oathkeeper/driver/configuration"
+	"github.com/ory/oathkeeper/driver/health"
 )
 
 func TestMain(m *testing.M) {
@@ -57,7 +58,7 @@ func (v *validatorNoop) Validate(*Rule) error {
 type mockHealthEventManager struct {
 }
 
-func (m *mockHealthEventManager) Dispatch(evt interface{}) {
+func (m *mockHealthEventManager) Dispatch(evt health.ReadinessProbeEvent) {
 
 }
 

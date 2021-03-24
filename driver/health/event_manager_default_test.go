@@ -5,49 +5,100 @@ import (
 	"testing"
 	"time"
 
-	"github.com/pkg/errors"
 	"github.com/stretchr/testify/require"
-
-	rulereadiness "github.com/ory/oathkeeper/rule/readiness"
 )
+
+const mockReadinessProbeName = "mock-readiness-probe"
+
+type (
+	mockReadinessProbe struct {
+		hasReceivedEvent bool
+		testData         string
+	}
+	mockReadinessEvent struct {
+		testData string
+	}
+)
+
+func (m *mockReadinessProbe) ID() string {
+	return mockReadinessProbeName
+}
+
+func (m *mockReadinessProbe) Validate() error {
+	return nil
+}
+
+func (m *mockReadinessProbe) EventTypes() []ReadinessProbeEvent {
+	return []ReadinessProbeEvent{&mockReadinessEvent{}}
+}
+
+func (m *mockReadinessProbe) EventsReceiver(evt ReadinessProbeEvent) {
+	switch castedEvent := evt.(type) {
+	case *mockReadinessEvent:
+		m.hasReceivedEvent = true
+		m.testData = castedEvent.testData
+	}
+}
+
+func (m *mockReadinessEvent) ReadinessProbeListenerID() string {
+	return mockReadinessProbeName
+}
 
 func TestNewDefaultHealthEventManager(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 	t.Run("health event manager", func(t *testing.T) {
-		ruleReadinessProbe := rulereadiness.NewReadinessHealthChecker()
+		readinessProbe := &mockReadinessProbe{}
 
 		// Create a new default health event manager with twice same probe
-		_, err := NewDefaultHealthEventManager(ruleReadinessProbe, ruleReadinessProbe)
+		_, err := NewDefaultHealthEventManager(readinessProbe, readinessProbe)
 		require.Error(t, err)
 
 		// Create a new default health event manager
-		hem, err := NewDefaultHealthEventManager(ruleReadinessProbe)
+		hem, err := NewDefaultHealthEventManager(readinessProbe)
 		require.NoError(t, err)
 
 		// Test healthx ready checkers generation
 		checkers := hem.HealthxReadyCheckers()
 		require.Len(t, checkers, 1)
-		_, ok := checkers[ruleReadinessProbe.Name()]
+		_, ok := checkers[readinessProbe.ID()]
 		require.True(t, ok, "health checker was not found")
 
-		// Rule readiness probe must return an error before event dispatch
-		require.True(t, errors.Is(ruleReadinessProbe.Validate(), rulereadiness.ErrRuleNotYetLoaded))
+		// Readiness probe must be empty before event dispatch
+		require.False(t, readinessProbe.hasReceivedEvent)
+		require.Equal(t, readinessProbe.testData, "")
+
+		// Nil events should be ignored
+		hem.Dispatch(nil)
+		require.False(t, readinessProbe.hasReceivedEvent)
 
 		// Dispatch event without watching (should not block)
-		hem.Dispatch(&rulereadiness.RuleLoadedEvent{})
+		const testData = "a sample string that will be passed along the event"
+		hem.Dispatch(&mockReadinessEvent{
+			testData: testData,
+		})
 
 		// Watching for incoming events
 		hem.Watch(ctx)
 
-		// Waiting for watcher to be ready
+		// Waiting for watcher to be ready, then verify the event has been received
 		time.Sleep(100 * time.Millisecond)
-		// Dispatch event
-		hem.Dispatch(&rulereadiness.RuleLoadedEvent{})
-		// Wait for event propagation
-		time.Sleep(100 * time.Millisecond)
+		require.True(t, readinessProbe.hasReceivedEvent)
+		require.Equal(t, readinessProbe.testData, testData)
 
-		require.NoError(t, ruleReadinessProbe.Validate())
+		// Reset probe
+		readinessProbe.hasReceivedEvent = false
+		readinessProbe.testData = ""
+
+		// Dispatch a new event
+		hem.Dispatch(&mockReadinessEvent{
+			testData: testData,
+		})
+
+		// Wait for event propagation, then verify the event has been received
+		time.Sleep(100 * time.Millisecond)
+		require.True(t, readinessProbe.hasReceivedEvent)
+		require.Equal(t, readinessProbe.testData, testData)
 		cancel()
 	})
 }

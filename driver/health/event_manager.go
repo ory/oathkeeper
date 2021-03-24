@@ -8,7 +8,7 @@ import (
 )
 
 type EventManager interface {
-	Dispatch(event interface{})
+	Dispatch(event ReadinessProbeEvent)
 	Watch(ctx context.Context)
 	HealthxReadyCheckers() healthx.ReadyCheckers
 }

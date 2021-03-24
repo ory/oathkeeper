@@ -1,9 +1,15 @@
 package health
 
-type Readiness interface {
-	Name() string
-	Validate() error
+type (
+	ReadinessProbe interface {
+		ID() string
+		Validate() error
 
-	EventTypes() []interface{}
-	EventsReceiver(event interface{})
-}
+		EventTypes() []ReadinessProbeEvent
+		EventsReceiver(event ReadinessProbeEvent)
+	}
+
+	ReadinessProbeEvent interface {
+		ReadinessProbeListenerID() string
+	}
+)

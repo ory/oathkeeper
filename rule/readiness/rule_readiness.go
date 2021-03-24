@@ -2,6 +2,8 @@ package readiness
 
 import (
 	"github.com/pkg/errors"
+
+	"github.com/ory/oathkeeper/driver/health"
 )
 
 type (
@@ -22,7 +24,7 @@ func NewReadinessHealthChecker() *RuleReadinessChecker {
 	}
 }
 
-func (r *RuleReadinessChecker) Name() string {
+func (r *RuleReadinessChecker) ID() string {
 	return probeName
 }
 
@@ -33,13 +35,17 @@ func (r *RuleReadinessChecker) Validate() error {
 	return nil
 }
 
-func (r *RuleReadinessChecker) EventTypes() []interface{} {
-	return []interface{}{&RuleLoadedEvent{}}
+func (r *RuleReadinessChecker) EventTypes() []health.ReadinessProbeEvent {
+	return []health.ReadinessProbeEvent{&RuleLoadedEvent{}}
 }
 
-func (r *RuleReadinessChecker) EventsReceiver(event interface{}) {
+func (r *RuleReadinessChecker) EventsReceiver(event health.ReadinessProbeEvent) {
 	switch event.(type) {
 	case *RuleLoadedEvent:
 		r.hasFirstRuleLoad = true
 	}
+}
+
+func (r *RuleLoadedEvent) ReadinessProbeListenerID() string {
+	return probeName
 }

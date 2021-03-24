@@ -10,8 +10,10 @@ import (
 func TestReadinessHealthChecker(t *testing.T) {
 	t.Run("rule readiness probe", func(t *testing.T) {
 		ruleReadinessProbe := NewReadinessHealthChecker()
+		ruleLoadedEvent := RuleLoadedEvent{}
 
-		assert.Equal(t, ruleReadinessProbe.Name(), probeName)
+		assert.Equal(t, ruleReadinessProbe.ID(), probeName)
+		assert.Equal(t, ruleLoadedEvent.ReadinessProbeListenerID(), probeName)
 
 		assert.True(t, errors.Is(ruleReadinessProbe.Validate(), ErrRuleNotYetLoaded))
 
