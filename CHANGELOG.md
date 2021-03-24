@@ -4,52 +4,53 @@
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 **Table of Contents**
 
-- [Unreleased (2021-03-23)](#unreleased-2021-03-23)
+- [Unreleased (2021-03-24)](#unreleased-2021-03-24)
+    - [Features](#features)
   - [0.38.9-beta.1 (2021-03-17)](#0389-beta1-2021-03-17)
     - [Bug Fixes](#bug-fixes)
-    - [Features](#features)
+    - [Features](#features-1)
     - [Unclassified](#unclassified)
   - [0.38.6-beta.1 (2021-01-27)](#0386-beta1-2021-01-27)
     - [Documentation](#documentation)
-    - [Features](#features-1)
+    - [Features](#features-2)
   - [0.38.5-beta.1 (2020-12-10)](#0385-beta1-2020-12-10)
     - [Bug Fixes](#bug-fixes-1)
     - [Documentation](#documentation-1)
-    - [Features](#features-2)
+    - [Features](#features-3)
     - [Unclassified](#unclassified-1)
   - [0.38.4-beta.1 (2020-09-28)](#0384-beta1-2020-09-28)
     - [Bug Fixes](#bug-fixes-2)
     - [Documentation](#documentation-2)
-    - [Features](#features-3)
+    - [Features](#features-4)
     - [Unclassified](#unclassified-2)
   - [0.38.3-beta.1 (2020-07-29)](#0383-beta1-2020-07-29)
     - [Bug Fixes](#bug-fixes-3)
     - [Documentation](#documentation-3)
-    - [Features](#features-4)
+    - [Features](#features-5)
   - [0.38.2-beta.1 (2020-05-25)](#0382-beta1-2020-05-25)
     - [Bug Fixes](#bug-fixes-4)
     - [Documentation](#documentation-4)
-    - [Features](#features-5)
+    - [Features](#features-6)
   - [0.38.1-beta.1 (2020-05-08)](#0381-beta1-2020-05-08)
     - [Bug Fixes](#bug-fixes-5)
 - [0.38.0-beta.2 (2020-05-07)](#0380-beta2-2020-05-07)
     - [Bug Fixes](#bug-fixes-6)
     - [Code Refactoring](#code-refactoring)
     - [Documentation](#documentation-5)
-    - [Features](#features-6)
+    - [Features](#features-7)
   - [0.37.1-beta.1 (2020-04-03)](#0371-beta1-2020-04-03)
     - [Documentation](#documentation-6)
 - [0.37.0-beta.1 (2020-04-02)](#0370-beta1-2020-04-02)
     - [Bug Fixes](#bug-fixes-7)
     - [Documentation](#documentation-7)
-    - [Features](#features-7)
+    - [Features](#features-8)
     - [BREAKING CHANGES](#breaking-changes)
 - [0.36.0-beta.4 (2020-02-14)](#0360-beta4-2020-02-14)
     - [Bug Fixes](#bug-fixes-8)
     - [Documentation](#documentation-8)
 - [0.36.0-beta.1 (2020-02-05)](#0360-beta1-2020-02-05)
     - [Documentation](#documentation-9)
-    - [Features](#features-8)
+    - [Features](#features-9)
     - [Unclassified](#unclassified-3)
   - [0.35.5-beta.2 (2020-01-31)](#0355-beta2-2020-01-31)
     - [Unclassified](#unclassified-4)
@@ -191,9 +192,13 @@
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-# Unreleased (2021-03-23)
+# [Unreleased](https://github.com/ory/oathkeeper/compare/v0.38.9-beta.1...e15a7a57846d1c28f7b7ed7b824e6fc318f9344d) (2021-03-24)
 
-No significant changes have been made for this release.
+
+### Features
+
+* Add http method into session.MatchContext ([#676](https://github.com/ory/oathkeeper/issues/676)) ([e15a7a5](https://github.com/ory/oathkeeper/commit/e15a7a57846d1c28f7b7ed7b824e6fc318f9344d)), closes [#625](https://github.com/ory/oathkeeper/issues/625)
+
 
 
 ## [0.38.9-beta.1](https://github.com/ory/oathkeeper/compare/v0.38.6-beta.1...v0.38.9-beta.1) (2021-03-17)
