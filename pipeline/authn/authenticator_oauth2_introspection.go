@@ -19,10 +19,12 @@ import (
 
 	"github.com/ory/go-convenience/stringslice"
 	"github.com/ory/x/httpx"
+	"github.com/ory/x/logrusx"
 
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/helper"
 	"github.com/ory/oathkeeper/pipeline"
+	"github.com/ory/oathkeeper/x"
 )
 
 type AuthenticatorOAuth2IntrospectionConfiguration struct {
@@ -54,6 +56,7 @@ type AuthenticatorOAuth2IntrospectionRetryConfiguration struct {
 type cacheConfig struct {
 	Enabled bool   `json:"enabled"`
 	TTL     string `json:"ttl"`
+	MaxCost int    `json:"max_cost"`
 }
 
 type AuthenticatorOAuth2Introspection struct {
@@ -63,19 +66,12 @@ type AuthenticatorOAuth2Introspection struct {
 
 	tokenCache *ristretto.Cache
 	cacheTTL   *time.Duration
+	logger     *logrusx.Logger
 }
 
 func NewAuthenticatorOAuth2Introspection(c configuration.Provider) *AuthenticatorOAuth2Introspection {
 	var rt http.RoundTripper
-	cache, _ := ristretto.NewCache(&ristretto.Config{
-		// This will hold about 1000 unique mutation responses.
-		NumCounters: 10000,
-		// Allocate a max of 32MB
-		MaxCost: 1 << 25,
-		// This is a best-practice value.
-		BufferItems: 64,
-	})
-	return &AuthenticatorOAuth2Introspection{c: c, client: httpx.NewResilientClientLatencyToleranceSmall(rt), tokenCache: cache}
+	return &AuthenticatorOAuth2Introspection{c: c, client: httpx.NewResilientClientLatencyToleranceSmall(rt), logger: logrusx.New("ORY Oathkeeper", x.Version)}
 }
 
 func (a *AuthenticatorOAuth2Introspection) GetID() string {
@@ -122,9 +118,9 @@ func (a *AuthenticatorOAuth2Introspection) tokenToCache(config *AuthenticatorOAu
 	}
 
 	if a.cacheTTL != nil {
-		a.tokenCache.SetWithTTL(token, i, 0, *a.cacheTTL)
+		a.tokenCache.SetWithTTL(token, i, 1, *a.cacheTTL)
 	} else {
-		a.tokenCache.Set(token, i, 0)
+		a.tokenCache.Set(token, i, 1)
 	}
 }
 
@@ -302,6 +298,20 @@ func (a *AuthenticatorOAuth2Introspection) Config(config json.RawMessage) (*Auth
 			return nil, err
 		}
 		a.cacheTTL = &cacheTTL
+	}
+
+	if a.tokenCache == nil {
+		a.logger.Debugf("Creating cache with max cost: %d", c.Cache.MaxCost)
+		cache, _ := ristretto.NewCache(&ristretto.Config{
+			// This will hold about 1000 unique mutation responses.
+			NumCounters: 10000,
+			// Allocate a max
+			MaxCost: int64(c.Cache.MaxCost),
+			// This is a best-practice value.
+			BufferItems: 64,
+		})
+
+		a.tokenCache = cache
 	}
 
 	return &c, nil

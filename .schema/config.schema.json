@@ -852,6 +852,12 @@
               "examples": [
                 "5s"
               ]
+            },
+            "max_cost": {
+              "type": "integer",
+              "default": 1000,
+              "title": "Max Cost",
+              "description": "Max number of tokens to cache."
             }
           }
         }
