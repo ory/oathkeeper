@@ -2,10 +2,11 @@ package authn
 
 import (
 	"encoding/json"
-	"net/http"
-
+	"fmt"
 	"github.com/form3tech-oss/jwt-go"
 	"github.com/pkg/errors"
+	"net/http"
+	"strings"
 
 	"github.com/ory/go-convenience/jwtx"
 	"github.com/ory/herodot"
@@ -96,7 +97,7 @@ func (a *AuthenticatorJWT) Authenticate(r *http.Request, session *Authentication
 		ScopeStrategy: a.c.ToScopeStrategy(cf.ScopeStrategy, "authenticators.jwt.Config.scope_strategy"),
 	})
 	if err != nil {
-		return helper.ErrUnauthorized.WithReason(err.Error()).WithTrace(err)
+		return a.tryEnrichResultErr(token, helper.ErrUnauthorized.WithReason(err.Error()).WithTrace(err))
 	}
 
 	claims, ok := pt.Claims.(jwt.MapClaims)
@@ -108,4 +109,29 @@ func (a *AuthenticatorJWT) Authenticate(r *http.Request, session *Authentication
 	session.Extra = claims
 
 	return nil
+}
+
+func (a *AuthenticatorJWT) tryEnrichResultErr(token string, err *herodot.DefaultError) *herodot.DefaultError {
+	t, _ := jwt.ParseWithClaims(token, jwt.MapClaims{}, nil)
+	if t == nil {
+		return err
+	}
+	claims, ok := t.Claims.(jwt.MapClaims)
+	if !ok {
+		return err
+	}
+	var claimKeyPairs []string
+	for k, v := range claims {
+		// print just root content of the JWT, skip nested objects
+		if _, ok := v.(map[string]interface{}); ok {
+			continue
+		}
+		if floatVal, ok := v.(float64); ok && v == float64(int64(floatVal)) {
+			// JWT JSON decode deserializes numbers as float64
+			claimKeyPairs = append(claimKeyPairs, fmt.Sprintf("%s=%v", k, int64(floatVal)))
+		} else {
+			claimKeyPairs = append(claimKeyPairs, fmt.Sprintf("%s=%v", k, v))
+		}
+	}
+	return err.WithDetail("jwt_claims", fmt.Sprintf("%+v", strings.Join(claimKeyPairs, ", ")))
 }
