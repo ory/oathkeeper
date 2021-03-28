@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"sort"
 	"strings"
 
 	"github.com/form3tech-oss/jwt-go"
@@ -133,5 +134,6 @@ func (a *AuthenticatorJWT) tryEnrichResultErr(token string, err *herodot.Default
 			claimKeyPairs = append(claimKeyPairs, fmt.Sprintf("%s=%v", k, v))
 		}
 	}
+	sort.Strings(claimKeyPairs)
 	return err.WithDetail("jwt_claims", fmt.Sprintf("%+v", strings.Join(claimKeyPairs, ", ")))
 }
