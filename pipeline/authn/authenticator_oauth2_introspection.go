@@ -24,7 +24,6 @@ import (
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/helper"
 	"github.com/ory/oathkeeper/pipeline"
-	"github.com/ory/oathkeeper/x"
 )
 
 type AuthenticatorOAuth2IntrospectionConfiguration struct {
@@ -69,9 +68,9 @@ type AuthenticatorOAuth2Introspection struct {
 	logger     *logrusx.Logger
 }
 
-func NewAuthenticatorOAuth2Introspection(c configuration.Provider) *AuthenticatorOAuth2Introspection {
+func NewAuthenticatorOAuth2Introspection(c configuration.Provider, logger logrusx.Logger) *AuthenticatorOAuth2Introspection {
 	var rt http.RoundTripper
-	return &AuthenticatorOAuth2Introspection{c: c, client: httpx.NewResilientClientLatencyToleranceSmall(rt), logger: logrusx.New("ORY Oathkeeper", x.Version)}
+	return &AuthenticatorOAuth2Introspection{c: c, client: httpx.NewResilientClientLatencyToleranceSmall(rt), logger: &logger}
 }
 
 func (a *AuthenticatorOAuth2Introspection) GetID() string {

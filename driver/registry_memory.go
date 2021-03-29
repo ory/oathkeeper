@@ -352,7 +352,7 @@ func (r *RegistryMemory) prepareAuthn() {
 			authn.NewAuthenticatorJWT(r.c, r),
 			authn.NewAuthenticatorNoOp(r.c),
 			authn.NewAuthenticatorOAuth2ClientCredentials(r.c),
-			authn.NewAuthenticatorOAuth2Introspection(r.c),
+			authn.NewAuthenticatorOAuth2Introspection(r.c, *r.Logger()),
 			authn.NewAuthenticatorUnauthorized(r.c),
 		}
 
