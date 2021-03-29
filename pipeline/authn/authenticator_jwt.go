@@ -2,10 +2,7 @@ package authn
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
-	"sort"
-	"strings"
 
 	"github.com/form3tech-oss/jwt-go"
 	"github.com/ory/go-convenience/jwtx"
@@ -121,19 +118,9 @@ func (a *AuthenticatorJWT) tryEnrichResultErr(token string, err *herodot.Default
 	if !ok {
 		return err
 	}
-	var claimKeyPairs []string
-	for k, v := range claims {
-		// print just root content of the JWT, skip nested objects
-		if _, ok := v.(map[string]interface{}); ok {
-			continue
-		}
-		if floatVal, ok := v.(float64); ok && v == float64(int64(floatVal)) {
-			// JWT JSON decode deserializes numbers as float64
-			claimKeyPairs = append(claimKeyPairs, fmt.Sprintf("%s=%v", k, int64(floatVal)))
-		} else {
-			claimKeyPairs = append(claimKeyPairs, fmt.Sprintf("%s=%v", k, v))
-		}
+	jsonVal, err2 := json.Marshal(claims)
+	if err2 != nil {
+		return err
 	}
-	sort.Strings(claimKeyPairs)
-	return err.WithDetail("jwt_claims", fmt.Sprintf("%+v", strings.Join(claimKeyPairs, ", ")))
+	return err.WithDetail("jwt_claims", string(jsonVal))
 }

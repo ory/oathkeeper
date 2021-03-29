@@ -327,7 +327,7 @@ func TestAuthenticatorJWT(t *testing.T) {
 				extraErrAssert: func(err error) {
 					defaultError := err.(*herodot.DefaultError)
 					require.Error(t, defaultError)
-					require.Equal(t, fmt.Sprintf("exp=%d, scope=[scope-1 scope-2], sub=sub", now.Add(time.Hour).Unix()), defaultError.DetailsField["jwt_claims"])
+					require.Equal(t, fmt.Sprintf("{\"exp\":%v,\"realm_access\":{\"roles\":[\"role-1\",\"role-2\"]},\"scope\":[\"scope-1\",\"scope-2\"],\"sub\":\"sub\"}", now.Add(time.Hour).Unix()), defaultError.DetailsField["jwt_claims"])
 				},
 			},
 		} {
