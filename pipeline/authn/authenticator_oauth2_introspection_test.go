@@ -474,6 +474,75 @@ func TestAuthenticatorOAuth2Introspection(t *testing.T) {
 				},
 				expectErr: false,
 			},
+			{
+				d:      "should pass because audience and scopes match configuration",
+				r:      &http.Request{Header: http.Header{"Authorization": {"bearer token"}}},
+				config: []byte(`{ "pre_authorization":{"client_id":"some_id","client_secret":"some_secret","enabled":true,"scope":["foo","bar"]} }`),
+				setup: func(t *testing.T, m *httprouter.Router) {
+					m.POST("/oauth2/token", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+						require.NoError(t, r.ParseForm())
+						require.Equal(t, "", r.Form.Get("audience"))
+						require.Equal(t, "foo bar", r.Form.Get("scope"))
+						w.Header().Set("Content-type", "application/json; charset=us-ascii")
+						require.NoError(t, json.NewEncoder(w).Encode(&map[string]interface{}{"access_token": "foo-token"}))
+					})
+					m.POST("/oauth2/introspect", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+						require.NoError(t, r.ParseForm())
+						require.Equal(t, "token", r.Form.Get("token"))
+						require.Equal(t, "Bearer foo-token", r.Header.Get("authorization"))
+						require.NoError(t, json.NewEncoder(w).Encode(&AuthenticatorOAuth2IntrospectionResult{
+							Active: true,
+						}))
+					})
+				},
+				expectErr: false,
+			},
+			{
+				d:      "should pass because audience and scopes match configuration",
+				r:      &http.Request{Header: http.Header{"Authorization": {"bearer token"}}},
+				config: []byte(`{ "pre_authorization":{"client_id":"some_id","client_secret":"some_secret","enabled":true,"scope":["foo","bar"]} }`),
+				setup: func(t *testing.T, m *httprouter.Router) {
+					m.POST("/oauth2/token", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+						require.NoError(t, r.ParseForm())
+						require.Equal(t, "", r.Form.Get("audience"))
+						require.Equal(t, "foo bar", r.Form.Get("scope"))
+						w.Header().Set("Content-type", "application/json; charset=us-ascii")
+						require.NoError(t, json.NewEncoder(w).Encode(&map[string]interface{}{"access_token": "foo-token"}))
+					})
+					m.POST("/oauth2/introspect", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+						require.NoError(t, r.ParseForm())
+						require.Equal(t, "token", r.Form.Get("token"))
+						require.Equal(t, "Bearer foo-token", r.Header.Get("authorization"))
+						require.NoError(t, json.NewEncoder(w).Encode(&AuthenticatorOAuth2IntrospectionResult{
+							Active: true,
+						}))
+					})
+				},
+				expectErr: false,
+			},
+			{
+				d:      "should pass because audience and scopes should not be requested",
+				r:      &http.Request{Header: http.Header{"Authorization": {"bearer token"}}},
+				config: []byte(`{ "pre_authorization":{"client_id":"some_id","client_secret":"some_secret","enabled":true} }`),
+				setup: func(t *testing.T, m *httprouter.Router) {
+					m.POST("/oauth2/token", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+						require.NoError(t, r.ParseForm())
+						require.Equal(t, "", r.Form.Get("audience"))
+						require.Equal(t, "", r.Form.Get("scope"))
+						w.Header().Set("Content-type", "application/json; charset=us-ascii")
+						require.NoError(t, json.NewEncoder(w).Encode(&map[string]interface{}{"access_token": "foo-token"}))
+					})
+					m.POST("/oauth2/introspect", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+						require.NoError(t, r.ParseForm())
+						require.Equal(t, "token", r.Form.Get("token"))
+						require.Equal(t, "Bearer foo-token", r.Header.Get("authorization"))
+						require.NoError(t, json.NewEncoder(w).Encode(&AuthenticatorOAuth2IntrospectionResult{
+							Active: true,
+						}))
+					})
+				},
+				expectErr: false,
+			},
 		} {
 			t.Run(fmt.Sprintf("case=%d/description=%s", k, tc.d), func(t *testing.T) {
 				router := httprouter.New()
@@ -484,6 +553,8 @@ func TestAuthenticatorOAuth2Introspection(t *testing.T) {
 				defer ts.Close()
 
 				tc.config, _ = sjson.SetBytes(tc.config, "introspection_url", ts.URL+"/oauth2/introspect")
+				tc.config, _ = sjson.SetBytes(tc.config, "pre_authorization.token_url", ts.URL+"/oauth2/token")
+
 				sess := new(AuthenticationSession)
 				err := a.Authenticate(tc.r, sess, tc.config, nil)
 				if tc.expectErr {
