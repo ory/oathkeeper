@@ -30,7 +30,8 @@ repositories:
 - [Ruby](https://rubygems.org/gems/ory-oathkeeper-client)
 - [Rust](https://crates.io/crates/ory-oathkeeper-client)
 
-Take a look at the source: [Generated SDKs for Ory Oathkeeper](https://github.com/ory/sdk/tree/master/clients/oathkeeper/)
+Take a look at the source:
+[Generated SDKs for Ory Oathkeeper](https://github.com/ory/sdk/tree/master/clients/oathkeeper/)
 
 Missing your programming language?
 [Create an issue](https://github.com/ory/oathkeeper/issues) and help us build,
