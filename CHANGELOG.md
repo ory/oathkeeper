@@ -4,7 +4,7 @@
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 **Table of Contents**
 
-- [Unreleased (2021-03-30)](#unreleased-2021-03-30)
+- [Unreleased (2021-04-04)](#unreleased-2021-04-04)
     - [Documentation](#documentation)
     - [Features](#features)
   - [0.38.9-beta.1 (2021-03-17)](#0389-beta1-2021-03-17)
@@ -202,7 +202,7 @@
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-# [Unreleased](https://github.com/ory/oathkeeper/compare/v0.38.9-beta.1...05ae9259414882015f30cc8d5c01e64afb65afbc) (2021-03-30)
+# [Unreleased](https://github.com/ory/oathkeeper/compare/v0.38.9-beta.1...2405810a839b9d3015655ced492097d0f130a06f) (2021-04-04)
 
 
 ### Documentation
@@ -217,6 +217,10 @@
 ### Features
 
 * Add http method into session.MatchContext ([#676](https://github.com/ory/oathkeeper/issues/676)) ([e15a7a5](https://github.com/ory/oathkeeper/commit/e15a7a57846d1c28f7b7ed7b824e6fc318f9344d)), closes [#625](https://github.com/ory/oathkeeper/issues/625)
+* Add support for requesting an audience to the OAuth2 Introspection pr… ([#678](https://github.com/ory/oathkeeper/issues/678)) ([2405810](https://github.com/ory/oathkeeper/commit/2405810a839b9d3015655ced492097d0f130a06f)), closes [#677](https://github.com/ory/oathkeeper/issues/677)
+* Additional JWT auth debug information ([#681](https://github.com/ory/oathkeeper/issues/681)) ([d08ab50](https://github.com/ory/oathkeeper/commit/d08ab5034b80736701fb38ee1e55d12c63fd06b2)), closes [#668](https://github.com/ory/oathkeeper/issues/668):
+
+    > JWT Claims added to error details field. 
 
 
 
