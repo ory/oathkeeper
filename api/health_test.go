@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -16,6 +17,10 @@ import (
 func TestHealth(t *testing.T) {
 	conf := internal.NewConfigurationWithDefaults()
 	r := internal.NewRegistry(conf)
+	r.Init()
+
+	// Waiting for rule load and health event propagation
+	time.Sleep(100 * time.Millisecond)
 
 	router := x.NewAPIRouter()
 	r.HealthHandler().SetRoutes(router.Router, true)
@@ -34,10 +39,12 @@ func TestHealth(t *testing.T) {
 	require.NoError(t, json.NewDecoder(res.Body).Decode(&result))
 	assert.Equal(t, "ok", result.Status)
 
+	result.Status = ""
+
 	res, err = server.Client().Get(server.URL + "/health/ready")
 	require.NoError(t, err)
 	defer res.Body.Close()
-	require.Equal(t, http.StatusServiceUnavailable, res.StatusCode)
+	require.Equal(t, http.StatusOK, res.StatusCode)
 	require.NoError(t, json.NewDecoder(res.Body).Decode(&result))
 	assert.Equal(t, "ok", result.Status)
 }

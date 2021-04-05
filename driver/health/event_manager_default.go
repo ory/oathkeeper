@@ -42,14 +42,16 @@ func (h *DefaultHealthEventManager) Dispatch(event ReadinessProbeEvent) {
 func (h *DefaultHealthEventManager) Watch(ctx context.Context) {
 	go func() {
 		for {
-			var evt ReadinessProbeEvent
 			select {
-			case evt = <-h.evtChan:
 			case <-ctx.Done():
 				return
-			}
-			if listener, ok := h.listenerEventTypeCache[evt.ReadinessProbeListenerID()]; ok {
-				listener.EventsReceiver(evt)
+			case evt, ok := <-h.evtChan:
+				if !ok {
+					return
+				}
+				if listener, ok := h.listenerEventTypeCache[evt.ReadinessProbeListenerID()]; ok {
+					listener.EventsReceiver(evt)
+				}
 			}
 		}
 	}()
