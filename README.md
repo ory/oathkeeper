@@ -45,14 +45,13 @@ documentation and upgrade instructions.
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
-
 - [Installation](#installation)
 - [Who's using it?](#whos-using-it)
 - [Ecosystem](#ecosystem)
-  - [ORY Security Console: Administrative User Interface](#ory-security-console-administrative-user-interface)
+  - [ORY Kratos: Identity and User Infrastructure and Management](#ory-kratos-identity-and-user-infrastructure-and-management)
   - [ORY Hydra: OAuth2 & OpenID Connect Server](#ory-hydra-oauth2--openid-connect-server)
+  - [ORY Oathkeeper: Identity & Access Proxy](#ory-oathkeeper-identity--access-proxy)
   - [ORY Keto: Access Control Policies as a Server](#ory-keto-access-control-policies-as-a-server)
-  - [Examples](#examples)
 - [Security](#security)
   - [Disclosing vulnerabilities](#disclosing-vulnerabilities)
 - [Telemetry](#telemetry)
@@ -62,8 +61,6 @@ documentation and upgrade instructions.
   - [Upgrading and Changelog](#upgrading-and-changelog)
   - [Command line documentation](#command-line-documentation)
   - [Develop](#develop)
-- [Backers](#backers)
-- [Sponsors](#sponsors)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -202,22 +199,6 @@ TheCrealm.
 
 <!--END ADOPTERS-->
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 ## Ecosystem
 
 <!--BEGIN ECOSYSTEM-->
@@ -270,21 +251,6 @@ to perform a certain action on a resource.
 
 <!--END ECOSYSTEM-->
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 ## Security
 
 ### Disclosing vulnerabilities
@@ -296,15 +262,13 @@ publicly on the forums, the chat, or GitHub and send us an email to
 ## Telemetry
 
 Our services collect summarized, anonymized data which can optionally be turned
-off. Click [here](https://www.ory.sh/docs/ecosystem/sqa) to learn
-more.
+off. Click [here](https://www.ory.sh/docs/ecosystem/sqa) to learn more.
 
 ## Documentation
 
 ### Guide
 
-The Guide is available
-[here](https://www.ory.sh/oathkeeper/docs/).
+The Guide is available [here](https://www.ory.sh/oathkeeper/docs/).
 
 ### HTTP API documentation
 
@@ -332,4 +296,3 @@ $ cd $GOPATH/src/github.com/ory/oathkeeper
 $ export GO111MODULE=on
 $ go test ./...
 ```
-
