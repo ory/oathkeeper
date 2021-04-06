@@ -14,7 +14,7 @@ type (
 	RuleLoadedEvent struct{}
 )
 
-const probeName = "rule-first-load"
+const ProbeName = "rule-first-load"
 
 var ErrRuleNotYetLoaded = errors.New("rules have not been loaded yet")
 
@@ -25,7 +25,7 @@ func NewReadinessHealthChecker() *RuleReadinessChecker {
 }
 
 func (r *RuleReadinessChecker) ID() string {
-	return probeName
+	return ProbeName
 }
 
 func (r *RuleReadinessChecker) Validate() error {
@@ -47,5 +47,5 @@ func (r *RuleReadinessChecker) EventsReceiver(event health.ReadinessProbeEvent) 
 }
 
 func (r *RuleLoadedEvent) ReadinessProbeListenerID() string {
-	return probeName
+	return ProbeName
 }

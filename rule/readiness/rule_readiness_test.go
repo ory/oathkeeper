@@ -12,8 +12,8 @@ func TestReadinessHealthChecker(t *testing.T) {
 		ruleReadinessProbe := NewReadinessHealthChecker()
 		ruleLoadedEvent := RuleLoadedEvent{}
 
-		assert.Equal(t, ruleReadinessProbe.ID(), probeName)
-		assert.Equal(t, ruleLoadedEvent.ReadinessProbeListenerID(), probeName)
+		assert.Equal(t, ruleReadinessProbe.ID(), ProbeName)
+		assert.Equal(t, ruleLoadedEvent.ReadinessProbeListenerID(), ProbeName)
 
 		assert.True(t, errors.Is(ruleReadinessProbe.Validate(), ErrRuleNotYetLoaded))
 
