@@ -3,11 +3,12 @@ package driver
 import (
 	"github.com/ory/x/logrusx"
 
-	"github.com/ory/oathkeeper/pipeline/errors"
-	"github.com/ory/oathkeeper/proxy"
-
 	"github.com/ory/x/healthx"
 	"github.com/ory/x/tracing"
+
+	"github.com/ory/oathkeeper/driver/health"
+	"github.com/ory/oathkeeper/pipeline/errors"
+	"github.com/ory/oathkeeper/proxy"
 
 	"github.com/ory/oathkeeper/api"
 	"github.com/ory/oathkeeper/credentials"
@@ -30,6 +31,7 @@ type Registry interface {
 	BuildHash() string
 
 	ProxyRequestHandler() *proxy.RequestHandler
+	HealthEventManager() health.EventManager
 	HealthHandler() *healthx.Handler
 	RuleHandler() *api.RuleHandler
 	DecisionHandler() *api.DecisionHandler

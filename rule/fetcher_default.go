@@ -16,12 +16,12 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/ory/oathkeeper/internal/cloudstorage"
-
 	"github.com/fsnotify/fsnotify"
 
 	"github.com/ory/x/stringslice"
 	"github.com/ory/x/urlx"
+
+	"github.com/ory/oathkeeper/internal/cloudstorage"
 
 	"github.com/ory/viper"
 	"github.com/ory/x/httpx"
