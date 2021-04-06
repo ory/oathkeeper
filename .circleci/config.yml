@@ -9,20 +9,22 @@ orbs:
   docs: ory/docs@0.0.11
   golangci: ory/golangci@0.0.18
   go: circleci/go@1.5.0
+  prettier: ory/prettier@0.0.11
 
 jobs:
   test:
     docker:
-      - image: circleci/golang:1.16
+      - image: cimg/go:1.16-node
         environment:
         - GO111MODULE=on
-    working_directory: /go/src/github.com/ory/oathkeeper
     steps:
       - checkout
       - setup_remote_docker
       - go/load-cache
-      - go/mod-download
+      - run: go mod tidy
       - go/save-cache
+      - prettier/install
+      - prettier/check
       - goreleaser/install
       - goreleaser/check
       - golangci/install
