@@ -14,7 +14,7 @@ orbs:
 jobs:
   test:
     docker:
-      - image: circleci/golang:1.16
+      - image: cimg/go:1.16-node
         environment:
         - GO111MODULE=on
     working_directory: /go/src/github.com/ory/oathkeeper
