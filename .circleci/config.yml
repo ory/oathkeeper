@@ -17,7 +17,6 @@ jobs:
       - image: cimg/go:1.16-node
         environment:
         - GO111MODULE=on
-    working_directory: /go/src/github.com/ory/oathkeeper
     steps:
       - checkout
       - setup_remote_docker
