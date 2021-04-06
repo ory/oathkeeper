@@ -228,7 +228,7 @@
           "application/json"
         ],
         "tags": [
-          "health"
+          "api"
         ],
         "summary": "Check alive status",
         "operationId": "isInstanceAlive",
@@ -280,7 +280,7 @@
           "application/json"
         ],
         "tags": [
-          "health"
+          "api"
         ],
         "summary": "Check readiness status",
         "operationId": "isInstanceReady",
@@ -483,7 +483,7 @@
           "application/json"
         ],
         "tags": [
-          "version"
+          "api"
         ],
         "summary": "Get service version",
         "operationId": "getVersion",
