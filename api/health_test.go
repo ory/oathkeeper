@@ -17,7 +17,7 @@ import (
 
 type statusResult struct {
 	// Status should contains "ok" in case of success
-	Status string            `json:"status"`
+	Status string `json:"status"`
 	// Otherwise a map of error messages is returned
 	Errors map[string]string `json:"errors"`
 }
