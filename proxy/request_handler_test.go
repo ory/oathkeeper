@@ -44,7 +44,7 @@ import (
 )
 
 func newTestRequest(u string) *http.Request {
-	return &http.Request{URL: x.ParseURLOrPanic(u)}
+	return &http.Request{URL: x.ParseURLOrPanic(u), Method: "GET"}
 }
 
 func TestHandleError(t *testing.T) {
@@ -477,6 +477,7 @@ func TestInitializeSession(t *testing.T) {
 			expectContext: authn.MatchContext{
 				RegexpCaptureGroups: []string{},
 				URL:                 x.ParseURLOrPanic("http://localhost"),
+				Method:              "GET",
 			},
 		},
 		{
@@ -489,6 +490,7 @@ func TestInitializeSession(t *testing.T) {
 			expectContext: authn.MatchContext{
 				RegexpCaptureGroups: []string{"user"},
 				URL:                 x.ParseURLOrPanic("http://localhost/user"),
+				Method:              "GET",
 			},
 		},
 		{
@@ -501,6 +503,7 @@ func TestInitializeSession(t *testing.T) {
 			expectContext: authn.MatchContext{
 				RegexpCaptureGroups: []string{"user"},
 				URL:                 x.ParseURLOrPanic("http://localhost/user?param=test"),
+				Method:              "GET",
 			},
 		},
 		{
@@ -513,6 +516,7 @@ func TestInitializeSession(t *testing.T) {
 			expectContext: authn.MatchContext{
 				RegexpCaptureGroups: []string{"http", "user"},
 				URL:                 x.ParseURLOrPanic("http://localhost/user?param=test"),
+				Method:              "GET",
 			},
 		},
 		{
@@ -525,6 +529,7 @@ func TestInitializeSession(t *testing.T) {
 			expectContext: authn.MatchContext{
 				RegexpCaptureGroups: []string{},
 				URL:                 x.ParseURLOrPanic("http://localhost/user?param=test"),
+				Method:              "GET",
 			},
 		},
 	} {

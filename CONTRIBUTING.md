@@ -48,11 +48,10 @@ contributions, and don't want a wall of rules to get in the way of that.
 
 That said, if you want to ensure that a pull request is likely to be merged,
 talk to us! You can find out our thoughts and ensure that your contribution
-won't clash or be obviated by ORY
-Oathkeeper's normal direction. A great way to
+won't clash or be obviated by ORY Oathkeeper's normal direction. A great way to
 do this is via
-[ORY Oathkeeper Discussions](https://github.com/ory/oathkeeper/discussions)
-or the [ORY Chat](https://www.ory.sh/chat).
+[ORY Oathkeeper Discussions](https://github.com/ory/oathkeeper/discussions) or
+the [ORY Chat](https://www.ory.sh/chat).
 
 ## FAQ
 
@@ -70,8 +69,7 @@ or the [ORY Chat](https://www.ory.sh/chat).
   [How can I become a part of the community?](#communication)
 
 - I would like to know what I am agreeing to when I contribute to ORY
-  Oathkeeper.
-  Does ORY have
+  Oathkeeper. Does ORY have
   [a Contributors License Agreement?](https://cla-assistant.io/ory/oathkeeper)
 
 - I would like updates about new versions of ORY Oathkeeper.
@@ -113,8 +111,10 @@ a few things you can do to help out:
 We use [Slack](https://www.ory.sh/chat). You are welcome to drop in and ask
 questions, discuss bugs and feature requests, talk to other users of ORY, etc.
 
-Check out [ORY Oathkeeper Discussions](https://github.com/ory/oathkeeper/discussions). This is a great place for
-in-depth discussions and lots of code examples, logs and similar data.
+Check out
+[ORY Oathkeeper Discussions](https://github.com/ory/oathkeeper/discussions).
+This is a great place for in-depth discussions and lots of code examples, logs
+and similar data.
 
 You can also join our community hangout, if you want to speak to the ORY team
 directly or ask some questions. You can find more info on the hangouts in
@@ -161,8 +161,8 @@ should be merged by the submitter after review.
 
 Please provide documentation when changing, removing, or adding features.
 Documentation resides in the project's
-[docs](https://github.com/ory/oathkeeper/tree/master/docs) folder. Generate API and
-configuration reference documentation using `cd docs; npm run gen`.
+[docs](https://github.com/ory/oathkeeper/tree/master/docs) folder. Generate API
+and configuration reference documentation using `cd docs; npm run gen`.
 
 For further instructions please head over to
 [docs/README.md](https://github.com/ory/oathkeeper/blob/master/README.md).
@@ -247,8 +247,8 @@ community a safe place for you and we've got your back.
   marginalized groups.
 - Private harassment is also unacceptable. No matter who you are, if you feel
   you have been or are being harassed or made uncomfortable by a community
-  member, please contact one of the channel ops or a member of the ORY Oathkeeper
-  core team immediately.
+  member, please contact one of the channel ops or a member of the ORY
+  Oathkeeper core team immediately.
 - Likewise any spamming, trolling, flaming, baiting or other attention-stealing
   behaviour is not welcome.
 

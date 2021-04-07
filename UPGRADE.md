@@ -8,7 +8,6 @@ before finalizing the upgrade process.
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
-
 - [v0.37](#v0370)
 - [v0.36](#v0360)
 - [v0.35.0-beta.1](#v0350-beta1)
@@ -51,42 +50,65 @@ before finalizing the upgrade process.
 ## v0.37
 
 BREAKING CHANGES:
-- This patch allows using the regex capture groups from the URL matcher to be used in several places, including the ID Token generator and elsewhere. To get this working, existing `keto_engine_acp_ory` authorizers are no longer able to use regex substition in the form of `my:action:$1` but instead must use the new format which is `{{ printIndex .MatchContext.RegexpCaptureGroups 0}}` (notice that the index changed by *-1*). A rule migrator exists which makes old rules compatible with the new format, if a version string is given. More details on the rule migration can be found here: https://github.com/ory/oathkeeper/commit/fd16ceb230a1b14ebb01a147d2d70acce77f9fbd#diff-6177fb19f1b7d7bc392f5062b838df15
+
+- This patch allows using the regex capture groups from the URL matcher to be
+  used in several places, including the ID Token generator and elsewhere. To get
+  this working, existing `keto_engine_acp_ory` authorizers are no longer able to
+  use regex substition in the form of `my:action:$1` but instead must use the
+  new format which is `{{ printIndex .MatchContext.RegexpCaptureGroups 0}}`
+  (notice that the index changed by _-1_). A rule migrator exists which makes
+  old rules compatible with the new format, if a version string is given. More
+  details on the rule migration can be found here:
+  https://github.com/ory/oathkeeper/commit/fd16ceb230a1b14ebb01a147d2d70acce77f9fbd#diff-6177fb19f1b7d7bc392f5062b838df15
 
 ## v0.36
 
-The access rule matcher now supports the [Glob patterns](https://github.com/gobwas/glob)!
+The access rule matcher now supports the
+[Glob patterns](https://github.com/gobwas/glob)!
 
 ## v0.35.0-beta.1
 
-This release focuses on a rework of the SDK pipeline. First of all, we have introduced new SDKs for all popular programming
-languages and published them on their respective package repositories:
+This release focuses on a rework of the SDK pipeline. First of all, we have
+introduced new SDKs for all popular programming languages and published them on
+their respective package repositories:
 
 - [Python](https://pypi.org/project/ory-oathkeeper-client/)
 - [PHP](https://packagist.org/packages/ory/oathkeeper-client)
 - [Go](https://github.com/ory/oathkeeper-client-go)
-- [NodeJS](https://www.npmjs.com/package/@oryd/oathkeeper-client) (with TypeScript)
+- [NodeJS](https://www.npmjs.com/package/@oryd/oathkeeper-client) (with
+  TypeScript)
 - [Java](https://search.maven.org/artifact/sh.ory.oathkeeper/oathkeeper-client)
 - [Ruby](https://rubygems.org/gems/ory-oathkeeper-client)
 
-The SDKs hosted in this repository (under ./sdk/...) have been completely removed. Please use only the SDKs from the
-above sources from now on as it will also remove several issues that were caused by the previous SDK pipeline.
+The SDKs hosted in this repository (under ./sdk/...) have been completely
+removed. Please use only the SDKs from the above sources from now on as it will
+also remove several issues that were caused by the previous SDK pipeline.
 
 Unfortunately, there were breaking changes introduced by the new SDK generation:
 
-- Several structs and fields have been renamed in the Go SDK. However, nothing else changed so upgrading should be a matter of
-half an hour if you made extensive use of the SDK, or several minutes if just one or two methods are being used.
-- All other SDKs changed to `openapi-generator`, which is a better maintained generator that creates
-better code than the one previously used. This manifests in TypeScript definitions for the NodeJS SDK and
-several other goodies. We do not have a proper migration path for those, unfortunately.
+- Several structs and fields have been renamed in the Go SDK. However, nothing
+  else changed so upgrading should be a matter of half an hour if you made
+  extensive use of the SDK, or several minutes if just one or two methods are
+  being used.
+- All other SDKs changed to `openapi-generator`, which is a better maintained
+  generator that creates better code than the one previously used. This
+  manifests in TypeScript definitions for the NodeJS SDK and several other
+  goodies. We do not have a proper migration path for those, unfortunately.
 
-If you have issues with upgrading the SDK, please let us know in an issue on this repository!
+If you have issues with upgrading the SDK, please let us know in an issue on
+this repository!
 
 ## v0.34.0-beta.1+oryOS.14
 
-A new feature was introduced which allows you to handle errors in different ways (e.g. redirect to login, return JSON error, ...) depending on the error and HTTP request type. For more information, head over to: https://www.ory.sh/docs/next/oathkeeper/pipeline/error
+A new feature was introduced which allows you to handle errors in different ways
+(e.g. redirect to login, return JSON error, ...) depending on the error and HTTP
+request type. For more information, head over to:
+https://www.ory.sh/docs/next/oathkeeper/pipeline/error
 
-One backwards incompatible change has been made, as JSON errors returned by ORY Oathkeeper now include only minimal information about the error source. You can change this behavior by setting `verbose` to `true`, see: https://www.ory.sh/docs/next/oathkeeper/pipeline/error#json
+One backwards incompatible change has been made, as JSON errors returned by ORY
+Oathkeeper now include only minimal information about the error source. You can
+change this behavior by setting `verbose` to `true`, see:
+https://www.ory.sh/docs/next/oathkeeper/pipeline/error#json
 
 No other backwards incompatible changes have been made!
 
@@ -256,10 +278,11 @@ overview of the most important changes:
    API).
 1. ORY Oathkeeper can now be configured from a file and configuration keys where
    updated. Where appropriate, environment variables from previous versions
-   still work. Please check out [./docs/config.yml](internal/config/.oathkeeper.yaml) for a
-   fully annotated configuration file as several environment variables changed,
-   for example (not exclusive): `HTTPS_TLS_CERT_PATH`, `HTTPS_TLS_KEY_PATH`,
-   `HTTPS_TLS_CERT`, `HTTPS_TLS_KEY`.
+   still work. Please check out
+   [./docs/config.yml](internal/config/.oathkeeper.yaml) for a fully annotated
+   configuration file as several environment variables changed, for example (not
+   exclusive): `HTTPS_TLS_CERT_PATH`, `HTTPS_TLS_KEY_PATH`, `HTTPS_TLS_CERT`,
+   `HTTPS_TLS_KEY`.
 1. The Judge API (`/judge`) was renamed to Access Control Decision API
    (`/decisions`)
 1. The need for a database was completely removed. Also, ORY Oathkeeper no

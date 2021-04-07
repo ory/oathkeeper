@@ -5,6 +5,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/ory/oathkeeper/driver/health"
 	"github.com/ory/oathkeeper/pipeline"
 	pe "github.com/ory/oathkeeper/pipeline/errors"
 	"github.com/ory/oathkeeper/proxy"
@@ -26,6 +27,7 @@ import (
 	ep "github.com/ory/oathkeeper/pipeline/errors"
 	"github.com/ory/oathkeeper/pipeline/mutate"
 	"github.com/ory/oathkeeper/rule"
+	rulereadiness "github.com/ory/oathkeeper/rule/readiness"
 )
 
 var _ Registry = new(RegistryMemory)
@@ -61,6 +63,8 @@ type RegistryMemory struct {
 	mutators       map[string]mutate.Mutator
 	errors         map[string]ep.Handler
 
+	healthEventManager *health.DefaultHealthEventManager
+
 	ruleRepositoryLock sync.Mutex
 }
 
@@ -70,6 +74,7 @@ func (r *RegistryMemory) Init() {
 			r.Logger().WithError(err).Fatal("Access rule watcher terminated with an error.")
 		}
 	}()
+	r.HealthEventManager().Watch(context.Background())
 	_ = r.RuleRepository()
 }
 
@@ -138,9 +143,23 @@ func (r *RegistryMemory) CredentialHandler() *api.CredentialsHandler {
 	return r.ch
 }
 
+func (r *RegistryMemory) HealthEventManager() health.EventManager {
+	if r.healthEventManager == nil {
+		var err error
+		rulesReadinessChecker := rulereadiness.NewReadinessHealthChecker()
+		if r.healthEventManager, err = health.NewDefaultHealthEventManager(rulesReadinessChecker); err != nil {
+			r.logger.WithError(err).Fatal("unable to instantiate new health event manager")
+		}
+	}
+	return r.healthEventManager
+}
+
 func (r *RegistryMemory) HealthHandler() *healthx.Handler {
+	r.RLock()
+	defer r.RUnlock()
+
 	if r.healthxHandler == nil {
-		r.healthxHandler = healthx.NewHandler(r.Writer(), r.BuildVersion(), healthx.ReadyCheckers{})
+		r.healthxHandler = healthx.NewHandler(r.Writer(), r.BuildVersion(), r.HealthEventManager().HealthxReadyCheckers())
 	}
 	return r.healthxHandler
 }
@@ -154,7 +173,7 @@ func (r *RegistryMemory) RuleValidator() rule.Validator {
 
 func (r *RegistryMemory) RuleRepository() rule.Repository {
 	if r.ruleRepository == nil {
-		r.ruleRepository = rule.NewRepositoryMemory(r)
+		r.ruleRepository = rule.NewRepositoryMemory(r, r.HealthEventManager())
 	}
 	return r.ruleRepository
 }

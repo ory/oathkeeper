@@ -74,6 +74,7 @@ func TestAuthenticatorJWT(t *testing.T) {
 			expectExactErr error
 			expectCode     int
 			expectSess     *AuthenticationSession
+			extraErrAssert func(err error)
 		}{
 			{
 				d:         "should fail because no payloads",
@@ -308,6 +309,27 @@ func TestAuthenticatorJWT(t *testing.T) {
 				expectErr:  true,
 				expectCode: 401,
 			},
+			{
+				d: "failed JWT authorization results in error with jwt_claims in DetailsField",
+				r: &http.Request{Header: http.Header{"Authorization": []string{"bearer " + gen(keys[2], jwt.MapClaims{
+					"sub":   "sub",
+					"exp":   now.Add(time.Hour).Unix(),
+					"scope": []string{"scope-1", "scope-2"},
+					"realm_access": map[string][]string{
+						"roles": {
+							"role-1",
+							"role-2",
+						},
+					},
+				})}}},
+				config:    `{"required_scope": ["scope-1", "scope-2", "scope-3"]}`,
+				expectErr: true,
+				extraErrAssert: func(err error) {
+					defaultError := err.(*herodot.DefaultError)
+					require.Error(t, defaultError)
+					require.Equal(t, fmt.Sprintf("{\"exp\":%v,\"realm_access\":{\"roles\":[\"role-1\",\"role-2\"]},\"scope\":[\"scope-1\",\"scope-2\"],\"sub\":\"sub\"}", now.Add(time.Hour).Unix()), defaultError.DetailsField["jwt_claims"])
+				},
+			},
 		} {
 			t.Run(fmt.Sprintf("case=%d/description=%s", k, tc.d), func(t *testing.T) {
 				if tc.setup != nil {
@@ -324,6 +346,9 @@ func TestAuthenticatorJWT(t *testing.T) {
 					}
 					if tc.expectExactErr != nil {
 						assert.EqualError(t, err, tc.expectExactErr.Error())
+					}
+					if tc.extraErrAssert != nil {
+						tc.extraErrAssert(err)
 					}
 				} else {
 					require.NoError(t, err, "%#v", errors.Cause(err))

@@ -50,6 +50,7 @@ func TestCopy(t *testing.T) {
 		MatchContext: authn.MatchContext{
 			RegexpCaptureGroups: []string{"a", "b"},
 			URL:                 x.ParseURLOrPanic("https://foo/bar"),
+			Method:              "GET",
 		},
 	}
 
@@ -59,10 +60,12 @@ func TestCopy(t *testing.T) {
 	copied.Header.Add("bazbar", "bar")
 	copied.MatchContext.URL.Host = "asdf"
 	copied.MatchContext.RegexpCaptureGroups[0] = "b"
+	copied.MatchContext.Method = "PUT"
 
 	assert.NotEqual(original.Subject, copied.Subject)
 	assert.NotEqual(original.Extra, copied.Extra)
 	assert.NotEqual(original.Header, copied.Header)
 	assert.NotEqual(original.MatchContext.URL.Host, copied.MatchContext.URL.Host)
 	assert.NotEqual(original.MatchContext.RegexpCaptureGroups, copied.MatchContext.RegexpCaptureGroups)
+	assert.NotEqual(original.MatchContext.Method, copied.MatchContext.Method)
 }
