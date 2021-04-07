@@ -68,9 +68,9 @@ type AuthenticatorOAuth2Introspection struct {
 	logger     *logrusx.Logger
 }
 
-func NewAuthenticatorOAuth2Introspection(c configuration.Provider, logger logrusx.Logger) *AuthenticatorOAuth2Introspection {
+func NewAuthenticatorOAuth2Introspection(c configuration.Provider, logger *logrusx.Logger) *AuthenticatorOAuth2Introspection {
 	var rt http.RoundTripper
-	return &AuthenticatorOAuth2Introspection{c: c, client: httpx.NewResilientClientLatencyToleranceSmall(rt), logger: &logger}
+	return &AuthenticatorOAuth2Introspection{c: c, client: httpx.NewResilientClientLatencyToleranceSmall(rt), logger: logger}
 }
 
 func (a *AuthenticatorOAuth2Introspection) GetID() string {
