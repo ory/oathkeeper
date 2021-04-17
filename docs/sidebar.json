@@ -24,8 +24,7 @@
   },
   {
     "Guides": [
-      "configure-deploy",
-      "oauth2-token-introspection-hydra"
+      "configure-deploy"
     ]
   },
   {
