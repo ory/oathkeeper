@@ -866,7 +866,7 @@ errors:
 authorizers:
   ## Deny ##
   #
-  # The [`deny` authorizer](https://www.ory.sh/oathkeeper/docs/pipeline/authz#allow).
+  # The [`deny` authorizer](https://www.ory.sh/oathkeeper/docs/pipeline/authz#deny).
   #
   deny:
     ## Enabled ##
