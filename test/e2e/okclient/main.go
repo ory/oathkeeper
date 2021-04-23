@@ -9,9 +9,10 @@ import (
 	"os"
 	"time"
 
-	"github.com/dgrijalva/jwt-go"
+	"github.com/form3tech-oss/jwt-go"
 	"github.com/square/go-jose"
 
+	"github.com/ory/oathkeeper/x"
 	"github.com/ory/x/cmdx"
 	"github.com/ory/x/urlx"
 )
@@ -74,7 +75,7 @@ func main() {
 }
 
 func requestWithJWT(token string) (*http.Response, string) {
-	pu := urlx.ParseOrPanic(os.Getenv("OATHKEEPER_PROXY"))
+	pu := x.ParseURLOrPanic(os.Getenv("OATHKEEPER_PROXY"))
 	req, err := http.NewRequest("GET", urlx.AppendPaths(pu, "/jwt").String(), nil)
 	cmdx.Must(err, "%s", err)
 	req.Header.Set("Authorization", "Bearer "+token)
@@ -87,7 +88,7 @@ func requestWithJWT(token string) (*http.Response, string) {
 }
 
 func decisionWithJWT(token string) (*http.Response, string) {
-	pu := urlx.ParseOrPanic(os.Getenv("OATHKEEPER_API"))
+	pu := x.ParseURLOrPanic(os.Getenv("OATHKEEPER_API"))
 	req, err := http.NewRequest("GET", urlx.AppendPaths(pu, "decisions", "jwt").String(), nil)
 	cmdx.Must(err, "%s", err)
 	req.Header.Set("Authorization", "Bearer "+token)

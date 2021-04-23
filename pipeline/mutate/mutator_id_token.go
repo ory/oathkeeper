@@ -26,13 +26,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"net/url"
+	"sync"
 	"text/template"
 	"time"
 
 	"github.com/dgraph-io/ristretto"
 
-	"github.com/dgrijalva/jwt-go"
+	"github.com/form3tech-oss/jwt-go"
 
 	"github.com/pborman/uuid"
 	"github.com/pkg/errors"
@@ -42,6 +42,7 @@ import (
 	"github.com/ory/oathkeeper/pipeline"
 	"github.com/ory/oathkeeper/pipeline/authn"
 	"github.com/ory/oathkeeper/x"
+	"github.com/ory/x/urlx"
 )
 
 type MutatorIDTokenRegistry interface {
@@ -49,9 +50,10 @@ type MutatorIDTokenRegistry interface {
 }
 
 type MutatorIDToken struct {
-	c         configuration.Provider
-	r         MutatorIDTokenRegistry
-	templates *template.Template
+	c             configuration.Provider
+	r             MutatorIDTokenRegistry
+	templates     *template.Template
+	templatesLock sync.Mutex
 
 	tokenCache        *ristretto.Cache
 	tokenCacheEnabled bool
@@ -152,7 +154,9 @@ func (a *MutatorIDToken) Mutate(r *http.Request, session *authn.AuthenticationSe
 		t := a.templates.Lookup(c.ClaimsTemplateID())
 		if t == nil {
 			var err error
+			a.templatesLock.Lock()
 			t, err = a.templates.New(c.ClaimsTemplateID()).Parse(c.Claims)
+			a.templatesLock.Unlock()
 			if err != nil {
 				return errors.Wrapf(err, `error parsing claims template in rule "%s"`, rl.GetID())
 			}
@@ -183,7 +187,7 @@ func (a *MutatorIDToken) Mutate(r *http.Request, session *authn.AuthenticationSe
 	claims["nbf"] = now.Unix()
 	claims["sub"] = session.Subject
 
-	jwks, err := url.Parse(c.JWKSURL)
+	jwks, err := urlx.Parse(c.JWKSURL)
 	if err != nil {
 		return errors.WithStack(err)
 	}

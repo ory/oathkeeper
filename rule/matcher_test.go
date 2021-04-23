@@ -115,7 +115,7 @@ func TestMatcher(t *testing.T) {
 	}
 
 	for name, matcher := range map[string]m{
-		"memory": NewRepositoryMemory(new(mockRepositoryRegistry)),
+		"memory": NewRepositoryMemory(new(mockRepositoryRegistry), new(mockHealthEventManager)),
 	} {
 		t.Run(fmt.Sprintf("regexp matcher=%s", name), func(t *testing.T) {
 			t.Run("case=empty", func(t *testing.T) {
@@ -138,6 +138,11 @@ func TestMatcher(t *testing.T) {
 				got, err := matcher.Get(context.Background(), r.ID)
 				require.NoError(t, err)
 				assert.NotEmpty(t, got.matchingEngine.Checksum())
+			})
+
+			t.Run("case=nil url", func(t *testing.T) {
+				_, err := matcher.Match(context.Background(), "GET", nil)
+				require.Error(t, err)
 			})
 
 			require.NoError(t, matcher.Set(context.Background(), testRules[1:]))

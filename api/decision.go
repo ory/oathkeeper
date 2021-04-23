@@ -22,6 +22,7 @@ package api
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/ory/oathkeeper/pipeline/authn"
 	"github.com/ory/oathkeeper/x"
@@ -54,7 +55,7 @@ func (h *DecisionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request, next
 	if len(r.URL.Path) >= len(DecisionPath) && r.URL.Path[:len(DecisionPath)] == DecisionPath {
 		r.URL.Scheme = "http"
 		r.URL.Host = r.Host
-		if r.TLS != nil {
+		if r.TLS != nil || strings.EqualFold(r.Header.Get("X-Forwarded-Proto"), "https") {
 			r.URL.Scheme = "https"
 		}
 		r.URL.Path = r.URL.Path[len(DecisionPath):]
@@ -110,7 +111,7 @@ func (h *DecisionHandler) decisions(w http.ResponseWriter, r *http.Request) {
 		h.r.Logger().WithError(err).
 			WithFields(fields).
 			WithField("granted", false).
-			Warn("Access request denied")
+			Info("Access request denied")
 
 		h.r.ProxyRequestHandler().HandleError(w, r, rl, err)
 		return
@@ -123,7 +124,7 @@ func (h *DecisionHandler) decisions(w http.ResponseWriter, r *http.Request) {
 
 	for k := range s.Header {
 		// Avoid copying the original Content-Length header from the client
-		if k == "content-length" {
+		if strings.ToLower(k) == "content-length" {
 			continue
 		}
 

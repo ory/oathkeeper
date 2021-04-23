@@ -5,12 +5,15 @@ const YAML = require('yaml')
 const { pathOr } = require('ramda')
 const path = require('path')
 const fs = require('fs')
+const prettier = require('prettier')
+const prettierStyles = require('ory-prettier-styles')
 
 jsf.option({
   alwaysFakeOptionals: true,
   useExamplesValue: true,
   useDefaultValue: true,
-  minItems: 1
+  minItems: 1,
+  random: () => 0
 })
 
 if (process.argv.length !== 3 || process.argv[1] === 'help') {
@@ -47,6 +50,26 @@ const enhance = (schema, parents = []) => (item) => {
     comments.push(' Default value: ' + defaultValue, '')
   }
 
+  const enums = pathOr('', [...path, 'enum'], schema)
+  if (enums && Array.isArray(enums)) {
+    comments.push(
+      ' One of:',
+      ...YAML.stringify(enums)
+        .split('\n')
+        .map((i) => ` ${i}`)
+    ) // split always returns one empty object so no need for newline
+  }
+
+  const min = pathOr('', [...path, 'minimum'], schema)
+  if (min || min === 0) {
+    comments.push(` Minimum value: ${min}`, '')
+  }
+
+  const max = pathOr('', [...path, 'maximum'], schema)
+  if (max || max === 0) {
+    comments.push(` Maximum value: ${max}`, '')
+  }
+
   const examples = pathOr('', [...path, 'examples'], schema)
   if (examples) {
     comments.push(
@@ -67,7 +90,12 @@ const enhance = (schema, parents = []) => (item) => {
     })
   }
 
-  if (!hasChildren) {
+  const showEnvVarBlockForObject = pathOr(
+    '',
+    [...path, 'showEnvVarBlockForObject'],
+    schema
+  )
+  if (!hasChildren || showEnvVarBlockForObject) {
     const env = [...parents, key].map((i) => i.toUpperCase()).join('_')
     comments.push(
       ' Set this value using environment variables on',
@@ -77,6 +105,14 @@ const enhance = (schema, parents = []) => (item) => {
       `    > set ${env}=<value>`,
       ''
     )
+
+    // Show this if the config property is an object, to call out how to specify the env var
+    if (hasChildren) {
+      comments.push(
+        ' This can be set as an environment variable by supplying it as a JSON object.',
+        ''
+      )
+    }
   }
 
   item.commentBefore = comments.join('\n')
@@ -167,6 +203,11 @@ flag: \`${config.projectSlug} --config path/to/config.yaml\`.
 Config files can be formatted as JSON, YAML and TOML. Some configuration values support reloading without server restart.
 All configuration values can be set using environment variables, as documented below.
 
+This reference configuration documents all keys, also deprecated ones!
+It is a reference for all possible configuration values.
+
+If you are looking for an example configuration, it is better to try out the quickstart.
+
 To find out more about edge cases like setting string array values through environmental variables head to the
 [Configuring ORY services](https://www.ory.sh/docs/ecosystem/configuring) section.
 
@@ -177,7 +218,7 @@ ${out.yaml}
     return new Promise((resolve, reject) => {
       fs.writeFile(
         path.resolve(config.updateConfig.dst),
-        content,
+        prettier.format(content, { ...prettierStyles, parser: 'markdown' }),
         'utf8',
         (err) => {
           if (err) {

@@ -1,0 +1,35 @@
+{
+  "Introduction": [
+    "index",
+    "install",
+    "contributing"
+  ],
+  "Core Concepts": [
+    "api-access-rules",
+    {
+      "type": "category",
+      "label": "Handlers",
+      "items": [
+        "pipeline",
+        "pipeline/authn",
+        "pipeline/authz",
+        "pipeline/mutator",
+        "pipeline/error"
+      ]
+    }
+  ],
+  "Guides": [
+    "configure-deploy",
+    "oauth2-token-introspection-hydra"
+  ],
+  "Reference": [
+    "reference/configuration",
+    "reference/api"
+  ],
+  "SDKs": [
+    "sdk"
+  ],
+  "Development": [
+    "milestones"
+  ]
+}

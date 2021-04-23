@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"testing"
 
 	"github.com/julienschmidt/httprouter"
@@ -322,6 +323,27 @@ func TestMutatorHydrator(t *testing.T) {
 				Config:  configWithRetriesForMutator("1s", "100ms"),
 				Request: &http.Request{},
 				Match:   newAuthenticationSession(setExtra(sampleKey, sampleValue)),
+				Err:     nil,
+			},
+			"Pass Query Parameters": {
+				Setup: func(t *testing.T) http.Handler {
+					router := httprouter.New()
+					router.POST("/", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+						q := r.URL.Query()
+						assert.Equal(t, len(q), 2)
+						assert.Equal(t, q["a"], []string{"b"})
+						assert.Equal(t, q["c"], []string{"&12"})
+
+						_, err = w.Write([]byte(`{}`))
+						require.NoError(t, err)
+					})
+					return router
+				},
+				Session: newAuthenticationSession(),
+				Rule:    &rule.Rule{ID: "test-rule"},
+				Config:  defaultConfigForMutator(),
+				Request: &http.Request{URL: &url.URL{RawQuery: "a=b&c=%2612"}},
+				Match:   newAuthenticationSession(),
 				Err:     nil,
 			},
 		}

@@ -100,5 +100,5 @@ func compileGlob(pattern string, delimiterStart, delimiterEnd rune) (glob.Glob, 
 	buffer.WriteString(glob.QuoteMeta(raw))
 
 	// Compile full regexp.
-	return glob.Compile(buffer.String())
+	return glob.Compile(buffer.String(), '.', '/')
 }

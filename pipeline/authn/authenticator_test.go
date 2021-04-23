@@ -7,9 +7,8 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/ory/x/urlx"
-
 	"github.com/ory/oathkeeper/pipeline/authn"
+	"github.com/ory/oathkeeper/x"
 )
 
 const (
@@ -50,7 +49,8 @@ func TestCopy(t *testing.T) {
 		Header:  http.Header{"foo": {"bar", "baz"}},
 		MatchContext: authn.MatchContext{
 			RegexpCaptureGroups: []string{"a", "b"},
-			URL:                 urlx.ParseOrPanic("https://foo/bar"),
+			URL:                 x.ParseURLOrPanic("https://foo/bar"),
+			Method:              "GET",
 		},
 	}
 
@@ -60,10 +60,12 @@ func TestCopy(t *testing.T) {
 	copied.Header.Add("bazbar", "bar")
 	copied.MatchContext.URL.Host = "asdf"
 	copied.MatchContext.RegexpCaptureGroups[0] = "b"
+	copied.MatchContext.Method = "PUT"
 
 	assert.NotEqual(original.Subject, copied.Subject)
 	assert.NotEqual(original.Extra, copied.Extra)
 	assert.NotEqual(original.Header, copied.Header)
 	assert.NotEqual(original.MatchContext.URL.Host, copied.MatchContext.URL.Host)
 	assert.NotEqual(original.MatchContext.RegexpCaptureGroups, copied.MatchContext.RegexpCaptureGroups)
+	assert.NotEqual(original.MatchContext.Method, copied.MatchContext.Method)
 }

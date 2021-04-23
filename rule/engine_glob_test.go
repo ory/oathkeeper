@@ -242,6 +242,15 @@ func TestIsMatch(t *testing.T) {
 			want:    true,
 			wantErr: false,
 		},
+		{
+			name: "asterisk matches only one path segment",
+			args: args{
+				pattern:      `http://example.com/<*>`,
+				matchAgainst: "http://example.com/foo/bar",
+			},
+			want:    false,
+			wantErr: false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

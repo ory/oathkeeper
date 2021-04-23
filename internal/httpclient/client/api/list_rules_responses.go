@@ -6,6 +6,7 @@ package api
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"context"
 	"fmt"
 	"io"
 
@@ -36,9 +37,8 @@ func (o *ListRulesReader) ReadResponse(response runtime.ClientResponse, consumer
 			return nil, err
 		}
 		return nil, result
-
 	default:
-		return nil, runtime.NewAPIError("unknown error", response, response.Code())
+		return nil, runtime.NewAPIError("response status code does not match any response statuses defined for this endpoint in the swagger spec", response, response.Code())
 	}
 }
 
@@ -47,7 +47,7 @@ func NewListRulesOK() *ListRulesOK {
 	return &ListRulesOK{}
 }
 
-/*ListRulesOK handles this case with default header values.
+/* ListRulesOK describes a response with status code 200, with default header values.
 
 A list of rules
 */
@@ -58,7 +58,6 @@ type ListRulesOK struct {
 func (o *ListRulesOK) Error() string {
 	return fmt.Sprintf("[GET /rules][%d] listRulesOK  %+v", 200, o.Payload)
 }
-
 func (o *ListRulesOK) GetPayload() []*models.Rule {
 	return o.Payload
 }
@@ -78,7 +77,7 @@ func NewListRulesInternalServerError() *ListRulesInternalServerError {
 	return &ListRulesInternalServerError{}
 }
 
-/*ListRulesInternalServerError handles this case with default header values.
+/* ListRulesInternalServerError describes a response with status code 500, with default header values.
 
 The standard error format
 */
@@ -89,7 +88,6 @@ type ListRulesInternalServerError struct {
 func (o *ListRulesInternalServerError) Error() string {
 	return fmt.Sprintf("[GET /rules][%d] listRulesInternalServerError  %+v", 500, o.Payload)
 }
-
 func (o *ListRulesInternalServerError) GetPayload() *ListRulesInternalServerErrorBody {
 	return o.Payload
 }
@@ -132,6 +130,11 @@ type ListRulesInternalServerErrorBody struct {
 
 // Validate validates this list rules internal server error body
 func (o *ListRulesInternalServerErrorBody) Validate(formats strfmt.Registry) error {
+	return nil
+}
+
+// ContextValidate validates this list rules internal server error body based on context it is used
+func (o *ListRulesInternalServerErrorBody) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
 	return nil
 }
 

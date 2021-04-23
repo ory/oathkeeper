@@ -2,7 +2,7 @@
 
 <h4 align="center">
     <a href="https://www.ory.sh/chat">Chat</a> |
-    <a href="https://community.ory.sh/">Forums</a> |
+    <a href="https://github.com/ory/oathkeeper/discussions">Discussions</a> |
     <a href="http://eepurl.com/di390P">Newsletter</a><br/><br/>
     <a href="https://www.ory.sh/oathkeeper/docs/reference/api">API Docs</a> |
     <a href="https://www.ory.sh/oathkeeper/docs/">Guide</a> |
@@ -45,14 +45,13 @@ documentation and upgrade instructions.
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
-
 - [Installation](#installation)
 - [Who's using it?](#whos-using-it)
 - [Ecosystem](#ecosystem)
-  - [ORY Security Console: Administrative User Interface](#ory-security-console-administrative-user-interface)
+  - [ORY Kratos: Identity and User Infrastructure and Management](#ory-kratos-identity-and-user-infrastructure-and-management)
   - [ORY Hydra: OAuth2 & OpenID Connect Server](#ory-hydra-oauth2--openid-connect-server)
+  - [ORY Oathkeeper: Identity & Access Proxy](#ory-oathkeeper-identity--access-proxy)
   - [ORY Keto: Access Control Policies as a Server](#ory-keto-access-control-policies-as-a-server)
-  - [Examples](#examples)
 - [Security](#security)
   - [Disclosing vulnerabilities](#disclosing-vulnerabilities)
 - [Telemetry](#telemetry)
@@ -62,8 +61,6 @@ documentation and upgrade instructions.
   - [Upgrading and Changelog](#upgrading-and-changelog)
   - [Command line documentation](#command-line-documentation)
   - [Develop](#develop)
-- [Backers](#backers)
-- [Sponsors](#sponsors)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -81,14 +78,14 @@ to build ORY Oathkeeper from source.
 The ORY community stands on the shoulders of individuals, companies, and
 maintainers. We thank everyone involved - from submitting bug reports and
 feature requests, to contributing patches, to sponsoring our work. Our community
-is 1000+ strong and growing rapidly. The ORY stack protects 1.200.000.000+ API
-requests every month with over 15.000+ active service nodes. We would have never
-been able to achieve this without each and everyone of you!
+is 1000+ strong and growing rapidly. The ORY stack protects 16.000.000.000+ API
+requests every month with over 250.000+ active service nodes. We would have
+never been able to achieve this without each and everyone of you!
 
 The following list represents companies that have accompanied us along the way
 and that have made outstanding contributions to our ecosystem. _If you think
 that your company deserves a spot here, reach out to
-<a href="mailto:hi@ory.sh">hi@ory.sh</a> now_!
+<a href="mailto:office-muc@ory.sh">office-muc@ory.sh</a> now_!
 
 **Please consider giving back by becoming a sponsor of our open source work on
 <a href="https://www.patreon.com/_ory">Patreon</a> or
@@ -112,7 +109,7 @@ that your company deserves a spot here, reach out to
         </tr>
         <tr>
             <td>Contributor</td>
-            <td>Kyma Project</a>
+            <td>Kyma Project</td>
             <td align="center"><img height="32px" src="https://raw.githubusercontent.com/ory/meta/master/static/adopters/kyma.svg" alt="Kyma Project"></td>
             <td><a href="https://kyma-project.io">kyma-project.io</a></td>
         </tr>
@@ -159,6 +156,18 @@ that your company deserves a spot here, reach out to
             <td><a href="https://www.arduino.cc/">arduino.cc</a></td>
         </tr>
         <tr>
+            <td>Adopter *</td>
+            <td>DataDetect</td>
+            <td align="center"><img height="32px" src="https://raw.githubusercontent.com/ory/meta/master/static/adopters/datadetect.svg" alt="Datadetect"></td>
+            <td><a href="https://unifiedglobalarchiving.com/data-detect/">unifiedglobalarchiving.com/data-detect/</a></td>
+        </tr>        
+        <tr>
+            <td>Adopter *</td>
+            <td>Sainsbury's</td>
+            <td align="center"><img height="32px" src="https://raw.githubusercontent.com/ory/meta/master/static/adopters/sainsburys.svg" alt="Sainsbury's"></td>
+            <td><a href="https://www.sainsburys.co.uk/">sainsburys.co.uk</a></td>
+        </tr>
+        <tr>
             <td>Sponsor</td>
             <td>OrderMyGear</td>
             <td align="center"><img height="32px" src="https://raw.githubusercontent.com/ory/meta/master/static/adopters/ordermygear.svg" alt="OrderMyGear"></td>
@@ -170,12 +179,12 @@ that your company deserves a spot here, reach out to
             <td align="center"><img height="32px" src="https://raw.githubusercontent.com/ory/meta/master/static/adopters/spiribo.svg" alt="Spiri.bo"></td>
             <td><a href="https://spiri.bo/">spiri.bo</a></td>
         </tr>
-    </tdbody>
+    </tbody>
 </table>
 
 We also want to thank all individual contributors
 
-<img src="https://opencollective.com/ory/contributors.svg?width=890&button=false" /></a>
+<a href="https://opencollective.com/ory" target="_blank"><img src="https://opencollective.com/ory/contributors.svg?width=890&button=false" /></a>
 
 as well as all of our backers
 
@@ -189,19 +198,6 @@ TheCrealm.
 <em>\* Uses one of ORY's major projects in production.</em>
 
 <!--END ADOPTERS-->
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 ## Ecosystem
 
@@ -233,8 +229,9 @@ deal with: Self-service Login and Registration, Multi-Factor Authentication
 ### ORY Hydra: OAuth2 & OpenID Connect Server
 
 [ORY Hydra](https://github.com/ory/hydra) is an OpenID Certified™ OAuth2 and
-OpenID Connect Provider can connect to any existing identity database (LDAP, AD,
-KeyCloak, PHP+MySQL, ...) and user interface.
+OpenID Connect Provider which easily connects to any existing identity system by
+writing a tiny "bridge" application. Gives absolute control over user interface
+and user experience flows.
 
 ### ORY Oathkeeper: Identity & Access Proxy
 
@@ -254,18 +251,6 @@ to perform a certain action on a resource.
 
 <!--END ECOSYSTEM-->
 
-
-
-
-
-
-
-
-
-
-
-
-
 ## Security
 
 ### Disclosing vulnerabilities
@@ -277,15 +262,13 @@ publicly on the forums, the chat, or GitHub and send us an email to
 ## Telemetry
 
 Our services collect summarized, anonymized data which can optionally be turned
-off. Click [here](https://www.ory.sh/docs/ecosystem/sqa) to learn
-more.
+off. Click [here](https://www.ory.sh/docs/ecosystem/sqa) to learn more.
 
 ## Documentation
 
 ### Guide
 
-The Guide is available
-[here](https://www.ory.sh/oathkeeper/docs/).
+The Guide is available [here](https://www.ory.sh/oathkeeper/docs/).
 
 ### HTTP API documentation
 
@@ -313,4 +296,3 @@ $ cd $GOPATH/src/github.com/ory/oathkeeper
 $ export GO111MODULE=on
 $ go test ./...
 ```
-

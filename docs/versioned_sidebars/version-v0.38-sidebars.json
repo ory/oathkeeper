@@ -1,6 +1,7 @@
 {
   "version-v0.38/docs": [
     {
+      "collapsed": true,
       "type": "category",
       "label": "Introduction",
       "items": [
@@ -11,10 +12,15 @@
         {
           "type": "doc",
           "id": "version-v0.38/install"
+        },
+        {
+          "type": "doc",
+          "id": "version-v0.38/contributing"
         }
       ]
     },
     {
+      "collapsed": true,
       "type": "category",
       "label": "Core Concepts",
       "items": [
@@ -23,12 +29,13 @@
           "id": "version-v0.38/api-access-rules"
         },
         {
+          "collapsed": true,
           "type": "category",
           "label": "Handlers",
           "items": [
             {
               "type": "doc",
-              "id": "version-v0.38/pipeline/index"
+              "id": "version-v0.38/pipeline"
             },
             {
               "type": "doc",
@@ -51,16 +58,22 @@
       ]
     },
     {
+      "collapsed": true,
       "type": "category",
       "label": "Guides",
       "items": [
         {
           "type": "doc",
           "id": "version-v0.38/configure-deploy"
+        },
+        {
+          "type": "doc",
+          "id": "version-v0.38/oauth2-token-introspection-hydra"
         }
       ]
     },
     {
+      "collapsed": true,
       "type": "category",
       "label": "Reference",
       "items": [
@@ -75,16 +88,29 @@
       ]
     },
     {
+      "collapsed": true,
       "type": "category",
       "label": "SDKs",
       "items": [
         {
           "type": "doc",
-          "id": "version-v0.38/sdk/index"
+          "id": "version-v0.38/sdk"
         }
       ]
     },
     {
+      "collapsed": true,
+      "type": "category",
+      "label": "Development",
+      "items": [
+        {
+          "type": "doc",
+          "id": "version-v0.38/milestones"
+        }
+      ]
+    },
+    {
+      "collapsed": true,
       "type": "category",
       "label": "ORY Kratos",
       "items": [
@@ -106,6 +132,7 @@
       ]
     },
     {
+      "collapsed": true,
       "type": "category",
       "label": "ORY Hydra",
       "items": [
@@ -127,6 +154,7 @@
       ]
     },
     {
+      "collapsed": true,
       "type": "category",
       "label": "ORY Keto",
       "items": [

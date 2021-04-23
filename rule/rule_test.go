@@ -22,6 +22,7 @@ package rule
 
 import (
 	"net/url"
+	"strconv"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -84,7 +85,7 @@ func TestRule(t *testing.T) {
 		},
 	}
 	for ind, tcase := range tests {
-		t.Run(string(ind), func(t *testing.T) {
+		t.Run(strconv.FormatInt(int64(ind), 10), func(t *testing.T) {
 			testFunc := func(rule Rule, strategy configuration.MatchingStrategy) {
 				matched, err := rule.IsMatching(strategy, tcase.method, mustParse(t, tcase.url))
 				assert.Equal(t, tcase.expectedMatch, matched)
@@ -137,7 +138,7 @@ func TestRule1(t *testing.T) {
 		},
 	}
 	for ind, tcase := range tests {
-		t.Run(string(ind), func(t *testing.T) {
+		t.Run(strconv.FormatInt(int64(ind), 10), func(t *testing.T) {
 			matched, err := r.IsMatching(configuration.Regexp, tcase.method, mustParse(t, tcase.url))
 			assert.Equal(t, tcase.expectedMatch, matched)
 			assert.Equal(t, tcase.expectedErr, err)
@@ -179,7 +180,7 @@ func TestRuleWithCustomMethod(t *testing.T) {
 		},
 	}
 	for ind, tcase := range tests {
-		t.Run(string(ind), func(t *testing.T) {
+		t.Run(strconv.FormatInt(int64(ind), 10), func(t *testing.T) {
 			matched, err := r.IsMatching(configuration.Regexp, tcase.method, mustParse(t, tcase.url))
 			assert.Equal(t, tcase.expectedMatch, matched)
 			assert.Equal(t, tcase.expectedErr, err)

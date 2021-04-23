@@ -1,36 +1,40 @@
 ---
-id: index
+id: pipeline
 title: Access Rule Pipeline
 ---
 
 Read more about the
-[principal components and execution pipeline of access rules](../api-access-rules.md)
+[principal components and execution pipeline of access rules](api-access-rules.md)
 if you have not already. This chapter explains the different pipeline handlers
 available to you:
 
-- [Authentication handlers](authn.md) inspect HTTP requests (e.g. the HTTP
-  Authorization Header) and execute some business logic that return true (for
-  authentication ok) or false (for authentication invalid) as well as a subject
-  ("user"). The subject is typically the "user" that made the request, but it
-  could also be a machine (if you have machine-2-machine interaction) or
+- [Authentication handlers](pipeline/authn.md) inspect HTTP requests (e.g. the
+  HTTP Authorization Header) and execute some business logic that return true
+  (for authentication ok) or false (for authentication invalid) as well as a
+  subject ("user"). The subject is typically the "user" that made the request,
+  but it could also be a machine (if you have machine-2-machine interaction) or
   something different.
-- [Authorization handlers](authz.md): ensure that a subject ("user") has the
-  right permissions. For example, a specific endpoint might only be accessible
-  to subjects ("users") from group "admin". The authorizer handles that logic.
-- [Mutation handlers](mutator.md): transforms the credentials from incoming
-  requests to credentials that your backend understands. For example, the
-  `Authorization: basic` header might be transformed to `X-User: <subject-id>`.
-  This allows you to write backends that do not care if the original request was
-  an anonymous one, an OAuth 2.0 Access Token, or some other credential type.
-  All your backend has to do is understand, for example, the `X-User:`.
-- [Error handlers](error.md): are responsible for executing logic after, for
-  example, authentication or authorization failed. ORY Oathkeeper supports
-  different error handlers and we will add more as the project progresses.
+- [Authorization handlers](pipeline/authz.md): ensure that a subject ("user")
+  has the right permissions. For example, a specific endpoint might only be
+  accessible to subjects ("users") from group "admin". The authorizer handles
+  that logic.
+- [Mutation handlers](pipeline/mutator.md): transforms the credentials from
+  incoming requests to credentials that your backend understands. For example,
+  the `Authorization: basic` header might be transformed to
+  `X-User: <subject-id>`. This allows you to write backends that do not care if
+  the original request was an anonymous one, an OAuth 2.0 Access Token, or some
+  other credential type. All your backend has to do is understand, for example,
+  the `X-User:`.
+- [Error handlers](pipeline/error.md): are responsible for executing logic
+  after, for example, authentication or authorization failed. ORY Oathkeeper
+  supports different error handlers and we will add more as the project
+  progresses.
 
 ## Templating
 
-Some handlers such as the [ID Token Mutator](mutator.md#id_token) support
-templating using [Golang Text Templates](https://golang.org/pkg/text/template/)
+Some handlers such as the [ID Token Mutator](pipeline/mutator.md#id_token)
+support templating using
+[Golang Text Templates](https://golang.org/pkg/text/template/)
 ([examples](https://blog.gopheracademy.com/advent-2017/using-go-templates/)).
 The [sprig](http://masterminds.github.io/sprig/) is also supported, on top of
 these two functions:
@@ -97,8 +101,8 @@ claim)
 { "config_field": "{{ print .Extra.some.arbitrary.data }}" }
 ```
 
-To use a Regex capture from the request URL  
-Note the usage of `printIndex` to print a value from the array
+To use a Regex capture from the request URL Note the usage of `printIndex` to
+print a value from the array
 
 ```json
 {

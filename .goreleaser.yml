@@ -53,7 +53,7 @@ changelog:
 
 brews:
   -
-    github:
+    tap:
       owner: ory
       name: homebrew-oathkeeper
     homepage:  https://www.ory.sh
@@ -73,7 +73,7 @@ scoop:
 
 dockers:
   - dockerfile: Dockerfile
-    binaries:
+    ids:
       - oathkeeper
     image_templates:
       - "oryd/oathkeeper:v{{ .Major }}"
@@ -82,7 +82,7 @@ dockers:
       - "oryd/oathkeeper:{{ .Tag }}"
       - "oryd/oathkeeper:latest"
   - dockerfile: Dockerfile-alpine
-    binaries:
+    ids:
       - oathkeeper
     image_templates:
       - "oryd/oathkeeper:v{{ .Major }}-alpine"

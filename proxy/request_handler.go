@@ -223,6 +223,9 @@ func (d *RequestHandler) HandleRequest(r *http.Request, rl *rule.Rule) (session 
 			// The authentication handler says that no further authentication/authorization is required, and the request should
 			// be forwarded to its final destination.
 			// return nil
+			case helper.ErrUnauthorized.ErrorField:
+				d.r.Logger().Info(err)
+				return nil, err
 			default:
 				d.r.Logger().WithError(err).
 					WithFields(fields).
@@ -329,7 +332,7 @@ func (d *RequestHandler) HandleRequest(r *http.Request, rl *rule.Rule) (session 
 	return session, nil
 }
 
-// InitializeAuthnSession reates an authentication session and initializes it with a Match context if possible
+// InitializeAuthnSession creates an authentication session and initializes it with a Match context if possible
 func (d *RequestHandler) InitializeAuthnSession(r *http.Request, rl *rule.Rule) *authn.AuthenticationSession {
 
 	session := &authn.AuthenticationSession{
@@ -347,6 +350,7 @@ func (d *RequestHandler) InitializeAuthnSession(r *http.Request, rl *rule.Rule) 
 		session.MatchContext = authn.MatchContext{
 			RegexpCaptureGroups: values,
 			URL:                 r.URL,
+			Method:              r.Method,
 		}
 	}
 

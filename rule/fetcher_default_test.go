@@ -10,6 +10,7 @@ import (
 	"os/exec"
 	"path"
 	"path/filepath"
+	"runtime"
 	"testing"
 	"time"
 
@@ -26,6 +27,7 @@ import (
 
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/internal"
+	"github.com/ory/oathkeeper/internal/cloudstorage"
 )
 
 const testRule = `[{"id":"test-rule-5","upstream":{"preserve_host":true,"strip_path":"/api","url":"mybackend.com/api"},"match":{"url":"myproxy.com/api","methods":["GET","POST"]},"authenticators":[{"handler":"noop"},{"handler":"anonymous"}],"authorizer":{"handler":"allow"},"mutators":[{"handler":"noop"}]}]`
@@ -280,6 +282,9 @@ access_rules:
 }
 
 func TestFetcherWatchRepositoryFromKubernetesConfigMap(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip()
+	}
 	viper.Reset()
 	conf := internal.NewConfigurationWithDefaults() // this must be at the top because it resets viper
 	r := internal.NewRegistry(conf)
@@ -355,4 +360,44 @@ func TestFetcherWatchRepositoryFromKubernetesConfigMap(t *testing.T) {
 			require.Equal(t, fmt.Sprintf("%d", i), rules[0].ID)
 		})
 	}
+}
+
+func TestFetchRulesFromObjectStorage(t *testing.T) {
+	t.Cleanup(func() {
+		cloudstorage.SetCurrentTest(nil)
+	})
+
+	cloudstorage.SetCurrentTest(t)
+
+	conf := internal.NewConfigurationWithDefaults() // this must be at the top because it resets viper
+	r := internal.NewRegistry(conf)
+
+	dir := path.Join(os.TempDir(), uuid.New().String())
+	require.NoError(t, os.MkdirAll(dir, 0777))
+
+	id := uuid.New().String()
+	require.NoError(t, ioutil.WriteFile(filepath.Join(os.TempDir(), ".oathkeeper-"+id+".yml"), []byte(`
+authenticators:
+  noop: { enabled: true }
+
+access_rules:
+  repositories:
+  - s3://oathkeeper-test-bucket/path/prefix/rules.json
+  - gs://oathkeeper-test-bucket/path/prefix/rules.json
+  - azblob://path/prefix/rules.json
+`), 0777))
+
+	viperx.InitializeConfig("oathkeeper-"+id, os.TempDir(), nil)
+	viperx.WatchConfig(nil, nil)
+
+	go func() {
+		require.NoError(t, r.RuleFetcher().Watch(context.TODO()))
+	}()
+
+	time.Sleep(time.Second * 2) // give it a bit of time to reload everything
+
+	rules, err := r.RuleRepository().List(context.Background(), 500, 0)
+	require.NoError(t, err)
+
+	assert.Equal(t, 9, len(rules))
 }

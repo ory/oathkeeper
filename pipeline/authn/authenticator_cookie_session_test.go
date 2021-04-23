@@ -116,6 +116,18 @@ func TestAuthenticatorCookieSession(t *testing.T) {
 			assert.Empty(t, requestRecorder.requests)
 		})
 
+		t.Run("description=should fallthrough if is missing and it has no cookies", func(t *testing.T) {
+			testServer, requestRecorder := makeServer(200, `{}`)
+			err := pipelineAuthenticator.Authenticate(
+				makeRequest("GET", "/", map[string]string{}, ""),
+				session,
+				json.RawMessage(fmt.Sprintf(`{"check_session_url": "%s"}`, testServer.URL)),
+				nil,
+			)
+			assert.Equal(t, errors.Cause(err), ErrAuthenticatorNotResponsible)
+			assert.Empty(t, requestRecorder.requests)
+		})
+
 		t.Run("description=should not fallthrough if only is specified and cookie specified is set", func(t *testing.T) {
 			testServer, _ := makeServer(200, `{}`)
 			err := pipelineAuthenticator.Authenticate(

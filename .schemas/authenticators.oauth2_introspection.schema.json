@@ -61,6 +61,15 @@
               "title": "OAuth 2.0 Token URL",
               "description": "The OAuth 2.0 Token Endpoint where the OAuth 2.0 Client Credentials Grant will be performed.\n\n>If pre-authorization is enabled, this value is required."
             },
+            "audience": {
+              "type": "string",
+              "title": "OAuth 2.0 Audience",
+              "description": "The OAuth 2.0 Audience to be requested during the OAuth 2.0 Client Credentials Grant.",
+              "examples": [
+                "http://www.example.com",
+                "services:my-app"
+              ]
+            },
             "scope": {
               "type": "array",
               "items": {

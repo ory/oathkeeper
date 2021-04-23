@@ -28,14 +28,13 @@ import (
 	"testing"
 	"time"
 
-	"github.com/dgrijalva/jwt-go"
+	"github.com/form3tech-oss/jwt-go"
 	"github.com/tidwall/sjson"
-
-	"github.com/ory/x/urlx"
 
 	"github.com/ory/herodot"
 	"github.com/ory/oathkeeper/internal"
 	. "github.com/ory/oathkeeper/pipeline/authn"
+	"github.com/ory/oathkeeper/x"
 
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
@@ -58,7 +57,7 @@ func TestAuthenticatorJWT(t *testing.T) {
 	assert.Equal(t, "jwt", a.GetID())
 
 	var gen = func(l string, c jwt.Claims) string {
-		token, err := reg.CredentialsSigner().Sign(context.Background(), urlx.ParseOrPanic(l), c)
+		token, err := reg.CredentialsSigner().Sign(context.Background(), x.ParseURLOrPanic(l), c)
 		require.NoError(t, err)
 		return token
 	}
@@ -75,6 +74,7 @@ func TestAuthenticatorJWT(t *testing.T) {
 			expectExactErr error
 			expectCode     int
 			expectSess     *AuthenticationSession
+			extraErrAssert func(err error)
 		}{
 			{
 				d:         "should fail because no payloads",
@@ -309,6 +309,27 @@ func TestAuthenticatorJWT(t *testing.T) {
 				expectErr:  true,
 				expectCode: 401,
 			},
+			{
+				d: "failed JWT authorization results in error with jwt_claims in DetailsField",
+				r: &http.Request{Header: http.Header{"Authorization": []string{"bearer " + gen(keys[2], jwt.MapClaims{
+					"sub":   "sub",
+					"exp":   now.Add(time.Hour).Unix(),
+					"scope": []string{"scope-1", "scope-2"},
+					"realm_access": map[string][]string{
+						"roles": {
+							"role-1",
+							"role-2",
+						},
+					},
+				})}}},
+				config:    `{"required_scope": ["scope-1", "scope-2", "scope-3"]}`,
+				expectErr: true,
+				extraErrAssert: func(err error) {
+					defaultError := err.(*herodot.DefaultError)
+					require.Error(t, defaultError)
+					require.Equal(t, fmt.Sprintf("{\"exp\":%v,\"realm_access\":{\"roles\":[\"role-1\",\"role-2\"]},\"scope\":[\"scope-1\",\"scope-2\"],\"sub\":\"sub\"}", now.Add(time.Hour).Unix()), defaultError.DetailsField["jwt_claims"])
+				},
+			},
 		} {
 			t.Run(fmt.Sprintf("case=%d/description=%s", k, tc.d), func(t *testing.T) {
 				if tc.setup != nil {
@@ -325,6 +346,9 @@ func TestAuthenticatorJWT(t *testing.T) {
 					}
 					if tc.expectExactErr != nil {
 						assert.EqualError(t, err, tc.expectExactErr.Error())
+					}
+					if tc.extraErrAssert != nil {
+						tc.extraErrAssert(err)
 					}
 				} else {
 					require.NoError(t, err, "%#v", errors.Cause(err))

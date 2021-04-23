@@ -7,13 +7,13 @@ import (
 	"testing"
 	"time"
 
-	"github.com/dgrijalva/jwt-go"
+	"github.com/form3tech-oss/jwt-go"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
 	"github.com/ory/fosite"
-	"github.com/ory/x/urlx"
+	"github.com/ory/oathkeeper/x"
 )
 
 func TestVerifierDefault(t *testing.T) {
@@ -22,7 +22,7 @@ func TestVerifierDefault(t *testing.T) {
 	now := time.Now().Round(time.Second)
 
 	var sign = func(claims jwt.MapClaims, src string) string {
-		tt, err := signer.Sign(context.Background(), urlx.ParseOrPanic(src), claims)
+		tt, err := signer.Sign(context.Background(), x.ParseURLOrPanic(src), claims)
 		require.NoError(t, err)
 		return tt
 	}
@@ -47,7 +47,7 @@ func TestVerifierDefault(t *testing.T) {
 				Audiences:     []string{"aud-1", "aud-2"},
 				Issuers:       []string{"iss-1", "iss-2"},
 				Scope:         []string{"scope-1", "scope-2"},
-				KeyURLs:       []url.URL{*urlx.ParseOrPanic("file://../test/stub/jwks-hs.json")},
+				KeyURLs:       []url.URL{*x.ParseURLOrPanic("file://../test/stub/jwks-hs.json")},
 				ScopeStrategy: fosite.ExactScopeStrategy,
 			},
 			token: sign(jwt.MapClaims{
@@ -72,7 +72,7 @@ func TestVerifierDefault(t *testing.T) {
 				Audiences:     []string{"aud-1", "aud-2"},
 				Issuers:       []string{"iss-1", "iss-2"},
 				Scope:         []string{"scope-1", "scope-2"},
-				KeyURLs:       []url.URL{*urlx.ParseOrPanic("file://../test/stub/jwks-hs.json")},
+				KeyURLs:       []url.URL{*x.ParseURLOrPanic("file://../test/stub/jwks-hs.json")},
 				ScopeStrategy: fosite.ExactScopeStrategy,
 			},
 			token: sign(jwt.MapClaims{
@@ -97,7 +97,7 @@ func TestVerifierDefault(t *testing.T) {
 				Audiences:     []string{"aud-1", "aud-2"},
 				Issuers:       []string{"iss-1", "iss-2"},
 				Scope:         []string{"scope-1", "scope-2"},
-				KeyURLs:       []url.URL{*urlx.ParseOrPanic("file://../test/stub/jwks-hs.json")},
+				KeyURLs:       []url.URL{*x.ParseURLOrPanic("file://../test/stub/jwks-hs.json")},
 				ScopeStrategy: fosite.ExactScopeStrategy,
 			},
 			token: sign(jwt.MapClaims{
@@ -122,7 +122,7 @@ func TestVerifierDefault(t *testing.T) {
 				Audiences:     []string{"aud-1", "aud-2"},
 				Issuers:       []string{"iss-1", "iss-2"},
 				Scope:         []string{"scope-1", "scope-2"},
-				KeyURLs:       []url.URL{*urlx.ParseOrPanic("file://../test/stub/jwks-hs.json")},
+				KeyURLs:       []url.URL{*x.ParseURLOrPanic("file://../test/stub/jwks-hs.json")},
 				ScopeStrategy: fosite.ExactScopeStrategy,
 			},
 			token: sign(jwt.MapClaims{
@@ -147,7 +147,7 @@ func TestVerifierDefault(t *testing.T) {
 				Audiences:  []string{"aud-1", "aud-2"},
 				Issuers:    []string{"iss-1", "iss-2"},
 				Scope:      []string{"scope-1", "scope-2"},
-				KeyURLs:    []url.URL{*urlx.ParseOrPanic("file://../test/stub/jwks-hs.json")},
+				KeyURLs:    []url.URL{*x.ParseURLOrPanic("file://../test/stub/jwks-hs.json")},
 			},
 			token: sign(jwt.MapClaims{
 				"sub":    "sub",
@@ -165,7 +165,7 @@ func TestVerifierDefault(t *testing.T) {
 				Audiences:     []string{"aud-1", "aud-2"},
 				Issuers:       []string{"iss-1", "iss-2"},
 				Scope:         []string{"scope-1", "scope-2"},
-				KeyURLs:       []url.URL{*urlx.ParseOrPanic("file://../test/stub/jwks-rsa-single.json")},
+				KeyURLs:       []url.URL{*x.ParseURLOrPanic("file://../test/stub/jwks-rsa-single.json")},
 				ScopeStrategy: fosite.ExactScopeStrategy,
 			},
 			token: sign(jwt.MapClaims{
@@ -184,7 +184,7 @@ func TestVerifierDefault(t *testing.T) {
 				Audiences:     []string{"aud-1", "aud-2"},
 				Issuers:       []string{"iss-1", "iss-2"},
 				Scope:         []string{"scope-1", "scope-2"},
-				KeyURLs:       []url.URL{*urlx.ParseOrPanic("file://../test/stub/jwks-hs.json")},
+				KeyURLs:       []url.URL{*x.ParseURLOrPanic("file://../test/stub/jwks-hs.json")},
 				ScopeStrategy: fosite.ExactScopeStrategy,
 			},
 			token: sign(jwt.MapClaims{
@@ -203,7 +203,7 @@ func TestVerifierDefault(t *testing.T) {
 				Audiences:     []string{"aud-1", "aud-2"},
 				Issuers:       []string{"iss-1", "iss-2"},
 				Scope:         []string{"scope-1", "scope-2"},
-				KeyURLs:       []url.URL{*urlx.ParseOrPanic("file://../test/stub/jwks-hs.json")},
+				KeyURLs:       []url.URL{*x.ParseURLOrPanic("file://../test/stub/jwks-hs.json")},
 				ScopeStrategy: fosite.ExactScopeStrategy,
 			},
 			token: sign(jwt.MapClaims{
@@ -222,7 +222,7 @@ func TestVerifierDefault(t *testing.T) {
 				Audiences:     []string{"aud-1", "aud-2"},
 				Issuers:       []string{"iss-1", "iss-2"},
 				Scope:         []string{"scope-1", "scope-2"},
-				KeyURLs:       []url.URL{*urlx.ParseOrPanic("file://../test/stub/jwks-hs.json")},
+				KeyURLs:       []url.URL{*x.ParseURLOrPanic("file://../test/stub/jwks-hs.json")},
 				ScopeStrategy: fosite.ExactScopeStrategy,
 			},
 			token: sign(jwt.MapClaims{
@@ -241,7 +241,7 @@ func TestVerifierDefault(t *testing.T) {
 				Audiences:     []string{"aud-1", "aud-2"},
 				Issuers:       []string{"iss-1", "iss-2"},
 				Scope:         []string{"scope-1", "scope-2"},
-				KeyURLs:       []url.URL{*urlx.ParseOrPanic("file://../test/stub/jwks-hs.json")},
+				KeyURLs:       []url.URL{*x.ParseURLOrPanic("file://../test/stub/jwks-hs.json")},
 				ScopeStrategy: fosite.ExactScopeStrategy,
 			},
 			token: sign(jwt.MapClaims{
@@ -260,7 +260,7 @@ func TestVerifierDefault(t *testing.T) {
 				Audiences:     []string{"aud-1", "aud-2"},
 				Issuers:       []string{"iss-1", "iss-2"},
 				Scope:         []string{"scope-1", "scope-2"},
-				KeyURLs:       []url.URL{*urlx.ParseOrPanic("file://../test/stub/jwks-hs.json")},
+				KeyURLs:       []url.URL{*x.ParseURLOrPanic("file://../test/stub/jwks-hs.json")},
 				ScopeStrategy: fosite.ExactScopeStrategy,
 			},
 			token: sign(jwt.MapClaims{
@@ -280,7 +280,7 @@ func TestVerifierDefault(t *testing.T) {
 				Audiences:     []string{"aud-1", "aud-2"},
 				Issuers:       []string{"iss-1", "iss-2"},
 				Scope:         []string{"scope-1", "scope-2"},
-				KeyURLs:       []url.URL{*urlx.ParseOrPanic("file://../test/stub/jwks-hs.json")},
+				KeyURLs:       []url.URL{*x.ParseURLOrPanic("file://../test/stub/jwks-hs.json")},
 				ScopeStrategy: fosite.ExactScopeStrategy,
 			},
 			token: sign(jwt.MapClaims{

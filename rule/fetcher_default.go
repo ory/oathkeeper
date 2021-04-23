@@ -19,6 +19,9 @@ import (
 	"github.com/fsnotify/fsnotify"
 
 	"github.com/ory/x/stringslice"
+	"github.com/ory/x/urlx"
+
+	"github.com/ory/oathkeeper/internal/cloudstorage"
 
 	"github.com/ory/viper"
 	"github.com/ory/x/httpx"
@@ -29,6 +32,11 @@ import (
 
 	"github.com/ghodss/yaml"
 	"github.com/pkg/errors"
+
+	"gocloud.dev/blob"
+	_ "gocloud.dev/blob/azureblob"
+	_ "gocloud.dev/blob/gcsblob"
+	_ "gocloud.dev/blob/s3blob"
 )
 
 type event struct {
@@ -53,9 +61,10 @@ type fetcherRegistry interface {
 }
 
 type FetcherDefault struct {
-	c  configuration.Provider
-	r  fetcherRegistry
-	hc *http.Client
+	c   configuration.Provider
+	r   fetcherRegistry
+	hc  *http.Client
+	mux *blob.URLMux
 
 	cache map[string][]Rule
 
@@ -73,6 +82,7 @@ func NewFetcherDefault(
 	return &FetcherDefault{
 		r:     r,
 		c:     c,
+		mux:   cloudstorage.NewURLMux(),
 		hc:    httpx.NewResilientClientLatencyToleranceHigh(nil),
 		cache: map[string][]Rule{},
 	}
@@ -82,8 +92,8 @@ func (f *FetcherDefault) configUpdate(ctx context.Context, watcher *fsnotify.Wat
 	var directoriesToWatch []string
 	var filesBeingWatched []string
 	for _, fileToWatch := range replace {
-		if fileToWatch.Scheme == "file" {
-			p := filepath.Clean(strings.Replace(fileToWatch.String(), "file://", "", 1))
+		if fileToWatch.Scheme == "file" || fileToWatch.Scheme == "" {
+			p := filepath.Clean(urlx.GetURLFilePath(&fileToWatch))
 			filesBeingWatched = append(filesBeingWatched, p)
 			directoryToWatch, _ := filepath.Split(p)
 			directoriesToWatch = append(directoriesToWatch, directoryToWatch)
@@ -144,15 +154,6 @@ func (f *FetcherDefault) configUpdate(ctx context.Context, watcher *fsnotify.Wat
 }
 
 func (f *FetcherDefault) sourceUpdate(e event) ([]Rule, error) {
-	if e.path.Scheme == "file" {
-		u, err := url.Parse("file://" + filepath.Clean(strings.TrimPrefix(e.path.String(), "file://")))
-		if err != nil {
-			return nil, err
-		}
-
-		e.path = *u
-	}
-
 	rules, err := f.fetch(e.path)
 	if err != nil {
 		return nil, err
@@ -314,12 +315,20 @@ func (f *FetcherDefault) fetch(source url.URL) ([]Rule, error) {
 		Debugf("Fetching access rules from given location because something changed.")
 
 	switch source.Scheme {
+	case "azblob":
+		fallthrough
+	case "gs":
+		fallthrough
+	case "s3":
+		return f.fetchFromStorage(source)
 	case "http":
 		fallthrough
 	case "https":
 		return f.fetchRemote(source.String())
+	case "":
+		fallthrough
 	case "file":
-		p := strings.Replace(source.String(), "file://", "", 1)
+		p := urlx.GetURLFilePath(&source)
 		if path.Ext(p) == ".json" || path.Ext(p) == ".yaml" || path.Ext(p) == ".yml" {
 			return f.fetchFile(p)
 		}
@@ -403,4 +412,21 @@ func (f *FetcherDefault) decode(r io.Reader) ([]Rule, error) {
 	}
 
 	return ks, nil
+}
+
+func (f *FetcherDefault) fetchFromStorage(source url.URL) ([]Rule, error) {
+	ctx := context.Background()
+	bucket, err := f.mux.OpenBucket(ctx, source.Scheme+"://"+source.Host)
+	if err != nil {
+		return nil, err
+	}
+	defer bucket.Close()
+
+	r, err := bucket.NewReader(ctx, source.Path[1:], nil)
+	if err != nil {
+		return nil, err
+	}
+	defer r.Close()
+
+	return f.decode(r)
 }

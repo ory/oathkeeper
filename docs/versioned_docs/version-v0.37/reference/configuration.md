@@ -18,10 +18,6 @@ Config files can be formatted as JSON, YAML and TOML. Some configuration values
 support reloading without server restart. All configuration values can be set
 using environment variables, as documented below.
 
-To find out more about edge cases like setting string array values through
-environmental variables head to the
-[Configuring ORY services](../ecosystem/configuring) section.
-
 ```yaml
 ## ORY Oathkeeper Configuration
 #

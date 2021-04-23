@@ -21,7 +21,7 @@ For this guide we are using Docker. ORY Oathkeeper however can be
 
 ORY Oathkeeper can be configured via the filesystem as well as environment
 variables. For more information on mapping the keys to environment variables
-please head over to the [configuration chapter](configuration.md).
+please head over to the [configuration chapter](reference/configuration.md).
 
 First, create an empty directory and `cd` into it:
 
@@ -99,13 +99,13 @@ service echoes incoming HTTP Requests and is perfect for seeing how ORY
 Oathkeeper works. Let's define three rules:
 
 1. An access rule that allowing anonymous access to
-   `https://httpbin.org/anything/cookie` and using the `cookie` mutator.
+   `https://httpbin.org/anything/header` and using the `header` mutator.
 2. An access rule denying every access to `https://httpbin.org/anything/deny`.
    If the request header has `Accept: application/json`, we will receive a JSON
    response. If however the accept header has `Accept: text/*`, a HTTP Redirect
    will be sent (to `https://www.ory.sh/docs` as configured above).
 3. An access rule allowing anonymous access to
-   `https://httpbin.org/anything/id_token` and using the `id_token` mutator.
+   `https://httpbin.org/anything/id_token` using the `id_token` mutator.
 
 ```shell
 $ cat << EOF > rules.json
@@ -236,7 +236,7 @@ HS256, ...). Let's generate a key for the RS256 algorithm that will be used by
 the id_token mutator:
 
 ```sh
-$ docker run oryd/oathkeeper:v0.38.2-beta.1 credentials generate --alg RS256 > jwks.json
+$ docker run oryd/oathkeeper:v0.38.9-beta.1 credentials generate --alg RS256 > jwks.json
 ```
 
 ### Dockerfile
@@ -246,7 +246,7 @@ files to the image:
 
 ```shell
 $ cat << EOF > Dockerfile
-FROM oryd/oathkeeper:v0.38.2-beta.1
+FROM oryd/oathkeeper:v0.38.9-beta.1
 
 ADD config.yaml /config.yaml
 ADD rules.json /rules.json
@@ -268,7 +268,7 @@ Before building the Docker Image, we need to make sure that the local ORY
 Oathkeeper Docker Image is on the most recent version:
 
 ```sh
-$ docker pull oryd/oathkeeper:v0.38.2-beta.1
+$ docker pull oryd/oathkeeper:v0.38.9-beta.1
 ```
 
 Next we will build our custom Docker Image

@@ -36,12 +36,11 @@ import (
 	"github.com/tidwall/sjson"
 
 	"github.com/ory/oathkeeper/rule"
+	"github.com/ory/oathkeeper/x"
 
-	"github.com/dgrijalva/jwt-go"
+	"github.com/form3tech-oss/jwt-go"
 
 	"github.com/ory/viper"
-
-	"github.com/ory/x/urlx"
 
 	"github.com/ory/oathkeeper/credentials"
 	"github.com/ory/oathkeeper/driver/configuration"
@@ -230,7 +229,7 @@ func TestMutatorIDToken(t *testing.T) {
 					result, err := reg.CredentialsVerifier().Verify(context.Background(), token, &credentials.ValidationContext{
 						Algorithms: []string{"RS256", "HS256", "ES256"},
 						Audiences:  []string{"foo", "bar"},
-						KeyURLs:    []url.URL{*urlx.ParseOrPanic(tc.K)},
+						KeyURLs:    []url.URL{*x.ParseURLOrPanic(tc.K)},
 					})
 					require.NoError(t, err, "token: %s", token)
 
@@ -348,7 +347,7 @@ func TestMutatorIDToken(t *testing.T) {
 			result, err := reg.CredentialsVerifier().Verify(context.Background(), token, &credentials.ValidationContext{
 				Algorithms: []string{"RS256", "HS256", "ES256"},
 				Audiences:  []string{"override"},
-				KeyURLs:    []url.URL{*urlx.ParseOrPanic(tc.K)},
+				KeyURLs:    []url.URL{*x.ParseURLOrPanic(tc.K)},
 			})
 			require.NoError(t, err, "token: %s (%s) %v", token, cfg.ClaimsTemplateID(), cache.Lookup(cfg.ClaimsTemplateID()))
 

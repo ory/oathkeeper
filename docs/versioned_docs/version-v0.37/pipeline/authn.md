@@ -449,8 +449,11 @@ was granted the requested scope.
   validate/match the token scope. Supports "hierarchic", "exact", "wildcard",
   "none". Defaults to "none".
 - `required_scope` ([]string, optional) - Sets what scope is required by the URL
-  and when making performing OAuth 2.0 Client Credentials request, the scope
-  will be included in the request
+  and when performing OAuth 2.0 Client Credentials request, the scope
+  will be included in the request.
+- `target_audience` ([]string, optional) - Sets what audience is required by the
+  URL.
+- `trusted_issuers` ([]string, optional) - Sets a list of trusted token issuers.
 - `pre_authorization` (object, optional) - Enable pre-authorization in cases
   where the OAuth 2.0 Token Introspection endpoint is protected by OAuth 2.0
   Bearer Tokens that can be retrieved using the OAuth 2.0 Client Credentials
@@ -478,7 +481,12 @@ was granted the requested scope.
     contain a Bearer token for request authentication. It can't be set along
     with `header` or `query_parameter`
 - `introspection_request_headers` (object, optional) - Additional headers to add
-  to the introspection request
+  to the introspection request.
+- `retry` (object, optional) - Configure the retry policy
+  - `max_delay` (string, optional, default to 500ms) - Maximum delay to wait before
+    retrying the request
+  - `give_up_after` (string, optional, default to 1s) - Maximum delay allowed for
+    retries
 
 ```yaml
 # Global configuration file oathkeeper.yml
@@ -493,6 +501,10 @@ authenticators:
       required_scope:
         - photo
         - profile
+      target_audience:
+        - example_audience
+      trusted_issuers:
+        - https://my-website.com/
       pre_authorization:
         enabled: true
         client_id: some_id
@@ -508,6 +520,9 @@ authenticators:
         # cookie: auth-token
       introspection_request_headers:
         x-forwarded-proto: https
+      retry:
+        max_delay: 300ms
+        give_up_after: 2s
 ```
 
 ```yaml
@@ -523,6 +538,10 @@ authenticators:
       required_scope:
         - photo
         - profile
+      target_audience:
+        - example_audience
+      trusted_issuers:
+        - https://my-website.com/
       pre_authorization:
         enabled: true
         client_id: some_id
@@ -539,6 +558,9 @@ authenticators:
       introspection_request_headers:
         x-forwarded-proto: https
         x-foo: bar
+      retry:
+        max_delay: 300ms
+        give_up_after: 2s
 ```
 
 ### Access Rule Example
@@ -560,7 +582,8 @@ $ cat ./rules.json
   "authenticators": [{
     "handler": "oauth2_introspection",
     "config": {
-      "required_scope": ["scope-a", "scope-b"]
+      "required_scope": ["scope-a", "scope-b"],
+      "target_audience": ["example_audience"]
     }
   }],
   "authorizer": { "handler": "allow" },

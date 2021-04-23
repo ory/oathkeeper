@@ -163,8 +163,8 @@ The ID Token Claims are as follows:
 
 - `issuer_url` (string, required) - Sets the "iss" value of the ID Token.
 - `jwks_url` (string, required) - Sets the URL where keys should be fetched
-  from. Supports remote locations (http, https) as well as local filesystem
-  paths.
+  from. Supports remote locations (http, https, s3, gs, azblob) as well as local
+  filesystem paths.
 - `ttl` (string, optional) - Sets the time-to-live of the ID token. Defaults to
   one minute. Valid time units are: s (second), m (minute), h (hour).
 - `claims` (string, optional) - Allows you to customize the ID Token claims and
@@ -224,7 +224,7 @@ represent names of claims and the values are arbitrary data structures which
 will be parsed by the Go [text/template](https://golang.org/pkg/text/template/)
 package for value substitution, receiving the `AuthenticationSession` struct.
 
-For more details please check [Session variables](index.md#session)
+For more details please check [Session variables](../pipeline.md#session)
 
 The claims configuration expects a string which is expected to be valid JSON:
 
@@ -322,7 +322,7 @@ field. The keys are the header name and the values are a string which will be
 parsed by the Go [`text/template`](https://golang.org/pkg/text/template/)
 package for value substitution, receiving the `AuthenticationSession` struct.
 
-For more details please check [Session variables](index.md#session)
+For more details please check [Session variables](../pipeline.md#session)
 
 ### Access Rule Example
 
@@ -401,7 +401,7 @@ field. The keys are the cookie name and the values are a string which will be
 parsed by the Go [`text/template`](https://golang.org/pkg/text/template/)
 package for value substitution, receiving the `AuthenticationSession` struct.
 
-For more details please check [Session variables](index.md#session)
+For more details please check [Session variables](../pipeline.md#session)
 
 ##### Example
 

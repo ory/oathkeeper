@@ -12,6 +12,7 @@ import (
 	"github.com/ory/oathkeeper/pipeline/mutate"
 	"github.com/ory/oathkeeper/rule"
 	"github.com/ory/oathkeeper/x"
+	"github.com/ory/x/urlx"
 
 	"github.com/julienschmidt/httprouter"
 	"gopkg.in/square/go-jose.v2"
@@ -102,7 +103,7 @@ func (h *CredentialsHandler) jwksURLs() ([]url.URL, error) {
 	result := make([]url.URL, len(t))
 	i := 0
 	for u := range t {
-		uu, err := url.Parse(u)
+		uu, err := urlx.Parse(u)
 		if err != nil {
 			return nil, err
 		}

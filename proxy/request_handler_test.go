@@ -33,11 +33,10 @@ import (
 	"github.com/ory/herodot"
 	"github.com/ory/viper"
 
-	"github.com/ory/x/urlx"
-
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/internal"
 	"github.com/ory/oathkeeper/pipeline/authn"
+	"github.com/ory/oathkeeper/x"
 
 	"github.com/stretchr/testify/require"
 
@@ -45,7 +44,7 @@ import (
 )
 
 func newTestRequest(u string) *http.Request {
-	return &http.Request{URL: urlx.ParseOrPanic(u)}
+	return &http.Request{URL: x.ParseURLOrPanic(u), Method: "GET"}
 }
 
 func TestHandleError(t *testing.T) {
@@ -477,7 +476,8 @@ func TestInitializeSession(t *testing.T) {
 			},
 			expectContext: authn.MatchContext{
 				RegexpCaptureGroups: []string{},
-				URL:                 urlx.ParseOrPanic("http://localhost"),
+				URL:                 x.ParseURLOrPanic("http://localhost"),
+				Method:              "GET",
 			},
 		},
 		{
@@ -489,7 +489,8 @@ func TestInitializeSession(t *testing.T) {
 			},
 			expectContext: authn.MatchContext{
 				RegexpCaptureGroups: []string{"user"},
-				URL:                 urlx.ParseOrPanic("http://localhost/user"),
+				URL:                 x.ParseURLOrPanic("http://localhost/user"),
+				Method:              "GET",
 			},
 		},
 		{
@@ -501,7 +502,8 @@ func TestInitializeSession(t *testing.T) {
 			},
 			expectContext: authn.MatchContext{
 				RegexpCaptureGroups: []string{"user"},
-				URL:                 urlx.ParseOrPanic("http://localhost/user?param=test"),
+				URL:                 x.ParseURLOrPanic("http://localhost/user?param=test"),
+				Method:              "GET",
 			},
 		},
 		{
@@ -513,7 +515,8 @@ func TestInitializeSession(t *testing.T) {
 			},
 			expectContext: authn.MatchContext{
 				RegexpCaptureGroups: []string{"http", "user"},
-				URL:                 urlx.ParseOrPanic("http://localhost/user?param=test"),
+				URL:                 x.ParseURLOrPanic("http://localhost/user?param=test"),
+				Method:              "GET",
 			},
 		},
 		{
@@ -525,7 +528,8 @@ func TestInitializeSession(t *testing.T) {
 			},
 			expectContext: authn.MatchContext{
 				RegexpCaptureGroups: []string{},
-				URL:                 urlx.ParseOrPanic("http://localhost/user?param=test"),
+				URL:                 x.ParseURLOrPanic("http://localhost/user?param=test"),
+				Method:              "GET",
 			},
 		},
 	} {

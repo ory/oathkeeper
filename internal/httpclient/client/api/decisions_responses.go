@@ -6,6 +6,7 @@ package api
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"context"
 	"fmt"
 	"io"
 
@@ -52,9 +53,8 @@ func (o *DecisionsReader) ReadResponse(response runtime.ClientResponse, consumer
 			return nil, err
 		}
 		return nil, result
-
 	default:
-		return nil, runtime.NewAPIError("unknown error", response, response.Code())
+		return nil, runtime.NewAPIError("response status code does not match any response statuses defined for this endpoint in the swagger spec", response, response.Code())
 	}
 }
 
@@ -63,7 +63,7 @@ func NewDecisionsOK() *DecisionsOK {
 	return &DecisionsOK{}
 }
 
-/*DecisionsOK handles this case with default header values.
+/* DecisionsOK describes a response with status code 200, with default header values.
 
 An empty response
 */
@@ -84,7 +84,7 @@ func NewDecisionsUnauthorized() *DecisionsUnauthorized {
 	return &DecisionsUnauthorized{}
 }
 
-/*DecisionsUnauthorized handles this case with default header values.
+/* DecisionsUnauthorized describes a response with status code 401, with default header values.
 
 The standard error format
 */
@@ -95,7 +95,6 @@ type DecisionsUnauthorized struct {
 func (o *DecisionsUnauthorized) Error() string {
 	return fmt.Sprintf("[GET /decisions][%d] decisionsUnauthorized  %+v", 401, o.Payload)
 }
-
 func (o *DecisionsUnauthorized) GetPayload() *DecisionsUnauthorizedBody {
 	return o.Payload
 }
@@ -117,7 +116,7 @@ func NewDecisionsForbidden() *DecisionsForbidden {
 	return &DecisionsForbidden{}
 }
 
-/*DecisionsForbidden handles this case with default header values.
+/* DecisionsForbidden describes a response with status code 403, with default header values.
 
 The standard error format
 */
@@ -128,7 +127,6 @@ type DecisionsForbidden struct {
 func (o *DecisionsForbidden) Error() string {
 	return fmt.Sprintf("[GET /decisions][%d] decisionsForbidden  %+v", 403, o.Payload)
 }
-
 func (o *DecisionsForbidden) GetPayload() *DecisionsForbiddenBody {
 	return o.Payload
 }
@@ -150,7 +148,7 @@ func NewDecisionsNotFound() *DecisionsNotFound {
 	return &DecisionsNotFound{}
 }
 
-/*DecisionsNotFound handles this case with default header values.
+/* DecisionsNotFound describes a response with status code 404, with default header values.
 
 The standard error format
 */
@@ -161,7 +159,6 @@ type DecisionsNotFound struct {
 func (o *DecisionsNotFound) Error() string {
 	return fmt.Sprintf("[GET /decisions][%d] decisionsNotFound  %+v", 404, o.Payload)
 }
-
 func (o *DecisionsNotFound) GetPayload() *DecisionsNotFoundBody {
 	return o.Payload
 }
@@ -183,7 +180,7 @@ func NewDecisionsInternalServerError() *DecisionsInternalServerError {
 	return &DecisionsInternalServerError{}
 }
 
-/*DecisionsInternalServerError handles this case with default header values.
+/* DecisionsInternalServerError describes a response with status code 500, with default header values.
 
 The standard error format
 */
@@ -194,7 +191,6 @@ type DecisionsInternalServerError struct {
 func (o *DecisionsInternalServerError) Error() string {
 	return fmt.Sprintf("[GET /decisions][%d] decisionsInternalServerError  %+v", 500, o.Payload)
 }
-
 func (o *DecisionsInternalServerError) GetPayload() *DecisionsInternalServerErrorBody {
 	return o.Payload
 }
@@ -237,6 +233,11 @@ type DecisionsForbiddenBody struct {
 
 // Validate validates this decisions forbidden body
 func (o *DecisionsForbiddenBody) Validate(formats strfmt.Registry) error {
+	return nil
+}
+
+// ContextValidate validates this decisions forbidden body based on context it is used
+func (o *DecisionsForbiddenBody) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
 	return nil
 }
 
@@ -287,6 +288,11 @@ func (o *DecisionsInternalServerErrorBody) Validate(formats strfmt.Registry) err
 	return nil
 }
 
+// ContextValidate validates this decisions internal server error body based on context it is used
+func (o *DecisionsInternalServerErrorBody) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
+	return nil
+}
+
 // MarshalBinary interface implementation
 func (o *DecisionsInternalServerErrorBody) MarshalBinary() ([]byte, error) {
 	if o == nil {
@@ -334,6 +340,11 @@ func (o *DecisionsNotFoundBody) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
+// ContextValidate validates this decisions not found body based on context it is used
+func (o *DecisionsNotFoundBody) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
+	return nil
+}
+
 // MarshalBinary interface implementation
 func (o *DecisionsNotFoundBody) MarshalBinary() ([]byte, error) {
 	if o == nil {
@@ -378,6 +389,11 @@ type DecisionsUnauthorizedBody struct {
 
 // Validate validates this decisions unauthorized body
 func (o *DecisionsUnauthorizedBody) Validate(formats strfmt.Registry) error {
+	return nil
+}
+
+// ContextValidate validates this decisions unauthorized body based on context it is used
+func (o *DecisionsUnauthorizedBody) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
 	return nil
 }
 

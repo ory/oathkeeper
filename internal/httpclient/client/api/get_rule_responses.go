@@ -6,6 +6,7 @@ package api
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"context"
 	"fmt"
 	"io"
 
@@ -42,9 +43,8 @@ func (o *GetRuleReader) ReadResponse(response runtime.ClientResponse, consumer r
 			return nil, err
 		}
 		return nil, result
-
 	default:
-		return nil, runtime.NewAPIError("unknown error", response, response.Code())
+		return nil, runtime.NewAPIError("response status code does not match any response statuses defined for this endpoint in the swagger spec", response, response.Code())
 	}
 }
 
@@ -53,7 +53,7 @@ func NewGetRuleOK() *GetRuleOK {
 	return &GetRuleOK{}
 }
 
-/*GetRuleOK handles this case with default header values.
+/* GetRuleOK describes a response with status code 200, with default header values.
 
 A rule
 */
@@ -64,7 +64,6 @@ type GetRuleOK struct {
 func (o *GetRuleOK) Error() string {
 	return fmt.Sprintf("[GET /rules/{id}][%d] getRuleOK  %+v", 200, o.Payload)
 }
-
 func (o *GetRuleOK) GetPayload() *models.Rule {
 	return o.Payload
 }
@@ -86,7 +85,7 @@ func NewGetRuleNotFound() *GetRuleNotFound {
 	return &GetRuleNotFound{}
 }
 
-/*GetRuleNotFound handles this case with default header values.
+/* GetRuleNotFound describes a response with status code 404, with default header values.
 
 The standard error format
 */
@@ -97,7 +96,6 @@ type GetRuleNotFound struct {
 func (o *GetRuleNotFound) Error() string {
 	return fmt.Sprintf("[GET /rules/{id}][%d] getRuleNotFound  %+v", 404, o.Payload)
 }
-
 func (o *GetRuleNotFound) GetPayload() *GetRuleNotFoundBody {
 	return o.Payload
 }
@@ -119,7 +117,7 @@ func NewGetRuleInternalServerError() *GetRuleInternalServerError {
 	return &GetRuleInternalServerError{}
 }
 
-/*GetRuleInternalServerError handles this case with default header values.
+/* GetRuleInternalServerError describes a response with status code 500, with default header values.
 
 The standard error format
 */
@@ -130,7 +128,6 @@ type GetRuleInternalServerError struct {
 func (o *GetRuleInternalServerError) Error() string {
 	return fmt.Sprintf("[GET /rules/{id}][%d] getRuleInternalServerError  %+v", 500, o.Payload)
 }
-
 func (o *GetRuleInternalServerError) GetPayload() *GetRuleInternalServerErrorBody {
 	return o.Payload
 }
@@ -173,6 +170,11 @@ type GetRuleInternalServerErrorBody struct {
 
 // Validate validates this get rule internal server error body
 func (o *GetRuleInternalServerErrorBody) Validate(formats strfmt.Registry) error {
+	return nil
+}
+
+// ContextValidate validates this get rule internal server error body based on context it is used
+func (o *GetRuleInternalServerErrorBody) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
 	return nil
 }
 
@@ -220,6 +222,11 @@ type GetRuleNotFoundBody struct {
 
 // Validate validates this get rule not found body
 func (o *GetRuleNotFoundBody) Validate(formats strfmt.Registry) error {
+	return nil
+}
+
+// ContextValidate validates this get rule not found body based on context it is used
+func (o *GetRuleNotFoundBody) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
 	return nil
 }
 

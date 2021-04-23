@@ -65,10 +65,10 @@ This is the same for all handlers!
   config: {
     when: [
       {
-        error: ['unauthorized', '...', '...'],
-      },
-    ],
-  },
+        error: ['unauthorized', '...', '...']
+      }
+    ]
+  }
 }
 ```
 
@@ -166,10 +166,10 @@ in the global config and in the access rule:
   config: {
     when: [
       {
-        error: ['unauthorized', '...', '...'],
-      },
-    ],
-  },
+        error: ['unauthorized', '...', '...']
+      }
+    ]
+  }
 }
 ```
 
@@ -295,7 +295,7 @@ As discussed previously, if this configuration key is left empty, then all
 remote IPs will match!
 
 HTTP Requests that include one of the matching IP Addresses in the
-`X-Forwaded-For` HTTP Header, for example
+`X-Forwarded-For` HTTP Header, for example
 `X-Forwarded-For: 123.123.123.123, ..., 192.168.1.1, ...`, now match this error
 handler.
 
@@ -402,8 +402,8 @@ conditions under the `when` key.
     verbose: true, // defaults to false
     when: [
       // ...
-    ],
-  },
+    ]
+  }
 }
 ```
 
@@ -413,6 +413,10 @@ The `redirect` Error Handler returns a HTTP 302/301 response with a `Location`
 Header. As discussed in the previous section, you can define error matching
 conditions under the `when` key.
 
+If you want to append the current url (where the error happened) to address
+redirected to, You can specify `return_to_query_param` to set the name of
+parameter that will hold the url.
+
 **Example**
 
 ```json5
@@ -421,13 +425,20 @@ conditions under the `when` key.
   handler: 'json',
   config: {
     to: 'http://my-website/login', // required!!
+    return_to_query_param: 'return_to',
     code: 301, // defaults to 302 - only 301 and 302 are supported.
     when: [
       // ...
-    ],
-  },
+    ]
+  }
 }
 ```
+
+When the user accesses a protected url `http://my-website/settings`, they will
+be redirected to
+`http://my-website/login?return_to=http%3A%2F%2Fmy-website%2Fsettings`. The
+login page can use the `return_to` paramter to return user to intended page
+after a successful login.
 
 ### `www_authenticate`
 
@@ -454,7 +465,7 @@ conditions under the `when` key.
     realm: 'Please enter your username and password', // Defaults to `Please authenticate.`
     when: [
       // ...
-    ],
-  },
+    ]
+  }
 }
 ```

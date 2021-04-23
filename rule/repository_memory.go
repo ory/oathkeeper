@@ -28,7 +28,9 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/ory/oathkeeper/driver/configuration"
+	"github.com/ory/oathkeeper/driver/health"
 	"github.com/ory/oathkeeper/helper"
+	rulereadiness "github.com/ory/oathkeeper/rule/readiness"
 	"github.com/ory/oathkeeper/x"
 
 	"github.com/ory/x/pagination"
@@ -46,6 +48,8 @@ type RepositoryMemory struct {
 	rules            []Rule
 	matchingStrategy configuration.MatchingStrategy
 	r                repositoryMemoryRegistry
+
+	hem health.EventManager
 }
 
 // MatchingStrategy returns current MatchingStrategy.
@@ -63,10 +67,11 @@ func (m *RepositoryMemory) SetMatchingStrategy(_ context.Context, ms configurati
 	return nil
 }
 
-func NewRepositoryMemory(r repositoryMemoryRegistry) *RepositoryMemory {
+func NewRepositoryMemory(r repositoryMemoryRegistry, hem health.EventManager) *RepositoryMemory {
 	return &RepositoryMemory{
 		r:     r,
 		rules: make([]Rule, 0),
+		hem:   hem,
 	}
 }
 
@@ -115,11 +120,16 @@ func (m *RepositoryMemory) Set(ctx context.Context, rules []Rule) error {
 
 	m.Lock()
 	m.rules = rules
+	m.hem.Dispatch(&rulereadiness.RuleLoadedEvent{})
 	m.Unlock()
 	return nil
 }
 
 func (m *RepositoryMemory) Match(_ context.Context, method string, u *url.URL) (*Rule, error) {
+	if u == nil {
+		return nil, errors.WithStack(errors.New("nil URL provided"))
+	}
+
 	m.Lock()
 	defer m.Unlock()
 

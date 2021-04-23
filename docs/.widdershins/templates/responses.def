@@ -12,7 +12,7 @@
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
-{{~ data.responses :r}}|{{=r.status}}|{{=r.meaning}}|{{=r.description || 'none'}}|{{=r.schema}}|
+{{~ data.responses :r}}|{{=r.status}}|{{=r.meaning}}|{{ const description = (r.description || 'none').replace('\n', ' '); }}{{=description }}|{{=r.schema}}|
 {{~}}
 
 {{ data.responseSchemas = false; }}
@@ -21,6 +21,7 @@
 {{~}}
 {{? data.responseSchemas }}
 <a id="{{=data.operationUniqueSlug}}-responseschema"></a>
+
 ##### Response Schema
 {{~ data.responses :response}}
 {{? response.content && !response.$ref && !data.utils.isPrimitive(response.type)}}
