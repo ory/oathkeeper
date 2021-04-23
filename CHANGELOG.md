@@ -207,7 +207,7 @@
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-# [Unreleased](https://github.com/ory/oathkeeper/compare/v0.38.10-beta.1...c9faecc5d32800537f07e8e05f9c8872e609c3f9) (2021-04-23)
+# [Unreleased](https://github.com/ory/oathkeeper/compare/v0.38.10-beta.1...f67241f2ab7063fa9ce8e8ea455de25b51414f30) (2021-04-23)
 
 ### Bug Fixes
 
@@ -241,6 +241,9 @@
 - Adds audience into Extra at oAuth2 introspection
   ([#480](https://github.com/ory/oathkeeper/issues/480))
   ([c9faecc](https://github.com/ory/oathkeeper/commit/c9faecc5d32800537f07e8e05f9c8872e609c3f9))
+- Global docs sidebar and added cloud pages
+  ([#705](https://github.com/ory/oathkeeper/issues/705))
+  ([f67241f](https://github.com/ory/oathkeeper/commit/f67241f2ab7063fa9ce8e8ea455de25b51414f30))
 
 ## [0.38.10-beta.1](https://github.com/ory/oathkeeper/compare/v0.38.9-beta.1...v0.38.10-beta.1) (2021-04-06)
 
