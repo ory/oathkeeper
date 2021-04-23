@@ -205,7 +205,7 @@ func (a *AuthenticatorOAuth2Introspection) Authenticate(r *http.Request, session
 		i.Extra["scope"] = i.Scope
 
 		if len(i.Audience) != 0 {
-			i.Extra["aud"] = strings.Join(i.Audience, " ")
+			i.Extra["aud"] = i.Audience
 		}
 
 		a.tokenToCache(cf, i, token)
