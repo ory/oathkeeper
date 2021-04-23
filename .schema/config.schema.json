@@ -1606,7 +1606,7 @@
         },
         "deny": {
           "title": "Deny",
-          "description": "The [`deny` authorizer](https://www.ory.sh/oathkeeper/docs/pipeline/authz#allow).",
+          "description": "The [`deny` authorizer](https://www.ory.sh/oathkeeper/docs/pipeline/authz#deny).",
           "type": "object",
           "additionalProperties": false,
           "properties": {
