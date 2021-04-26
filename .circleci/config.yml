@@ -52,9 +52,11 @@ workflows:
               only: master
       - sdk/generate:
           appname: Ory_Oathkeeper
+          swagpath: spec/api.json
           requires:
             - test
       - sdk/release:
+          swagpath: spec/api.json
           requires:
             - test
             - goreleaser/release
@@ -64,6 +66,7 @@ workflows:
             branches:
               ignore: /.*/
       - docs/build:
+          swag-spec-location: spec/api.json
           requires:
             - test
           filters:
