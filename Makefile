@@ -34,7 +34,7 @@ gen:
 
 # Generates the SDKs
 .PHONY: sdk
-sdk: deps
+sdk: .bin/packr2 .bin/swagger .bin/ory
 		swagger generate spec -m -o ./spec/api.json -x internal/httpclient
 		ory dev swagger sanitize ./spec/api.json
 		swagger flatten --with-flatten=remove-unused -o ./spec/api.json ./spec/api.json
@@ -45,7 +45,7 @@ sdk: deps
 		make format
 
 .PHONY: install-stable
-install-stable: deps
+install-stable: .bin/packr2
 		OATHKEEPER_LATEST=$$(git describe --abbrev=0 --tags)
 		git checkout $$OATHKEEPER_LATEST
 		packr2
@@ -56,13 +56,13 @@ install-stable: deps
 		git checkout master
 
 .PHONY: install
-install: deps
+install: .bin/packr2
 		packr2 || (GO111MODULE=on go install github.com/gobuffalo/packr/v2/packr2 && packr2)
 		GO111MODULE=on go install .
 		packr2 clean
 
 .PHONY: docker
-docker: deps
+docker: .bin/packr2
 		packr2 || (GO111MODULE=on go install github.com/gobuffalo/packr/v2/packr2 && packr2)
 		CGO_ENABLED=0 GO111MODULE=on GOOS=linux GOARCH=amd64 go build
 		packr2 clean
