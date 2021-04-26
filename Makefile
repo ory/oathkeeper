@@ -1,27 +1,32 @@
-SHELL=/usr/bin/env bash -o pipefail
+SHELL=/bin/bash -o pipefail
 
 export GO111MODULE := on
 export PATH := .bin:${PATH}
+export PWD := $(shell pwd)
 
-.PHONY: deps
-deps:
-ifneq ("$(shell base64 Makefile))","$(shell cat .bin/.lock)")
-		go build -o .bin/go-acc github.com/ory/go-acc
-		go build -o .bin/goreturns github.com/sqs/goreturns
-		go build -o .bin/listx github.com/ory/x/tools/listx
-		go build -o .bin/mockgen github.com/golang/mock/mockgen
-		go build -o .bin/swagger github.com/go-swagger/go-swagger/cmd/swagger
-		go build -o .bin/goimports golang.org/x/tools/cmd/goimports
-		go build -o .bin/ory github.com/ory/cli
-		go build -o .bin/packr2 github.com/gobuffalo/packr/v2/packr2
-		echo "v0" > .bin/.lock
-		echo "$$(base64 Makefile)" > .bin/.lock
-endif
+GO_DEPENDENCIES = github.com/ory/go-acc \
+				  golang.org/x/tools/cmd/goimports \
+				  github.com/go-swagger/go-swagger/cmd/swagger \
+				  github.com/ory/cli \
+				  github.com/gobuffalo/packr/v2/packr2 \
+				  github.com/go-bindata/go-bindata/go-bindata
+
+define make-go-dependency
+  # go install is responsible for not re-building when the code hasn't changed
+  .bin/$(notdir $1): go.sum go.mod
+		GOBIN=$(PWD)/.bin/ go install $1
+endef
+
+
+.bin/clidoc: go.mod
+		go build -o .bin/clidoc ./cmd/clidoc/.
 
 # Formats the code
 .PHONY: format
-format: deps
-		goreturns -w -local github.com/ory $$(listx .)
+format: .bin/goimports node_modules docs/node_modules
+		goimports -w --local github.com/ory .
+		npm run format
+		cd docs; npm run format
 
 .PHONY: gen
 gen:
@@ -30,13 +35,13 @@ gen:
 # Generates the SDKs
 .PHONY: sdk
 sdk: deps
-		swagger generate spec -m -o ./.schema/api.swagger.json -x internal/httpclient
-		ory dev swagger sanitize ./.schema/api.swagger.json
-		swagger flatten --with-flatten=remove-unused -o ./.schema/api.swagger.json ./.schema/api.swagger.json
-		swagger validate ./.schema/api.swagger.json
+		swagger generate spec -m -o ./spec/api.json -x internal/httpclient
+		ory dev swagger sanitize ./spec/api.json
+		swagger flatten --with-flatten=remove-unused -o ./spec/api.json ./spec/api.json
+		swagger validate ./spec/api.json
 		rm -rf internal/httpclient
 		mkdir -p internal/httpclient
-		swagger generate client -f ./.schema/api.swagger.json -t internal/httpclient -A Ory_Oathkeeper
+		swagger generate client -f ./spec/api.json -t internal/httpclient -A Ory_Oathkeeper
 		make format
 
 .PHONY: install-stable
@@ -64,3 +69,6 @@ docker: deps
 		docker build -t oryd/oathkeeper:dev .
 		docker build -t oryd/oathkeeper:dev-alpine -f Dockerfile-alpine .
 		rm oathkeeper
+
+docs/cli: .bin/clidoc
+		clidoc .
