@@ -16,7 +16,7 @@ define make-go-dependency
   .bin/$(notdir $1): go.sum go.mod
 		GOBIN=$(PWD)/.bin/ go install $1
 endef
-
+$(foreach dep, $(GO_DEPENDENCIES), $(eval $(call make-go-dependency, $(dep))))
 
 .bin/clidoc: go.mod
 		go build -o .bin/clidoc ./cmd/clidoc/.
