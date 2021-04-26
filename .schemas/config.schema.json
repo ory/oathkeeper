@@ -772,6 +772,24 @@
           "examples": [
             "{\"subject\":\"{{ .Subject }}\"}"
           ]
+        },
+        "client": {
+          "title": "HTTP client resilience configuration",
+          "type": "object",
+          "description": "Backoff configuration of the resilient HTTP client used to connect to the remote authorizer",
+          "properties": {
+            "timeout": {
+              "type": "integer",
+              "description": "Timeout in milliseconds after which we need to retry unsuccessful HTTP call",
+              "default": 0
+            },
+            "stop_after": {
+              "type": "integer",
+              "description": "Stop issuing HTTP calls after this time in milliseconds",
+              "default": 0
+            }
+          },
+          "additionalProperties": false
         }
       },
       "required": [

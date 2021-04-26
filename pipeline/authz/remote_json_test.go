@@ -99,6 +99,23 @@ func TestAuthorizerRemoteJSONAuthorize(t *testing.T) {
 			config:  json.RawMessage(`{"payload":"{}"}`),
 		},
 		{
+			name: "ok with custom client",
+			setup: func(t *testing.T) *httptest.Server {
+				return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+					assert.Contains(t, r.Header, "Content-Type")
+					assert.Contains(t, r.Header["Content-Type"], "application/json")
+					assert.Contains(t, r.Header, "Authorization")
+					assert.Contains(t, r.Header["Authorization"], "Bearer token")
+					body, err := ioutil.ReadAll(r.Body)
+					require.NoError(t, err)
+					assert.Equal(t, string(body), "{}")
+					w.WriteHeader(http.StatusOK)
+				}))
+			},
+			session: &authn.AuthenticationSession{},
+			config:  json.RawMessage(`{"payload":"{}","client":{"timeout":2000,"stop_after":4000}}`),
+		},
+		{
 			name: "authentication session",
 			setup: func(t *testing.T) *httptest.Server {
 				return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -189,9 +206,15 @@ func TestAuthorizerRemoteJSONValidate(t *testing.T) {
 			wantErr: true,
 		},
 		{
+			name:    "invalid client config",
+			enabled: true,
+			config:  json.RawMessage(`{"remote":"http://host/path","payload":"{}","client":{"timeout": "foo"}}`),
+			wantErr: true,
+		},
+		{
 			name:    "valid configuration",
 			enabled: true,
-			config:  json.RawMessage(`{"remote":"http://host/path","payload":"{}"}`),
+			config:  json.RawMessage(`{"remote":"http://host/path","payload":"{}","client":{"timeout":2,"stop_after":55}}`),
 		},
 	}
 	for _, tt := range tests {
