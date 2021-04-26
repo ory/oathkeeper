@@ -2,10 +2,6 @@ module github.com/ory/oathkeeper
 
 replace gopkg.in/DataDog/dd-trace-go.v1 => gopkg.in/DataDog/dd-trace-go.v1 v1.27.1
 
-replace github.com/ory/kratos/corp => github.com/ory/kratos/corp v0.0.0-20210118092700-c2358be1e867
-
-replace github.com/ory/kratos-client-go => github.com/ory/kratos-client-go v0.5.4-alpha.1.0.20210210170256-960b093d8bf9
-
 require (
 	github.com/Azure/azure-pipeline-go v0.2.2
 	github.com/Azure/azure-storage-blob-go v0.9.0
@@ -42,7 +38,7 @@ require (
 	github.com/mitchellh/copystructure v1.0.0
 	github.com/opentracing/opentracing-go v1.2.0
 	github.com/ory/analytics-go/v4 v4.0.1
-	github.com/ory/cli v0.0.49
+	github.com/ory/cli v0.0.10
 	github.com/ory/fosite v0.36.1
 	github.com/ory/go-acc v0.2.6
 	github.com/ory/go-convenience v0.1.0
@@ -52,7 +48,7 @@ require (
 	github.com/ory/jsonschema/v3 v3.0.1
 	github.com/ory/ladon v1.1.0
 	github.com/ory/viper v1.7.5
-	github.com/ory/x v0.0.223
+	github.com/ory/x v0.0.163
 	github.com/pborman/uuid v1.2.0
 	github.com/phayes/freeport v0.0.0-20180830031419-95f893ade6f2
 	github.com/pkg/errors v0.9.1
