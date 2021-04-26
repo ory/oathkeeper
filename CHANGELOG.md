@@ -5,8 +5,9 @@
 
 **Table of Contents**
 
-- [Unreleased (2021-04-25)](#unreleased-2021-04-25)
+- [Unreleased (2021-04-26)](#unreleased-2021-04-26)
   - [Bug Fixes](#bug-fixes)
+  - [Code Refactoring](#code-refactoring)
   - [Documentation](#documentation)
   - [Features](#features)
   - [0.38.10-beta.1 (2021-04-06)](#03810-beta1-2021-04-06)
@@ -50,7 +51,7 @@
     - [Bug Fixes](#bug-fixes-9)
 - [0.38.0-beta.2 (2020-05-07)](#0380-beta2-2020-05-07)
   - [Bug Fixes](#bug-fixes-10)
-  - [Code Refactoring](#code-refactoring)
+  - [Code Refactoring](#code-refactoring-1)
   - [Documentation](#documentation-7)
   - [Features](#features-8)
   - [0.37.1-beta.1 (2020-04-03)](#0371-beta1-2020-04-03)
@@ -207,16 +208,25 @@
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-# [Unreleased](https://github.com/ory/oathkeeper/compare/v0.38.10-beta.1...f67241f2ab7063fa9ce8e8ea455de25b51414f30) (2021-04-25)
+# [Unreleased](https://github.com/ory/oathkeeper/compare/v0.38.10-beta.1...2832a773782047f39680033860c2a8e9558883c0) (2021-04-26)
 
 ### Bug Fixes
 
+- Register makefile tasks
+  ([2832a77](https://github.com/ory/oathkeeper/commit/2832a773782047f39680033860c2a8e9558883c0))
+- Resolve makefile issues
+  ([9df3b2a](https://github.com/ory/oathkeeper/commit/9df3b2a7bd4a207bc68e94fde28a720eb7a816b1))
 - Set cost 1 when caching tokens with configurable max cost
   ([#680](https://github.com/ory/oathkeeper/issues/680))
   ([8db0e9d](https://github.com/ory/oathkeeper/commit/8db0e9de60dbc5d1964440bd2ea14ec063b71cab))
 - Update shebangs to use bash from /usr/bin/env instead of /bin/ for better
   portability ([#694](https://github.com/ory/oathkeeper/issues/694))
   ([e522062](https://github.com/ory/oathkeeper/commit/e52206214e5e6b949b785752ee638a80b4775355))
+
+### Code Refactoring
+
+- Move api.json
+  ([7dc37fd](https://github.com/ory/oathkeeper/commit/7dc37fd55edfa623bf30e32da1aef6c662779678))
 
 ### Documentation
 
