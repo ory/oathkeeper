@@ -43,6 +43,7 @@ type proxyRegistry interface {
 
 	ProxyRequestHandler() *RequestHandler
 	RuleMatcher() rule.Matcher
+	UpstreamTransport(r *http.Request) (http.RoundTripper, error)
 }
 
 func NewProxy(r proxyRegistry) *Proxy {
@@ -91,24 +92,14 @@ func (d *Proxy) RoundTrip(r *http.Request) (*http.Response, error) {
 		}, nil
 	} else if err == nil {
 
-		transport := http.DefaultTransport
-
-		// FIXME: Test config settings for extended Root CA cert file
-		if true {
+		transport, err := d.r.UpstreamTransport(r)
+		if err != nil {
 			d.r.Logger().
+				WithError(errors.WithStack(err)).
+				WithField("granted", false).
 				WithFields(fields).
-				WithField("insecure-skip-verify", false).
-				Warn("Using extended Root CA")
-
-			transport, err = useTransportWithExtendedRootCa("./config/certs/hydra/private.crt") // FIXME: Read from a config somehow...
-			if err != nil {
-				d.r.Logger().
-					WithError(errors.WithStack(err)).
-					WithField("granted", false).
-					WithFields(fields).
-					Warn("Access request denied because extended Root CA failed")
-				return nil, err
-			}
+				Warn("Access request denied because upstream transport creation failed")
+			return nil, err
 		}
 
 		res, err := transport.RoundTrip(r)

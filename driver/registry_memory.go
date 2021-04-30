@@ -2,6 +2,10 @@ package driver
 
 import (
 	"context"
+	"crypto/tls"
+	"crypto/x509"
+	"io/ioutil"
+	"net/http"
 	"sync"
 	"time"
 
@@ -100,6 +104,41 @@ func (r *RegistryMemory) ProxyRequestHandler() *proxy.RequestHandler {
 func (r *RegistryMemory) RuleMatcher() rule.Matcher {
 	_ = r.RuleRepository() // make sure `r.ruleRepository` is set
 	return r.ruleRepository
+}
+
+func (r *RegistryMemory) UpstreamTransport(req *http.Request) (http.RoundTripper, error) {
+
+	// Use req to decide the transport per request iff need be.
+
+	certFile := r.c.ProxyServeUpstreamCaAppendCrtPath()
+	if certFile == "" {
+		return http.DefaultTransport, nil
+	}
+
+	transport := &(*http.DefaultTransport.(*http.Transport)) // shallow copy
+
+	// Get the SystemCertPool or continue with an empty pool on error
+	rootCAs, err := x509.SystemCertPool()
+	if err != nil {
+		return nil, err
+	}
+
+	certs, err := ioutil.ReadFile(certFile)
+	if err != nil {
+		return nil, err
+	}
+
+	// Append our cert to the system pool
+	if ok := rootCAs.AppendCertsFromPEM(certs); !ok {
+		return nil, errors.New("No certs appended, only system certs present, did you specify the correct cert file?")
+	}
+
+	transport.TLSClientConfig = &tls.Config{
+		InsecureSkipVerify: false,
+		RootCAs:            rootCAs,
+	}
+
+	return transport, nil
 }
 
 func NewRegistryMemory() *RegistryMemory {

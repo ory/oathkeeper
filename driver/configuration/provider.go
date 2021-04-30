@@ -5,7 +5,7 @@ import (
 	"net/url"
 	"time"
 
-	"github.com/gobuffalo/packr/v2"
+	packr "github.com/gobuffalo/packr/v2"
 
 	"github.com/ory/fosite"
 	"github.com/ory/x/tracing"
@@ -41,6 +41,7 @@ type Provider interface {
 	ProxyReadTimeout() time.Duration
 	ProxyWriteTimeout() time.Duration
 	ProxyIdleTimeout() time.Duration
+	ProxyServeUpstreamCaAppendCrtPath() string
 
 	APIReadTimeout() time.Duration
 	APIWriteTimeout() time.Duration
