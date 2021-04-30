@@ -1212,6 +1212,22 @@
             "timeout": {
               "$ref": "#/definitions/serverTimeout"
             },
+            "upstream": {
+              "type": "object",
+              "title": "HTTP Upstream",
+              "additionalProperties": false,
+              "properties": {
+                "ca_append_crt_path": {
+                  "type": "string",
+                  "default": "",
+                  "examples": [
+                    "./self-signed.crt"
+                  ],
+                  "title": "CA Certificate",
+                  "description": "The file containing the CA certificates to append to the Root CA when using upstream connections."
+                }
+              }
+            },
             "cors": {
               "$ref": "#/definitions/cors"
             },
