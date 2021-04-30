@@ -22,6 +22,8 @@ package proxy
 
 import (
 	"context"
+	"crypto/tls"
+	"crypto/x509"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -41,6 +43,7 @@ type proxyRegistry interface {
 
 	ProxyRequestHandler() *RequestHandler
 	RuleMatcher() rule.Matcher
+	UpstreamTransport(r *http.Request) (http.RoundTripper, error)
 }
 
 func NewProxy(r proxyRegistry) *Proxy {
@@ -88,7 +91,18 @@ func (d *Proxy) RoundTrip(r *http.Request) (*http.Response, error) {
 			Header:     rw.header,
 		}, nil
 	} else if err == nil {
-		res, err := http.DefaultTransport.RoundTrip(r)
+
+		transport, err := d.r.UpstreamTransport(r)
+		if err != nil {
+			d.r.Logger().
+				WithError(errors.WithStack(err)).
+				WithField("granted", false).
+				WithFields(fields).
+				Warn("Access request denied because upstream transport creation failed")
+			return nil, err
+		}
+
+		res, err := transport.RoundTrip(r)
 		if err != nil {
 			d.r.Logger().
 				WithError(errors.WithStack(err)).
@@ -193,4 +207,34 @@ func ConfigureBackendURL(r *http.Request, rl *rule.Rule) error {
 	}
 
 	return nil
+}
+
+// Allow for extending the Root CA chain
+// Use to avoid the error: "http: proxy error: x509: certificate signed by unknown authority" for self-signed
+// certificates upstream.
+func useTransportWithExtendedRootCa(certFile string) (transport *http.Transport, err error) {
+	transport = &(*http.DefaultTransport.(*http.Transport)) // shallow copy
+
+	// Get the SystemCertPool or continue with an empty pool on error
+	rootCAs, err := x509.SystemCertPool()
+	if err != nil {
+		return nil, err
+	}
+
+	certs, err := ioutil.ReadFile(certFile)
+	if err != nil {
+		return nil, err
+	}
+
+	// Append our cert to the system pool
+	if ok := rootCAs.AppendCertsFromPEM(certs); !ok {
+		return nil, errors.New("No certs appended, only system certs present, did you specifi the correct cert file?")
+	}
+
+	transport.TLSClientConfig = &tls.Config{
+		InsecureSkipVerify: false,
+		RootCAs:            rootCAs,
+	}
+
+	return transport, nil
 }
