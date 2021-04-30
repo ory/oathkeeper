@@ -1538,6 +1538,28 @@ serve:
       #
       read: 5s
 
+    ## HTTP Upstream ##
+    #
+    # Control the HTTP upstream.
+    #
+    upstream:
+      ## Append Certificate To Root CA ##
+      #
+      # The path to a certificate file to append to the Root Certificate Authority for the upstream connection. Use this to accept self-signed certificates on the upstream only, keeping the host system certificate authority unaltered.
+      #
+      # Default value: ""
+      #
+      # Examples:
+      # - self-signed.crt      
+      #
+      # Set this value using environment variables on
+      # - Linux/macOS:
+      #    $ export SERVE_PROXY_UPSTREAM_CA_APPEND_CRT_PATH=<value>
+      # - Windows Command Line (CMD):
+      #    > set SERVE_PROXY_UPSTREAM_CA_APPEND_CRT_PATH=<value>
+      #
+      ca_append_crt_path: ""
+
     ## Cross Origin Resource Sharing (CORS) ##
     #
     # Configure [Cross Origin Resource Sharing (CORS)](http://www.w3.org/TR/cors/) using the following options.
