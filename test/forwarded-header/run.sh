@@ -34,14 +34,28 @@ run_oathkekeper() {
   waitport 6061
 }
 
-function make_request {
-  local url=$1
-  local expected_status_code=$2
+make_request() {
+  url=$1
+  expected_status_code=$2
   shift 2
 
-  if [[ $(curl --silent --output /dev/null -f ${url} -w '%{http_code}' "$@") -ne $expected_status_code ]]
-  then
-    exit 1
+  [[ $(curl --silent --output /dev/null -f ${url} -w '%{http_code}' "$@") -eq $expected_status_code ]]
+}
+
+SUCCESS_TEST=()
+FAILED_TEST=()
+
+run_test() {
+  label=$1
+  shift 1
+
+  result="0"
+  "$@" || result="1"
+
+  if [[ "$result" -eq "0" ]]; then
+    SUCCESS_TEST+=("$label")
+  else
+    FAILED_TEST+=("$label")
   fi
 }
 
@@ -54,23 +68,40 @@ trap finish EXIT
 
 run_oathkekeper
 
-echo "Executing request against a HTTP rule -> 200"
-make_request "http://127.0.0.1:6060/http" 200
+run_test "Executing request against a HTTP rule -> 200" \
+  make_request "http://127.0.0.1:6060/http" 200
 
-echo "Executing request against a HTTP rule with forwrded proto HTTP -> 200"
-make_request "http://127.0.0.1:6060/http" 200 -H "X-Forwarded-Proto: http"
+run_test "Executing request against a HTTP rule with forwrded proto HTTP -> 200" \
+  make_request "http://127.0.0.1:6060/http" 200 -H "X-Forwarded-Proto: http"
 
-echo "Executing request against a HTTP rule with forwrded proto HTTPS -> 404"
-make_request "http://127.0.0.1:6060/http" 404 -H "X-Forwarded-Proto: https"
+run_test "Executing request against a HTTP rule with forwrded proto HTTPS -> 404" \
+  make_request "http://127.0.0.1:6060/http" 404 -H "X-Forwarded-Proto: https"
 
-echo "Executing request against a HTTPS rule -> 404"
-make_request "http://127.0.0.1:6060/https" 404
+run_test "Executing request against a HTTPS rule -> 404" \
+  make_request "http://127.0.0.1:6060/https" 404
 
-echo "Executing request against a HTTPS rule with forwarded proto HTTP -> 404"
-make_request "http://127.0.0.1:6060/https" 404 -H "X-Forwarded-Proto: http"
+run_test "Executing request against a HTTPS rule with forwarded proto HTTP -> 404" \
+  make_request "http://127.0.0.1:6060/https" 404 -H "X-Forwarded-Proto: http"
 
-echo "Executing request against a HTTPS rule with forwarded proto HTTPS -> 200"
-make_request "http://127.0.0.1:6060/https" 200 -H "X-Forwarded-Proto: https"
+run_test "Executing request against a HTTPS rule with forwarded proto HTTPS -> 200" \
+  make_request "http://127.0.0.1:6060/https" 200 -H "X-Forwarded-Proto: https"
+
+
+echo "PASS: ${#SUCCESS_TEST[@]}"
+for value in "${SUCCESS_TEST[@]}"
+do
+  echo "- $value"
+done
+
+if [[ "${#FAILED_TEST[@]}" -gt 0 ]]; then
+  echo "FAILED: ${#FAILED_TEST[@]}"
+  for value in "${FAILED_TEST[@]}"
+  do
+    echo "- $value"
+  done
+
+  exit 1
+fi
 
 kill %1 || true
 
