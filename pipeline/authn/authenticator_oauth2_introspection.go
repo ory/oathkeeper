@@ -70,8 +70,7 @@ type AuthenticatorOAuth2Introspection struct {
 }
 
 func NewAuthenticatorOAuth2Introspection(c configuration.Provider, logger *logrusx.Logger) *AuthenticatorOAuth2Introspection {
-	var rt http.RoundTripper
-	return &AuthenticatorOAuth2Introspection{c: c, client: httpx.NewResilientClientLatencyToleranceSmall(rt), logger: logger}
+	return &AuthenticatorOAuth2Introspection{c: c, logger: logger}
 }
 
 func (a *AuthenticatorOAuth2Introspection) GetID() string {
@@ -263,6 +262,7 @@ func (a *AuthenticatorOAuth2Introspection) Config(config json.RawMessage) (*Auth
 	}
 
 	if a.client == nil {
+		a.logger.Debug("Initializing http client")
 		var rt http.RoundTripper
 		if c.PreAuth != nil && c.PreAuth.Enabled {
 			var ep url.Values
