@@ -21,6 +21,17 @@
       "examples": [
         "{\"subject\":\"{{ .Subject }}\"}"
       ]
+    },
+    "allowed_remote_headers": {
+      "title": "Allowed Remote HTTP Headers for his Responses",
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "A list of non simple headers the remote is allowed to return to mutate requests.",
+      "examples": [
+        "X-Branch-Id"
+      ]
     }
   },
   "required": [

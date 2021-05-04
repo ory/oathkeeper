@@ -21,8 +21,9 @@ import (
 
 // AuthorizerRemoteConfiguration represents a configuration for the remote authorizer.
 type AuthorizerRemoteConfiguration struct {
-	Remote  string            `json:"remote"`
-	Headers map[string]string `json:"headers"`
+	Remote               string            `json:"remote"`
+	Headers              map[string]string `json:"headers"`
+	AllowedRemoteHeaders []string          `json:"allowed_remote_headers"`
 }
 
 // AuthorizerRemote implements the Authorizer interface.
@@ -106,6 +107,10 @@ func (a *AuthorizerRemote) Authorize(r *http.Request, session *authn.Authenticat
 		return errors.WithStack(helper.ErrForbidden)
 	} else if res.StatusCode != http.StatusOK {
 		return errors.Errorf("expected status code %d but got %d", http.StatusOK, res.StatusCode)
+	}
+
+	for _, allowedHeader := range c.AllowedRemoteHeaders {
+		session.SetHeader(allowedHeader, res.Header.Get(allowedHeader))
 	}
 
 	return nil
