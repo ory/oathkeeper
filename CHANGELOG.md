@@ -5,11 +5,12 @@
 
 **Table of Contents**
 
-- [Unreleased (2021-04-27)](#unreleased-2021-04-27)
-  - [Bug Fixes](#bug-fixes)
-  - [Code Refactoring](#code-refactoring)
-  - [Documentation](#documentation)
-  - [Features](#features)
+- [Unreleased (2021-05-04)](#unreleased-2021-05-04)
+  - [0.38.10-beta.2.pre.1 (2021-05-04)](#03810-beta2pre1-2021-05-04)
+    - [Bug Fixes](#bug-fixes)
+    - [Code Refactoring](#code-refactoring)
+    - [Documentation](#documentation)
+    - [Features](#features)
   - [0.38.10-beta.1 (2021-04-06)](#03810-beta1-2021-04-06)
     - [Documentation](#documentation-1)
     - [Features](#features-1)
@@ -208,7 +209,11 @@
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-# [Unreleased](https://github.com/ory/oathkeeper/compare/v0.38.10-beta.1...2832a773782047f39680033860c2a8e9558883c0) (2021-04-27)
+# Unreleased (2021-05-04)
+
+No significant changes have been made for this release.
+
+## [0.38.10-beta.2.pre.1](https://github.com/ory/oathkeeper/compare/v0.38.10-beta.1...v0.38.10-beta.2.pre.1) (2021-05-04)
 
 ### Bug Fixes
 
