@@ -337,6 +337,7 @@ func (d *RequestHandler) InitializeAuthnSession(r *http.Request, rl *rule.Rule) 
 
 	session := &authn.AuthenticationSession{
 		Subject: "",
+		Header: r.Header,
 	}
 
 	values, err := rl.ExtractRegexGroups(d.c.AccessRuleMatchingStrategy(), r.URL)

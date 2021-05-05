@@ -44,7 +44,12 @@ import (
 )
 
 func newTestRequest(u string) *http.Request {
-	return &http.Request{URL: x.ParseURLOrPanic(u), Method: "GET"}
+	req, err := http.NewRequest("GET", u, nil)
+	if err != nil {
+		//do something
+	}
+	req.Header.Add("Test-Header", "Test-Value")
+	return req
 }
 
 func TestHandleError(t *testing.T) {
@@ -549,6 +554,7 @@ func TestInitializeSession(t *testing.T) {
 			session := reg.ProxyRequestHandler().InitializeAuthnSession(tc.r, &rule)
 
 			assert.NotNil(t, session)
+			assert.NotNil(t, session.Header)
 			assert.EqualValues(t, tc.expectContext, session.MatchContext)
 		})
 	}
