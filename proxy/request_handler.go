@@ -351,6 +351,7 @@ func (d *RequestHandler) InitializeAuthnSession(r *http.Request, rl *rule.Rule) 
 			RegexpCaptureGroups: values,
 			URL:                 r.URL,
 			Method:              r.Method,
+			Header:              r.Header,
 		}
 	}
 

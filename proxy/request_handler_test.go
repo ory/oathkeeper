@@ -44,7 +44,16 @@ import (
 )
 
 func newTestRequest(u string) *http.Request {
-	return &http.Request{URL: x.ParseURLOrPanic(u), Method: "GET"}
+	req, err := http.NewRequest("GET", u, nil)
+	if err != nil {
+		//do something
+	}
+	req.Header = newTestHeader() //.Add("Test-Header", "Test-Value")
+	return req
+}
+
+func newTestHeader() http.Header {
+	return http.Header{"Test-Header":[]string{"Test-Value"}}
 }
 
 func TestHandleError(t *testing.T) {
@@ -478,6 +487,7 @@ func TestInitializeSession(t *testing.T) {
 				RegexpCaptureGroups: []string{},
 				URL:                 x.ParseURLOrPanic("http://localhost"),
 				Method:              "GET",
+				Header:              newTestHeader(),
 			},
 		},
 		{
@@ -491,6 +501,7 @@ func TestInitializeSession(t *testing.T) {
 				RegexpCaptureGroups: []string{"user"},
 				URL:                 x.ParseURLOrPanic("http://localhost/user"),
 				Method:              "GET",
+				Header:              newTestHeader(),
 			},
 		},
 		{
@@ -504,6 +515,7 @@ func TestInitializeSession(t *testing.T) {
 				RegexpCaptureGroups: []string{"user"},
 				URL:                 x.ParseURLOrPanic("http://localhost/user?param=test"),
 				Method:              "GET",
+				Header:              newTestHeader(),
 			},
 		},
 		{
@@ -517,6 +529,7 @@ func TestInitializeSession(t *testing.T) {
 				RegexpCaptureGroups: []string{"http", "user"},
 				URL:                 x.ParseURLOrPanic("http://localhost/user?param=test"),
 				Method:              "GET",
+				Header:              newTestHeader(),
 			},
 		},
 		{
@@ -530,6 +543,7 @@ func TestInitializeSession(t *testing.T) {
 				RegexpCaptureGroups: []string{},
 				URL:                 x.ParseURLOrPanic("http://localhost/user?param=test"),
 				Method:              "GET",
+				Header:              newTestHeader(),
 			},
 		},
 	} {
@@ -549,6 +563,7 @@ func TestInitializeSession(t *testing.T) {
 			session := reg.ProxyRequestHandler().InitializeAuthnSession(tc.r, &rule)
 
 			assert.NotNil(t, session)
+			assert.NotNil(t, session.MatchContext.Header)
 			assert.EqualValues(t, tc.expectContext, session.MatchContext)
 		})
 	}
