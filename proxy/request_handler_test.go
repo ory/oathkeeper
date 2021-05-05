@@ -44,12 +44,7 @@ import (
 )
 
 func newTestRequest(u string) *http.Request {
-	req, err := http.NewRequest("GET", u, nil)
-	if err != nil {
-		//do something
-	}
-	req.Header = newTestHeader() //.Add("Test-Header", "Test-Value")
-	return req
+	return &http.Request{URL: x.ParseURLOrPanic(u), Method: "GET", Header: newTestHeader()}
 }
 
 func newTestHeader() http.Header {
