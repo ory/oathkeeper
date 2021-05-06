@@ -43,12 +43,10 @@ import (
 	"github.com/ory/oathkeeper/rule"
 )
 
-func newTestRequest(u string) *http.Request {
-	return &http.Request{URL: x.ParseURLOrPanic(u), Method: "GET", Header: newTestHeader()}
-}
+var TestHeader =  http.Header{"Test-Header":[]string{"Test-Value"}}
 
-func newTestHeader() http.Header {
-	return http.Header{"Test-Header":[]string{"Test-Value"}}
+func newTestRequest(u string) *http.Request {
+	return &http.Request{URL: x.ParseURLOrPanic(u), Method: "GET", Header: TestHeader}
 }
 
 func TestHandleError(t *testing.T) {
@@ -482,7 +480,7 @@ func TestInitializeSession(t *testing.T) {
 				RegexpCaptureGroups: []string{},
 				URL:                 x.ParseURLOrPanic("http://localhost"),
 				Method:              "GET",
-				Header:              newTestHeader(),
+				Header:              TestHeader,
 			},
 		},
 		{
@@ -496,7 +494,7 @@ func TestInitializeSession(t *testing.T) {
 				RegexpCaptureGroups: []string{"user"},
 				URL:                 x.ParseURLOrPanic("http://localhost/user"),
 				Method:              "GET",
-				Header:              newTestHeader(),
+				Header:              TestHeader,
 			},
 		},
 		{
@@ -510,7 +508,7 @@ func TestInitializeSession(t *testing.T) {
 				RegexpCaptureGroups: []string{"user"},
 				URL:                 x.ParseURLOrPanic("http://localhost/user?param=test"),
 				Method:              "GET",
-				Header:              newTestHeader(),
+				Header:              TestHeader,
 			},
 		},
 		{
@@ -524,7 +522,7 @@ func TestInitializeSession(t *testing.T) {
 				RegexpCaptureGroups: []string{"http", "user"},
 				URL:                 x.ParseURLOrPanic("http://localhost/user?param=test"),
 				Method:              "GET",
-				Header:              newTestHeader(),
+				Header:              TestHeader,
 			},
 		},
 		{
@@ -538,7 +536,7 @@ func TestInitializeSession(t *testing.T) {
 				RegexpCaptureGroups: []string{},
 				URL:                 x.ParseURLOrPanic("http://localhost/user?param=test"),
 				Method:              "GET",
-				Header:              newTestHeader(),
+				Header:              TestHeader,
 			},
 		},
 	} {
