@@ -7,6 +7,7 @@
 
 - [Unreleased (2021-05-08)](#unreleased-2021-05-08)
   - [Bug Fixes](#bug-fixes)
+  - [Reverts](#reverts)
   - [0.38.10-beta.2 (2021-05-05)](#03810-beta2-2021-05-05)
     - [Bug Fixes](#bug-fixes-1)
     - [Code Refactoring](#code-refactoring)
@@ -207,7 +208,7 @@
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-# [Unreleased](https://github.com/ory/oathkeeper/compare/v0.38.10-beta.2...e203ad14ac0e78909e7d42aa214c47a708a7c136) (2021-05-08)
+# [Unreleased](https://github.com/ory/oathkeeper/compare/v0.38.10-beta.2...c58cbd9341e58adfdf49fd1e9c0241528917c86c) (2021-05-08)
 
 ### Bug Fixes
 
@@ -219,6 +220,15 @@
   ([#713](https://github.com/ory/oathkeeper/issues/713))
   ([766b071](https://github.com/ory/oathkeeper/commit/766b0714dc8aaff010a99b182a6450f21d1795f5)),
   closes [#467](https://github.com/ory/oathkeeper/issues/467)
+
+### Reverts
+
+- Init introspect http client once
+  ([#714](https://github.com/ory/oathkeeper/issues/714))
+  ([#722](https://github.com/ory/oathkeeper/issues/722))
+  ([c58cbd9](https://github.com/ory/oathkeeper/commit/c58cbd9341e58adfdf49fd1e9c0241528917c86c)):
+
+  > This reverts commit e203ad14ac0e78909e7d42aa214c47a708a7c136.
 
 ## [0.38.10-beta.2](https://github.com/ory/oathkeeper/compare/v0.38.9-beta.1...v0.38.10-beta.2) (2021-05-05)
 
