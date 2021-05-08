@@ -97,7 +97,7 @@ func (a *AuthenticatorJWT) Authenticate(r *http.Request, session *Authentication
 	})
 	if err != nil {
 		de := herodot.ToDefaultError(err, "")
-		r := fmt.Sprintf("[%+v]", de)
+		r := fmt.Sprintf("%+v", de)
 		return a.tryEnrichResultErr(token, helper.ErrUnauthorized.WithReason(r).WithTrace(err))
 	}
 
