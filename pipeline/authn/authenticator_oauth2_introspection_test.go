@@ -555,12 +555,8 @@ func TestAuthenticatorOAuth2Introspection(t *testing.T) {
 				tc.config, _ = sjson.SetBytes(tc.config, "introspection_url", ts.URL+"/oauth2/introspect")
 				tc.config, _ = sjson.SetBytes(tc.config, "pre_authorization.token_url", ts.URL+"/oauth2/token")
 
-				//reinitialize authenticator so client will be reinitialized in authenticator
-				reg := internal.NewRegistry(conf)
-				a, err := reg.PipelineAuthenticator("oauth2_introspection")
-
 				sess := new(AuthenticationSession)
-				err = a.Authenticate(tc.r, sess, tc.config, nil)
+				err := a.Authenticate(tc.r, sess, tc.config, nil)
 				if tc.expectErr {
 					require.Error(t, err)
 					if tc.expectExactErr != nil {
