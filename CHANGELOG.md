@@ -207,10 +207,14 @@
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-# [Unreleased](https://github.com/ory/oathkeeper/compare/v0.38.10-beta.2...766b0714dc8aaff010a99b182a6450f21d1795f5) (2021-05-08)
+# [Unreleased](https://github.com/ory/oathkeeper/compare/v0.38.10-beta.2...e203ad14ac0e78909e7d42aa214c47a708a7c136) (2021-05-08)
 
 ### Bug Fixes
 
+- Init introspect http client once
+  ([#714](https://github.com/ory/oathkeeper/issues/714))
+  ([e203ad1](https://github.com/ory/oathkeeper/commit/e203ad14ac0e78909e7d42aa214c47a708a7c136)),
+  closes [#712](https://github.com/ory/oathkeeper/issues/712)
 - Log credentials verifier error details
   ([#713](https://github.com/ory/oathkeeper/issues/713))
   ([766b071](https://github.com/ory/oathkeeper/commit/766b0714dc8aaff010a99b182a6450f21d1795f5)),
