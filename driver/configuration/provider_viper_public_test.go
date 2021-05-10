@@ -300,7 +300,7 @@ func TestViperProvider(t *testing.T) {
 			assert.True(t, p.AuthenticatorIsEnabled(a.GetID()))
 			require.NoError(t, a.Validate(nil))
 
-			config, err := a.Config(nil)
+			config, _, err := a.Config(nil)
 			require.NoError(t, err)
 			assert.Equal(t, "https://my-website.com/oauth2/introspection", config.IntrospectionURL)
 			assert.Equal(t, "exact", config.ScopeStrategy)
@@ -433,7 +433,7 @@ func TestAuthenticatorOAuth2TokenIntrospectionPreAuthorization(t *testing.T) {
 		t.Run(fmt.Sprintf("case=%d", k), func(t *testing.T) {
 			a := authn.NewAuthenticatorOAuth2Introspection(v, logrusx.New("", ""))
 
-			config, err := a.Config(json.RawMessage(fmt.Sprintf(`{
+			config, _, err := a.Config(json.RawMessage(fmt.Sprintf(`{
 	"pre_authorization": {
 		"enabled": %v,
 		"client_id": "%v",
