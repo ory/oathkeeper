@@ -592,6 +592,8 @@ was granted the requested scope.
     to be used for the OAuth 2.0 Client Credentials Grant.
   - `token_url` (string, required if enabled) - The OAuth 2.0 Token Endpoint
     where the OAuth 2.0 Client Credentials Grant will be performed.
+  - `audience` (string, optional) - The OAuth 2.0 Audience to be requested
+    during the OAuth 2.0 Client Credentials Grant.
   - `scope` ([]string, optional) - The OAuth 2.0 Scope to be requested during
     the OAuth 2.0 Client Credentials Grant.
 - `token_from` (object, optional) - The location of the bearer token. If not

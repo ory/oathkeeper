@@ -2,6 +2,7 @@ package authn
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 
 	"github.com/form3tech-oss/jwt-go"
@@ -95,7 +96,9 @@ func (a *AuthenticatorJWT) Authenticate(r *http.Request, session *Authentication
 		ScopeStrategy: a.c.ToScopeStrategy(cf.ScopeStrategy, "authenticators.jwt.Config.scope_strategy"),
 	})
 	if err != nil {
-		return a.tryEnrichResultErr(token, helper.ErrUnauthorized.WithReason(err.Error()).WithTrace(err))
+		de := herodot.ToDefaultError(err, "")
+		r := fmt.Sprintf("%+v", de)
+		return a.tryEnrichResultErr(token, helper.ErrUnauthorized.WithReason(r).WithTrace(err))
 	}
 
 	claims, ok := pt.Claims.(jwt.MapClaims)
