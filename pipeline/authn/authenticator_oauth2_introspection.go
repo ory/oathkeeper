@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/dgraph-io/ristretto"
@@ -64,6 +65,7 @@ type AuthenticatorOAuth2Introspection struct {
 	c configuration.Provider
 
 	clientMap map[string]*http.Client
+	mu        sync.RWMutex
 
 	tokenCache *ristretto.Cache
 	cacheTTL   *time.Duration
@@ -263,7 +265,10 @@ func (a *AuthenticatorOAuth2Introspection) Config(config json.RawMessage) (*Auth
 	}
 
 	clientKey := fmt.Sprintf("%x", md5.Sum([]byte(config)))
+	a.mu.Lock()
 	client, ok := a.clientMap[clientKey]
+	a.mu.Unlock()
+
 	if !ok {
 		a.logger.Debug("Initializing http client")
 		var rt http.RoundTripper
