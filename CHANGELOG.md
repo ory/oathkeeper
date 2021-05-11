@@ -5,68 +5,68 @@
 
 **Table of Contents**
 
-- [Unreleased (2021-04-27)](#unreleased-2021-04-27)
+- [Unreleased (2021-05-08)](#unreleased-2021-05-08)
   - [Bug Fixes](#bug-fixes)
-  - [Code Refactoring](#code-refactoring)
-  - [Documentation](#documentation)
-  - [Features](#features)
-  - [0.38.10-beta.1 (2021-04-06)](#03810-beta1-2021-04-06)
-    - [Documentation](#documentation-1)
-    - [Features](#features-1)
+  - [Reverts](#reverts)
+  - [0.38.10-beta.2 (2021-05-05)](#03810-beta2-2021-05-05)
+    - [Bug Fixes](#bug-fixes-1)
+    - [Code Refactoring](#code-refactoring)
+    - [Documentation](#documentation)
+    - [Features](#features)
   - [0.38.9-beta.1 (2021-03-17)](#0389-beta1-2021-03-17)
   - [0.38.9-beta.1.pre.3 (2021-03-16)](#0389-beta1pre3-2021-03-16)
-    - [Bug Fixes](#bug-fixes-1)
+    - [Bug Fixes](#bug-fixes-2)
   - [0.38.9-beta.1.pre.2 (2021-03-15)](#0389-beta1pre2-2021-03-15)
   - [0.38.9-beta.1.pre.1 (2021-03-15)](#0389-beta1pre1-2021-03-15)
-    - [Bug Fixes](#bug-fixes-2)
+    - [Bug Fixes](#bug-fixes-3)
     - [Unclassified](#unclassified)
   - [0.38.8-beta.1 (2021-02-25)](#0388-beta1-2021-02-25)
-    - [Bug Fixes](#bug-fixes-3)
+    - [Bug Fixes](#bug-fixes-4)
     - [Unclassified](#unclassified-1)
   - [0.38.7-beta.1 (2021-02-22)](#0387-beta1-2021-02-22)
-    - [Bug Fixes](#bug-fixes-4)
-    - [Features](#features-2)
+    - [Bug Fixes](#bug-fixes-5)
+    - [Features](#features-1)
   - [0.38.6-beta.1 (2021-01-27)](#0386-beta1-2021-01-27)
+    - [Documentation](#documentation-1)
+    - [Features](#features-2)
+  - [0.38.5-beta.1 (2020-12-10)](#0385-beta1-2020-12-10)
+    - [Bug Fixes](#bug-fixes-6)
     - [Documentation](#documentation-2)
     - [Features](#features-3)
-  - [0.38.5-beta.1 (2020-12-10)](#0385-beta1-2020-12-10)
-    - [Bug Fixes](#bug-fixes-5)
-    - [Documentation](#documentation-3)
-    - [Features](#features-4)
     - [Unclassified](#unclassified-2)
   - [0.38.4-beta.1 (2020-09-28)](#0384-beta1-2020-09-28)
-    - [Bug Fixes](#bug-fixes-6)
-    - [Documentation](#documentation-4)
-    - [Features](#features-5)
+    - [Bug Fixes](#bug-fixes-7)
+    - [Documentation](#documentation-3)
+    - [Features](#features-4)
     - [Unclassified](#unclassified-3)
   - [0.38.3-beta.1 (2020-07-29)](#0383-beta1-2020-07-29)
-    - [Bug Fixes](#bug-fixes-7)
+    - [Bug Fixes](#bug-fixes-8)
+    - [Documentation](#documentation-4)
+    - [Features](#features-5)
+  - [0.38.2-beta.1 (2020-05-25)](#0382-beta1-2020-05-25)
+    - [Bug Fixes](#bug-fixes-9)
     - [Documentation](#documentation-5)
     - [Features](#features-6)
-  - [0.38.2-beta.1 (2020-05-25)](#0382-beta1-2020-05-25)
-    - [Bug Fixes](#bug-fixes-8)
-    - [Documentation](#documentation-6)
-    - [Features](#features-7)
   - [0.38.1-beta.1 (2020-05-08)](#0381-beta1-2020-05-08)
-    - [Bug Fixes](#bug-fixes-9)
+    - [Bug Fixes](#bug-fixes-10)
 - [0.38.0-beta.2 (2020-05-07)](#0380-beta2-2020-05-07)
-  - [Bug Fixes](#bug-fixes-10)
-  - [Code Refactoring](#code-refactoring-1)
-  - [Documentation](#documentation-7)
-  - [Features](#features-8)
-  - [0.37.1-beta.1 (2020-04-03)](#0371-beta1-2020-04-03)
-    - [Documentation](#documentation-8)
-- [0.37.0-beta.1 (2020-04-02)](#0370-beta1-2020-04-02)
   - [Bug Fixes](#bug-fixes-11)
-  - [Documentation](#documentation-9)
-  - [Features](#features-9)
+  - [Code Refactoring](#code-refactoring-1)
+  - [Documentation](#documentation-6)
+  - [Features](#features-7)
+  - [0.37.1-beta.1 (2020-04-03)](#0371-beta1-2020-04-03)
+    - [Documentation](#documentation-7)
+- [0.37.0-beta.1 (2020-04-02)](#0370-beta1-2020-04-02)
+  - [Bug Fixes](#bug-fixes-12)
+  - [Documentation](#documentation-8)
+  - [Features](#features-8)
   - [BREAKING CHANGES](#breaking-changes)
 - [0.36.0-beta.4 (2020-02-14)](#0360-beta4-2020-02-14)
-  - [Bug Fixes](#bug-fixes-12)
-  - [Documentation](#documentation-10)
+  - [Bug Fixes](#bug-fixes-13)
+  - [Documentation](#documentation-9)
 - [0.36.0-beta.1 (2020-02-05)](#0360-beta1-2020-02-05)
-  - [Documentation](#documentation-11)
-  - [Features](#features-10)
+  - [Documentation](#documentation-10)
+  - [Features](#features-9)
   - [Unclassified](#unclassified-4)
   - [0.35.5-beta.2 (2020-01-31)](#0355-beta2-2020-01-31)
     - [Unclassified](#unclassified-5)
@@ -75,74 +75,74 @@
   - [0.35.4-beta.1 (2020-01-26)](#0354-beta1-2020-01-26)
     - [Unclassified](#unclassified-7)
   - [0.35.3-beta.1 (2020-01-26)](#0353-beta1-2020-01-26)
-    - [Documentation](#documentation-12)
+    - [Documentation](#documentation-11)
     - [Unclassified](#unclassified-8)
   - [0.35.1-beta.1 (2020-01-14)](#0351-beta1-2020-01-14)
     - [Unclassified](#unclassified-9)
 - [0.35.0-beta.1 (2020-01-13)](#0350-beta1-2020-01-13)
-  - [Documentation](#documentation-13)
+  - [Documentation](#documentation-12)
   - [Unclassified](#unclassified-10)
 - [0.34.0-beta.1 (2019-12-26)](#0340-beta1-2019-12-26)
-  - [Documentation](#documentation-14)
+  - [Documentation](#documentation-13)
   - [Unclassified](#unclassified-11)
   - [0.33.1-beta.1 (2019-12-18)](#0331-beta1-2019-12-18)
-    - [Documentation](#documentation-15)
+    - [Documentation](#documentation-14)
     - [Unclassified](#unclassified-12)
 - [0.33.0-beta.1 (2019-12-16)](#0330-beta1-2019-12-16)
-  - [Documentation](#documentation-16)
+  - [Documentation](#documentation-15)
   - [Unclassified](#unclassified-13)
   - [0.32.1-beta.1 (2019-10-30)](#0321-beta1-2019-10-30)
-    - [Documentation](#documentation-17)
+    - [Documentation](#documentation-16)
     - [Unclassified](#unclassified-14)
 - [0.32.0-beta.1 (2019-10-20)](#0320-beta1-2019-10-20)
-  - [Documentation](#documentation-18)
+  - [Documentation](#documentation-17)
 - [0.31.0-beta.1 (2019-10-20)](#0310-beta1-2019-10-20)
-  - [Documentation](#documentation-19)
+  - [Documentation](#documentation-18)
   - [Unclassified](#unclassified-15)
 - [0.19.0-beta.1 (2019-09-23)](#0190-beta1-2019-09-23)
   - [Unclassified](#unclassified-16)
 - [0.18.0-beta.1 (2019-08-22)](#0180-beta1-2019-08-22)
-  - [Documentation](#documentation-20)
+  - [Documentation](#documentation-19)
   - [Unclassified](#unclassified-17)
   - [0.17.4-beta.1 (2019-08-09)](#0174-beta1-2019-08-09)
-    - [Documentation](#documentation-21)
+    - [Documentation](#documentation-20)
     - [Unclassified](#unclassified-18)
   - [0.17.3-beta.1 (2019-08-03)](#0173-beta1-2019-08-03)
-    - [Documentation](#documentation-22)
+    - [Documentation](#documentation-21)
     - [Unclassified](#unclassified-19)
   - [0.17.2-beta.1 (2019-08-02)](#0172-beta1-2019-08-02)
-    - [Documentation](#documentation-23)
+    - [Documentation](#documentation-22)
     - [Unclassified](#unclassified-20)
   - [0.17.1-beta.1 (2019-07-23)](#0171-beta1-2019-07-23)
-    - [Documentation](#documentation-24)
+    - [Documentation](#documentation-23)
     - [Unclassified](#unclassified-21)
 - [0.17.0-beta.1 (2019-07-18)](#0170-beta1-2019-07-18)
-  - [Documentation](#documentation-25)
+  - [Documentation](#documentation-24)
   - [Unclassified](#unclassified-22)
 - [0.16.0-beta.5 (2019-06-28)](#0160-beta5-2019-06-28)
-  - [Documentation](#documentation-26)
+  - [Documentation](#documentation-25)
   - [Unclassified](#unclassified-23)
 - [0.16.0-beta.4 (2019-05-28)](#0160-beta4-2019-05-28)
-  - [Documentation](#documentation-27)
+  - [Documentation](#documentation-26)
   - [Unclassified](#unclassified-24)
 - [0.16.0-beta.3 (2019-05-19)](#0160-beta3-2019-05-19)
-  - [Documentation](#documentation-28)
+  - [Documentation](#documentation-27)
   - [Unclassified](#unclassified-25)
   - [0.15.2 (2019-05-04)](#0152-2019-05-04)
-    - [Documentation](#documentation-29)
+    - [Documentation](#documentation-28)
     - [Unclassified](#unclassified-26)
   - [0.15.1 (2019-04-29)](#0151-2019-04-29)
     - [Unclassified](#unclassified-27)
 - [0.15.0 (2019-04-29)](#0150-2019-04-29)
-  - [Documentation](#documentation-30)
+  - [Documentation](#documentation-29)
   - [Unclassified](#unclassified-28)
   - [0.14.2+oryOS.10 (2018-12-13)](#0142oryos10-2018-12-13)
   - [0.14.1+oryOS.10 (2018-12-13)](#0141oryos10-2018-12-13)
 - [0.14.0+oryOS.10 (2018-12-13)](#0140oryos10-2018-12-13)
-  - [Documentation](#documentation-31)
+  - [Documentation](#documentation-30)
   - [Unclassified](#unclassified-29)
   - [0.11.12 (2018-05-07)](#01112-2018-05-07)
-    - [Documentation](#documentation-32)
+    - [Documentation](#documentation-31)
     - [Unclassified](#unclassified-30)
   - [0.0.29 (2017-12-19)](#0029-2017-12-19)
     - [Unclassified](#unclassified-31)
@@ -157,14 +157,14 @@
   - [0.0.24 (2017-11-26)](#0024-2017-11-26)
     - [Unclassified](#unclassified-36)
   - [0.0.23 (2017-11-24)](#0023-2017-11-24)
-    - [Documentation](#documentation-33)
+    - [Documentation](#documentation-32)
     - [Unclassified](#unclassified-37)
   - [0.0.22 (2017-11-20)](#0022-2017-11-20)
     - [Unclassified](#unclassified-38)
   - [0.0.21 (2017-11-19)](#0021-2017-11-19)
     - [Unclassified](#unclassified-39)
   - [0.0.20 (2017-11-18)](#0020-2017-11-18)
-    - [Documentation](#documentation-34)
+    - [Documentation](#documentation-33)
     - [Unclassified](#unclassified-40)
   - [0.0.19 (2017-11-13)](#0019-2017-11-13)
     - [Unclassified](#unclassified-41)
@@ -203,12 +203,34 @@
   - [0.0.2 (2017-10-12)](#002-2017-10-12)
     - [Unclassified](#unclassified-58)
   - [0.0.1 (2017-10-10)](#001-2017-10-10)
-    - [Documentation](#documentation-35)
+    - [Documentation](#documentation-34)
     - [Unclassified](#unclassified-59)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-# [Unreleased](https://github.com/ory/oathkeeper/compare/v0.38.10-beta.1...2832a773782047f39680033860c2a8e9558883c0) (2021-04-27)
+# [Unreleased](https://github.com/ory/oathkeeper/compare/v0.38.10-beta.2...c58cbd9341e58adfdf49fd1e9c0241528917c86c) (2021-05-08)
+
+### Bug Fixes
+
+- Init introspect http client once
+  ([#714](https://github.com/ory/oathkeeper/issues/714))
+  ([e203ad1](https://github.com/ory/oathkeeper/commit/e203ad14ac0e78909e7d42aa214c47a708a7c136)),
+  closes [#712](https://github.com/ory/oathkeeper/issues/712)
+- Log credentials verifier error details
+  ([#713](https://github.com/ory/oathkeeper/issues/713))
+  ([766b071](https://github.com/ory/oathkeeper/commit/766b0714dc8aaff010a99b182a6450f21d1795f5)),
+  closes [#467](https://github.com/ory/oathkeeper/issues/467)
+
+### Reverts
+
+- Init introspect http client once
+  ([#714](https://github.com/ory/oathkeeper/issues/714))
+  ([#722](https://github.com/ory/oathkeeper/issues/722))
+  ([c58cbd9](https://github.com/ory/oathkeeper/commit/c58cbd9341e58adfdf49fd1e9c0241528917c86c)):
+
+  > This reverts commit e203ad14ac0e78909e7d42aa214c47a708a7c136.
+
+## [0.38.10-beta.2](https://github.com/ory/oathkeeper/compare/v0.38.9-beta.1...v0.38.10-beta.2) (2021-05-05)
 
 ### Bug Fixes
 
@@ -230,6 +252,13 @@
 
 ### Documentation
 
+- Add dotnet sdk ([#683](https://github.com/ory/oathkeeper/issues/683))
+  ([05ae925](https://github.com/ory/oathkeeper/commit/05ae9259414882015f30cc8d5c01e64afb65afbc)):
+
+  > - docs: add dotnet sdk
+  >
+  > - docs: add dotnet sdk versioned
+
 - Change forum to discussions readme
   ([#690](https://github.com/ory/oathkeeper/issues/690))
   ([d942c04](https://github.com/ory/oathkeeper/commit/d942c043aa2370b87e0dd822440ad39d809755f9))
@@ -245,26 +274,6 @@
 - Point to deny authz ([#701](https://github.com/ory/oathkeeper/issues/701))
   ([4f01963](https://github.com/ory/oathkeeper/commit/4f01963b33ab0484da69c9f120c69ae9b49c6fdc)),
   closes [#700](https://github.com/ory/oathkeeper/issues/700)
-
-### Features
-
-- Adds audience into Extra at oAuth2 introspection
-  ([#480](https://github.com/ory/oathkeeper/issues/480))
-  ([c9faecc](https://github.com/ory/oathkeeper/commit/c9faecc5d32800537f07e8e05f9c8872e609c3f9))
-- Global docs sidebar and added cloud pages
-  ([#705](https://github.com/ory/oathkeeper/issues/705))
-  ([f67241f](https://github.com/ory/oathkeeper/commit/f67241f2ab7063fa9ce8e8ea455de25b51414f30))
-
-## [0.38.10-beta.1](https://github.com/ory/oathkeeper/compare/v0.38.9-beta.1...v0.38.10-beta.1) (2021-04-06)
-
-### Documentation
-
-- Add dotnet sdk ([#683](https://github.com/ory/oathkeeper/issues/683))
-  ([05ae925](https://github.com/ory/oathkeeper/commit/05ae9259414882015f30cc8d5c01e64afb65afbc)):
-
-  > - docs: add dotnet sdk
-  >
-  > - docs: add dotnet sdk versioned
 
 ### Features
 
@@ -285,6 +294,13 @@
   closes [#668](https://github.com/ory/oathkeeper/issues/668):
 
   > JWT Claims added to error details field.
+
+- Adds audience into Extra at oAuth2 introspection
+  ([#480](https://github.com/ory/oathkeeper/issues/480))
+  ([c9faecc](https://github.com/ory/oathkeeper/commit/c9faecc5d32800537f07e8e05f9c8872e609c3f9))
+- Global docs sidebar and added cloud pages
+  ([#705](https://github.com/ory/oathkeeper/issues/705))
+  ([f67241f](https://github.com/ory/oathkeeper/commit/f67241f2ab7063fa9ce8e8ea455de25b51414f30))
 
 ## [0.38.9-beta.1](https://github.com/ory/oathkeeper/compare/v0.38.9-beta.1.pre.3...v0.38.9-beta.1) (2021-03-17)
 

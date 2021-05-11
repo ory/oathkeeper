@@ -33,7 +33,7 @@ Each authorizer has two keys:
 There is a 1:1 mandatory relationship between an authoriser and an access rule.
 It is not possible to configure more than one authorizer per Access Rule.
 
-## Authorizer `allow`
+## `allow`
 
 This authorizer permits every action allowed.
 
@@ -78,7 +78,7 @@ HTTP/1.0 200 Status OK
 The request has been allowed!
 ```
 
-## Authorizer`deny`
+## `deny`
 
 This authorizer considers every action unauthorized therefore "forbidden" or
 "disallowed".
@@ -124,7 +124,7 @@ HTTP/1.0 403 Forbidden
 The request is forbidden!
 ```
 
-## Authorizer `keto_engine_acp_ory`
+## `keto_engine_acp_ory`
 
 This authorizer uses the ORY Keto API to carry out access control using
 "ORY-flavored" Access Control Policies. The conventions used in the ORY Keto

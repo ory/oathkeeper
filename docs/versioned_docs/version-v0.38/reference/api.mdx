@@ -447,6 +447,354 @@ p JSON.parse(result)
 </TabItem>
 </Tabs>
 
+<a id="opIdisInstanceAlive"></a>
+
+### Check alive status
+
+```
+GET /health/alive HTTP/1.1
+Accept: application/json
+
+```
+
+This endpoint returns a 200 status code when the HTTP server is up running. This
+status does currently not include checks whether the database connection is
+working.
+
+If the service supports TLS Edge Termination, this endpoint does not require the
+`X-Forwarded-Proto` header to be set.
+
+Be aware that if you are running multiple nodes of this service, the health
+status will never refer to the cluster state, only to a single instance.
+
+#### Responses
+
+<a id="check-alive-status-responses"></a>
+
+##### Overview
+
+| Status | Meaning                                                                    | Description               | Schema                              |
+| ------ | -------------------------------------------------------------------------- | ------------------------- | ----------------------------------- |
+| 200    | [OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)                    | healthStatus              | [healthStatus](#schemahealthstatus) |
+| 500    | [Internal Server Error](https://tools.ietf.org/html/rfc7231#section-6.6.1) | The standard error format | Inline                              |
+
+<a id="check-alive-status-responseschema"></a>
+
+##### Response Schema
+
+Status Code **500**
+
+| Name      | Type           | Required | Restrictions | Description |
+| --------- | -------------- | -------- | ------------ | ----------- |
+| » code    | integer(int64) | false    | none         | none        |
+| » details | [object]       | false    | none         | none        |
+| » message | string         | false    | none         | none        |
+| » reason  | string         | false    | none         | none        |
+| » request | string         | false    | none         | none        |
+| » status  | string         | false    | none         | none        |
+
+##### Examples
+
+###### 200 response
+
+```json
+{
+  "status": "string"
+}
+```
+
+<aside class="success">This operation does not require authentication</aside>
+
+#### Code samples
+
+<Tabs groupId="code-samples" defaultValue="shell"
+  values={[{label: 'Shell', value: 'shell'}, {label: 'Go', value: 'go'}, {label: 'Node', value: 'node'},
+    {label: 'Java', value: 'java'}, {label: 'Python', value: 'python'}, {label: 'Ruby', value: 'ruby'}]}>
+<TabItem value="shell">
+
+```shell
+curl -X GET /health/alive \
+  -H 'Accept: application/json'
+```
+
+</TabItem>
+<TabItem value="go">
+
+```go
+package main
+
+import (
+    "bytes"
+    "net/http"
+)
+
+func main() {
+    headers := map[string][]string{
+        "Accept": []string{"application/json"},
+    }
+
+    var body []byte
+    // body = ...
+
+    req, err := http.NewRequest("GET", "/health/alive", bytes.NewBuffer(body))
+    req.Header = headers
+
+    client := &http.Client{}
+    resp, err := client.Do(req)
+    // ...
+}
+```
+
+</TabItem>
+<TabItem value="node">
+
+```javascript
+const fetch = require('node-fetch')
+
+const headers = {
+  Accept: 'application/json'
+}
+
+fetch('/health/alive', {
+  method: 'GET',
+  headers
+})
+  .then((r) => r.json())
+  .then((body) => {
+    console.log(body)
+  })
+```
+
+</TabItem>
+<TabItem value="java">
+
+```java
+// This sample needs improvement.
+URL obj = new URL("/health/alive");
+
+HttpURLConnection con = (HttpURLConnection) obj.openConnection();
+con.setRequestMethod("GET");
+
+int responseCode = con.getResponseCode();
+
+BufferedReader in = new BufferedReader(
+    new InputStreamReader(con.getInputStream())
+);
+
+String inputLine;
+StringBuffer response = new StringBuffer();
+while ((inputLine = in.readLine()) != null) {
+    response.append(inputLine);
+}
+in.close();
+
+System.out.println(response.toString());
+```
+
+</TabItem>
+<TabItem value="python">
+
+```python
+import requests
+
+headers = {
+  'Accept': 'application/json'
+}
+
+r = requests.get(
+  '/health/alive',
+  params={},
+  headers = headers)
+
+print r.json()
+```
+
+</TabItem>
+<TabItem value="ruby">
+
+```ruby
+require 'rest-client'
+require 'json'
+
+headers = {
+  'Accept' => 'application/json'
+}
+
+result = RestClient.get '/health/alive',
+  params: {}, headers: headers
+
+p JSON.parse(result)
+```
+
+</TabItem>
+</Tabs>
+
+<a id="opIdisInstanceReady"></a>
+
+### Check readiness status
+
+```
+GET /health/ready HTTP/1.1
+Accept: application/json
+
+```
+
+This endpoint returns a 200 status code when the HTTP server is up running and
+the environment dependencies (e.g. the database) are responsive as well.
+
+If the service supports TLS Edge Termination, this endpoint does not require the
+`X-Forwarded-Proto` header to be set.
+
+Be aware that if you are running multiple nodes of this service, the health
+status will never refer to the cluster state, only to a single instance.
+
+#### Responses
+
+<a id="check-readiness-status-responses"></a>
+
+##### Overview
+
+| Status | Meaning                                                                  | Description          | Schema                                              |
+| ------ | ------------------------------------------------------------------------ | -------------------- | --------------------------------------------------- |
+| 200    | [OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)                  | healthStatus         | [healthStatus](#schemahealthstatus)                 |
+| 503    | [Service Unavailable](https://tools.ietf.org/html/rfc7231#section-6.6.4) | healthNotReadyStatus | [healthNotReadyStatus](#schemahealthnotreadystatus) |
+
+##### Examples
+
+###### 200 response
+
+```json
+{
+  "status": "string"
+}
+```
+
+<aside class="success">This operation does not require authentication</aside>
+
+#### Code samples
+
+<Tabs groupId="code-samples" defaultValue="shell"
+  values={[{label: 'Shell', value: 'shell'}, {label: 'Go', value: 'go'}, {label: 'Node', value: 'node'},
+    {label: 'Java', value: 'java'}, {label: 'Python', value: 'python'}, {label: 'Ruby', value: 'ruby'}]}>
+<TabItem value="shell">
+
+```shell
+curl -X GET /health/ready \
+  -H 'Accept: application/json'
+```
+
+</TabItem>
+<TabItem value="go">
+
+```go
+package main
+
+import (
+    "bytes"
+    "net/http"
+)
+
+func main() {
+    headers := map[string][]string{
+        "Accept": []string{"application/json"},
+    }
+
+    var body []byte
+    // body = ...
+
+    req, err := http.NewRequest("GET", "/health/ready", bytes.NewBuffer(body))
+    req.Header = headers
+
+    client := &http.Client{}
+    resp, err := client.Do(req)
+    // ...
+}
+```
+
+</TabItem>
+<TabItem value="node">
+
+```javascript
+const fetch = require('node-fetch')
+
+const headers = {
+  Accept: 'application/json'
+}
+
+fetch('/health/ready', {
+  method: 'GET',
+  headers
+})
+  .then((r) => r.json())
+  .then((body) => {
+    console.log(body)
+  })
+```
+
+</TabItem>
+<TabItem value="java">
+
+```java
+// This sample needs improvement.
+URL obj = new URL("/health/ready");
+
+HttpURLConnection con = (HttpURLConnection) obj.openConnection();
+con.setRequestMethod("GET");
+
+int responseCode = con.getResponseCode();
+
+BufferedReader in = new BufferedReader(
+    new InputStreamReader(con.getInputStream())
+);
+
+String inputLine;
+StringBuffer response = new StringBuffer();
+while ((inputLine = in.readLine()) != null) {
+    response.append(inputLine);
+}
+in.close();
+
+System.out.println(response.toString());
+```
+
+</TabItem>
+<TabItem value="python">
+
+```python
+import requests
+
+headers = {
+  'Accept': 'application/json'
+}
+
+r = requests.get(
+  '/health/ready',
+  params={},
+  headers = headers)
+
+print r.json()
+```
+
+</TabItem>
+<TabItem value="ruby">
+
+```ruby
+require 'rest-client'
+require 'json'
+
+headers = {
+  'Accept' => 'application/json'
+}
+
+result = RestClient.get '/health/ready',
+  params: {}, headers: headers
+
+p JSON.parse(result)
+```
+
+</TabItem>
+</Tabs>
+
 <a id="opIdlistRules"></a>
 
 ### List all rules
@@ -901,362 +1249,6 @@ p JSON.parse(result)
 
 </TabItem>
 </Tabs>
-
-<a id="ory-oathkeeper-health"></a>
-
-## health
-
-<a id="opIdisInstanceAlive"></a>
-
-### Check alive status
-
-```
-GET /health/alive HTTP/1.1
-Accept: application/json
-
-```
-
-This endpoint returns a 200 status code when the HTTP server is up running. This
-status does currently not include checks whether the database connection is
-working.
-
-If the service supports TLS Edge Termination, this endpoint does not require the
-`X-Forwarded-Proto` header to be set.
-
-Be aware that if you are running multiple nodes of this service, the health
-status will never refer to the cluster state, only to a single instance.
-
-#### Responses
-
-<a id="check-alive-status-responses"></a>
-
-##### Overview
-
-| Status | Meaning                                                                    | Description               | Schema                              |
-| ------ | -------------------------------------------------------------------------- | ------------------------- | ----------------------------------- |
-| 200    | [OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)                    | healthStatus              | [healthStatus](#schemahealthstatus) |
-| 500    | [Internal Server Error](https://tools.ietf.org/html/rfc7231#section-6.6.1) | The standard error format | Inline                              |
-
-<a id="check-alive-status-responseschema"></a>
-
-##### Response Schema
-
-Status Code **500**
-
-| Name      | Type           | Required | Restrictions | Description |
-| --------- | -------------- | -------- | ------------ | ----------- |
-| » code    | integer(int64) | false    | none         | none        |
-| » details | [object]       | false    | none         | none        |
-| » message | string         | false    | none         | none        |
-| » reason  | string         | false    | none         | none        |
-| » request | string         | false    | none         | none        |
-| » status  | string         | false    | none         | none        |
-
-##### Examples
-
-###### 200 response
-
-```json
-{
-  "status": "string"
-}
-```
-
-<aside class="success">This operation does not require authentication</aside>
-
-#### Code samples
-
-<Tabs groupId="code-samples" defaultValue="shell"
-  values={[{label: 'Shell', value: 'shell'}, {label: 'Go', value: 'go'}, {label: 'Node', value: 'node'},
-    {label: 'Java', value: 'java'}, {label: 'Python', value: 'python'}, {label: 'Ruby', value: 'ruby'}]}>
-<TabItem value="shell">
-
-```shell
-curl -X GET /health/alive \
-  -H 'Accept: application/json'
-```
-
-</TabItem>
-<TabItem value="go">
-
-```go
-package main
-
-import (
-    "bytes"
-    "net/http"
-)
-
-func main() {
-    headers := map[string][]string{
-        "Accept": []string{"application/json"},
-    }
-
-    var body []byte
-    // body = ...
-
-    req, err := http.NewRequest("GET", "/health/alive", bytes.NewBuffer(body))
-    req.Header = headers
-
-    client := &http.Client{}
-    resp, err := client.Do(req)
-    // ...
-}
-```
-
-</TabItem>
-<TabItem value="node">
-
-```javascript
-const fetch = require('node-fetch')
-
-const headers = {
-  Accept: 'application/json'
-}
-
-fetch('/health/alive', {
-  method: 'GET',
-  headers
-})
-  .then((r) => r.json())
-  .then((body) => {
-    console.log(body)
-  })
-```
-
-</TabItem>
-<TabItem value="java">
-
-```java
-// This sample needs improvement.
-URL obj = new URL("/health/alive");
-
-HttpURLConnection con = (HttpURLConnection) obj.openConnection();
-con.setRequestMethod("GET");
-
-int responseCode = con.getResponseCode();
-
-BufferedReader in = new BufferedReader(
-    new InputStreamReader(con.getInputStream())
-);
-
-String inputLine;
-StringBuffer response = new StringBuffer();
-while ((inputLine = in.readLine()) != null) {
-    response.append(inputLine);
-}
-in.close();
-
-System.out.println(response.toString());
-```
-
-</TabItem>
-<TabItem value="python">
-
-```python
-import requests
-
-headers = {
-  'Accept': 'application/json'
-}
-
-r = requests.get(
-  '/health/alive',
-  params={},
-  headers = headers)
-
-print r.json()
-```
-
-</TabItem>
-<TabItem value="ruby">
-
-```ruby
-require 'rest-client'
-require 'json'
-
-headers = {
-  'Accept' => 'application/json'
-}
-
-result = RestClient.get '/health/alive',
-  params: {}, headers: headers
-
-p JSON.parse(result)
-```
-
-</TabItem>
-</Tabs>
-
-<a id="opIdisInstanceReady"></a>
-
-### Check readiness status
-
-```
-GET /health/ready HTTP/1.1
-Accept: application/json
-
-```
-
-This endpoint returns a 200 status code when the HTTP server is up running and
-the environment dependencies (e.g. the database) are responsive as well.
-
-If the service supports TLS Edge Termination, this endpoint does not require the
-`X-Forwarded-Proto` header to be set.
-
-Be aware that if you are running multiple nodes of this service, the health
-status will never refer to the cluster state, only to a single instance.
-
-#### Responses
-
-<a id="check-readiness-status-responses"></a>
-
-##### Overview
-
-| Status | Meaning                                                                  | Description          | Schema                                              |
-| ------ | ------------------------------------------------------------------------ | -------------------- | --------------------------------------------------- |
-| 200    | [OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)                  | healthStatus         | [healthStatus](#schemahealthstatus)                 |
-| 503    | [Service Unavailable](https://tools.ietf.org/html/rfc7231#section-6.6.4) | healthNotReadyStatus | [healthNotReadyStatus](#schemahealthnotreadystatus) |
-
-##### Examples
-
-###### 200 response
-
-```json
-{
-  "status": "string"
-}
-```
-
-<aside class="success">This operation does not require authentication</aside>
-
-#### Code samples
-
-<Tabs groupId="code-samples" defaultValue="shell"
-  values={[{label: 'Shell', value: 'shell'}, {label: 'Go', value: 'go'}, {label: 'Node', value: 'node'},
-    {label: 'Java', value: 'java'}, {label: 'Python', value: 'python'}, {label: 'Ruby', value: 'ruby'}]}>
-<TabItem value="shell">
-
-```shell
-curl -X GET /health/ready \
-  -H 'Accept: application/json'
-```
-
-</TabItem>
-<TabItem value="go">
-
-```go
-package main
-
-import (
-    "bytes"
-    "net/http"
-)
-
-func main() {
-    headers := map[string][]string{
-        "Accept": []string{"application/json"},
-    }
-
-    var body []byte
-    // body = ...
-
-    req, err := http.NewRequest("GET", "/health/ready", bytes.NewBuffer(body))
-    req.Header = headers
-
-    client := &http.Client{}
-    resp, err := client.Do(req)
-    // ...
-}
-```
-
-</TabItem>
-<TabItem value="node">
-
-```javascript
-const fetch = require('node-fetch')
-
-const headers = {
-  Accept: 'application/json'
-}
-
-fetch('/health/ready', {
-  method: 'GET',
-  headers
-})
-  .then((r) => r.json())
-  .then((body) => {
-    console.log(body)
-  })
-```
-
-</TabItem>
-<TabItem value="java">
-
-```java
-// This sample needs improvement.
-URL obj = new URL("/health/ready");
-
-HttpURLConnection con = (HttpURLConnection) obj.openConnection();
-con.setRequestMethod("GET");
-
-int responseCode = con.getResponseCode();
-
-BufferedReader in = new BufferedReader(
-    new InputStreamReader(con.getInputStream())
-);
-
-String inputLine;
-StringBuffer response = new StringBuffer();
-while ((inputLine = in.readLine()) != null) {
-    response.append(inputLine);
-}
-in.close();
-
-System.out.println(response.toString());
-```
-
-</TabItem>
-<TabItem value="python">
-
-```python
-import requests
-
-headers = {
-  'Accept': 'application/json'
-}
-
-r = requests.get(
-  '/health/ready',
-  params={},
-  headers = headers)
-
-print r.json()
-```
-
-</TabItem>
-<TabItem value="ruby">
-
-```ruby
-require 'rest-client'
-require 'json'
-
-headers = {
-  'Accept' => 'application/json'
-}
-
-result = RestClient.get '/health/ready',
-  params: {}, headers: headers
-
-p JSON.parse(result)
-```
-
-</TabItem>
-</Tabs>
-
-<a id="ory-oathkeeper-version"></a>
-
-## version
 
 <a id="opIdgetVersion"></a>
 
