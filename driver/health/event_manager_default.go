@@ -3,8 +3,9 @@ package health
 import (
 	"context"
 
-	"github.com/ory/x/healthx"
 	"github.com/pkg/errors"
+
+	"github.com/ory/x/healthx"
 )
 
 type DefaultHealthEventManager struct {

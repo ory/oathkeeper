@@ -43,7 +43,7 @@ import (
 	"github.com/ory/oathkeeper/rule"
 )
 
-var TestHeader =  http.Header{"Test-Header":[]string{"Test-Value"}}
+var TestHeader = http.Header{"Test-Header": []string{"Test-Value"}}
 
 func newTestRequest(u string) *http.Request {
 	return &http.Request{URL: x.ParseURLOrPanic(u), Method: "GET", Header: TestHeader}
