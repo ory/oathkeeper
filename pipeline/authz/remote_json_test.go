@@ -121,7 +121,7 @@ func TestAuthorizerRemoteJSONAuthorize(t *testing.T) {
 			},
 			session:            new(authn.AuthenticationSession),
 			sessionHeaderMatch: &http.Header{"X-Foo": []string{""}},
-			config:             json.RawMessage(`{"allowed_remote_headers":["X-Foo"]}`),
+			config:             json.RawMessage(`{"payload":"{}","allowed_remote_headers":["X-Foo"]}`),
 		},
 		{
 			name: "authentication session",
