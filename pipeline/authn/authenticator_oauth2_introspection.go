@@ -265,9 +265,9 @@ func (a *AuthenticatorOAuth2Introspection) Config(config json.RawMessage) (*Auth
 	}
 
 	clientKey := fmt.Sprintf("%x", md5.Sum([]byte(config)))
-	a.mu.Lock()
+	a.mu.RLock()
 	client, ok := a.clientMap[clientKey]
-	a.mu.Unlock()
+	a.mu.RUnlock()
 
 	if !ok {
 		a.logger.Debug("Initializing http client")
@@ -310,7 +310,9 @@ func (a *AuthenticatorOAuth2Introspection) Config(config json.RawMessage) (*Auth
 		}
 
 		client = httpx.NewResilientClientLatencyToleranceConfigurable(rt, timeout, maxWait)
+		a.mu.Lock()
 		a.clientMap[clientKey] = client
+		a.mu.Unlock()
 	}
 
 	if c.Cache.TTL != "" {
