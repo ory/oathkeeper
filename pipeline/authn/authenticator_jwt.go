@@ -6,9 +6,10 @@ import (
 	"net/http"
 
 	"github.com/form3tech-oss/jwt-go"
+	"github.com/pkg/errors"
+
 	"github.com/ory/go-convenience/jwtx"
 	"github.com/ory/herodot"
-	"github.com/pkg/errors"
 
 	"github.com/ory/oathkeeper/credentials"
 	"github.com/ory/oathkeeper/driver/configuration"
