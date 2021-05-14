@@ -21,9 +21,9 @@ import (
 
 // AuthorizerRemoteJSONConfiguration represents a configuration for the remote_json authorizer.
 type AuthorizerRemoteJSONConfiguration struct {
-	Remote               string   `json:"remote"`
-	Payload              string   `json:"payload"`
-	AllowedRemoteHeaders []string `json:"allowed_remote_headers"`
+	Remote                           string   `json:"remote"`
+	Payload                          string   `json:"payload"`
+	ForwardResponseHeadersToUpstream []string `json:"forward_response_headers_to_upstream"`
 }
 
 // PayloadTemplateID returns a string with which to associate the payload template.
@@ -102,7 +102,7 @@ func (a *AuthorizerRemoteJSON) Authorize(r *http.Request, session *authn.Authent
 		return errors.Errorf("expected status code %d but got %d", http.StatusOK, res.StatusCode)
 	}
 
-	for _, allowedHeader := range c.AllowedRemoteHeaders {
+	for _, allowedHeader := range c.ForwardResponseHeadersToUpstream {
 		session.SetHeader(allowedHeader, res.Header.Get(allowedHeader))
 	}
 

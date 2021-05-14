@@ -109,7 +109,7 @@ func TestAuthorizerRemoteJSONAuthorize(t *testing.T) {
 			},
 			session:            new(authn.AuthenticationSession),
 			sessionHeaderMatch: &http.Header{"X-Foo": []string{"bar"}},
-			config:             json.RawMessage(`{"payload":"{}","allowed_remote_headers":["X-Foo"]}`),
+			config:             json.RawMessage(`{"payload":"{}","forward_response_headers_to_upstream":["X-Foo"]}`),
 		},
 		{
 			name: "ok with not allowed headers",
@@ -121,7 +121,7 @@ func TestAuthorizerRemoteJSONAuthorize(t *testing.T) {
 			},
 			session:            new(authn.AuthenticationSession),
 			sessionHeaderMatch: &http.Header{"X-Foo": []string{""}},
-			config:             json.RawMessage(`{"payload":"{}","allowed_remote_headers":["X-Foo"]}`),
+			config:             json.RawMessage(`{"payload":"{}","forward_response_headers_to_upstream":["X-Foo"]}`),
 		},
 		{
 			name: "authentication session",

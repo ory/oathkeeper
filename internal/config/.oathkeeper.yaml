@@ -264,7 +264,7 @@ authorizers:
     config:
       remote: https://host/path
       headers: {}
-      allowed_remote_headers:
+      forward_response_headers_to_upstream:
         - x-foo-bar
 
   # Configures the remote_json authorizer
@@ -275,7 +275,7 @@ authorizers:
     config:
       remote: https://host/path
       payload: "{}"
-      allowed_remote_headers:
+      forward_response_headers_to_upstream:
         - x-foo-bar
 
 # All mutators can be configured under this configuration key
