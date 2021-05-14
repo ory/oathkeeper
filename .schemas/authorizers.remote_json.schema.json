@@ -22,7 +22,7 @@
         "{\"subject\":\"{{ .Subject }}\"}"
       ]
     },
-    "allowed_remote_headers": {
+        "forward_response_headers_to_upstream": {
       "title": "Allowed Remote HTTP Headers for his Responses",
       "type": "array",
       "items": {

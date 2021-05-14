@@ -930,7 +930,7 @@
             "type": "string"
           }
         },
-        "allowed_remote_headers": {
+        "forward_response_headers_to_upstream": {
           "description": "A list of non simple headers the remote is allowed to return to mutate requests.",
           "title": "Allowed Remote HTTP Headers for his Responses",
           "type": "array",
@@ -969,7 +969,7 @@
             "{\"subject\":\"{{ .Subject }}\"}"
           ]
         },
-        "allowed_remote_headers": {
+        "forward_response_headers_to_upstream": {
           "description": "A list of non simple headers the remote is allowed to return to mutate requests.",
           "title": "Allowed Remote HTTP Headers for his Responses",
           "type": "array",
