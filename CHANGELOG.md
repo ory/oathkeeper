@@ -5,7 +5,8 @@
 
 **Table of Contents**
 
-- [Unreleased (2021-05-13)](#unreleased-2021-05-13)
+- [Unreleased (2021-05-14)](#unreleased-2021-05-14)
+  - [Features](#features)
   - [0.38.11-beta.1 (2021-05-13)](#03811-beta1-2021-05-13)
     - [Bug Fixes](#bug-fixes)
     - [Reverts](#reverts)
@@ -13,7 +14,7 @@
     - [Bug Fixes](#bug-fixes-1)
     - [Code Refactoring](#code-refactoring)
     - [Documentation](#documentation)
-    - [Features](#features)
+    - [Features](#features-1)
   - [0.38.9-beta.1 (2021-03-17)](#0389-beta1-2021-03-17)
   - [0.38.9-beta.1.pre.3 (2021-03-16)](#0389-beta1pre3-2021-03-16)
     - [Bug Fixes](#bug-fixes-2)
@@ -26,48 +27,48 @@
     - [Unclassified](#unclassified-1)
   - [0.38.7-beta.1 (2021-02-22)](#0387-beta1-2021-02-22)
     - [Bug Fixes](#bug-fixes-5)
-    - [Features](#features-1)
+    - [Features](#features-2)
   - [0.38.6-beta.1 (2021-01-27)](#0386-beta1-2021-01-27)
     - [Documentation](#documentation-1)
-    - [Features](#features-2)
+    - [Features](#features-3)
   - [0.38.5-beta.1 (2020-12-10)](#0385-beta1-2020-12-10)
     - [Bug Fixes](#bug-fixes-6)
     - [Documentation](#documentation-2)
-    - [Features](#features-3)
+    - [Features](#features-4)
     - [Unclassified](#unclassified-2)
   - [0.38.4-beta.1 (2020-09-28)](#0384-beta1-2020-09-28)
     - [Bug Fixes](#bug-fixes-7)
     - [Documentation](#documentation-3)
-    - [Features](#features-4)
+    - [Features](#features-5)
     - [Unclassified](#unclassified-3)
   - [0.38.3-beta.1 (2020-07-29)](#0383-beta1-2020-07-29)
     - [Bug Fixes](#bug-fixes-8)
     - [Documentation](#documentation-4)
-    - [Features](#features-5)
+    - [Features](#features-6)
   - [0.38.2-beta.1 (2020-05-25)](#0382-beta1-2020-05-25)
     - [Bug Fixes](#bug-fixes-9)
     - [Documentation](#documentation-5)
-    - [Features](#features-6)
+    - [Features](#features-7)
   - [0.38.1-beta.1 (2020-05-08)](#0381-beta1-2020-05-08)
     - [Bug Fixes](#bug-fixes-10)
 - [0.38.0-beta.2 (2020-05-07)](#0380-beta2-2020-05-07)
   - [Bug Fixes](#bug-fixes-11)
   - [Code Refactoring](#code-refactoring-1)
   - [Documentation](#documentation-6)
-  - [Features](#features-7)
+  - [Features](#features-8)
   - [0.37.1-beta.1 (2020-04-03)](#0371-beta1-2020-04-03)
     - [Documentation](#documentation-7)
 - [0.37.0-beta.1 (2020-04-02)](#0370-beta1-2020-04-02)
   - [Bug Fixes](#bug-fixes-12)
   - [Documentation](#documentation-8)
-  - [Features](#features-8)
+  - [Features](#features-9)
   - [BREAKING CHANGES](#breaking-changes)
 - [0.36.0-beta.4 (2020-02-14)](#0360-beta4-2020-02-14)
   - [Bug Fixes](#bug-fixes-13)
   - [Documentation](#documentation-9)
 - [0.36.0-beta.1 (2020-02-05)](#0360-beta1-2020-02-05)
   - [Documentation](#documentation-10)
-  - [Features](#features-9)
+  - [Features](#features-10)
   - [Unclassified](#unclassified-4)
   - [0.35.5-beta.2 (2020-01-31)](#0355-beta2-2020-01-31)
     - [Unclassified](#unclassified-5)
@@ -209,9 +210,14 @@
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-# Unreleased (2021-05-13)
+# [Unreleased](https://github.com/ory/oathkeeper/compare/v0.38.11-beta.1...22b0dbe6495b9f57206dc8fb2335e1c81906e27d) (2021-05-14)
 
-No significant changes have been made for this release.
+### Features
+
+- Add request header in match context
+  ([#719](https://github.com/ory/oathkeeper/issues/719))
+  ([22b0dbe](https://github.com/ory/oathkeeper/commit/22b0dbe6495b9f57206dc8fb2335e1c81906e27d)),
+  closes [#512](https://github.com/ory/oathkeeper/issues/512)
 
 ## [0.38.11-beta.1](https://github.com/ory/oathkeeper/compare/v0.38.10-beta.2...v0.38.11-beta.1) (2021-05-13)
 
