@@ -30,7 +30,7 @@
       },
       "description": "A list of non simple headers the remote is allowed to return to mutate requests.",
       "examples": [
-        "X-Branch-Id"
+        "X-Foo"
       ]
     }
   },

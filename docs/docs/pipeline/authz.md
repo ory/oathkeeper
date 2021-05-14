@@ -349,7 +349,7 @@ authorizers:
         "X-Subject": "{{ print .Subject }}"
       },
       "forward_response_headers_to_upstream": [
-        "X-Branch-Id"
+        "X-Foo"
       ]
     }
   }
@@ -442,7 +442,7 @@ authorizers:
       "payload": "{\"subject\": \"{{ print .Subject }}\", \"resource\": \"{{ printIndex .MatchContext.RegexpCaptureGroups 0 }}\"}"
     },
     "forward_response_headers_to_upstream": [
-      "X-Branch-Id"
+      "X-Foo"
     ]
   }
   "mutators": [
