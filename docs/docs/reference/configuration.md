@@ -304,6 +304,26 @@ authenticators:
         - https://my-other-website.com/.well-known/jwks.json
         - file://path/to/local/jwks.json
 
+      ## jwk_max_wait ##
+      #
+      # Set this value using environment variables on
+      # - Linux/macOS:
+      #    $ export AUTHENTICATORS_JWT_CONFIG_JWK_MAX_WAIT=<value>
+      # - Windows Command Line (CMD):
+      #    > set AUTHENTICATORS_JWT_CONFIG_JWK_MAX_WAIT=<value>
+      #
+      jwk_max_wait: 1s
+
+      ## jwk_ttl ##
+      #
+      # Set this value using environment variables on
+      # - Linux/macOS:
+      #    $ export AUTHENTICATORS_JWT_CONFIG_JWK_TTL=<value>
+      # - Windows Command Line (CMD):
+      #    > set AUTHENTICATORS_JWT_CONFIG_JWK_TTL=<value>
+      #
+      jwk_ttl: 30s
+
       ## target_audience ##
       #
       # Set this value using environment variables on

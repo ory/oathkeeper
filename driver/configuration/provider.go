@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/gobuffalo/packr/v2"
-
 	"github.com/ory/fosite"
 	"github.com/ory/x/tracing"
 
@@ -73,6 +72,8 @@ type ProviderErrorHandlers interface {
 type ProviderAuthenticators interface {
 	AuthenticatorConfig(id string, overrides json.RawMessage, destination interface{}) error
 	AuthenticatorIsEnabled(id string) bool
+	AuthenticatorJwtJwkMaxWait() time.Duration
+	AuthenticatorJwtJwkTtl() time.Duration
 }
 
 type ProviderAuthorizers interface {
