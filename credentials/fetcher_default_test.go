@@ -153,6 +153,14 @@ func TestFetcherDefault(t *testing.T) {
 		assert.True(t, check("8e884167-1300-4f58-8cc1-81af68f878a8"))
 	})
 
+	time.Sleep(maxWait * 7) // wait so the fetched key reaches ttl
+
+	t.Run("name=should find the previously fetched key if the refresh request times out", func(t *testing.T) {
+		key, err := s.ResolveKey(context.Background(), uris, "c61308cc-faef-4b98-99c3-839f513ac296", "sig")
+		require.NoError(t, err)
+		assert.Equal(t, "c61308cc-faef-4b98-99c3-839f513ac296", key.KeyID)
+	})
+
 	t.Run("name=should fetch from s3 object storage", func(t *testing.T) {
 		ctx := context.Background()
 		cloudstorage.SetCurrentTest(t)
