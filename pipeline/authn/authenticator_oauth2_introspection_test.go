@@ -614,9 +614,9 @@ func TestAuthenticatorOAuth2Introspection(t *testing.T) {
 			require.NoError(t, err)
 		}
 
-		if noPreauthClient == preauthOneClient || noPreauthClient == preauthTwoClient || preauthOneClient == preauthTwoClient {
-			t.FailNow()
-		}
+		require.NotEqual(t, noPreauthClient, preauthOneClient)
+		require.NotEqual(t, noPreauthClient, preauthTwoClient)
+		require.NotEqual(t, preauthOneClient, preauthTwoClient)
 
 		_, preauthOneClient2, err := authenticator.Config(preAuthConfigOne)
 		if err != nil {
@@ -642,9 +642,9 @@ func TestAuthenticatorOAuth2Introspection(t *testing.T) {
 			t.FailNow()
 		}
 
-		if noPreauthClient == preauthOneClient || noPreauthClient == preauthTwoClient || preauthOneClient == preauthTwoClient {
-			t.FailNow()
-		}
+		require.NotEqual(t, noPreauthClient, preauthOneClient)
+		require.NotEqual(t, noPreauthClient, preauthTwoClient)
+		require.NotEqual(t, preauthOneClient, preauthTwoClient)
 
 	})
 }
