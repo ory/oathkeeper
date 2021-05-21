@@ -17,6 +17,10 @@ serve:
       write: 2s
       idle: 3s
 
+    request:
+      allowed_client_headers:
+        - X-B3-Traceid
+
     cors:
       enabled: true
       allowed_origins:

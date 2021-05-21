@@ -109,6 +109,25 @@
         }
       }
     },
+    "requests": {
+      "title": "Proxy requests",
+      "description": "Configure proxy request handler using the following options.",
+      "type": "object",
+      "properties": {
+        "allowed_headers": {
+          "description": "A list of non simple headers the client is allowed to use with in receiving requests.",
+          "title": "Allowed Request HTTP Headers",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minLength": 0,
+          "uniqueItems": true,
+          "default": []
+        }
+      },
+      "additionalProperties": false
+    },
     "cors": {
       "title": "Cross Origin Resource Sharing (CORS)",
       "description": "Configure [Cross Origin Resource Sharing (CORS)](http://www.w3.org/TR/cors/) using the following options.",

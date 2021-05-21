@@ -347,11 +347,14 @@ func (d *RequestHandler) InitializeAuthnSession(r *http.Request, rl *rule.Rule) 
 			WithField("reason_id", "capture_groups_error").
 			Warn("Unable to capture the groups for the MatchContext")
 	} else {
+		for _, k := range d.c.ProxyAllowedClientHeaders() {
+			session.Header.Add(k, r.Header.Get(k))
+		}
+
 		session.MatchContext = authn.MatchContext{
 			RegexpCaptureGroups: values,
 			URL:                 r.URL,
 			Method:              r.Method,
-			Header:              r.Header,
 		}
 	}
 

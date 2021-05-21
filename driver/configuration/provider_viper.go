@@ -43,6 +43,7 @@ const (
 	ViperKeyProxyIdleTimeout                    = "serve.proxy.timeout.idle"
 	ViperKeyProxyServeAddressHost               = "serve.proxy.host"
 	ViperKeyProxyServeAddressPort               = "serve.proxy.port"
+	ViperKeyProxyAllowedClientHeaders           = "serve.proxy.request.allowed_client_headers"
 	ViperKeyAPIServeAddressHost                 = "serve.api.host"
 	ViperKeyAPIServeAddressPort                 = "serve.api.port"
 	ViperKeyAPIReadTimeout                      = "serve.api.timeout.read"
@@ -412,6 +413,10 @@ func (v *ViperProvider) MutatorConfig(id string, override json.RawMessage, dest 
 
 func (v *ViperProvider) JSONWebKeyURLs() []string {
 	return viperx.GetStringSlice(v.l, ViperKeyMutatorIDTokenJWKSURL, []string{})
+}
+
+func (v *ViperProvider) ProxyAllowedClientHeaders() []string {
+	return viperx.GetStringSlice(v.l, ViperKeyProxyAllowedClientHeaders, []string{})
 }
 
 func (v *ViperProvider) TracingServiceName() string {

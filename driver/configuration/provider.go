@@ -60,6 +60,8 @@ type Provider interface {
 	ParseURLs(sources []string) ([]url.URL, error)
 	JSONWebKeyURLs() []string
 
+	ProxyAllowedClientHeaders() []string
+
 	TracingServiceName() string
 	TracingProvider() string
 	TracingJaegerConfig() *tracing.JaegerConfig

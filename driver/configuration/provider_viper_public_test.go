@@ -192,6 +192,14 @@ func TestViperProvider(t *testing.T) {
 			assert.Equal(t, true, p.PrometheusCollapseRequestPaths())
 		})
 
+		t.Run("group=requests", func(t *testing.T) {
+			t.Run("case=should pass array values", func(t *testing.T) {
+				assert.Equal(t, []string{
+					"X-B3-Traceid",
+				}, p.ProxyAllowedClientHeaders())
+			})
+		})
+
 		t.Run("group=cors", func(t *testing.T) {
 			assert.True(t, p.CORSEnabled("proxy"))
 			assert.True(t, p.CORSEnabled("api"))

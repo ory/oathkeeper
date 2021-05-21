@@ -1518,6 +1518,24 @@ serve:
       #
       read: 5s
 
+    ## Proxy requests ##
+    #
+    # Configure proxy request handler using the following options.
+    #
+    request:
+      ## Allowed Request HTTP Headers ##
+      #
+      # A list of non simple headers the client is allowed to use with in receiving requests.
+      #
+      # Set this value using environment variables on
+      # - Linux/macOS:
+      #    $ export SERVE_PROXY_REQUEST_ALLOWED_CLIENT_HEADERS=<value>
+      # - Windows Command Line (CMD):
+      #    > set SERVE_PROXY_REQUEST_ALLOWED_CLIENT_HEADERS=<value>
+      #
+      allowed_client_headers:
+        - ''
+        
     ## Cross Origin Resource Sharing (CORS) ##
     #
     # Configure [Cross Origin Resource Sharing (CORS)](http://www.w3.org/TR/cors/) using the following options.
