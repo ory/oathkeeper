@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"net/http"
 	"text/template"
+	"time"
 
 	"github.com/pkg/errors"
 
@@ -19,10 +20,18 @@ import (
 	"github.com/ory/oathkeeper/x"
 )
 
+// AuthorizerRemoteClientConfiguration represents a configuration of the backoff for the resilient HTTP client
+// used to connect to the authorizer
+type AuthorizerRemoteClientConfiguration struct {
+	Timeout   int `json:"timeout"`
+	StopAfter int `json:"stop_after"`
+}
+
 // AuthorizerRemoteJSONConfiguration represents a configuration for the remote_json authorizer.
 type AuthorizerRemoteJSONConfiguration struct {
-	Remote  string `json:"remote"`
-	Payload string `json:"payload"`
+	Remote       string                              `json:"remote"`
+	Payload      string                              `json:"payload"`
+	ClientConfig AuthorizerRemoteClientConfiguration `json:"client"`
 }
 
 // PayloadTemplateID returns a string with which to associate the payload template.
@@ -40,11 +49,23 @@ type AuthorizerRemoteJSON struct {
 
 // NewAuthorizerRemoteJSON creates a new AuthorizerRemoteJSON.
 func NewAuthorizerRemoteJSON(c configuration.Provider) *AuthorizerRemoteJSON {
-	return &AuthorizerRemoteJSON{
+	authorizer := &AuthorizerRemoteJSON{
 		c:      c,
 		client: httpx.NewResilientClientLatencyToleranceSmall(nil),
 		t:      x.NewTemplate("remote_json"),
 	}
+	// Add configurable HTTP client if set in config
+	conf, _ := authorizer.Config(nil)
+	if conf != nil && conf.ClientConfig.Timeout > 0 && conf.ClientConfig.StopAfter > 0 {
+		resilientClient := httpx.NewResilientClientLatencyToleranceConfigurable(
+			nil,
+			time.Millisecond*time.Duration(conf.ClientConfig.Timeout),
+			time.Millisecond*time.Duration(conf.ClientConfig.StopAfter),
+		)
+		authorizer.client = resilientClient
+	}
+
+	return authorizer
 }
 
 // GetID implements the Authorizer interface.
