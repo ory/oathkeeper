@@ -5,7 +5,7 @@
 
 **Table of Contents**
 
-- [Unreleased (2021-05-21)](#unreleased-2021-05-21)
+- [Unreleased (2021-05-24)](#unreleased-2021-05-24)
   - [Bug Fixes](#bug-fixes)
   - [Features](#features)
   - [0.38.11-beta.1 (2021-05-13)](#03811-beta1-2021-05-13)
@@ -211,7 +211,7 @@
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-# [Unreleased](https://github.com/ory/oathkeeper/compare/v0.38.11-beta.1...3a9ae1a43a6f157bb7998d2e4ee5b76851c68ec1) (2021-05-21)
+# [Unreleased](https://github.com/ory/oathkeeper/compare/v0.38.11-beta.1...b3d117b5d7de02cc1e3ab965328cf6c7995f8a6e) (2021-05-24)
 
 ### Bug Fixes
 
@@ -221,6 +221,28 @@
   closes [#712](https://github.com/ory/oathkeeper/issues/712)
 
 ### Features
+
+- Ability to Configure Remote Authorizers to set Headers in
+  AuthenticationSession ([#717](https://github.com/ory/oathkeeper/issues/717))
+  ([b3d117b](https://github.com/ory/oathkeeper/commit/b3d117b5d7de02cc1e3ab965328cf6c7995f8a6e)):
+
+  > The remote authorizers may have useful context from user's permissions. So
+  > with this changes, custom authorizers using remote and remote_json can
+  > return some useful headers to be forward into the AuthenticationSession,
+  > meaning that these headers will be passed to upstream services.
+  >
+  > For example, an user containing scopes/branches inside an organization
+  > profile has some level of data addressed to him. In this case, the upstream
+  > service need to know that, and "filter" the data according to his
+  > "branch_id". The permission that is given to the user (and the remote
+  > authorizers manages) has a record of the "branch_id", for the following
+  > responses will be returned as status code 200 (if granted) and containing a
+  > header like X-Branch-Id.
+  >
+  > The upstream service receives the X-Branch-Id and does your thing.
+  >
+  > The configuration requires to configure a list of "allowed headers"
+  > returning from remote authorizer, that will be accepted in the pipeline.
 
 - Add request header in match context
   ([#719](https://github.com/ory/oathkeeper/issues/719))
