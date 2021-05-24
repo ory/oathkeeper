@@ -21,6 +21,17 @@
       "examples": [
         "{\"subject\":\"{{ .Subject }}\"}"
       ]
+    },
+        "forward_response_headers_to_upstream": {
+      "title": "Allowed Remote HTTP Headers for his Responses",
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "A list of non simple headers the remote is allowed to return to mutate requests.",
+      "examples": [
+        "X-Foo"
+      ]
     }
   },
   "required": [
