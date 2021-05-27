@@ -52,10 +52,6 @@ type reasoner interface {
 	Reason() string
 }
 
-type fetchResult struct {
-	finishedWithTimeout bool
-}
-
 var _ Fetcher = new(FetcherDefault)
 
 type FetcherDefault struct {
@@ -92,9 +88,9 @@ func (s *FetcherDefault) ResolveSets(ctx context.Context, locations []url.URL) (
 		return set, nil
 	}
 
-	fetchResult := s.fetchParallel(ctx, locations)
+	fetchError := s.fetchParallel(ctx, locations)
 
-	if set := s.set(locations, fetchResult.finishedWithTimeout); set != nil {
+	if set := s.set(locations, fetchError != nil); set != nil {
 		return set, nil
 	}
 
@@ -104,7 +100,7 @@ func (s *FetcherDefault) ResolveSets(ctx context.Context, locations []url.URL) (
 	)
 }
 
-func (s *FetcherDefault) fetchParallel(ctx context.Context, locations []url.URL) fetchResult {
+func (s *FetcherDefault) fetchParallel(ctx context.Context, locations []url.URL) error {
 	ctx, cancel := context.WithTimeout(ctx, s.cancelAfter)
 	defer cancel()
 	errs := make(chan error)
@@ -128,10 +124,10 @@ func (s *FetcherDefault) fetchParallel(ctx context.Context, locations []url.URL)
 	select {
 	case <-ctx.Done():
 		s.l.Errorf("Ignoring JSON Web Keys from at least one URI because the request timed out waiting for a response.")
-		return fetchResult{true}
+		return errors.Errorf("At least one JWT fetch took more then the allowed duration")
 	case <-done:
 		// We're done!
-		return fetchResult{false}
+		return nil
 	}
 }
 
@@ -140,9 +136,9 @@ func (s *FetcherDefault) ResolveKey(ctx context.Context, locations []url.URL, ki
 		return key, nil
 	}
 
-	fetchResult := s.fetchParallel(ctx, locations)
+	fetchError := s.fetchParallel(ctx, locations)
 
-	if key := s.key(kid, locations, use, fetchResult.finishedWithTimeout); key != nil {
+	if key := s.key(kid, locations, use, fetchError != nil); key != nil {
 		return key, nil
 	}
 

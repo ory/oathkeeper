@@ -574,7 +574,7 @@
             ]
           ]
         },
-        "jwk_max_wait": {
+        "jwks_max_wait": {
           "title": "Max await interval for the JWK fetch",
           "type": "string",
           "description": "The configuration which sets the max wait threshold when fetching new JWKs",

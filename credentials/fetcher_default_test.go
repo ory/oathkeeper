@@ -31,16 +31,19 @@ var sets = [...]json.RawMessage{
 
 func TestFetcherDefault(t *testing.T) {
 	const maxWait = time.Millisecond * 100
+	const JWKsTTL = maxWait * 7
+	const timeoutServerDelay = maxWait * 2
+
 	t.Cleanup(func() {
 		cloudstorage.SetCurrentTest(nil)
 	})
 
 	l := logrusx.New("", "", logrusx.ForceLevel(logrus.DebugLevel))
 	w := herodot.NewJSONWriter(l.Logger)
-	s := NewFetcherDefault(l, maxWait, maxWait*7)
+	s := NewFetcherDefault(l, maxWait, JWKsTTL)
 
 	timeOutServer := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
-		time.Sleep(maxWait * 2)
+		time.Sleep(timeoutServerDelay)
 		w.Write(rw, r, sets[0])
 	}))
 	defer timeOutServer.Close()
@@ -153,19 +156,25 @@ func TestFetcherDefault(t *testing.T) {
 		assert.True(t, check("8e884167-1300-4f58-8cc1-81af68f878a8"))
 	})
 
-	time.Sleep(maxWait * 7) // wait so the fetched key reaches ttl
+	time.Sleep(
+		timeoutServerDelay +
+			JWKsTTL +
+			(time.Millisecond * 100)) // wait so the fetched key reaches ttl
+	// change "alg" for "c61308cc-faef-4b98-99c3-839f513ac296",
+	// so we are sure we get the "stale" data in `name=should find the previously fetched key if the refresh request times out`
+	sets[0] = json.RawMessage(`{"keys":[{"use":"sig","kty":"oct","kid":"c61308cc-faef-4b98-99c3-839f513ac296","k":"I2_YrZxll-Uq65GKjnJq4u7uNub8hG5cBvlHRz03w94","alg":"RS256"}]}`)
 
 	t.Run("name=should find the previously fetched key if the refresh request times out", func(t *testing.T) {
 		key, err := s.ResolveKey(context.Background(), uris, "c61308cc-faef-4b98-99c3-839f513ac296", "sig")
 		require.NoError(t, err)
-		assert.Equal(t, "c61308cc-faef-4b98-99c3-839f513ac296", key.KeyID)
+		assert.Equal(t, "HS256", key.Algorithm)
 	})
 
 	t.Run("name=should fetch from s3 object storage", func(t *testing.T) {
 		ctx := context.Background()
 		cloudstorage.SetCurrentTest(t)
 
-		s := NewFetcherDefault(l, maxWait, maxWait*7)
+		s := NewFetcherDefault(l, maxWait, JWKsTTL)
 
 		key, err := s.ResolveKey(ctx, []url.URL{
 			*urlx.ParseOrPanic("s3://oathkeeper-test-bucket/path/prefix/jwks.json"),
@@ -178,7 +187,7 @@ func TestFetcherDefault(t *testing.T) {
 		ctx := context.Background()
 		cloudstorage.SetCurrentTest(t)
 
-		s := NewFetcherDefault(l, maxWait, maxWait*7)
+		s := NewFetcherDefault(l, maxWait, JWKsTTL)
 
 		key, err := s.ResolveKey(ctx, []url.URL{
 			*urlx.ParseOrPanic("gs://oathkeeper-test-bucket/path/prefix/jwks.json"),
@@ -191,7 +200,7 @@ func TestFetcherDefault(t *testing.T) {
 		ctx := context.Background()
 		cloudstorage.SetCurrentTest(t)
 
-		s := NewFetcherDefault(l, maxWait, maxWait*7)
+		s := NewFetcherDefault(l, maxWait, JWKsTTL)
 
 		jwkKey, err := s.ResolveKey(ctx, []url.URL{
 			*urlx.ParseOrPanic("azblob://path/prefix/jwks.json"),
