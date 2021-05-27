@@ -5,66 +5,67 @@
 
 **Table of Contents**
 
-- [Unreleased (2021-05-14)](#unreleased-2021-05-14)
+- [Unreleased (2021-05-24)](#unreleased-2021-05-24)
+  - [Bug Fixes](#bug-fixes)
   - [Features](#features)
   - [0.38.11-beta.1 (2021-05-13)](#03811-beta1-2021-05-13)
-    - [Bug Fixes](#bug-fixes)
+    - [Bug Fixes](#bug-fixes-1)
     - [Reverts](#reverts)
   - [0.38.10-beta.2 (2021-05-05)](#03810-beta2-2021-05-05)
-    - [Bug Fixes](#bug-fixes-1)
+    - [Bug Fixes](#bug-fixes-2)
     - [Code Refactoring](#code-refactoring)
     - [Documentation](#documentation)
     - [Features](#features-1)
   - [0.38.9-beta.1 (2021-03-17)](#0389-beta1-2021-03-17)
   - [0.38.9-beta.1.pre.3 (2021-03-16)](#0389-beta1pre3-2021-03-16)
-    - [Bug Fixes](#bug-fixes-2)
+    - [Bug Fixes](#bug-fixes-3)
   - [0.38.9-beta.1.pre.2 (2021-03-15)](#0389-beta1pre2-2021-03-15)
   - [0.38.9-beta.1.pre.1 (2021-03-15)](#0389-beta1pre1-2021-03-15)
-    - [Bug Fixes](#bug-fixes-3)
+    - [Bug Fixes](#bug-fixes-4)
     - [Unclassified](#unclassified)
   - [0.38.8-beta.1 (2021-02-25)](#0388-beta1-2021-02-25)
-    - [Bug Fixes](#bug-fixes-4)
+    - [Bug Fixes](#bug-fixes-5)
     - [Unclassified](#unclassified-1)
   - [0.38.7-beta.1 (2021-02-22)](#0387-beta1-2021-02-22)
-    - [Bug Fixes](#bug-fixes-5)
+    - [Bug Fixes](#bug-fixes-6)
     - [Features](#features-2)
   - [0.38.6-beta.1 (2021-01-27)](#0386-beta1-2021-01-27)
     - [Documentation](#documentation-1)
     - [Features](#features-3)
   - [0.38.5-beta.1 (2020-12-10)](#0385-beta1-2020-12-10)
-    - [Bug Fixes](#bug-fixes-6)
+    - [Bug Fixes](#bug-fixes-7)
     - [Documentation](#documentation-2)
     - [Features](#features-4)
     - [Unclassified](#unclassified-2)
   - [0.38.4-beta.1 (2020-09-28)](#0384-beta1-2020-09-28)
-    - [Bug Fixes](#bug-fixes-7)
+    - [Bug Fixes](#bug-fixes-8)
     - [Documentation](#documentation-3)
     - [Features](#features-5)
     - [Unclassified](#unclassified-3)
   - [0.38.3-beta.1 (2020-07-29)](#0383-beta1-2020-07-29)
-    - [Bug Fixes](#bug-fixes-8)
+    - [Bug Fixes](#bug-fixes-9)
     - [Documentation](#documentation-4)
     - [Features](#features-6)
   - [0.38.2-beta.1 (2020-05-25)](#0382-beta1-2020-05-25)
-    - [Bug Fixes](#bug-fixes-9)
+    - [Bug Fixes](#bug-fixes-10)
     - [Documentation](#documentation-5)
     - [Features](#features-7)
   - [0.38.1-beta.1 (2020-05-08)](#0381-beta1-2020-05-08)
-    - [Bug Fixes](#bug-fixes-10)
+    - [Bug Fixes](#bug-fixes-11)
 - [0.38.0-beta.2 (2020-05-07)](#0380-beta2-2020-05-07)
-  - [Bug Fixes](#bug-fixes-11)
+  - [Bug Fixes](#bug-fixes-12)
   - [Code Refactoring](#code-refactoring-1)
   - [Documentation](#documentation-6)
   - [Features](#features-8)
   - [0.37.1-beta.1 (2020-04-03)](#0371-beta1-2020-04-03)
     - [Documentation](#documentation-7)
 - [0.37.0-beta.1 (2020-04-02)](#0370-beta1-2020-04-02)
-  - [Bug Fixes](#bug-fixes-12)
+  - [Bug Fixes](#bug-fixes-13)
   - [Documentation](#documentation-8)
   - [Features](#features-9)
   - [BREAKING CHANGES](#breaking-changes)
 - [0.36.0-beta.4 (2020-02-14)](#0360-beta4-2020-02-14)
-  - [Bug Fixes](#bug-fixes-13)
+  - [Bug Fixes](#bug-fixes-14)
   - [Documentation](#documentation-9)
 - [0.36.0-beta.1 (2020-02-05)](#0360-beta1-2020-02-05)
   - [Documentation](#documentation-10)
@@ -210,9 +211,38 @@
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-# [Unreleased](https://github.com/ory/oathkeeper/compare/v0.38.11-beta.1...22b0dbe6495b9f57206dc8fb2335e1c81906e27d) (2021-05-14)
+# [Unreleased](https://github.com/ory/oathkeeper/compare/v0.38.11-beta.1...b3d117b5d7de02cc1e3ab965328cf6c7995f8a6e) (2021-05-24)
+
+### Bug Fixes
+
+- Cache introspection pre-auth
+  ([#723](https://github.com/ory/oathkeeper/issues/723))
+  ([3a9ae1a](https://github.com/ory/oathkeeper/commit/3a9ae1a43a6f157bb7998d2e4ee5b76851c68ec1)),
+  closes [#712](https://github.com/ory/oathkeeper/issues/712)
 
 ### Features
+
+- Ability to Configure Remote Authorizers to set Headers in
+  AuthenticationSession ([#717](https://github.com/ory/oathkeeper/issues/717))
+  ([b3d117b](https://github.com/ory/oathkeeper/commit/b3d117b5d7de02cc1e3ab965328cf6c7995f8a6e)):
+
+  > The remote authorizers may have useful context from user's permissions. So
+  > with this changes, custom authorizers using remote and remote_json can
+  > return some useful headers to be forward into the AuthenticationSession,
+  > meaning that these headers will be passed to upstream services.
+  >
+  > For example, an user containing scopes/branches inside an organization
+  > profile has some level of data addressed to him. In this case, the upstream
+  > service need to know that, and "filter" the data according to his
+  > "branch_id". The permission that is given to the user (and the remote
+  > authorizers manages) has a record of the "branch_id", for the following
+  > responses will be returned as status code 200 (if granted) and containing a
+  > header like X-Branch-Id.
+  >
+  > The upstream service receives the X-Branch-Id and does your thing.
+  >
+  > The configuration requires to configure a list of "allowed headers"
+  > returning from remote authorizer, that will be accepted in the pipeline.
 
 - Add request header in match context
   ([#719](https://github.com/ory/oathkeeper/issues/719))

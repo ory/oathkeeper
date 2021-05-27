@@ -292,6 +292,9 @@ if it returns a "403 Forbidden" response code, the access is denied.
   to an
   [`AuthenticationSession`](https://github.com/ory/oathkeeper/blob/master/pipeline/authn/authenticator.go#L40)
   object. See [Session](../pipeline.md#session) for more details.
+- `forward_response_headers_to_upstream` (slice of strings, optional) - The HTTP headers that 
+  will be allowed from remote authorizer responses. If returned, headers on this list 
+  will be forward to upstream services.
 
 #### Example
 
@@ -344,7 +347,10 @@ authorizers:
       "remote": "http://my-remote-authorizer/authorize",
       "headers": {
         "X-Subject": "{{ print .Subject }}"
-      }
+      },
+      "forward_response_headers_to_upstream": [
+        "X-Foo"
+      ]
     }
   }
   "mutators": [
@@ -373,6 +379,10 @@ Forbidden" response code, the access is denied.
   to an
   [`AuthenticationSession`](https://github.com/ory/oathkeeper/blob/master/pipeline/authn/authenticator.go#L40)
   object. See [Session](../pipeline.md#session) for more details.
+- `forward_response_headers_to_upstream` (slice of strings, optional) - The HTTP headers that
+  will be allowed from remote authorizer responses. If returned, headers on this list
+  will be forward to upstream services.
+
 
 #### Example
 
@@ -430,7 +440,10 @@ authorizers:
     "config": {
       "remote": "http://my-remote-authorizer/authorize",
       "payload": "{\"subject\": \"{{ print .Subject }}\", \"resource\": \"{{ printIndex .MatchContext.RegexpCaptureGroups 0 }}\"}"
-    }
+    },
+    "forward_response_headers_to_upstream": [
+      "X-Foo"
+    ]
   }
   "mutators": [
     {

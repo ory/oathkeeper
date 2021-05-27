@@ -949,6 +949,17 @@
           "additionalProperties": {
             "type": "string"
           }
+        },
+        "forward_response_headers_to_upstream": {
+          "description": "A list of non simple headers the remote is allowed to return to mutate requests.",
+          "title": "Allowed Remote HTTP Headers for his Responses",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minLength": 0,
+          "uniqueItems": true,
+          "default": []
         }
       },
       "required": [
@@ -977,6 +988,17 @@
           "examples": [
             "{\"subject\":\"{{ .Subject }}\"}"
           ]
+        },
+        "forward_response_headers_to_upstream": {
+          "description": "A list of non simple headers the remote is allowed to return to mutate requests.",
+          "title": "Allowed Remote HTTP Headers for his Responses",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minLength": 0,
+          "uniqueItems": true,
+          "default": []
         }
       },
       "required": [
