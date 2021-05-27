@@ -449,7 +449,7 @@
             "1s"
           ]
         },
-        "jwk_ttl": {
+        "jwks_ttl": {
           "title": "JWK cache TTL configuration",
           "type": "string",
           "description": "The time interval for which fetched JWKs are cached",

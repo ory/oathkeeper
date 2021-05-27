@@ -97,7 +97,7 @@ const (
 	// jwt
 	ViperKeyAuthenticatorJwtIsEnabled  = "authenticators.jwt.enabled"
 	ViperKeyAuthenticatorJwtJwkMaxWait = "authenticators.jwt.config.jwks_max_wait"
-	ViperKeyAuthenticatorJwtJwkTtl     = "authenticators.jwt.config.jwk_ttl"
+	ViperKeyAuthenticatorJwtJwkTtl     = "authenticators.jwt.config.jwks_ttl"
 
 	// oauth2_client_credentials
 	ViperKeyAuthenticatorOAuth2ClientCredentialsIsEnabled = "authenticators.oauth2_client_credentials.enabled"

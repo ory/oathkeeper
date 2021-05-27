@@ -314,15 +314,15 @@ authenticators:
       #
       jwks_max_wait: 1s
 
-      ## jwk_ttl ##
+      ## jwks_ttl ##
       #
       # Set this value using environment variables on
       # - Linux/macOS:
-      #    $ export AUTHENTICATORS_JWT_CONFIG_JWK_TTL=<value>
+      #    $ export AUTHENTICATORS_JWT_CONFIG_JWKS_TTL=<value>
       # - Windows Command Line (CMD):
-      #    > set AUTHENTICATORS_JWT_CONFIG_JWK_TTL=<value>
+      #    > set AUTHENTICATORS_JWT_CONFIG_JWKS_TTL=<value>
       #
-      jwk_ttl: 30s
+      jwks_ttl: 30s
 
       ## target_audience ##
       #
