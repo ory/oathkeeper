@@ -292,9 +292,9 @@ if it returns a "403 Forbidden" response code, the access is denied.
   to an
   [`AuthenticationSession`](https://github.com/ory/oathkeeper/blob/master/pipeline/authn/authenticator.go#L40)
   object. See [Session](../pipeline.md#session) for more details.
-- `forward_response_headers_to_upstream` (slice of strings, optional) - The HTTP headers that 
-  will be allowed from remote authorizer responses. If returned, headers on this list 
-  will be forward to upstream services.
+- `forward_response_headers_to_upstream` (slice of strings, optional) - The HTTP
+  headers that will be allowed from remote authorizer responses. If returned,
+  headers on this list will be forward to upstream services.
 
 #### Example
 
@@ -379,10 +379,9 @@ Forbidden" response code, the access is denied.
   to an
   [`AuthenticationSession`](https://github.com/ory/oathkeeper/blob/master/pipeline/authn/authenticator.go#L40)
   object. See [Session](../pipeline.md#session) for more details.
-- `forward_response_headers_to_upstream` (slice of strings, optional) - The HTTP headers that
-  will be allowed from remote authorizer responses. If returned, headers on this list
-  will be forward to upstream services.
-
+- `forward_response_headers_to_upstream` (slice of strings, optional) - The HTTP
+  headers that will be allowed from remote authorizer responses. If returned,
+  headers on this list will be forward to upstream services.
 
 #### Example
 
