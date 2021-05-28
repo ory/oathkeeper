@@ -95,7 +95,9 @@ const (
 	ViperKeyAuthenticatorCookieSessionIsEnabled = "authenticators.cookie_session.enabled"
 
 	// jwt
-	ViperKeyAuthenticatorJWTIsEnabled = "authenticators.jwt.enabled"
+	ViperKeyAuthenticatorJwtIsEnabled  = "authenticators.jwt.enabled"
+	ViperKeyAuthenticatorJwtJwkMaxWait = "authenticators.jwt.config.jwks_max_wait"
+	ViperKeyAuthenticatorJwtJwkTtl     = "authenticators.jwt.config.jwks_ttl"
 
 	// oauth2_client_credentials
 	ViperKeyAuthenticatorOAuth2ClientCredentialsIsEnabled = "authenticators.oauth2_client_credentials.enabled"
@@ -392,6 +394,14 @@ func (v *ViperProvider) AuthenticatorIsEnabled(id string) bool {
 
 func (v *ViperProvider) AuthenticatorConfig(id string, override json.RawMessage, dest interface{}) error {
 	return v.PipelineConfig("authenticators", id, override, dest)
+}
+
+func (v *ViperProvider) AuthenticatorJwtJwkMaxWait() time.Duration {
+	return viperx.GetDuration(v.l, ViperKeyAuthenticatorJwtJwkMaxWait, time.Second)
+}
+
+func (v *ViperProvider) AuthenticatorJwtJwkTtl() time.Duration {
+	return viperx.GetDuration(v.l, ViperKeyAuthenticatorJwtJwkTtl, time.Second*30)
 }
 
 func (v *ViperProvider) AuthorizerIsEnabled(id string) bool {

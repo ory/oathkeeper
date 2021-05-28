@@ -84,13 +84,13 @@ func NewFetcherDefault(l *logrusx.Logger, cancelAfter time.Duration, ttl time.Du
 }
 
 func (s *FetcherDefault) ResolveSets(ctx context.Context, locations []url.URL) ([]jose.JSONWebKeySet, error) {
-	if set := s.set(locations); set != nil {
+	if set := s.set(locations, false); set != nil {
 		return set, nil
 	}
 
-	s.fetchParallel(ctx, locations)
+	fetchError := s.fetchParallel(ctx, locations)
 
-	if set := s.set(locations); set != nil {
+	if set := s.set(locations, errors.Is(fetchError, context.DeadlineExceeded)); set != nil {
 		return set, nil
 	}
 
@@ -100,7 +100,7 @@ func (s *FetcherDefault) ResolveSets(ctx context.Context, locations []url.URL) (
 	)
 }
 
-func (s *FetcherDefault) fetchParallel(ctx context.Context, locations []url.URL) {
+func (s *FetcherDefault) fetchParallel(ctx context.Context, locations []url.URL) error {
 	ctx, cancel := context.WithTimeout(ctx, s.cancelAfter)
 	defer cancel()
 	errs := make(chan error)
@@ -123,20 +123,22 @@ func (s *FetcherDefault) fetchParallel(ctx context.Context, locations []url.URL)
 
 	select {
 	case <-ctx.Done():
-		s.l.Errorf("Ignoring JSON Web Keys from at least one URI because the request timed out waiting for a response.")
+		s.l.WithError(ctx.Err()).Errorf("Ignoring JSON Web Keys from at least one URI because the request timed out waiting for a response.")
+		return ctx.Err()
 	case <-done:
 		// We're done!
+		return nil
 	}
 }
 
 func (s *FetcherDefault) ResolveKey(ctx context.Context, locations []url.URL, kid string, use string) (*jose.JSONWebKey, error) {
-	if key := s.key(kid, locations, use); key != nil {
+	if key := s.key(kid, locations, use, false); key != nil {
 		return key, nil
 	}
 
-	s.fetchParallel(ctx, locations)
+	fetchError := s.fetchParallel(ctx, locations)
 
-	if key := s.key(kid, locations, use); key != nil {
+	if key := s.key(kid, locations, use, errors.Is(fetchError, context.DeadlineExceeded)); key != nil {
 		return key, nil
 	}
 
@@ -148,14 +150,14 @@ func (s *FetcherDefault) ResolveKey(ctx context.Context, locations []url.URL, ki
 	)
 }
 
-func (s *FetcherDefault) key(kid string, locations []url.URL, use string) *jose.JSONWebKey {
+func (s *FetcherDefault) key(kid string, locations []url.URL, use string, staleKeyAcceptable bool) *jose.JSONWebKey {
 	for _, l := range locations {
 		s.RLock()
 		keys, ok1 := s.keys[l.String()]
 		fetchedAt, ok2 := s.fetchedAt[l.String()]
 		s.RUnlock()
 
-		if !ok1 || !ok2 || fetchedAt.Add(s.ttl).Before(time.Now().UTC()) {
+		if !ok1 || !ok2 || s.isKeyExpired(staleKeyAcceptable, fetchedAt) {
 			continue
 		}
 
@@ -169,7 +171,7 @@ func (s *FetcherDefault) key(kid string, locations []url.URL, use string) *jose.
 	return nil
 }
 
-func (s *FetcherDefault) set(locations []url.URL) []jose.JSONWebKeySet {
+func (s *FetcherDefault) set(locations []url.URL, staleKeyAcceptable bool) []jose.JSONWebKeySet {
 	var result []jose.JSONWebKeySet
 	for _, l := range locations {
 		s.RLock()
@@ -177,7 +179,7 @@ func (s *FetcherDefault) set(locations []url.URL) []jose.JSONWebKeySet {
 		fetchedAt, ok2 := s.fetchedAt[l.String()]
 		s.RUnlock()
 
-		if !ok1 || !ok2 || fetchedAt.Add(s.ttl).Before(time.Now().UTC()) {
+		if !ok1 || !ok2 || s.isKeyExpired(staleKeyAcceptable, fetchedAt) {
 			continue
 		}
 
@@ -185,6 +187,11 @@ func (s *FetcherDefault) set(locations []url.URL) []jose.JSONWebKeySet {
 	}
 
 	return result
+}
+
+func (s *FetcherDefault) isKeyExpired(expiredKeyAcceptable bool, fetchedAt time.Time) bool {
+	return expiredKeyAcceptable == false &&
+		fetchedAt.Add(s.ttl).Before(time.Now().UTC())
 }
 
 func (s *FetcherDefault) resolveAll(done chan struct{}, errs chan error, locations []url.URL) {

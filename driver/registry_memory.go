@@ -3,7 +3,6 @@ package driver
 import (
 	"context"
 	"sync"
-	"time"
 
 	"github.com/ory/oathkeeper/driver/health"
 	"github.com/ory/oathkeeper/pipeline"
@@ -208,7 +207,7 @@ func (r *RegistryMemory) DecisionHandler() *api.DecisionHandler {
 
 func (r *RegistryMemory) CredentialsFetcher() credentials.Fetcher {
 	if r.credentialsFetcher == nil {
-		r.credentialsFetcher = credentials.NewFetcherDefault(r.Logger(), time.Second, time.Second*30)
+		r.credentialsFetcher = credentials.NewFetcherDefault(r.Logger(), r.c.AuthenticatorJwtJwkMaxWait(), r.c.AuthenticatorJwtJwkTtl())
 	}
 
 	return r.credentialsFetcher
