@@ -90,7 +90,7 @@ func (s *FetcherDefault) ResolveSets(ctx context.Context, locations []url.URL) (
 
 	fetchError := s.fetchParallel(ctx, locations)
 
-	if set := s.set(locations, fetchError != nil); set != nil {
+	if set := s.set(locations, errors.Is(fetchError, context.DeadlineExceeded)); set != nil {
 		return set, nil
 	}
 
@@ -123,8 +123,8 @@ func (s *FetcherDefault) fetchParallel(ctx context.Context, locations []url.URL)
 
 	select {
 	case <-ctx.Done():
-		s.l.Errorf("Ignoring JSON Web Keys from at least one URI because the request timed out waiting for a response.")
-		return errors.Errorf("At least one JWT fetch took more then the allowed duration")
+		s.l.WithError(ctx.Err()).Errorf("Ignoring JSON Web Keys from at least one URI because the request timed out waiting for a response.")
+		return ctx.Err()
 	case <-done:
 		// We're done!
 		return nil
@@ -138,7 +138,7 @@ func (s *FetcherDefault) ResolveKey(ctx context.Context, locations []url.URL, ki
 
 	fetchError := s.fetchParallel(ctx, locations)
 
-	if key := s.key(kid, locations, use, fetchError != nil); key != nil {
+	if key := s.key(kid, locations, use, errors.Is(fetchError, context.DeadlineExceeded)); key != nil {
 		return key, nil
 	}
 
