@@ -211,7 +211,7 @@
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-# [Unreleased](https://github.com/ory/oathkeeper/compare/v0.38.11-beta.1...b3d117b5d7de02cc1e3ab965328cf6c7995f8a6e) (2021-05-28)
+# [Unreleased](https://github.com/ory/oathkeeper/compare/v0.38.11-beta.1...5613f650facbb136d6dd7ad7dcf3057f54cb30fc) (2021-05-28)
 
 ### Bug Fixes
 
@@ -248,6 +248,10 @@
   ([#719](https://github.com/ory/oathkeeper/issues/719))
   ([22b0dbe](https://github.com/ory/oathkeeper/commit/22b0dbe6495b9f57206dc8fb2335e1c81906e27d)),
   closes [#512](https://github.com/ory/oathkeeper/issues/512)
+- Improved JWT Authorizer JWKs fetching
+  ([#726](https://github.com/ory/oathkeeper/issues/726))
+  ([5613f65](https://github.com/ory/oathkeeper/commit/5613f650facbb136d6dd7ad7dcf3057f54cb30fc)),
+  closes [#203](https://github.com/ory/oathkeeper/issues/203)
 
 ## [0.38.11-beta.1](https://github.com/ory/oathkeeper/compare/v0.38.10-beta.2...v0.38.11-beta.1) (2021-05-13)
 
