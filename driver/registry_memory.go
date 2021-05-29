@@ -6,6 +6,7 @@ import (
 	"crypto/x509"
 	"io/ioutil"
 	"net/http"
+	"os"
 	"sync"
 	"time"
 
@@ -62,6 +63,11 @@ type RegistryMemory struct {
 	proxyProxy          *proxy.Proxy
 	ruleFetcher         rule.Fetcher
 
+	cachedCertFilePath   string
+	cachedCertFileStat   *os.FileInfo
+	upstreamRequestCount int64
+	upstreamTransport    *http.Transport
+
 	authenticators map[string]authn.Authenticator
 	authorizers    map[string]authz.Authorizer
 	mutators       map[string]mutate.Mutator
@@ -106,31 +112,64 @@ func (r *RegistryMemory) RuleMatcher() rule.Matcher {
 	return r.ruleRepository
 }
 
-func (r *RegistryMemory) UpstreamTransport(req *http.Request) (http.RoundTripper, error) {
+func (r *RegistryMemory) isCachedUpstreamTransportDirty(certFile string) (bool, error) {
 
-	// Use req to decide the transport per request iff need be.
-
-	certFile := r.c.ProxyServeUpstreamCaAppendCrtPath()
-	if certFile == "" {
-		return http.DefaultTransport, nil
+	// No cached transport yet, but configuration requires it, so handle as if it was dirty so we get one.
+	if r.upstreamTransport == nil {
+		return true, nil
 	}
 
+	// The transport is dirty if the cert file path changed.
+	if certFile != r.cachedCertFilePath {
+		return true, nil
+	}
+
+	// Transport is dirty if the certificate bytes changed or the modification time,
+	// but only check this based on the ca_refresh_frequency option to reduce IO impact.
+	caRefreshFrequency := r.c.ProxyServeUpstreamCaRefreshFrequency()
+	if caRefreshFrequency <= 0 {
+		return false, nil // Periodic refresh of the Ca is diabled.
+	}
+
+	if r.upstreamRequestCount < int64(caRefreshFrequency) {
+		return false, nil
+	}
+	r.upstreamRequestCount = 0
+
+	stat, err := os.Stat(certFile)
+	if err != nil {
+		return false, err
+	}
+
+	if stat.Size() != (*r.cachedCertFileStat).Size() || stat.ModTime() != (*r.cachedCertFileStat).ModTime() {
+		return true, nil
+	}
+
+	return false, nil
+}
+
+func createUpstreamTransportWithCertificate(certFile string) (*http.Transport, *os.FileInfo, error) {
 	transport := &(*http.DefaultTransport.(*http.Transport)) // shallow copy
 
 	// Get the SystemCertPool or continue with an empty pool on error
 	rootCAs, err := x509.SystemCertPool()
 	if err != nil {
-		return nil, err
+		return nil, nil, err
+	}
+
+	stat, err := os.Stat(certFile)
+	if err != nil {
+		return nil, nil, err
 	}
 
 	certs, err := ioutil.ReadFile(certFile)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	// Append our cert to the system pool
 	if ok := rootCAs.AppendCertsFromPEM(certs); !ok {
-		return nil, errors.New("No certs appended, only system certs present, did you specify the correct cert file?")
+		return nil, nil, errors.New("No certs appended, only system certs present, did you specify the correct cert file?")
 	}
 
 	transport.TLSClientConfig = &tls.Config{
@@ -138,7 +177,41 @@ func (r *RegistryMemory) UpstreamTransport(req *http.Request) (http.RoundTripper
 		RootCAs:            rootCAs,
 	}
 
-	return transport, nil
+	return transport, &stat, nil
+}
+
+// UpstreamTransport decides the transport to use for the upstream for the request.
+func (r *RegistryMemory) UpstreamTransport(req *http.Request) (http.RoundTripper, error) {
+
+	r.upstreamRequestCount++
+
+	// Use req to decide the transport per request iff need be.
+
+	// Not using custom certificates on upstreams, so go with default transport no need to use cache
+	certFile := r.c.ProxyServeUpstreamCaAppendCrtPath()
+	if certFile == "" {
+		return http.DefaultTransport, nil
+	}
+
+	// Decide wether to create a transport or use the cached one. Update the cached transport if it is dirty.
+	isTransportDirty, err := r.isCachedUpstreamTransportDirty(certFile)
+	if err != nil {
+		return nil, err
+	}
+
+	if isTransportDirty == true {
+
+		transport, stat, err := createUpstreamTransportWithCertificate(certFile)
+		if err != nil {
+			return nil, err
+		}
+		// Cache the transport and cert meta data
+		r.cachedCertFilePath = certFile
+		r.cachedCertFileStat = stat
+		r.upstreamTransport = transport
+	}
+
+	return r.upstreamTransport, nil
 }
 
 func NewRegistryMemory() *RegistryMemory {
