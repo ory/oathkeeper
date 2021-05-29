@@ -36,6 +36,7 @@ import (
 	"github.com/ory/oathkeeper/internal"
 	. "github.com/ory/oathkeeper/pipeline/authn"
 	"github.com/ory/viper"
+	"github.com/ory/x/logrusx"
 )
 
 func TestAuthenticatorOAuth2Introspection(t *testing.T) {
@@ -556,7 +557,7 @@ func TestAuthenticatorOAuth2Introspection(t *testing.T) {
 				tc.config, _ = sjson.SetBytes(tc.config, "pre_authorization.token_url", ts.URL+"/oauth2/token")
 
 				sess := new(AuthenticationSession)
-				err := a.Authenticate(tc.r, sess, tc.config, nil)
+				err = a.Authenticate(tc.r, sess, tc.config, nil)
 				if tc.expectErr {
 					require.Error(t, err)
 					if tc.expectExactErr != nil {
@@ -588,5 +589,62 @@ func TestAuthenticatorOAuth2Introspection(t *testing.T) {
 		viper.Reset()
 		viper.Set(configuration.ViperKeyAuthenticatorOAuth2TokenIntrospectionIsEnabled, true)
 		require.Error(t, a.Validate(json.RawMessage(`{"introspection_url":"/oauth2/token"}`)))
+	})
+
+	t.Run("method=config", func(t *testing.T) {
+		logger := logrusx.New("test", "1")
+		authenticator := NewAuthenticatorOAuth2Introspection(conf, logger)
+
+		noPreauthConfig := []byte(`{ "introspection_url":"http://localhost/oauth2/token" }`)
+		preAuthConfigOne := []byte(`{ "introspection_url":"http://localhost/oauth2/token","pre_authorization":{"token_url":"http://localhost/oauth2/token","client_id":"some_id","client_secret":"some_secret","enabled":true} }`)
+		preAuthConfigTwo := []byte(`{ "introspection_url":"http://localhost/oauth2/token2","pre_authorization":{"token_url":"http://localhost/oauth2/token2","client_id":"some_id2","client_secret":"some_secret2","enabled":true} }`)
+
+		_, noPreauthClient, err := authenticator.Config(noPreauthConfig)
+		if err != nil {
+			require.NoError(t, err)
+		}
+
+		_, preauthOneClient, err := authenticator.Config(preAuthConfigOne)
+		if err != nil {
+			require.NoError(t, err)
+		}
+
+		_, preauthTwoClient, err := authenticator.Config(preAuthConfigTwo)
+		if err != nil {
+			require.NoError(t, err)
+		}
+
+		require.NotEqual(t, noPreauthClient, preauthOneClient)
+		require.NotEqual(t, noPreauthClient, preauthTwoClient)
+		require.NotEqual(t, preauthOneClient, preauthTwoClient)
+
+		_, preauthOneClient2, err := authenticator.Config(preAuthConfigOne)
+		if err != nil {
+			require.NoError(t, err)
+		}
+		if preauthOneClient2 != preauthOneClient {
+			t.FailNow()
+		}
+
+		_, preauthTwoClient2, err := authenticator.Config(preAuthConfigTwo)
+		if err != nil {
+			require.NoError(t, err)
+		}
+		if preauthTwoClient2 != preauthTwoClient {
+			t.FailNow()
+		}
+
+		_, noPreauthClient2, err := authenticator.Config(noPreauthConfig)
+		if err != nil {
+			require.NoError(t, err)
+		}
+		if noPreauthClient2 != noPreauthClient {
+			t.FailNow()
+		}
+
+		require.NotEqual(t, noPreauthClient, preauthOneClient)
+		require.NotEqual(t, noPreauthClient, preauthTwoClient)
+		require.NotEqual(t, preauthOneClient, preauthTwoClient)
+
 	})
 }

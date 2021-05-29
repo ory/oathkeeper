@@ -304,6 +304,26 @@ authenticators:
         - https://my-other-website.com/.well-known/jwks.json
         - file://path/to/local/jwks.json
 
+      ## jwks_max_wait ##
+      #
+      # Set this value using environment variables on
+      # - Linux/macOS:
+      #    $ export AUTHENTICATORS_JWT_CONFIG_JWKS_MAX_WAIT=<value>
+      # - Windows Command Line (CMD):
+      #    > set AUTHENTICATORS_JWT_CONFIG_JWKS_MAX_WAIT=<value>
+      #
+      jwks_max_wait: 1s
+
+      ## jwks_ttl ##
+      #
+      # Set this value using environment variables on
+      # - Linux/macOS:
+      #    $ export AUTHENTICATORS_JWT_CONFIG_JWKS_TTL=<value>
+      # - Windows Command Line (CMD):
+      #    > set AUTHENTICATORS_JWT_CONFIG_JWKS_TTL=<value>
+      #
+      jwks_ttl: 30s
+
       ## target_audience ##
       #
       # Set this value using environment variables on
@@ -475,6 +495,16 @@ authenticators:
       ## pre_authorization ##
       #
       pre_authorization:
+        ## audience ##
+        #
+        # Set this value using environment variables on
+        # - Linux/macOS:
+        #    $ export AUTHENTICATORS_OAUTH2_INTROSPECTION_CONFIG_PRE_AUTHORIZATION_AUDIENCE=<value>
+        # - Windows Command Line (CMD):
+        #    > set AUTHENTICATORS_OAUTH2_INTROSPECTION_CONFIG_PRE_AUTHORIZATION_AUDIENCE=<value>
+        #
+        audience: http://www.example.com
+
         ## scope ##
         #
         # Set this value using environment variables on
@@ -575,6 +605,16 @@ authenticators:
         #    > set AUTHENTICATORS_OAUTH2_INTROSPECTION_CONFIG_CACHE_TTL=<value>
         #
         ttl: 5s
+
+        ## max_cost ##
+        #
+        # Set this value using environment variables on
+        # - Linux/macOS:
+        #    $ export AUTHENTICATORS_OAUTH2_INTROSPECTION_CONFIG_CACHE_MAX_COST=<value>
+        # - Windows Command Line (CMD):
+        #    > set AUTHENTICATORS_OAUTH2_INTROSPECTION_CONFIG_CACHE_MAX_COST=<value>
+        #
+        max_cost: -100000000
 
         ## enabled ##
         #
@@ -866,7 +906,7 @@ errors:
 authorizers:
   ## Deny ##
   #
-  # The [`deny` authorizer](https://www.ory.sh/oathkeeper/docs/pipeline/authz#allow).
+  # The [`deny` authorizer](https://www.ory.sh/oathkeeper/docs/pipeline/authz#deny).
   #
   deny:
     ## Enabled ##
