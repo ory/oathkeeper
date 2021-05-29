@@ -44,6 +44,7 @@ const (
 	ViperKeyProxyServeAddressHost               = "serve.proxy.host"
 	ViperKeyProxyServeAddressPort               = "serve.proxy.port"
 	ViperKeyProxyUpstreamCaAppendCrtPath        = "serve.proxy.upstream.ca_append_crt_path"
+	ViperKeyProxyUpstreamCaRefreshFrequency     = "serve.proxy.upstream.ca_refresh_frequency"
 	ViperKeyAPIServeAddressHost                 = "serve.api.host"
 	ViperKeyAPIServeAddressPort                 = "serve.api.port"
 	ViperKeyAPIReadTimeout                      = "serve.api.timeout.read"
@@ -182,6 +183,10 @@ func (v *ViperProvider) ProxyServeAddress() string {
 
 func (v *ViperProvider) ProxyServeUpstreamCaAppendCrtPath() string {
 	return viperx.GetString(v.l, ViperKeyProxyUpstreamCaAppendCrtPath, "")
+}
+
+func (v *ViperProvider) ProxyServeUpstreamCaRefreshFrequency() int {
+	return viperx.GetInt(v.l, ViperKeyProxyUpstreamCaRefreshFrequency, 1000)
 }
 
 func (v *ViperProvider) APIReadTimeout() time.Duration {

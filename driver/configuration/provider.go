@@ -42,6 +42,7 @@ type Provider interface {
 	ProxyWriteTimeout() time.Duration
 	ProxyIdleTimeout() time.Duration
 	ProxyServeUpstreamCaAppendCrtPath() string
+	ProxyServeUpstreamCaRefreshFrequency() int
 
 	APIReadTimeout() time.Duration
 	APIWriteTimeout() time.Duration
