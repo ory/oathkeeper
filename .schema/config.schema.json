@@ -1225,6 +1225,12 @@
                   ],
                   "title": "CA Certificate",
                   "description": "The file containing the CA certificates to append to the Root CA when using upstream connections."
+                },
+                "ca_refresh_frequency": {
+                  "type": "integer",
+                  "default": 1000,
+                  "title": "CA Refresh Frequency",
+                  "description": "Test if upstream transport needs certificate refresh once every 1000 requests."
                 }
               }
             },
