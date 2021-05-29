@@ -1560,6 +1560,24 @@ serve:
       #
       ca_append_crt_path: ""
 
+      ## CA Refresh Frequency ##
+      #
+      # The interval at which to test if the upstream transport certificate changed. Use 0 to disable test.
+      #
+      # Default value: 1000
+      #
+      # Examples:
+      # - 1000
+      # - 0
+      #
+      # Set this value using environment variables on
+      # - Linux/macOS:
+      #    $ export SERVE_PROXY_UPSTREAM_CA_REFRESH_FREQUENCY=<value>
+      # - Windows Command Line (CMD):
+      #    > set SERVE_PROXY_UPSTREAM_CA_REFRESH_FREQUENCY=<value>
+      #
+      ca_refresh_frequency: 1000
+
     ## Cross Origin Resource Sharing (CORS) ##
     #
     # Configure [Cross Origin Resource Sharing (CORS)](http://www.w3.org/TR/cors/) using the following options.
