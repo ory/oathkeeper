@@ -5,7 +5,7 @@
 
 **Table of Contents**
 
-- [Unreleased (2021-05-28)](#unreleased-2021-05-28)
+- [Unreleased (2021-06-02)](#unreleased-2021-06-02)
   - [Bug Fixes](#bug-fixes)
   - [Features](#features)
   - [0.38.11-beta.1 (2021-05-13)](#03811-beta1-2021-05-13)
@@ -211,7 +211,7 @@
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-# [Unreleased](https://github.com/ory/oathkeeper/compare/v0.38.11-beta.1...5613f650facbb136d6dd7ad7dcf3057f54cb30fc) (2021-05-28)
+# [Unreleased](https://github.com/ory/oathkeeper/compare/v0.38.11-beta.1...5613f650facbb136d6dd7ad7dcf3057f54cb30fc) (2021-06-02)
 
 ### Bug Fixes
 
