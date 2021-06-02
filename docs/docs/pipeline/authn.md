@@ -781,12 +781,13 @@ JSON Web Token and tries to verify the signature of it.
   JSON Web Keys from for validating the JSON Web Token. Usually something like
   `https://my-keys.com/.well-known/jwks.json`. The response of that endpoint
   must return a JSON Web Key Set (JWKS).
-- `jwks_max_wait` (duration, optional) - The maximum time for which the JWK fetcher
-  should wait for the JWK request to complete. After the interval passes,
-  the JWK fetcher will return expired or no JWK at all. If the initial JWK request
-  finishes successfully, it will still refresh the cached JWKs. Defaults to "1s".
-- `jwks_ttl` (duration, optional) - The duration for which fetched JWKs should be
-  cached internally. Defaults to "30s".
+- `jwks_max_wait` (duration, optional) - The maximum time for which the JWK
+  fetcher should wait for the JWK request to complete. After the interval
+  passes, the JWK fetcher will return expired or no JWK at all. If the initial
+  JWK request finishes successfully, it will still refresh the cached JWKs.
+  Defaults to "1s".
+- `jwks_ttl` (duration, optional) - The duration for which fetched JWKs should
+  be cached internally. Defaults to "30s".
 - `scope_strategy` (string, optional) - Sets the strategy to be used to
   validate/match the scope. Supports "hierarchic", "exact", "wildcard", "none".
   Defaults to "none".
