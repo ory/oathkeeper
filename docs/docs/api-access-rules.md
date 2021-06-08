@@ -234,19 +234,25 @@ authenticators:
 }
 ```
 
-## Upstream Configuration
+## Upstream Transport Configuration
 
-Upstreams are often protected by SSL certificates trusted by the SSL root servers, but what if you want to run your upstream infrastructure using self-signed certificates? Use the `ca_append_crt_path` to specifiy the certificate file to append to the Root Certificate Authority (CA) of the upstream transport. Upstream transport is cached to reduce IO overhead at scale. The upstream transport certificate will automatically update if the certificate file path is changed.
+Upstreams are often protected by SSL certificates trusted by the SSL root servers, but what if you want to run your upstream infrastructure using self-signed certificates? Use the `certs` attribute to specifiy the certificate files to append to the Root Certificate Authority (CA) of the upstream transport. Upstream transport is cached to reduce IO overhead at scale. The upstream transport certificate will automatically update if the certificate file path is changed.
 
-Use the `ca_refresh_frequency`to test once every `1000` requests for a certificate file size or modification timestamp change. Setting the value to 0 will disable the refresh on a frequency functionality, but retrain the update on file path change functionality.
+Use the `cache.refresh_frequency` to test once every `1000` requests for a certificate file size or modification timestamp change. Setting the value to 0 will disable the refresh on a frequency functionality, but retrain the update on file path change functionality.
+
+Use the `cache.ttl` to force the refresh of certificates once every `5m` regardless of the cache status. Setting this value to 0 will disable forced cache eviction due to an expired time-to-live.
 
 **oathkeeper.yml**
 ```yaml
 serve:
   proxy:
-    upstream:
-      ca_append_crt_path: "/my-certs/certs-to-append.crt",
-      ca_refresh_frequency: 1000
+    transport:
+      certs:
+        - "/my-certs/certificate-to-append.crt"
+        - "/my-certs/another-certificate.crt"
+      cache:
+        refresh_frequency: 1000
+        ttl: 5m
 ```
 
 ## Scoped Credentials

@@ -1212,25 +1212,49 @@
             "timeout": {
               "$ref": "#/definitions/serverTimeout"
             },
-            "upstream": {
+            "transport": {
               "type": "object",
-              "title": "HTTP Upstream",
+              "title": "HTTP(S) Upstream Transport",
               "additionalProperties": false,
               "properties": {
-                "ca_append_crt_path": {
-                  "type": "string",
+                "certs": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
                   "default": "",
                   "examples": [
-                    "./self-signed.crt"
+                    [
+                      "./self-signed.crt"
+                    ]
                   ],
-                  "title": "CA Certificate",
-                  "description": "The file containing the CA certificates to append to the Root CA when using upstream connections."
+                  "title": "CA Certificates",
+                  "description": "The array of files containing the CA certificates to append to the Root CA when using upstream connections."
                 },
-                "ca_refresh_frequency": {
-                  "type": "integer",
-                  "default": 1000,
-                  "title": "CA Refresh Frequency",
-                  "description": "Test if upstream transport needs certificate refresh once every 1000 requests."
+                "cache": {
+                  "type": "object",
+                  "title": "Transport Cache",
+                  "additionalProperties": false,
+                  "properties": {
+                    "refresh_frequency": {
+                      "type": "integer",
+                      "default": 1000,
+                      "title": "Refresh Frequency",
+                      "description": "Test if upstream transport needs certificate refresh once every 1000 requests."
+                    },
+                    "ttl": {
+                      "type": "string",
+                      "title": "Expire After",
+                      "description": "Sets the time-to-live of the certificate cache.",
+                      "pattern": "^[0-9]+(ns|us|ms|s|m|h)$",
+                      "default": "5m",
+                      "examples": [
+                        "1h",
+                        "1m",
+                        "30s"
+                      ]
+                    }
+                  }
                 }
               }
             },

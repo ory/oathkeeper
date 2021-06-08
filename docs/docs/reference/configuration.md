@@ -1538,11 +1538,11 @@ serve:
       #
       read: 5s
 
-    ## HTTP Upstream ##
+    ## HTTP(S) Upsream Transport ##
     #
-    # Control the HTTP upstream.
+    # Control the HTTP transport.
     #
-    upstream:
+    transport:
       ## Append Certificate To Root CA ##
       #
       # The path to a certificate file to append to the Root Certificate Authority for the upstream connection. Use this to accept self-signed certificates on the upstream only, keeping the host system certificate authority unaltered.
@@ -1554,29 +1554,50 @@ serve:
       #
       # Set this value using environment variables on
       # - Linux/macOS:
-      #    $ export SERVE_PROXY_UPSTREAM_CA_APPEND_CRT_PATH=<value>
+      #    $ export SERVE_PROXY_TRANSPORT_CERTS=<value>
       # - Windows Command Line (CMD):
-      #    > set SERVE_PROXY_UPSTREAM_CA_APPEND_CRT_PATH=<value>
+      #    > set SERVE_PROXY_TRANSPORT_CERTS=<value>
       #
-      ca_append_crt_path: ""
+      certs: ""
 
-      ## CA Refresh Frequency ##
+      ## cache ##
       #
-      # The interval at which to test if the upstream transport certificate changed. Use 0 to disable test.
-      #
-      # Default value: 1000
-      #
-      # Examples:
-      # - 1000
-      # - 0
-      #
-      # Set this value using environment variables on
-      # - Linux/macOS:
-      #    $ export SERVE_PROXY_UPSTREAM_CA_REFRESH_FREQUENCY=<value>
-      # - Windows Command Line (CMD):
-      #    > set SERVE_PROXY_UPSTREAM_CA_REFRESH_FREQUENCY=<value>
-      #
-      ca_refresh_frequency: 1000
+      cache:
+        ## Refresh Frequency ##
+        #
+        # The interval at which to test if the upstream transport certificates changed. Use 0 to disable test.
+        #
+        # Default value: 1000
+        #
+        # Examples:
+        # - 1000
+        # - 0
+        #
+        # Set this value using environment variables on
+        # - Linux/macOS:
+        #    $ export SERVE_PROXY_TRANSPORT_CACHE_REFRESH_FREQUENCY=<value>
+        # - Windows Command Line (CMD):
+        #    > set SERVE_PROXY_TRANSPORT_CACHE_REFRESH_FREQUENCY=<value>
+        #
+        refresh_frequency: 1000
+
+        ## Refresh Frequency ##
+        #
+        # Sets the time-to-live of the certificate cache. Use 0 to disable cache expiration.
+        #
+        # Default value: 1000
+        #
+        # Examples:
+        # - 1000
+        # - 0
+        #
+        # Set this value using environment variables on
+        # - Linux/macOS:
+        #    $ export SERVE_PROXY_TRANSPORT_CACHE_TTL=<value>
+        # - Windows Command Line (CMD):
+        #    > set SERVE_PROXY_TRANSPORT_CACHE_TTL=<value>
+        #
+        ttl: 5m
 
     ## Cross Origin Resource Sharing (CORS) ##
     #
