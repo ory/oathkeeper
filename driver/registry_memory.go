@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"runtime"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -168,10 +169,14 @@ func (r *RegistryMemory) isTransportCacheValid(certFile string) (bool, error) {
 func createTransportWithCerts(certs []string) (*http.Transport, error) {
 	transport := &(*http.DefaultTransport.(*http.Transport)) // shallow copy
 
-	// Get the SystemCertPool or continue with an empty pool on error
-	rootCAs, err := x509.SystemCertPool()
-	if err != nil {
-		return nil, err
+	// Get the SystemCertPool if we are not running on Windows.
+	rootCAs := x509.NewCertPool()
+	if runtime.GOOS != "windows" {
+		var err error
+		rootCAs, err = x509.SystemCertPool()
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	for _, cert := range certs {
