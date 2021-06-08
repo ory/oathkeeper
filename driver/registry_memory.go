@@ -135,8 +135,9 @@ func (r *RegistryMemory) isTransportCacheValid(certFile string) (bool, error) {
 	// If the last time the transport was accessed is beyond the cache TTL then
 	// a refresh of the cache is forced whether the file was updated or not.
 	// This ensures that the cache is always refreshed at fixed intervals
-	// regardless of the environment.
-	if time.Since(cache.lastUpdate) > r.c.ProxyServeTransportCacheTimeToLive() {
+	// regardless of the environment. If the TTL is set to 0 skip the check.
+	if r.c.ProxyServeTransportCacheTimeToLive() != 0 &&
+		time.Since(cache.lastUpdate) > r.c.ProxyServeTransportCacheTimeToLive() {
 		return true, nil
 	}
 
