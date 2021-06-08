@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"sync"
+	"sync/atomic"
 
 	"github.com/ory/oathkeeper/driver/health"
 	"github.com/ory/oathkeeper/pipeline"
@@ -181,8 +182,7 @@ func createUpstreamTransportWithCertificate(certFile string) (*http.Transport, *
 
 // UpstreamTransport decides the transport to use for the upstream for the request.
 func (r *RegistryMemory) UpstreamTransport(req *http.Request) (http.RoundTripper, error) {
-
-	r.upstreamRequestCount++
+	atomic.AddInt64(&r.upstreamRequestCount, 1)
 
 	// Use req to decide the transport per request iff need be.
 
@@ -198,7 +198,7 @@ func (r *RegistryMemory) UpstreamTransport(req *http.Request) (http.RoundTripper
 		return nil, err
 	}
 
-	if isTransportDirty == true {
+	if isTransportDirty {
 
 		transport, stat, err := createUpstreamTransportWithCertificate(certFile)
 		if err != nil {
