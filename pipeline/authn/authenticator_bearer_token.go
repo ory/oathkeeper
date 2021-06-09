@@ -1,6 +1,7 @@
 package authn
 
 import (
+	"crypto/tls"
 	"encoding/json"
 	"net/http"
 
@@ -11,6 +12,7 @@ import (
 
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/helper"
+	"github.com/ory/oathkeeper/internal/certs"
 	"github.com/ory/oathkeeper/pipeline"
 )
 
@@ -33,11 +35,14 @@ type AuthenticatorBearerTokenConfiguration struct {
 
 type AuthenticatorBearerToken struct {
 	c configuration.Provider
+
+	cm *certs.CertManager
 }
 
 func NewAuthenticatorBearerToken(c configuration.Provider) *AuthenticatorBearerToken {
 	return &AuthenticatorBearerToken{
-		c: c,
+		c:  c,
+		cm: certs.NewCertManager(c),
 	}
 }
 
@@ -82,7 +87,19 @@ func (a *AuthenticatorBearerToken) Authenticate(r *http.Request, session *Authen
 		return errors.WithStack(ErrAuthenticatorNotResponsible)
 	}
 
-	body, err := forwardRequestToSessionStore(r, cf.CheckSessionURL, cf.PreservePath)
+	pool, err := a.cm.CertPool()
+	if err != nil {
+		return errors.WithStack(err)
+	}
+
+	client := &http.Client{Transport: &http.Transport{
+		TLSClientConfig: &tls.Config{
+			InsecureSkipVerify: false,
+			RootCAs:            pool,
+		},
+	}}
+
+	body, err := forwardRequestToSessionStore(client, r, cf.CheckSessionURL, cf.PreservePath)
 	if err != nil {
 		return err
 	}

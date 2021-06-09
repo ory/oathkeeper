@@ -2,6 +2,7 @@ package authz
 
 import (
 	"bytes"
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -14,6 +15,7 @@ import (
 
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/helper"
+	"github.com/ory/oathkeeper/internal/certs"
 	"github.com/ory/oathkeeper/pipeline"
 	"github.com/ory/oathkeeper/pipeline/authn"
 	"github.com/ory/oathkeeper/x"
@@ -32,6 +34,7 @@ type AuthorizerRemote struct {
 
 	client *http.Client
 	t      *template.Template
+	cm     *certs.CertManager
 }
 
 // NewAuthorizerRemote creates a new AuthorizerRemote.
@@ -40,6 +43,7 @@ func NewAuthorizerRemote(c configuration.Provider) *AuthorizerRemote {
 		c:      c,
 		client: httpx.NewResilientClientLatencyToleranceSmall(nil),
 		t:      x.NewTemplate("remote"),
+		cm:     certs.NewCertManager(c),
 	}
 }
 
@@ -95,6 +99,22 @@ func (a *AuthorizerRemote) Authorize(r *http.Request, session *authn.Authenticat
 		}
 
 		req.Header.Set(hdr, headerValue.String())
+	}
+
+	pool, err := a.cm.CertPool()
+	if err != nil {
+		return errors.WithStack(err)
+	}
+
+	tlsConfig := &tls.Config{
+		InsecureSkipVerify: false,
+		RootCAs:            pool,
+	}
+
+	if a.client.Transport != nil {
+		a.client.Transport.(*httpx.ResilientRoundTripper).RoundTripper.(*http.Transport).TLSClientConfig = tlsConfig
+	} else {
+		a.client.Transport = &http.Transport{TLSClientConfig: tlsConfig}
 	}
 
 	res, err := a.client.Do(req.WithContext(r.Context()))

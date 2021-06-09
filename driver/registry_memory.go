@@ -2,15 +2,7 @@ package driver
 
 import (
 	"context"
-	"crypto/tls"
-	"crypto/x509"
-	"io/ioutil"
-	"net/http"
-	"os"
-	"runtime"
 	"sync"
-	"sync/atomic"
-	"time"
 
 	"github.com/ory/oathkeeper/driver/health"
 	"github.com/ory/oathkeeper/pipeline"
@@ -65,10 +57,6 @@ type RegistryMemory struct {
 	proxyProxy          *proxy.Proxy
 	ruleFetcher         rule.Fetcher
 
-	cachedCerts          sync.Map
-	upstreamRequestCount int64
-	upstreamTransport    *http.Transport
-
 	authenticators map[string]authn.Authenticator
 	authorizers    map[string]authz.Authorizer
 	mutators       map[string]mutate.Mutator
@@ -77,12 +65,6 @@ type RegistryMemory struct {
 	healthEventManager *health.DefaultHealthEventManager
 
 	ruleRepositoryLock sync.Mutex
-}
-
-type certCache struct {
-	path       string
-	stat       *os.FileInfo
-	lastUpdate time.Time
 }
 
 func (r *RegistryMemory) Init() {
@@ -117,137 +99,6 @@ func (r *RegistryMemory) ProxyRequestHandler() *proxy.RequestHandler {
 func (r *RegistryMemory) RuleMatcher() rule.Matcher {
 	_ = r.RuleRepository() // make sure `r.ruleRepository` is set
 	return r.ruleRepository
-}
-
-func (r *RegistryMemory) isTransportCacheValid(certFile string) (bool, error) {
-	// No cached transport yet, but configuration requires it, so handle as if it was dirty so we get one.
-	if r.upstreamTransport == nil {
-		return true, nil
-	}
-
-	// Check whether this is the first time we see this file.
-	cacheItem, ok := r.cachedCerts.Load(certFile)
-	if !ok {
-		return true, nil
-	}
-
-	cache := cacheItem.(*certCache)
-
-	// If the last time the transport was accessed is beyond the cache TTL then
-	// a refresh of the cache is forced whether the file was updated or not.
-	// This ensures that the cache is always refreshed at fixed intervals
-	// regardless of the environment. If the TTL is set to 0 skip the check.
-	if r.c.ProxyServeTransportCacheTimeToLive() != 0 &&
-		time.Since(cache.lastUpdate) > r.c.ProxyServeTransportCacheTimeToLive() {
-		return true, nil
-	}
-
-	// Transport is dirty if the certificate bytes changed or the modification time,
-	// but only check this based on the cache.refresh_frequency option to reduce IO impact.
-	caRefreshFrequency := r.c.ProxyServeTransportCacheRefreshFrequency()
-	if caRefreshFrequency <= 0 {
-		return false, nil // Periodic refresh of the Ca is diabled.
-	}
-
-	if r.upstreamRequestCount < int64(caRefreshFrequency) {
-		return false, nil
-	}
-	r.upstreamRequestCount = 0
-
-	stat, err := os.Stat(certFile)
-	if err != nil {
-		return false, err
-	}
-
-	if stat.Size() != (*cache.stat).Size() || stat.ModTime() != (*cache.stat).ModTime() {
-		return true, nil
-	}
-
-	return false, nil
-}
-
-func createTransportWithCerts(certs []string) (*http.Transport, error) {
-	transport := &(*http.DefaultTransport.(*http.Transport)) // shallow copy
-
-	// Get the SystemCertPool if we are not running on Windows.
-	rootCAs := x509.NewCertPool()
-	if runtime.GOOS != "windows" {
-		var err error
-		rootCAs, err = x509.SystemCertPool()
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	for _, cert := range certs {
-		data, err := ioutil.ReadFile(cert)
-		if err != nil {
-			return nil, err
-		}
-
-		// Append our cert to the system pool
-		if ok := rootCAs.AppendCertsFromPEM(data); !ok {
-			return nil, errors.New("No certs appended, only system certs present, did you specify the correct cert file?")
-		}
-	}
-
-	transport.TLSClientConfig = &tls.Config{
-		InsecureSkipVerify: false,
-		RootCAs:            rootCAs,
-	}
-
-	return transport, nil
-}
-
-// UpstreamTransport decides the transport to use for the upstream for the request.
-func (r *RegistryMemory) UpstreamTransport(req *http.Request) (http.RoundTripper, error) {
-	atomic.AddInt64(&r.upstreamRequestCount, 1)
-
-	// Use req to decide the transport per request iff need be.
-
-	// Not using custom certificates on upstreams, so go with default transport no need to use cache
-	certs := r.c.ProxyServeTransportCerts()
-	if certs == nil {
-		return http.DefaultTransport, nil
-	}
-
-	// Decide wether to create a transport or use the cached one. Update the cached transport if it is dirty.
-	refreshTransport := false
-	for _, cert := range certs {
-		dirty, err := r.isTransportCacheValid(cert)
-		if err != nil {
-			return nil, err
-		}
-
-		// TODO: Should we check cached certs and purge them if they are no longer used?
-
-		// Cache the transport and cert metadata
-		if dirty {
-			stat, err := os.Stat(cert)
-			if err != nil {
-				return nil, err
-			}
-
-			r.cachedCerts.Store(cert, &certCache{
-				path:       cert,
-				stat:       &stat,
-				lastUpdate: time.Now(),
-			})
-
-			refreshTransport = true
-		}
-	}
-
-	if refreshTransport {
-		transport, err := createTransportWithCerts(certs)
-		if err != nil {
-			return nil, err
-		}
-
-		r.upstreamTransport = transport
-	}
-
-	return r.upstreamTransport, nil
 }
 
 func NewRegistryMemory() *RegistryMemory {

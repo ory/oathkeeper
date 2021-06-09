@@ -118,6 +118,8 @@ func (a *AuthenticatorOAuth2ClientCredentials) Authenticate(r *http.Request, ses
 		AuthStyle:    oauth2.AuthStyleInHeader,
 	}
 
+	// TODO: add cert manager for additional certificates in the http transport.
+
 	token, err := c.Token(context.WithValue(
 		r.Context(),
 		oauth2.HTTPClient,

@@ -22,11 +22,13 @@ package proxy
 
 import (
 	"context"
+	"crypto/tls"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strings"
 
+	"github.com/ory/oathkeeper/internal/certs"
 	"github.com/ory/oathkeeper/pipeline/authn"
 	"github.com/ory/oathkeeper/x"
 
@@ -41,15 +43,15 @@ type proxyRegistry interface {
 
 	ProxyRequestHandler() *RequestHandler
 	RuleMatcher() rule.Matcher
-	UpstreamTransport(r *http.Request) (http.RoundTripper, error)
 }
 
 func NewProxy(r proxyRegistry) *Proxy {
-	return &Proxy{r: r}
+	return &Proxy{r: r, cm: certs.NewCertManager(r.ProxyRequestHandler().c)}
 }
 
 type Proxy struct {
-	r proxyRegistry
+	r  proxyRegistry
+	cm *certs.CertManager
 }
 
 type key int
@@ -89,18 +91,22 @@ func (d *Proxy) RoundTrip(r *http.Request) (*http.Response, error) {
 			Header:     rw.header,
 		}, nil
 	} else if err == nil {
-
-		transport, err := d.r.UpstreamTransport(r)
+		pool, err := d.cm.CertPool()
 		if err != nil {
 			d.r.Logger().
 				WithError(errors.WithStack(err)).
 				WithField("granted", false).
 				WithFields(fields).
-				Warn("Access request denied because upstream transport creation failed")
+				Warn("Access request denied due to failure in cert pool loading")
 			return nil, err
 		}
 
-		res, err := transport.RoundTrip(r)
+		tr := &http.Transport{TLSClientConfig: &tls.Config{
+			InsecureSkipVerify: false,
+			RootCAs:            pool,
+		}}
+
+		res, err := tr.RoundTrip(r)
 		if err != nil {
 			d.r.Logger().
 				WithError(errors.WithStack(err)).

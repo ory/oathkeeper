@@ -23,6 +23,7 @@ package mutate
 import (
 	"bytes"
 	"crypto/md5"
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -31,6 +32,7 @@ import (
 
 	"github.com/dgraph-io/ristretto"
 
+	"github.com/ory/oathkeeper/internal/certs"
 	"github.com/ory/oathkeeper/pipeline/authn"
 	"github.com/ory/oathkeeper/x"
 
@@ -57,9 +59,9 @@ type MutatorHydrator struct {
 	c      configuration.Provider
 	client *http.Client
 	d      mutatorHydratorDependencies
+	cm     *certs.CertManager
 
 	hydrateCache *ristretto.Cache
-	cacheTTL     *time.Duration
 }
 
 type BasicAuth struct {
@@ -107,7 +109,13 @@ func NewMutatorHydrator(c configuration.Provider, d mutatorHydratorDependencies)
 		// This is a best-practice value.
 		BufferItems: 64,
 	})
-	return &MutatorHydrator{c: c, d: d, client: httpx.NewResilientClientLatencyToleranceSmall(nil), hydrateCache: cache}
+	return &MutatorHydrator{
+		c:            c,
+		d:            d,
+		client:       httpx.NewResilientClientLatencyToleranceSmall(nil),
+		hydrateCache: cache,
+		cm:           certs.NewCertManager(c),
+	}
 }
 
 func (a *MutatorHydrator) GetID() string {
@@ -204,6 +212,26 @@ func (a *MutatorHydrator) Mutate(r *http.Request, session *authn.AuthenticationS
 		}
 
 		client.Transport = httpx.NewResilientRoundTripper(a.client.Transport, maxRetryDelay, giveUpAfter)
+	}
+
+	pool, err := a.cm.CertPool()
+	if err != nil {
+		return errors.WithStack(err)
+	}
+
+	tlsConfig := &tls.Config{
+		InsecureSkipVerify: false,
+		RootCAs:            pool,
+	}
+
+	if client.Transport != nil {
+		if tr, ok := client.Transport.(*httpx.ResilientRoundTripper).RoundTripper.(*httpx.ResilientRoundTripper); ok {
+			tr.RoundTripper = &http.Transport{TLSClientConfig: tlsConfig}
+		} else {
+			client.Transport.(*httpx.ResilientRoundTripper).RoundTripper.(*http.Transport).TLSClientConfig = tlsConfig
+		}
+	} else {
+		client.Transport = &http.Transport{TLSClientConfig: tlsConfig}
 	}
 
 	res, err := client.Do(req.WithContext(r.Context()))

@@ -3,6 +3,7 @@ package authn
 import (
 	"context"
 	"crypto/md5"
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -17,6 +18,7 @@ import (
 	"github.com/opentracing/opentracing-go/ext"
 
 	"github.com/pkg/errors"
+	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/clientcredentials"
 
 	"github.com/ory/go-convenience/stringslice"
@@ -25,6 +27,7 @@ import (
 
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/helper"
+	"github.com/ory/oathkeeper/internal/certs"
 	"github.com/ory/oathkeeper/pipeline"
 )
 
@@ -70,10 +73,17 @@ type AuthenticatorOAuth2Introspection struct {
 	tokenCache *ristretto.Cache
 	cacheTTL   *time.Duration
 	logger     *logrusx.Logger
+
+	cm *certs.CertManager
 }
 
 func NewAuthenticatorOAuth2Introspection(c configuration.Provider, logger *logrusx.Logger) *AuthenticatorOAuth2Introspection {
-	return &AuthenticatorOAuth2Introspection{c: c, logger: logger, clientMap: make(map[string]*http.Client)}
+	return &AuthenticatorOAuth2Introspection{
+		c:         c,
+		logger:    logger,
+		clientMap: make(map[string]*http.Client),
+		cm:        certs.NewCertManager(c),
+	}
 }
 
 func (a *AuthenticatorOAuth2Introspection) GetID() string {
@@ -182,6 +192,26 @@ func (a *AuthenticatorOAuth2Introspection) Authenticate(r *http.Request, session
 
 		// add tracing
 		closeSpan := a.traceRequest(r.Context(), introspectReq)
+
+		pool, err := a.cm.CertPool()
+		if err != nil {
+			return errors.WithStack(err)
+		}
+
+		tlsConfig := &tls.Config{
+			InsecureSkipVerify: false,
+			RootCAs:            pool,
+		}
+
+		if client.Transport != nil {
+			if tr, ok := client.Transport.(*httpx.ResilientRoundTripper).RoundTripper.(*oauth2.Transport); ok {
+				tr.Base = &http.Transport{TLSClientConfig: tlsConfig}
+			} else {
+				client.Transport.(*httpx.ResilientRoundTripper).RoundTripper = &http.Transport{TLSClientConfig: tlsConfig}
+			}
+		} else {
+			client.Transport = &http.Transport{TLSClientConfig: tlsConfig}
+		}
 
 		resp, err := client.Do(introspectReq.WithContext(r.Context()))
 
