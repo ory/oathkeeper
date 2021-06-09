@@ -5,7 +5,7 @@
 
 **Table of Contents**
 
-- [Unreleased (2021-06-04)](#unreleased-2021-06-04)
+- [Unreleased (2021-06-09)](#unreleased-2021-06-09)
   - [Bug Fixes](#bug-fixes)
   - [Features](#features)
   - [0.38.11-beta.1 (2021-05-13)](#03811-beta1-2021-05-13)
@@ -211,7 +211,7 @@
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-# [Unreleased](https://github.com/ory/oathkeeper/compare/v0.38.11-beta.1...5613f650facbb136d6dd7ad7dcf3057f54cb30fc) (2021-06-04)
+# [Unreleased](https://github.com/ory/oathkeeper/compare/v0.38.11-beta.1...2ccbb2f2607af39301a6d129c9552a5682cf96fc) (2021-06-09)
 
 ### Bug Fixes
 
@@ -219,6 +219,10 @@
   ([#723](https://github.com/ory/oathkeeper/issues/723))
   ([3a9ae1a](https://github.com/ory/oathkeeper/commit/3a9ae1a43a6f157bb7998d2e4ee5b76851c68ec1)),
   closes [#712](https://github.com/ory/oathkeeper/issues/712)
+- Ensure no vulnerable jwt-go deep dependency is being used
+  ([#745](https://github.com/ory/oathkeeper/issues/745))
+  ([2ccbb2f](https://github.com/ory/oathkeeper/commit/2ccbb2f2607af39301a6d129c9552a5682cf96fc)),
+  closes [#740](https://github.com/ory/oathkeeper/issues/740)
 
 ### Features
 
