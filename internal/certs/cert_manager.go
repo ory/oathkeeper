@@ -17,7 +17,7 @@ type CertManager struct {
 	c configuration.Provider
 
 	// isWindows is set to true if the application is running in a Windows
-	// environment. This information is used to decide whether the stystem
+	// environment. This information is used to decide whether the system
 	// certificate pool should be loaded or not as Windows does not support
 	// this feature and will return an error.
 	isWindows bool
@@ -28,12 +28,17 @@ type CertManager struct {
 	cachePool *x509.CertPool
 
 	// cacheTime contains the last update of the cache and is used to check
-	// whether it has reached the end of its time-to-live.
+	// whether it has reached the end of its time-to-live. This value is used for
+	// caching purposes.
 	cacheTime time.Time
 
-	// cacheCerts
+	// cacheCerts contains the cached certificates and all file information
+	// associated with them such as size and last modification time.
 	cacheCerts sync.Map
 
+	// requests is an atomic counter that keeps track of how many requests have
+	// been served since the last certificate refresh. This value is used for
+	// caching purposes.
 	requests int64
 }
 
@@ -59,7 +64,7 @@ func (cm *CertManager) systemCertPool() (*x509.CertPool, error) {
 
 func (cm *CertManager) additionalCerts() ([][]byte, error) {
 	var certs [][]byte
-	for _, cert := range cm.c.ProxyServeTransportCerts() {
+	for _, cert := range cm.c.ProxyServeClientTLSTrustedCerts() {
 		data, err := ioutil.ReadFile(cert)
 		if err != nil {
 			return nil, err
@@ -82,7 +87,7 @@ func (cm *CertManager) additionalCerts() ([][]byte, error) {
 }
 
 func (cm *CertManager) cacheIsExpired() bool {
-	if cm.c.ProxyServeTransportCacheTimeToLive() == 0 {
+	if cm.c.ProxyServeClientTLSCacheTimeToLive() == 0 {
 		return false
 	}
 
@@ -90,7 +95,7 @@ func (cm *CertManager) cacheIsExpired() bool {
 	// a refresh of the cache is forced whether the file was updated or not.
 	// This ensures that the cache is always refreshed at fixed intervals
 	// regardless of the environment. If the TTL is set to 0 skip the check.
-	return time.Since(cm.cacheTime) > cm.c.ProxyServeTransportCacheTimeToLive()
+	return time.Since(cm.cacheTime) > cm.c.ProxyServeClientTLSCacheTimeToLive()
 }
 
 func (cm *CertManager) lookupCertificate(cert string) (*CertCache, bool) {
@@ -109,7 +114,7 @@ func (cm *CertManager) isCertificateValid(cert string) (bool, error) {
 		return false, nil
 	}
 
-	refreshFrequency := cm.c.ProxyServeTransportCacheRefreshFrequency()
+	refreshFrequency := cm.c.ProxyServeClientTLSCacheRefreshFrequency()
 	if refreshFrequency <= 0 {
 		return true, nil
 	}
@@ -131,7 +136,7 @@ func (cm *CertManager) isCertificateValid(cert string) (bool, error) {
 }
 
 func (cm *CertManager) cacheIsValid() (bool, error) {
-	for _, cert := range cm.c.ProxyServeTransportCerts() {
+	for _, cert := range cm.c.ProxyServeClientTLSTrustedCerts() {
 		valid, err := cm.isCertificateValid(cert)
 		if err != nil {
 			return false, err

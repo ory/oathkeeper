@@ -457,7 +457,7 @@ func TestUpstreamAppendCaCertToRootCa(t *testing.T) {
 	viper.Set(configuration.ViperKeyAuthenticatorNoopIsEnabled, true)
 	viper.Set(configuration.ViperKeyAuthorizerAllowIsEnabled, true)
 	viper.Set(configuration.ViperKeyMutatorNoopIsEnabled, true)
-	viper.Set(configuration.ViperKeyProxyTransportCerts, []string{tmpfile.Name()})
+	viper.Set(configuration.ViperKeyProxyClientTLSTrustedCerts, []string{tmpfile.Name()})
 
 	url := ts.URL + "/test-tls"
 

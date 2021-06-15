@@ -41,9 +41,9 @@ type Provider interface {
 	ProxyReadTimeout() time.Duration
 	ProxyWriteTimeout() time.Duration
 	ProxyIdleTimeout() time.Duration
-	ProxyServeTransportCerts() []string
-	ProxyServeTransportCacheRefreshFrequency() int
-	ProxyServeTransportCacheTimeToLive() time.Duration
+	ProxyServeClientTLSTrustedCerts() []string
+	ProxyServeClientTLSCacheRefreshFrequency() int
+	ProxyServeClientTLSCacheTimeToLive() time.Duration
 
 	APIReadTimeout() time.Duration
 	APIWriteTimeout() time.Duration

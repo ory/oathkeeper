@@ -17,8 +17,8 @@ import (
 	"github.com/opentracing/opentracing-go/ext"
 
 	"github.com/pkg/errors"
+	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/clientcredentials"
-	"golang.org/x/oauth2/internal"
 
 	"github.com/ory/go-convenience/stringslice"
 	"github.com/ory/x/httpx"
@@ -289,7 +289,7 @@ func (a *AuthenticatorOAuth2Introspection) Config(config json.RawMessage) (*Auth
 				ep = url.Values{"audience": {c.PreAuth.Audience}}
 			}
 
-			ctx := context.WithValue(context.Background(), internal.HTTPClient, tlsClient)
+			ctx := context.WithValue(context.Background(), oauth2.HTTPClient, tlsClient)
 			rt = (&clientcredentials.Config{
 				ClientID:       c.PreAuth.ClientID,
 				ClientSecret:   c.PreAuth.ClientSecret,
