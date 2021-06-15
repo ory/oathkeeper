@@ -1554,9 +1554,9 @@ serve:
       #
       # Set this value using environment variables on
       # - Linux/macOS:
-      #    $ export SERVE_PROXY_TRANSPORT_CERTS=<value>
+      #    $ export SERVE_PROXY_CLIENT_TLS_TRUSTED_CERTIFICATES=<value>
       # - Windows Command Line (CMD):
-      #    > set SERVE_PROXY_TRANSPORT_CERTS=<value>
+      #    > set SERVE_PROXY_CLIENT_TLS_TRUSTED_CERTIFICATES=<value>
       #
       trusted_certificates:
         - "/my-certs/certificate-to-append.crt"
@@ -1577,9 +1577,9 @@ serve:
         #
         # Set this value using environment variables on
         # - Linux/macOS:
-        #    $ export SERVE_PROXY_TRANSPORT_CACHE_REFRESH_FREQUENCY=<value>
+        #    $ export SERVE_PROXY_CLIENT_TLS_CACHE_REFRESH_FREQUENCY=<value>
         # - Windows Command Line (CMD):
-        #    > set SERVE_PROXY_TRANSPORT_CACHE_REFRESH_FREQUENCY=<value>
+        #    > set SERVE_PROXY_CLIENT_TLS_CACHE_REFRESH_FREQUENCY=<value>
         #
         refresh_frequency: 1000
 
@@ -1587,17 +1587,11 @@ serve:
         #
         # Sets the time-to-live of the certificate cache. Use 0 to disable cache expiration.
         #
-        # Default value: 1000
-        #
-        # Examples:
-        # - 1000
-        # - 0
-        #
         # Set this value using environment variables on
         # - Linux/macOS:
-        #    $ export SERVE_PROXY_TRANSPORT_CACHE_TTL=<value>
+        #    $ export SERVE_PROXY_CLIENT_TLS_CACHE_TTL=<value>
         # - Windows Command Line (CMD):
-        #    > set SERVE_PROXY_TRANSPORT_CACHE_TTL=<value>
+        #    > set SERVE_PROXY_CLIENT_TLS_CACHE_TTL=<value>
         #
         ttl: 5m
 
