@@ -12,6 +12,7 @@ import (
 	"github.com/ory/x/httpx"
 
 	"github.com/ory/oathkeeper/driver/configuration"
+	"github.com/ory/oathkeeper/internal/certs"
 
 	"github.com/ory/oathkeeper/pipeline"
 
@@ -84,7 +85,10 @@ func (a *AuthenticatorOAuth2ClientCredentials) Config(config json.RawMessage) (*
 		return nil, err
 	}
 	timeout := time.Millisecond * duration
-	a.client = httpx.NewResilientClientLatencyToleranceConfigurable(nil, timeout, maxWait)
+
+	cm := certs.NewCertManager(a.c)
+	rt := certs.NewRoundTripper(cm)
+	a.client = httpx.NewResilientClientLatencyToleranceConfigurable(rt, timeout, maxWait)
 
 	return &c, nil
 }
@@ -117,8 +121,6 @@ func (a *AuthenticatorOAuth2ClientCredentials) Authenticate(r *http.Request, ses
 		TokenURL:     cf.TokenURL,
 		AuthStyle:    oauth2.AuthStyleInHeader,
 	}
-
-	// TODO: add cert manager for additional certificates in the http transport.
 
 	token, err := c.Token(context.WithValue(
 		r.Context(),

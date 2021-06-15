@@ -43,9 +43,9 @@ const (
 	ViperKeyProxyIdleTimeout                    = "serve.proxy.timeout.idle"
 	ViperKeyProxyServeAddressHost               = "serve.proxy.host"
 	ViperKeyProxyServeAddressPort               = "serve.proxy.port"
-	ViperKeyProxyTransportCerts                 = "serve.proxy.transport.certs"
-	ViperKeyProxyTransportCacheRefreshFrequency = "serve.proxy.transport.cache.refresh_frequency"
-	ViperKeyProxyTransportCacheTimeToLive       = "serve.proxy.transport.cache.ttl"
+	ViperKeyProxyClientTLSTrustedCerts          = "serve.proxy.client_tls.trusted_certificates"
+	ViperKeyProxyClientTLSCacheRefreshFrequency = "serve.proxy.client_tls.cache.refresh_frequency"
+	ViperKeyProxyClientTLSCacheTimeToLive       = "serve.proxy.client_tls.cache.ttl"
 	ViperKeyAPIServeAddressHost                 = "serve.api.host"
 	ViperKeyAPIServeAddressPort                 = "serve.api.port"
 	ViperKeyAPIReadTimeout                      = "serve.api.timeout.read"
@@ -182,16 +182,16 @@ func (v *ViperProvider) ProxyServeAddress() string {
 	)
 }
 
-func (v *ViperProvider) ProxyServeTransportCerts() []string {
-	return viperx.GetStringSlice(v.l, ViperKeyProxyTransportCerts, nil)
+func (v *ViperProvider) ProxyServeClientTLSTrustedCerts() []string {
+	return viperx.GetStringSlice(v.l, ViperKeyProxyClientTLSTrustedCerts, nil)
 }
 
-func (v *ViperProvider) ProxyServeTransportCacheRefreshFrequency() int {
-	return viperx.GetInt(v.l, ViperKeyProxyTransportCacheRefreshFrequency, 1000)
+func (v *ViperProvider) ProxyServeClientTLSCacheRefreshFrequency() int {
+	return viperx.GetInt(v.l, ViperKeyProxyClientTLSCacheRefreshFrequency, 1000)
 }
 
-func (v *ViperProvider) ProxyServeTransportCacheTimeToLive() time.Duration {
-	return viperx.GetDuration(v.l, ViperKeyProxyTransportCacheTimeToLive, time.Minute*5)
+func (v *ViperProvider) ProxyServeClientTLSCacheTimeToLive() time.Duration {
+	return viperx.GetDuration(v.l, ViperKeyProxyClientTLSCacheTimeToLive, time.Minute*5)
 }
 
 func (v *ViperProvider) APIReadTimeout() time.Duration {

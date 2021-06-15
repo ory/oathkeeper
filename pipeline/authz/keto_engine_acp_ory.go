@@ -23,7 +23,6 @@ package authz
 import (
 	"bytes"
 	"crypto/sha256"
-	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -73,21 +72,22 @@ type AuthorizerKetoEngineACPORY struct {
 	client         *http.Client
 	contextCreator authorizerKetoWardenContext
 	t              *template.Template
-	cm             *certs.CertManager
 }
 
 func NewAuthorizerKetoEngineACPORY(c configuration.Provider) *AuthorizerKetoEngineACPORY {
+	cm := certs.NewCertManager(c)
+	rt := certs.NewRoundTripper(cm)
+
 	return &AuthorizerKetoEngineACPORY{
 		c:      c,
-		client: httpx.NewResilientClientLatencyToleranceSmall(nil),
+		client: httpx.NewResilientClientLatencyToleranceSmall(rt),
 		contextCreator: func(r *http.Request) map[string]interface{} {
 			return map[string]interface{}{
 				"remoteIpAddress": realip.RealIP(r),
 				"requestedAt":     time.Now().UTC(),
 			}
 		},
-		t:  x.NewTemplate("keto_engine_acp_ory"),
-		cm: certs.NewCertManager(c),
+		t: x.NewTemplate("keto_engine_acp_ory"),
 	}
 }
 
@@ -163,22 +163,6 @@ func (a *AuthorizerKetoEngineACPORY) Authorize(r *http.Request, session *authn.A
 		return errors.WithStack(err)
 	}
 	req.Header.Add("Content-Type", "application/json")
-
-	pool, err := a.cm.CertPool()
-	if err != nil {
-		return errors.WithStack(err)
-	}
-
-	tlsConfig := &tls.Config{
-		InsecureSkipVerify: false,
-		RootCAs:            pool,
-	}
-
-	if a.client.Transport != nil {
-		a.client.Transport.(*httpx.ResilientRoundTripper).RoundTripper.(*http.Transport).TLSClientConfig = tlsConfig
-	} else {
-		a.client.Transport = &http.Transport{TLSClientConfig: tlsConfig}
-	}
 
 	res, err := a.client.Do(req.WithContext(r.Context()))
 	if err != nil {

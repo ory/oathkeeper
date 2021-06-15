@@ -2,7 +2,6 @@ package authz
 
 import (
 	"bytes"
-	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -34,16 +33,17 @@ type AuthorizerRemote struct {
 
 	client *http.Client
 	t      *template.Template
-	cm     *certs.CertManager
 }
 
 // NewAuthorizerRemote creates a new AuthorizerRemote.
 func NewAuthorizerRemote(c configuration.Provider) *AuthorizerRemote {
+	cm := certs.NewCertManager(c)
+	rt := certs.NewRoundTripper(cm)
+
 	return &AuthorizerRemote{
 		c:      c,
-		client: httpx.NewResilientClientLatencyToleranceSmall(nil),
+		client: httpx.NewResilientClientLatencyToleranceSmall(rt),
 		t:      x.NewTemplate("remote"),
-		cm:     certs.NewCertManager(c),
 	}
 }
 
@@ -99,22 +99,6 @@ func (a *AuthorizerRemote) Authorize(r *http.Request, session *authn.Authenticat
 		}
 
 		req.Header.Set(hdr, headerValue.String())
-	}
-
-	pool, err := a.cm.CertPool()
-	if err != nil {
-		return errors.WithStack(err)
-	}
-
-	tlsConfig := &tls.Config{
-		InsecureSkipVerify: false,
-		RootCAs:            pool,
-	}
-
-	if a.client.Transport != nil {
-		a.client.Transport.(*httpx.ResilientRoundTripper).RoundTripper.(*http.Transport).TLSClientConfig = tlsConfig
-	} else {
-		a.client.Transport = &http.Transport{TLSClientConfig: tlsConfig}
 	}
 
 	res, err := a.client.Do(req.WithContext(r.Context()))

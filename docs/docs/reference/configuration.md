@@ -1538,14 +1538,14 @@ serve:
       #
       read: 5s
 
-    ## HTTP(S) Upsream Transport ##
+    ## Client TLS Transport ##
     #
-    # Control the HTTP transport.
+    # Control the client TLS transport.
     #
-    transport:
-      ## Append Certificate To Root CA ##
+    client_tls:
+      ## Trusted Root CA Certificates ##
       #
-      # The path to a certificate file to append to the Root Certificate Authority for the upstream connection. Use this to accept self-signed certificates on the upstream only, keeping the host system certificate authority unaltered.
+      # The path to a certificate files to append to the Root Certificate Authority for TLS connections. Use this to accept self-signed certificates while keeping the host system certificate authority unaltered.
       #
       # Default value: ""
       #
@@ -1558,7 +1558,9 @@ serve:
       # - Windows Command Line (CMD):
       #    > set SERVE_PROXY_TRANSPORT_CERTS=<value>
       #
-      certs: ""
+      trusted_certificates:
+        - "/my-certs/certificate-to-append.crt"
+        - "/my-certs/another-certificate.crt"
 
       ## cache ##
       #

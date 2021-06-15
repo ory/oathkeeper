@@ -1,7 +1,6 @@
 package authn
 
 import (
-	"crypto/tls"
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
@@ -11,6 +10,7 @@ import (
 	"github.com/tidwall/gjson"
 
 	"github.com/ory/go-convenience/stringsx"
+	"github.com/ory/x/httpx"
 
 	"github.com/ory/herodot"
 
@@ -38,15 +38,17 @@ type AuthenticatorCookieSessionConfiguration struct {
 }
 
 type AuthenticatorCookieSession struct {
-	c configuration.Provider
-
-	cm *certs.CertManager
+	c      configuration.Provider
+	client *http.Client
 }
 
 func NewAuthenticatorCookieSession(c configuration.Provider) *AuthenticatorCookieSession {
+	cm := certs.NewCertManager(c)
+	rt := certs.NewRoundTripper(cm)
+
 	return &AuthenticatorCookieSession{
-		c:  c,
-		cm: certs.NewCertManager(c),
+		c:      c,
+		client: httpx.NewResilientClientLatencyToleranceSmall(rt),
 	}
 }
 
@@ -90,19 +92,7 @@ func (a *AuthenticatorCookieSession) Authenticate(r *http.Request, session *Auth
 		return errors.WithStack(ErrAuthenticatorNotResponsible)
 	}
 
-	pool, err := a.cm.CertPool()
-	if err != nil {
-		return errors.WithStack(err)
-	}
-
-	client := &http.Client{Transport: &http.Transport{
-		TLSClientConfig: &tls.Config{
-			InsecureSkipVerify: false,
-			RootCAs:            pool,
-		},
-	}}
-
-	body, err := forwardRequestToSessionStore(client, r, cf.CheckSessionURL, cf.PreservePath)
+	body, err := forwardRequestToSessionStore(a.client, r, cf.CheckSessionURL, cf.PreservePath)
 	if err != nil {
 		return err
 	}

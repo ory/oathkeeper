@@ -1,7 +1,6 @@
 package authn
 
 import (
-	"crypto/tls"
 	"encoding/json"
 	"net/http"
 
@@ -9,6 +8,7 @@ import (
 	"github.com/tidwall/gjson"
 
 	"github.com/ory/go-convenience/stringsx"
+	"github.com/ory/x/httpx"
 
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/helper"
@@ -34,15 +34,17 @@ type AuthenticatorBearerTokenConfiguration struct {
 }
 
 type AuthenticatorBearerToken struct {
-	c configuration.Provider
-
-	cm *certs.CertManager
+	c      configuration.Provider
+	client *http.Client
 }
 
 func NewAuthenticatorBearerToken(c configuration.Provider) *AuthenticatorBearerToken {
+	cm := certs.NewCertManager(c)
+	rt := certs.NewRoundTripper(cm)
+
 	return &AuthenticatorBearerToken{
-		c:  c,
-		cm: certs.NewCertManager(c),
+		c:      c,
+		client: httpx.NewResilientClientLatencyToleranceSmall(rt),
 	}
 }
 
@@ -87,19 +89,7 @@ func (a *AuthenticatorBearerToken) Authenticate(r *http.Request, session *Authen
 		return errors.WithStack(ErrAuthenticatorNotResponsible)
 	}
 
-	pool, err := a.cm.CertPool()
-	if err != nil {
-		return errors.WithStack(err)
-	}
-
-	client := &http.Client{Transport: &http.Transport{
-		TLSClientConfig: &tls.Config{
-			InsecureSkipVerify: false,
-			RootCAs:            pool,
-		},
-	}}
-
-	body, err := forwardRequestToSessionStore(client, r, cf.CheckSessionURL, cf.PreservePath)
+	body, err := forwardRequestToSessionStore(a.client, r, cf.CheckSessionURL, cf.PreservePath)
 	if err != nil {
 		return err
 	}

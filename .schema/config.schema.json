@@ -1212,35 +1212,35 @@
             "timeout": {
               "$ref": "#/definitions/serverTimeout"
             },
-            "transport": {
+            "client_tls": {
               "type": "object",
-              "title": "HTTP(S) Upstream Transport",
+              "title": "Client TLS",
               "additionalProperties": false,
               "properties": {
-                "certs": {
+                "trusted_certificates": {
                   "type": "array",
                   "items": {
                     "type": "string"
                   },
-                  "default": "",
+                  "default": [],
                   "examples": [
                     [
                       "./self-signed.crt"
                     ]
                   ],
-                  "title": "CA Certificates",
-                  "description": "The array of files containing the CA certificates to append to the Root CA when using upstream connections."
+                  "title": "Trusted Certificates",
+                  "description": "The array of files containing the certificates to trust when opening new TLS connections."
                 },
                 "cache": {
                   "type": "object",
-                  "title": "Transport Cache",
+                  "title": "Certificates Cache",
                   "additionalProperties": false,
                   "properties": {
                     "refresh_frequency": {
                       "type": "integer",
                       "default": 1000,
                       "title": "Refresh Frequency",
-                      "description": "Test if upstream transport needs certificate refresh once every 1000 requests."
+                      "description": "Test if transport needs certificate refresh once every 1000 requests."
                     },
                     "ttl": {
                       "type": "string",

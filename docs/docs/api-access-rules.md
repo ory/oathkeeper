@@ -234,9 +234,10 @@ authenticators:
 }
 ```
 
-## Upstream Transport Configuration
+## Client TLS Transport
 
-Upstreams are often protected by SSL certificates trusted by the SSL root servers, but what if you want to run your upstream infrastructure using self-signed certificates? Use the `certs` attribute to specifiy the certificate files to append to the Root Certificate Authority (CA) of the upstream transport. Upstream transport is cached to reduce IO overhead at scale. The upstream transport certificate will automatically update if the certificate file path is changed.
+In case you want to enable TLS connections to services protected by a self-signed certificate you will very likely need to setup your own custom certificates.
+Through the `client_tls` configuration you can set custom certificates that will be used by oathkeeper to connect to other services such as the upstream service, authorizers, authenticators, and mutators. The certificates are cached in memory to reduce latency, you can set the cache expiration conditions through the `cache` configuration or disable caching entirely. NOTE: Caching is enabled by default.
 
 Use the `cache.refresh_frequency` to test once every `1000` requests for a certificate file size or modification timestamp change. Setting the value to 0 will disable the refresh on a frequency functionality, but retrain the update on file path change functionality.
 
@@ -246,8 +247,8 @@ Use the `cache.ttl` to force the refresh of certificates once every `5m` regardl
 ```yaml
 serve:
   proxy:
-    transport:
-      certs:
+    client_tls:
+      trusted_certificates:
         - "/my-certs/certificate-to-append.crt"
         - "/my-certs/another-certificate.crt"
       cache:

@@ -3,7 +3,6 @@ package authn
 import (
 	"context"
 	"crypto/md5"
-	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -18,8 +17,8 @@ import (
 	"github.com/opentracing/opentracing-go/ext"
 
 	"github.com/pkg/errors"
-	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/clientcredentials"
+	"golang.org/x/oauth2/internal"
 
 	"github.com/ory/go-convenience/stringslice"
 	"github.com/ory/x/httpx"
@@ -73,8 +72,6 @@ type AuthenticatorOAuth2Introspection struct {
 	tokenCache *ristretto.Cache
 	cacheTTL   *time.Duration
 	logger     *logrusx.Logger
-
-	cm *certs.CertManager
 }
 
 func NewAuthenticatorOAuth2Introspection(c configuration.Provider, logger *logrusx.Logger) *AuthenticatorOAuth2Introspection {
@@ -82,7 +79,6 @@ func NewAuthenticatorOAuth2Introspection(c configuration.Provider, logger *logru
 		c:         c,
 		logger:    logger,
 		clientMap: make(map[string]*http.Client),
-		cm:        certs.NewCertManager(c),
 	}
 }
 
@@ -193,26 +189,6 @@ func (a *AuthenticatorOAuth2Introspection) Authenticate(r *http.Request, session
 		// add tracing
 		closeSpan := a.traceRequest(r.Context(), introspectReq)
 
-		pool, err := a.cm.CertPool()
-		if err != nil {
-			return errors.WithStack(err)
-		}
-
-		tlsConfig := &tls.Config{
-			InsecureSkipVerify: false,
-			RootCAs:            pool,
-		}
-
-		if client.Transport != nil {
-			if tr, ok := client.Transport.(*httpx.ResilientRoundTripper).RoundTripper.(*oauth2.Transport); ok {
-				tr.Base = &http.Transport{TLSClientConfig: tlsConfig}
-			} else {
-				client.Transport.(*httpx.ResilientRoundTripper).RoundTripper = &http.Transport{TLSClientConfig: tlsConfig}
-			}
-		} else {
-			client.Transport = &http.Transport{TLSClientConfig: tlsConfig}
-		}
-
 		resp, err := client.Do(introspectReq.WithContext(r.Context()))
 
 		// close the span so it represents just the http request
@@ -301,7 +277,11 @@ func (a *AuthenticatorOAuth2Introspection) Config(config json.RawMessage) (*Auth
 
 	if !ok {
 		a.logger.Debug("Initializing http client")
-		var rt http.RoundTripper
+
+		tlsTransport := certs.NewRoundTripper(certs.NewCertManager(a.c))
+		tlsClient := &http.Client{Transport: tlsTransport}
+
+		var rt http.RoundTripper = tlsTransport
 		if c.PreAuth != nil && c.PreAuth.Enabled {
 			var ep url.Values
 
@@ -309,13 +289,14 @@ func (a *AuthenticatorOAuth2Introspection) Config(config json.RawMessage) (*Auth
 				ep = url.Values{"audience": {c.PreAuth.Audience}}
 			}
 
+			ctx := context.WithValue(context.Background(), internal.HTTPClient, tlsClient)
 			rt = (&clientcredentials.Config{
 				ClientID:       c.PreAuth.ClientID,
 				ClientSecret:   c.PreAuth.ClientSecret,
 				Scopes:         c.PreAuth.Scope,
 				EndpointParams: ep,
 				TokenURL:       c.PreAuth.TokenURL,
-			}).Client(context.Background()).Transport
+			}).Client(ctx).Transport
 		}
 
 		if c.Retry == nil {
