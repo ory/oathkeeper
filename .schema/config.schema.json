@@ -1222,7 +1222,7 @@
                   "items": {
                     "type": "string"
                   },
-                  "default": [],
+                  "default": null,
                   "examples": [
                     [
                       "./self-signed.crt"
