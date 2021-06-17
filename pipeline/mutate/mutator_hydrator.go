@@ -22,6 +22,7 @@ package mutate
 
 import (
 	"bytes"
+	"context"
 	"crypto/md5"
 	"encoding/json"
 	"fmt"
@@ -30,6 +31,7 @@ import (
 	"time"
 
 	"github.com/dgraph-io/ristretto"
+	"golang.org/x/oauth2/clientcredentials"
 
 	"github.com/ory/oathkeeper/pipeline/authn"
 	"github.com/ory/oathkeeper/x"
@@ -67,6 +69,13 @@ type BasicAuth struct {
 	Password string `json:"password"`
 }
 
+type MutatorHydratorRetryConfiguration struct {
+	Timeout string `json:"max_delay"`
+	MaxWait string `json:"give_up_after"`
+}
+
+//new
+
 type auth struct {
 	Basic BasicAuth `json:"basic"`
 }
@@ -90,8 +99,19 @@ type cacheConfig struct {
 }
 
 type MutatorHydratorConfig struct {
-	Api   externalAPIConfig `json:"api"`
-	Cache cacheConfig       `json:"cache"`
+	PreAuth *MutatorHydratorPreAuth `json:"pre_authorization"`
+	Api     externalAPIConfig       `json:"api"`
+	Cache   cacheConfig             `json:"cache"`
+	Retry   *MutatorHydratorRetryConfiguration
+}
+
+//new
+type MutatorHydratorPreAuth struct {
+	Enabled      bool     `json:"enabled"`
+	ClientID     string   `json:"client_id"`
+	ClientSecret string   `json:"client_secret"`
+	Scope        []string `json:"scope"`
+	TokenURL     string   `json:"token_url"`
 }
 
 type mutatorHydratorDependencies interface {
@@ -99,6 +119,7 @@ type mutatorHydratorDependencies interface {
 }
 
 func NewMutatorHydrator(c configuration.Provider, d mutatorHydratorDependencies) *MutatorHydrator {
+	var rt http.RoundTripper
 	cache, _ := ristretto.NewCache(&ristretto.Config{
 		// This will hold about 1000 unique mutation responses.
 		NumCounters: 10000,
@@ -107,7 +128,7 @@ func NewMutatorHydrator(c configuration.Provider, d mutatorHydratorDependencies)
 		// This is a best-practice value.
 		BufferItems: 64,
 	})
-	return &MutatorHydrator{c: c, d: d, client: httpx.NewResilientClientLatencyToleranceSmall(nil), hydrateCache: cache}
+	return &MutatorHydrator{c: c, d: d, client: httpx.NewResilientClientLatencyToleranceSmall(rt), hydrateCache: cache}
 }
 
 func (a *MutatorHydrator) GetID() string {
@@ -184,7 +205,7 @@ func (a *MutatorHydrator) Mutate(r *http.Request, session *authn.AuthenticationS
 	}
 	req.Header.Set(contentTypeHeaderKey, contentTypeJSONHeaderValue)
 
-	var client http.Client
+	//var client http.Client
 	if cfg.Api.Retry != nil {
 		maxRetryDelay := time.Second
 		giveUpAfter := time.Millisecond * 50
@@ -203,10 +224,10 @@ func (a *MutatorHydrator) Mutate(r *http.Request, session *authn.AuthenticationS
 			}
 		}
 
-		client.Transport = httpx.NewResilientRoundTripper(a.client.Transport, maxRetryDelay, giveUpAfter)
+		a.client.Transport = httpx.NewResilientRoundTripper(a.client.Transport, maxRetryDelay, giveUpAfter)
 	}
 
-	res, err := client.Do(req.WithContext(r.Context()))
+	res, err := a.client.Do(req)
 	if err != nil {
 		return errors.WithStack(err)
 	}
@@ -253,6 +274,40 @@ func (a *MutatorHydrator) Config(config json.RawMessage) (*MutatorHydratorConfig
 	if err := a.c.MutatorConfig(a.GetID(), config, &c); err != nil {
 		return nil, NewErrMutatorMisconfigured(a, err)
 	}
+
+	var rt http.RoundTripper
+
+	if c.PreAuth != nil && c.PreAuth.Enabled {
+		rt = (&clientcredentials.Config{
+			ClientID:     c.PreAuth.ClientID,
+			ClientSecret: c.PreAuth.ClientSecret,
+			Scopes:       c.PreAuth.Scope,
+			TokenURL:     c.PreAuth.TokenURL,
+		}).Client(context.Background()).Transport
+	}
+
+	if c.Retry == nil {
+		c.Retry = &MutatorHydratorRetryConfiguration{Timeout: "500ms", MaxWait: "1s"}
+	} else {
+		if c.Retry.Timeout == "" {
+			c.Retry.Timeout = "0ms"
+		}
+		if c.Retry.MaxWait == "" {
+			c.Retry.MaxWait = "0s"
+		}
+	}
+	duration, err := time.ParseDuration(c.Retry.Timeout)
+	if err != nil {
+		return nil, err
+	}
+	timeout := time.Millisecond * duration
+
+	maxWait, err := time.ParseDuration(c.Retry.MaxWait)
+	if err != nil {
+		return nil, err
+	}
+
+	a.client = httpx.NewResilientClientLatencyToleranceConfigurable(rt, timeout, maxWait)
 
 	if c.Cache.Enabled {
 		var err error
