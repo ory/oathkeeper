@@ -10,6 +10,17 @@
     <a href="https://opencollective.com/ory">Support this project!</a>
 </h4>
 
+---
+
+<p align="left">
+    <a href="https://circleci.com/gh/ory/oathkeeper/tree/master"><img src="https://circleci.com/gh/ory/oathkeeper.svg?style=shield" alt="Build Status"></a>
+    <a href="https://coveralls.io/github/ory/oathkeeper?branch=master"> <img src="https://coveralls.io/repos/ory/oathkeeper/badge.svg?branch=master&service=github" alt="Coverage Status"></a>
+    <a href="https://goreportcard.com/report/github.com/ory/oathkeeper"><img src="https://goreportcard.com/badge/github.com/ory/oathkeeper" alt="Go Report Card"></a>
+    <a href="https://pkg.go.dev/github.com/ory/oathkeeper"><img src="https://pkg.go.dev/badge/www.github.com/ory/oathkeeper" alt="PkgGoDev"></a>
+    <a href="#backers" alt="sponsors on Open Collective"><img src="https://opencollective.com/ory/backers/badge.svg" /></a> <a href="#sponsors" alt="Sponsors on Open Collective"><img src="https://opencollective.com/ory/sponsors/badge.svg" /></a>
+    <a href="https://github.com/ory/oathkeeper/blob/master/CODE_OF_CONDUCT.md" alt="Ory Code of Conduct"><img src="https://img.shields.io/badge/ory-code%20of%20conduct-green" /></a>
+</p>
+
 ORY Oathkeeper is an Identity & Access Proxy (IAP) and Access Control Decision
 API that authorizes HTTP requests based on sets of Access Rules. The BeyondCorp
 Model is designed by [Google](https://cloud.google.com/beyondcorp/) and secures
@@ -35,10 +46,6 @@ among others.
 This service is stable, but under active development and may introduce breaking
 changes in future releases. Any breaking change will have extensive
 documentation and upgrade instructions.
-
-[![CircleCI](https://circleci.com/gh/ory/oathkeeper.svg?style=shield&circle-token=eb458bf636326d41674141b6bbfa475a39c9db1e)](https://circleci.com/gh/ory/oathkeeper)
-[![Coverage Status](https://coveralls.io/repos/github/ory/oathkeeper/badge.svg?branch=master)](https://coveralls.io/github/ory/oathkeeper?branch=master)
-![Go Report Card](https://goreportcard.com/badge/github.com/ory/oathkeeper)
 
 ---
 
