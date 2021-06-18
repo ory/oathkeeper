@@ -5,65 +5,81 @@
 
 **Table of Contents**
 
-- [Unreleased (2021-06-17)](#unreleased-2021-06-17)
+- [Unreleased (2021-06-18)](#unreleased-2021-06-18)
   - [Bug Fixes](#bug-fixes)
   - [Features](#features)
-  - [0.38.11-beta.1 (2021-05-13)](#03811-beta1-2021-05-13)
-    - [Bug Fixes](#bug-fixes-1)
-    - [Reverts](#reverts)
-  - [0.38.10-beta.2 (2021-05-05)](#03810-beta2-2021-05-05)
-    - [Bug Fixes](#bug-fixes-2)
-    - [Code Refactoring](#code-refactoring)
-    - [Documentation](#documentation)
-    - [Features](#features-1)
-  - [0.38.9-beta.1 (2021-03-17)](#0389-beta1-2021-03-17)
-  - [0.38.9-beta.1.pre.3 (2021-03-16)](#0389-beta1pre3-2021-03-16)
-    - [Bug Fixes](#bug-fixes-3)
-  - [0.38.9-beta.1.pre.2 (2021-03-15)](#0389-beta1pre2-2021-03-15)
-  - [0.38.9-beta.1.pre.1 (2021-03-15)](#0389-beta1pre1-2021-03-15)
-    - [Bug Fixes](#bug-fixes-4)
-    - [Unclassified](#unclassified)
-  - [0.38.8-beta.1 (2021-02-25)](#0388-beta1-2021-02-25)
-    - [Bug Fixes](#bug-fixes-5)
-    - [Unclassified](#unclassified-1)
-  - [0.38.7-beta.1 (2021-02-22)](#0387-beta1-2021-02-22)
-    - [Bug Fixes](#bug-fixes-6)
-    - [Features](#features-2)
-  - [0.38.6-beta.1 (2021-01-27)](#0386-beta1-2021-01-27)
-    - [Documentation](#documentation-1)
-    - [Features](#features-3)
-  - [0.38.5-beta.1 (2020-12-10)](#0385-beta1-2020-12-10)
-    - [Bug Fixes](#bug-fixes-7)
-    - [Documentation](#documentation-2)
-    - [Features](#features-4)
-    - [Unclassified](#unclassified-2)
-  - [0.38.4-beta.1 (2020-09-28)](#0384-beta1-2020-09-28)
-    - [Bug Fixes](#bug-fixes-8)
-    - [Documentation](#documentation-3)
-    - [Features](#features-5)
-    - [Unclassified](#unclassified-3)
-  - [0.38.3-beta.1 (2020-07-29)](#0383-beta1-2020-07-29)
-    - [Bug Fixes](#bug-fixes-9)
-    - [Documentation](#documentation-4)
-    - [Features](#features-6)
-  - [0.38.2-beta.1 (2020-05-25)](#0382-beta1-2020-05-25)
-    - [Bug Fixes](#bug-fixes-10)
-    - [Documentation](#documentation-5)
-    - [Features](#features-7)
-  - [0.38.1-beta.1 (2020-05-08)](#0381-beta1-2020-05-08)
-    - [Bug Fixes](#bug-fixes-11)
+- [0.38.11-beta.1 (2021-05-13)](#03811-beta1-2021-05-13)
+  - [Bug Fixes](#bug-fixes-1)
+  - [Code Generation](#code-generation)
+  - [Reverts](#reverts)
+- [0.38.10-beta.2 (2021-05-05)](#03810-beta2-2021-05-05)
+  - [Bug Fixes](#bug-fixes-2)
+  - [Code Generation](#code-generation-1)
+  - [Code Refactoring](#code-refactoring)
+  - [Documentation](#documentation)
+  - [Features](#features-1)
+- [0.38.9-beta.1 (2021-03-17)](#0389-beta1-2021-03-17)
+  - [Code Generation](#code-generation-2)
+- [0.38.9-beta.1.pre.3 (2021-03-16)](#0389-beta1pre3-2021-03-16)
+  - [Bug Fixes](#bug-fixes-3)
+  - [Code Generation](#code-generation-3)
+- [0.38.9-beta.1.pre.2 (2021-03-15)](#0389-beta1pre2-2021-03-15)
+  - [Code Generation](#code-generation-4)
+- [0.38.9-beta.1.pre.1 (2021-03-15)](#0389-beta1pre1-2021-03-15)
+  - [Bug Fixes](#bug-fixes-4)
+  - [Code Generation](#code-generation-5)
+  - [Unclassified](#unclassified)
+- [0.38.8-beta.1 (2021-02-25)](#0388-beta1-2021-02-25)
+  - [Bug Fixes](#bug-fixes-5)
+  - [Code Generation](#code-generation-6)
+  - [Unclassified](#unclassified-1)
+- [0.38.7-beta.1 (2021-02-22)](#0387-beta1-2021-02-22)
+  - [Bug Fixes](#bug-fixes-6)
+  - [Code Generation](#code-generation-7)
+  - [Features](#features-2)
+- [0.38.6-beta.1 (2021-01-27)](#0386-beta1-2021-01-27)
+  - [Code Generation](#code-generation-8)
+  - [Documentation](#documentation-1)
+  - [Features](#features-3)
+- [0.38.5-beta.1 (2020-12-10)](#0385-beta1-2020-12-10)
+  - [Bug Fixes](#bug-fixes-7)
+  - [Code Generation](#code-generation-9)
+  - [Documentation](#documentation-2)
+  - [Features](#features-4)
+  - [Unclassified](#unclassified-2)
+- [0.38.4-beta.1 (2020-09-28)](#0384-beta1-2020-09-28)
+  - [Bug Fixes](#bug-fixes-8)
+  - [Code Generation](#code-generation-10)
+  - [Documentation](#documentation-3)
+  - [Features](#features-5)
+  - [Unclassified](#unclassified-3)
+- [0.38.3-beta.1 (2020-07-29)](#0383-beta1-2020-07-29)
+  - [Bug Fixes](#bug-fixes-9)
+  - [Code Generation](#code-generation-11)
+  - [Documentation](#documentation-4)
+  - [Features](#features-6)
+- [0.38.2-beta.1 (2020-05-25)](#0382-beta1-2020-05-25)
+  - [Bug Fixes](#bug-fixes-10)
+  - [Chores](#chores)
+  - [Documentation](#documentation-5)
+  - [Features](#features-7)
+- [0.38.1-beta.1 (2020-05-08)](#0381-beta1-2020-05-08)
+  - [Bug Fixes](#bug-fixes-11)
+  - [Chores](#chores-1)
 - [0.38.0-beta.2 (2020-05-07)](#0380-beta2-2020-05-07)
   - [Bug Fixes](#bug-fixes-12)
+  - [Chores](#chores-2)
   - [Code Refactoring](#code-refactoring-1)
   - [Documentation](#documentation-6)
   - [Features](#features-8)
-  - [0.37.1-beta.1 (2020-04-03)](#0371-beta1-2020-04-03)
-    - [Documentation](#documentation-7)
+- [0.37.1-beta.1 (2020-04-03)](#0371-beta1-2020-04-03)
+  - [Chores](#chores-3)
+  - [Documentation](#documentation-7)
 - [0.37.0-beta.1 (2020-04-02)](#0370-beta1-2020-04-02)
-  - [Bug Fixes](#bug-fixes-13)
-  - [Documentation](#documentation-8)
-  - [Features](#features-9)
-  - [BREAKING CHANGES](#breaking-changes)
+  - [Breaking Changes](#breaking-changes)
+    - [Bug Fixes](#bug-fixes-13)
+    - [Documentation](#documentation-8)
+    - [Features](#features-9)
 - [0.36.0-beta.4 (2020-02-14)](#0360-beta4-2020-02-14)
   - [Bug Fixes](#bug-fixes-14)
   - [Documentation](#documentation-9)
@@ -71,32 +87,32 @@
   - [Documentation](#documentation-10)
   - [Features](#features-10)
   - [Unclassified](#unclassified-4)
-  - [0.35.5-beta.2 (2020-01-31)](#0355-beta2-2020-01-31)
-    - [Unclassified](#unclassified-5)
-  - [0.35.5-beta.1 (2020-01-27)](#0355-beta1-2020-01-27)
-    - [Unclassified](#unclassified-6)
-  - [0.35.4-beta.1 (2020-01-26)](#0354-beta1-2020-01-26)
-    - [Unclassified](#unclassified-7)
-  - [0.35.3-beta.1 (2020-01-26)](#0353-beta1-2020-01-26)
-    - [Documentation](#documentation-11)
-    - [Unclassified](#unclassified-8)
-  - [0.35.1-beta.1 (2020-01-14)](#0351-beta1-2020-01-14)
-    - [Unclassified](#unclassified-9)
+- [0.35.5-beta.2 (2020-01-31)](#0355-beta2-2020-01-31)
+  - [Unclassified](#unclassified-5)
+- [0.35.5-beta.1 (2020-01-27)](#0355-beta1-2020-01-27)
+  - [Unclassified](#unclassified-6)
+- [0.35.4-beta.1 (2020-01-26)](#0354-beta1-2020-01-26)
+  - [Unclassified](#unclassified-7)
+- [0.35.3-beta.1 (2020-01-26)](#0353-beta1-2020-01-26)
+  - [Documentation](#documentation-11)
+  - [Unclassified](#unclassified-8)
+- [0.35.1-beta.1 (2020-01-14)](#0351-beta1-2020-01-14)
+  - [Unclassified](#unclassified-9)
 - [0.35.0-beta.1 (2020-01-13)](#0350-beta1-2020-01-13)
   - [Documentation](#documentation-12)
   - [Unclassified](#unclassified-10)
 - [0.34.0-beta.1 (2019-12-26)](#0340-beta1-2019-12-26)
   - [Documentation](#documentation-13)
   - [Unclassified](#unclassified-11)
-  - [0.33.1-beta.1 (2019-12-18)](#0331-beta1-2019-12-18)
-    - [Documentation](#documentation-14)
-    - [Unclassified](#unclassified-12)
+- [0.33.1-beta.1 (2019-12-18)](#0331-beta1-2019-12-18)
+  - [Documentation](#documentation-14)
+  - [Unclassified](#unclassified-12)
 - [0.33.0-beta.1 (2019-12-16)](#0330-beta1-2019-12-16)
   - [Documentation](#documentation-15)
   - [Unclassified](#unclassified-13)
-  - [0.32.1-beta.1 (2019-10-30)](#0321-beta1-2019-10-30)
-    - [Documentation](#documentation-16)
-    - [Unclassified](#unclassified-14)
+- [0.32.1-beta.1 (2019-10-30)](#0321-beta1-2019-10-30)
+  - [Documentation](#documentation-16)
+  - [Unclassified](#unclassified-14)
 - [0.32.0-beta.1 (2019-10-20)](#0320-beta1-2019-10-20)
   - [Documentation](#documentation-17)
 - [0.31.0-beta.1 (2019-10-20)](#0310-beta1-2019-10-20)
@@ -107,19 +123,20 @@
 - [0.18.0-beta.1 (2019-08-22)](#0180-beta1-2019-08-22)
   - [Documentation](#documentation-19)
   - [Unclassified](#unclassified-17)
-  - [0.17.4-beta.1 (2019-08-09)](#0174-beta1-2019-08-09)
-    - [Documentation](#documentation-20)
-    - [Unclassified](#unclassified-18)
-  - [0.17.3-beta.1 (2019-08-03)](#0173-beta1-2019-08-03)
-    - [Documentation](#documentation-21)
-    - [Unclassified](#unclassified-19)
-  - [0.17.2-beta.1 (2019-08-02)](#0172-beta1-2019-08-02)
-    - [Documentation](#documentation-22)
-    - [Unclassified](#unclassified-20)
-  - [0.17.1-beta.1 (2019-07-23)](#0171-beta1-2019-07-23)
-    - [Documentation](#documentation-23)
-    - [Unclassified](#unclassified-21)
+- [0.17.4-beta.1 (2019-08-09)](#0174-beta1-2019-08-09)
+  - [Documentation](#documentation-20)
+  - [Unclassified](#unclassified-18)
+- [0.17.3-beta.1 (2019-08-03)](#0173-beta1-2019-08-03)
+  - [Documentation](#documentation-21)
+  - [Unclassified](#unclassified-19)
+- [0.17.2-beta.1 (2019-08-02)](#0172-beta1-2019-08-02)
+  - [Documentation](#documentation-22)
+  - [Unclassified](#unclassified-20)
+- [0.17.1-beta.1 (2019-07-23)](#0171-beta1-2019-07-23)
+  - [Documentation](#documentation-23)
+  - [Unclassified](#unclassified-21)
 - [0.17.0-beta.1 (2019-07-18)](#0170-beta1-2019-07-18)
+  - [Continuous Integration](#continuous-integration)
   - [Documentation](#documentation-24)
   - [Unclassified](#unclassified-22)
 - [0.16.0-beta.5 (2019-06-28)](#0160-beta5-2019-06-28)
@@ -129,89 +146,93 @@
   - [Documentation](#documentation-26)
   - [Unclassified](#unclassified-24)
 - [0.16.0-beta.3 (2019-05-19)](#0160-beta3-2019-05-19)
+  - [Continuous Integration](#continuous-integration-1)
   - [Documentation](#documentation-27)
   - [Unclassified](#unclassified-25)
-  - [0.15.2 (2019-05-04)](#0152-2019-05-04)
-    - [Documentation](#documentation-28)
-    - [Unclassified](#unclassified-26)
-  - [0.15.1 (2019-04-29)](#0151-2019-04-29)
-    - [Unclassified](#unclassified-27)
+- [0.15.2 (2019-05-04)](#0152-2019-05-04)
+  - [Documentation](#documentation-28)
+  - [Unclassified](#unclassified-26)
+- [0.15.1 (2019-04-29)](#0151-2019-04-29)
+  - [Unclassified](#unclassified-27)
 - [0.15.0 (2019-04-29)](#0150-2019-04-29)
   - [Documentation](#documentation-29)
   - [Unclassified](#unclassified-28)
-  - [0.14.2+oryOS.10 (2018-12-13)](#0142oryos10-2018-12-13)
-  - [0.14.1+oryOS.10 (2018-12-13)](#0141oryos10-2018-12-13)
+- [0.14.2+oryOS.10 (2018-12-13)](#0142oryos10-2018-12-13)
+  - [Continuous Integration](#continuous-integration-2)
+- [0.14.1+oryOS.10 (2018-12-13)](#0141oryos10-2018-12-13)
+  - [Continuous Integration](#continuous-integration-3)
 - [0.14.0+oryOS.10 (2018-12-13)](#0140oryos10-2018-12-13)
+  - [Continuous Integration](#continuous-integration-4)
   - [Documentation](#documentation-30)
   - [Unclassified](#unclassified-29)
-  - [0.11.12 (2018-05-07)](#01112-2018-05-07)
-    - [Documentation](#documentation-31)
-    - [Unclassified](#unclassified-30)
-  - [0.0.29 (2017-12-19)](#0029-2017-12-19)
-    - [Unclassified](#unclassified-31)
-  - [0.0.28 (2017-12-19)](#0028-2017-12-19)
-    - [Unclassified](#unclassified-32)
-  - [0.0.27 (2017-12-12)](#0027-2017-12-12)
-    - [Unclassified](#unclassified-33)
-  - [0.0.26 (2017-12-11)](#0026-2017-12-11)
-    - [Unclassified](#unclassified-34)
-  - [0.0.25 (2017-11-28)](#0025-2017-11-28)
-    - [Unclassified](#unclassified-35)
-  - [0.0.24 (2017-11-26)](#0024-2017-11-26)
-    - [Unclassified](#unclassified-36)
-  - [0.0.23 (2017-11-24)](#0023-2017-11-24)
-    - [Documentation](#documentation-32)
-    - [Unclassified](#unclassified-37)
-  - [0.0.22 (2017-11-20)](#0022-2017-11-20)
-    - [Unclassified](#unclassified-38)
-  - [0.0.21 (2017-11-19)](#0021-2017-11-19)
-    - [Unclassified](#unclassified-39)
-  - [0.0.20 (2017-11-18)](#0020-2017-11-18)
-    - [Documentation](#documentation-33)
-    - [Unclassified](#unclassified-40)
-  - [0.0.19 (2017-11-13)](#0019-2017-11-13)
-    - [Unclassified](#unclassified-41)
-  - [0.0.18 (2017-11-13)](#0018-2017-11-13)
-    - [Unclassified](#unclassified-42)
-  - [0.0.17 (2017-11-12)](#0017-2017-11-12)
-    - [Unclassified](#unclassified-43)
-  - [0.0.16 (2017-11-12)](#0016-2017-11-12)
-    - [Unclassified](#unclassified-44)
-  - [0.0.15 (2017-11-09)](#0015-2017-11-09)
-    - [Unclassified](#unclassified-45)
-  - [0.0.14 (2017-11-07)](#0014-2017-11-07)
-    - [Unclassified](#unclassified-46)
-  - [0.0.13 (2017-11-07)](#0013-2017-11-07)
-    - [Unclassified](#unclassified-47)
-  - [0.0.12 (2017-11-07)](#0012-2017-11-07)
-    - [Unclassified](#unclassified-48)
-  - [0.0.11 (2017-11-06)](#0011-2017-11-06)
-    - [Unclassified](#unclassified-49)
-  - [0.0.10 (2017-11-06)](#0010-2017-11-06)
-    - [Unclassified](#unclassified-50)
-  - [0.0.9 (2017-11-06)](#009-2017-11-06)
-    - [Unclassified](#unclassified-51)
-  - [0.0.8 (2017-11-06)](#008-2017-11-06)
-    - [Unclassified](#unclassified-52)
-  - [0.0.7 (2017-11-06)](#007-2017-11-06)
-    - [Unclassified](#unclassified-53)
-  - [0.0.6 (2017-11-03)](#006-2017-11-03)
-    - [Unclassified](#unclassified-54)
-  - [0.0.5 (2017-11-01)](#005-2017-11-01)
-    - [Unclassified](#unclassified-55)
-  - [0.0.4 (2017-10-21)](#004-2017-10-21)
-    - [Unclassified](#unclassified-56)
-  - [0.0.3 (2017-10-18)](#003-2017-10-18)
-    - [Unclassified](#unclassified-57)
-  - [0.0.2 (2017-10-12)](#002-2017-10-12)
-    - [Unclassified](#unclassified-58)
-  - [0.0.1 (2017-10-10)](#001-2017-10-10)
-    - [Documentation](#documentation-34)
-    - [Unclassified](#unclassified-59)
+- [0.11.12 (2018-05-07)](#01112-2018-05-07)
+  - [Documentation](#documentation-31)
+  - [Unclassified](#unclassified-30)
+- [0.0.29 (2017-12-19)](#0029-2017-12-19)
+  - [Unclassified](#unclassified-31)
+- [0.0.28 (2017-12-19)](#0028-2017-12-19)
+  - [Unclassified](#unclassified-32)
+- [0.0.27 (2017-12-12)](#0027-2017-12-12)
+  - [Unclassified](#unclassified-33)
+- [0.0.26 (2017-12-11)](#0026-2017-12-11)
+  - [Unclassified](#unclassified-34)
+- [0.0.25 (2017-11-28)](#0025-2017-11-28)
+  - [Unclassified](#unclassified-35)
+- [0.0.24 (2017-11-26)](#0024-2017-11-26)
+  - [Unclassified](#unclassified-36)
+- [0.0.23 (2017-11-24)](#0023-2017-11-24)
+  - [Documentation](#documentation-32)
+  - [Unclassified](#unclassified-37)
+- [0.0.22 (2017-11-20)](#0022-2017-11-20)
+  - [Unclassified](#unclassified-38)
+- [0.0.21 (2017-11-19)](#0021-2017-11-19)
+  - [Unclassified](#unclassified-39)
+- [0.0.20 (2017-11-18)](#0020-2017-11-18)
+  - [Documentation](#documentation-33)
+  - [Unclassified](#unclassified-40)
+- [0.0.19 (2017-11-13)](#0019-2017-11-13)
+  - [Unclassified](#unclassified-41)
+- [0.0.18 (2017-11-13)](#0018-2017-11-13)
+  - [Unclassified](#unclassified-42)
+- [0.0.17 (2017-11-12)](#0017-2017-11-12)
+  - [Unclassified](#unclassified-43)
+- [0.0.16 (2017-11-12)](#0016-2017-11-12)
+  - [Unclassified](#unclassified-44)
+- [0.0.15 (2017-11-09)](#0015-2017-11-09)
+  - [Unclassified](#unclassified-45)
+- [0.0.14 (2017-11-07)](#0014-2017-11-07)
+  - [Unclassified](#unclassified-46)
+- [0.0.13 (2017-11-07)](#0013-2017-11-07)
+  - [Unclassified](#unclassified-47)
+- [0.0.12 (2017-11-07)](#0012-2017-11-07)
+  - [Unclassified](#unclassified-48)
+- [0.0.11 (2017-11-06)](#0011-2017-11-06)
+  - [Unclassified](#unclassified-49)
+- [0.0.10 (2017-11-06)](#0010-2017-11-06)
+  - [Unclassified](#unclassified-50)
+- [0.0.9 (2017-11-06)](#009-2017-11-06)
+  - [Unclassified](#unclassified-51)
+- [0.0.8 (2017-11-06)](#008-2017-11-06)
+  - [Unclassified](#unclassified-52)
+- [0.0.7 (2017-11-06)](#007-2017-11-06)
+  - [Unclassified](#unclassified-53)
+- [0.0.6 (2017-11-03)](#006-2017-11-03)
+  - [Unclassified](#unclassified-54)
+- [0.0.5 (2017-11-01)](#005-2017-11-01)
+  - [Unclassified](#unclassified-55)
+- [0.0.4 (2017-10-21)](#004-2017-10-21)
+  - [Unclassified](#unclassified-56)
+- [0.0.3 (2017-10-18)](#003-2017-10-18)
+  - [Unclassified](#unclassified-57)
+- [0.0.2 (2017-10-12)](#002-2017-10-12)
+  - [Unclassified](#unclassified-58)
+- [0.0.1 (2017-10-10)](#001-2017-10-10)
+  - [Documentation](#documentation-34)
+  - [Unclassified](#unclassified-59)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-# [Unreleased](https://github.com/ory/oathkeeper/compare/v0.38.11-beta.1...2ccbb2f2607af39301a6d129c9552a5682cf96fc) (2021-06-17)
+# [Unreleased](https://github.com/ory/oathkeeper/compare/v0.38.11-beta.1...2ccbb2f2607af39301a6d129c9552a5682cf96fc) (2021-06-18)
 
 ### Bug Fixes
 
@@ -229,25 +250,19 @@
 - Ability to Configure Remote Authorizers to set Headers in
   AuthenticationSession ([#717](https://github.com/ory/oathkeeper/issues/717))
   ([b3d117b](https://github.com/ory/oathkeeper/commit/b3d117b5d7de02cc1e3ab965328cf6c7995f8a6e)):
-
-  > The remote authorizers may have useful context from user's permissions. So
-  > with this changes, custom authorizers using remote and remote_json can
-  > return some useful headers to be forward into the AuthenticationSession,
-  > meaning that these headers will be passed to upstream services.
-  >
-  > For example, an user containing scopes/branches inside an organization
-  > profile has some level of data addressed to him. In this case, the upstream
-  > service need to know that, and "filter" the data according to his
-  > "branch_id". The permission that is given to the user (and the remote
-  > authorizers manages) has a record of the "branch_id", for the following
-  > responses will be returned as status code 200 (if granted) and containing a
-  > header like X-Branch-Id.
-  >
-  > The upstream service receives the X-Branch-Id and does your thing.
-  >
-  > The configuration requires to configure a list of "allowed headers"
-  > returning from remote authorizer, that will be accepted in the pipeline.
-
+  The remote authorizers may have useful context from user's permissions. So
+  with this changes, custom authorizers using remote and remote_json can return
+  some useful headers to be forward into the AuthenticationSession, meaning that
+  these headers will be passed to upstream services.
+  For example, an user containing scopes/branches inside an organization profile
+  has some level of data addressed to him. In this case, the upstream service
+  need to know that, and "filter" the data according to his "branch_id". The
+  permission that is given to the user (and the remote authorizers manages) has
+  a record of the "branch_id", for the following responses will be returned as
+  status code 200 (if granted) and containing a header like X-Branch-Id.
+  The upstream service receives the X-Branch-Id and does your thing.
+  The configuration requires to configure a list of "allowed headers" returning
+  from remote authorizer, that will be accepted in the pipeline.
 - Add request header in match context
   ([#719](https://github.com/ory/oathkeeper/issues/719))
   ([22b0dbe](https://github.com/ory/oathkeeper/commit/22b0dbe6495b9f57206dc8fb2335e1c81906e27d)),
@@ -257,7 +272,9 @@
   ([5613f65](https://github.com/ory/oathkeeper/commit/5613f650facbb136d6dd7ad7dcf3057f54cb30fc)),
   closes [#203](https://github.com/ory/oathkeeper/issues/203)
 
-## [0.38.11-beta.1](https://github.com/ory/oathkeeper/compare/v0.38.10-beta.2...v0.38.11-beta.1) (2021-05-13)
+# [0.38.11-beta.1](https://github.com/ory/oathkeeper/compare/v0.38.10-beta.2...v0.38.11-beta.1) (2021-05-13)
+
+This release primarily addresses issues in the SDK build pipeline.
 
 ### Bug Fixes
 
@@ -270,16 +287,23 @@
   ([766b071](https://github.com/ory/oathkeeper/commit/766b0714dc8aaff010a99b182a6450f21d1795f5)),
   closes [#467](https://github.com/ory/oathkeeper/issues/467)
 
+### Code Generation
+
+- Pin v0.38.11-beta.1 release commit
+  ([413393f](https://github.com/ory/oathkeeper/commit/413393f8750796ae2b8dd02fb3735d991807ddaa))
+
 ### Reverts
 
 - Init introspect http client once
   ([#714](https://github.com/ory/oathkeeper/issues/714))
   ([#722](https://github.com/ory/oathkeeper/issues/722))
   ([c58cbd9](https://github.com/ory/oathkeeper/commit/c58cbd9341e58adfdf49fd1e9c0241528917c86c)):
+  This reverts commit e203ad14ac0e78909e7d42aa214c47a708a7c136.
 
-  > This reverts commit e203ad14ac0e78909e7d42aa214c47a708a7c136.
+# [0.38.10-beta.2](https://github.com/ory/oathkeeper/compare/v0.38.9-beta.1...v0.38.10-beta.2) (2021-05-05)
 
-## [0.38.10-beta.2](https://github.com/ory/oathkeeper/compare/v0.38.9-beta.1...v0.38.10-beta.2) (2021-05-05)
+This release improves the health status manager, cache management, improves JSON
+Web Token debuggability, and resolves other issues.
 
 ### Bug Fixes
 
@@ -294,6 +318,11 @@
   portability ([#694](https://github.com/ory/oathkeeper/issues/694))
   ([e522062](https://github.com/ory/oathkeeper/commit/e52206214e5e6b949b785752ee638a80b4775355))
 
+### Code Generation
+
+- Pin v0.38.10-beta.2 release commit
+  ([4b3403b](https://github.com/ory/oathkeeper/commit/4b3403baecaa1c452d95138e929fae0b3d71988d))
+
 ### Code Refactoring
 
 - Move api.json
@@ -303,21 +332,17 @@
 
 - Add dotnet sdk ([#683](https://github.com/ory/oathkeeper/issues/683))
   ([05ae925](https://github.com/ory/oathkeeper/commit/05ae9259414882015f30cc8d5c01e64afb65afbc)):
+  - docs: add dotnet sdk
 
-  > - docs: add dotnet sdk
-  >
-  > - docs: add dotnet sdk versioned
-
+  - docs: add dotnet sdk versioned
 - Change forum to discussions readme
   ([#690](https://github.com/ory/oathkeeper/issues/690))
   ([d942c04](https://github.com/ory/oathkeeper/commit/d942c043aa2370b87e0dd822440ad39d809755f9))
 - Consistent authz headers
   ([#699](https://github.com/ory/oathkeeper/issues/699))
   ([19948e1](https://github.com/ory/oathkeeper/commit/19948e11933f3607a562bcff75e2061b8cb2a527)):
-
-  > Removes the "Authorizer" prefix from a few of the authorizers to make them
-  > all consistent.
-
+  Removes the "Authorizer" prefix from a few of the authorizers to make them all
+  consistent.
 - Fix typo ([#696](https://github.com/ory/oathkeeper/issues/696))
   ([eda83f1](https://github.com/ory/oathkeeper/commit/eda83f12a58de80ae78aa86e90806f277e8dc1f5))
 - Point to deny authz ([#701](https://github.com/ory/oathkeeper/issues/701))
@@ -341,9 +366,7 @@
   ([#681](https://github.com/ory/oathkeeper/issues/681))
   ([d08ab50](https://github.com/ory/oathkeeper/commit/d08ab5034b80736701fb38ee1e55d12c63fd06b2)),
   closes [#668](https://github.com/ory/oathkeeper/issues/668):
-
-  > JWT Claims added to error details field.
-
+  JWT Claims added to error details field.
 - Adds audience into Extra at oAuth2 introspection
   ([#480](https://github.com/ory/oathkeeper/issues/480))
   ([c9faecc](https://github.com/ory/oathkeeper/commit/c9faecc5d32800537f07e8e05f9c8872e609c3f9))
@@ -351,11 +374,22 @@
   ([#705](https://github.com/ory/oathkeeper/issues/705))
   ([f67241f](https://github.com/ory/oathkeeper/commit/f67241f2ab7063fa9ce8e8ea455de25b51414f30))
 
-## [0.38.9-beta.1](https://github.com/ory/oathkeeper/compare/v0.38.9-beta.1.pre.3...v0.38.9-beta.1) (2021-03-17)
+# [0.38.9-beta.1](https://github.com/ory/oathkeeper/compare/v0.38.9-beta.1.pre.3...v0.38.9-beta.1) (2021-03-17)
 
-No significant changes have been made for this release.
+This release adds support for X-Forwarded-Proto, passes tracing contexts to
+downstream requests, bumps Go to 1.16, and resolves issues preventing the log
+level from being set to trace level. Additionally included are improvements to
+the overall tracing set up, a cookie authenticator bugfix, and a bugfix for glob
+pattern matching.
 
-## [0.38.9-beta.1.pre.3](https://github.com/ory/oathkeeper/compare/v0.38.9-beta.1.pre.2...v0.38.9-beta.1.pre.3) (2021-03-16)
+### Code Generation
+
+- Pin v0.38.9-beta.1 release commit
+  ([9ad41f0](https://github.com/ory/oathkeeper/commit/9ad41f02c4e6c140afa702743b5880f7fbab5df5))
+
+# [0.38.9-beta.1.pre.3](https://github.com/ory/oathkeeper/compare/v0.38.9-beta.1.pre.2...v0.38.9-beta.1.pre.3) (2021-03-16)
+
+autogen: pin v0.38.9-beta.1.pre.3 release commit
 
 ### Bug Fixes
 
@@ -363,20 +397,36 @@ No significant changes have been made for this release.
   ([#664](https://github.com/ory/oathkeeper/issues/664))
   ([c711aac](https://github.com/ory/oathkeeper/commit/c711aacc5fc29664e3825e087557e7baf4e47aa8)),
   closes [#630](https://github.com/ory/oathkeeper/issues/630):
+  This makes `/` also a separator as well as the presumably default value of
+  `.`. This allows using <\*> for matching only one path segment.
 
-  > This makes `/` also a separator as well as the presumably default value of
-  > `.`. This allows using <\*> for matching only one path segment.
+### Code Generation
 
-## [0.38.9-beta.1.pre.2](https://github.com/ory/oathkeeper/compare/v0.38.9-beta.1.pre.1...v0.38.9-beta.1.pre.2) (2021-03-15)
+- Pin v0.38.9-beta.1.pre.3 release commit
+  ([7725554](https://github.com/ory/oathkeeper/commit/77255541cafc25fd7adc242aed149837f3fa3141))
 
-No significant changes have been made for this release.
+# [0.38.9-beta.1.pre.2](https://github.com/ory/oathkeeper/compare/v0.38.9-beta.1.pre.1...v0.38.9-beta.1.pre.2) (2021-03-15)
 
-## [0.38.9-beta.1.pre.1](https://github.com/ory/oathkeeper/compare/v0.38.8-beta.1...v0.38.9-beta.1.pre.1) (2021-03-15)
+autogen: pin v0.38.9-beta.1.pre.2 release commit
+
+### Code Generation
+
+- Pin v0.38.9-beta.1.pre.2 release commit
+  ([9695b77](https://github.com/ory/oathkeeper/commit/9695b772bfdfc398e1ccc29731e6e2736fd31cb2))
+
+# [0.38.9-beta.1.pre.1](https://github.com/ory/oathkeeper/compare/v0.38.8-beta.1...v0.38.9-beta.1.pre.1) (2021-03-15)
+
+autogen: pin v0.38.9-beta.1.pre.1 release commit
 
 ### Bug Fixes
 
 - Resolve goreleaser issues and bump golang
   ([7291df9](https://github.com/ory/oathkeeper/commit/7291df9f2745b4dfc178d81b65fc837f58b34206))
+
+### Code Generation
+
+- Pin v0.38.9-beta.1.pre.1 release commit
+  ([7afdc40](https://github.com/ory/oathkeeper/commit/7afdc40144dbd703f0a88531d6093525af54dcc8))
 
 ### Unclassified
 
@@ -385,12 +435,19 @@ No significant changes have been made for this release.
   ([34cf38c](https://github.com/ory/oathkeeper/commit/34cf38c0fe431eb375fab4dbfa9cb9098961943d)),
   closes [#549](https://github.com/ory/oathkeeper/issues/549)
 
-## [0.38.8-beta.1](https://github.com/ory/oathkeeper/compare/v0.38.7-beta.1...v0.38.8-beta.1) (2021-02-25)
+# [0.38.8-beta.1](https://github.com/ory/oathkeeper/compare/v0.38.7-beta.1...v0.38.8-beta.1) (2021-02-25)
+
+Improves tracing set up and addresses a bug in the cookie authenticator.
 
 ### Bug Fixes
 
 - Ignore cookie auth when no cookies set
   ([c84d880](https://github.com/ory/oathkeeper/commit/c84d8808805f124bd31c6d8717f36539652fb4e8))
+
+### Code Generation
+
+- Pin v0.38.8-beta.1 release commit
+  ([2943e9a](https://github.com/ory/oathkeeper/commit/2943e9af887a78191a50426ed069604615ca58e2))
 
 ### Unclassified
 
@@ -399,7 +456,11 @@ No significant changes have been made for this release.
 - Add tracing to outbound oauth introspection requests
   ([daf44cb](https://github.com/ory/oathkeeper/commit/daf44cb22961817f6d9aaddd4ffce64bcee50d70))
 
-## [0.38.7-beta.1](https://github.com/ory/oathkeeper/compare/v0.38.6-beta.1...v0.38.7-beta.1) (2021-02-22)
+# [0.38.7-beta.1](https://github.com/ory/oathkeeper/compare/v0.38.6-beta.1...v0.38.7-beta.1) (2021-02-22)
+
+This release adds support for X-Forwarded-Proto, passes context for tracing to
+downstream requests, bumps Go to 1.16 and resolves issues preventing the log
+level from being set to trace level.
 
 ### Bug Fixes
 
@@ -412,13 +473,16 @@ No significant changes have been made for this release.
 - Pass context through to external requests
   ([#627](https://github.com/ory/oathkeeper/issues/627))
   ([ee25197](https://github.com/ory/oathkeeper/commit/ee251976537ade1e06399a3d5b2883620e3407eb)):
-
-  > Enables proper tracing through Jaeger etc
-
+  Enables proper tracing through Jaeger etc
 - Update goreleaser config
   ([9689f45](https://github.com/ory/oathkeeper/commit/9689f45db1ec0a974a109a6b28314cddaba2b2de))
 - Update log schema
   ([78e654d](https://github.com/ory/oathkeeper/commit/78e654df3b81d3ab3f8f946033ee5f1fe45afded))
+
+### Code Generation
+
+- Pin v0.38.7-beta.1 release commit
+  ([3b37928](https://github.com/ory/oathkeeper/commit/3b37928256363ceff294897fd05461d01829314c))
 
 ### Features
 
@@ -427,15 +491,21 @@ No significant changes have been made for this release.
 - Resolve go mod issues
   ([6a3f5d3](https://github.com/ory/oathkeeper/commit/6a3f5d39c2326a49c694624ff2d35b8e3beccc2e))
 
-## [0.38.6-beta.1](https://github.com/ory/oathkeeper/compare/v0.38.5-beta.1...v0.38.6-beta.1) (2021-01-27)
+# [0.38.6-beta.1](https://github.com/ory/oathkeeper/compare/v0.38.5-beta.1...v0.38.6-beta.1) (2021-01-27)
+
+We are happy to announce Dart and Rust SDKs for Ory Oathkeeper! Additionally, a
+new `bearer_token` authenticator has been added.
+
+### Code Generation
+
+- Pin v0.38.6-beta.1 release commit
+  ([a0c4d7f](https://github.com/ory/oathkeeper/commit/a0c4d7fc46151000b4ae9db5a958b94611c9cd58))
 
 ### Documentation
 
 - Add Rust and Dart SDKs
   ([1524fed](https://github.com/ory/oathkeeper/commit/1524fed70b4b5c8d3ca8d23e5ab46bc32f073d53)):
-
-  > We now support for Rust and Dart SDKs!
-
+  We now support for Rust and Dart SDKs!
 - Fix js npm links ([#634](https://github.com/ory/oathkeeper/issues/634))
   ([c339fee](https://github.com/ory/oathkeeper/commit/c339fee771877dbc3e362d4656af53fe492cd58e))
 - Rename index documents
@@ -446,23 +516,24 @@ No significant changes have been made for this release.
 - Add bearer_token authenticator
   ([#613](https://github.com/ory/oathkeeper/issues/613))
   ([b623ae7](https://github.com/ory/oathkeeper/commit/b623ae7f68aac948f8e584fb9254e43a7272adf6)):
+  Adds a new authenticator to work with Kratos' new API token. Works the same as
+  the cookie_session authenticator but checks for a bearer token in the
+  Authorization header (unless overwritten by token_from)
 
-  > Adds a new authenticator to work with Kratos' new API token. Works the same
-  > as the cookie_session authenticator but checks for a bearer token in the
-  > Authorization header (unless overwritten by token_from)
+# [0.38.5-beta.1](https://github.com/ory/oathkeeper/compare/v0.38.4-beta.1...v0.38.5-beta.1) (2020-12-10)
 
-## [0.38.5-beta.1](https://github.com/ory/oathkeeper/compare/v0.38.4-beta.1...v0.38.5-beta.1) (2020-12-10)
+The ORY Community is proud to present you the next iteration of ORY Oathkeeper.
+In this release, we focused on improving production stability and resolved
+several pesky bugs!
 
 ### Bug Fixes
 
 - Check content-length header in lowercase
   ([#530](https://github.com/ory/oathkeeper/issues/530))
   ([a68fc8a](https://github.com/ory/oathkeeper/commit/a68fc8aa3892311960c4e818fa413caf189b9f8d)):
-
-  > Issue #422 didn't fix the problem with the requests' Content-Length being
-  > copied in the responses because the check was case-sensitive and unit tests
-  > didn't cover it.
-
+  Issue #422 didn't fix the problem with the requests' Content-Length being
+  copied in the responses because the check was case-sensitive and unit tests
+  didn't cover it.
 - Never construct id token claim templates in parallel
   ([#552](https://github.com/ory/oathkeeper/issues/552))
   ([4f504d9](https://github.com/ory/oathkeeper/commit/4f504d9032a5be9ea6f82c723a655a0f9028c45a)),
@@ -479,14 +550,17 @@ No significant changes have been made for this release.
 - Update dd-trace to fix build
   ([2e571fa](https://github.com/ory/oathkeeper/commit/2e571fa98880b62a174dbcfcdde2bb1a339cc7a3))
 
+### Code Generation
+
+- Pin v0.38.5-beta.1 release commit
+  ([f4a04da](https://github.com/ory/oathkeeper/commit/f4a04dac17a77a0983bd8461a5db8438232aede4))
+
 ### Documentation
 
 - Add contributing to sidebar
   ([#595](https://github.com/ory/oathkeeper/issues/595))
   ([a3c9584](https://github.com/ory/oathkeeper/commit/a3c9584e848b3e71b33073c89299bc60c6d0b3ee)):
-
-  > The same change as in https://github.com/ory/hydra/pull/2209
-
+  The same change as in https://github.com/ory/hydra/pull/2209
 - Add newsletter to config
   ([3c02e22](https://github.com/ory/oathkeeper/commit/3c02e22c398b5a573883b6c1cceb05aff15dcbea))
 - Correct sidebar.json ([#524](https://github.com/ory/oathkeeper/issues/524))
@@ -522,18 +596,18 @@ No significant changes have been made for this release.
 - docs. fix typo in list
   ([335189f](https://github.com/ory/oathkeeper/commit/335189fba1d4c3db841c0cf9c51412adc7bdae01))
 
-## [0.38.4-beta.1](https://github.com/ory/oathkeeper/compare/v0.38.3-beta.1...v0.38.4-beta.1) (2020-09-28)
+# [0.38.4-beta.1](https://github.com/ory/oathkeeper/compare/v0.38.3-beta.1...v0.38.4-beta.1) (2020-09-28)
+
+This release stabilizes several features and resolves a couple of bugs.
 
 ### Bug Fixes
 
 - Add tests in error_redirect_test.go
   ([#522](https://github.com/ory/oathkeeper/issues/522))
   ([24bdd9b](https://github.com/ory/oathkeeper/commit/24bdd9bdc56a46953a393d503ccfd2416cf11bcf)):
-
-  > Increased tests coverage to cover for all the three valid scenarios - http
-  > absolute, https absolute, relative. Explicitly checked Location path to
-  > ensure that correct uri scheme was returned
-
+  Increased tests coverage to cover for all the three valid scenarios - http
+  absolute, https absolute, relative. Explicitly checked Location path to ensure
+  that correct uri scheme was returned
 - Deprecated key in goreleaser config
   ([2a4f901](https://github.com/ory/oathkeeper/commit/2a4f90127e66917dfaa72f8089efa5149631434d))
 - Ignore x/net false positives
@@ -543,6 +617,11 @@ No significant changes have been made for this release.
   ([0f65631](https://github.com/ory/oathkeeper/commit/0f65631af61e6a4098745f0149b0154d5dd7386c)),
   closes [#496](https://github.com/ory/oathkeeper/issues/496)
 
+### Code Generation
+
+- Pin v0.38.4-beta.1 release commit
+  ([1c997b2](https://github.com/ory/oathkeeper/commit/1c997b281b27db9dcc010b299d2df9e0ef126c9d))
+
 ### Documentation
 
 - Fix broken links
@@ -550,10 +629,8 @@ No significant changes have been made for this release.
 - Fix OAuth2 Introspect Authn Config Documentation
   ([#498](https://github.com/ory/oathkeeper/issues/498))
   ([7612e20](https://github.com/ory/oathkeeper/commit/7612e207e96841aad3dcf5806f5af2cc42024075)):
-
-  > Switch the definitions for the pre-authorisation fields 'scope' and 'token
-  > endpoint' in the documentation.
-
+  Switch the definitions for the pre-authorisation fields 'scope' and 'token
+  endpoint' in the documentation.
 - Fix sidebar
   ([28247fc](https://github.com/ory/oathkeeper/commit/28247fcf53ed5c47879ada62456ab39b29c5752a))
 - Guide for integrating with ORY Hydra
@@ -579,16 +656,13 @@ No significant changes have been made for this release.
   ([#520](https://github.com/ory/oathkeeper/issues/520))
   ([b5bb3bc](https://github.com/ory/oathkeeper/commit/b5bb3bc6b88ea8b26d53f03477fce1b74f113b97)),
   closes [#511](https://github.com/ory/oathkeeper/issues/511):
-
-  > This change introduces a url_param config option for redirect error handler.
-  > If it contains a url paramter name, the redirect url will have this
-  > parameter set, containing the current url (from which Oathkeeper has
-  > redirected the user).
-  >
-  > This can be useful in passing the return_to url to Kratos, so user can be
-  > redirected to the page they initially wanted to access after a successfull
-  > sign in.
-
+  This change introduces a url_param config option for redirect error handler.
+  If it contains a url paramter name, the redirect url will have this parameter
+  set, containing the current url (from which Oathkeeper has redirected the
+  user).
+  This can be useful in passing the return_to url to Kratos, so user can be
+  redirected to the page they initially wanted to access after a successfull
+  sign in.
 - Log invalid credentials on info level instead of error/warning
   ([#517](https://github.com/ory/oathkeeper/issues/517))
   ([a372b5f](https://github.com/ory/oathkeeper/commit/a372b5f833305ad85451cfb99b1db9e10ae8b8dc)),
@@ -602,7 +676,10 @@ No significant changes have been made for this release.
 - Run go format
   ([2c25a2a](https://github.com/ory/oathkeeper/commit/2c25a2ad18bba7bf72e612b2005f1080e164d0d9))
 
-## [0.38.3-beta.1](https://github.com/ory/oathkeeper/compare/v0.38.2-beta.1...v0.38.3-beta.1) (2020-07-29)
+# [0.38.3-beta.1](https://github.com/ory/oathkeeper/compare/v0.38.2-beta.1...v0.38.3-beta.1) (2020-07-29)
+
+This release addresses several configuration bugs and resolves a potential
+panic.
 
 ### Bug Fixes
 
@@ -618,6 +695,11 @@ No significant changes have been made for this release.
 - Use ory-dev instead of swagutil
   ([#465](https://github.com/ory/oathkeeper/issues/465))
   ([3fce382](https://github.com/ory/oathkeeper/commit/3fce382e83c95049b561a97365d0b4cc2f73bc54))
+
+### Code Generation
+
+- Pin v0.38.3-beta.1 release commit
+  ([1f754a9](https://github.com/ory/oathkeeper/commit/1f754a90d50c66545ce326ff1780894f4b2cbcfe))
 
 ### Documentation
 
@@ -647,7 +729,10 @@ No significant changes have been made for this release.
   ([#479](https://github.com/ory/oathkeeper/issues/479))
   ([48603a1](https://github.com/ory/oathkeeper/commit/48603a1ac484b6571706021f2667f770604256b6))
 
-## [0.38.2-beta.1](https://github.com/ory/oathkeeper/compare/v0.38.1-beta.1...v0.38.2-beta.1) (2020-05-25)
+# [0.38.2-beta.1](https://github.com/ory/oathkeeper/compare/v0.38.1-beta.1...v0.38.2-beta.1) (2020-05-25)
+
+This patch makes timeouts configurable for oauth2_client_credentials and the
+reverse proxy and additionally allows prometheus to be configured.
 
 ### Bug Fixes
 
@@ -655,6 +740,11 @@ No significant changes have been made for this release.
   ([#437](https://github.com/ory/oathkeeper/issues/437))
   ([dcf3e14](https://github.com/ory/oathkeeper/commit/dcf3e14f2b4e09deb40260303061f27bcb55503c)),
   closes [#438](https://github.com/ory/oathkeeper/issues/438)
+
+### Chores
+
+- Pin v0.38.2-beta.1 release commit
+  ([0de2682](https://github.com/ory/oathkeeper/commit/0de2682a1e0d556688c48db52ccc4e24f2bce336))
 
 ### Documentation
 
@@ -671,18 +761,30 @@ No significant changes have been made for this release.
   ([2462fa3](https://github.com/ory/oathkeeper/commit/2462fa3f97601009aff9b45c7c288d7a1afdec45)),
   closes [#442](https://github.com/ory/oathkeeper/issues/442)
 
-## [0.38.1-beta.1](https://github.com/ory/oathkeeper/compare/v0.38.0-beta.2...v0.38.1-beta.1) (2020-05-08)
+# [0.38.1-beta.1](https://github.com/ory/oathkeeper/compare/v0.38.0-beta.2...v0.38.1-beta.1) (2020-05-08)
+
+Caching in the hydrator mutator has been improved. Please use
+`cache.enable=true` if you intend using the hydrator.
 
 ### Bug Fixes
 
 - Improve caching strategy and config for hydrator
   ([#433](https://github.com/ory/oathkeeper/issues/433))
   ([0047054](https://github.com/ory/oathkeeper/commit/00470541fb3d5d2672ef068c9e02c20deaac3d0d)):
+  To enable the hydrator cache you must now use the `cache.enabled` property.
+  Also, the cache key strategy has been improved.
 
-  > To enable the hydrator cache you must now use the `cache.enabled` property.
-  > Also, the cache key strategy has been improved.
+### Chores
+
+- Pin v0.38.1-beta.1 release commit
+  ([20f439d](https://github.com/ory/oathkeeper/commit/20f439d9df7eed3a7c8c163234b70c9260439613))
 
 # [0.38.0-beta.2](https://github.com/ory/oathkeeper/compare/v0.37.1-beta.1...v0.38.0-beta.2) (2020-05-07)
+
+This release introduces Prometheus support, a new `remote` authorizer, caching,
+and several bugfixes!
+
+No backwards incompatible changes have been introduced.
 
 ### Bug Fixes
 
@@ -692,16 +794,13 @@ No significant changes have been made for this release.
 - Don't copy the decision endpoint request's Content-Length
   ([#422](https://github.com/ory/oathkeeper/issues/422))
   ([0e99045](https://github.com/ory/oathkeeper/commit/0e990459104c7683764f4ed0e0a6b7162b57cd57)):
-
-  > We currently copy all original request headers send to the decission
-  > endpoint back. This can include the Content-Length header which describes
-  > the request body or response. Including the original request Content-Length
-  > causes issues for the decission endpoint client if the response body doesn't
-  > match the exact size.
-  >
-  > This change makes sure the Content-Length doesn't get included in the
-  > response body and adds a test to prevent future regressions.
-
+  We currently copy all original request headers send to the decission endpoint
+  back. This can include the Content-Length header which describes the request
+  body or response. Including the original request Content-Length causes issues
+  for the decission endpoint client if the response body doesn't match the exact
+  size.
+  This change makes sure the Content-Length doesn't get included in the response
+  body and adds a test to prevent future regressions.
 - Respect retry in token introspection
   ([#410](https://github.com/ory/oathkeeper/issues/410))
   ([88f7b69](https://github.com/ory/oathkeeper/commit/88f7b69c9ff252ddc3dbe960155883ec98115fd0))
@@ -711,11 +810,14 @@ No significant changes have been made for this release.
 - Use pipe to pass body remote authorizer
   ([#426](https://github.com/ory/oathkeeper/issues/426))
   ([1a44087](https://github.com/ory/oathkeeper/commit/1a44087f424d8a01437769c6bce177eab36c195f)):
-
-  > Resolves flaky tests.
-
+  Resolves flaky tests.
 - Use semver-regex replacer func
   ([a13cdf5](https://github.com/ory/oathkeeper/commit/a13cdf5d9a518e3095545e30d15c7c4b7859752b))
+
+### Chores
+
+- Pin v0.38.0-beta.2 release commit
+  ([73d36cd](https://github.com/ory/oathkeeper/commit/73d36cd367c1c93d4b6e93be180c982789924356))
 
 ### Code Refactoring
 
@@ -771,48 +873,47 @@ No significant changes have been made for this release.
 - Add cache to hydrator ([#418](https://github.com/ory/oathkeeper/issues/418))
   ([1ae6e7a](https://github.com/ory/oathkeeper/commit/1ae6e7a958d602533f54cada5d231bcf1bace093)),
   closes [#417](https://github.com/ory/oathkeeper/issues/417):
-
-  > This patch introduces new configuration parameters that allow the hydrator
-  > mutator to cache requests.
-
+  This patch introduces new configuration parameters that allow the hydrator
+  mutator to cache requests.
 - Add new remote authorizer that uses request body and headers
   ([#416](https://github.com/ory/oathkeeper/issues/416))
   ([3a20637](https://github.com/ory/oathkeeper/commit/3a206376c0ec4d72d5d6ec66c2d738199a24e0c6)):
-
-  > This pull request implements a new authorizer that sends the original
-  > request body as body to the remote endpoint. This allows the remote endpoint
-  > to take the body into account in its decision.
-  >
-  > The current remote_json authorizer does not have the ability to send the
-  > request body of the request to authorize. This means this cannot be taken
-  > into account while checking permissions.
-  >
-  > Providing the request body as part of the JSON payload won't always work as
-  > JSON cannot handle binary data.
-
+  This pull request implements a new authorizer that sends the original request
+  body as body to the remote endpoint. This allows the remote endpoint to take
+  the body into account in its decision.
+  The current remote_json authorizer does not have the ability to send the
+  request body of the request to authorize. This means this cannot be taken into
+  account while checking permissions.
+  Providing the request body as part of the JSON payload won't always work as
+  JSON cannot handle binary data.
 - Add prometheus docs ([#427](https://github.com/ory/oathkeeper/issues/427))
   ([117ee6a](https://github.com/ory/oathkeeper/commit/117ee6a4c53035651f41a5bb4a9afe3c8b0c7438))
 - Add prometheus endpoint providing basic request metrics
   ([#404](https://github.com/ory/oathkeeper/issues/404))
   ([fdaed46](https://github.com/ory/oathkeeper/commit/fdaed46bcffbbdf593e94bc1784df88809e63fcd)):
-
-  > This patch adds basic prometheus metrics. The prometheus metrics are exposed
-  > at the default prometheus exporter port 9000 and is configurable with:
-  >
-  > ```
-  >  serve:
-  >    prometheus:
-  >      port: 9000
-  >      host: localhost
-  >      metrics_path: /metrics
-  > ```
-
+  This patch adds basic prometheus metrics. The prometheus metrics are exposed
+  at the default prometheus exporter port 9000 and is configurable with:
+  ```
+   serve:
+     prometheus:
+       port: 9000
+       host: localhost
+       metrics_path: /metrics
+  ```
 - Oauth2_introspect cache introspection results
   ([#424](https://github.com/ory/oathkeeper/issues/424))
   ([d4557ae](https://github.com/ory/oathkeeper/commit/d4557aeac69e84d36dfc2a1ab97c61188c93457f)),
   closes [#293](https://github.com/ory/oathkeeper/issues/293)
 
-## [0.37.1-beta.1](https://github.com/ory/oathkeeper/compare/v0.37.0-beta.1...v0.37.1-beta.1) (2020-04-03)
+# [0.37.1-beta.1](https://github.com/ory/oathkeeper/compare/v0.37.0-beta.1...v0.37.1-beta.1) (2020-04-03)
+
+chore: replace segment with ory fork (#391)
+
+### Chores
+
+- Replace segment with ory fork
+  ([#391](https://github.com/ory/oathkeeper/issues/391))
+  ([77d0b48](https://github.com/ory/oathkeeper/commit/77d0b48c8de5b4681f49f90e306e5b2324ac0d5d))
 
 ### Documentation
 
@@ -820,6 +921,20 @@ No significant changes have been made for this release.
   ([4e251e9](https://github.com/ory/oathkeeper/commit/4e251e904a4028a01687b0155108cc9c315e6941))
 
 # [0.37.0-beta.1](https://github.com/ory/oathkeeper/compare/v0.36.0-beta.4...v0.37.0-beta.1) (2020-04-02)
+
+docs: document v0.36 and v0.37
+
+## Breaking Changes
+
+This feature allows to use the regex capture groups from the URL matcher to be
+used in several places, including the ID Token generator and elsewhere. To get
+this working, existing `keto_engine_acp_ory` authorizers are no longer able to
+use regex substition in the form of `my:action:$1` but instead must use the new
+format which is `{{ printIndex .MatchContext.RegexpCaptureGroups 0}}` (notice
+that the index changed by _-1_). A rule migrator exists which makes old rules
+compatible with the new format, if a version string is given. More details on
+the rule migration can be found here:
+https://github.com/ory/oathkeeper/pull/358/commits/fd16ceb230a1b14ebb01a147d2d70acce77f9fbd#diff-6177fb19f1b7d7bc392f5062b838df15
 
 ### Bug Fixes
 
@@ -844,12 +959,10 @@ No significant changes have been made for this release.
   ([#379](https://github.com/ory/oathkeeper/issues/379))
   ([5e0c8dc](https://github.com/ory/oathkeeper/commit/5e0c8dcdc4a64662f59372a488ec633bcdbc0d85)),
   closes [#377](https://github.com/ory/oathkeeper/issues/377):
-
-  > This patch removes the `scope` key from the OAuth2 Introspection request
-  > body when a scope strategy other than `none` is set for the OAuth2
-  > Introspection handler. If the scope strategy is `none`, the `scope` key is
-  > included in the body.
-
+  This patch removes the `scope` key from the OAuth2 Introspection request body
+  when a scope strategy other than `none` is set for the OAuth2 Introspection
+  handler. If the scope strategy is `none`, the `scope` key is included in the
+  body.
 - Token expiration error in tests
   ([#390](https://github.com/ory/oathkeeper/issues/390))
   ([9c07a73](https://github.com/ory/oathkeeper/commit/9c07a7349cdf560c0ba29a637aaec93021757d27))
@@ -857,37 +970,32 @@ No significant changes have been made for this release.
   ([#325](https://github.com/ory/oathkeeper/issues/325))
   ([1247381](https://github.com/ory/oathkeeper/commit/12473815dad3fcbc57ea102dd982170960adb9f6)),
   closes [#324](https://github.com/ory/oathkeeper/issues/324):
-
-  > Add a new file 'Dockerfile-dc' which will primarily be used by Docker
-  > Compose to build docker images. Unlike the existing Dockerfile which depends
-  > on the Makefile to build the binary, this Dockerfile copies the source code
-  > and builds the binary.
-  >
-  > Oathkeeper has gone through a couple of changes since the initial draft of
-  > the docker compose file, considering these changes and the newly introduced
-  > Dockerfile in the previous commit, make these changes to the
-  > docker-compose.yml:
-  >
-  > 1. Bump the version of the compose file to 3.
-  > 2. Remove the need for the postgres database app, since Oathkeeper no longer
-  >    needs a database.
-  > 3. Remove the need for the migration app, since we no longer need to migrate
-  >    since there is no database and the option is deprecated.
-  > 4. Use the newly defined Dockerfile 'Dockerfile-dc'.
-  > 5. We now serve both API and PROXY from the same app, so we don't need two
-  >    instances of the app.
-  > 6. Add sample config, rules and JWK files to `.docker_compose`, mount this
-  >    via a volume mount.
+  Add a new file 'Dockerfile-dc' which will primarily be used by Docker Compose
+  to build docker images. Unlike the existing Dockerfile which depends on the
+  Makefile to build the binary, this Dockerfile copies the source code and
+  builds the binary.
+  Oathkeeper has gone through a couple of changes since the initial draft of the
+  docker compose file, considering these changes and the newly introduced
+  Dockerfile in the previous commit, make these changes to the
+  docker-compose.yml:
+  1.  Bump the version of the compose file to 3.
+  2.  Remove the need for the postgres database app, since Oathkeeper no longer
+      needs a database.
+  3.  Remove the need for the migration app, since we no longer need to migrate
+      since there is no database and the option is deprecated.
+  4.  Use the newly defined Dockerfile 'Dockerfile-dc'.
+  5.  We now serve both API and PROXY from the same app, so we don't need two
+      instances of the app.
+  6.  Add sample config, rules and JWK files to `.docker_compose`, mount this
+      via a volume mount.
 
 ### Documentation
 
 - Change link to Developer Install Guide
   ([#369](https://github.com/ory/oathkeeper/issues/369))
   ([f7fe46f](https://github.com/ory/oathkeeper/commit/f7fe46f9e183c53b5af71592c05cacf6b7584a2c)):
-
-  > Changing the link to the Developer Documentation - it was pointing to Keto
-  > and not to Oathkeeper.
-
+  Changing the link to the Developer Documentation - it was pointing to Keto and
+  not to Oathkeeper.
 - Document v0.36 and v0.37
   ([a176c73](https://github.com/ory/oathkeeper/commit/a176c7301baddbec572e3451830ee1f32dc55c75))
 - Fix examples for some JSON Schema config keys
@@ -936,9 +1044,7 @@ No significant changes have been made for this release.
 - Update README.md ([#375](https://github.com/ory/oathkeeper/issues/375))
   ([313d2fe](https://github.com/ory/oathkeeper/commit/313d2fe99f699c441e6f8e24abb096e239a17f83)),
   closes [#374](https://github.com/ory/oathkeeper/issues/374):
-
-  > Fixed link to Envoy configuration page and added link to AWS API Gateway.
-
+  Fixed link to Envoy configuration page and added link to AWS API Gateway.
 - Updates issue and pull request templates
   ([#382](https://github.com/ory/oathkeeper/issues/382))
   ([484c406](https://github.com/ory/oathkeeper/commit/484c406785c2633feee3cb9179a94147085cadd6))
@@ -960,19 +1066,9 @@ No significant changes have been made for this release.
   ([#370](https://github.com/ory/oathkeeper/issues/370))
   ([0a39511](https://github.com/ory/oathkeeper/commit/0a395115123e34be0dbb47608a96dad2dca5e60c))
 
-### BREAKING CHANGES
-
-- This feature allows to use the regex capture groups from the URL matcher to be
-  used in several places, including the ID Token generator and elsewhere. To get
-  this working, existing `keto_engine_acp_ory` authorizers are no longer able to
-  use regex substition in the form of `my:action:$1` but instead must use the
-  new format which is `{{ printIndex .MatchContext.RegexpCaptureGroups 0}}`
-  (notice that the index changed by _-1_). A rule migrator exists which makes
-  old rules compatible with the new format, if a version string is given. More
-  details on the rule migration can be found here:
-  https://github.com/ory/oathkeeper/pull/358/commits/fd16ceb230a1b14ebb01a147d2d70acce77f9fbd#diff-6177fb19f1b7d7bc392f5062b838df15
-
 # [0.36.0-beta.4](https://github.com/ory/oathkeeper/compare/v0.36.0-beta.3...v0.36.0-beta.4) (2020-02-14)
+
+docs: Regenerate and update changelog
 
 ### Bug Fixes
 
@@ -985,6 +1081,8 @@ No significant changes have been made for this release.
   ([95a7c09](https://github.com/ory/oathkeeper/commit/95a7c091165b8a9acebedb197208fadc04585d4a))
 
 # [0.36.0-beta.1](https://github.com/ory/oathkeeper/compare/v0.35.5-beta.2...v0.36.0-beta.1) (2020-02-05)
+
+docs: Regenerate and update changelog
 
 ### Documentation
 
@@ -1009,10 +1107,9 @@ No significant changes have been made for this release.
   ([#334](https://github.com/ory/oathkeeper/issues/334))
   ([5f983ab](https://github.com/ory/oathkeeper/commit/5f983ab118ce784a49a38e6024b99b8791907d4b)),
   closes [#321](https://github.com/ory/oathkeeper/issues/321):
-
-  > This patch adds the ability to choose a matching strategy and adds a
-  > glob-based matching strategy to the available options (regex is still the
-  > default).
+  This patch adds the ability to choose a matching strategy and adds a
+  glob-based matching strategy to the available options (regex is still the
+  default).
 
 ### Unclassified
 
@@ -1025,7 +1122,9 @@ No significant changes have been made for this release.
 - Update CHANGELOG [ci skip]
   ([0e109ce](https://github.com/ory/oathkeeper/commit/0e109cee1222e8277157807d14f8b9ae7c1120d9))
 
-## [0.35.5-beta.2](https://github.com/ory/oathkeeper/compare/v0.35.5-beta.1...v0.35.5-beta.2) (2020-01-31)
+# [0.35.5-beta.2](https://github.com/ory/oathkeeper/compare/v0.35.5-beta.1...v0.35.5-beta.2) (2020-01-31)
+
+Update README.md
 
 ### Unclassified
 
@@ -1034,7 +1133,9 @@ No significant changes have been made for this release.
 - Update CHANGELOG [ci skip]
   ([963d60d](https://github.com/ory/oathkeeper/commit/963d60d802a56b87390bfdb10632b7e5754398aa))
 
-## [0.35.5-beta.1](https://github.com/ory/oathkeeper/compare/v0.35.4-beta.1...v0.35.5-beta.1) (2020-01-27)
+# [0.35.5-beta.1](https://github.com/ory/oathkeeper/compare/v0.35.4-beta.1...v0.35.5-beta.1) (2020-01-27)
+
+Hash enabled check to further improve performance (#353)
 
 ### Unclassified
 
@@ -1046,7 +1147,9 @@ No significant changes have been made for this release.
 - Update CHANGELOG [ci skip]
   ([3226ae6](https://github.com/ory/oathkeeper/commit/3226ae6d69837ae64d357e92236153c32c19e2cf))
 
-## [0.35.4-beta.1](https://github.com/ory/oathkeeper/compare/v0.35.3-beta.1...v0.35.4-beta.1) (2020-01-26)
+# [0.35.4-beta.1](https://github.com/ory/oathkeeper/compare/v0.35.3-beta.1...v0.35.4-beta.1) (2020-01-26)
+
+Update release pipeline and tests (#351)
 
 ### Unclassified
 
@@ -1054,7 +1157,9 @@ No significant changes have been made for this release.
   ([c7d81a9](https://github.com/ory/oathkeeper/commit/c7d81a99243a2adb1387ada12550303c76ae9768)),
   closes [#351](https://github.com/ory/oathkeeper/issues/351)
 
-## [0.35.3-beta.1](https://github.com/ory/oathkeeper/compare/v0.35.1-beta.1...v0.35.3-beta.1) (2020-01-26)
+# [0.35.3-beta.1](https://github.com/ory/oathkeeper/compare/v0.35.1-beta.1...v0.35.3-beta.1) (2020-01-26)
+
+Update CHANGELOG [ci skip]
 
 ### Documentation
 
@@ -1097,7 +1202,9 @@ No significant changes have been made for this release.
 - Update broken links in README
   ([78e498c](https://github.com/ory/oathkeeper/commit/78e498c0eb24380671364d333447abd0f25de1e8))
 
-## [0.35.1-beta.1](https://github.com/ory/oathkeeper/compare/v0.35.0-beta.1...v0.35.1-beta.1) (2020-01-14)
+# [0.35.1-beta.1](https://github.com/ory/oathkeeper/compare/v0.35.0-beta.1...v0.35.1-beta.1) (2020-01-14)
+
+Update CHANGELOG [ci skip]
 
 ### Unclassified
 
@@ -1105,6 +1212,8 @@ No significant changes have been made for this release.
   ([63b0076](https://github.com/ory/oathkeeper/commit/63b0076a264537ffd22f6f787c508598306c8661))
 
 # [0.35.0-beta.1](https://github.com/ory/oathkeeper/compare/v0.35.0-alpha.1...v0.35.0-beta.1) (2020-01-13)
+
+Update CHANGELOG [ci skip]
 
 ### Documentation
 
@@ -1140,29 +1249,25 @@ No significant changes have been made for this release.
 - authn/cookie_session: Add subject_from modifier (#336)
   ([6723fb8](https://github.com/ory/oathkeeper/commit/6723fb834c386b72e9525d2dfd661e684bd915d3)),
   closes [#336](https://github.com/ory/oathkeeper/issues/336):
-
-  > The subject_from modifier is a GJSON path that points to the `subject`
-  > field. Useful if the upstream API does not return a `{"subject": "..."}`
-  > format.
-
+  The subject_from modifier is a GJSON path that points to the `subject` field.
+  Useful if the upstream API does not return a `{"subject": "..."}` format.
 - authn/cookie_session: Add extra_from modifier (#335)
   ([ee2b9e7](https://github.com/ory/oathkeeper/commit/ee2b9e743f4f6c56563d791947ffb592cc13394e)),
   closes [#335](https://github.com/ory/oathkeeper/issues/335):
-
-  > The extra_from modifier is a GJSON path that points to the extra field.
-  > Useful if the upstream API does not return a
-  > `{"subject": "...", "extra": "..."}` format.
-
+  The extra_from modifier is a GJSON path that points to the extra field. Useful
+  if the upstream API does not return a `{"subject": "...", "extra": "..."}`
+  format.
 - pipeline/authn: Add tests for cookie sources in jwt and oauth2_intro (#330)
   (#331)
   ([7516eed](https://github.com/ory/oathkeeper/commit/7516eedc1ea97242a18225365898e0cbeafcffbf)),
   closes [#330](https://github.com/ory/oathkeeper/issues/330)
   [#331](https://github.com/ory/oathkeeper/issues/331)
   [#330](https://github.com/ory/oathkeeper/issues/330):
-
-  > Also updates the schemas to add missing cookie config element.
+  Also updates the schemas to add missing cookie config element.
 
 # [0.34.0-beta.1](https://github.com/ory/oathkeeper/compare/v0.33.1-beta.1...v0.34.0-beta.1) (2019-12-26)
+
+Prepare v0.34.0-beta.1+oryOS.14 release
 
 ### Documentation
 
@@ -1180,32 +1285,29 @@ No significant changes have been made for this release.
 - pipe/err: Improve IP and MIME matching (#323)
   ([7e6f636](https://github.com/ory/oathkeeper/commit/7e6f6369f4acc33211d78f2acb1036c610286c2c)),
   closes [#323](https://github.com/ory/oathkeeper/issues/323):
-
-  > Previously, MIME matching respected the request's wildcards which lead to
-  > multiple handlers feeling responsible for a particular request. Now,
-  > wildcards coming from the HTTP Request itself are interpreted literally.
-  >
-  > Additionally, ORY Oathkeeper respected the X-Forwarded-For HTTP Header for
-  > matching remote IP addresses. This behavior is now turned off by default
-  > because clients were able to fake this header otherwise. It can explicitly
-  > be turned on by setting
-  > `config.when.#.request.remote_ip.RespectForwardedForHeader: true`.
-
+  Previously, MIME matching respected the request's wildcards which lead to
+  multiple handlers feeling responsible for a particular request. Now, wildcards
+  coming from the HTTP Request itself are interpreted literally.
+  Additionally, ORY Oathkeeper respected the X-Forwarded-For HTTP Header for
+  matching remote IP addresses. This behavior is now turned off by default
+  because clients were able to fake this header otherwise. It can explicitly be
+  turned on by setting
+  `config.when.#.request.remote_ip.RespectForwardedForHeader: true`.
 - Add customizable error handlers (#322)
   ([4033321](https://github.com/ory/oathkeeper/commit/4033321b13671de8d0d5a42846a4e19d6065db62)),
   closes [#322](https://github.com/ory/oathkeeper/issues/322)
   [#204](https://github.com/ory/oathkeeper/issues/204)
   [#252](https://github.com/ory/oathkeeper/issues/252)
   [#119](https://github.com/ory/oathkeeper/issues/119):
+  This patch adds a new feature called error handlers. It allows to define the
+  error handling logic globally and per rule. It is now possible, for example,
+  to return a JSON response for `Accept: application/json` requests and a HTTP
+  Redirect response for requests that are coming from a user.
+  This also resolves several issues, as noted below:
 
-  > This patch adds a new feature called error handlers. It allows to define the
-  > error handling logic globally and per rule. It is now possible, for example,
-  > to return a JSON response for `Accept: application/json` requests and a HTTP
-  > Redirect response for requests that are coming from a user.
-  >
-  > This also resolves several issues, as noted below:
+# [0.33.1-beta.1](https://github.com/ory/oathkeeper/compare/v0.33.0-beta.1...v0.33.1-beta.1) (2019-12-18)
 
-## [0.33.1-beta.1](https://github.com/ory/oathkeeper/compare/v0.33.0-beta.1...v0.33.1-beta.1) (2019-12-18)
+docs: Incorporates changes from version v0.33.0-beta.1-12-g0dd3fe3 [ci skip]
 
 ### Documentation
 
@@ -1230,10 +1332,8 @@ No significant changes have been made for this release.
   closes [#320](https://github.com/ory/oathkeeper/issues/320)
   [#305](https://github.com/ory/oathkeeper/issues/305)
   [#317](https://github.com/ory/oathkeeper/issues/317):
-
-  > Previously, some keys did not respect the values set in the environment
-  > variables.
-
+  Previously, some keys did not respect the values set in the environment
+  variables.
 - Add alpine-based Docker image (#318)
   ([815951b](https://github.com/ory/oathkeeper/commit/815951bb039937acc7be3f8b1b2bb06fe9ecac90)),
   closes [#318](https://github.com/ory/oathkeeper/issues/318)
@@ -1243,19 +1343,15 @@ No significant changes have been made for this release.
   closes [#316](https://github.com/ory/oathkeeper/issues/316)
   [#244](https://github.com/ory/oathkeeper/issues/244)
   [#242](https://github.com/ory/oathkeeper/issues/242):
-
-  > Adds details such as the HTTP Method, User Agent, Subject, and other
-  > information to the logging output of both the reverse proxy and the decision
-  > API.
-
+  Adds details such as the HTTP Method, User Agent, Subject, and other
+  information to the logging output of both the reverse proxy and the decision
+  API.
 - Health endpoints now emit TRACE logs
   ([#314](https://github.com/ory/oathkeeper/issues/314))
   ([9036f8e](https://github.com/ory/oathkeeper/commit/9036f8eec3f264f7bcae46b44286367b8521802a)),
   closes [#283](https://github.com/ory/oathkeeper/issues/283):
-
-  > Remove health endpoints from the logs to make monitoring easier. Setting
-  > `log_level` to `trace` will show these calls.
-
+  Remove health endpoints from the logs to make monitoring easier. Setting
+  `log_level` to `trace` will show these calls.
 - Improve session endpoint debugability
   ([#315](https://github.com/ory/oathkeeper/issues/315))
   ([2718639](https://github.com/ory/oathkeeper/commit/27186396ccff4ee3a7f8f0a4c703263fcc55afae)),
@@ -1263,15 +1359,15 @@ No significant changes have been made for this release.
 - Resolve matcher cache ([#313](https://github.com/ory/oathkeeper/issues/313))
   ([1519632](https://github.com/ory/oathkeeper/commit/15196326d2436c2d849d955bf5050766ae6dff0c)),
   closes [#291](https://github.com/ory/oathkeeper/issues/291):
-
-  > A bug caused the rule matcher to not cache the regular expression result.
-
+  A bug caused the rule matcher to not cache the regular expression result.
 - Use bearer splitting when header is set to Authorization
   ([#311](https://github.com/ory/oathkeeper/issues/311))
   ([464fa31](https://github.com/ory/oathkeeper/commit/464fa319e84953835b71e16360bab3016b8bfc64)),
   closes [#308](https://github.com/ory/oathkeeper/issues/308)
 
 # [0.33.0-beta.1](https://github.com/ory/oathkeeper/compare/v0.32.1-beta.1...v0.33.0-beta.1) (2019-12-16)
+
+pipeline/mutator: Refactor hydrator retry config (#287)
 
 ### Documentation
 
@@ -1299,7 +1395,9 @@ No significant changes have been made for this release.
   ([b1e5cea](https://github.com/ory/oathkeeper/commit/b1e5cea5245c07142b6b34f2660ed41e6239b79f)),
   closes [#302](https://github.com/ory/oathkeeper/issues/302)
 
-## [0.32.1-beta.1](https://github.com/ory/oathkeeper/compare/v0.32.0-beta.1...v0.32.1-beta.1) (2019-10-30)
+# [0.32.1-beta.1](https://github.com/ory/oathkeeper/compare/v0.32.0-beta.1...v0.32.1-beta.1) (2019-10-30)
+
+docs: Incorporates changes from version v0.32.0-beta.1-13-g1910bbe [ci skip]
 
 ### Documentation
 
@@ -1339,10 +1437,8 @@ No significant changes have been made for this release.
   [#270](https://github.com/ory/oathkeeper/issues/270)
   [#279](https://github.com/ory/oathkeeper/issues/279)
   [#280](https://github.com/ory/oathkeeper/issues/280):
-
-  > This patch automatically binds environment variables to configuration keys.
-  > This patch resolves several issues:
-
+  This patch automatically binds environment variables to configuration keys.
+  This patch resolves several issues:
 - Dereference config schema and resolve issues (#282)
   ([8cf6868](https://github.com/ory/oathkeeper/commit/8cf6868b3e925e686769d43c912d5e52c6589a9b)),
   closes [#282](https://github.com/ory/oathkeeper/issues/282)
@@ -1352,12 +1448,16 @@ No significant changes have been made for this release.
 
 # [0.32.0-beta.1](https://github.com/ory/oathkeeper/compare/v0.31.0-beta.1...v0.32.0-beta.1) (2019-10-20)
 
+docs: Incorporates changes from version v0.31.0-beta.1 [ci skip]
+
 ### Documentation
 
 - Incorporates changes from version v0.31.0-beta.1 [ci skip]
   ([dafc870](https://github.com/ory/oathkeeper/commit/dafc870943720f04f5ac06a139bf5e126a83afa8))
 
 # [0.31.0-beta.1](https://github.com/ory/oathkeeper/compare/v0.19.0-beta.1...v0.31.0-beta.1) (2019-10-20)
+
+docs: Incorporates changes from version v0.30.0-beta.1 [ci skip]
 
 ### Documentation
 
@@ -1374,19 +1474,15 @@ No significant changes have been made for this release.
   ([fc85ac8](https://github.com/ory/oathkeeper/commit/fc85ac854c3fb4cdd96bbae650f7355400431eac)),
   closes [#271](https://github.com/ory/oathkeeper/issues/271)
   [#257](https://github.com/ory/oathkeeper/issues/257):
-
-  > Add additional optional configuration to jwt and oauth2_introspection
-  > authenticators allowing to set from where (which header or query parameter)
-  > the token should be received. The configuration is a token_from field in
-  > per-rule-configuration, as described in a linked issue.
-
+  Add additional optional configuration to jwt and oauth2_introspection
+  authenticators allowing to set from where (which header or query parameter)
+  the token should be received. The configuration is a token_from field in
+  per-rule-configuration, as described in a linked issue.
 - Add migration capabilities
   ([#268](https://github.com/ory/oathkeeper/issues/268))
   ([bc74e72](https://github.com/ory/oathkeeper/commit/bc74e726712c77955d2013979770c2724af17f20)),
   closes [#266](https://github.com/ory/oathkeeper/issues/266):
-
-  > Adds the ability to modify rules with backwards compatibility.
-
+  Adds the ability to modify rules with backwards compatibility.
 - Force auth style in oauth2 client credentials authn
   ([#267](https://github.com/ory/oathkeeper/issues/267))
   ([97d7890](https://github.com/ory/oathkeeper/commit/97d789097b47b50117421f8f4ebd32182de4195c)),
@@ -1401,6 +1497,8 @@ No significant changes have been made for this release.
   closes [#256](https://github.com/ory/oathkeeper/issues/256)
 
 # [0.19.0-beta.1](https://github.com/ory/oathkeeper/compare/v0.18.0-beta.1...v0.19.0-beta.1) (2019-09-23)
+
+Fix id_token schema reference URL
 
 ### Unclassified
 
@@ -1418,6 +1516,8 @@ No significant changes have been made for this release.
   [#251](https://github.com/ory/oathkeeper/issues/251)
 
 # [0.18.0-beta.1](https://github.com/ory/oathkeeper/compare/v0.17.4-beta.1...v0.18.0-beta.1) (2019-08-22)
+
+mutator/id_token: Add claim templating (#246)
 
 ### Documentation
 
@@ -1454,7 +1554,9 @@ No significant changes have been made for this release.
   ([#236](https://github.com/ory/oathkeeper/issues/236))
   ([302c7b8](https://github.com/ory/oathkeeper/commit/302c7b8cec0479db2735440ef336c11ca92675ff))
 
-## [0.17.4-beta.1](https://github.com/ory/oathkeeper/compare/v0.17.3-beta.1...v0.17.4-beta.1) (2019-08-09)
+# [0.17.4-beta.1](https://github.com/ory/oathkeeper/compare/v0.17.3-beta.1...v0.17.4-beta.1) (2019-08-09)
+
+Add sprig template library (#235)
 
 ### Documentation
 
@@ -1470,7 +1572,9 @@ No significant changes have been made for this release.
   ([c85c540](https://github.com/ory/oathkeeper/commit/c85c5400000f1c534b99db292273f71c427d368e)),
   closes [#235](https://github.com/ory/oathkeeper/issues/235)
 
-## [0.17.3-beta.1](https://github.com/ory/oathkeeper/compare/v0.17.2-beta.1...v0.17.3-beta.1) (2019-08-03)
+# [0.17.3-beta.1](https://github.com/ory/oathkeeper/compare/v0.17.2-beta.1...v0.17.3-beta.1) (2019-08-03)
+
+rule: Resolve k8s configmap reload issue (#231)
 
 ### Documentation
 
@@ -1485,7 +1589,9 @@ No significant changes have been made for this release.
 - Move back to scratch Docker image
   ([3fa8a50](https://github.com/ory/oathkeeper/commit/3fa8a5078759869c3a3a0521f17b80f246fdd7f4))
 
-## [0.17.2-beta.1](https://github.com/ory/oathkeeper/compare/v0.17.1-beta.1...v0.17.2-beta.1) (2019-08-02)
+# [0.17.2-beta.1](https://github.com/ory/oathkeeper/compare/v0.17.1-beta.1...v0.17.2-beta.1) (2019-08-02)
+
+rules: Support kubernetes configmap reloading (#230)
 
 ### Documentation
 
@@ -1501,7 +1607,11 @@ No significant changes have been made for this release.
   ([#230](https://github.com/ory/oathkeeper/issues/230))
   ([92b769b](https://github.com/ory/oathkeeper/commit/92b769bfdf4d5fd7902e1b5ae1dc63d11de4e0f1))
 
-## [0.17.1-beta.1](https://github.com/ory/oathkeeper/compare/v0.17.0-beta.1...v0.17.1-beta.1) (2019-07-23)
+# [0.17.1-beta.1](https://github.com/ory/oathkeeper/compare/v0.17.0-beta.1...v0.17.1-beta.1) (2019-07-23)
+
+rule: Fix panic on send on closed channel (#225)
+
+Closes #224
 
 ### Documentation
 
@@ -1516,6 +1626,13 @@ No significant changes have been made for this release.
   closes [#224](https://github.com/ory/oathkeeper/issues/224)
 
 # [0.17.0-beta.1](https://github.com/ory/oathkeeper/compare/v0.16.0-beta.5...v0.17.0-beta.1) (2019-07-18)
+
+ci: Automate schema confiugration sync
+
+### Continuous Integration
+
+- Automate schema confiugration sync
+  ([94bcc4f](https://github.com/ory/oathkeeper/commit/94bcc4f611a3d0d5112fb44b7a20f2afc70bb760))
 
 ### Documentation
 
@@ -1539,23 +1656,21 @@ No significant changes have been made for this release.
 - Watch configuration and access rule changes (#217)
   ([a078e89](https://github.com/ory/oathkeeper/commit/a078e891e2fe97bdb6ce8a2264f629a179c9116e)),
   closes [#217](https://github.com/ory/oathkeeper/issues/217):
-
-  > This patch allows oathkeeper to re-load any changes made to the
-  > configuraiton file and/or the access rules to be reloaded without a restart.
-  >
-  > Some configuration keys like serve._, log._, profiling however require a
-  > restart.
-
+  This patch allows oathkeeper to re-load any changes made to the configuraiton
+  file and/or the access rules to be reloaded without a restart.
+  Some configuration keys like serve._, log._, profiling however require a
+  restart.
 - Create FUNDING.yml
   ([d7da8e2](https://github.com/ory/oathkeeper/commit/d7da8e296205e183140c18ba3cc6269334476a2b))
 - Add support for rules in YAML format (#213)
   ([67face6](https://github.com/ory/oathkeeper/commit/67face611b9f19ed9b6606931c9b7a82df769154)),
   closes [#213](https://github.com/ory/oathkeeper/issues/213):
-
-  > This commit adds support for defining access rules in YAML format, in
-  > addition to existing JSON format.
+  This commit adds support for defining access rules in YAML format, in addition
+  to existing JSON format.
 
 # [0.16.0-beta.5](https://github.com/ory/oathkeeper/compare/v0.16.0-beta.4...v0.16.0-beta.5) (2019-06-28)
+
+authenticator: Add cookie session authenticator (#211)
 
 ### Documentation
 
@@ -1579,10 +1694,19 @@ No significant changes have been made for this release.
 - Update config.yaml (#204)
   ([effe9c0](https://github.com/ory/oathkeeper/commit/effe9c025c3a25edf88bc3791ec27cb01e128a1a)),
   closes [#204](https://github.com/ory/oathkeeper/issues/204):
-
-  > There's no DSN in oathkeeper
+  There's no DSN in oathkeeper
 
 # [0.16.0-beta.4](https://github.com/ory/oathkeeper/compare/v0.16.0-beta.3...v0.16.0-beta.4) (2019-05-28)
+
+server: Properly declare negroni middleware (#200)
+
+Previously, negroni.With was mistakenly used to add middleware onto the stack.
+The proper method however is negroni.Use.
+
+This patch fixes the use of negroni.With and resolves issues around logging and
+the decisions endpoint.
+
+Closes #199
 
 ### Documentation
 
@@ -1604,14 +1728,19 @@ No significant changes have been made for this release.
   ([#200](https://github.com/ory/oathkeeper/issues/200))
   ([9d3dc54](https://github.com/ory/oathkeeper/commit/9d3dc54e1350fa74fb126cc4761462e83d86548f)),
   closes [#199](https://github.com/ory/oathkeeper/issues/199):
-
-  > Previously, negroni.With was mistakenly used to add middleware onto the
-  > stack. The proper method however is negroni.Use.
-  >
-  > This patch fixes the use of negroni.With and resolves issues around logging
-  > and the decisions endpoint.
+  Previously, negroni.With was mistakenly used to add middleware onto the stack.
+  The proper method however is negroni.Use.
+  This patch fixes the use of negroni.With and resolves issues around logging
+  and the decisions endpoint.
 
 # [0.16.0-beta.3](https://github.com/ory/oathkeeper/compare/v0.15.2...v0.16.0-beta.3) (2019-05-19)
+
+ci: Use golang for docs task
+
+### Continuous Integration
+
+- Use golang for docs task
+  ([b120c72](https://github.com/ory/oathkeeper/commit/b120c7214d7f11441b0cec7a34517b4403226f5f))
 
 ### Documentation
 
@@ -1641,7 +1770,13 @@ No significant changes have been made for this release.
   ([d31d5be](https://github.com/ory/oathkeeper/commit/d31d5bea5085355960cc051c4bb6b6232a77ac75)),
   closes [#187](https://github.com/ory/oathkeeper/issues/187)
 
-## [0.15.2](https://github.com/ory/oathkeeper/compare/v0.15.1...v0.15.2) (2019-05-04)
+# [0.15.2](https://github.com/ory/oathkeeper/compare/v0.15.1...v0.15.2) (2019-05-04)
+
+cmd/client: Use json rawmessage for arbtrary payloads (#184)
+
+Closes #182
+
+Signed-off-by: Stanislav Zapolsky <stszap@gmail.com>
 
 ### Documentation
 
@@ -1655,7 +1790,11 @@ No significant changes have been made for this release.
   closes [#184](https://github.com/ory/oathkeeper/issues/184)
   [#182](https://github.com/ory/oathkeeper/issues/182)
 
-## [0.15.1](https://github.com/ory/oathkeeper/compare/v0.15.0...v0.15.1) (2019-04-29)
+# [0.15.1](https://github.com/ory/oathkeeper/compare/v0.15.0...v0.15.1) (2019-04-29)
+
+vendor: Add go.sum (#180)
+
+Signed-off-by: aeneasr <aeneas@ory.sh>
 
 ### Unclassified
 
@@ -1663,6 +1802,10 @@ No significant changes have been made for this release.
   ([fc261f0](https://github.com/ory/oathkeeper/commit/fc261f0a340b3bcca56519c2da3042e614f8b6a3))
 
 # [0.15.0](https://github.com/ory/oathkeeper/compare/v0.14.2+oryOS.10...v0.15.0) (2019-04-29)
+
+docker: Remove full tag from build pipeline (#179)
+
+Signed-off-by: aeneasr <aeneas@ory.sh>
 
 ### Documentation
 
@@ -1685,20 +1828,16 @@ No significant changes have been made for this release.
 - Remove sdk dependencies to keto/hydra
   ([#173](https://github.com/ory/oathkeeper/issues/173))
   ([b538e3c](https://github.com/ory/oathkeeper/commit/b538e3c8fdd52be1e61ed88502fce1de7737d4a9)):
-
-  > This patch replaces code-generated SDKs with raw http.Client calls which
-  > reduces dependencies and makes future changes to the keto/hydra SDK easier
-  > to adopt to.
-
+  This patch replaces code-generated SDKs with raw http.Client calls which
+  reduces dependencies and makes future changes to the keto/hydra SDK easier to
+  adopt to.
 - Update CHANGELOG.md
   ([cbccbe2](https://github.com/ory/oathkeeper/commit/cbccbe2f4786f90208dfa93a8b8b47027ca11548))
 - Ensure rule matcher is locked before updating
   ([#159](https://github.com/ory/oathkeeper/issues/159))
   ([6fb7151](https://github.com/ory/oathkeeper/commit/6fb715161370382b384ab2e0cb7ec64ca425f16a)):
-
-  > Lock CachedMatcher before rules are updated when HTTPMatcher refreshes to
-  > avoid concurrent map iteration and map write errors.
-
+  Lock CachedMatcher before rules are updated when HTTPMatcher refreshes to
+  avoid concurrent map iteration and map write errors.
 - Improve debugability of JWT authenticator
   ([#156](https://github.com/ory/oathkeeper/issues/156))
   ([8441bd5](https://github.com/ory/oathkeeper/commit/8441bd52dc567de04b8b4eb9b4655aaf45b90f03))
@@ -1721,20 +1860,42 @@ No significant changes have been made for this release.
   ([#162](https://github.com/ory/oathkeeper/issues/162))
   ([eebc2f4](https://github.com/ory/oathkeeper/commit/eebc2f44e3e42b7af653f91d9345111e0a280401)),
   closes [#138](https://github.com/ory/oathkeeper/issues/138):
+  Previously, the JWT authenticator only used the "scope" claim to retrieve
+  scope values from a JWT. Now, "scp", "scope", "scopes" are supported as string
+  arrays and strings separated by spaces.
 
-  > Previously, the JWT authenticator only used the "scope" claim to retrieve
-  > scope values from a JWT. Now, "scp", "scope", "scopes" are supported as
-  > string arrays and strings separated by spaces.
+# [0.14.2+oryOS.10](https://github.com/ory/oathkeeper/compare/v0.14.1+oryOS.10...v0.14.2+oryOS.10) (2018-12-13)
 
-## [0.14.2+oryOS.10](https://github.com/ory/oathkeeper/compare/v0.14.1+oryOS.10...v0.14.2+oryOS.10) (2018-12-13)
+ci: Fix docker push arguments in publish task
 
-No significant changes have been made for this release.
+Signed-off-by: aeneasr <aeneas@ory.sh>
 
-## [0.14.1+oryOS.10](https://github.com/ory/oathkeeper/compare/v0.14.0+oryOS.10...v0.14.1+oryOS.10) (2018-12-13)
+### Continuous Integration
 
-No significant changes have been made for this release.
+- Fix docker push arguments in publish task
+  ([62415a1](https://github.com/ory/oathkeeper/commit/62415a1c36f6a335f02adf272cb0e50eb1691f89))
+
+# [0.14.1+oryOS.10](https://github.com/ory/oathkeeper/compare/v0.14.0+oryOS.10...v0.14.1+oryOS.10) (2018-12-13)
+
+ci: Fix docker release task
+
+Signed-off-by: aeneasr <aeneas@ory.sh>
+
+### Continuous Integration
+
+- Fix docker release task
+  ([893385b](https://github.com/ory/oathkeeper/commit/893385b10f26ffd9933f4d66c4187ca59d2f3f47))
 
 # [0.14.0+oryOS.10](https://github.com/ory/oathkeeper/compare/v0.11.12...v0.14.0+oryOS.10) (2018-12-13)
+
+ci: Fix circle misconfiguration
+
+Signed-off-by: aeneasr <aeneas@ory.sh>
+
+### Continuous Integration
+
+- Fix circle misconfiguration
+  ([a00ce64](https://github.com/ory/oathkeeper/commit/a00ce64e0bf5890192808f0edb1879caaa811742))
 
 ### Documentation
 
@@ -1860,58 +2021,46 @@ No significant changes have been made for this release.
 - Add endpoint for answering access requests directly
   ([d211641](https://github.com/ory/oathkeeper/commit/d2116410edf1f5089427858727f155bc0aa4313c)),
   closes [#42](https://github.com/ory/oathkeeper/issues/42):
-
-  > This patch adds endpoint `/judge` to `oathkeeper serve api`. The `/judge`
-  > endpoint mimics the behavior of `oathkeeper serve proxy` but instead of
-  > forwarding the request to the upstream server, the endpoint answers directly
-  > with a HTTP response.
-  >
-  > The HTTP response returns status code 200 if the request should be allowed
-  > and any other status code (e.g. 401, 403) if not.
-  >
-  > Assuming you are making the following request:
-  >
-  > ```
-  > PUT /judge/my-service/whatever HTTP/1.1
-  > Host: oathkeeper-api:4456
-  > User-Agent: curl/7.54.0
-  > Authorization: bearer some-token
-  > Accept: */*
-  > Content-Type: application/json
-  > Content-Length: 0
-  > ```
-  >
-  > And you have a rule which allows token `some-bearer` to access
-  > `PUT /my-service/whatever` and you have a credentials issuer which does not
-  > modify the Authorization header, the response will be:
-  >
-  > ```
-  > HTTP/1.1 200 OK
-  > Authorization: bearer-sometoken
-  > Content-Length: 0
-  > Connection: Closed
-  > ```
-  >
-  > If the rule denies the request, the response will be, for example:
-  >
-  > ```
-  > HTTP/1.1 401 OK
-  > Content-Length: 0
-  > Connection: Closed
-  > ```
-
+  This patch adds endpoint `/judge` to `oathkeeper serve api`. The `/judge`
+  endpoint mimics the behavior of `oathkeeper serve proxy` but instead of
+  forwarding the request to the upstream server, the endpoint answers directly
+  with a HTTP response.
+  The HTTP response returns status code 200 if the request should be allowed and
+  any other status code (e.g. 401, 403) if not.
+  Assuming you are making the following request:
+  ```
+  PUT /judge/my-service/whatever HTTP/1.1
+  Host: oathkeeper-api:4456
+  User-Agent: curl/7.54.0
+  Authorization: bearer some-token
+  Accept: */*
+  Content-Type: application/json
+  Content-Length: 0
+  ```
+  And you have a rule which allows token `some-bearer` to access
+  `PUT /my-service/whatever` and you have a credentials issuer which does not
+  modify the Authorization header, the response will be:
+  ```
+  HTTP/1.1 200 OK
+  Authorization: bearer-sometoken
+  Content-Length: 0
+  Connection: Closed
+  ```
+  If the rule denies the request, the response will be, for example:
+  ```
+  HTTP/1.1 401 OK
+  Content-Length: 0
+  Connection: Closed
+  ```
 - Add headers credentials issuer
   ([b084c32](https://github.com/ory/oathkeeper/commit/b084c3271ab8ca71c9fe766de030572c69057671))
 - Add http proxy timeout config
   ([#132](https://github.com/ory/oathkeeper/issues/132))
   ([b3718ce](https://github.com/ory/oathkeeper/commit/b3718ce56d4bcfe4610806ae6b15382226adab75)):
-
-  > Add environment parameters (and description) to configure timeout settings
-  > of a server handled proxy requests.
-  >
-  > It will help prevent a case of unexpected closing a client connection if an
-  > upstream request is executing more than default timeout.
-
+  Add environment parameters (and description) to configure timeout settings of
+  a server handled proxy requests.
+  It will help prevent a case of unexpected closing a client connection if an
+  upstream request is executing more than default timeout.
 - Add JWT authenticator
   ([61625bc](https://github.com/ory/oathkeeper/commit/61625bccebe0b478b980c66a29894dc1ffe48b0a))
 - Add NodeJS SDK ([#94](https://github.com/ory/oathkeeper/issues/94))
@@ -1924,12 +2073,10 @@ No significant changes have been made for this release.
   ([ed2f983](https://github.com/ory/oathkeeper/commit/ed2f9836c6ff2e496b4cbe300d7cee4f1ce5c12e))
 - Adds validator for rules ([#77](https://github.com/ory/oathkeeper/issues/77))
   ([f450697](https://github.com/ory/oathkeeper/commit/f45069711b2aa5ed3ace6361a1bc8e9115a76406)):
-
-  > This patch adds an input validator for rules which should prevent accidental
-  > typos or similar issues when creating a rule. Additionally, no
-  > invalid/unconfigured handlers (authorizers, credential issuers,
-  > authenticators) can be used.
-
+  This patch adds an input validator for rules which should prevent accidental
+  typos or similar issues when creating a rule. Additionally, no
+  invalid/unconfigured handlers (authorizers, credential issuers,
+  authenticators) can be used.
 - Align TLS options with hydra
   ([#114](https://github.com/ory/oathkeeper/issues/114))
   ([c763152](https://github.com/ory/oathkeeper/commit/c7631528afc1e60ffed61a5b5e101079224e751b))
@@ -1949,9 +2096,7 @@ No significant changes have been made for this release.
 - Disable cors per default
   ([#107](https://github.com/ory/oathkeeper/issues/107))
   ([c5ab0c3](https://github.com/ory/oathkeeper/commit/c5ab0c3175b336bb8bea3b919cae57c838262ab4)):
-
-  > This patch introduces CORS_ENABLED which defaults to "false".
-
+  This patch introduces CORS_ENABLED which defaults to "false".
 - Doesn't fatal if no ORY Hydra is unresponsive.
   ([#66](https://github.com/ory/oathkeeper/issues/66))
   ([181e9ac](https://github.com/ory/oathkeeper/commit/181e9acf9bdc9adc05e6718df53b7fa1ff539c41)),
@@ -1973,10 +2118,8 @@ No significant changes have been made for this release.
   ([#108](https://github.com/ory/oathkeeper/issues/108))
   ([296e012](https://github.com/ory/oathkeeper/commit/296e01254b50b645fae67e51aa668d39652b0778)),
   closes [#101](https://github.com/ory/oathkeeper/issues/101):
-
-  > This patch improves compatibility with ORY Hydra 1.0.0-beta.8 and updates
-  > vendored dependencies.
-
+  This patch improves compatibility with ORY Hydra 1.0.0-beta.8 and updates
+  vendored dependencies.
 - Improve hydra integration tests
   ([e8b7a58](https://github.com/ory/oathkeeper/commit/e8b7a586c5fcb86efddf57d4f2f97a0ff915b869))
 - Improve refresh subroutines
@@ -2002,11 +2145,9 @@ No significant changes have been made for this release.
 - Properly handle conflicts on PUT and POST
   ([83b591d](https://github.com/ory/oathkeeper/commit/83b591d8cf3d180ad9d48a72bd92ffdb3a8192ac)),
   closes [#38](https://github.com/ory/oathkeeper/issues/38):
-
-  > Previously, PUT and POST did not result in errors (409) when non-existing
-  > resources were modified, or existing resources were created. This patch
-  > resolves that.
-
+  Previously, PUT and POST did not result in errors (409) when non-existing
+  resources were modified, or existing resources were created. This patch
+  resolves that.
 - Refactors Oathkeeper into new ecosystem
   ([#60](https://github.com/ory/oathkeeper/issues/60))
   ([7acfbca](https://github.com/ory/oathkeeper/commit/7acfbcaca36645a984baded2dc3cbb689154ef8c))
@@ -2062,10 +2203,8 @@ No significant changes have been made for this release.
 - Resolves an issue with cached matchers
   ([951da25](https://github.com/ory/oathkeeper/commit/951da251e3e862f2d0a1e5076c028a481f0235dd)),
   closes [#73](https://github.com/ory/oathkeeper/issues/73):
-
-  > This patch resolves an issue where updates would not properly propagate.
-  > This caused deleted rules to still be available in the proxy.
-
+  This patch resolves an issue where updates would not properly propagate. This
+  caused deleted rules to still be available in the proxy.
 - Resolves issues with broken tests
   ([6604045](https://github.com/ory/oathkeeper/commit/6604045191446baca03791940ddf746aed4799d1))
 - Resolves naming issues and updates readme
@@ -2079,24 +2218,21 @@ No significant changes have been made for this release.
 - Reduces setup complexity by making strategies configurable
   ([6626f8f](https://github.com/ory/oathkeeper/commit/6626f8f2aa98f8ee05e5b1f63c1b698083f9ae78)),
   closes [#71](https://github.com/ory/oathkeeper/issues/71):
-
-  > This patch adds another ID Token signing algorithm (HS256) which is easier
-  > to set up as it does not rely on ORY Hydra but instead on a shared secret.
-  >
-  > Additionally the ability to specify which ID Token singing algorithm to use
-  > has been added. Environmental variables to configure the behvaiour have been
-  > added as well.
-  >
-  > Further, the ORY Keto Warden Authorizer strategy is now optional and
-  > disabled when the environment variable `AUTHORIZER_KETO_WARDEN_KETO_URL` is
-  > empty.
-
+  This patch adds another ID Token signing algorithm (HS256) which is easier to
+  set up as it does not rely on ORY Hydra but instead on a shared secret.
+  Additionally the ability to specify which ID Token singing algorithm to use
+  has been added. Environmental variables to configure the behvaiour have been
+  added as well.
+  Further, the ORY Keto Warden Authorizer strategy is now optional and disabled
+  when the environment variable `AUTHORIZER_KETO_WARDEN_KETO_URL` is empty.
 - Updates to ORY Hydra v1.0.0-beta.2
   ([e4c9f2e](https://github.com/ory/oathkeeper/commit/e4c9f2eeed41ab8deeb54f2137ea1b2d90a3bdc3))
 - Tells linguist to ignore SDK files
   ([ace7f34](https://github.com/ory/oathkeeper/commit/ace7f3411f882c6e89bef7800fb2b700e51cd5f6))
 
-## [0.11.12](https://github.com/ory/oathkeeper/compare/v0.0.29...v0.11.12) (2018-05-07)
+# [0.11.12](https://github.com/ory/oathkeeper/compare/v0.0.29...v0.11.12) (2018-05-07)
+
+Introduces new versioning number to match ORY Hydra
 
 ### Documentation
 
@@ -2130,9 +2266,7 @@ No significant changes have been made for this release.
 - Updates execution instructions
   ([#56](https://github.com/ory/oathkeeper/issues/56))
   ([3bcfd8b](https://github.com/ory/oathkeeper/commit/3bcfd8b1b91df97f78eb6e7b9bb2df7ba398b158)):
-
-  > Adjusting run script to respect env variables
-
+  Adjusting run script to respect env variables
 - Updates README.md ([#58](https://github.com/ory/oathkeeper/issues/58))
   ([bdb542f](https://github.com/ory/oathkeeper/commit/bdb542fcb6006c218f499793f0e44ce30f79cf2a))
 - Updates swagger docs
@@ -2146,10 +2280,8 @@ No significant changes have been made for this release.
   ([00b51b7](https://github.com/ory/oathkeeper/commit/00b51b7a71089d04a4b3005e5fd15d5e9db22939))
 - Corrects logging typo ([#52](https://github.com/ory/oathkeeper/issues/52))
   ([d415291](https://github.com/ory/oathkeeper/commit/d41529123a756cd202b2216a0aa746e137e72e5e)):
-
-  > This corrects logging from 'oahtkeeper-proxy' to 'oathkeeper-proxy' in,
-  > e.g., the proxy latency logline.
-
+  This corrects logging from 'oahtkeeper-proxy' to 'oathkeeper-proxy' in, e.g.,
+  the proxy latency logline.
 - Updates hydra sdk mock
   ([2ff8032](https://github.com/ory/oathkeeper/commit/2ff8032f9362a8ef5d85692ce49d425bfc18f2f0))
 - Updates hydra to 0.11.6
@@ -2165,7 +2297,9 @@ No significant changes have been made for this release.
 - Updates README.md
   ([c9340dc](https://github.com/ory/oathkeeper/commit/c9340dc94d1b6aec4825c8a2ccf423aee1a5fd3b))
 
-## [0.0.29](https://github.com/ory/oathkeeper/compare/v0.0.28...v0.0.29) (2017-12-19)
+# [0.0.29](https://github.com/ory/oathkeeper/compare/v0.0.28...v0.0.29) (2017-12-19)
+
+Adds use field to well known (#48)
 
 ### Unclassified
 
@@ -2173,7 +2307,11 @@ No significant changes have been made for this release.
   ([f7353ea](https://github.com/ory/oathkeeper/commit/f7353ea1de25c37f58b9e7532e06210ea575bc29)),
   closes [#48](https://github.com/ory/oathkeeper/issues/48)
 
-## [0.0.28](https://github.com/ory/oathkeeper/compare/v0.0.27...v0.0.28) (2017-12-19)
+# [0.0.28](https://github.com/ory/oathkeeper/compare/v0.0.27...v0.0.28) (2017-12-19)
+
+Replaces key discovery with well-known feature (#46)
+
+Closes #43
 
 ### Unclassified
 
@@ -2182,14 +2320,18 @@ No significant changes have been made for this release.
   closes [#46](https://github.com/ory/oathkeeper/issues/46)
   [#43](https://github.com/ory/oathkeeper/issues/43)
 
-## [0.0.27](https://github.com/ory/oathkeeper/compare/v0.0.26...v0.0.27) (2017-12-12)
+# [0.0.27](https://github.com/ory/oathkeeper/compare/v0.0.26...v0.0.27) (2017-12-12)
+
+Adds cors capabilities to management server
 
 ### Unclassified
 
 - Adds cors capabilities to management server
   ([6519846](https://github.com/ory/oathkeeper/commit/6519846691737a4f8ddfb5c55186d1b0c26db8ad))
 
-## [0.0.26](https://github.com/ory/oathkeeper/compare/v0.0.25...v0.0.26) (2017-12-11)
+# [0.0.26](https://github.com/ory/oathkeeper/compare/v0.0.25...v0.0.26) (2017-12-11)
+
+Adds hydra.introspect to required tokens
 
 ### Unclassified
 
@@ -2198,14 +2340,18 @@ No significant changes have been made for this release.
 - Fixes broken image link in docs
   ([1aa2404](https://github.com/ory/oathkeeper/commit/1aa2404b9fa88e69b6e18832f1532978012dba27))
 
-## [0.0.25](https://github.com/ory/oathkeeper/compare/v0.0.24...v0.0.25) (2017-11-28)
+# [0.0.25](https://github.com/ory/oathkeeper/compare/v0.0.24...v0.0.25) (2017-11-28)
+
+Add extra data from token introspection to session
 
 ### Unclassified
 
 - Add extra data from token introspection to session
   ([ce8f9f2](https://github.com/ory/oathkeeper/commit/ce8f9f265bad2d60b467d788d4314270c549a461))
 
-## [0.0.24](https://github.com/ory/oathkeeper/compare/v0.0.23...v0.0.24) (2017-11-26)
+# [0.0.24](https://github.com/ory/oathkeeper/compare/v0.0.23...v0.0.24) (2017-11-26)
+
+Replaces LogError with direct error logging
 
 ### Unclassified
 
@@ -2220,7 +2366,9 @@ No significant changes have been made for this release.
 - Use oathkeeper public url as issuer
   ([1e5ae00](https://github.com/ory/oathkeeper/commit/1e5ae00f457aafdd7a284a388704ce954b3339b1))
 
-## [0.0.23](https://github.com/ory/oathkeeper/compare/v0.0.22...v0.0.23) (2017-11-24)
+# [0.0.23](https://github.com/ory/oathkeeper/compare/v0.0.22...v0.0.23) (2017-11-24)
+
+Print formatted output string in rule management CLI (#35)
 
 ### Documentation
 
@@ -2238,7 +2386,11 @@ No significant changes have been made for this release.
   ([c6bf7d1](https://github.com/ory/oathkeeper/commit/c6bf7d15e8b935b6ed64551391f9aa23968cf4d9)),
   closes [#32](https://github.com/ory/oathkeeper/issues/32)
 
-## [0.0.22](https://github.com/ory/oathkeeper/compare/v0.0.21...v0.0.22) (2017-11-20)
+# [0.0.22](https://github.com/ory/oathkeeper/compare/v0.0.21...v0.0.22) (2017-11-20)
+
+Renames bypass values for better clarity
+
+Closes #13 Closes #29
 
 ### Unclassified
 
@@ -2247,14 +2399,18 @@ No significant changes have been made for this release.
   closes [#13](https://github.com/ory/oathkeeper/issues/13)
   [#29](https://github.com/ory/oathkeeper/issues/29)
 
-## [0.0.21](https://github.com/ory/oathkeeper/compare/v0.0.20...v0.0.21) (2017-11-19)
+# [0.0.21](https://github.com/ory/oathkeeper/compare/v0.0.20...v0.0.21) (2017-11-19)
+
+Request hydra.keys scope and fix panic
 
 ### Unclassified
 
 - Request hydra.keys scope and fix panic
   ([546b2cf](https://github.com/ory/oathkeeper/commit/546b2cff5e7cea306a60963f646ad4522f5bfd15))
 
-## [0.0.20](https://github.com/ory/oathkeeper/compare/v0.0.19...v0.0.20) (2017-11-18)
+# [0.0.20](https://github.com/ory/oathkeeper/compare/v0.0.19...v0.0.20) (2017-11-18)
+
+docs: Improve swagger documentation
 
 ### Documentation
 
@@ -2280,14 +2436,18 @@ No significant changes have been made for this release.
 - Ignore gitbook output directory
   ([580b94f](https://github.com/ory/oathkeeper/commit/580b94fa921363782e02d66981172659dc76dadc))
 
-## [0.0.19](https://github.com/ory/oathkeeper/compare/v0.0.18...v0.0.19) (2017-11-13)
+# [0.0.19](https://github.com/ory/oathkeeper/compare/v0.0.18...v0.0.19) (2017-11-13)
+
+evaluator: Use full request URL
 
 ### Unclassified
 
 - Use full request URL
   ([2b4b149](https://github.com/ory/oathkeeper/commit/2b4b1492ce3356a7a251e241a308669517ddba3e))
 
-## [0.0.18](https://github.com/ory/oathkeeper/compare/v0.0.17...v0.0.18) (2017-11-13)
+# [0.0.18](https://github.com/ory/oathkeeper/compare/v0.0.17...v0.0.18) (2017-11-13)
+
+evaluator: Improve audit capabilities
 
 ### Unclassified
 
@@ -2297,7 +2457,9 @@ No significant changes have been made for this release.
   ([8fe9e9a](https://github.com/ory/oathkeeper/commit/8fe9e9a5bd7b951b93c4966f8585945074ff104d)),
   closes [#22](https://github.com/ory/oathkeeper/issues/22)
 
-## [0.0.17](https://github.com/ory/oathkeeper/compare/v0.0.16...v0.0.17) (2017-11-12)
+# [0.0.17](https://github.com/ory/oathkeeper/compare/v0.0.16...v0.0.17) (2017-11-12)
+
+Introduces surrogate_id to SQLManager (#21)
 
 ### Unclassified
 
@@ -2305,7 +2467,9 @@ No significant changes have been made for this release.
   ([fbe272f](https://github.com/ory/oathkeeper/commit/fbe272f36e64c4e15758a34f62cc3d03e63c7c64)),
   closes [#21](https://github.com/ory/oathkeeper/issues/21)
 
-## [0.0.16](https://github.com/ory/oathkeeper/compare/v0.0.15...v0.0.16) (2017-11-12)
+# [0.0.16](https://github.com/ory/oathkeeper/compare/v0.0.15...v0.0.16) (2017-11-12)
+
+Replace MatchesPath with MatchesURL (#20)
 
 ### Unclassified
 
@@ -2313,7 +2477,9 @@ No significant changes have been made for this release.
   ([4ee776c](https://github.com/ory/oathkeeper/commit/4ee776cc08201f91dfdab5c0c259c4cfffd88ddb)),
   closes [#20](https://github.com/ory/oathkeeper/issues/20)
 
-## [0.0.15](https://github.com/ory/oathkeeper/compare/v0.0.14...v0.0.15) (2017-11-09)
+# [0.0.15](https://github.com/ory/oathkeeper/compare/v0.0.14...v0.0.15) (2017-11-09)
+
+Add HTTPS capabilities and document proxy/management commands (#19)
 
 ### Unclassified
 
@@ -2321,7 +2487,9 @@ No significant changes have been made for this release.
   ([98ef623](https://github.com/ory/oathkeeper/commit/98ef623e64a58afa99fcb2db67bf5c514c86334c)),
   closes [#19](https://github.com/ory/oathkeeper/issues/19)
 
-## [0.0.14](https://github.com/ory/oathkeeper/compare/v0.0.13...v0.0.14) (2017-11-07)
+# [0.0.14](https://github.com/ory/oathkeeper/compare/v0.0.13...v0.0.14) (2017-11-07)
+
+Make refresh_delay configurable and skip it on boot (#18)
 
 ### Unclassified
 
@@ -2329,7 +2497,9 @@ No significant changes have been made for this release.
   ([4863a82](https://github.com/ory/oathkeeper/commit/4863a823d8f510e5c82d7f8c34f5753f18861a03)),
   closes [#18](https://github.com/ory/oathkeeper/issues/18)
 
-## [0.0.13](https://github.com/ory/oathkeeper/compare/v0.0.12...v0.0.13) (2017-11-07)
+# [0.0.13](https://github.com/ory/oathkeeper/compare/v0.0.12...v0.0.13) (2017-11-07)
+
+Store rules path match in plaintext (#17)
 
 ### Unclassified
 
@@ -2337,7 +2507,9 @@ No significant changes have been made for this release.
   ([6570b5d](https://github.com/ory/oathkeeper/commit/6570b5d7f3169f63f9d8c31d844660f5394fc37a)),
   closes [#17](https://github.com/ory/oathkeeper/issues/17)
 
-## [0.0.12](https://github.com/ory/oathkeeper/compare/v0.0.11...v0.0.12) (2017-11-07)
+# [0.0.12](https://github.com/ory/oathkeeper/compare/v0.0.11...v0.0.12) (2017-11-07)
+
+Use ladon regex compiler for matches (#16)
 
 ### Unclassified
 
@@ -2349,7 +2521,9 @@ No significant changes have been made for this release.
 - Run docker image in test
   ([12b5f13](https://github.com/ory/oathkeeper/commit/12b5f13ad997b7c427505bffa1ad7e33aa2de684))
 
-## [0.0.11](https://github.com/ory/oathkeeper/compare/v0.0.10...v0.0.11) (2017-11-06)
+# [0.0.11](https://github.com/ory/oathkeeper/compare/v0.0.10...v0.0.11) (2017-11-06)
+
+Move gatekeeper to $PATH in docker image
 
 ### Unclassified
 
@@ -2358,7 +2532,9 @@ No significant changes have been made for this release.
 - Force docker version 17.10 in circle
   ([3927a78](https://github.com/ory/oathkeeper/commit/3927a789d7b93849fb1b2d0edbccf45781c9030b))
 
-## [0.0.10](https://github.com/ory/oathkeeper/compare/v0.0.9...v0.0.10) (2017-11-06)
+# [0.0.10](https://github.com/ory/oathkeeper/compare/v0.0.9...v0.0.10) (2017-11-06)
+
+Add ssl certificates to scratch image
 
 ### Unclassified
 
@@ -2367,40 +2543,53 @@ No significant changes have been made for this release.
 - Build static binary within docker
   ([4d6d8bf](https://github.com/ory/oathkeeper/commit/4d6d8bf22f7aea16fa21e4fee99c829b9e76de0d))
 
-## [0.0.9](https://github.com/ory/oathkeeper/compare/v0.0.8...v0.0.9) (2017-11-06)
+# [0.0.9](https://github.com/ory/oathkeeper/compare/v0.0.8...v0.0.9) (2017-11-06)
+
+Build binary statically with CGO disabled
 
 ### Unclassified
 
 - Build binary statically with CGO disabled
   ([6dd3761](https://github.com/ory/oathkeeper/commit/6dd376171e3c1219de54984a9a27ac44d76d897b))
 
-## [0.0.8](https://github.com/ory/oathkeeper/compare/v0.0.7...v0.0.8) (2017-11-06)
+# [0.0.8](https://github.com/ory/oathkeeper/compare/v0.0.7...v0.0.8) (2017-11-06)
+
+Make oathkeeper binary executable#
 
 ### Unclassified
 
 - Make oathkeeper binary executable#
   ([9e24888](https://github.com/ory/oathkeeper/commit/9e24888654675208f96913e6c11233b598e78815))
 
-## [0.0.7](https://github.com/ory/oathkeeper/compare/v0.0.6...v0.0.7) (2017-11-06)
+# [0.0.7](https://github.com/ory/oathkeeper/compare/v0.0.6...v0.0.7) (2017-11-06)
+
+Build oathekeeper docker image statically (#14)
+
+- Build oathekeeper docker image statically
+
+- Build oathekeeper docker image statically
 
 ### Unclassified
 
 - Build oathekeeper docker image statically (#14)
   ([dbd2037](https://github.com/ory/oathkeeper/commit/dbd2037b56b6104b79607b20394be0e9a30e67e1)),
   closes [#14](https://github.com/ory/oathkeeper/issues/14):
+  - Build oathekeeper docker image statically
 
-  > - Build oathekeeper docker image statically
-  >
-  > - Build oathekeeper docker image statically
+  - Build oathekeeper docker image statically
 
-## [0.0.6](https://github.com/ory/oathkeeper/compare/v0.0.5...v0.0.6) (2017-11-03)
+# [0.0.6](https://github.com/ory/oathkeeper/compare/v0.0.5...v0.0.6) (2017-11-03)
+
+Added serve all command
 
 ### Unclassified
 
 - Added serve all command
   ([dfc071c](https://github.com/ory/oathkeeper/commit/dfc071c02d9fa6fda9832bd35fdc4b1eb96c63c6))
 
-## [0.0.5](https://github.com/ory/oathkeeper/compare/v0.0.4...v0.0.5) (2017-11-01)
+# [0.0.5](https://github.com/ory/oathkeeper/compare/v0.0.4...v0.0.5) (2017-11-01)
+
+Remove goveralls from circle build
 
 ### Unclassified
 
@@ -2418,7 +2607,9 @@ No significant changes have been made for this release.
   ([971d020](https://github.com/ory/oathkeeper/commit/971d02082956969c9cd6cfcb5afb257606ddeb6b)),
   closes [#7](https://github.com/ory/oathkeeper/issues/7)
 
-## [0.0.4](https://github.com/ory/oathkeeper/compare/v0.0.3...v0.0.4) (2017-10-21)
+# [0.0.4](https://github.com/ory/oathkeeper/compare/v0.0.3...v0.0.4) (2017-10-21)
+
+Return arrays instead of null on rule creation (#6)
 
 ### Unclassified
 
@@ -2429,7 +2620,9 @@ No significant changes have been made for this release.
   ([76e58f2](https://github.com/ory/oathkeeper/commit/76e58f2033e86c522875faafc77717f31274b4f7)),
   closes [#5](https://github.com/ory/oathkeeper/issues/5)
 
-## [0.0.3](https://github.com/ory/oathkeeper/compare/v0.0.2...v0.0.3) (2017-10-18)
+# [0.0.3](https://github.com/ory/oathkeeper/compare/v0.0.2...v0.0.3) (2017-10-18)
+
+Force linefeed for shell scripts
 
 ### Unclassified
 
@@ -2438,7 +2631,9 @@ No significant changes have been made for this release.
 - When introspection fails return unauthorized
   ([f5295b4](https://github.com/ory/oathkeeper/commit/f5295b484fd9430bcb0d5333ca9b395f88812d62))
 
-## [0.0.2](https://github.com/ory/oathkeeper/compare/v0.0.1...v0.0.2) (2017-10-12)
+# [0.0.2](https://github.com/ory/oathkeeper/compare/v0.0.1...v0.0.2) (2017-10-12)
+
+cmd: remove unnecessary scope hydra.warden.\*
 
 ### Unclassified
 
@@ -2447,7 +2642,9 @@ No significant changes have been made for this release.
 - Remove unnecessary scope hydra.warden.\*
   ([2214498](https://github.com/ory/oathkeeper/commit/2214498c477b8cfb739c0326437d684b291d16eb))
 
-## [0.0.1](https://github.com/ory/oathkeeper/compare/072f5e4321ac3a143544cf70da337f0734a86483...v0.0.1) (2017-10-10)
+# [0.0.1](https://github.com/ory/oathkeeper/compare/072f5e4321ac3a143544cf70da337f0734a86483...v0.0.1) (2017-10-10)
+
+travis: add goveralls report submission (#2)
 
 ### Documentation
 
