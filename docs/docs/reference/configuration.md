@@ -1538,6 +1538,46 @@ serve:
       #
       read: 5s
 
+    ## HTTP Upstream ##
+    #
+    # Control the HTTP upstream.
+    #
+    upstream:
+      ## Append Certificate To Root CA ##
+      #
+      # The path to a certificate file to append to the Root Certificate Authority for the upstream connection. Use this to accept self-signed certificates on the upstream only, keeping the host system certificate authority unaltered.
+      #
+      # Default value: ""
+      #
+      # Examples:
+      # - self-signed.crt      
+      #
+      # Set this value using environment variables on
+      # - Linux/macOS:
+      #    $ export SERVE_PROXY_UPSTREAM_CA_APPEND_CRT_PATH=<value>
+      # - Windows Command Line (CMD):
+      #    > set SERVE_PROXY_UPSTREAM_CA_APPEND_CRT_PATH=<value>
+      #
+      ca_append_crt_path: ""
+
+      ## CA Refresh Frequency ##
+      #
+      # The interval at which to test if the upstream transport certificate changed. Use 0 to disable test.
+      #
+      # Default value: 1000
+      #
+      # Examples:
+      # - 1000
+      # - 0
+      #
+      # Set this value using environment variables on
+      # - Linux/macOS:
+      #    $ export SERVE_PROXY_UPSTREAM_CA_REFRESH_FREQUENCY=<value>
+      # - Windows Command Line (CMD):
+      #    > set SERVE_PROXY_UPSTREAM_CA_REFRESH_FREQUENCY=<value>
+      #
+      ca_refresh_frequency: 1000
+
     ## Cross Origin Resource Sharing (CORS) ##
     #
     # Configure [Cross Origin Resource Sharing (CORS)](http://www.w3.org/TR/cors/) using the following options.

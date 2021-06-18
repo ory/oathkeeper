@@ -22,12 +22,14 @@ package proxy_test
 
 import (
 	"context"
+	"encoding/pem"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"net/http/httputil"
 	"net/url"
+	"os"
 	"strings"
 	"testing"
 
@@ -427,6 +429,61 @@ func TestConfigureBackendURL(t *testing.T) {
 			assert.EqualValues(t, tc.eHost, tc.r.Host)
 		})
 	}
+}
+
+func TestUpstreamAppendCaCertToRootCa(t *testing.T) {
+	backend := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprintln(w, "Hello from TLS Upstream")
+	}))
+	defer backend.Close()
+
+	crtBytes := backend.Certificate().Raw
+
+	tmpfile, err := ioutil.TempFile("", "certificate.crt")
+	require.NoError(t, err)
+	defer os.Remove(tmpfile.Name())
+	defer tmpfile.Close()
+
+	err = pem.Encode(tmpfile, &pem.Block{Type: "CERTIFICATE", Bytes: crtBytes})
+	require.NoError(t, err)
+
+	conf := internal.NewConfigurationWithDefaults()
+	reg := internal.NewRegistry(conf)
+
+	d := reg.Proxy()
+	ts := httptest.NewServer(&httputil.ReverseProxy{Director: d.Director, Transport: d})
+	defer ts.Close()
+
+	viper.Set(configuration.ViperKeyAuthenticatorNoopIsEnabled, true)
+	viper.Set(configuration.ViperKeyAuthorizerAllowIsEnabled, true)
+	viper.Set(configuration.ViperKeyMutatorNoopIsEnabled, true)
+	viper.Set(configuration.ViperKeyProxyUpstreamCaAppendCrtPath, tmpfile.Name())
+
+	url := ts.URL + "/test-tls"
+
+	reg.RuleRepository().(*rule.RepositoryMemory).WithRules([]rule.Rule{
+		rule.Rule{
+			Match:          &rule.Match{Methods: []string{"GET"}, URL: url},
+			Authenticators: []rule.Handler{{Handler: "noop"}},
+			Authorizer:     rule.Handler{Handler: "allow"},
+			Mutators:       []rule.Handler{{Handler: "noop"}},
+			Upstream:       rule.Upstream{URL: backend.URL},
+		},
+	})
+
+	req, err := http.NewRequest("GET", url, nil)
+	require.NoError(t, err)
+
+	res, err := http.DefaultClient.Do(req)
+	require.NoError(t, err)
+
+	response, err := ioutil.ReadAll(res.Body)
+	require.NoError(t, res.Body.Close())
+	require.NoError(t, err)
+
+	assert.True(t, strings.Contains(string(response), "Hello from TLS Upstream"))
+
+	assert.Equal(t, 200, res.StatusCode, "%s", res.Body)
 }
 
 //

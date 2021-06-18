@@ -41,6 +41,7 @@ type proxyRegistry interface {
 
 	ProxyRequestHandler() *RequestHandler
 	RuleMatcher() rule.Matcher
+	UpstreamTransport(r *http.Request) (http.RoundTripper, error)
 }
 
 func NewProxy(r proxyRegistry) *Proxy {
@@ -88,7 +89,18 @@ func (d *Proxy) RoundTrip(r *http.Request) (*http.Response, error) {
 			Header:     rw.header,
 		}, nil
 	} else if err == nil {
-		res, err := http.DefaultTransport.RoundTrip(r)
+
+		transport, err := d.r.UpstreamTransport(r)
+		if err != nil {
+			d.r.Logger().
+				WithError(errors.WithStack(err)).
+				WithField("granted", false).
+				WithFields(fields).
+				Warn("Access request denied because upstream transport creation failed")
+			return nil, err
+		}
+
+		res, err := transport.RoundTrip(r)
 		if err != nil {
 			d.r.Logger().
 				WithError(errors.WithStack(err)).
