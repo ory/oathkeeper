@@ -236,20 +236,33 @@ authenticators:
 
 ## Client TLS Transport
 
-In case you want to enable TLS connections to services protected by a self-signed certificate you will very likely need to setup your own custom certificates. Through the `client_tls` configuration you can set custom certificates that will be used by oathkeeper to connect to other services such as the upstream service, authorizers, authenticators, and mutators. The certificates are cached in memory to reduce latency, you can set the cache expiration conditions through the `cache` configuration or disable caching entirely. NOTE: Caching is enabled by default.
+In case you want to enable TLS connections to services protected by a
+self-signed certificate you will very likely need to setup your own custom
+certificates. Through the `client_tls` configuration you can set custom
+certificates that will be used by oathkeeper to connect to other services such
+as the upstream service, authorizers, authenticators, and mutators. The
+certificates are cached in memory to reduce latency, you can set the cache
+expiration conditions through the `cache` configuration or disable caching
+entirely. NOTE: Caching is enabled by default.
 
-Use the `cache.refresh_frequency` to test once every `1000` requests for a certificate file size or modification timestamp change. Setting the value to 0 will disable the refresh on a frequency functionality, but retrain the update on file path change functionality.
+Use the `cache.refresh_frequency` to test once every `1000` requests for a
+certificate file size or modification timestamp change. Setting the value to 0
+will disable the refresh on a frequency functionality, but retrain the update on
+file path change functionality.
 
-Use the `cache.ttl` to force the refresh of certificates once every `5m` regardless of the cache status. Setting this value to 0 will disable forced cache eviction due to an expired time-to-live.
+Use the `cache.ttl` to force the refresh of certificates once every `5m`
+regardless of the cache status. Setting this value to 0 will disable forced
+cache eviction due to an expired time-to-live.
 
 **oathkeeper.yml**
+
 ```yaml
 serve:
   proxy:
     client_tls:
       trusted_certificates:
-        - "/my-certs/certificate-to-append.crt"
-        - "/my-certs/another-certificate.crt"
+        - /my-certs/certificate-to-append.crt
+        - /my-certs/another-certificate.crt
       cache:
         refresh_frequency: 1000
         ttl: 5m

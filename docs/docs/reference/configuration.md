@@ -1550,7 +1550,7 @@ serve:
       # Default value: ""
       #
       # Examples:
-      # - self-signed.crt      
+      # - self-signed.crt
       #
       # Set this value using environment variables on
       # - Linux/macOS:
@@ -1559,8 +1559,8 @@ serve:
       #    > set SERVE_PROXY_CLIENT_TLS_TRUSTED_CERTIFICATES=<value>
       #
       trusted_certificates:
-        - "/my-certs/certificate-to-append.crt"
-        - "/my-certs/another-certificate.crt"
+        - /my-certs/certificate-to-append.crt
+        - /my-certs/another-certificate.crt
 
       ## cache ##
       #

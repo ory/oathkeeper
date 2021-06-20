@@ -9,8 +9,9 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/pkg/errors"
+
+	"github.com/ory/oathkeeper/driver/configuration"
 )
 
 type CertManager struct {
