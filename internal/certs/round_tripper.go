@@ -9,10 +9,14 @@ var _ http.RoundTripper = (*RoundTripper)(nil)
 
 type RoundTripper struct {
 	cm *CertManager
+	tr *http.Transport
 }
 
 func NewRoundTripper(cm *CertManager) *RoundTripper {
-	return &RoundTripper{cm: cm}
+	return &RoundTripper{
+		cm: cm,
+		tr: http.DefaultTransport.(*http.Transport).Clone(),
+	}
 }
 
 func (rt *RoundTripper) RoundTrip(r *http.Request) (*http.Response, error) {
@@ -21,11 +25,10 @@ func (rt *RoundTripper) RoundTrip(r *http.Request) (*http.Response, error) {
 		return nil, err
 	}
 
-	tr := http.DefaultTransport.(*http.Transport).Clone()
-	tr.TLSClientConfig = &tls.Config{
+	rt.tr.TLSClientConfig = &tls.Config{
 		InsecureSkipVerify: false,
 		RootCAs:            pool,
 	}
 
-	return tr.RoundTrip(r)
+	return rt.tr.RoundTrip(r)
 }
