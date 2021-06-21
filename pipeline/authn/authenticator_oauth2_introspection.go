@@ -17,6 +17,7 @@ import (
 	"github.com/opentracing/opentracing-go/ext"
 
 	"github.com/pkg/errors"
+	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/clientcredentials"
 
 	"github.com/ory/go-convenience/stringslice"
@@ -25,6 +26,7 @@ import (
 
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/helper"
+	"github.com/ory/oathkeeper/internal/certs"
 	"github.com/ory/oathkeeper/pipeline"
 )
 
@@ -73,7 +75,11 @@ type AuthenticatorOAuth2Introspection struct {
 }
 
 func NewAuthenticatorOAuth2Introspection(c configuration.Provider, logger *logrusx.Logger) *AuthenticatorOAuth2Introspection {
-	return &AuthenticatorOAuth2Introspection{c: c, logger: logger, clientMap: make(map[string]*http.Client)}
+	return &AuthenticatorOAuth2Introspection{
+		c:         c,
+		logger:    logger,
+		clientMap: make(map[string]*http.Client),
+	}
 }
 
 func (a *AuthenticatorOAuth2Introspection) GetID() string {
@@ -271,7 +277,11 @@ func (a *AuthenticatorOAuth2Introspection) Config(config json.RawMessage) (*Auth
 
 	if !ok {
 		a.logger.Debug("Initializing http client")
-		var rt http.RoundTripper
+
+		tlsTransport := certs.NewRoundTripper(certs.NewCertManager(a.c))
+		tlsClient := &http.Client{Transport: tlsTransport}
+
+		var rt http.RoundTripper = tlsTransport
 		if c.PreAuth != nil && c.PreAuth.Enabled {
 			var ep url.Values
 
@@ -279,13 +289,14 @@ func (a *AuthenticatorOAuth2Introspection) Config(config json.RawMessage) (*Auth
 				ep = url.Values{"audience": {c.PreAuth.Audience}}
 			}
 
+			ctx := context.WithValue(context.Background(), oauth2.HTTPClient, tlsClient)
 			rt = (&clientcredentials.Config{
 				ClientID:       c.PreAuth.ClientID,
 				ClientSecret:   c.PreAuth.ClientSecret,
 				Scopes:         c.PreAuth.Scope,
 				EndpointParams: ep,
 				TokenURL:       c.PreAuth.TokenURL,
-			}).Client(context.Background()).Transport
+			}).Client(ctx).Transport
 		}
 
 		if c.Retry == nil {

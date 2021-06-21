@@ -14,6 +14,7 @@ import (
 
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/helper"
+	"github.com/ory/oathkeeper/internal/certs"
 	"github.com/ory/oathkeeper/pipeline"
 	"github.com/ory/oathkeeper/pipeline/authn"
 	"github.com/ory/oathkeeper/x"
@@ -41,9 +42,12 @@ type AuthorizerRemoteJSON struct {
 
 // NewAuthorizerRemoteJSON creates a new AuthorizerRemoteJSON.
 func NewAuthorizerRemoteJSON(c configuration.Provider) *AuthorizerRemoteJSON {
+	cm := certs.NewCertManager(c)
+	rt := certs.NewRoundTripper(cm)
+
 	return &AuthorizerRemoteJSON{
 		c:      c,
-		client: httpx.NewResilientClientLatencyToleranceSmall(nil),
+		client: httpx.NewResilientClientLatencyToleranceSmall(rt),
 		t:      x.NewTemplate("remote_json"),
 	}
 }

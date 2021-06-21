@@ -31,6 +31,7 @@ import (
 
 	"github.com/dgraph-io/ristretto"
 
+	"github.com/ory/oathkeeper/internal/certs"
 	"github.com/ory/oathkeeper/pipeline/authn"
 	"github.com/ory/oathkeeper/x"
 
@@ -59,7 +60,6 @@ type MutatorHydrator struct {
 	d      mutatorHydratorDependencies
 
 	hydrateCache *ristretto.Cache
-	cacheTTL     *time.Duration
 }
 
 type BasicAuth struct {
@@ -107,7 +107,16 @@ func NewMutatorHydrator(c configuration.Provider, d mutatorHydratorDependencies)
 		// This is a best-practice value.
 		BufferItems: 64,
 	})
-	return &MutatorHydrator{c: c, d: d, client: httpx.NewResilientClientLatencyToleranceSmall(nil), hydrateCache: cache}
+
+	cm := certs.NewCertManager(c)
+	rt := certs.NewRoundTripper(cm)
+
+	return &MutatorHydrator{
+		c:            c,
+		d:            d,
+		client:       httpx.NewResilientClientLatencyToleranceSmall(rt),
+		hydrateCache: cache,
+	}
 }
 
 func (a *MutatorHydrator) GetID() string {

@@ -1212,6 +1212,52 @@
             "timeout": {
               "$ref": "#/definitions/serverTimeout"
             },
+            "client_tls": {
+              "type": "object",
+              "title": "Client TLS",
+              "additionalProperties": false,
+              "properties": {
+                "trusted_certificates": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "default": null,
+                  "examples": [
+                    [
+                      "./self-signed.crt"
+                    ]
+                  ],
+                  "title": "Trusted Certificates",
+                  "description": "The array of files containing the certificates to trust when opening new TLS connections."
+                },
+                "cache": {
+                  "type": "object",
+                  "title": "Certificates Cache",
+                  "additionalProperties": false,
+                  "properties": {
+                    "refresh_frequency": {
+                      "type": "integer",
+                      "default": 1000,
+                      "title": "Refresh Frequency",
+                      "description": "Test if transport needs certificate refresh once every 1000 requests."
+                    },
+                    "ttl": {
+                      "type": "string",
+                      "title": "Expire After",
+                      "description": "Sets the time-to-live of the certificate cache.",
+                      "pattern": "^[0-9]+(ns|us|ms|s|m|h)$",
+                      "default": "5m",
+                      "examples": [
+                        "1h",
+                        "1m",
+                        "30s"
+                      ]
+                    }
+                  }
+                }
+              }
+            },
             "cors": {
               "$ref": "#/definitions/cors"
             },

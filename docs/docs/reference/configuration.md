@@ -1538,6 +1538,63 @@ serve:
       #
       read: 5s
 
+    ## Client TLS Transport ##
+    #
+    # Control the client TLS transport.
+    #
+    client_tls:
+      ## Trusted Root CA Certificates ##
+      #
+      # The path to a certificate files to append to the Root Certificate Authority for TLS connections. Use this to accept self-signed certificates while keeping the host system certificate authority unaltered.
+      #
+      # Default value: ""
+      #
+      # Examples:
+      # - self-signed.crt
+      #
+      # Set this value using environment variables on
+      # - Linux/macOS:
+      #    $ export SERVE_PROXY_CLIENT_TLS_TRUSTED_CERTIFICATES=<value>
+      # - Windows Command Line (CMD):
+      #    > set SERVE_PROXY_CLIENT_TLS_TRUSTED_CERTIFICATES=<value>
+      #
+      trusted_certificates:
+        - /my-certs/certificate-to-append.crt
+        - /my-certs/another-certificate.crt
+
+      ## cache ##
+      #
+      cache:
+        ## Refresh Frequency ##
+        #
+        # The interval at which to test if the upstream transport certificates changed. Use 0 to disable test.
+        #
+        # Default value: 1000
+        #
+        # Examples:
+        # - 1000
+        # - 0
+        #
+        # Set this value using environment variables on
+        # - Linux/macOS:
+        #    $ export SERVE_PROXY_CLIENT_TLS_CACHE_REFRESH_FREQUENCY=<value>
+        # - Windows Command Line (CMD):
+        #    > set SERVE_PROXY_CLIENT_TLS_CACHE_REFRESH_FREQUENCY=<value>
+        #
+        refresh_frequency: 1000
+
+        ## Refresh Frequency ##
+        #
+        # Sets the time-to-live of the certificate cache. Use 0 to disable cache expiration.
+        #
+        # Set this value using environment variables on
+        # - Linux/macOS:
+        #    $ export SERVE_PROXY_CLIENT_TLS_CACHE_TTL=<value>
+        # - Windows Command Line (CMD):
+        #    > set SERVE_PROXY_CLIENT_TLS_CACHE_TTL=<value>
+        #
+        ttl: 5m
+
     ## Cross Origin Resource Sharing (CORS) ##
     #
     # Configure [Cross Origin Resource Sharing (CORS)](http://www.w3.org/TR/cors/) using the following options.

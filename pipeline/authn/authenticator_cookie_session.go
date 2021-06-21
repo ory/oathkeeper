@@ -10,11 +10,13 @@ import (
 	"github.com/tidwall/gjson"
 
 	"github.com/ory/go-convenience/stringsx"
+	"github.com/ory/x/httpx"
 
 	"github.com/ory/herodot"
 
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/helper"
+	"github.com/ory/oathkeeper/internal/certs"
 	"github.com/ory/oathkeeper/pipeline"
 )
 
@@ -36,12 +38,17 @@ type AuthenticatorCookieSessionConfiguration struct {
 }
 
 type AuthenticatorCookieSession struct {
-	c configuration.Provider
+	c      configuration.Provider
+	client *http.Client
 }
 
 func NewAuthenticatorCookieSession(c configuration.Provider) *AuthenticatorCookieSession {
+	cm := certs.NewCertManager(c)
+	rt := certs.NewRoundTripper(cm)
+
 	return &AuthenticatorCookieSession{
-		c: c,
+		c:      c,
+		client: httpx.NewResilientClientLatencyToleranceSmall(rt),
 	}
 }
 
@@ -85,7 +92,7 @@ func (a *AuthenticatorCookieSession) Authenticate(r *http.Request, session *Auth
 		return errors.WithStack(ErrAuthenticatorNotResponsible)
 	}
 
-	body, err := forwardRequestToSessionStore(r, cf.CheckSessionURL, cf.PreservePath)
+	body, err := forwardRequestToSessionStore(a.client, r, cf.CheckSessionURL, cf.PreservePath)
 	if err != nil {
 		return err
 	}
@@ -125,7 +132,7 @@ func cookieSessionResponsible(r *http.Request, only []string) bool {
 	return false
 }
 
-func forwardRequestToSessionStore(r *http.Request, checkSessionURL string, preservePath bool) (json.RawMessage, error) {
+func forwardRequestToSessionStore(client *http.Client, r *http.Request, checkSessionURL string, preservePath bool) (json.RawMessage, error) {
 	reqUrl, err := url.Parse(checkSessionURL)
 	if err != nil {
 		return nil, errors.WithStack(herodot.ErrInternalServerError.WithReasonf("Unable to parse session check URL: %s", err))
@@ -140,7 +147,8 @@ func forwardRequestToSessionStore(r *http.Request, checkSessionURL string, prese
 		URL:    reqUrl,
 		Header: r.Header,
 	}
-	res, err := http.DefaultClient.Do(req.WithContext(r.Context()))
+
+	res, err := client.Do(req.WithContext(r.Context()))
 	if err != nil {
 		return nil, helper.ErrForbidden.WithReason(err.Error()).WithTrace(err)
 	}
