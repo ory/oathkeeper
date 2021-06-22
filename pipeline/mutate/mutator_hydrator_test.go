@@ -4,13 +4,14 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/julienschmidt/httprouter"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
 	"runtime"
 	"testing"
+
+	"github.com/julienschmidt/httprouter"
 
 	"github.com/ory/oathkeeper/pipeline/authn"
 	"github.com/ory/oathkeeper/pipeline/mutate"
