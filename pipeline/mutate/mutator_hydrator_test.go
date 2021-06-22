@@ -374,10 +374,6 @@ func TestMutatorHydrator(t *testing.T) {
 	})
 
 	t.Run("method=validate", func(t *testing.T) {
-		if runtime.GOOS == "windows" {
-			t.Skip("Disabled on windows")
-		}
-
 		for k, testCase := range []struct {
 			enabled    bool
 			apiUrl     string
