@@ -646,8 +646,8 @@ func TestAuthenticatorOAuth2Introspection(t *testing.T) {
 			viper.Set("authenticators.oauth2_introspection.config.scope_strategy", "none")
 			r := &http.Request{Header: http.Header{"Authorization": {"bearer active-scope-a"}}}
 			expected := new(AuthenticationSession)
-			t.Run("case=initial request succeeds", func(t *testing.T) {
-				config := setup(t, `{ "required_scope": ["scope-a"], "trusted_issuers": ["foo", "bar"], "target_audience": ["audience"] }`)
+			t.Run("case=initial request succeeds and caches", func(t *testing.T) {
+				config := setup(t, `{ "required_scope": [], "trusted_issuers": ["foo", "bar"], "target_audience": ["audience"] }`)
 
 				didNotUseCache.Add(1)
 				err = a.Authenticate(r, expected, config, nil)
