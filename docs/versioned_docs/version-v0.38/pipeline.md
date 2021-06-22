@@ -81,6 +81,8 @@ type AuthenticationSession struct {
 type MatchContext struct {
 	RegexpCaptureGroups []string
 	URL                 *url.URL
+	Method              string
+	Header              http.Header
 }
 ```
 
@@ -92,6 +94,12 @@ To use the subject extract to the token
 
 ```json
 { "config_field": "{{ print .subject }}" }
+```
+
+To use any arbitrary header value from the request headers
+
+```json
+{ "config_field": "{{ .MatchContext.Header.Get \"some_header\" }}" }
 ```
 
 To use an embedded value in the `Extra` map (most of the time, it's a JWT token

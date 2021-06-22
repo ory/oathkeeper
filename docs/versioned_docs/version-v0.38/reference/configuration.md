@@ -337,6 +337,26 @@ authenticators:
       allowed_algorithms:
         - ''
 
+      ## jwks_max_wait ##
+      #
+      # Set this value using environment variables on
+      # - Linux/macOS:
+      #    $ export AUTHENTICATORS_JWT_CONFIG_JWKS_MAX_WAIT=<value>
+      # - Windows Command Line (CMD):
+      #    > set AUTHENTICATORS_JWT_CONFIG_JWKS_MAX_WAIT=<value>
+      #
+      jwks_max_wait: 100ms
+
+      ## jwks_ttl ##
+      #
+      # Set this value using environment variables on
+      # - Linux/macOS:
+      #    $ export AUTHENTICATORS_JWT_CONFIG_JWKS_TTL=<value>
+      # - Windows Command Line (CMD):
+      #    > set AUTHENTICATORS_JWT_CONFIG_JWKS_TTL=<value>
+      #
+      jwks_ttl: 30m
+
       ## scope_strategy ##
       #
       # Set this value using environment variables on
@@ -999,6 +1019,17 @@ authorizers:
       #
       remote: https://host/path
 
+      ## forward_response_headers_to_upstream ##
+      #
+      # Set this value using environment variables on
+      # - Linux/macOS:
+      #    $ export AUTHORIZERS_REMOTE_CONFIG_FORWARD_RESPONSE_HEADERS_TO_UPSTREAM=<value>
+      # - Windows Command Line (CMD):
+      #    > set AUTHORIZERS_REMOTE_CONFIG_FORWARD_RESPONSE_HEADERS_TO_UPSTREAM=<value>
+      #
+      forward_response_headers_to_upstream:
+        - ''
+
     ## Enabled ##
     #
     # En-/disables this component.
@@ -1043,6 +1074,17 @@ authorizers:
       #    > set AUTHORIZERS_REMOTE_JSON_CONFIG_PAYLOAD=<value>
       #
       payload: '{"subject":"{{ .Subject }}"}'
+
+      ## forward_response_headers_to_upstream ##
+      #
+      # Set this value using environment variables on
+      # - Linux/macOS:
+      #    $ export AUTHORIZERS_REMOTE_JSON_CONFIG_FORWARD_RESPONSE_HEADERS_TO_UPSTREAM=<value>
+      # - Windows Command Line (CMD):
+      #    > set AUTHORIZERS_REMOTE_JSON_CONFIG_FORWARD_RESPONSE_HEADERS_TO_UPSTREAM=<value>
+      #
+      forward_response_headers_to_upstream:
+        - ''
 
     ## Enabled ##
     #

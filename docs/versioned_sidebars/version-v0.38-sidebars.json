@@ -16,6 +16,16 @@
               "href": "https://www.ory.sh/docs/"
             },
             {
+              "label": "Get Started",
+              "type": "link",
+              "href": "https://www.ory.sh/docs/get-started"
+            },
+            {
+              "label": "Ory Open Source",
+              "type": "link",
+              "href": "https://www.ory.sh/docs/open-source"
+            },
+            {
               "label": "Early Access",
               "type": "link",
               "href": "https://www.ory.sh/docs/early-access"
@@ -24,6 +34,38 @@
               "label": "Community",
               "type": "link",
               "href": "https://www.ory.sh/docs/ecosystem/community"
+            }
+          ]
+        },
+        {
+          "collapsed": true,
+          "type": "category",
+          "label": "Guides",
+          "items": [
+            {
+              "label": "Install and Use the Ory CLI",
+              "type": "link",
+              "href": "https://www.ory.sh/docs/guides/ory-cli-install-use"
+            },
+            {
+              "label": "Integrate with NodeJS",
+              "type": "link",
+              "href": "https://www.ory.sh/docs/guides/integrate-nodejs"
+            },
+            {
+              "label": "No-Code with Ory Proxy",
+              "type": "link",
+              "href": "https://www.ory.sh/docs/guides/proxy"
+            },
+            {
+              "label": "Bring your own UI",
+              "type": "link",
+              "href": "https://www.ory.sh/docs/guides/bring-your-user-interface"
+            },
+            {
+              "label": "Create And Use Personal Access Tokens",
+              "type": "link",
+              "href": "https://www.ory.sh/docs/guides/create-personal-access-token"
             }
           ]
         },
@@ -56,18 +98,6 @@
               "label": "Sessions",
               "type": "link",
               "href": "https://www.ory.sh/docs/concepts/session"
-            }
-          ]
-        },
-        {
-          "collapsed": true,
-          "type": "category",
-          "label": "Guides",
-          "items": [
-            {
-              "label": "Bring your own UI",
-              "type": "link",
-              "href": "https://www.ory.sh/docs/guides/bring-your-user-interface"
             }
           ]
         },
@@ -127,6 +157,11 @@
                   "label": "ory proxy",
                   "type": "link",
                   "href": "https://www.ory.sh/docs/cli/ory-proxy"
+                },
+                {
+                  "label": "ory proxy local",
+                  "type": "link",
+                  "href": "https://www.ory.sh/docs/cli/ory-proxy-local"
                 },
                 {
                   "label": "ory version",
@@ -435,6 +470,16 @@
                   "label": "Setting up Argon2 Password Hashing Parameters",
                   "type": "link",
                   "href": "https://www.ory.sh/kratos/docs/next/guides/setting-up-password-hashing-parameters"
+                },
+                {
+                  "label": "Integration using Web-Hooks",
+                  "type": "link",
+                  "href": "https://www.ory.sh/kratos/docs/next/guides/integration-with-other-systems-using-web-hooks"
+                },
+                {
+                  "label": "Distributed Tracing",
+                  "type": "link",
+                  "href": "https://www.ory.sh/kratos/docs/next/guides/tracing"
                 }
               ]
             },
