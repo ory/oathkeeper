@@ -229,6 +229,10 @@ access_rules:
 }
 
 func TestFetcherWatchRepositoryFromFS(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("Skipping watcher tests on windows")
+	}
+
 	conf := internal.NewConfigurationWithDefaults() // this resets viper!!
 	r := internal.NewRegistry(conf)
 
