@@ -279,12 +279,17 @@ func (a *AuthenticatorOAuth2Introspection) Config(config json.RawMessage) (*Auth
 		return nil, nil, NewErrAuthenticatorMisconfigured(a, err)
 	}
 
-	clientKey := fmt.Sprintf("%x", md5.Sum([]byte(config)))
+	rawKey, err := json.Marshal(&c)
+	if err != nil {
+		return nil, nil, errors.WithStack(err)
+	}
+
+	clientKey := fmt.Sprintf("%x", md5.Sum(rawKey))
 	a.mu.RLock()
 	client, ok := a.clientMap[clientKey]
 	a.mu.RUnlock()
 
-	if !ok {
+	if !ok || client == nil {
 		a.logger.Debug("Initializing http client")
 		var rt http.RoundTripper
 		if c.PreAuth != nil && c.PreAuth.Enabled {
@@ -315,13 +320,13 @@ func (a *AuthenticatorOAuth2Introspection) Config(config json.RawMessage) (*Auth
 		}
 		duration, err := time.ParseDuration(c.Retry.Timeout)
 		if err != nil {
-			return nil, nil, err
+			return nil, nil, errors.WithStack(err)
 		}
 		timeout := time.Millisecond * duration
 
 		maxWait, err := time.ParseDuration(c.Retry.MaxWait)
 		if err != nil {
-			return nil, nil, err
+			return nil, nil, errors.WithStack(err)
 		}
 
 		client = httpx.NewResilientClientLatencyToleranceConfigurable(rt, timeout, maxWait)
