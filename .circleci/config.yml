@@ -29,8 +29,8 @@ jobs:
       - goreleaser/check
       - golangci/install
       - golangci/lint
-      - run: go install github.com/ory/go-acc github.com/mattn/goveralls
-      - run: go-acc -o coverage.out ./... -- -failfast -timeout=20m
+      - run: make .bin/go-acc
+      - run: .bin/go-acc -o coverage.out ./... -- -failfast -timeout=20m
       - run: |
           bash <(curl -s https://codecov.io/bash)
       - run: ./test/e2e/run.sh
