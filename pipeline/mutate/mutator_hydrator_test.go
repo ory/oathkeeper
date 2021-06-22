@@ -9,6 +9,7 @@ import (
 	"net/http/httptest"
 	"net/url"
 	"testing"
+	"time"
 
 	"github.com/julienschmidt/httprouter"
 
@@ -373,6 +374,7 @@ func TestMutatorHydrator(t *testing.T) {
 	})
 
 	t.Run("method=validate", func(t *testing.T) {
+
 		for k, testCase := range []struct {
 			enabled    bool
 			apiUrl     string
@@ -384,6 +386,7 @@ func TestMutatorHydrator(t *testing.T) {
 			t.Run(fmt.Sprintf("case=%d", k), func(t *testing.T) {
 				viper.Reset()
 				viper.Set(configuration.ViperKeyMutatorHydratorIsEnabled, testCase.enabled)
+				time.Sleep(time.Millisecond) // windows?!
 
 				err := a.Validate(json.RawMessage(`{"api":{"url":"` + testCase.apiUrl + `"}}`))
 				if testCase.shouldPass {
