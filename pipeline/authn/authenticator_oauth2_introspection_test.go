@@ -797,51 +797,37 @@ func TestAuthenticatorOAuth2Introspection(t *testing.T) {
 		preAuthConfigTwo := []byte(`{ "introspection_url":"http://localhost/oauth2/token2","pre_authorization":{"token_url":"http://localhost/oauth2/token2","client_id":"some_id2","client_secret":"some_secret2","enabled":true} }`)
 
 		_, noPreauthClient, err := authenticator.Config(noPreauthConfig)
-		if err != nil {
-			require.NoError(t, err)
-		}
+		require.NoError(t, err)
 
 		_, preauthOneClient, err := authenticator.Config(preAuthConfigOne)
-		if err != nil {
-			require.NoError(t, err)
-		}
+		require.NoError(t, err)
 
 		_, preauthTwoClient, err := authenticator.Config(preAuthConfigTwo)
-		if err != nil {
-			require.NoError(t, err)
-		}
+		require.NoError(t, err)
 
 		require.NotEqual(t, noPreauthClient, preauthOneClient)
 		require.NotEqual(t, noPreauthClient, preauthTwoClient)
 		require.NotEqual(t, preauthOneClient, preauthTwoClient)
-
-		_, preauthOneClient2, err := authenticator.Config(preAuthConfigOne)
-		if err != nil {
-			require.NoError(t, err)
-		}
-		if preauthOneClient2 != preauthOneClient {
-			t.FailNow()
-		}
-
-		_, preauthTwoClient2, err := authenticator.Config(preAuthConfigTwo)
-		if err != nil {
-			require.NoError(t, err)
-		}
-		if preauthTwoClient2 != preauthTwoClient {
-			t.FailNow()
-		}
 
 		_, noPreauthClient2, err := authenticator.Config(noPreauthConfig)
-		if err != nil {
-			require.NoError(t, err)
-		}
-		if noPreauthClient2 != noPreauthClient {
-			t.FailNow()
-		}
+		require.NoError(t, err)
+		require.Equal(t, noPreauthClient2, noPreauthClient)
 
-		require.NotEqual(t, noPreauthClient, preauthOneClient)
-		require.NotEqual(t, noPreauthClient, preauthTwoClient)
-		require.NotEqual(t, preauthOneClient, preauthTwoClient)
+		_, preauthOneClient2, err := authenticator.Config(preAuthConfigOne)
+		require.NoError(t, err)
+		require.Equal(t, preauthOneClient2, preauthOneClient)
 
+		_, preauthTwoClient2, err := authenticator.Config(preAuthConfigTwo)
+		require.NoError(t, err)
+		require.Equal(t, preauthTwoClient2, preauthTwoClient)
+
+		require.NotEqual(t, noPreauthClient2, preauthOneClient)
+		require.NotEqual(t, noPreauthClient2, preauthTwoClient)
+
+		require.NotEqual(t, preauthOneClient2, noPreauthClient)
+		require.NotEqual(t, preauthOneClient2, preauthTwoClient)
+
+		require.NotEqual(t, preauthTwoClient2, noPreauthClient)
+		require.NotEqual(t, preauthTwoClient2, preauthOneClient)
 	})
 }

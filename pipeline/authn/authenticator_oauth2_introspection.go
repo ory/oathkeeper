@@ -284,7 +284,7 @@ func (a *AuthenticatorOAuth2Introspection) Config(config json.RawMessage) (*Auth
 	client, ok := a.clientMap[clientKey]
 	a.mu.RUnlock()
 
-	if !ok {
+	if !ok || client == nil {
 		a.logger.Debug("Initializing http client")
 		var rt http.RoundTripper
 		if c.PreAuth != nil && c.PreAuth.Enabled {
