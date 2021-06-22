@@ -16,52 +16,66 @@ import (
 	"github.com/go-openapi/strfmt"
 )
 
-// NewDecisionsParams creates a new DecisionsParams object
-// with the default values initialized.
+// NewDecisionsParams creates a new DecisionsParams object,
+// with the default timeout for this client.
+//
+// Default values are not hydrated, since defaults are normally applied by the API server side.
+//
+// To enforce default values in parameter, use SetDefaults or WithDefaults.
 func NewDecisionsParams() *DecisionsParams {
-
 	return &DecisionsParams{
-
 		timeout: cr.DefaultTimeout,
 	}
 }
 
 // NewDecisionsParamsWithTimeout creates a new DecisionsParams object
-// with the default values initialized, and the ability to set a timeout on a request
+// with the ability to set a timeout on a request.
 func NewDecisionsParamsWithTimeout(timeout time.Duration) *DecisionsParams {
-
 	return &DecisionsParams{
-
 		timeout: timeout,
 	}
 }
 
 // NewDecisionsParamsWithContext creates a new DecisionsParams object
-// with the default values initialized, and the ability to set a context for a request
+// with the ability to set a context for a request.
 func NewDecisionsParamsWithContext(ctx context.Context) *DecisionsParams {
-
 	return &DecisionsParams{
-
 		Context: ctx,
 	}
 }
 
 // NewDecisionsParamsWithHTTPClient creates a new DecisionsParams object
-// with the default values initialized, and the ability to set a custom HTTPClient for a request
+// with the ability to set a custom HTTPClient for a request.
 func NewDecisionsParamsWithHTTPClient(client *http.Client) *DecisionsParams {
-
 	return &DecisionsParams{
 		HTTPClient: client,
 	}
 }
 
-/*DecisionsParams contains all the parameters to send to the API endpoint
-for the decisions operation typically these are written to a http.Request
+/* DecisionsParams contains all the parameters to send to the API endpoint
+   for the decisions operation.
+
+   Typically these are written to a http.Request.
 */
 type DecisionsParams struct {
 	timeout    time.Duration
 	Context    context.Context
 	HTTPClient *http.Client
+}
+
+// WithDefaults hydrates default values in the decisions params (not the query body).
+//
+// All values with no default are reset to their zero value.
+func (o *DecisionsParams) WithDefaults() *DecisionsParams {
+	o.SetDefaults()
+	return o
+}
+
+// SetDefaults hydrates default values in the decisions params (not the query body).
+//
+// All values with no default are reset to their zero value.
+func (o *DecisionsParams) SetDefaults() {
+	// no default values defined for this parameter
 }
 
 // WithTimeout adds the timeout to the decisions params
