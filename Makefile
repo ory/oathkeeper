@@ -35,6 +35,10 @@ format: .bin/goimports node_modules docs/node_modules
 gen:
 		mocks sdk
 
+.bin/ory: Makefile
+		bash <(curl https://raw.githubusercontent.com/ory/cli/master/install.sh) -b .bin v0.0.53
+		touch -a -m .bin/ory
+
 # Generates the SDKs
 .PHONY: sdk
 sdk: .bin/packr2 .bin/swagger .bin/ory
