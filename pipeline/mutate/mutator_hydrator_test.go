@@ -8,7 +8,6 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
-	"runtime"
 	"testing"
 
 	"github.com/julienschmidt/httprouter"
