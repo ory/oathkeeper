@@ -4,14 +4,13 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/julienschmidt/httprouter"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"runtime"
 	"testing"
-	"time"
-
-	"github.com/julienschmidt/httprouter"
 
 	"github.com/ory/oathkeeper/pipeline/authn"
 	"github.com/ory/oathkeeper/pipeline/mutate"
@@ -374,6 +373,9 @@ func TestMutatorHydrator(t *testing.T) {
 	})
 
 	t.Run("method=validate", func(t *testing.T) {
+		if runtime.GOOS == "windows" {
+			t.Skip("Disabled on windows")
+		}
 
 		for k, testCase := range []struct {
 			enabled    bool
@@ -386,7 +388,6 @@ func TestMutatorHydrator(t *testing.T) {
 			t.Run(fmt.Sprintf("case=%d", k), func(t *testing.T) {
 				viper.Reset()
 				viper.Set(configuration.ViperKeyMutatorHydratorIsEnabled, testCase.enabled)
-				time.Sleep(time.Millisecond) // windows?!
 
 				err := a.Validate(json.RawMessage(`{"api":{"url":"` + testCase.apiUrl + `"}}`))
 				if testCase.shouldPass {
