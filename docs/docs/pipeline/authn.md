@@ -622,6 +622,10 @@ was granted the requested scope.
   - `ttl` (string) - Can override the default behaviour of using the token exp
     time, and specify a set time to live for the token in the cache.
 
+Please note that caching will not be used if the scope strategy is `none` and
+`required_scope` is not empty. In that case, the configured introspection URL
+will always be called and is expected to check if the scope is valid or not.
+
 ```yaml
 # Global configuration file oathkeeper.yml
 authenticators:

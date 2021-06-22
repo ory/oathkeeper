@@ -11,6 +11,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/ory/fosite"
+
 	"github.com/dgraph-io/ristretto"
 
 	"github.com/opentracing/opentracing-go"
@@ -94,28 +96,34 @@ type AuthenticatorOAuth2IntrospectionResult struct {
 	TokenUse  string                 `json:"token_use"`
 }
 
-func (a *AuthenticatorOAuth2Introspection) tokenFromCache(config *AuthenticatorOAuth2IntrospectionConfiguration, token string) (*AuthenticatorOAuth2IntrospectionResult, bool) {
+func (a *AuthenticatorOAuth2Introspection) tokenFromCache(config *AuthenticatorOAuth2IntrospectionConfiguration, token string, ss fosite.ScopeStrategy) *AuthenticatorOAuth2IntrospectionResult {
 	if !config.Cache.Enabled {
-		return nil, false
+		return nil
+	}
+
+	if ss == nil && len(config.Scopes) > 0 {
+		return nil
 	}
 
 	item, found := a.tokenCache.Get(token)
 	if !found {
-		return nil, false
+		return nil
 	}
 
-	i := item.(*AuthenticatorOAuth2IntrospectionResult)
-	expires := time.Unix(i.Expires, 0)
-	if expires.Before(time.Now()) {
-		a.tokenCache.Del(token)
-		return nil, false
+	i, ok := item.(*AuthenticatorOAuth2IntrospectionResult)
+	if !ok {
+		return nil
 	}
 
-	return i, true
+	return i
 }
 
-func (a *AuthenticatorOAuth2Introspection) tokenToCache(config *AuthenticatorOAuth2IntrospectionConfiguration, i *AuthenticatorOAuth2IntrospectionResult, token string) {
+func (a *AuthenticatorOAuth2Introspection) tokenToCache(config *AuthenticatorOAuth2IntrospectionConfiguration, i *AuthenticatorOAuth2IntrospectionResult, token string, ss fosite.ScopeStrategy) {
 	if !config.Cache.Enabled {
+		return
+	}
+
+	if ss == nil && len(config.Scopes) > 0 {
 		return
 	}
 
@@ -145,7 +153,7 @@ func (a *AuthenticatorOAuth2Introspection) traceRequest(ctx context.Context, req
 	ext.HTTPUrl.Set(clientSpan, urlStr)
 	ext.HTTPMethod.Set(clientSpan, req.Method)
 
-	tracer.Inject(clientSpan.Context(), opentracing.HTTPHeaders, opentracing.HTTPHeadersCarrier(req.Header))
+	_ = tracer.Inject(clientSpan.Context(), opentracing.HTTPHeaders, opentracing.HTTPHeadersCarrier(req.Header))
 	return clientSpan.Finish
 }
 
@@ -160,12 +168,14 @@ func (a *AuthenticatorOAuth2Introspection) Authenticate(r *http.Request, session
 		return errors.WithStack(ErrAuthenticatorNotResponsible)
 	}
 
-	ss := a.c.ToScopeStrategy(cf.ScopeStrategy, "authenticators.oauth2_introspection.scope_strategy")
+	ss := a.c.ToScopeStrategy(cf.ScopeStrategy, "authenticators.oauth2_introspection.config.scope_strategy")
 
-	i, ok := a.tokenFromCache(cf, token)
-	if !ok {
+	i := a.tokenFromCache(cf, token, ss)
+
+	// If the token can not be found, and the scope strategy is nil, and the required scope list
+	// is not empty, then we can not use the cache.
+	if i == nil {
 		body := url.Values{"token": {token}}
-
 		if ss == nil {
 			body.Add("scope", strings.Join(cf.Scopes, " "))
 		}
@@ -174,6 +184,7 @@ func (a *AuthenticatorOAuth2Introspection) Authenticate(r *http.Request, session
 		if err != nil {
 			return errors.WithStack(err)
 		}
+
 		for key, value := range cf.IntrospectionRequestHeaders {
 			introspectReq.Header.Set(key, value)
 		}
@@ -199,48 +210,52 @@ func (a *AuthenticatorOAuth2Introspection) Authenticate(r *http.Request, session
 		if err := json.NewDecoder(resp.Body).Decode(&i); err != nil {
 			return errors.WithStack(err)
 		}
+	}
 
-		if len(i.TokenUse) > 0 && i.TokenUse != "access_token" {
-			return errors.WithStack(helper.ErrForbidden.WithReason(fmt.Sprintf("Use of introspected token is not an access token but \"%s\"", i.TokenUse)))
+	if len(i.TokenUse) > 0 && i.TokenUse != "access_token" {
+		return errors.WithStack(helper.ErrForbidden.WithReason(fmt.Sprintf("Use of introspected token is not an access token but \"%s\"", i.TokenUse)))
+	}
+
+	if !i.Active {
+		return errors.WithStack(helper.ErrUnauthorized.WithReason("Access token is not active"))
+	}
+
+	if i.Expires > 0 && time.Unix(i.Expires, 0).Before(time.Now()) {
+		return errors.WithStack(helper.ErrUnauthorized.WithReason("Access token expired"))
+	}
+
+	for _, audience := range cf.Audience {
+		if !stringslice.Has(i.Audience, audience) {
+			return errors.WithStack(helper.ErrForbidden.WithReason(fmt.Sprintf("Token audience is not intended for target audience %s", audience)))
 		}
+	}
 
-		if !i.Active {
-			return errors.WithStack(helper.ErrUnauthorized.WithReason("Access token i says token is not active"))
+	if len(cf.Issuers) > 0 {
+		if !stringslice.Has(cf.Issuers, i.Issuer) {
+			return errors.WithStack(helper.ErrForbidden.WithReason(fmt.Sprintf("Token issuer does not match any trusted issuer")))
 		}
+	}
 
-		for _, audience := range cf.Audience {
-			if !stringslice.Has(i.Audience, audience) {
-				return errors.WithStack(helper.ErrForbidden.WithReason(fmt.Sprintf("Token audience is not intended for target audience %s", audience)))
+	if ss != nil {
+		for _, scope := range cf.Scopes {
+			if !ss(strings.Split(i.Scope, " "), scope) {
+				return errors.WithStack(helper.ErrForbidden.WithReason(fmt.Sprintf("Scope %s was not granted", scope)))
 			}
 		}
+	}
 
-		if len(cf.Issuers) > 0 {
-			if !stringslice.Has(cf.Issuers, i.Issuer) {
-				return errors.WithStack(helper.ErrForbidden.WithReason(fmt.Sprintf("Token issuer does not match any trusted issuer")))
-			}
-		}
+	a.tokenToCache(cf, i, token, ss)
 
-		if ss != nil {
-			for _, scope := range cf.Scopes {
-				if !ss(strings.Split(i.Scope, " "), scope) {
-					return errors.WithStack(helper.ErrForbidden.WithReason(fmt.Sprintf("Scope %s was not granted", scope)))
-				}
-			}
-		}
+	if len(i.Extra) == 0 {
+		i.Extra = map[string]interface{}{}
+	}
 
-		if len(i.Extra) == 0 {
-			i.Extra = map[string]interface{}{}
-		}
+	i.Extra["username"] = i.Username
+	i.Extra["client_id"] = i.ClientID
+	i.Extra["scope"] = i.Scope
 
-		i.Extra["username"] = i.Username
-		i.Extra["client_id"] = i.ClientID
-		i.Extra["scope"] = i.Scope
-
-		if len(i.Audience) != 0 {
-			i.Extra["aud"] = i.Audience
-		}
-
-		a.tokenToCache(cf, i, token)
+	if len(i.Audience) != 0 {
+		i.Extra["aud"] = i.Audience
 	}
 
 	session.Subject = i.Subject
@@ -324,15 +339,22 @@ func (a *AuthenticatorOAuth2Introspection) Config(config json.RawMessage) (*Auth
 	}
 
 	if a.tokenCache == nil {
+		cost := int64(c.Cache.MaxCost)
+		if cost == 0 {
+			cost = 100000000
+		}
 		a.logger.Debugf("Creating cache with max cost: %d", c.Cache.MaxCost)
-		cache, _ := ristretto.NewCache(&ristretto.Config{
+		cache, err := ristretto.NewCache(&ristretto.Config{
 			// This will hold about 1000 unique mutation responses.
 			NumCounters: 10000,
 			// Allocate a max
-			MaxCost: int64(c.Cache.MaxCost),
+			MaxCost: cost,
 			// This is a best-practice value.
 			BufferItems: 64,
 		})
+		if err != nil {
+			return nil, nil, err
+		}
 
 		a.tokenCache = cache
 	}

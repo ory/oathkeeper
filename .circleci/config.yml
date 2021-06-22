@@ -30,8 +30,9 @@ jobs:
       - golangci/install
       - golangci/lint
       - run: go install github.com/ory/go-acc github.com/mattn/goveralls
-      - run: go-acc -o coverage.txt ./... -- -failfast -timeout=20m
-      - run: test -z "$CIRCLE_PR_NUMBER" && goveralls -service=circle-ci -coverprofile=coverage.txt -repotoken=$COVERALLS_REPO_TOKEN || echo "forks are not allowed to push to coveralls"
+      - run: go-acc -o coverage.out ./... -- -failfast -timeout=20m
+      - run: |
+          bash <(curl -s https://codecov.io/bash)
       - run: ./test/e2e/run.sh
       - run: ./test/reload/run.sh
 

@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/gobuffalo/packr/v2"
+
 	"github.com/ory/fosite"
 	"github.com/ory/x/tracing"
 

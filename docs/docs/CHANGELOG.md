@@ -25,16 +25,16 @@ custom_edit_url: null
   The remote authorizers may have useful context from user's permissions. So
   with this changes, custom authorizers using remote and remote_json can return
   some useful headers to be forward into the AuthenticationSession, meaning that
-  these headers will be passed to upstream services.
-  For example, an user containing scopes/branches inside an organization profile
-  has some level of data addressed to him. In this case, the upstream service
-  need to know that, and "filter" the data according to his "branch_id". The
-  permission that is given to the user (and the remote authorizers manages) has
-  a record of the "branch_id", for the following responses will be returned as
-  status code 200 (if granted) and containing a header like X-Branch-Id.
-  The upstream service receives the X-Branch-Id and does your thing.
-  The configuration requires to configure a list of "allowed headers" returning
-  from remote authorizer, that will be accepted in the pipeline.
+  these headers will be passed to upstream services. For example, an user
+  containing scopes/branches inside an organization profile has some level of
+  data addressed to him. In this case, the upstream service need to know that,
+  and "filter" the data according to his "branch_id". The permission that is
+  given to the user (and the remote authorizers manages) has a record of the
+  "branch_id", for the following responses will be returned as status code 200
+  (if granted) and containing a header like X-Branch-Id. The upstream service
+  receives the X-Branch-Id and does your thing. The configuration requires to
+  configure a list of "allowed headers" returning from remote authorizer, that
+  will be accepted in the pipeline.
 - Add request header in match context
   ([#719](https://github.com/ory/oathkeeper/issues/719))
   ([22b0dbe](https://github.com/ory/oathkeeper/commit/22b0dbe6495b9f57206dc8fb2335e1c81906e27d)),
@@ -104,9 +104,11 @@ Web Token debuggability, and resolves other issues.
 
 - Add dotnet sdk ([#683](https://github.com/ory/oathkeeper/issues/683))
   ([05ae925](https://github.com/ory/oathkeeper/commit/05ae9259414882015f30cc8d5c01e64afb65afbc)):
+
   - docs: add dotnet sdk
 
   - docs: add dotnet sdk versioned
+
 - Change forum to discussions readme
   ([#690](https://github.com/ory/oathkeeper/issues/690))
   ([d942c04](https://github.com/ory/oathkeeper/commit/d942c043aa2370b87e0dd822440ad39d809755f9))
@@ -137,8 +139,8 @@ Web Token debuggability, and resolves other issues.
 - Additional JWT auth debug information
   ([#681](https://github.com/ory/oathkeeper/issues/681))
   ([d08ab50](https://github.com/ory/oathkeeper/commit/d08ab5034b80736701fb38ee1e55d12c63fd06b2)),
-  closes [#668](https://github.com/ory/oathkeeper/issues/668):
-  JWT Claims added to error details field.
+  closes [#668](https://github.com/ory/oathkeeper/issues/668): JWT Claims added
+  to error details field.
 - Adds audience into Extra at oAuth2 introspection
   ([#480](https://github.com/ory/oathkeeper/issues/480))
   ([c9faecc](https://github.com/ory/oathkeeper/commit/c9faecc5d32800537f07e8e05f9c8872e609c3f9))
@@ -168,9 +170,9 @@ autogen: pin v0.38.9-beta.1.pre.3 release commit
 - Make glob patterns match only one path segment.
   ([#664](https://github.com/ory/oathkeeper/issues/664))
   ([c711aac](https://github.com/ory/oathkeeper/commit/c711aacc5fc29664e3825e087557e7baf4e47aa8)),
-  closes [#630](https://github.com/ory/oathkeeper/issues/630):
-  This makes `/` also a separator as well as the presumably default value of
-  `.`. This allows using <\*> for matching only one path segment.
+  closes [#630](https://github.com/ory/oathkeeper/issues/630): This makes `/`
+  also a separator as well as the presumably default value of `.`. This allows
+  using <\*> for matching only one path segment.
 
 ### Code Generation
 
@@ -427,11 +429,10 @@ This release stabilizes several features and resolves a couple of bugs.
 - Add url_param config option to redirect error handler.
   ([#520](https://github.com/ory/oathkeeper/issues/520))
   ([b5bb3bc](https://github.com/ory/oathkeeper/commit/b5bb3bc6b88ea8b26d53f03477fce1b74f113b97)),
-  closes [#511](https://github.com/ory/oathkeeper/issues/511):
-  This change introduces a url_param config option for redirect error handler.
-  If it contains a url paramter name, the redirect url will have this parameter
-  set, containing the current url (from which Oathkeeper has redirected the
-  user).
+  closes [#511](https://github.com/ory/oathkeeper/issues/511): This change
+  introduces a url_param config option for redirect error handler. If it
+  contains a url paramter name, the redirect url will have this parameter set,
+  containing the current url (from which Oathkeeper has redirected the user).
   This can be useful in passing the return_to url to Kratos, so user can be
   redirected to the page they initially wanted to access after a successfull
   sign in.
@@ -570,9 +571,8 @@ No backwards incompatible changes have been introduced.
   back. This can include the Content-Length header which describes the request
   body or response. Including the original request Content-Length causes issues
   for the decission endpoint client if the response body doesn't match the exact
-  size.
-  This change makes sure the Content-Length doesn't get included in the response
-  body and adds a test to prevent future regressions.
+  size. This change makes sure the Content-Length doesn't get included in the
+  response body and adds a test to prevent future regressions.
 - Respect retry in token introspection
   ([#410](https://github.com/ory/oathkeeper/issues/410))
   ([88f7b69](https://github.com/ory/oathkeeper/commit/88f7b69c9ff252ddc3dbe960155883ec98115fd0))
@@ -644,18 +644,17 @@ No backwards incompatible changes have been introduced.
 
 - Add cache to hydrator ([#418](https://github.com/ory/oathkeeper/issues/418))
   ([1ae6e7a](https://github.com/ory/oathkeeper/commit/1ae6e7a958d602533f54cada5d231bcf1bace093)),
-  closes [#417](https://github.com/ory/oathkeeper/issues/417):
-  This patch introduces new configuration parameters that allow the hydrator
-  mutator to cache requests.
+  closes [#417](https://github.com/ory/oathkeeper/issues/417): This patch
+  introduces new configuration parameters that allow the hydrator mutator to
+  cache requests.
 - Add new remote authorizer that uses request body and headers
   ([#416](https://github.com/ory/oathkeeper/issues/416))
   ([3a20637](https://github.com/ory/oathkeeper/commit/3a206376c0ec4d72d5d6ec66c2d738199a24e0c6)):
   This pull request implements a new authorizer that sends the original request
   body as body to the remote endpoint. This allows the remote endpoint to take
-  the body into account in its decision.
-  The current remote_json authorizer does not have the ability to send the
-  request body of the request to authorize. This means this cannot be taken into
-  account while checking permissions.
+  the body into account in its decision. The current remote_json authorizer does
+  not have the ability to send the request body of the request to authorize.
+  This means this cannot be taken into account while checking permissions.
   Providing the request body as part of the JSON payload won't always work as
   JSON cannot handle binary data.
 - Add prometheus docs ([#427](https://github.com/ory/oathkeeper/issues/427))
@@ -730,22 +729,20 @@ https://github.com/ory/oathkeeper/pull/358/commits/fd16ceb230a1b14ebb01a147d2d70
 - SendOAuth2 introspection scope only when strategy is none
   ([#379](https://github.com/ory/oathkeeper/issues/379))
   ([5e0c8dc](https://github.com/ory/oathkeeper/commit/5e0c8dcdc4a64662f59372a488ec633bcdbc0d85)),
-  closes [#377](https://github.com/ory/oathkeeper/issues/377):
-  This patch removes the `scope` key from the OAuth2 Introspection request body
-  when a scope strategy other than `none` is set for the OAuth2 Introspection
-  handler. If the scope strategy is `none`, the `scope` key is included in the
-  body.
+  closes [#377](https://github.com/ory/oathkeeper/issues/377): This patch
+  removes the `scope` key from the OAuth2 Introspection request body when a
+  scope strategy other than `none` is set for the OAuth2 Introspection handler.
+  If the scope strategy is `none`, the `scope` key is included in the body.
 - Token expiration error in tests
   ([#390](https://github.com/ory/oathkeeper/issues/390))
   ([9c07a73](https://github.com/ory/oathkeeper/commit/9c07a7349cdf560c0ba29a637aaec93021757d27))
 - **docker:** Improve docker-compose example
   ([#325](https://github.com/ory/oathkeeper/issues/325))
   ([1247381](https://github.com/ory/oathkeeper/commit/12473815dad3fcbc57ea102dd982170960adb9f6)),
-  closes [#324](https://github.com/ory/oathkeeper/issues/324):
-  Add a new file 'Dockerfile-dc' which will primarily be used by Docker Compose
-  to build docker images. Unlike the existing Dockerfile which depends on the
-  Makefile to build the binary, this Dockerfile copies the source code and
-  builds the binary.
+  closes [#324](https://github.com/ory/oathkeeper/issues/324): Add a new file
+  'Dockerfile-dc' which will primarily be used by Docker Compose to build docker
+  images. Unlike the existing Dockerfile which depends on the Makefile to build
+  the binary, this Dockerfile copies the source code and builds the binary.
   Oathkeeper has gone through a couple of changes since the initial draft of the
   docker compose file, considering these changes and the newly introduced
   Dockerfile in the previous commit, make these changes to the
@@ -815,8 +812,8 @@ https://github.com/ory/oathkeeper/pull/358/commits/fd16ceb230a1b14ebb01a147d2d70
   ([d9eed10](https://github.com/ory/oathkeeper/commit/d9eed10abd43eb41362fcc0f36e47a6f88658835))
 - Update README.md ([#375](https://github.com/ory/oathkeeper/issues/375))
   ([313d2fe](https://github.com/ory/oathkeeper/commit/313d2fe99f699c441e6f8e24abb096e239a17f83)),
-  closes [#374](https://github.com/ory/oathkeeper/issues/374):
-  Fixed link to Envoy configuration page and added link to AWS API Gateway.
+  closes [#374](https://github.com/ory/oathkeeper/issues/374): Fixed link to
+  Envoy configuration page and added link to AWS API Gateway.
 - Updates issue and pull request templates
   ([#382](https://github.com/ory/oathkeeper/issues/382))
   ([484c406](https://github.com/ory/oathkeeper/commit/484c406785c2633feee3cb9179a94147085cadd6))
@@ -878,10 +875,9 @@ docs: Regenerate and update changelog
 - **rule:** Add glob matching strategy
   ([#334](https://github.com/ory/oathkeeper/issues/334))
   ([5f983ab](https://github.com/ory/oathkeeper/commit/5f983ab118ce784a49a38e6024b99b8791907d4b)),
-  closes [#321](https://github.com/ory/oathkeeper/issues/321):
-  This patch adds the ability to choose a matching strategy and adds a
-  glob-based matching strategy to the available options (regex is still the
-  default).
+  closes [#321](https://github.com/ory/oathkeeper/issues/321): This patch adds
+  the ability to choose a matching strategy and adds a glob-based matching
+  strategy to the available options (regex is still the default).
 
 ### Unclassified
 
@@ -1020,22 +1016,21 @@ Update CHANGELOG [ci skip]
   closes [#333](https://github.com/ory/oathkeeper/issues/333)
 - authn/cookie_session: Add subject_from modifier (#336)
   ([6723fb8](https://github.com/ory/oathkeeper/commit/6723fb834c386b72e9525d2dfd661e684bd915d3)),
-  closes [#336](https://github.com/ory/oathkeeper/issues/336):
-  The subject_from modifier is a GJSON path that points to the `subject` field.
-  Useful if the upstream API does not return a `{"subject": "..."}` format.
+  closes [#336](https://github.com/ory/oathkeeper/issues/336): The subject_from
+  modifier is a GJSON path that points to the `subject` field. Useful if the
+  upstream API does not return a `{"subject": "..."}` format.
 - authn/cookie_session: Add extra_from modifier (#335)
   ([ee2b9e7](https://github.com/ory/oathkeeper/commit/ee2b9e743f4f6c56563d791947ffb592cc13394e)),
-  closes [#335](https://github.com/ory/oathkeeper/issues/335):
-  The extra_from modifier is a GJSON path that points to the extra field. Useful
-  if the upstream API does not return a `{"subject": "...", "extra": "..."}`
-  format.
+  closes [#335](https://github.com/ory/oathkeeper/issues/335): The extra_from
+  modifier is a GJSON path that points to the extra field. Useful if the
+  upstream API does not return a `{"subject": "...", "extra": "..."}` format.
 - pipeline/authn: Add tests for cookie sources in jwt and oauth2_intro (#330)
   (#331)
   ([7516eed](https://github.com/ory/oathkeeper/commit/7516eedc1ea97242a18225365898e0cbeafcffbf)),
   closes [#330](https://github.com/ory/oathkeeper/issues/330)
   [#331](https://github.com/ory/oathkeeper/issues/331)
-  [#330](https://github.com/ory/oathkeeper/issues/330):
-  Also updates the schemas to add missing cookie config element.
+  [#330](https://github.com/ory/oathkeeper/issues/330): Also updates the schemas
+  to add missing cookie config element.
 
 # [0.34.0-beta.1](https://github.com/ory/oathkeeper/compare/v0.33.1-beta.1...v0.34.0-beta.1) (2019-12-26)
 
@@ -1056,26 +1051,25 @@ Prepare v0.34.0-beta.1+oryOS.14 release
   ([96f77b2](https://github.com/ory/oathkeeper/commit/96f77b24d8adb160d5c2c3db2f2432e206b99c77))
 - pipe/err: Improve IP and MIME matching (#323)
   ([7e6f636](https://github.com/ory/oathkeeper/commit/7e6f6369f4acc33211d78f2acb1036c610286c2c)),
-  closes [#323](https://github.com/ory/oathkeeper/issues/323):
-  Previously, MIME matching respected the request's wildcards which lead to
-  multiple handlers feeling responsible for a particular request. Now, wildcards
-  coming from the HTTP Request itself are interpreted literally.
-  Additionally, ORY Oathkeeper respected the X-Forwarded-For HTTP Header for
-  matching remote IP addresses. This behavior is now turned off by default
-  because clients were able to fake this header otherwise. It can explicitly be
-  turned on by setting
+  closes [#323](https://github.com/ory/oathkeeper/issues/323): Previously, MIME
+  matching respected the request's wildcards which lead to multiple handlers
+  feeling responsible for a particular request. Now, wildcards coming from the
+  HTTP Request itself are interpreted literally. Additionally, ORY Oathkeeper
+  respected the X-Forwarded-For HTTP Header for matching remote IP addresses.
+  This behavior is now turned off by default because clients were able to fake
+  this header otherwise. It can explicitly be turned on by setting
   `config.when.#.request.remote_ip.RespectForwardedForHeader: true`.
 - Add customizable error handlers (#322)
   ([4033321](https://github.com/ory/oathkeeper/commit/4033321b13671de8d0d5a42846a4e19d6065db62)),
   closes [#322](https://github.com/ory/oathkeeper/issues/322)
   [#204](https://github.com/ory/oathkeeper/issues/204)
   [#252](https://github.com/ory/oathkeeper/issues/252)
-  [#119](https://github.com/ory/oathkeeper/issues/119):
-  This patch adds a new feature called error handlers. It allows to define the
-  error handling logic globally and per rule. It is now possible, for example,
-  to return a JSON response for `Accept: application/json` requests and a HTTP
-  Redirect response for requests that are coming from a user.
-  This also resolves several issues, as noted below:
+  [#119](https://github.com/ory/oathkeeper/issues/119): This patch adds a new
+  feature called error handlers. It allows to define the error handling logic
+  globally and per rule. It is now possible, for example, to return a JSON
+  response for `Accept: application/json` requests and a HTTP Redirect response
+  for requests that are coming from a user. This also resolves several issues,
+  as noted below:
 
 # [0.33.1-beta.1](https://github.com/ory/oathkeeper/compare/v0.33.0-beta.1...v0.33.1-beta.1) (2019-12-18)
 
@@ -1103,9 +1097,8 @@ docs: Incorporates changes from version v0.33.0-beta.1-12-g0dd3fe3 [ci skip]
   ([3e7936a](https://github.com/ory/oathkeeper/commit/3e7936a41150f367003c81c208910fdb77f556d9)),
   closes [#320](https://github.com/ory/oathkeeper/issues/320)
   [#305](https://github.com/ory/oathkeeper/issues/305)
-  [#317](https://github.com/ory/oathkeeper/issues/317):
-  Previously, some keys did not respect the values set in the environment
-  variables.
+  [#317](https://github.com/ory/oathkeeper/issues/317): Previously, some keys
+  did not respect the values set in the environment variables.
 - Add alpine-based Docker image (#318)
   ([815951b](https://github.com/ory/oathkeeper/commit/815951bb039937acc7be3f8b1b2bb06fe9ecac90)),
   closes [#318](https://github.com/ory/oathkeeper/issues/318)
@@ -1114,24 +1107,23 @@ docs: Incorporates changes from version v0.33.0-beta.1-12-g0dd3fe3 [ci skip]
   ([f60f525](https://github.com/ory/oathkeeper/commit/f60f52538ff6e66ea98afc89c6c6557ab8c5f93f)),
   closes [#316](https://github.com/ory/oathkeeper/issues/316)
   [#244](https://github.com/ory/oathkeeper/issues/244)
-  [#242](https://github.com/ory/oathkeeper/issues/242):
-  Adds details such as the HTTP Method, User Agent, Subject, and other
-  information to the logging output of both the reverse proxy and the decision
-  API.
+  [#242](https://github.com/ory/oathkeeper/issues/242): Adds details such as the
+  HTTP Method, User Agent, Subject, and other information to the logging output
+  of both the reverse proxy and the decision API.
 - Health endpoints now emit TRACE logs
   ([#314](https://github.com/ory/oathkeeper/issues/314))
   ([9036f8e](https://github.com/ory/oathkeeper/commit/9036f8eec3f264f7bcae46b44286367b8521802a)),
-  closes [#283](https://github.com/ory/oathkeeper/issues/283):
-  Remove health endpoints from the logs to make monitoring easier. Setting
-  `log_level` to `trace` will show these calls.
+  closes [#283](https://github.com/ory/oathkeeper/issues/283): Remove health
+  endpoints from the logs to make monitoring easier. Setting `log_level` to
+  `trace` will show these calls.
 - Improve session endpoint debugability
   ([#315](https://github.com/ory/oathkeeper/issues/315))
   ([2718639](https://github.com/ory/oathkeeper/commit/27186396ccff4ee3a7f8f0a4c703263fcc55afae)),
   closes [#300](https://github.com/ory/oathkeeper/issues/300)
 - Resolve matcher cache ([#313](https://github.com/ory/oathkeeper/issues/313))
   ([1519632](https://github.com/ory/oathkeeper/commit/15196326d2436c2d849d955bf5050766ae6dff0c)),
-  closes [#291](https://github.com/ory/oathkeeper/issues/291):
-  A bug caused the rule matcher to not cache the regular expression result.
+  closes [#291](https://github.com/ory/oathkeeper/issues/291): A bug caused the
+  rule matcher to not cache the regular expression result.
 - Use bearer splitting when header is set to Authorization
   ([#311](https://github.com/ory/oathkeeper/issues/311))
   ([464fa31](https://github.com/ory/oathkeeper/commit/464fa319e84953835b71e16360bab3016b8bfc64)),
@@ -1208,9 +1200,9 @@ docs: Incorporates changes from version v0.32.0-beta.1-13-g1910bbe [ci skip]
   closes [#276](https://github.com/ory/oathkeeper/issues/276)
   [#270](https://github.com/ory/oathkeeper/issues/270)
   [#279](https://github.com/ory/oathkeeper/issues/279)
-  [#280](https://github.com/ory/oathkeeper/issues/280):
-  This patch automatically binds environment variables to configuration keys.
-  This patch resolves several issues:
+  [#280](https://github.com/ory/oathkeeper/issues/280): This patch automatically
+  binds environment variables to configuration keys. This patch resolves several
+  issues:
 - Dereference config schema and resolve issues (#282)
   ([8cf6868](https://github.com/ory/oathkeeper/commit/8cf6868b3e925e686769d43c912d5e52c6589a9b)),
   closes [#282](https://github.com/ory/oathkeeper/issues/282)
@@ -1245,16 +1237,16 @@ docs: Incorporates changes from version v0.30.0-beta.1 [ci skip]
 - pipeline/authn: Add token_from config to introspection and jwt (#271)
   ([fc85ac8](https://github.com/ory/oathkeeper/commit/fc85ac854c3fb4cdd96bbae650f7355400431eac)),
   closes [#271](https://github.com/ory/oathkeeper/issues/271)
-  [#257](https://github.com/ory/oathkeeper/issues/257):
-  Add additional optional configuration to jwt and oauth2_introspection
-  authenticators allowing to set from where (which header or query parameter)
-  the token should be received. The configuration is a token_from field in
-  per-rule-configuration, as described in a linked issue.
+  [#257](https://github.com/ory/oathkeeper/issues/257): Add additional optional
+  configuration to jwt and oauth2_introspection authenticators allowing to set
+  from where (which header or query parameter) the token should be received. The
+  configuration is a token_from field in per-rule-configuration, as described in
+  a linked issue.
 - Add migration capabilities
   ([#268](https://github.com/ory/oathkeeper/issues/268))
   ([bc74e72](https://github.com/ory/oathkeeper/commit/bc74e726712c77955d2013979770c2724af17f20)),
-  closes [#266](https://github.com/ory/oathkeeper/issues/266):
-  Adds the ability to modify rules with backwards compatibility.
+  closes [#266](https://github.com/ory/oathkeeper/issues/266): Adds the ability
+  to modify rules with backwards compatibility.
 - Force auth style in oauth2 client credentials authn
   ([#267](https://github.com/ory/oathkeeper/issues/267))
   ([97d7890](https://github.com/ory/oathkeeper/commit/97d789097b47b50117421f8f4ebd32182de4195c)),
@@ -1427,18 +1419,17 @@ ci: Automate schema confiugration sync
   ([717d7f7](https://github.com/ory/oathkeeper/commit/717d7f748abe61014653f3c6519c4aef019d1969))
 - Watch configuration and access rule changes (#217)
   ([a078e89](https://github.com/ory/oathkeeper/commit/a078e891e2fe97bdb6ce8a2264f629a179c9116e)),
-  closes [#217](https://github.com/ory/oathkeeper/issues/217):
-  This patch allows oathkeeper to re-load any changes made to the configuraiton
-  file and/or the access rules to be reloaded without a restart.
-  Some configuration keys like serve._, log._, profiling however require a
-  restart.
+  closes [#217](https://github.com/ory/oathkeeper/issues/217): This patch allows
+  oathkeeper to re-load any changes made to the configuraiton file and/or the
+  access rules to be reloaded without a restart. Some configuration keys like
+  serve._, log._, profiling however require a restart.
 - Create FUNDING.yml
   ([d7da8e2](https://github.com/ory/oathkeeper/commit/d7da8e296205e183140c18ba3cc6269334476a2b))
 - Add support for rules in YAML format (#213)
   ([67face6](https://github.com/ory/oathkeeper/commit/67face611b9f19ed9b6606931c9b7a82df769154)),
-  closes [#213](https://github.com/ory/oathkeeper/issues/213):
-  This commit adds support for defining access rules in YAML format, in addition
-  to existing JSON format.
+  closes [#213](https://github.com/ory/oathkeeper/issues/213): This commit adds
+  support for defining access rules in YAML format, in addition to existing JSON
+  format.
 
 # [0.16.0-beta.5](https://github.com/ory/oathkeeper/compare/v0.16.0-beta.4...v0.16.0-beta.5) (2019-06-28)
 
@@ -1465,8 +1456,8 @@ authenticator: Add cookie session authenticator (#211)
   closes [#208](https://github.com/ory/oathkeeper/issues/208)
 - Update config.yaml (#204)
   ([effe9c0](https://github.com/ory/oathkeeper/commit/effe9c025c3a25edf88bc3791ec27cb01e128a1a)),
-  closes [#204](https://github.com/ory/oathkeeper/issues/204):
-  There's no DSN in oathkeeper
+  closes [#204](https://github.com/ory/oathkeeper/issues/204): There's no DSN in
+  oathkeeper
 
 # [0.16.0-beta.4](https://github.com/ory/oathkeeper/compare/v0.16.0-beta.3...v0.16.0-beta.4) (2019-05-28)
 
@@ -1499,11 +1490,10 @@ Closes #199
 - Properly declare negroni middleware
   ([#200](https://github.com/ory/oathkeeper/issues/200))
   ([9d3dc54](https://github.com/ory/oathkeeper/commit/9d3dc54e1350fa74fb126cc4761462e83d86548f)),
-  closes [#199](https://github.com/ory/oathkeeper/issues/199):
-  Previously, negroni.With was mistakenly used to add middleware onto the stack.
-  The proper method however is negroni.Use.
-  This patch fixes the use of negroni.With and resolves issues around logging
-  and the decisions endpoint.
+  closes [#199](https://github.com/ory/oathkeeper/issues/199): Previously,
+  negroni.With was mistakenly used to add middleware onto the stack. The proper
+  method however is negroni.Use. This patch fixes the use of negroni.With and
+  resolves issues around logging and the decisions endpoint.
 
 # [0.16.0-beta.3](https://github.com/ory/oathkeeper/compare/v0.15.2...v0.16.0-beta.3) (2019-05-19)
 
@@ -1631,10 +1621,10 @@ Signed-off-by: aeneasr <aeneas@ory.sh>
 - Use scp,scope,scopes in jwt authenticator
   ([#162](https://github.com/ory/oathkeeper/issues/162))
   ([eebc2f4](https://github.com/ory/oathkeeper/commit/eebc2f44e3e42b7af653f91d9345111e0a280401)),
-  closes [#138](https://github.com/ory/oathkeeper/issues/138):
-  Previously, the JWT authenticator only used the "scope" claim to retrieve
-  scope values from a JWT. Now, "scp", "scope", "scopes" are supported as string
-  arrays and strings separated by spaces.
+  closes [#138](https://github.com/ory/oathkeeper/issues/138): Previously, the
+  JWT authenticator only used the "scope" claim to retrieve scope values from a
+  JWT. Now, "scp", "scope", "scopes" are supported as string arrays and strings
+  separated by spaces.
 
 # [0.14.2+oryOS.10](https://github.com/ory/oathkeeper/compare/v0.14.1+oryOS.10...v0.14.2+oryOS.10) (2018-12-13)
 
@@ -1792,14 +1782,13 @@ Signed-off-by: aeneasr <aeneas@ory.sh>
   ([032d88e](https://github.com/ory/oathkeeper/commit/032d88ea8dee24506d277d22b7f4aaef2a502fa7))
 - Add endpoint for answering access requests directly
   ([d211641](https://github.com/ory/oathkeeper/commit/d2116410edf1f5089427858727f155bc0aa4313c)),
-  closes [#42](https://github.com/ory/oathkeeper/issues/42):
-  This patch adds endpoint `/judge` to `oathkeeper serve api`. The `/judge`
-  endpoint mimics the behavior of `oathkeeper serve proxy` but instead of
-  forwarding the request to the upstream server, the endpoint answers directly
-  with a HTTP response.
-  The HTTP response returns status code 200 if the request should be allowed and
-  any other status code (e.g. 401, 403) if not.
-  Assuming you are making the following request:
+  closes [#42](https://github.com/ory/oathkeeper/issues/42): This patch adds
+  endpoint `/judge` to `oathkeeper serve api`. The `/judge` endpoint mimics the
+  behavior of `oathkeeper serve proxy` but instead of forwarding the request to
+  the upstream server, the endpoint answers directly with a HTTP response. The
+  HTTP response returns status code 200 if the request should be allowed and any
+  other status code (e.g. 401, 403) if not. Assuming you are making the
+  following request:
   ```
   PUT /judge/my-service/whatever HTTP/1.1
   Host: oathkeeper-api:4456
@@ -1830,9 +1819,9 @@ Signed-off-by: aeneasr <aeneas@ory.sh>
   ([#132](https://github.com/ory/oathkeeper/issues/132))
   ([b3718ce](https://github.com/ory/oathkeeper/commit/b3718ce56d4bcfe4610806ae6b15382226adab75)):
   Add environment parameters (and description) to configure timeout settings of
-  a server handled proxy requests.
-  It will help prevent a case of unexpected closing a client connection if an
-  upstream request is executing more than default timeout.
+  a server handled proxy requests. It will help prevent a case of unexpected
+  closing a client connection if an upstream request is executing more than
+  default timeout.
 - Add JWT authenticator
   ([61625bc](https://github.com/ory/oathkeeper/commit/61625bccebe0b478b980c66a29894dc1ffe48b0a))
 - Add NodeJS SDK ([#94](https://github.com/ory/oathkeeper/issues/94))
@@ -1889,9 +1878,9 @@ Signed-off-by: aeneasr <aeneas@ory.sh>
 - Improve compatibility with ORY Hydra 1.0.0-beta.8
   ([#108](https://github.com/ory/oathkeeper/issues/108))
   ([296e012](https://github.com/ory/oathkeeper/commit/296e01254b50b645fae67e51aa668d39652b0778)),
-  closes [#101](https://github.com/ory/oathkeeper/issues/101):
-  This patch improves compatibility with ORY Hydra 1.0.0-beta.8 and updates
-  vendored dependencies.
+  closes [#101](https://github.com/ory/oathkeeper/issues/101): This patch
+  improves compatibility with ORY Hydra 1.0.0-beta.8 and updates vendored
+  dependencies.
 - Improve hydra integration tests
   ([e8b7a58](https://github.com/ory/oathkeeper/commit/e8b7a586c5fcb86efddf57d4f2f97a0ff915b869))
 - Improve refresh subroutines
@@ -1916,10 +1905,9 @@ Signed-off-by: aeneasr <aeneas@ory.sh>
   ([2e024f9](https://github.com/ory/oathkeeper/commit/2e024f91640bf4182d1b1a6fb143d77c523f4596))
 - Properly handle conflicts on PUT and POST
   ([83b591d](https://github.com/ory/oathkeeper/commit/83b591d8cf3d180ad9d48a72bd92ffdb3a8192ac)),
-  closes [#38](https://github.com/ory/oathkeeper/issues/38):
-  Previously, PUT and POST did not result in errors (409) when non-existing
-  resources were modified, or existing resources were created. This patch
-  resolves that.
+  closes [#38](https://github.com/ory/oathkeeper/issues/38): Previously, PUT and
+  POST did not result in errors (409) when non-existing resources were modified,
+  or existing resources were created. This patch resolves that.
 - Refactors Oathkeeper into new ecosystem
   ([#60](https://github.com/ory/oathkeeper/issues/60))
   ([7acfbca](https://github.com/ory/oathkeeper/commit/7acfbcaca36645a984baded2dc3cbb689154ef8c))
@@ -1974,9 +1962,9 @@ Signed-off-by: aeneasr <aeneas@ory.sh>
   ([3f259da](https://github.com/ory/oathkeeper/commit/3f259da7766eb6a42b54bb3a6f3ddeb49d9363a1))
 - Resolves an issue with cached matchers
   ([951da25](https://github.com/ory/oathkeeper/commit/951da251e3e862f2d0a1e5076c028a481f0235dd)),
-  closes [#73](https://github.com/ory/oathkeeper/issues/73):
-  This patch resolves an issue where updates would not properly propagate. This
-  caused deleted rules to still be available in the proxy.
+  closes [#73](https://github.com/ory/oathkeeper/issues/73): This patch resolves
+  an issue where updates would not properly propagate. This caused deleted rules
+  to still be available in the proxy.
 - Resolves issues with broken tests
   ([6604045](https://github.com/ory/oathkeeper/commit/6604045191446baca03791940ddf746aed4799d1))
 - Resolves naming issues and updates readme
@@ -1989,12 +1977,11 @@ Signed-off-by: aeneasr <aeneas@ory.sh>
   closes [#80](https://github.com/ory/oathkeeper/issues/80)
 - Reduces setup complexity by making strategies configurable
   ([6626f8f](https://github.com/ory/oathkeeper/commit/6626f8f2aa98f8ee05e5b1f63c1b698083f9ae78)),
-  closes [#71](https://github.com/ory/oathkeeper/issues/71):
-  This patch adds another ID Token signing algorithm (HS256) which is easier to
-  set up as it does not rely on ORY Hydra but instead on a shared secret.
-  Additionally the ability to specify which ID Token singing algorithm to use
-  has been added. Environmental variables to configure the behvaiour have been
-  added as well.
+  closes [#71](https://github.com/ory/oathkeeper/issues/71): This patch adds
+  another ID Token signing algorithm (HS256) which is easier to set up as it
+  does not rely on ORY Hydra but instead on a shared secret. Additionally the
+  ability to specify which ID Token singing algorithm to use has been added.
+  Environmental variables to configure the behvaiour have been added as well.
   Further, the ORY Keto Warden Authorizer strategy is now optional and disabled
   when the environment variable `AUTHORIZER_KETO_WARDEN_KETO_URL` is empty.
 - Updates to ORY Hydra v1.0.0-beta.2
@@ -2346,6 +2333,7 @@ Build oathekeeper docker image statically (#14)
 - Build oathekeeper docker image statically (#14)
   ([dbd2037](https://github.com/ory/oathkeeper/commit/dbd2037b56b6104b79607b20394be0e9a30e67e1)),
   closes [#14](https://github.com/ory/oathkeeper/issues/14):
+
   - Build oathekeeper docker image statically
 
   - Build oathekeeper docker image statically

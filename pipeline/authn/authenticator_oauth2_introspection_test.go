@@ -25,7 +25,11 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"sync"
 	"testing"
+	"time"
+
+	"github.com/ory/x/assertx"
 
 	"github.com/julienschmidt/httprouter"
 	"github.com/stretchr/testify/assert"
@@ -48,7 +52,6 @@ func TestAuthenticatorOAuth2Introspection(t *testing.T) {
 	assert.Equal(t, "oauth2_introspection", a.GetID())
 
 	t.Run("method=authenticate", func(t *testing.T) {
-
 		for k, tc := range []struct {
 			d              string
 			setup          func(*testing.T, *httprouter.Router)
@@ -572,6 +575,200 @@ func TestAuthenticatorOAuth2Introspection(t *testing.T) {
 				}
 			})
 		}
+	})
+
+	t.Run("method=authenticate-with-cache", func(t *testing.T) {
+		viper.Set("authenticators.oauth2_introspection.config.cache.enabled", true)
+		t.Cleanup(func() {
+			viper.Set("authenticators.oauth2_introspection.config.cache.enabled", false)
+		})
+
+		var didNotUseCache sync.WaitGroup
+
+		setup := func(t *testing.T, config string) []byte {
+			router := httprouter.New()
+			router.POST("/oauth2/introspect", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+				defer didNotUseCache.Done()
+				require.NoError(t, r.ParseForm())
+				switch r.Form.Get("token") {
+				case "inactive-scope-b":
+					require.NoError(t, json.NewEncoder(w).Encode(&AuthenticatorOAuth2IntrospectionResult{
+						Active: false,
+					}))
+				case "another-active-scope-a":
+					fallthrough
+				case "active-scope-a":
+					if r.Form.Get("scope") != "" && r.Form.Get("scope") != "scope-a" {
+						require.NoError(t, json.NewEncoder(w).Encode(&AuthenticatorOAuth2IntrospectionResult{
+							Active: false,
+						}))
+						return
+					}
+					require.NoError(t, json.NewEncoder(w).Encode(&AuthenticatorOAuth2IntrospectionResult{
+						Active:   true,
+						Scope:    "scope-a",
+						Subject:  "subject",
+						Audience: []string{"audience"},
+						Issuer:   "foo",
+						Username: "username",
+						Expires:  time.Now().Add(time.Second).Unix(),
+						Extra:    map[string]interface{}{"extra": "foo"},
+					}))
+				case "refresh-token":
+					require.NoError(t, json.NewEncoder(w).Encode(&AuthenticatorOAuth2IntrospectionResult{
+						Active:   true,
+						Scope:    "scope-a",
+						Subject:  "subject",
+						Audience: []string{"audience"},
+						Issuer:   "foo",
+						Username: "username",
+						TokenUse: "refresh_token",
+						Extra:    map[string]interface{}{"extra": "foo"},
+					}))
+				default:
+					require.NoError(t, json.NewEncoder(w).Encode(&AuthenticatorOAuth2IntrospectionResult{
+						Active: false,
+					}))
+				}
+			})
+			ts := httptest.NewServer(router)
+			t.Cleanup(ts.Close)
+
+			config, err = sjson.Set(config, "introspection_url", ts.URL+"/oauth2/introspect")
+			require.NoError(t, err)
+			config, err = sjson.Set(config, "pre_authorization.token_url", ts.URL+"/oauth2/token")
+			require.NoError(t, err)
+
+			return []byte(config)
+		}
+
+		t.Run("case=with none scope strategy", func(t *testing.T) {
+			viper.Set("authenticators.oauth2_introspection.config.scope_strategy", "none")
+			r := &http.Request{Header: http.Header{"Authorization": {"bearer active-scope-a"}}}
+			expected := new(AuthenticationSession)
+			t.Run("case=initial request succeeds", func(t *testing.T) {
+				config := setup(t, `{ "required_scope": ["scope-a"], "trusted_issuers": ["foo", "bar"], "target_audience": ["audience"] }`)
+
+				didNotUseCache.Add(1)
+				err = a.Authenticate(r, expected, config, nil)
+				didNotUseCache.Wait()
+				require.NoError(t, err)
+			})
+
+			// We expect to use the cache here because we are not interested to validate the scope. Usually we would
+			// expect to make the upstream call if the upstream has to validate the scope.
+			t.Run("case=second request does use cache because no scope was requested and strategy is nil", func(t *testing.T) {
+				config := setup(t, `{ "trusted_issuers": ["foo", "bar"], "target_audience": ["audience"] }`)
+				sess := new(AuthenticationSession)
+
+				err = a.Authenticate(r, sess, config, nil)
+				didNotUseCache.Wait() // Would result in a panic if wg.done was called!
+				require.NoError(t, err)
+				assertx.EqualAsJSON(t, expected, sess)
+			})
+
+			t.Run("case=second request does not use cache because scope strategy is disabled and scope was requested request succeeds", func(t *testing.T) {
+				config := setup(t, `{ "required_scope": ["scope-a"], "trusted_issuers": ["foo", "bar"], "target_audience": ["audience"] }`)
+				sess := new(AuthenticationSession)
+
+				didNotUseCache.Add(1)
+				err = a.Authenticate(r, sess, config, nil)
+				didNotUseCache.Wait()
+				require.NoError(t, err)
+				assertx.EqualAsJSON(t, expected, sess)
+			})
+
+			t.Run("case=request fails because we requested a scope which the upstream does not validate", func(t *testing.T) {
+				config := setup(t, `{ "required_scope": ["scope-b"], "trusted_issuers": ["foo", "bar"], "target_audience": ["audience"] }`)
+				sess := new(AuthenticationSession)
+
+				didNotUseCache.Add(1)
+				err = a.Authenticate(r, sess, config, nil)
+				didNotUseCache.Wait()
+				require.Error(t, err)
+			})
+		})
+
+		t.Run("case=does not use cache for refresh tokens", func(t *testing.T) {
+			for _, strategy := range []string{"wildcard", "none"} {
+				t.Run("scope_strategy="+strategy, func(t *testing.T) {
+					viper.Set("authenticators.oauth2_introspection.config.scope_strategy", strategy)
+					r := &http.Request{Header: http.Header{"Authorization": {"bearer refresh_token"}}}
+					expected := new(AuthenticationSession)
+
+					// The initial request
+					config := setup(t, `{ "required_scope": ["scope-a"], "trusted_issuers": ["foo", "bar"], "target_audience": ["audience"] }`)
+
+					// Also doesn't use the cache the second time
+					didNotUseCache.Add(2)
+					require.Error(t, a.Authenticate(r, expected, config, nil))
+					require.Error(t, a.Authenticate(r, expected, config, nil))
+					didNotUseCache.Wait()
+				})
+			}
+		})
+
+		t.Run("case=with a scope scope strategy", func(t *testing.T) {
+			viper.Set("authenticators.oauth2_introspection.config.scope_strategy", "wildcard")
+			r := &http.Request{Header: http.Header{"Authorization": {"bearer another-active-scope-a"}}}
+			expected := new(AuthenticationSession)
+
+			// The initial request
+			config := setup(t, `{ "required_scope": ["scope-a"], "trusted_issuers": ["foo", "bar"], "target_audience": ["audience"] }`)
+
+			didNotUseCache.Add(1)
+			require.NoError(t, a.Authenticate(r, expected, config, nil))
+			didNotUseCache.Wait()
+
+			t.Run("case=request succeeds and uses the cache", func(t *testing.T) {
+				config := setup(t, `{ "trusted_issuers": ["foo", "bar"], "target_audience": ["audience"] }`)
+				sess := new(AuthenticationSession)
+
+				err = a.Authenticate(r, sess, config, nil)
+				didNotUseCache.Wait()
+				require.NoError(t, err)
+				assertx.EqualAsJSON(t, expected, sess)
+			})
+
+			t.Run("case=request the initial request which also passes", func(t *testing.T) {
+				config := setup(t, `{ "required_scope": ["scope-a"], "trusted_issuers": ["foo", "bar"], "target_audience": ["audience"] }`)
+				sess := new(AuthenticationSession)
+
+				err = a.Authenticate(r, sess, config, nil)
+				didNotUseCache.Wait()
+				require.NoError(t, err)
+				assertx.EqualAsJSON(t, expected, sess)
+			})
+
+			t.Run("case=requests a scope the token does not have", func(t *testing.T) {
+				require.Error(t, a.Authenticate(r, new(AuthenticationSession),
+					setup(t, `{ "required_scope": ["scope-b"], "trusted_issuers": ["foo", "bar"], "target_audience": ["audience"] }`),
+					nil))
+				didNotUseCache.Wait()
+			})
+
+			t.Run("case=requests an audience which the token does not have", func(t *testing.T) {
+				require.Error(t, a.Authenticate(r, new(AuthenticationSession),
+					setup(t, `{ "required_scope": ["scope-a"], "trusted_issuers": ["foo", "bar"], "target_audience": ["not-audience"] }`),
+					nil))
+				didNotUseCache.Wait()
+			})
+
+			t.Run("case=does not trust the issuer", func(t *testing.T) {
+				require.Error(t, a.Authenticate(r, new(AuthenticationSession),
+					setup(t, `{ "required_scope": ["scope-a"], "trusted_issuers": ["not-foo", "bar"], "target_audience": ["audience"] }`),
+					nil))
+				didNotUseCache.Wait()
+			})
+
+			t.Run("case=respects the expiry time", func(t *testing.T) {
+				setup(t, `{ "required_scope": ["scope-a"], "trusted_issuers": ["foo", "bar"], "target_audience": ["audience"] }`)
+				require.NoError(t, a.Authenticate(r, new(AuthenticationSession), config, nil))
+				time.Sleep(time.Second)
+				require.Error(t, a.Authenticate(r, new(AuthenticationSession), config, nil))
+				didNotUseCache.Wait()
+			})
+		})
 	})
 
 	t.Run("method=validate", func(t *testing.T) {
