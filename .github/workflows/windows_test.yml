@@ -13,4 +13,4 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v2
-      - run: go-acc -o coverage.out ./... -- -failfast -timeout=20m
+      - run: go test -p 1 -failfast ./...
