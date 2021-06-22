@@ -833,7 +833,7 @@ func TestAuthenticatorOAuth2Introspection(t *testing.T) {
 		t.Run("Should not be equal because we changed a system default", func(t *testing.T) {
 			// Unskip once https://github.com/ory/oathkeeper/issues/757 lands
 			t.Skip("This fails due to viper caching and it makes no sense to fix it as we need to adopt koanf first")
-			viper.Set("authenticators.oauth2_introspection.config.pre_authorization", map[string]interface{}{"scope":[]string{"foo"}})
+			viper.Set("authenticators.oauth2_introspection.config.pre_authorization", map[string]interface{}{"scope": []string{"foo"}})
 
 			_, noPreauthClient3, err := authenticator.Config(noPreauthConfig)
 			require.NoError(t, err)
