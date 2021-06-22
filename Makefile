@@ -21,6 +21,9 @@ $(foreach dep, $(GO_DEPENDENCIES), $(eval $(call make-go-dependency, $(dep))))
 node_modules: package.json package-lock.json
 		npm i
 
+docs/node_modules: docs/package.json docs/package-lock.json
+		cd docs; npm i
+
 .bin/clidoc: go.mod
 		go build -o .bin/clidoc ./cmd/clidoc/.
 
