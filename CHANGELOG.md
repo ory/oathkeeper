@@ -3,59 +3,61 @@
 
 **Table of Contents**
 
-- [Unreleased (2021-06-22)](#unreleased-2021-06-22)
+- [Unreleased (2021-06-23)](#unreleased-2021-06-23)
+- [0.38.12-beta.1 (2021-06-22)](#03812-beta1-2021-06-22)
   - [Bug Fixes](#bug-fixes)
+  - [Code Generation](#code-generation)
   - [Features](#features)
   - [Tests](#tests)
   - [Unclassified](#unclassified)
 - [0.38.11-beta.1 (2021-05-13)](#03811-beta1-2021-05-13)
   - [Bug Fixes](#bug-fixes-1)
-  - [Code Generation](#code-generation)
+  - [Code Generation](#code-generation-1)
   - [Reverts](#reverts)
 - [0.38.10-beta.2 (2021-05-05)](#03810-beta2-2021-05-05)
   - [Bug Fixes](#bug-fixes-2)
-  - [Code Generation](#code-generation-1)
+  - [Code Generation](#code-generation-2)
   - [Code Refactoring](#code-refactoring)
   - [Documentation](#documentation)
   - [Features](#features-1)
 - [0.38.9-beta.1 (2021-03-17)](#0389-beta1-2021-03-17)
-  - [Code Generation](#code-generation-2)
+  - [Code Generation](#code-generation-3)
 - [0.38.9-beta.1.pre.3 (2021-03-16)](#0389-beta1pre3-2021-03-16)
   - [Bug Fixes](#bug-fixes-3)
-  - [Code Generation](#code-generation-3)
-- [0.38.9-beta.1.pre.2 (2021-03-15)](#0389-beta1pre2-2021-03-15)
   - [Code Generation](#code-generation-4)
+- [0.38.9-beta.1.pre.2 (2021-03-15)](#0389-beta1pre2-2021-03-15)
+  - [Code Generation](#code-generation-5)
 - [0.38.9-beta.1.pre.1 (2021-03-15)](#0389-beta1pre1-2021-03-15)
   - [Bug Fixes](#bug-fixes-4)
-  - [Code Generation](#code-generation-5)
+  - [Code Generation](#code-generation-6)
   - [Unclassified](#unclassified-1)
 - [0.38.8-beta.1 (2021-02-25)](#0388-beta1-2021-02-25)
   - [Bug Fixes](#bug-fixes-5)
-  - [Code Generation](#code-generation-6)
+  - [Code Generation](#code-generation-7)
   - [Unclassified](#unclassified-2)
 - [0.38.7-beta.1 (2021-02-22)](#0387-beta1-2021-02-22)
   - [Bug Fixes](#bug-fixes-6)
-  - [Code Generation](#code-generation-7)
+  - [Code Generation](#code-generation-8)
   - [Features](#features-2)
 - [0.38.6-beta.1 (2021-01-27)](#0386-beta1-2021-01-27)
-  - [Code Generation](#code-generation-8)
+  - [Code Generation](#code-generation-9)
   - [Documentation](#documentation-1)
   - [Features](#features-3)
 - [0.38.5-beta.1 (2020-12-10)](#0385-beta1-2020-12-10)
   - [Bug Fixes](#bug-fixes-7)
-  - [Code Generation](#code-generation-9)
+  - [Code Generation](#code-generation-10)
   - [Documentation](#documentation-2)
   - [Features](#features-4)
   - [Unclassified](#unclassified-3)
 - [0.38.4-beta.1 (2020-09-28)](#0384-beta1-2020-09-28)
   - [Bug Fixes](#bug-fixes-8)
-  - [Code Generation](#code-generation-10)
+  - [Code Generation](#code-generation-11)
   - [Documentation](#documentation-3)
   - [Features](#features-5)
   - [Unclassified](#unclassified-4)
 - [0.38.3-beta.1 (2020-07-29)](#0383-beta1-2020-07-29)
   - [Bug Fixes](#bug-fixes-9)
-  - [Code Generation](#code-generation-11)
+  - [Code Generation](#code-generation-12)
   - [Documentation](#documentation-4)
   - [Features](#features-6)
 - [0.38.2-beta.1 (2020-05-25)](#0382-beta1-2020-05-25)
@@ -232,10 +234,25 @@
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-# [Unreleased](https://github.com/ory/oathkeeper/compare/v0.38.11-beta.1...c444d46e67d70d2aed8da5bac54faf728f8ede67) (2021-06-22)
+# Unreleased (2021-06-23)
+
+# [0.38.12-beta.1](https://github.com/ory/oathkeeper/compare/v0.38.11-beta.1...v0.38.12-beta.1) (2021-06-22)
+
+This patch includes an **important patch for a security vulnerability**
+impacting the `oauth2_introspection` authenticator when caching is enabled. For
+more information please read the
+[Security Advisory](https://github.com/ory/oathkeeper/security/advisories/GHSA-qvp4-rpmr-xwrr).
+
+We strongly recommend upgrading to this version!
+
+Apart from this fix some improvements have been added to reduce latencies when
+fetching JSON Web Keys and during `oauth2_introspection` pre-auth. Go templates
+can now access the incoming request headers.
 
 ### Bug Fixes
 
+- Add docs/node_modules target
+  ([52f1c7b](https://github.com/ory/oathkeeper/commit/52f1c7b08fc9556a645a58a21a5109da2169129b))
 - Cache introspection pre-auth
   ([#723](https://github.com/ory/oathkeeper/issues/723))
   ([3a9ae1a](https://github.com/ory/oathkeeper/commit/3a9ae1a43a6f157bb7998d2e4ee5b76851c68ec1)),
@@ -244,6 +261,13 @@
   ([#745](https://github.com/ory/oathkeeper/issues/745))
   ([2ccbb2f](https://github.com/ory/oathkeeper/commit/2ccbb2f2607af39301a6d129c9552a5682cf96fc)),
   closes [#740](https://github.com/ory/oathkeeper/issues/740)
+- Makefile and sdk issues
+  ([598d48c](https://github.com/ory/oathkeeper/commit/598d48ce6e3c9a4710579825c7004ce1376ec3ce))
+
+### Code Generation
+
+- Pin v0.38.12-beta.1 release commit
+  ([ae23224](https://github.com/ory/oathkeeper/commit/ae232241ac61eea88530e7730d3547f9dd122b1a))
 
 ### Features
 
@@ -279,9 +303,15 @@
 
 ### Tests
 
+- Add improved preauth tests
+  ([#758](https://github.com/ory/oathkeeper/issues/758))
+  ([83c5349](https://github.com/ory/oathkeeper/commit/83c534980c9ffd770ea75b67f77f153ca9c4313f))
 - Resolve waiting forever regression
   ([#755](https://github.com/ory/oathkeeper/issues/755))
   ([c444d46](https://github.com/ory/oathkeeper/commit/c444d46e67d70d2aed8da5bac54faf728f8ede67))
+- Resolve windows build failures
+  ([#754](https://github.com/ory/oathkeeper/issues/754))
+  ([e4e2263](https://github.com/ory/oathkeeper/commit/e4e2263c7b97e47506919e29442efb395eaba99d))
 
 ### Unclassified
 
