@@ -3,7 +3,7 @@
 
 **Table of Contents**
 
-- [Unreleased (2021-06-23)](#unreleased-2021-06-23)
+- [Unreleased (2021-06-24)](#unreleased-2021-06-24)
 - [0.38.12-beta.1 (2021-06-22)](#03812-beta1-2021-06-22)
   - [Bug Fixes](#bug-fixes)
   - [Code Generation](#code-generation)
@@ -234,7 +234,7 @@
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-# Unreleased (2021-06-23)
+# Unreleased (2021-06-24)
 
 # [0.38.12-beta.1](https://github.com/ory/oathkeeper/compare/v0.38.11-beta.1...v0.38.12-beta.1) (2021-06-22)
 
