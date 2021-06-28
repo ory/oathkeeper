@@ -1,10 +1,6 @@
 [
   {
-    "Introduction": [
-      "index",
-      "install",
-      "contributing"
-    ]
+    "Introduction": ["index", "install", "contributing"]
   },
   {
     "Core Concepts": [
@@ -23,24 +19,15 @@
     ]
   },
   {
-    "Guides": [
-      "configure-deploy"
-    ]
+    "Guides": ["configure-deploy"]
   },
   {
-    "Reference": [
-      "reference/configuration",
-      "reference/api"
-    ]
+    "Reference": ["reference/configuration", "reference/api"]
   },
   {
-    "SDKs": [
-      "sdk"
-    ]
+    "SDKs": ["sdk"]
   },
   {
-    "Development": [
-      "milestones"
-    ]
+    "Development": ["milestones"]
   }
 ]
