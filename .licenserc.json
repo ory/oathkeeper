@@ -1,0 +1,6 @@
+{
+  "**/*.go": "// Copyright 2021 Ory GmbH",
+  "*.go": "// Copyright 2021 Ory GmbH",
+  "**/*.go": "// Copyright 2021 Ory GmbH"
+  "*.go": "// Copyright 2021 Ory GmbH"
+}
