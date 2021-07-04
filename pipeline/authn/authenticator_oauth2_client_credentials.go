@@ -127,11 +127,7 @@ func (a *AuthenticatorOAuth2ClientCredentials) Authenticate(r *http.Request, ses
 		AuthStyle:    oauth2.AuthStyleInHeader,
 	}
 
-	token, err := c.Token(context.WithValue(
-		tlsContext,
-		oauth2.HTTPClient,
-		c.Client,
-	))
+	token, err := c.Token(tlsContext)
 
 	if err != nil {
 		if rErr, ok := err.(*oauth2.RetrieveError); ok {
