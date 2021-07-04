@@ -114,6 +114,11 @@ func (a *AuthenticatorOAuth2ClientCredentials) Authenticate(r *http.Request, ses
 		return errors.Wrapf(helper.ErrUnauthorized, err.Error())
 	}
 
+	// Wrap TLS configuration in the transport layer of the oauth2 client.
+	tlsContext := context.WithValue(r.Context(), oauth2.HTTPClient, &http.Client{
+		Transport: certs.NewRoundTripper(certs.NewCertManager(a.c)),
+	})
+
 	c := &clientcredentials.Config{
 		ClientID:     user,
 		ClientSecret: password,
@@ -123,7 +128,7 @@ func (a *AuthenticatorOAuth2ClientCredentials) Authenticate(r *http.Request, ses
 	}
 
 	token, err := c.Token(context.WithValue(
-		r.Context(),
+		tlsContext,
 		oauth2.HTTPClient,
 		c.Client,
 	))
