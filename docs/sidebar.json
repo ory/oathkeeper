@@ -21,8 +21,9 @@
   {
     "Guides": ["configure-deploy"]
   },
+  "reference/api",
   {
-    "Reference": ["reference/configuration", "reference/api"]
+    "Reference": ["reference/configuration"]
   },
   {
     "SDKs": ["sdk"]
