@@ -86,6 +86,7 @@ workflows:
               only: /.*/
       -
         goreleaser/render-version-schema:
+          schema-path: .schema/config.schema.json
           requires:
             - goreleaser/release
           filters:
