@@ -35,6 +35,7 @@ jobs:
           bash <(curl -s https://codecov.io/bash)
       - run: ./test/e2e/run.sh
       - run: ./test/reload/run.sh
+      - run: ./test/forwarded-header/run.sh
 
 workflows:
   "test, build, and relase":
