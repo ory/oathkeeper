@@ -96,6 +96,42 @@ type AuthenticatorOAuth2IntrospectionResult struct {
 	TokenUse  string                 `json:"token_use"`
 }
 
+// based on
+type AuthenticatorOAuth2IntrospectionResultFork struct {
+	Active    bool                   `json:"active"`
+	Extra     map[string]interface{} `json:"ext"`
+	Subject   string                 `json:"sub,omitempty"`
+	Username  string                 `json:"username"`
+	Audience  string                 `json:"aud"`
+	TokenType string                 `json:"token_type"`
+	Issuer    string                 `json:"iss"`
+	ClientID  string                 `json:"client_id,omitempty"`
+	Scope     string                 `json:"scope,omitempty"`
+	Expires   int64                  `json:"exp"`
+	TokenUse  string                 `json:"token_use"`
+}
+
+func modifyResponse(old interface{}) *AuthenticatorOAuth2IntrospectionResult {
+	i, ok := old.(*AuthenticatorOAuth2IntrospectionResultFork)
+	if !ok {
+		return nil
+	}
+	audience := append([]string{}, i.Audience)
+	return &AuthenticatorOAuth2IntrospectionResult{
+		Active:    i.Active,
+		Extra:     i.Extra,
+		Subject:   i.Subject,
+		Username:  i.Username,
+		Audience:  audience,
+		TokenType: i.TokenType,
+		Issuer:    i.Issuer,
+		ClientID:  i.ClientID,
+		Scope:     i.Scope,
+		Expires:   i.Expires,
+		TokenUse:  i.TokenUse,
+	}
+}
+
 func (a *AuthenticatorOAuth2Introspection) tokenFromCache(config *AuthenticatorOAuth2IntrospectionConfiguration, token string, ss fosite.ScopeStrategy) *AuthenticatorOAuth2IntrospectionResult {
 	if !config.Cache.Enabled {
 		return nil
@@ -110,9 +146,10 @@ func (a *AuthenticatorOAuth2Introspection) tokenFromCache(config *AuthenticatorO
 		return nil
 	}
 
+	fmt.Printf("[Response From Keycloak : %+v\n", item)
 	i, ok := item.(*AuthenticatorOAuth2IntrospectionResult)
 	if !ok {
-		return nil
+		return modifyResponse(item)
 	}
 
 	return i
