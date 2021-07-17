@@ -96,7 +96,7 @@ type AuthenticatorOAuth2IntrospectionResult struct {
 	TokenUse  string                 `json:"token_use"`
 }
 
-// based on
+// Audience value mau be a single sensitive string.
 type AuthenticatorOAuth2IntrospectionResultFork struct {
 	Active    bool                   `json:"active"`
 	Extra     map[string]interface{} `json:"ext"`
@@ -146,7 +146,6 @@ func (a *AuthenticatorOAuth2Introspection) tokenFromCache(config *AuthenticatorO
 		return nil
 	}
 
-	fmt.Printf("[Response From Keycloak : %+v\n", item)
 	i, ok := item.(*AuthenticatorOAuth2IntrospectionResult)
 	if !ok {
 		return modifyResponse(item)
