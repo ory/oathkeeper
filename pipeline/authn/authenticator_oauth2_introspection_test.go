@@ -25,22 +25,21 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"reflect"
 	"sync"
 	"testing"
 	"time"
 
-	"github.com/ory/x/assertx"
-
 	"github.com/julienschmidt/httprouter"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
-	"github.com/tidwall/sjson"
-
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/internal"
 	. "github.com/ory/oathkeeper/pipeline/authn"
 	"github.com/ory/viper"
+	"github.com/ory/x/assertx"
 	"github.com/ory/x/logrusx"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	"github.com/tidwall/sjson"
 )
 
 func TestAuthenticatorOAuth2Introspection(t *testing.T) {
@@ -840,4 +839,43 @@ func TestAuthenticatorOAuth2Introspection(t *testing.T) {
 			require.NotEqual(t, noPreauthClient3, noPreauthClient)
 		})
 	})
+}
+
+func Test_ModifyResponse(t *testing.T) {
+	type args struct {
+		old interface{}
+	}
+	tests := []struct {
+		name string
+		args args
+		want *AuthenticatorOAuth2IntrospectionResult
+	}{
+		{
+			name: "Test No Error",
+			args: args{
+				old: &AuthenticatorOAuth2IntrospectionResultFork{
+					Audience: "application",
+				},
+			},
+			want: &AuthenticatorOAuth2IntrospectionResult{
+				Audience: []string{"application"},
+			},
+		},
+		{
+			name: "Test Different Struct (Error)",
+			args: args{
+				old: &AuthenticatorOAuth2IntrospectionPreAuthConfiguration{
+					Audience: "application",
+				},
+			},
+			want: nil,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := ModifyResponse(tt.args.old); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("modifyResponse() = %v, want %v", got, tt.want)
+			}
+		})
+	}
 }
