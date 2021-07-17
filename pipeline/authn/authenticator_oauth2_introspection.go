@@ -111,7 +111,7 @@ type AuthenticatorOAuth2IntrospectionResultFork struct {
 	TokenUse  string                 `json:"token_use"`
 }
 
-func modifyResponse(old interface{}) *AuthenticatorOAuth2IntrospectionResult {
+func ModifyResponse(old interface{}) *AuthenticatorOAuth2IntrospectionResult {
 	i, ok := old.(*AuthenticatorOAuth2IntrospectionResultFork)
 	if !ok {
 		return nil
@@ -148,7 +148,7 @@ func (a *AuthenticatorOAuth2Introspection) tokenFromCache(config *AuthenticatorO
 
 	i, ok := item.(*AuthenticatorOAuth2IntrospectionResult)
 	if !ok {
-		return modifyResponse(item)
+		return ModifyResponse(item)
 	}
 
 	return i
