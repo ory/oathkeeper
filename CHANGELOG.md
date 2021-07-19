@@ -3,99 +3,99 @@
 
 **Table of Contents**
 
-- [Unreleased (2021-07-14)](#unreleased-2021-07-14)
+- [Unreleased (2021-07-19)](#unreleased-2021-07-19)
   - [Bug Fixes](#bug-fixes)
-  - [Reverts](#reverts)
-- [0.38.14-beta.1.pre.1 (2021-07-14)](#03814-beta1pre1-2021-07-14)
+  - [Features](#features)
+- [0.38.14-beta.1 (2021-07-14)](#03814-beta1-2021-07-14)
+  - [Bug Fixes](#bug-fixes-1)
   - [Code Generation](#code-generation)
   - [Documentation](#documentation)
-  - [Features](#features)
-- [0.38.13-beta.1 (2021-06-28)](#03813-beta1-2021-06-28)
-  - [Code Generation](#code-generation-1)
-- [0.38.12-beta.1 (2021-06-22)](#03812-beta1-2021-06-22)
-  - [Bug Fixes](#bug-fixes-1)
-  - [Code Generation](#code-generation-2)
   - [Features](#features-1)
+  - [Reverts](#reverts)
+- [0.38.12-beta.1 (2021-06-22)](#03812-beta1-2021-06-22)
+  - [Bug Fixes](#bug-fixes-2)
+  - [Code Generation](#code-generation-1)
+  - [Features](#features-2)
   - [Tests](#tests)
   - [Unclassified](#unclassified)
 - [0.38.11-beta.1 (2021-05-13)](#03811-beta1-2021-05-13)
-  - [Bug Fixes](#bug-fixes-2)
-  - [Code Generation](#code-generation-3)
+  - [Bug Fixes](#bug-fixes-3)
+  - [Code Generation](#code-generation-2)
   - [Reverts](#reverts-1)
 - [0.38.10-beta.2 (2021-05-05)](#03810-beta2-2021-05-05)
-  - [Bug Fixes](#bug-fixes-3)
-  - [Code Generation](#code-generation-4)
+  - [Bug Fixes](#bug-fixes-4)
+  - [Code Generation](#code-generation-3)
   - [Code Refactoring](#code-refactoring)
   - [Documentation](#documentation-1)
-  - [Features](#features-2)
+  - [Features](#features-3)
 - [0.38.9-beta.1 (2021-03-17)](#0389-beta1-2021-03-17)
-  - [Code Generation](#code-generation-5)
+  - [Code Generation](#code-generation-4)
 - [0.38.9-beta.1.pre.3 (2021-03-16)](#0389-beta1pre3-2021-03-16)
-  - [Bug Fixes](#bug-fixes-4)
-  - [Code Generation](#code-generation-6)
-- [0.38.9-beta.1.pre.2 (2021-03-15)](#0389-beta1pre2-2021-03-15)
-  - [Code Generation](#code-generation-7)
-- [0.38.9-beta.1.pre.1 (2021-03-15)](#0389-beta1pre1-2021-03-15)
   - [Bug Fixes](#bug-fixes-5)
-  - [Code Generation](#code-generation-8)
+  - [Code Generation](#code-generation-5)
+- [0.38.9-beta.1.pre.2 (2021-03-15)](#0389-beta1pre2-2021-03-15)
+  - [Code Generation](#code-generation-6)
+- [0.38.9-beta.1.pre.1 (2021-03-15)](#0389-beta1pre1-2021-03-15)
+  - [Bug Fixes](#bug-fixes-6)
+  - [Code Generation](#code-generation-7)
   - [Unclassified](#unclassified-1)
 - [0.38.8-beta.1 (2021-02-25)](#0388-beta1-2021-02-25)
-  - [Bug Fixes](#bug-fixes-6)
-  - [Code Generation](#code-generation-9)
+  - [Bug Fixes](#bug-fixes-7)
+  - [Code Generation](#code-generation-8)
   - [Unclassified](#unclassified-2)
 - [0.38.7-beta.1 (2021-02-22)](#0387-beta1-2021-02-22)
-  - [Bug Fixes](#bug-fixes-7)
-  - [Code Generation](#code-generation-10)
-  - [Features](#features-3)
-- [0.38.6-beta.1 (2021-01-27)](#0386-beta1-2021-01-27)
-  - [Code Generation](#code-generation-11)
-  - [Documentation](#documentation-2)
-  - [Features](#features-4)
-- [0.38.5-beta.1 (2020-12-10)](#0385-beta1-2020-12-10)
   - [Bug Fixes](#bug-fixes-8)
-  - [Code Generation](#code-generation-12)
-  - [Documentation](#documentation-3)
+  - [Code Generation](#code-generation-9)
+  - [Features](#features-4)
+- [0.38.6-beta.1 (2021-01-27)](#0386-beta1-2021-01-27)
+  - [Code Generation](#code-generation-10)
+  - [Documentation](#documentation-2)
   - [Features](#features-5)
+- [0.38.5-beta.1 (2020-12-10)](#0385-beta1-2020-12-10)
+  - [Bug Fixes](#bug-fixes-9)
+  - [Code Generation](#code-generation-11)
+  - [Documentation](#documentation-3)
+  - [Features](#features-6)
   - [Unclassified](#unclassified-3)
 - [0.38.4-beta.1 (2020-09-28)](#0384-beta1-2020-09-28)
-  - [Bug Fixes](#bug-fixes-9)
-  - [Code Generation](#code-generation-13)
+  - [Bug Fixes](#bug-fixes-10)
+  - [Code Generation](#code-generation-12)
   - [Documentation](#documentation-4)
-  - [Features](#features-6)
+  - [Features](#features-7)
   - [Unclassified](#unclassified-4)
 - [0.38.3-beta.1 (2020-07-29)](#0383-beta1-2020-07-29)
-  - [Bug Fixes](#bug-fixes-10)
-  - [Code Generation](#code-generation-14)
-  - [Documentation](#documentation-5)
-  - [Features](#features-7)
-- [0.38.2-beta.1 (2020-05-25)](#0382-beta1-2020-05-25)
   - [Bug Fixes](#bug-fixes-11)
+  - [Code Generation](#code-generation-13)
+  - [Documentation](#documentation-5)
+  - [Features](#features-8)
+- [0.38.2-beta.1 (2020-05-25)](#0382-beta1-2020-05-25)
+  - [Bug Fixes](#bug-fixes-12)
   - [Chores](#chores)
   - [Documentation](#documentation-6)
-  - [Features](#features-8)
+  - [Features](#features-9)
 - [0.38.1-beta.1 (2020-05-08)](#0381-beta1-2020-05-08)
-  - [Bug Fixes](#bug-fixes-12)
+  - [Bug Fixes](#bug-fixes-13)
   - [Chores](#chores-1)
 - [0.38.0-beta.2 (2020-05-07)](#0380-beta2-2020-05-07)
-  - [Bug Fixes](#bug-fixes-13)
+  - [Bug Fixes](#bug-fixes-14)
   - [Chores](#chores-2)
   - [Code Refactoring](#code-refactoring-1)
   - [Documentation](#documentation-7)
-  - [Features](#features-9)
+  - [Features](#features-10)
 - [0.37.1-beta.1 (2020-04-03)](#0371-beta1-2020-04-03)
   - [Chores](#chores-3)
   - [Documentation](#documentation-8)
 - [0.37.0-beta.1 (2020-04-02)](#0370-beta1-2020-04-02)
   - [Breaking Changes](#breaking-changes)
-    - [Bug Fixes](#bug-fixes-14)
+    - [Bug Fixes](#bug-fixes-15)
     - [Documentation](#documentation-9)
-    - [Features](#features-10)
+    - [Features](#features-11)
 - [0.36.0-beta.4 (2020-02-14)](#0360-beta4-2020-02-14)
-  - [Bug Fixes](#bug-fixes-15)
+  - [Bug Fixes](#bug-fixes-16)
   - [Documentation](#documentation-10)
 - [0.36.0-beta.1 (2020-02-05)](#0360-beta1-2020-02-05)
   - [Documentation](#documentation-11)
-  - [Features](#features-11)
+  - [Features](#features-12)
   - [Unclassified](#unclassified-5)
 - [0.35.5-beta.2 (2020-01-31)](#0355-beta2-2020-01-31)
   - [Unclassified](#unclassified-6)
@@ -242,30 +242,34 @@
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-# [Unreleased](https://github.com/ory/oathkeeper/compare/v0.38.14-beta.1.pre.1...d33e3e17d2774c1018ffed3538d190fc132b262b) (2021-07-14)
+# [Unreleased](https://github.com/ory/oathkeeper/compare/v0.38.14-beta.1...1f6c4306c3ec0e860b6606e06133c1f2a796c8e1) (2021-07-19)
+
+### Bug Fixes
+
+- Do not modify original headers
+  ([1f6c430](https://github.com/ory/oathkeeper/commit/1f6c4306c3ec0e860b6606e06133c1f2a796c8e1))
+
+### Features
+
+- Add preserve_host to session and bearer configs
+  ([e1cc575](https://github.com/ory/oathkeeper/commit/e1cc575817b0b230e280ce2e9796603ec47b0874))
+- Add support for additional headers in check_session and bearer token
+  ([390abe3](https://github.com/ory/oathkeeper/commit/390abe3d5cb72851502dbbd24b618e21a5fcbf2c))
+
+# [0.38.14-beta.1](https://github.com/ory/oathkeeper/compare/v0.38.12-beta.1...v0.38.14-beta.1) (2021-07-14)
+
+Ory Oathkeeper v0.38.14-beta.1 addresses a vunlerability in jwt-go by bumping
+the dependency to v3.2.4.
 
 ### Bug Fixes
 
 - Update docs deps
   ([3d50ab4](https://github.com/ory/oathkeeper/commit/3d50ab4cbf84757e693c6e43905c2ab43c5e1afa))
 
-### Reverts
-
-- Fix goreleaser/render-version-schema step
-  ([#789](https://github.com/ory/oathkeeper/issues/789))
-  ([#790](https://github.com/ory/oathkeeper/issues/790))
-  ([d33e3e1](https://github.com/ory/oathkeeper/commit/d33e3e17d2774c1018ffed3538d190fc132b262b)):
-
-  This reverts commit d306aa61401b047c232352da47f189a5cd0d4f23.
-
-# [0.38.14-beta.1.pre.1](https://github.com/ory/oathkeeper/compare/v0.38.13-beta.1...v0.38.14-beta.1.pre.1) (2021-07-14)
-
-autogen: pin v0.38.14-beta.1.pre.1 release commit
-
 ### Code Generation
 
-- Pin v0.38.14-beta.1.pre.1 release commit
-  ([199b7ee](https://github.com/ory/oathkeeper/commit/199b7ee5896a91b8915d5293d77db2639be04d88))
+- Pin v0.38.14-beta.1 release commit
+  ([4918be0](https://github.com/ory/oathkeeper/commit/4918be05a2de7ef1c5f83541aba000f69a1cd4d4))
 
 ### Documentation
 
@@ -277,15 +281,14 @@ autogen: pin v0.38.14-beta.1.pre.1 release commit
 - Add redoc doc generator ([#782](https://github.com/ory/oathkeeper/issues/782))
   ([e0f3bd5](https://github.com/ory/oathkeeper/commit/e0f3bd531c56dca6730fceacdedfc2cb831f2a07))
 
-# [0.38.13-beta.1](https://github.com/ory/oathkeeper/compare/v0.38.12-beta.1...v0.38.13-beta.1) (2021-06-28)
+### Reverts
 
-This release resolves a vunlerability in jwt-go by bumping the dependency to
-v3.2.4.
+- Fix goreleaser/render-version-schema step
+  ([#789](https://github.com/ory/oathkeeper/issues/789))
+  ([#790](https://github.com/ory/oathkeeper/issues/790))
+  ([d33e3e1](https://github.com/ory/oathkeeper/commit/d33e3e17d2774c1018ffed3538d190fc132b262b)):
 
-### Code Generation
-
-- Pin v0.38.13-beta.1 release commit
-  ([5bbc5dc](https://github.com/ory/oathkeeper/commit/5bbc5dc9085a3c6ac865286ac79dd577620454c1))
+  This reverts commit d306aa61401b047c232352da47f189a5cd0d4f23.
 
 # [0.38.12-beta.1](https://github.com/ory/oathkeeper/compare/v0.38.11-beta.1...v0.38.12-beta.1) (2021-06-22)
 
