@@ -89,6 +89,26 @@ func TestAuthenticatorCookieSession(t *testing.T) {
 			assert.Equal(t, &AuthenticationSession{Subject: "123"}, session)
 		})
 
+		t.Run("description=should pass through x-forwarded-host if preserve_host is set to true", func(t *testing.T) {
+			testServer, requestRecorder := makeServer(200, `{"subject": "123"}`)
+			req := makeRequest("PUT", "/users/123?query=string", map[string]string{"sessionid": "zyx"}, "")
+			expectedHost := "some-host"
+			req.Host = expectedHost
+			err := pipelineAuthenticator.Authenticate(
+				req,
+				session,
+				json.RawMessage(fmt.Sprintf(`{"check_session_url": "%s", "preserve_host": true}`, testServer.URL)),
+				nil,
+			)
+			require.NoError(t, err, "%#v", errors.Cause(err))
+			assert.Len(t, requestRecorder.requests, 1)
+			r := requestRecorder.requests[0]
+			assert.Equal(t, r.Method, "PUT")
+			assert.Equal(t, expectedHost, r.Header.Get("X-Forwarded-Host"))
+			assert.Equal(t, r.Header.Get("Cookie"), "sessionid=zyx")
+			assert.Equal(t, &AuthenticationSession{Subject: "123"}, session)
+		})
+
 		t.Run("description=does not pass request body through to auth server", func(t *testing.T) {
 			testServer, requestRecorder := makeServer(200, `{}`)
 			pipelineAuthenticator.Authenticate(

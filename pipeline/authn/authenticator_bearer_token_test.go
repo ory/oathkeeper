@@ -115,6 +115,22 @@ func TestAuthenticatorBearerToken(t *testing.T) {
 				},
 			},
 			{
+				d: "should pass through method and headers ONLY to auth server when PreserveHost is true",
+				r: &http.Request{Host: "some-host", Header: http.Header{"Authorization": {"bearer zyx"}}, URL: &url.URL{Path: "/users/123?query=string"}, Method: "PUT"},
+				router: func(w http.ResponseWriter, r *http.Request) {
+					assert.Equal(t, r.Method, "PUT")
+					assert.Equal(t, "some-host", r.Header.Get("X-Forwarded-Host"))
+					assert.Equal(t, r.Header.Get("Authorization"), "bearer zyx")
+					w.WriteHeader(200)
+					w.Write([]byte(`{"sub": "123"}`))
+				},
+				config:    []byte(`{"preserve_host": true}`),
+				expectErr: false,
+				expectSess: &AuthenticationSession{
+					Subject: "123",
+				},
+			},
+			{
 				d: "does not pass request body through to auth server",
 				r: &http.Request{
 					Header: http.Header{

@@ -423,7 +423,12 @@
         "preserve_path": {
           "title": "Preserve Path",
           "type": "boolean",
-          "description": "When set to true, any path specified in `check_session_url` will be preserved instead of overwriting the path with the path from the original request"
+          "description": "When set to true, any path specified in `check_session_url` will be preserved instead of overwriting the path with the path from the original request."
+        },
+        "preserve_host": {
+          "title": "Preserve Host",
+          "type": "boolean",
+          "description": "When set to true the HTTP Header X-Forwarded-Host will be set to the original HTTP host."
         },
         "extra_from": {
           "title": "Extra JSON Path",
@@ -503,6 +508,11 @@
           "title": "Preserve Path",
           "type": "boolean",
           "description": "When set to true, any path specified in `check_session_url` will be preserved instead of overwriting the path with the path from the original request"
+        },
+        "preserve_host": {
+          "title": "Preserve Host",
+          "type": "boolean",
+          "description": "When set to true the HTTP Header X-Forwarded-Host will be set to the original HTTP host."
         },
         "extra_from": {
           "title": "Extra JSON Path",
