@@ -430,6 +430,14 @@
           "type": "boolean",
           "description": "When set to true the HTTP Header X-Forwarded-Host will be set to the original HTTP host."
         },
+        "additional_headers": {
+          "title": "Set Additional HTTP Headers",
+          "type": "object",
+          "description": "Set additional HTTP Headers for the Session Check URL.",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
         "extra_from": {
           "title": "Extra JSON Path",
           "description": "The `extra` field in the ORY Oathkeeper authentication session is set using this JSON Path. Defaults to `extra`, and could be `@this` (for the root element), `foo.bar` (for key foo.bar), or any other valid GJSON path. See [GSJON Syntax](https://github.com/tidwall/gjson/blob/master/SYNTAX.md) for reference.",
@@ -513,6 +521,12 @@
           "title": "Preserve Host",
           "type": "boolean",
           "description": "When set to true the HTTP Header X-Forwarded-Host will be set to the original HTTP host."
+        },
+        "additional_headers": {
+          "title": "Set Additional HTTP Headers",
+          "type": "object",
+          "description": "Set additional HTTP Headers for the Session Check URL.",
+          "additionalProperties": { "type": "string" }
         },
         "extra_from": {
           "title": "Extra JSON Path",
