@@ -115,7 +115,7 @@ func TestAuthenticatorBearerToken(t *testing.T) {
 				},
 			},
 			{
-				d: "should pass through method and headers ONLY to auth server when PreserveHost is true",
+				d: "should pass and set host when preserve_host is true",
 				r: &http.Request{Host: "some-host", Header: http.Header{"Authorization": {"bearer zyx"}}, URL: &url.URL{Path: "/users/123?query=string"}, Method: "PUT"},
 				router: func(w http.ResponseWriter, r *http.Request) {
 					assert.Equal(t, r.Method, "PUT")
@@ -125,6 +125,23 @@ func TestAuthenticatorBearerToken(t *testing.T) {
 					w.Write([]byte(`{"sub": "123"}`))
 				},
 				config:    []byte(`{"preserve_host": true}`),
+				expectErr: false,
+				expectSess: &AuthenticationSession{
+					Subject: "123",
+				},
+			},
+			{
+				d: "should pass and set additional hosts but not overwrite x-forwarded-host",
+				r: &http.Request{Host: "some-host", Header: http.Header{"Authorization": {"bearer zyx"}}, URL: &url.URL{Path: "/users/123?query=string"}, Method: "PUT"},
+				router: func(w http.ResponseWriter, r *http.Request) {
+					assert.Equal(t, r.Method, "PUT")
+					assert.Equal(t, "some-host", r.Header.Get("X-Forwarded-Host"))
+					assert.Equal(t, "bar", r.Header.Get("X-Foo"))
+					assert.Equal(t, r.Header.Get("Authorization"), "bearer zyx")
+					w.WriteHeader(200)
+					w.Write([]byte(`{"sub": "123"}`))
+				},
+				config:    []byte(`{"preserve_host": true, "additional_headers": {"X-Foo": "bar","X-Forwarded-For": "not-some-host"}}`),
 				expectErr: false,
 				expectSess: &AuthenticationSession{
 					Subject: "123",
