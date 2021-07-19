@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"reflect"
 	"testing"
 
 	"github.com/tidwall/sjson"
@@ -204,7 +205,6 @@ func TestAuthenticatorBearerToken(t *testing.T) {
 			},
 		} {
 			t.Run(fmt.Sprintf("case=%d/description=%s", k, tc.d), func(t *testing.T) {
-
 				var ts *httptest.Server
 				if tc.router != nil {
 					ts = httptest.NewServer(http.HandlerFunc(tc.router))
@@ -219,6 +219,11 @@ func TestAuthenticatorBearerToken(t *testing.T) {
 
 				tc.config, _ = sjson.SetBytes(tc.config, "check_session_url", ts.URL)
 				sess := new(AuthenticationSession)
+				originalHeaders := http.Header{}
+				for k, v := range tc.r.Header {
+					originalHeaders[k] = v
+				}
+
 				err := pipelineAuthenticator.Authenticate(tc.r, sess, tc.config, nil)
 				if tc.expectErr {
 					require.Error(t, err)
@@ -228,6 +233,8 @@ func TestAuthenticatorBearerToken(t *testing.T) {
 				} else {
 					require.NoError(t, err)
 				}
+
+				require.True(t, reflect.DeepEqual(tc.r.Header, originalHeaders))
 
 				if tc.expectSess != nil {
 					assert.Equal(t, tc.expectSess, sess)
