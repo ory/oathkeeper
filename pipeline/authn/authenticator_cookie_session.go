@@ -140,7 +140,12 @@ func forwardRequestToSessionStore(r *http.Request, checkSessionURL string, prese
 	req := http.Request{
 		Method: r.Method,
 		URL:    reqUrl,
-		Header: r.Header,
+		Header: http.Header{},
+	}
+
+	// We need to make a COPY of the header, not modify r.Header!
+	for k, v := range r.Header {
+		req.Header[k] = v
 	}
 
 	for k, v := range setHeaders {

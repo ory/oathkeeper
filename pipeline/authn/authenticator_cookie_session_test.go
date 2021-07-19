@@ -105,6 +105,7 @@ func TestAuthenticatorCookieSession(t *testing.T) {
 			r := requestRecorder.requests[0]
 			assert.Equal(t, r.Method, "PUT")
 			assert.Equal(t, expectedHost, r.Header.Get("X-Forwarded-Host"))
+			assert.Empty(t, req.Header.Get("X-Forwarded-Host"), "The original header must NOT be modified")
 			assert.Equal(t, r.Header.Get("Cookie"), "sessionid=zyx")
 			assert.Equal(t, &AuthenticationSession{Subject: "123"}, session)
 		})
@@ -125,7 +126,9 @@ func TestAuthenticatorCookieSession(t *testing.T) {
 			r := requestRecorder.requests[0]
 			assert.Equal(t, r.Method, "PUT")
 			assert.Equal(t, expectedHost, r.Header.Get("X-Forwarded-Host"))
-			assert.Equal(t, "bar", r.Header.Get("X-Foo"), "%+v", r.Header)
+			assert.Equal(t, "bar", r.Header.Get("X-Foo"))
+			assert.Empty(t, req.Header.Get("X-Forwarded-Host"), "The original header must NOT be modified")
+			assert.Empty(t, req.Header.Get("X-Foo"), "The original header must NOT be modified")
 			assert.Equal(t, r.Header.Get("Cookie"), "sessionid=zyx")
 			assert.Equal(t, &AuthenticationSession{Subject: "123"}, session)
 		})
