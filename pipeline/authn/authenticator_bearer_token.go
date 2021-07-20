@@ -27,8 +27,10 @@ type AuthenticatorBearerTokenConfiguration struct {
 	CheckSessionURL     string                      `json:"check_session_url"`
 	BearerTokenLocation *helper.BearerTokenLocation `json:"token_from"`
 	PreservePath        bool                        `json:"preserve_path"`
+	PreserveHost        bool                        `json:"preserve_host"`
 	ExtraFrom           string                      `json:"extra_from"`
 	SubjectFrom         string                      `json:"subject_from"`
+	SetHeaders          map[string]string           `json:"additional_headers"`
 }
 
 type AuthenticatorBearerToken struct {
@@ -82,7 +84,7 @@ func (a *AuthenticatorBearerToken) Authenticate(r *http.Request, session *Authen
 		return errors.WithStack(ErrAuthenticatorNotResponsible)
 	}
 
-	body, err := forwardRequestToSessionStore(r, cf.CheckSessionURL, cf.PreservePath)
+	body, err := forwardRequestToSessionStore(r, cf.CheckSessionURL, cf.PreservePath, cf.PreserveHost, cf.SetHeaders)
 	if err != nil {
 		return err
 	}

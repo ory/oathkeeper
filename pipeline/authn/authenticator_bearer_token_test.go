@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"reflect"
 	"testing"
 
 	"github.com/tidwall/sjson"
@@ -115,6 +116,39 @@ func TestAuthenticatorBearerToken(t *testing.T) {
 				},
 			},
 			{
+				d: "should pass and set host when preserve_host is true",
+				r: &http.Request{Host: "some-host", Header: http.Header{"Authorization": {"bearer zyx"}}, URL: &url.URL{Path: "/users/123?query=string"}, Method: "PUT"},
+				router: func(w http.ResponseWriter, r *http.Request) {
+					assert.Equal(t, r.Method, "PUT")
+					assert.Equal(t, "some-host", r.Header.Get("X-Forwarded-Host"))
+					assert.Equal(t, r.Header.Get("Authorization"), "bearer zyx")
+					w.WriteHeader(200)
+					w.Write([]byte(`{"sub": "123"}`))
+				},
+				config:    []byte(`{"preserve_host": true}`),
+				expectErr: false,
+				expectSess: &AuthenticationSession{
+					Subject: "123",
+				},
+			},
+			{
+				d: "should pass and set additional hosts but not overwrite x-forwarded-host",
+				r: &http.Request{Host: "some-host", Header: http.Header{"Authorization": {"bearer zyx"}}, URL: &url.URL{Path: "/users/123?query=string"}, Method: "PUT"},
+				router: func(w http.ResponseWriter, r *http.Request) {
+					assert.Equal(t, r.Method, "PUT")
+					assert.Equal(t, "some-host", r.Header.Get("X-Forwarded-Host"))
+					assert.Equal(t, "bar", r.Header.Get("X-Foo"))
+					assert.Equal(t, r.Header.Get("Authorization"), "bearer zyx")
+					w.WriteHeader(200)
+					w.Write([]byte(`{"sub": "123"}`))
+				},
+				config:    []byte(`{"preserve_host": true, "additional_headers": {"X-Foo": "bar","X-Forwarded-For": "not-some-host"}}`),
+				expectErr: false,
+				expectSess: &AuthenticationSession{
+					Subject: "123",
+				},
+			},
+			{
 				d: "does not pass request body through to auth server",
 				r: &http.Request{
 					Header: http.Header{
@@ -171,7 +205,6 @@ func TestAuthenticatorBearerToken(t *testing.T) {
 			},
 		} {
 			t.Run(fmt.Sprintf("case=%d/description=%s", k, tc.d), func(t *testing.T) {
-
 				var ts *httptest.Server
 				if tc.router != nil {
 					ts = httptest.NewServer(http.HandlerFunc(tc.router))
@@ -186,6 +219,11 @@ func TestAuthenticatorBearerToken(t *testing.T) {
 
 				tc.config, _ = sjson.SetBytes(tc.config, "check_session_url", ts.URL)
 				sess := new(AuthenticationSession)
+				originalHeaders := http.Header{}
+				for k, v := range tc.r.Header {
+					originalHeaders[k] = v
+				}
+
 				err := pipelineAuthenticator.Authenticate(tc.r, sess, tc.config, nil)
 				if tc.expectErr {
 					require.Error(t, err)
@@ -195,6 +233,8 @@ func TestAuthenticatorBearerToken(t *testing.T) {
 				} else {
 					require.NoError(t, err)
 				}
+
+				require.True(t, reflect.DeepEqual(tc.r.Header, originalHeaders))
 
 				if tc.expectSess != nil {
 					assert.Equal(t, tc.expectSess, sess)
