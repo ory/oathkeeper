@@ -15,7 +15,6 @@ require (
 	github.com/aws/aws-sdk-go v1.31.13
 	github.com/blang/semver v3.5.1+incompatible
 	github.com/bxcodec/faker v2.0.1+incompatible
-	github.com/davecgh/go-spew v1.1.1
 	github.com/dgraph-io/ristretto v0.0.2
 	github.com/dlclark/regexp2 v1.2.0
 	github.com/form3tech-oss/jwt-go v3.2.2+incompatible
@@ -53,7 +52,7 @@ require (
 	github.com/ory/jsonschema/v3 v3.0.1
 	github.com/ory/ladon v1.1.0
 	github.com/ory/viper v1.7.5
-	github.com/ory/x v0.0.163
+	github.com/ory/x v0.0.163-1
 	github.com/pborman/uuid v1.2.0
 	github.com/phayes/freeport v0.0.0-20180830031419-95f893ade6f2
 	github.com/pkg/errors v0.9.1
@@ -64,7 +63,7 @@ require (
 	github.com/spf13/cobra v1.1.1
 	github.com/sqs/goreturns v0.0.0-20181028201513-538ac6014518
 	github.com/square/go-jose v2.3.1+incompatible
-	github.com/stretchr/testify v1.6.1
+	github.com/stretchr/testify v1.7.0
 	github.com/tidwall/gjson v1.6.7
 	github.com/tidwall/sjson v1.1.1
 	github.com/tomasen/realip v0.0.0-20180522021738-f0c99a92ddce
