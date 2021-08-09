@@ -49,9 +49,16 @@ documentation and upgrade instructions.
 
 ## Project Renaming
 
-The Ory Oathkeeper project was started in 2017 in Germany and owes its name to the Sword [Oathkeeper](https://gameofthrones.fandom.com/wiki/Oathkeeper) from Game of Thrones. We also understand that the name is politically charged in the US as it is shared with a far-right militia organization in the US called "Oath Keepers".
+The Ory Oathkeeper project was started in 2017 in Germany and owes its name to
+the Sword [Oathkeeper](https://gameofthrones.fandom.com/wiki/Oathkeeper) from
+Game of Thrones. We also understand that the name is politically charged in the
+US as it is shared with a far-right militia organization in the US called "Oath
+Keepers".
 
-To take a stand against extremism and avoid any confusion to the name's origin, we will be renaming the project in the near future. Please be patient with us as we work on this complicated change of various CIs, tools, scripts, and automations.
+To take a stand against extremism and avoid any confusion to the name's origin,
+we will be renaming the project in the near future. Please be patient with us as
+we work on this complicated change of various CIs, tools, scripts, and
+automations.
 
 ---
 
