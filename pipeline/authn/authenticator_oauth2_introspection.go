@@ -83,17 +83,18 @@ func (a *AuthenticatorOAuth2Introspection) GetID() string {
 }
 
 type AuthenticatorOAuth2IntrospectionResult struct {
-	Active    bool                   `json:"active"`
-	Extra     map[string]interface{} `json:"ext"`
-	Subject   string                 `json:"sub,omitempty"`
-	Username  string                 `json:"username"`
-	Audience  []string               `json:"aud"`
-	TokenType string                 `json:"token_type"`
-	Issuer    string                 `json:"iss"`
-	ClientID  string                 `json:"client_id,omitempty"`
-	Scope     string                 `json:"scope,omitempty"`
-	Expires   int64                  `json:"exp"`
-	TokenUse  string                 `json:"token_use"`
+	Active    		bool                   	`json:"active"`
+	Extra     		map[string]interface{} 	`json:"ext"`
+	Subject   		string                 	`json:"sub,omitempty"`
+	Username  		string                 	`json:"username"`
+	Audience  		[]string               	`json:"-"`
+	TokenType 		string                 	`json:"token_type"`
+	Issuer    		string                 	`json:"iss"`
+	ClientID  		string                 	`json:"client_id,omitempty"`
+	Scope     		string                 	`json:"scope,omitempty"`
+	Expires   		int64                  	`json:"exp"`
+	TokenUse  		string           		`json:"token_use"`
+	AudienceHelper  interface{}     		`json:"aud"`
 }
 
 func (a *AuthenticatorOAuth2Introspection) tokenFromCache(config *AuthenticatorOAuth2IntrospectionConfiguration, token string, ss fosite.ScopeStrategy) *AuthenticatorOAuth2IntrospectionResult {
@@ -209,6 +210,15 @@ func (a *AuthenticatorOAuth2Introspection) Authenticate(r *http.Request, session
 
 		if err := json.NewDecoder(resp.Body).Decode(&i); err != nil {
 			return errors.WithStack(err)
+		}
+		if parsedAud, ok := i.AudienceHelper.(string); ok {
+        	i.Audience = []string{string(parsedAud)};
+        }
+	    if parsedAud, ok := i.AudienceHelper.([]interface{}); ok {
+	    	i.Audience = make([]string, len(parsedAud))
+    	    for index, aud := range parsedAud {
+				i.Audience[index] = string(aud.(string))
+			}
 		}
 	}
 
