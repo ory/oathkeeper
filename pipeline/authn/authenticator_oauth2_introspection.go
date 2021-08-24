@@ -110,12 +110,16 @@ func (a *AuthenticatorOAuth2Introspection) tokenFromCache(config *AuthenticatorO
 		return nil
 	}
 
-	i, ok := item.(*AuthenticatorOAuth2IntrospectionResult)
+	i, ok := item.([]byte)
 	if !ok {
 		return nil
 	}
 
-	return i
+	var v AuthenticatorOAuth2IntrospectionResult
+	if err := json.Unmarshal(i, &v); err != nil {
+		return nil
+	}
+	return &v
 }
 
 func (a *AuthenticatorOAuth2Introspection) tokenToCache(config *AuthenticatorOAuth2IntrospectionConfiguration, i *AuthenticatorOAuth2IntrospectionResult, token string, ss fosite.ScopeStrategy) {
@@ -127,10 +131,12 @@ func (a *AuthenticatorOAuth2Introspection) tokenToCache(config *AuthenticatorOAu
 		return
 	}
 
-	if a.cacheTTL != nil {
-		a.tokenCache.SetWithTTL(token, i, 1, *a.cacheTTL)
+	if v, err := json.Marshal(i); err != nil {
+		return
+	} else if a.cacheTTL != nil {
+		a.tokenCache.SetWithTTL(token, v, 1, *a.cacheTTL)
 	} else {
-		a.tokenCache.Set(token, i, 1)
+		a.tokenCache.Set(token, v, 1)
 	}
 }
 
