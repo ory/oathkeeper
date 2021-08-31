@@ -35,7 +35,7 @@ func TestCache(t *testing.T) {
 
 			a.tokenToCache(config, i, "token", fosite.WildcardScopeStrategy)
 			// wait cache to save value
-			time.Sleep(time.Millisecond * 100)
+			time.Sleep(time.Millisecond * 10)
 
 			// modify struct should not affect cached value
 			i.Active = false
@@ -52,7 +52,7 @@ func TestCache(t *testing.T) {
 
 			a.tokenToCache(config, i, "invalid-token", fosite.WildcardScopeStrategy)
 			// wait cache to save value
-			time.Sleep(time.Millisecond * 100)
+			time.Sleep(time.Millisecond * 10)
 
 			v := a.tokenFromCache(config, "invalid-token", fosite.WildcardScopeStrategy)
 			require.Nil(t, v)
@@ -62,7 +62,7 @@ func TestCache(t *testing.T) {
 			ok := a.tokenCache.Set("invalid-json", []byte("invalid-json-string"), 1)
 			require.True(t, ok)
 			// wait cache to save value
-			time.Sleep(time.Millisecond * 100)
+			time.Sleep(time.Millisecond * 10)
 
 			v := a.tokenFromCache(config, "invalid-json", fosite.WildcardScopeStrategy)
 			require.Nil(t, v)
@@ -73,16 +73,16 @@ func TestCache(t *testing.T) {
 				Active: true,
 			}
 
-			config, _, _ := a.Config([]byte(`{ "cache": { "ttl": "1s" } }`))
+			config, _, _ := a.Config([]byte(`{ "cache": { "ttl": "100ms" } }`))
 			a.tokenToCache(config, i, "token", fosite.WildcardScopeStrategy)
 			// wait cache to save value
-			time.Sleep(time.Millisecond * 100)
+			time.Sleep(time.Millisecond * 10)
 
 			v := a.tokenFromCache(config, "token", fosite.WildcardScopeStrategy)
 			require.NotNil(t, v)
 
 			// wait cache to be expired
-			time.Sleep(time.Second)
+			time.Sleep(time.Millisecond * 100)
 			v = a.tokenFromCache(config, "token", fosite.WildcardScopeStrategy)
 			require.Nil(t, v)
 		})
