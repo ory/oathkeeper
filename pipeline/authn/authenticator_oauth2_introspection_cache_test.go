@@ -1,14 +1,15 @@
 package authn
 
 import (
+	"testing"
+	"time"
+
 	"github.com/ory/fosite"
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/viper"
 	"github.com/ory/x/logrusx"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"testing"
-	"time"
 )
 
 func TestCache(t *testing.T) {
