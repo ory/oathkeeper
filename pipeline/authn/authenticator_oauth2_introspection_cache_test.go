@@ -59,12 +59,31 @@ func TestCache(t *testing.T) {
 		})
 
 		t.Run("case=cached invalid json value should not working", func(t *testing.T) {
-			ok := a.tokenCache.Set("invalid-json", "invalid-json-string", 1)
+			ok := a.tokenCache.Set("invalid-json", []byte("invalid-json-string"), 1)
 			require.True(t, ok)
 			// wait cache to save value
 			time.Sleep(time.Millisecond * 100)
 
 			v := a.tokenFromCache(config, "invalid-json", fosite.WildcardScopeStrategy)
+			require.Nil(t, v)
+		})
+
+		t.Run("case=cache with ttl", func(t *testing.T) {
+			i := &AuthenticatorOAuth2IntrospectionResult{
+				Active: true,
+			}
+
+			config, _, _ := a.Config([]byte(`{ "cache": { "ttl": "1s" } }`))
+			a.tokenToCache(config, i, "token", fosite.WildcardScopeStrategy)
+			// wait cache to save value
+			time.Sleep(time.Millisecond * 100)
+
+			v := a.tokenFromCache(config, "token", fosite.WildcardScopeStrategy)
+			require.NotNil(t, v)
+
+			// wait cache to be expired
+			time.Sleep(time.Second)
+			v = a.tokenFromCache(config, "token", fosite.WildcardScopeStrategy)
 			require.Nil(t, v)
 		})
 	})
