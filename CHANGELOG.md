@@ -3,70 +3,72 @@
 
 **Table of Contents**
 
-- [0.0.0 (2021-08-10)](#000-2021-08-10)
+- [0.0.0 (2021-08-31)](#000-2021-08-31)
+- [0.38.15-beta.1 (2021-08-28)](#03815-beta1-2021-08-28)
   - [Bug Fixes](#bug-fixes)
+  - [Code Generation](#code-generation)
   - [Documentation](#documentation)
   - [Features](#features)
 - [0.38.14-beta.1 (2021-07-14)](#03814-beta1-2021-07-14)
   - [Bug Fixes](#bug-fixes-1)
-  - [Code Generation](#code-generation)
+  - [Code Generation](#code-generation-1)
   - [Documentation](#documentation-1)
   - [Features](#features-1)
   - [Reverts](#reverts)
 - [0.38.12-beta.1 (2021-06-22)](#03812-beta1-2021-06-22)
   - [Bug Fixes](#bug-fixes-2)
-  - [Code Generation](#code-generation-1)
+  - [Code Generation](#code-generation-2)
   - [Features](#features-2)
   - [Tests](#tests)
   - [Unclassified](#unclassified)
 - [0.38.11-beta.1 (2021-05-13)](#03811-beta1-2021-05-13)
   - [Bug Fixes](#bug-fixes-3)
-  - [Code Generation](#code-generation-2)
+  - [Code Generation](#code-generation-3)
   - [Reverts](#reverts-1)
 - [0.38.10-beta.2 (2021-05-05)](#03810-beta2-2021-05-05)
   - [Bug Fixes](#bug-fixes-4)
-  - [Code Generation](#code-generation-3)
+  - [Code Generation](#code-generation-4)
   - [Code Refactoring](#code-refactoring)
   - [Documentation](#documentation-2)
   - [Features](#features-3)
 - [0.38.9-beta.1 (2021-03-17)](#0389-beta1-2021-03-17)
-  - [Code Generation](#code-generation-4)
+  - [Code Generation](#code-generation-5)
 - [0.38.9-beta.1.pre.3 (2021-03-16)](#0389-beta1pre3-2021-03-16)
   - [Bug Fixes](#bug-fixes-5)
-  - [Code Generation](#code-generation-5)
-- [0.38.9-beta.1.pre.2 (2021-03-15)](#0389-beta1pre2-2021-03-15)
   - [Code Generation](#code-generation-6)
+- [0.38.9-beta.1.pre.2 (2021-03-15)](#0389-beta1pre2-2021-03-15)
+  - [Code Generation](#code-generation-7)
 - [0.38.9-beta.1.pre.1 (2021-03-15)](#0389-beta1pre1-2021-03-15)
   - [Bug Fixes](#bug-fixes-6)
-  - [Code Generation](#code-generation-7)
+  - [Code Generation](#code-generation-8)
   - [Unclassified](#unclassified-1)
 - [0.38.8-beta.1 (2021-02-25)](#0388-beta1-2021-02-25)
   - [Bug Fixes](#bug-fixes-7)
-  - [Code Generation](#code-generation-8)
+  - [Code Generation](#code-generation-9)
   - [Unclassified](#unclassified-2)
 - [0.38.7-beta.1 (2021-02-22)](#0387-beta1-2021-02-22)
   - [Bug Fixes](#bug-fixes-8)
-  - [Code Generation](#code-generation-9)
+  - [Code Generation](#code-generation-10)
   - [Features](#features-4)
 - [0.38.6-beta.1 (2021-01-27)](#0386-beta1-2021-01-27)
-  - [Code Generation](#code-generation-10)
+  - [Code Generation](#code-generation-11)
   - [Documentation](#documentation-3)
   - [Features](#features-5)
 - [0.38.5-beta.1 (2020-12-10)](#0385-beta1-2020-12-10)
   - [Bug Fixes](#bug-fixes-9)
-  - [Code Generation](#code-generation-11)
+  - [Code Generation](#code-generation-12)
   - [Documentation](#documentation-4)
   - [Features](#features-6)
   - [Unclassified](#unclassified-3)
 - [0.38.4-beta.1 (2020-09-28)](#0384-beta1-2020-09-28)
   - [Bug Fixes](#bug-fixes-10)
-  - [Code Generation](#code-generation-12)
+  - [Code Generation](#code-generation-13)
   - [Documentation](#documentation-5)
   - [Features](#features-7)
   - [Unclassified](#unclassified-4)
 - [0.38.3-beta.1 (2020-07-29)](#0383-beta1-2020-07-29)
   - [Bug Fixes](#bug-fixes-11)
-  - [Code Generation](#code-generation-13)
+  - [Code Generation](#code-generation-14)
   - [Documentation](#documentation-6)
   - [Features](#features-8)
 - [0.38.2-beta.1 (2020-05-25)](#0382-beta1-2020-05-25)
@@ -243,12 +245,21 @@
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-# [0.0.0](https://github.com/ory/oathkeeper/compare/v0.38.14-beta.1...v0.0.0) (2021-08-10)
+# [0.0.0](https://github.com/ory/oathkeeper/compare/v0.38.15-beta.1...v0.0.0) (2021-08-31)
+
+# [0.38.15-beta.1](https://github.com/ory/oathkeeper/compare/v0.38.14-beta.1...v0.38.15-beta.1) (2021-08-28)
+
+This release primarily resolves issues with the SDK publishing pipeline.
 
 ### Bug Fixes
 
 - Do not modify original headers
   ([1f6c430](https://github.com/ory/oathkeeper/commit/1f6c4306c3ec0e860b6606e06133c1f2a796c8e1))
+
+### Code Generation
+
+- Pin v0.38.15-beta.1 release commit
+  ([95185bb](https://github.com/ory/oathkeeper/commit/95185bb1c9ac6d78a4e79a3b4866ef8190176073))
 
 ### Documentation
 
