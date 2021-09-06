@@ -85,31 +85,51 @@ func TestAuthenticatorBearerToken(t *testing.T) {
 				},
 			},
 			{
-				d: "should pass through method, path, and headers to auth server",
-				r: &http.Request{Header: http.Header{"Authorization": {"bearer zyx"}}, URL: &url.URL{Path: "/users/123?query=string"}, Method: "PUT"},
+				d: "should pass through method, path, and headers to auth server; should NOT pass through query parameters by default for backwards compatibility",
+				r: &http.Request{Header: http.Header{"Authorization": {"bearer zyx"}}, URL: &url.URL{Path: "/users/123", RawQuery: "query=string"}, Method: "PUT"},
 				router: func(w http.ResponseWriter, r *http.Request) {
 					assert.Equal(t, r.Method, "PUT")
-					assert.Equal(t, r.URL.Path, "/users/123?query=string")
+					assert.Equal(t, r.URL.Path, "/users/123")
+					assert.Equal(t, r.URL.RawQuery, "")
 					assert.Equal(t, r.Header.Get("Authorization"), "bearer zyx")
 					w.WriteHeader(200)
 					w.Write([]byte(`{"sub": "123"}`))
 				},
+				config:    []byte(`{"preserve_query": true}`),
 				expectErr: false,
 				expectSess: &AuthenticationSession{
 					Subject: "123",
 				},
 			},
 			{
-				d: "should pass through method and headers ONLY to auth server when PreservePath is true",
-				r: &http.Request{Header: http.Header{"Authorization": {"bearer zyx"}}, URL: &url.URL{Path: "/users/123?query=string"}, Method: "PUT"},
+				d: "should pass through method, headers, and query ONLY to auth server when PreservePath is true and PreserveQuery is false",
+				r: &http.Request{Header: http.Header{"Authorization": {"bearer zyx"}}, URL: &url.URL{Path: "/users/123", RawQuery: "query=string"}, Method: "PUT"},
 				router: func(w http.ResponseWriter, r *http.Request) {
 					assert.Equal(t, r.Method, "PUT")
 					assert.Equal(t, r.URL.Path, "/")
+					assert.Equal(t, r.URL.RawQuery, "query=string")
 					assert.Equal(t, r.Header.Get("Authorization"), "bearer zyx")
 					w.WriteHeader(200)
 					w.Write([]byte(`{"sub": "123"}`))
 				},
-				config:    []byte(`{"preserve_path": true}`),
+				config:    []byte(`{"preserve_path": true, "preserve_query": false}`),
+				expectErr: false,
+				expectSess: &AuthenticationSession{
+					Subject: "123",
+				},
+			},
+			{
+				d: "should pass through method, headers, and path ONLY to auth server when PreservePath is false and PreserveQuery is true",
+				r: &http.Request{Header: http.Header{"Authorization": {"bearer zyx"}}, URL: &url.URL{Path: "/users/123", RawQuery: "query=string"}, Method: "PUT"},
+				router: func(w http.ResponseWriter, r *http.Request) {
+					assert.Equal(t, r.Method, "PUT")
+					assert.Equal(t, r.URL.Path, "/users/123")
+					assert.Equal(t, r.URL.RawQuery, "")
+					assert.Equal(t, r.Header.Get("Authorization"), "bearer zyx")
+					w.WriteHeader(200)
+					w.Write([]byte(`{"sub": "123"}`))
+				},
+				config:    []byte(`{"preserve_path": false, "preserve_query": true}`),
 				expectErr: false,
 				expectSess: &AuthenticationSession{
 					Subject: "123",
@@ -117,7 +137,7 @@ func TestAuthenticatorBearerToken(t *testing.T) {
 			},
 			{
 				d: "should pass and set host when preserve_host is true",
-				r: &http.Request{Host: "some-host", Header: http.Header{"Authorization": {"bearer zyx"}}, URL: &url.URL{Path: "/users/123?query=string"}, Method: "PUT"},
+				r: &http.Request{Host: "some-host", Header: http.Header{"Authorization": {"bearer zyx"}}, URL: &url.URL{Path: "/users/123", RawQuery: "query=string"}, Method: "PUT"},
 				router: func(w http.ResponseWriter, r *http.Request) {
 					assert.Equal(t, r.Method, "PUT")
 					assert.Equal(t, "some-host", r.Header.Get("X-Forwarded-Host"))
@@ -133,7 +153,7 @@ func TestAuthenticatorBearerToken(t *testing.T) {
 			},
 			{
 				d: "should pass and set additional hosts but not overwrite x-forwarded-host",
-				r: &http.Request{Host: "some-host", Header: http.Header{"Authorization": {"bearer zyx"}}, URL: &url.URL{Path: "/users/123?query=string"}, Method: "PUT"},
+				r: &http.Request{Host: "some-host", Header: http.Header{"Authorization": {"bearer zyx"}}, URL: &url.URL{Path: "/users/123", RawQuery: "query=string"}, Method: "PUT"},
 				router: func(w http.ResponseWriter, r *http.Request) {
 					assert.Equal(t, r.Method, "PUT")
 					assert.Equal(t, "some-host", r.Header.Get("X-Forwarded-Host"))
@@ -155,7 +175,7 @@ func TestAuthenticatorBearerToken(t *testing.T) {
 						"Authorization":  {"bearer zyx"},
 						"Content-Length": {"4"},
 					},
-					URL:    &url.URL{Path: "/users/123?query=string"},
+					URL:    &url.URL{Path: "/users/123", RawQuery: "query=string"},
 					Method: "PUT",
 					Body:   ioutil.NopCloser(bytes.NewBufferString("body")),
 				},

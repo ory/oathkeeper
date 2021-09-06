@@ -26,6 +26,7 @@ type AuthenticatorBearerTokenFilter struct {
 type AuthenticatorBearerTokenConfiguration struct {
 	CheckSessionURL     string                      `json:"check_session_url"`
 	BearerTokenLocation *helper.BearerTokenLocation `json:"token_from"`
+	PreserveQuery       bool                        `json:"preserve_query"`
 	PreservePath        bool                        `json:"preserve_path"`
 	PreserveHost        bool                        `json:"preserve_host"`
 	ExtraFrom           string                      `json:"extra_from"`
@@ -84,7 +85,7 @@ func (a *AuthenticatorBearerToken) Authenticate(r *http.Request, session *Authen
 		return errors.WithStack(ErrAuthenticatorNotResponsible)
 	}
 
-	body, err := forwardRequestToSessionStore(r, cf.CheckSessionURL, cf.PreservePath, cf.PreserveHost, cf.SetHeaders)
+	body, err := forwardRequestToSessionStore(r, cf.CheckSessionURL, cf.PreserveQuery, cf.PreservePath, cf.PreserveHost, cf.SetHeaders)
 	if err != nil {
 		return err
 	}
