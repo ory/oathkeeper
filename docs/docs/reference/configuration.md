@@ -18,11 +18,15 @@ Config files can be formatted as JSON, YAML and TOML. Some configuration values
 support reloading without server restart. All configuration values can be set
 using environment variables, as documented below.
 
+:::warning Disclaimer
+
 This reference configuration documents all keys, also deprecated ones! It is a
 reference for all possible configuration values.
 
 If you are looking for an example configuration, it is better to try out the
 quickstart.
+
+:::
 
 To find out more about edge cases like setting string array values through
 environmental variables head to the
@@ -150,6 +154,16 @@ authenticators:
       #
       check_session_url: https://session-store-host
 
+      ## preserve_query ##
+      #
+      # Set this value using environment variables on
+      # - Linux/macOS:
+      #    $ export AUTHENTICATORS_COOKIE_SESSION_CONFIG_PRESERVE_QUERY=<value>
+      # - Windows Command Line (CMD):
+      #    > set AUTHENTICATORS_COOKIE_SESSION_CONFIG_PRESERVE_QUERY=<value>
+      #
+      preserve_query: false
+
       ## preserve_path ##
       #
       # Set this value using environment variables on
@@ -159,6 +173,16 @@ authenticators:
       #    > set AUTHENTICATORS_COOKIE_SESSION_CONFIG_PRESERVE_PATH=<value>
       #
       preserve_path: false
+
+      ## preserve_host ##
+      #
+      # Set this value using environment variables on
+      # - Linux/macOS:
+      #    $ export AUTHENTICATORS_COOKIE_SESSION_CONFIG_PRESERVE_HOST=<value>
+      # - Windows Command Line (CMD):
+      #    > set AUTHENTICATORS_COOKIE_SESSION_CONFIG_PRESERVE_HOST=<value>
+      #
+      preserve_host: false
 
       ## extra_from ##
       #
@@ -226,6 +250,16 @@ authenticators:
       #
       check_session_url: https://session-store-host
 
+      ## preserve_query ##
+      #
+      # Set this value using environment variables on
+      # - Linux/macOS:
+      #    $ export AUTHENTICATORS_BEARER_TOKEN_CONFIG_PRESERVE_QUERY=<value>
+      # - Windows Command Line (CMD):
+      #    > set AUTHENTICATORS_BEARER_TOKEN_CONFIG_PRESERVE_QUERY=<value>
+      #
+      preserve_query: false
+
       ## preserve_path ##
       #
       # Set this value using environment variables on
@@ -235,6 +269,16 @@ authenticators:
       #    > set AUTHENTICATORS_BEARER_TOKEN_CONFIG_PRESERVE_PATH=<value>
       #
       preserve_path: false
+
+      ## preserve_host ##
+      #
+      # Set this value using environment variables on
+      # - Linux/macOS:
+      #    $ export AUTHENTICATORS_BEARER_TOKEN_CONFIG_PRESERVE_HOST=<value>
+      # - Windows Command Line (CMD):
+      #    > set AUTHENTICATORS_BEARER_TOKEN_CONFIG_PRESERVE_HOST=<value>
+      #
+      preserve_host: false
 
       ## extra_from ##
       #
