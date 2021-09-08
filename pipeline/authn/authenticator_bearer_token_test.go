@@ -10,6 +10,7 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
 
 	"net/http/httptest"
@@ -136,6 +137,21 @@ func TestAuthenticatorBearerToken(t *testing.T) {
 				},
 			},
 			{
+				d: "should preserve path, query in check_session_url when preserve_path, preserve_query are true",
+				r: &http.Request{Host: "some-host", Header: http.Header{"Authorization": {"bearer zyx"}}, URL: &url.URL{Path: "/client/request/path", RawQuery: "q=client-request-query"}, Method: "PUT"},
+				router: func(w http.ResponseWriter, r *http.Request) {
+					assert.Equal(t, r.URL.Path, "/configured/path")
+					assert.Equal(t, r.URL.RawQuery, "q=configured-query")
+					w.WriteHeader(200)
+					w.Write([]byte(`{"sub": "123"}`))
+				},
+				config:    []byte(`{"preserve_path": true, "preserve_query": true, "check_session_url": "http://origin-replaced-in-test/configured/path?q=configured-query"}`),
+				expectErr: false,
+				expectSess: &AuthenticationSession{
+					Subject: "123",
+				},
+			},
+			{
 				d: "should pass and set host when preserve_host is true",
 				r: &http.Request{Host: "some-host", Header: http.Header{"Authorization": {"bearer zyx"}}, URL: &url.URL{Path: "/users/123", RawQuery: "query=string"}, Method: "PUT"},
 				router: func(w http.ResponseWriter, r *http.Request) {
@@ -237,14 +253,21 @@ func TestAuthenticatorBearerToken(t *testing.T) {
 				}
 				defer ts.Close()
 
-				tc.config, _ = sjson.SetBytes(tc.config, "check_session_url", ts.URL)
+				testCheckSessionUrl, err := url.Parse(ts.URL)
+				require.NoError(t, err)
+				configCheckSessionUrl, err := url.Parse(gjson.Get(string(tc.config), "check_session_url").String())
+				require.NoError(t, err)
+				testCheckSessionUrl.Path = configCheckSessionUrl.Path
+				testCheckSessionUrl.RawQuery = configCheckSessionUrl.RawQuery
+
+				tc.config, _ = sjson.SetBytes(tc.config, "check_session_url", testCheckSessionUrl.String())
 				sess := new(AuthenticationSession)
 				originalHeaders := http.Header{}
 				for k, v := range tc.r.Header {
 					originalHeaders[k] = v
 				}
 
-				err := pipelineAuthenticator.Authenticate(tc.r, sess, tc.config, nil)
+				err = pipelineAuthenticator.Authenticate(tc.r, sess, tc.config, nil)
 				if tc.expectErr {
 					require.Error(t, err)
 					if tc.expectExactErr != nil {

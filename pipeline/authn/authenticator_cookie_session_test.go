@@ -91,6 +91,24 @@ func TestAuthenticatorCookieSession(t *testing.T) {
 			assert.Equal(t, &AuthenticationSession{Subject: "123"}, session)
 		})
 
+		t.Run("should preserve path, query in check_session_url when preserve_path, preserve_query are true", func(t *testing.T) {
+			testServer, requestRecorder := makeServer(200, `{"subject": "123"}`)
+			err := pipelineAuthenticator.Authenticate(
+				makeRequest("PUT", "/client/request/path", "q=client-request-query", map[string]string{"sessionid": "zyx"}, ""),
+				session,
+				json.RawMessage(fmt.Sprintf(`{"check_session_url": "%s/configured/path?q=configured-query", "preserve_path": true, "preserve_query": true}`, testServer.URL)),
+				nil,
+			)
+			require.NoError(t, err, "%#v", errors.Cause(err))
+			assert.Len(t, requestRecorder.requests, 1)
+			r := requestRecorder.requests[0]
+			assert.Equal(t, r.Method, "PUT")
+			assert.Equal(t, r.URL.Path, "/configured/path")
+			assert.Equal(t, r.URL.RawQuery, "q=configured-query")
+			assert.Equal(t, r.Header.Get("Cookie"), "sessionid=zyx")
+			assert.Equal(t, &AuthenticationSession{Subject: "123"}, session)
+		})
+
 		t.Run("description=should pass through x-forwarded-host if preserve_host is set to true", func(t *testing.T) {
 			testServer, requestRecorder := makeServer(200, `{"subject": "123"}`)
 			req := makeRequest("PUT", "/users/123", "query=string", map[string]string{"sessionid": "zyx"}, "")
