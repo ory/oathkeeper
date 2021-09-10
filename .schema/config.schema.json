@@ -420,6 +420,12 @@
           "title": "Only Cookies",
           "description": "A list of possible cookies to look for on incoming requests, and will fallthrough to the next authenticator if none of the passed cookies are set on the request."
         },
+        "preserve_query": {
+          "title": "Preserve Query",
+          "type": "boolean",
+          "default": true,
+          "description": "When unset or set to true, any query parameters specified in `check_session_url` will be preserved instead of overwriting them with the query parameters from the original request"
+        },
         "preserve_path": {
           "title": "Preserve Path",
           "type": "boolean",
@@ -511,6 +517,12 @@
               }
             }
           ]
+        },
+        "preserve_query": {
+          "title": "Preserve Query",
+          "type": "boolean",
+          "default": true,
+          "description": "When unset or set to true, any query parameters specified in `check_session_url` will be preserved instead of overwriting them with the query parameters from the original request"
         },
         "preserve_path": {
           "title": "Preserve Path",

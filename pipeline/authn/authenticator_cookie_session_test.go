@@ -32,7 +32,7 @@ func TestAuthenticatorCookieSession(t *testing.T) {
 		t.Run("description=should fail because session store returned 400", func(t *testing.T) {
 			testServer, _ := makeServer(400, `{}`)
 			err := pipelineAuthenticator.Authenticate(
-				makeRequest("GET", "/", map[string]string{"sessionid": "zyx"}, ""),
+				makeRequest("GET", "/", "", map[string]string{"sessionid": "zyx"}, ""),
 				session,
 				json.RawMessage(fmt.Sprintf(`{"check_session_url": "%s"}`, testServer.URL)),
 				nil,
@@ -43,7 +43,7 @@ func TestAuthenticatorCookieSession(t *testing.T) {
 		t.Run("description=should pass because session store returned 200", func(t *testing.T) {
 			testServer, _ := makeServer(200, `{"subject": "123", "extra": {"foo": "bar"}}`)
 			err := pipelineAuthenticator.Authenticate(
-				makeRequest("GET", "/", map[string]string{"sessionid": "zyx"}, ""),
+				makeRequest("GET", "/", "", map[string]string{"sessionid": "zyx"}, ""),
 				session,
 				json.RawMessage(fmt.Sprintf(`{"check_session_url": "%s"}`, testServer.URL)),
 				nil,
@@ -58,7 +58,7 @@ func TestAuthenticatorCookieSession(t *testing.T) {
 		t.Run("description=should pass through method, path, and headers to auth server", func(t *testing.T) {
 			testServer, requestRecorder := makeServer(200, `{"subject": "123"}`)
 			err := pipelineAuthenticator.Authenticate(
-				makeRequest("PUT", "/users/123?query=string", map[string]string{"sessionid": "zyx"}, ""),
+				makeRequest("PUT", "/users/123", "query=string", map[string]string{"sessionid": "zyx"}, ""),
 				session,
 				json.RawMessage(fmt.Sprintf(`{"check_session_url": "%s"}`, testServer.URL)),
 				nil,
@@ -67,17 +67,18 @@ func TestAuthenticatorCookieSession(t *testing.T) {
 			assert.Len(t, requestRecorder.requests, 1)
 			r := requestRecorder.requests[0]
 			assert.Equal(t, r.Method, "PUT")
-			assert.Equal(t, r.URL.Path, "/users/123?query=string")
+			assert.Equal(t, r.URL.Path, "/users/123")
+			assert.Equal(t, r.URL.RawQuery, "query=string")
 			assert.Equal(t, r.Header.Get("Cookie"), "sessionid=zyx")
 			assert.Equal(t, &AuthenticationSession{Subject: "123"}, session)
 		})
 
-		t.Run("description=should pass through method and headers ONLY to auth server when PreservePath is true", func(t *testing.T) {
+		t.Run("description=should pass through method and headers ONLY to auth server when PreservePath and PreserveQuery are true", func(t *testing.T) {
 			testServer, requestRecorder := makeServer(200, `{"subject": "123"}`)
 			err := pipelineAuthenticator.Authenticate(
-				makeRequest("PUT", "/users/123?query=string", map[string]string{"sessionid": "zyx"}, ""),
+				makeRequest("PUT", "/users/123", "query=string", map[string]string{"sessionid": "zyx"}, ""),
 				session,
-				json.RawMessage(fmt.Sprintf(`{"check_session_url": "%s", "preserve_path": true}`, testServer.URL)),
+				json.RawMessage(fmt.Sprintf(`{"check_session_url": "%s", "preserve_path": true, "preserve_query": true}`, testServer.URL)),
 				nil,
 			)
 			require.NoError(t, err, "%#v", errors.Cause(err))
@@ -85,13 +86,32 @@ func TestAuthenticatorCookieSession(t *testing.T) {
 			r := requestRecorder.requests[0]
 			assert.Equal(t, r.Method, "PUT")
 			assert.Equal(t, r.URL.Path, "/")
+			assert.Equal(t, r.URL.RawQuery, "")
+			assert.Equal(t, r.Header.Get("Cookie"), "sessionid=zyx")
+			assert.Equal(t, &AuthenticationSession{Subject: "123"}, session)
+		})
+
+		t.Run("should preserve path, query in check_session_url when preserve_path, preserve_query are true", func(t *testing.T) {
+			testServer, requestRecorder := makeServer(200, `{"subject": "123"}`)
+			err := pipelineAuthenticator.Authenticate(
+				makeRequest("PUT", "/client/request/path", "q=client-request-query", map[string]string{"sessionid": "zyx"}, ""),
+				session,
+				json.RawMessage(fmt.Sprintf(`{"check_session_url": "%s/configured/path?q=configured-query", "preserve_path": true, "preserve_query": true}`, testServer.URL)),
+				nil,
+			)
+			require.NoError(t, err, "%#v", errors.Cause(err))
+			assert.Len(t, requestRecorder.requests, 1)
+			r := requestRecorder.requests[0]
+			assert.Equal(t, r.Method, "PUT")
+			assert.Equal(t, r.URL.Path, "/configured/path")
+			assert.Equal(t, r.URL.RawQuery, "q=configured-query")
 			assert.Equal(t, r.Header.Get("Cookie"), "sessionid=zyx")
 			assert.Equal(t, &AuthenticationSession{Subject: "123"}, session)
 		})
 
 		t.Run("description=should pass through x-forwarded-host if preserve_host is set to true", func(t *testing.T) {
 			testServer, requestRecorder := makeServer(200, `{"subject": "123"}`)
-			req := makeRequest("PUT", "/users/123?query=string", map[string]string{"sessionid": "zyx"}, "")
+			req := makeRequest("PUT", "/users/123", "query=string", map[string]string{"sessionid": "zyx"}, "")
 			expectedHost := "some-host"
 			req.Host = expectedHost
 			err := pipelineAuthenticator.Authenticate(
@@ -112,7 +132,7 @@ func TestAuthenticatorCookieSession(t *testing.T) {
 
 		t.Run("description=should pass not override x-forwarded-host in set_headers", func(t *testing.T) {
 			testServer, requestRecorder := makeServer(200, `{"subject": "123"}`)
-			req := makeRequest("PUT", "/users/123?query=string", map[string]string{"sessionid": "zyx"}, "")
+			req := makeRequest("PUT", "/users/123", "query=string", map[string]string{"sessionid": "zyx"}, "")
 			expectedHost := "some-host"
 			req.Host = expectedHost
 			err := pipelineAuthenticator.Authenticate(
@@ -136,7 +156,7 @@ func TestAuthenticatorCookieSession(t *testing.T) {
 		t.Run("description=does not pass request body through to auth server", func(t *testing.T) {
 			testServer, requestRecorder := makeServer(200, `{}`)
 			pipelineAuthenticator.Authenticate(
-				makeRequest("POST", "/", map[string]string{"sessionid": "zyx"}, "Some body..."),
+				makeRequest("POST", "/", "", map[string]string{"sessionid": "zyx"}, "Some body..."),
 				session,
 				json.RawMessage(fmt.Sprintf(`{"check_session_url": "%s"}`, testServer.URL)),
 				nil,
@@ -151,7 +171,7 @@ func TestAuthenticatorCookieSession(t *testing.T) {
 		t.Run("description=should fallthrough if only is specified and no cookie specified is set", func(t *testing.T) {
 			testServer, requestRecorder := makeServer(200, `{}`)
 			err := pipelineAuthenticator.Authenticate(
-				makeRequest("GET", "/", map[string]string{"sessionid": "zyx"}, ""),
+				makeRequest("GET", "/", "", map[string]string{"sessionid": "zyx"}, ""),
 				session,
 				json.RawMessage(fmt.Sprintf(`{"only": ["session", "sid"], "check_session_url": "%s"}`, testServer.URL)),
 				nil,
@@ -163,7 +183,7 @@ func TestAuthenticatorCookieSession(t *testing.T) {
 		t.Run("description=should fallthrough if is missing and it has no cookies", func(t *testing.T) {
 			testServer, requestRecorder := makeServer(200, `{}`)
 			err := pipelineAuthenticator.Authenticate(
-				makeRequest("GET", "/", map[string]string{}, ""),
+				makeRequest("GET", "/", "", map[string]string{}, ""),
 				session,
 				json.RawMessage(fmt.Sprintf(`{"check_session_url": "%s"}`, testServer.URL)),
 				nil,
@@ -175,7 +195,7 @@ func TestAuthenticatorCookieSession(t *testing.T) {
 		t.Run("description=should not fallthrough if only is specified and cookie specified is set", func(t *testing.T) {
 			testServer, _ := makeServer(200, `{}`)
 			err := pipelineAuthenticator.Authenticate(
-				makeRequest("GET", "/", map[string]string{"sid": "zyx"}, ""),
+				makeRequest("GET", "/", "", map[string]string{"sid": "zyx"}, ""),
 				session,
 				json.RawMessage(fmt.Sprintf(`{"only": ["session", "sid"], "check_session_url": "%s"}`, testServer.URL)),
 				nil,
@@ -186,7 +206,7 @@ func TestAuthenticatorCookieSession(t *testing.T) {
 		t.Run("description=should work with nested extra keys", func(t *testing.T) {
 			testServer, _ := makeServer(200, `{"subject": "123", "session": {"foo": "bar"}}`)
 			err := pipelineAuthenticator.Authenticate(
-				makeRequest("GET", "/", map[string]string{"sessionid": "zyx"}, ""),
+				makeRequest("GET", "/", "", map[string]string{"sessionid": "zyx"}, ""),
 				session,
 				json.RawMessage(fmt.Sprintf(`{"check_session_url": "%s", "extra_from": "session"}`, testServer.URL)),
 				nil,
@@ -201,7 +221,7 @@ func TestAuthenticatorCookieSession(t *testing.T) {
 		t.Run("description=should work with the root key for extra and a custom subject key", func(t *testing.T) {
 			testServer, _ := makeServer(200, `{"identity": {"id": "123"}, "session": {"foo": "bar"}}`)
 			err := pipelineAuthenticator.Authenticate(
-				makeRequest("GET", "/", map[string]string{"sessionid": "zyx"}, ""),
+				makeRequest("GET", "/", "", map[string]string{"sessionid": "zyx"}, ""),
 				session,
 				json.RawMessage(fmt.Sprintf(`{"check_session_url": "%s", "subject_from": "identity.id", "extra_from": "@this"}`, testServer.URL)),
 				nil,
@@ -232,7 +252,7 @@ func makeServer(statusCode int, responseBody string) (*httptest.Server, *Request
 	return testServer, requestRecorder
 }
 
-func makeRequest(method string, path string, cookies map[string]string, bodyStr string) *http.Request {
+func makeRequest(method string, path string, rawQuery string, cookies map[string]string, bodyStr string) *http.Request {
 	var body io.ReadCloser
 	header := http.Header{}
 	if bodyStr != "" {
@@ -241,7 +261,7 @@ func makeRequest(method string, path string, cookies map[string]string, bodyStr 
 	}
 	req := &http.Request{
 		Method: method,
-		URL:    &url.URL{Path: path},
+		URL:    &url.URL{Path: path, RawQuery: rawQuery},
 		Header: header,
 		Body:   body,
 	}
