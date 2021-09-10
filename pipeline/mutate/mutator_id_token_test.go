@@ -38,7 +38,7 @@ import (
 	"github.com/ory/oathkeeper/rule"
 	"github.com/ory/oathkeeper/x"
 
-	"github.com/form3tech-oss/jwt-go"
+	"github.com/golang-jwt/jwt/v4"
 
 	"github.com/ory/viper"
 

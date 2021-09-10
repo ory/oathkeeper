@@ -29,6 +29,7 @@ require (
 	github.com/gobuffalo/httptest v1.0.2
 	github.com/gobuffalo/packr/v2 v2.8.0
 	github.com/gobwas/glob v0.2.3
+	github.com/golang-jwt/jwt/v4 v4.0.0
 	github.com/golang/gddo v0.0.0-20190904175337-72a348e765d2
 	github.com/golang/mock v1.4.3
 	github.com/google/go-replayers/httpreplay v0.1.0

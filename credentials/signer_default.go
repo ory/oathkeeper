@@ -7,7 +7,7 @@ import (
 	"net/url"
 	"reflect"
 
-	"github.com/form3tech-oss/jwt-go"
+	"github.com/golang-jwt/jwt/v4"
 	"github.com/pkg/errors"
 	"golang.org/x/crypto/ed25519"
 	"gopkg.in/square/go-jose.v2"
