@@ -3,7 +3,7 @@
 
 **Table of Contents**
 
-- [0.0.0 (2021-09-08)](#000-2021-09-08)
+- [0.0.0 (2021-09-10)](#000-2021-09-10)
   - [Features](#features)
 - [0.38.15-beta.1 (2021-08-28)](#03815-beta1-2021-08-28)
   - [Bug Fixes](#bug-fixes)
@@ -246,10 +246,13 @@
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-# [0.0.0](https://github.com/ory/oathkeeper/compare/v0.38.15-beta.1...v0.0.0) (2021-09-08)
+# [0.0.0](https://github.com/ory/oathkeeper/compare/v0.38.15-beta.1...v0.0.0) (2021-09-10)
 
 ### Features
 
+- **jwt:** Replace jwt module
+  ([#818](https://github.com/ory/oathkeeper/issues/818))
+  ([301b673](https://github.com/ory/oathkeeper/commit/301b673483b7af59dd0f38148edd12da22c67a6c))
 - Store oauth2 introspection result as bytes in cache
   ([#811](https://github.com/ory/oathkeeper/issues/811))
   ([5645605](https://github.com/ory/oathkeeper/commit/56456056909d19c04353347e9543e9dce73edfca))
