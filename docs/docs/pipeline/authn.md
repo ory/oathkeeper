@@ -247,8 +247,8 @@ appropriately.
   will be preserved instead of replacing the path with the path of the request
   being checked.
 - `preserve_query` (boolean, optional) - If unset or true, query parameters in
-  `check_session_url` will be preserved instead of replacing them with the
-  query of the request being checked.
+  `check_session_url` will be preserved instead of replacing them with the query
+  of the request being checked.
 - `extra_from` (string, optional - defaults to `extra`) - A
   [GJSON Path](https://github.com/tidwall/gjson/blob/master/SYNTAX.md) pointing
   to the `extra` field. This defaults to `extra`, but it could also be `@this`
@@ -347,8 +347,8 @@ appropriately.
   will be preserved instead of replacing the path with the path of the request
   being checked.
 - `preserve_query` (boolean, optional) - If unset or true, query parameters in
-  `check_session_url` will be preserved instead of replacing them with the
-  query of the request being checked.
+  `check_session_url` will be preserved instead of replacing them with the query
+  of the request being checked.
 - `extra_from` (string, optional - defaults to `extra`) - A
   [GJSON Path](https://github.com/tidwall/gjson/blob/master/SYNTAX.md) pointing
   to the `extra` field. This defaults to `extra`, but it could also be `@this`
