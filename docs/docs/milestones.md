@@ -42,8 +42,6 @@ New feature or request.
 
 - [ ] Implement GRPC response handler in Decisions API
       ([oathkeeper#134](https://github.com/ory/oathkeeper/issues/134))
-- [ ] Pass query parameters to the hydrator
-      ([oathkeeper#339](https://github.com/ory/oathkeeper/issues/339))
 - [ ] Switch to go-jose key generation lib
       ([oathkeeper#419](https://github.com/ory/oathkeeper/issues/419))
 - [ ] remote_json: Enable timeout configuration for calls to authorization
@@ -52,8 +50,22 @@ New feature or request.
       ([oathkeeper#560](https://github.com/ory/oathkeeper/issues/560))
 - [ ] Hydator Mutator Client Credential
       ([oathkeeper#565](https://github.com/ory/oathkeeper/issues/565))
+- [ ] Header and Cookie Mutators should sign the payloads
+      ([oathkeeper#176](https://github.com/ory/oathkeeper/issues/176))
+- [ ] Url matching http method should be available in authenticators
+      ([oathkeeper#221](https://github.com/ory/oathkeeper/issues/221))
+- [ ] Better logging
+      ([oathkeeper#227](https://github.com/ory/oathkeeper/issues/227))
+- [ ] Iterate over all the available JWKs and see which one is valid when no KID
+      is present on the JWT header
+      ([oathkeeper#362](https://github.com/ory/oathkeeper/issues/362))
+- [ ] Consider jsonnet for templating
+      ([oathkeeper#423](https://github.com/ory/oathkeeper/issues/423)) -
+      [@hackerman](https://github.com/aeneasr)
 - [x] Oathkeeper behind ssl terminating balancer
       ([oathkeeper#153](https://github.com/ory/oathkeeper/issues/153))
+- [x] Pass query parameters to the hydrator
+      ([oathkeeper#339](https://github.com/ory/oathkeeper/issues/339))
 - [x] Clean up logging in case of invalid credentials
       ([oathkeeper#505](https://github.com/ory/oathkeeper/issues/505))
 - [x] Fetch JWKs from object storage (S3)
