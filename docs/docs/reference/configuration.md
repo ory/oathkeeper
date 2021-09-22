@@ -7,9 +7,6 @@ title: Configuration
 OPEN AN ISSUE IF YOU WOULD LIKE TO MAKE ADJUSTMENTS HERE AND MAINTAINERS WILL HELP YOU LOCATE THE RIGHT
 FILE -->
 
-If file `$HOME/.oathkeeper.yaml` exists, it will be used as a configuration file
-which supports all configuration settings listed below.
-
 You can load the config file from another source using the
 `-c path/to/config.yaml` or `--config path/to/config.yaml` flag:
 `oathkeeper --config path/to/config.yaml`.
@@ -70,11 +67,18 @@ access_rules:
   # - If the URL Scheme is `file://`, the access rules (an array of access rules is expected) will be fetched from the local file system.
   # - If the URL Scheme is `inline://`, the access rules (an array of access rules is expected) are expected to be a base64 encoded (with padding!) JSON/YAML string (base64_encode(`[{"id":"foo-rule","authenticators":[....]}]`)).
   # - If the URL Scheme is `http://` or `https://`, the access rules (an array of access rules is expected) will be fetched from the provided HTTP(s) location.
+  # - If the URL Scheme is `s3://`, `gs://` or `azblob://`, the access rules (an array of access rules is expected) will be fetched by an object storage (AWS S3, Google Cloud Storage, Azure Blob Storage).
+  #
+  # S3 storage also supports S3-compatible endpoints served by Minio or Ceph. See aws.ConfigFromURLParams (https://godoc.org/gocloud.dev/aws#ConfigFromURLParams) for more details on supported URL options for S3.
   #
   # Examples:
   # - - file://path/to/rules.json
   #   - inline://W3siaWQiOiJmb28tcnVsZSIsImF1dGhlbnRpY2F0b3JzIjpbXX1d
   #   - https://path-to-my-rules/rules.json
+  #   - s3://my-bucket-name/rules.json
+  #   - s3://my-bucket-name/rules.json?endpoint=minio.my-server.net
+  #   - gs://gcp-bucket-name/rules.json
+  #   - azblob://my-blob-container/rules.json
   #
   # Set this value using environment variables on
   # - Linux/macOS:
@@ -86,6 +90,10 @@ access_rules:
     - file://path/to/rules.json
     - inline://W3siaWQiOiJmb28tcnVsZSIsImF1dGhlbnRpY2F0b3JzIjpbXX1d
     - https://path-to-my-rules/rules.json
+    - s3://my-bucket-name/rules.json
+    - s3://my-bucket-name/rules.json?endpoint=minio.my-server.net
+    - gs://gcp-bucket-name/rules.json
+    - azblob://my-blob-container/rules.json
 
 ## Authenticators ##
 #
