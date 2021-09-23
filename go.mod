@@ -6,8 +6,6 @@ replace github.com/dgrijalva/jwt-go => github.com/form3tech-oss/jwt-go v1.0.3-0.
 
 replace github.com/oleiade/reflections => github.com/oleiade/reflections v1.0.1
 
-replace github.com/ory/x/tracing => github.com/ory/x/tracing v0.0.283
-
 require (
 	github.com/Azure/azure-pipeline-go v0.2.2
 	github.com/Azure/azure-storage-blob-go v0.9.0
@@ -55,7 +53,7 @@ require (
 	github.com/ory/jsonschema/v3 v3.0.1
 	github.com/ory/ladon v1.1.0
 	github.com/ory/viper v1.7.5
-	github.com/ory/x v0.0.163-1
+	github.com/ory/x v0.0.165
 	github.com/pborman/uuid v1.2.0
 	github.com/phayes/freeport v0.0.0-20180830031419-95f893ade6f2
 	github.com/pkg/errors v0.9.1
