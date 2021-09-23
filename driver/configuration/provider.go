@@ -63,6 +63,7 @@ type Provider interface {
 	TracingServiceName() string
 	TracingProvider() string
 	TracingJaegerConfig() *tracing.JaegerConfig
+	TracingZipkinConfig() *tracing.ZipkinConfig
 }
 
 type ProviderErrorHandlers interface {

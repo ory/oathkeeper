@@ -6,6 +6,8 @@ replace github.com/dgrijalva/jwt-go => github.com/form3tech-oss/jwt-go v1.0.3-0.
 
 replace github.com/oleiade/reflections => github.com/oleiade/reflections v1.0.1
 
+replace github.com/ory/x/tracing => github.com/ory/x/tracing v0.0.283
+
 require (
 	github.com/Azure/azure-pipeline-go v0.2.2
 	github.com/Azure/azure-storage-blob-go v0.9.0

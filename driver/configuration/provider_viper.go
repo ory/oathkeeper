@@ -444,3 +444,8 @@ func (v *ViperProvider) TracingJaegerConfig() *tracing.JaegerConfig {
 		),
 	}
 }
+func (v *ViperProvider) TracingZipkinConfig() *tracing.ZipkinConfig {
+	return &tracing.ZipkinConfig{
+		ServerURL: viperx.GetString(v.l, "tracing.providers.zipkin.server_url", "", "TRACING_PROVIDER_ZIPKIN_SERVER_URL"),
+	}
+}

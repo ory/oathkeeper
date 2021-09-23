@@ -424,6 +424,7 @@ func (r *RegistryMemory) Tracer() *tracing.Tracer {
 		r.trc = &tracing.Tracer{
 			ServiceName:  r.c.TracingServiceName(),
 			JaegerConfig: r.c.TracingJaegerConfig(),
+			ZipkinConfig: r.c.TracingZipkinConfig(),
 			Provider:     r.c.TracingProvider(),
 			Logger:       r.Logger(),
 		}
