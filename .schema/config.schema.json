@@ -1938,6 +1938,55 @@
         }
       }
     },
+    "tracing": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "$id": "ory://tracing-config",
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Configure distributed tracing.",
+      "properties": {
+        "provider": {
+          "type": "string",
+          "description": "Set this to the tracing backend you wish to use. Supports Zipkin. If omitted or empty, tracing will be disabled.",
+          "enum": [
+            "zipkin"
+          ],
+          "examples": [
+            "zipkin"
+          ]
+        },
+        "service_name": {
+          "type": "string",
+          "description": "Specifies the service name to use on the tracer.",
+          "examples": [
+            "Ory Oathkeeper"
+          ]
+        },
+        "providers": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "zipkin": {
+              "type": "object",
+              "additionalProperties": false,
+              "description": "Configures the zipkin tracing backend.",
+              "properties": {
+                "server_url": {
+                  "type": "string",
+                  "description": "The address of Zipkin server where spans should be sent to.",
+                  "format": "uri"
+                }
+              },
+              "examples": [
+                {
+                  "server_url": "http://localhost:9411/api/v2/spans"
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
     "log": {
       "title": "Log",
       "description": "Configure logging using the following options. Logging will always be sent to stdout and stderr.",

@@ -7,9 +7,6 @@ title: Configuration
 OPEN AN ISSUE IF YOU WOULD LIKE TO MAKE ADJUSTMENTS HERE AND MAINTAINERS WILL HELP YOU LOCATE THE RIGHT
 FILE -->
 
-If file `$HOME/.oathkeeper.yaml` exists, it will be used as a configuration file
-which supports all configuration settings listed below.
-
 You can load the config file from another source using the
 `-c path/to/config.yaml` or `--config path/to/config.yaml` flag:
 `oathkeeper --config path/to/config.yaml`.
@@ -1434,6 +1431,67 @@ mutators:
     #    > set MUTATORS_NOOP_ENABLED=<value>
     #
     enabled: true
+
+## tracing ##
+#
+# Configure distributed tracing.
+#
+tracing:
+  ## service_name ##
+  #
+  # Specifies the service name to use on the tracer.
+  #
+  # Examples:
+  # - Ory Oathkeeper
+  #
+  # Set this value using environment variables on
+  # - Linux/macOS:
+  #    $ export TRACING_SERVICE_NAME=<value>
+  # - Windows Command Line (CMD):
+  #    > set TRACING_SERVICE_NAME=<value>
+  #
+  service_name: Ory Oathkeeper
+
+  ## providers ##
+  #
+  providers:
+    ## zipkin ##
+    #
+    # Configures the zipkin tracing backend.
+    #
+    # Examples:
+    # - server_url: http://localhost:9411/api/v2/spans
+    #
+    zipkin:
+      ## server_url ##
+      #
+      # The address of Zipkin server where spans should be sent to.
+      #
+      # Set this value using environment variables on
+      # - Linux/macOS:
+      #    $ export TRACING_PROVIDERS_ZIPKIN_SERVER_URL=<value>
+      # - Windows Command Line (CMD):
+      #    > set TRACING_PROVIDERS_ZIPKIN_SERVER_URL=<value>
+      #
+      server_url: http://localhost:9411/api/v2/spans
+
+  ## provider ##
+  #
+  # Set this to the tracing backend you wish to use. Supports Zipkin. If omitted or empty, tracing will be disabled.
+  #
+  # One of:
+  # - zipkin
+  #
+  # Examples:
+  # - zipkin
+  #
+  # Set this value using environment variables on
+  # - Linux/macOS:
+  #    $ export TRACING_PROVIDER=<value>
+  # - Windows Command Line (CMD):
+  #    > set TRACING_PROVIDER=<value>
+  #
+  provider: zipkin
 
 ## Log ##
 #
