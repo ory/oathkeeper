@@ -3,7 +3,7 @@
 
 **Table of Contents**
 
-- [0.0.0 (2021-09-27)](#000-2021-09-27)
+- [0.0.0 (2021-09-28)](#000-2021-09-28)
   - [Bug Fixes](#bug-fixes)
   - [Documentation](#documentation)
   - [Features](#features)
@@ -248,7 +248,7 @@
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-# [0.0.0](https://github.com/ory/oathkeeper/compare/v0.38.15-beta.1...v0.0.0) (2021-09-27)
+# [0.0.0](https://github.com/ory/oathkeeper/compare/v0.38.15-beta.1...v0.0.0) (2021-09-28)
 
 ### Bug Fixes
 
