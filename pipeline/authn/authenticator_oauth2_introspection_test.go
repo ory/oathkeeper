@@ -840,4 +840,22 @@ func TestAuthenticatorOAuth2Introspection(t *testing.T) {
 			require.NotEqual(t, noPreauthClient3, noPreauthClient)
 		})
 	})
+
+	t.Run("unmarshal-audience", func(t *testing.T) {
+		t.Run("Should pass because audience is a valid string", func(t *testing.T) {
+			var aud Audience
+			data := `"audience"`
+			json.Unmarshal([]byte(data), &aud)
+			require.NoError(t, err)
+			require.Equal(t, Audience{"audience"}, aud)
+		})
+
+		t.Run("Should pass because audience is a valid string array", func(t *testing.T) {
+			var aud Audience
+			data := `["audience1","audience2"]`
+			json.Unmarshal([]byte(data), &aud)
+			require.NoError(t, err)
+			require.Equal(t, Audience{"audience1", "audience2"}, aud)
+		})
+	})
 }

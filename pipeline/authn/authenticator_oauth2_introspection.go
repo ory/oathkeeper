@@ -82,18 +82,49 @@ func (a *AuthenticatorOAuth2Introspection) GetID() string {
 	return "oauth2_introspection"
 }
 
+type Audience []string
+
 type AuthenticatorOAuth2IntrospectionResult struct {
 	Active    bool                   `json:"active"`
 	Extra     map[string]interface{} `json:"ext"`
 	Subject   string                 `json:"sub,omitempty"`
 	Username  string                 `json:"username"`
-	Audience  []string               `json:"aud"`
+	Audience  Audience               `json:"aud,omitempty"`
 	TokenType string                 `json:"token_type"`
 	Issuer    string                 `json:"iss"`
 	ClientID  string                 `json:"client_id,omitempty"`
 	Scope     string                 `json:"scope,omitempty"`
 	Expires   int64                  `json:"exp"`
 	TokenUse  string                 `json:"token_use"`
+}
+
+func (a *Audience) UnmarshalJSON(b []byte) error {
+	var errUnsupportedType = errors.New("Unsupported aud type, only string or []string are allowed")
+
+	var jsonObject interface{}
+	err := json.Unmarshal(b, &jsonObject)
+	if err != nil {
+		return err
+	}
+
+	switch o := jsonObject.(type) {
+	case string:
+		*a = Audience{o}
+		return nil
+	case []interface{}:
+		s := make(Audience, 0, len(o))
+		for _, v := range o {
+			value, ok := v.(string)
+			if !ok {
+				return errUnsupportedType
+			}
+			s = append(s, value)
+		}
+		*a = s
+		return nil
+	}
+
+	return errUnsupportedType
 }
 
 func (a *AuthenticatorOAuth2Introspection) tokenFromCache(config *AuthenticatorOAuth2IntrospectionConfiguration, token string, ss fosite.ScopeStrategy) *AuthenticatorOAuth2IntrospectionResult {
