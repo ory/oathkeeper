@@ -3,7 +3,7 @@
 
 **Table of Contents**
 
-- [0.0.0 (2021-09-29)](#000-2021-09-29)
+- [0.0.0 (2021-09-30)](#000-2021-09-30)
   - [Bug Fixes](#bug-fixes)
   - [Documentation](#documentation)
   - [Features](#features)
@@ -249,7 +249,7 @@
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-# [0.0.0](https://github.com/ory/oathkeeper/compare/v0.38.15-beta.1...v0.0.0) (2021-09-29)
+# [0.0.0](https://github.com/ory/oathkeeper/compare/v0.38.15-beta.1...v0.0.0) (2021-09-30)
 
 ### Bug Fixes
 
@@ -278,6 +278,8 @@
   [#601](https://github.com/ory/oathkeeper/issues/601)
   [#792](https://github.com/ory/oathkeeper/issues/792)
   [#810](https://github.com/ory/oathkeeper/issues/810)
+- Introduce cve scanning ([#839](https://github.com/ory/oathkeeper/issues/839))
+  ([1432e2c](https://github.com/ory/oathkeeper/commit/1432e2cbbd53d86133307d23ec5b85dc032e00fd))
 - **jwt:** Replace jwt module
   ([#818](https://github.com/ory/oathkeeper/issues/818))
   ([301b673](https://github.com/ory/oathkeeper/commit/301b673483b7af59dd0f38148edd12da22c67a6c))
