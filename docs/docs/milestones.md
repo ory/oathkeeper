@@ -21,12 +21,12 @@ Something is not working.
       ([oathkeeper#361](https://github.com/ory/oathkeeper/issues/361))
 - [ ] Timeout in oauth2_client_credentials when using self-signed certificates
       ([oathkeeper#368](https://github.com/ory/oathkeeper/issues/368))
-- [ ] oauth2_introspection not parsing single string aud valie
-      ([oathkeeper#491](https://github.com/ory/oathkeeper/issues/491))
 - [ ] JWT validation sometimes appends trailing slash to issuer
       ([oathkeeper#527](https://github.com/ory/oathkeeper/issues/527))
 - [ ] I found some data race warnings
       ([oathkeeper#574](https://github.com/ory/oathkeeper/issues/574))
+- [x] oauth2_introspection not parsing single string aud valie
+      ([oathkeeper#491](https://github.com/ory/oathkeeper/issues/491))
 - [x] "fatal error: concurrent map writes" panic, unable to reproduce
       ([oathkeeper#551](https://github.com/ory/oathkeeper/issues/551)) -
       [@hackerman](https://github.com/aeneasr)
