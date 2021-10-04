@@ -922,7 +922,60 @@
               "type": "integer",
               "default": 1000,
               "title": "Max Cost",
-              "description": "Max number of tokens to cache."
+              "description": "Max number of tokens to cache. When using providers different than memory the cost may be ignored."
+            },
+            "provider": {
+              "type": "string",
+              "default": "memory",
+              "description": "Set this to the cache backend you wish to use. Supports in-memory and Redis. If omitted or empty, cache will be in-memory.",
+              "enum": [
+                "memory",
+                "redis"
+              ],
+              "examples": [
+                "memory"
+              ]
+            },
+            "providers": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "redis": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "description": "Configures the redis caching backend.",
+                  "properties": {
+                    "server_url": {
+                      "type": "string",
+                      "description": "The address of Redis server where cache keys and values should be sent to.",
+                      "format": "uri"
+                    },
+                    "username": {
+                      "type": "string",
+                      "title": "Redis Username",
+                      "description": "Username for connect to redis server."
+                    },
+                    "password": {
+                      "type": "string",
+                      "title": "Redis Password",
+                      "description": "Password for connect to redis server."
+                    },
+                    "failover_sentinel": {
+                      "$ref": "#/definitions/handlerSwitch"
+                    },
+                    "failover_master_name": {
+                      "type": "string",
+                      "title": "Redis Master name",
+                      "description": "The master name when connecting to a redis failover server."
+                    }
+                  },
+                  "examples": [
+                    {
+                      "server_url": "localhost:6379"
+                    }
+                  ]
+                }
+              }
             }
           }
         }

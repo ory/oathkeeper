@@ -40,7 +40,7 @@ type AuthenticatorOAuth2IntrospectionConfiguration struct {
 	BearerTokenLocation         *helper.BearerTokenLocation                           `json:"token_from"`
 	IntrospectionRequestHeaders map[string]string                                     `json:"introspection_request_headers"`
 	Retry                       *AuthenticatorOAuth2IntrospectionRetryConfiguration   `json:"retry"`
-	Cache                       cacheConfig                                           `json:"cache"`
+	Cache                       *AuthenticatorOAuth2IntrospectionCacheConfiguration   `json:"cache"`
 }
 
 type AuthenticatorOAuth2IntrospectionPreAuthConfiguration struct {
@@ -57,10 +57,24 @@ type AuthenticatorOAuth2IntrospectionRetryConfiguration struct {
 	MaxWait string `json:"give_up_after"`
 }
 
-type cacheConfig struct {
-	Enabled bool   `json:"enabled"`
-	TTL     string `json:"ttl"`
-	MaxCost int    `json:"max_cost"`
+type AuthenticatorOAuth2IntrospectionCacheConfiguration struct {
+	Enabled   bool                         `json:"enabled"`
+	TTL       string                       `json:"ttl"`
+	MaxCost   int                          `json:"max_cost"`
+	Provider  string                       `json:"provider"`
+	Providers *cacheProvidersConfiguration `json:"providers"`
+}
+
+type cacheProvidersConfiguration struct {
+	Redis *cacheRedisProviderConfiguration `json:"redis,omitempty"`
+}
+
+type cacheRedisProviderConfiguration struct {
+	ServerUrl          string `json:"server_url"`
+	Username           string `json:"username"`
+	Password           string `json:"password"`
+	FailoverSentinel   bool   `json:"failover_sentinel"`
+	FailoverMasterName string `json:"failover_master_name"`
 }
 
 type AuthenticatorOAuth2Introspection struct {
