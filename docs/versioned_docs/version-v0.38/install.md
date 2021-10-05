@@ -11,7 +11,7 @@ pre-built binaries, Docker Images and support various package managers.
 We recommend using Docker to run ORY Oathkeeper:
 
 ```shell
-$ docker pull oryd/oathkeeper:v0.38.12-beta.1
+$ docker pull oryd/oathkeeper:v0.38.16-beta.1
 $ docker run --rm -it oryd/oathkeeper help
 ```
 
@@ -31,7 +31,7 @@ On linux, you can use `bash <(curl ...)` to fetch the latest stable binary
 using:
 
 ```shell
-$ bash <(curl https://raw.githubusercontent.com/ory/oathkeeper/master/install.sh) -b . v0.38.12-beta.1
+$ bash <(curl https://raw.githubusercontent.com/ory/oathkeeper/master/install.sh) -b . v0.38.16-beta.1
 $ ./oathkeeper help
 ```
 

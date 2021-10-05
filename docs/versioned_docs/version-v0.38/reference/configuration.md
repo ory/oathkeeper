@@ -7,9 +7,6 @@ title: Configuration
 OPEN AN ISSUE IF YOU WOULD LIKE TO MAKE ADJUSTMENTS HERE AND MAINTAINERS WILL HELP YOU LOCATE THE RIGHT
 FILE -->
 
-If file `$HOME/.oathkeeper.yaml` exists, it will be used as a configuration file
-which supports all configuration settings listed below.
-
 You can load the config file from another source using the
 `-c path/to/config.yaml` or `--config path/to/config.yaml` flag:
 `oathkeeper --config path/to/config.yaml`.
@@ -18,11 +15,15 @@ Config files can be formatted as JSON, YAML and TOML. Some configuration values
 support reloading without server restart. All configuration values can be set
 using environment variables, as documented below.
 
+:::warning Disclaimer
+
 This reference configuration documents all keys, also deprecated ones! It is a
 reference for all possible configuration values.
 
 If you are looking for an example configuration, it is better to try out the
 quickstart.
+
+:::
 
 To find out more about edge cases like setting string array values through
 environmental variables head to the
@@ -66,11 +67,18 @@ access_rules:
   # - If the URL Scheme is `file://`, the access rules (an array of access rules is expected) will be fetched from the local file system.
   # - If the URL Scheme is `inline://`, the access rules (an array of access rules is expected) are expected to be a base64 encoded (with padding!) JSON/YAML string (base64_encode(`[{"id":"foo-rule","authenticators":[....]}]`)).
   # - If the URL Scheme is `http://` or `https://`, the access rules (an array of access rules is expected) will be fetched from the provided HTTP(s) location.
+  # - If the URL Scheme is `s3://`, `gs://` or `azblob://`, the access rules (an array of access rules is expected) will be fetched by an object storage (AWS S3, Google Cloud Storage, Azure Blob Storage).
+  #
+  # S3 storage also supports S3-compatible endpoints served by Minio or Ceph. See aws.ConfigFromURLParams (https://godoc.org/gocloud.dev/aws#ConfigFromURLParams) for more details on supported URL options for S3.
   #
   # Examples:
   # - - file://path/to/rules.json
   #   - inline://W3siaWQiOiJmb28tcnVsZSIsImF1dGhlbnRpY2F0b3JzIjpbXX1d
   #   - https://path-to-my-rules/rules.json
+  #   - s3://my-bucket-name/rules.json
+  #   - s3://my-bucket-name/rules.json?endpoint=minio.my-server.net
+  #   - gs://gcp-bucket-name/rules.json
+  #   - azblob://my-blob-container/rules.json
   #
   # Set this value using environment variables on
   # - Linux/macOS:
@@ -82,6 +90,10 @@ access_rules:
     - file://path/to/rules.json
     - inline://W3siaWQiOiJmb28tcnVsZSIsImF1dGhlbnRpY2F0b3JzIjpbXX1d
     - https://path-to-my-rules/rules.json
+    - s3://my-bucket-name/rules.json
+    - s3://my-bucket-name/rules.json?endpoint=minio.my-server.net
+    - gs://gcp-bucket-name/rules.json
+    - azblob://my-blob-container/rules.json
 
 ## Authenticators ##
 #
@@ -150,6 +162,16 @@ authenticators:
       #
       check_session_url: https://session-store-host
 
+      ## preserve_query ##
+      #
+      # Set this value using environment variables on
+      # - Linux/macOS:
+      #    $ export AUTHENTICATORS_COOKIE_SESSION_CONFIG_PRESERVE_QUERY=<value>
+      # - Windows Command Line (CMD):
+      #    > set AUTHENTICATORS_COOKIE_SESSION_CONFIG_PRESERVE_QUERY=<value>
+      #
+      preserve_query: false
+
       ## preserve_path ##
       #
       # Set this value using environment variables on
@@ -159,6 +181,16 @@ authenticators:
       #    > set AUTHENTICATORS_COOKIE_SESSION_CONFIG_PRESERVE_PATH=<value>
       #
       preserve_path: false
+
+      ## preserve_host ##
+      #
+      # Set this value using environment variables on
+      # - Linux/macOS:
+      #    $ export AUTHENTICATORS_COOKIE_SESSION_CONFIG_PRESERVE_HOST=<value>
+      # - Windows Command Line (CMD):
+      #    > set AUTHENTICATORS_COOKIE_SESSION_CONFIG_PRESERVE_HOST=<value>
+      #
+      preserve_host: false
 
       ## extra_from ##
       #
@@ -226,6 +258,16 @@ authenticators:
       #
       check_session_url: https://session-store-host
 
+      ## preserve_query ##
+      #
+      # Set this value using environment variables on
+      # - Linux/macOS:
+      #    $ export AUTHENTICATORS_BEARER_TOKEN_CONFIG_PRESERVE_QUERY=<value>
+      # - Windows Command Line (CMD):
+      #    > set AUTHENTICATORS_BEARER_TOKEN_CONFIG_PRESERVE_QUERY=<value>
+      #
+      preserve_query: false
+
       ## preserve_path ##
       #
       # Set this value using environment variables on
@@ -235,6 +277,16 @@ authenticators:
       #    > set AUTHENTICATORS_BEARER_TOKEN_CONFIG_PRESERVE_PATH=<value>
       #
       preserve_path: false
+
+      ## preserve_host ##
+      #
+      # Set this value using environment variables on
+      # - Linux/macOS:
+      #    $ export AUTHENTICATORS_BEARER_TOKEN_CONFIG_PRESERVE_HOST=<value>
+      # - Windows Command Line (CMD):
+      #    > set AUTHENTICATORS_BEARER_TOKEN_CONFIG_PRESERVE_HOST=<value>
+      #
+      preserve_host: false
 
       ## extra_from ##
       #
@@ -1390,6 +1442,67 @@ mutators:
     #    > set MUTATORS_NOOP_ENABLED=<value>
     #
     enabled: true
+
+## tracing ##
+#
+# Configure distributed tracing.
+#
+tracing:
+  ## service_name ##
+  #
+  # Specifies the service name to use on the tracer.
+  #
+  # Examples:
+  # - Ory Oathkeeper
+  #
+  # Set this value using environment variables on
+  # - Linux/macOS:
+  #    $ export TRACING_SERVICE_NAME=<value>
+  # - Windows Command Line (CMD):
+  #    > set TRACING_SERVICE_NAME=<value>
+  #
+  service_name: Ory Oathkeeper
+
+  ## providers ##
+  #
+  providers:
+    ## zipkin ##
+    #
+    # Configures the zipkin tracing backend.
+    #
+    # Examples:
+    # - server_url: http://localhost:9411/api/v2/spans
+    #
+    zipkin:
+      ## server_url ##
+      #
+      # The address of Zipkin server where spans should be sent to.
+      #
+      # Set this value using environment variables on
+      # - Linux/macOS:
+      #    $ export TRACING_PROVIDERS_ZIPKIN_SERVER_URL=<value>
+      # - Windows Command Line (CMD):
+      #    > set TRACING_PROVIDERS_ZIPKIN_SERVER_URL=<value>
+      #
+      server_url: http://localhost:9411/api/v2/spans
+
+  ## provider ##
+  #
+  # Set this to the tracing backend you wish to use. Supports Zipkin. If omitted or empty, tracing will be disabled.
+  #
+  # One of:
+  # - zipkin
+  #
+  # Examples:
+  # - zipkin
+  #
+  # Set this value using environment variables on
+  # - Linux/macOS:
+  #    $ export TRACING_PROVIDER=<value>
+  # - Windows Command Line (CMD):
+  #    > set TRACING_PROVIDER=<value>
+  #
+  provider: zipkin
 
 ## Log ##
 #

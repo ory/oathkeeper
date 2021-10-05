@@ -1,0 +1,645 @@
+{
+  "consumes": ["application/json"],
+  "produces": ["application/json"],
+  "schemes": ["http", "https"],
+  "swagger": "2.0",
+  "info": {
+    "description": "ORY Oathkeeper is a reverse proxy that checks the HTTP Authorization for validity against a set of rules. This service uses Hydra to validate access tokens and policies.",
+    "title": "ORY Oathkeeper",
+    "contact": {
+      "name": "ORY",
+      "url": "https://www.ory.am",
+      "email": "hi@ory.am"
+    },
+    "version": "Latest"
+  },
+  "basePath": "/",
+  "paths": {
+    "/.well-known/jwks.json": {
+      "get": {
+        "description": "This endpoint returns cryptographic keys that are required to, for example, verify signatures of ID Tokens.",
+        "produces": ["application/json"],
+        "schemes": ["http", "https"],
+        "tags": ["api"],
+        "summary": "Lists cryptographic keys",
+        "operationId": "getWellKnownJSONWebKeys",
+        "responses": {
+          "200": {
+            "description": "jsonWebKeySet",
+            "schema": {
+              "$ref": "#/definitions/jsonWebKeySet"
+            }
+          },
+          "500": {
+            "description": "The standard error format",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "integer",
+                  "format": "int64"
+                },
+                "details": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": true
+                  }
+                },
+                "message": {
+                  "type": "string"
+                },
+                "reason": {
+                  "type": "string"
+                },
+                "request": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/decisions": {
+      "get": {
+        "description": "\u003e This endpoint works with all HTTP Methods (GET, POST, PUT, ...) and matches every path prefixed with /decision.\n\nThis endpoint mirrors the proxy capability of ORY Oathkeeper's proxy functionality but instead of forwarding the\nrequest to the upstream server, returns 200 (request should be allowed), 401 (unauthorized), or 403 (forbidden)\nstatus codes. This endpoint can be used to integrate with other API Proxies like Ambassador, Kong, Envoy, and many more.",
+        "schemes": ["http", "https"],
+        "tags": ["api"],
+        "summary": "Access Control Decision API",
+        "operationId": "decisions",
+        "responses": {
+          "200": {
+            "description": "An empty response"
+          },
+          "401": {
+            "description": "The standard error format",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "integer",
+                  "format": "int64"
+                },
+                "details": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": true
+                  }
+                },
+                "message": {
+                  "type": "string"
+                },
+                "reason": {
+                  "type": "string"
+                },
+                "request": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The standard error format",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "integer",
+                  "format": "int64"
+                },
+                "details": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": true
+                  }
+                },
+                "message": {
+                  "type": "string"
+                },
+                "reason": {
+                  "type": "string"
+                },
+                "request": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The standard error format",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "integer",
+                  "format": "int64"
+                },
+                "details": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": true
+                  }
+                },
+                "message": {
+                  "type": "string"
+                },
+                "reason": {
+                  "type": "string"
+                },
+                "request": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "The standard error format",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "integer",
+                  "format": "int64"
+                },
+                "details": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": true
+                  }
+                },
+                "message": {
+                  "type": "string"
+                },
+                "reason": {
+                  "type": "string"
+                },
+                "request": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/health/alive": {
+      "get": {
+        "description": "This endpoint returns a 200 status code when the HTTP server is up running.\nThis status does currently not include checks whether the database connection is working.\n\nIf the service supports TLS Edge Termination, this endpoint does not require the\n`X-Forwarded-Proto` header to be set.\n\nBe aware that if you are running multiple nodes of this service, the health status will never\nrefer to the cluster state, only to a single instance.",
+        "produces": ["application/json"],
+        "tags": ["api"],
+        "summary": "Check alive status",
+        "operationId": "isInstanceAlive",
+        "responses": {
+          "200": {
+            "description": "healthStatus",
+            "schema": {
+              "$ref": "#/definitions/healthStatus"
+            }
+          },
+          "500": {
+            "description": "The standard error format",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "integer",
+                  "format": "int64"
+                },
+                "details": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": true
+                  }
+                },
+                "message": {
+                  "type": "string"
+                },
+                "reason": {
+                  "type": "string"
+                },
+                "request": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/health/ready": {
+      "get": {
+        "description": "This endpoint returns a 200 status code when the HTTP server is up running and the environment dependencies (e.g.\nthe database) are responsive as well.\n\nIf the service supports TLS Edge Termination, this endpoint does not require the\n`X-Forwarded-Proto` header to be set.\n\nBe aware that if you are running multiple nodes of this service, the health status will never\nrefer to the cluster state, only to a single instance.",
+        "produces": ["application/json"],
+        "tags": ["api"],
+        "summary": "Check readiness status",
+        "operationId": "isInstanceReady",
+        "responses": {
+          "200": {
+            "description": "healthStatus",
+            "schema": {
+              "$ref": "#/definitions/healthStatus"
+            }
+          },
+          "503": {
+            "description": "healthNotReadyStatus",
+            "schema": {
+              "$ref": "#/definitions/healthNotReadyStatus"
+            }
+          }
+        }
+      }
+    },
+    "/rules": {
+      "get": {
+        "description": "This method returns an array of all rules that are stored in the backend. This is useful if you want to get a full\nview of what rules you have currently in place.",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "schemes": ["http", "https"],
+        "tags": ["api"],
+        "summary": "List all rules",
+        "operationId": "listRules",
+        "parameters": [
+          {
+            "type": "integer",
+            "format": "int64",
+            "description": "The maximum amount of rules returned.",
+            "name": "limit",
+            "in": "query"
+          },
+          {
+            "type": "integer",
+            "format": "int64",
+            "description": "The offset from where to start looking.",
+            "name": "offset",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of rules",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/rule"
+              }
+            }
+          },
+          "500": {
+            "description": "The standard error format",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "integer",
+                  "format": "int64"
+                },
+                "details": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": true
+                  }
+                },
+                "message": {
+                  "type": "string"
+                },
+                "reason": {
+                  "type": "string"
+                },
+                "request": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rules/{id}": {
+      "get": {
+        "description": "Use this method to retrieve a rule from the storage. If it does not exist you will receive a 404 error.",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "schemes": ["http", "https"],
+        "tags": ["api"],
+        "summary": "Retrieve a rule",
+        "operationId": "getRule",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A rule",
+            "schema": {
+              "$ref": "#/definitions/rule"
+            }
+          },
+          "404": {
+            "description": "The standard error format",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "integer",
+                  "format": "int64"
+                },
+                "details": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": true
+                  }
+                },
+                "message": {
+                  "type": "string"
+                },
+                "reason": {
+                  "type": "string"
+                },
+                "request": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "The standard error format",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "integer",
+                  "format": "int64"
+                },
+                "details": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": true
+                  }
+                },
+                "message": {
+                  "type": "string"
+                },
+                "reason": {
+                  "type": "string"
+                },
+                "request": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/version": {
+      "get": {
+        "description": "This endpoint returns the service version typically notated using semantic versioning.\n\nIf the service supports TLS Edge Termination, this endpoint does not require the\n`X-Forwarded-Proto` header to be set.\n\nBe aware that if you are running multiple nodes of this service, the health status will never\nrefer to the cluster state, only to a single instance.",
+        "produces": ["application/json"],
+        "tags": ["api"],
+        "summary": "Get service version",
+        "operationId": "getVersion",
+        "responses": {
+          "200": {
+            "description": "version",
+            "schema": {
+              "$ref": "#/definitions/version"
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "Upstream": {
+      "type": "object",
+      "properties": {
+        "preserve_host": {
+          "description": "PreserveHost, if false (the default), tells ORY Oathkeeper to set the upstream request's Host header to the\nhostname of the API's upstream's URL. Setting this flag to true instructs ORY Oathkeeper not to do so.",
+          "type": "boolean"
+        },
+        "strip_path": {
+          "description": "StripPath if set, replaces the provided path prefix when forwarding the requested URL to the upstream URL.",
+          "type": "string"
+        },
+        "url": {
+          "description": "URL is the URL the request will be proxied to.",
+          "type": "string"
+        }
+      }
+    },
+    "healthNotReadyStatus": {
+      "type": "object",
+      "properties": {
+        "errors": {
+          "description": "Errors contains a list of errors that caused the not ready status.",
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "healthStatus": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "description": "Status always contains \"ok\".",
+          "type": "string"
+        }
+      }
+    },
+    "jsonWebKey": {
+      "type": "object",
+      "properties": {
+        "alg": {
+          "description": "The \"alg\" (algorithm) parameter identifies the algorithm intended for\nuse with the key.  The values used should either be registered in the\nIANA \"JSON Web Signature and Encryption Algorithms\" registry\nestablished by [JWA] or be a value that contains a Collision-\nResistant Name.",
+          "type": "string"
+        },
+        "crv": {
+          "type": "string"
+        },
+        "d": {
+          "type": "string"
+        },
+        "dp": {
+          "type": "string"
+        },
+        "dq": {
+          "type": "string"
+        },
+        "e": {
+          "type": "string"
+        },
+        "k": {
+          "type": "string"
+        },
+        "kid": {
+          "description": "The \"kid\" (key ID) parameter is used to match a specific key.  This\nis used, for instance, to choose among a set of keys within a JWK Set\nduring key rollover.  The structure of the \"kid\" value is\nunspecified.  When \"kid\" values are used within a JWK Set, different\nkeys within the JWK Set SHOULD use distinct \"kid\" values.  (One\nexample in which different keys might use the same \"kid\" value is if\nthey have different \"kty\" (key type) values but are considered to be\nequivalent alternatives by the application using them.)  The \"kid\"\nvalue is a case-sensitive string.",
+          "type": "string"
+        },
+        "kty": {
+          "description": "The \"kty\" (key type) parameter identifies the cryptographic algorithm\nfamily used with the key, such as \"RSA\" or \"EC\". \"kty\" values should\neither be registered in the IANA \"JSON Web Key Types\" registry\nestablished by [JWA] or be a value that contains a Collision-\nResistant Name.  The \"kty\" value is a case-sensitive string.",
+          "type": "string"
+        },
+        "n": {
+          "type": "string"
+        },
+        "p": {
+          "type": "string"
+        },
+        "q": {
+          "type": "string"
+        },
+        "qi": {
+          "type": "string"
+        },
+        "use": {
+          "description": "The \"use\" (public key use) parameter identifies the intended use of\nthe public key. The \"use\" parameter is employed to indicate whether\na public key is used for encrypting data or verifying the signature\non data. Values are commonly \"sig\" (signature) or \"enc\" (encryption).",
+          "type": "string"
+        },
+        "x": {
+          "type": "string"
+        },
+        "x5c": {
+          "description": "The \"x5c\" (X.509 certificate chain) parameter contains a chain of one\nor more PKIX certificates [RFC5280].  The certificate chain is\nrepresented as a JSON array of certificate value strings.  Each\nstring in the array is a base64-encoded (Section 4 of [RFC4648] --\nnot base64url-encoded) DER [ITU.X690.1994] PKIX certificate value.\nThe PKIX certificate containing the key value MUST be the first\ncertificate.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "y": {
+          "type": "string"
+        }
+      }
+    },
+    "jsonWebKeySet": {
+      "type": "object",
+      "properties": {
+        "keys": {
+          "description": "The value of the \"keys\" parameter is an array of JWK values.  By\ndefault, the order of the JWK values within the array does not imply\nan order of preference among them, although applications of JWK Sets\ncan choose to assign a meaning to the order for their purposes, if\ndesired.",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/jsonWebKey"
+          }
+        }
+      }
+    },
+    "rule": {
+      "type": "object",
+      "title": "swaggerRule is a single rule that will get checked on every HTTP request.",
+      "properties": {
+        "authenticators": {
+          "description": "Authenticators is a list of authentication handlers that will try and authenticate the provided credentials.\nAuthenticators are checked iteratively from index 0 to n and if the first authenticator to return a positive\nresult will be the one used.\n\nIf you want the rule to first check a specific authenticator  before \"falling back\" to others, have that authenticator\nas the first item in the array.",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ruleHandler"
+          }
+        },
+        "authorizer": {
+          "$ref": "#/definitions/ruleHandler"
+        },
+        "description": {
+          "description": "Description is a human readable description of this rule.",
+          "type": "string"
+        },
+        "id": {
+          "description": "ID is the unique id of the rule. It can be at most 190 characters long, but the layout of the ID is up to you.\nYou will need this ID later on to update or delete the rule.",
+          "type": "string"
+        },
+        "match": {
+          "$ref": "#/definitions/ruleMatch"
+        },
+        "mutators": {
+          "description": "Mutators is a list of mutation handlers that transform the HTTP request. A common use case is generating a new set\nof credentials (e.g. JWT) which then will be forwarded to the upstream server.\n\nMutations are performed iteratively from index 0 to n and should all succeed in order for the HTTP request to be forwarded.",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ruleHandler"
+          }
+        },
+        "upstream": {
+          "$ref": "#/definitions/Upstream"
+        }
+      }
+    },
+    "ruleHandler": {
+      "type": "object",
+      "properties": {
+        "config": {
+          "description": "Config contains the configuration for the handler. Please read the user\nguide for a complete list of each handler's available settings.",
+          "type": "object"
+        },
+        "handler": {
+          "description": "Handler identifies the implementation which will be used to handle this specific request. Please read the user\nguide for a complete list of available handlers.",
+          "type": "string"
+        }
+      }
+    },
+    "ruleMatch": {
+      "type": "object",
+      "properties": {
+        "methods": {
+          "description": "An array of HTTP methods (e.g. GET, POST, PUT, DELETE, ...). When ORY Oathkeeper searches for rules\nto decide what to do with an incoming request to the proxy server, it compares the HTTP method of the incoming\nrequest with the HTTP methods of each rules. If a match is found, the rule is considered a partial match.\nIf the matchesUrl field is satisfied as well, the rule is considered a full match.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "url": {
+          "description": "This field represents the URL pattern this rule matches. When ORY Oathkeeper searches for rules\nto decide what to do with an incoming request to the proxy server, it compares the full request URL\n(e.g. https://mydomain.com/api/resource) without query parameters of the incoming\nrequest with this field. If a match is found, the rule is considered a partial match.\nIf the matchesMethods field is satisfied as well, the rule is considered a full match.\n\nYou can use regular expressions in this field to match more than one url. Regular expressions are encapsulated in\nbrackets \u003c and \u003e. The following example matches all paths of the domain `mydomain.com`: `https://mydomain.com/\u003c.*\u003e`.",
+          "type": "string"
+        }
+      }
+    },
+    "version": {
+      "type": "object",
+      "properties": {
+        "version": {
+          "description": "Version is the service's version.",
+          "type": "string"
+        }
+      }
+    }
+  },
+  "x-forwarded-proto": "string",
+  "x-request-id": "string"
+}

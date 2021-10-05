@@ -21,12 +21,12 @@ Something is not working.
       ([oathkeeper#361](https://github.com/ory/oathkeeper/issues/361))
 - [ ] Timeout in oauth2_client_credentials when using self-signed certificates
       ([oathkeeper#368](https://github.com/ory/oathkeeper/issues/368))
-- [ ] oauth2_introspection not parsing single string aud valie
-      ([oathkeeper#491](https://github.com/ory/oathkeeper/issues/491))
 - [ ] JWT validation sometimes appends trailing slash to issuer
       ([oathkeeper#527](https://github.com/ory/oathkeeper/issues/527))
 - [ ] I found some data race warnings
       ([oathkeeper#574](https://github.com/ory/oathkeeper/issues/574))
+- [x] oauth2_introspection not parsing single string aud valie
+      ([oathkeeper#491](https://github.com/ory/oathkeeper/issues/491))
 - [x] "fatal error: concurrent map writes" panic, unable to reproduce
       ([oathkeeper#551](https://github.com/ory/oathkeeper/issues/551)) -
       [@hackerman](https://github.com/aeneasr)
@@ -42,8 +42,6 @@ New feature or request.
 
 - [ ] Implement GRPC response handler in Decisions API
       ([oathkeeper#134](https://github.com/ory/oathkeeper/issues/134))
-- [ ] Pass query parameters to the hydrator
-      ([oathkeeper#339](https://github.com/ory/oathkeeper/issues/339))
 - [ ] Switch to go-jose key generation lib
       ([oathkeeper#419](https://github.com/ory/oathkeeper/issues/419))
 - [ ] remote_json: Enable timeout configuration for calls to authorization
@@ -52,8 +50,22 @@ New feature or request.
       ([oathkeeper#560](https://github.com/ory/oathkeeper/issues/560))
 - [ ] Hydator Mutator Client Credential
       ([oathkeeper#565](https://github.com/ory/oathkeeper/issues/565))
+- [ ] Header and Cookie Mutators should sign the payloads
+      ([oathkeeper#176](https://github.com/ory/oathkeeper/issues/176))
+- [ ] Url matching http method should be available in authenticators
+      ([oathkeeper#221](https://github.com/ory/oathkeeper/issues/221))
+- [ ] Better logging
+      ([oathkeeper#227](https://github.com/ory/oathkeeper/issues/227))
+- [ ] Iterate over all the available JWKs and see which one is valid when no KID
+      is present on the JWT header
+      ([oathkeeper#362](https://github.com/ory/oathkeeper/issues/362))
+- [ ] Consider jsonnet for templating
+      ([oathkeeper#423](https://github.com/ory/oathkeeper/issues/423)) -
+      [@hackerman](https://github.com/aeneasr)
 - [x] Oathkeeper behind ssl terminating balancer
       ([oathkeeper#153](https://github.com/ory/oathkeeper/issues/153))
+- [x] Pass query parameters to the hydrator
+      ([oathkeeper#339](https://github.com/ory/oathkeeper/issues/339))
 - [x] Clean up logging in case of invalid credentials
       ([oathkeeper#505](https://github.com/ory/oathkeeper/issues/505))
 - [x] Fetch JWKs from object storage (S3)
