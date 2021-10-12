@@ -37,7 +37,6 @@ require (
 	github.com/gorilla/websocket v1.4.2
 	github.com/imdario/mergo v0.3.8
 	github.com/julienschmidt/httprouter v1.2.0
-	github.com/karrick/godirwalk v1.16.1 // indirect
 	github.com/lib/pq v1.3.0
 	github.com/mattn/goveralls v0.0.6
 	github.com/mitchellh/copystructure v1.0.0
