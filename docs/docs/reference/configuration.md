@@ -79,6 +79,7 @@ access_rules:
   #   - s3://my-bucket-name/rules.json?endpoint=minio.my-server.net
   #   - gs://gcp-bucket-name/rules.json
   #   - azblob://my-blob-container/rules.json
+  #   - https://path-to-my-rules/rules.json
   #
   # Set this value using environment variables on
   # - Linux/macOS:
@@ -94,6 +95,7 @@ access_rules:
     - s3://my-bucket-name/rules.json?endpoint=minio.my-server.net
     - gs://gcp-bucket-name/rules.json
     - azblob://my-blob-container/rules.json
+    - https://path-to-my-rules/rules.json
 
 ## Authenticators ##
 #
@@ -1466,6 +1468,93 @@ tracing:
   ## providers ##
   #
   providers:
+    ## jaeger ##
+    #
+    # Configures the jaeger tracing backend.
+    #
+    jaeger:
+      ## propagation ##
+      #
+      # The tracing header format
+      #
+      # Examples:
+      # - jaeger
+      #
+      # Set this value using environment variables on
+      # - Linux/macOS:
+      #    $ export TRACING_PROVIDERS_JAEGER_PROPAGATION=<value>
+      # - Windows Command Line (CMD):
+      #    > set TRACING_PROVIDERS_JAEGER_PROPAGATION=<value>
+      #
+      propagation: jaeger
+
+      ## max_tag_value_length ##
+      #
+      # The value passed to the max tag value length that has been configured.
+      #
+      # Minimum value: 0
+      #
+      # Set this value using environment variables on
+      # - Linux/macOS:
+      #    $ export TRACING_PROVIDERS_JAEGER_MAX_TAG_VALUE_LENGTH=<value>
+      # - Windows Command Line (CMD):
+      #    > set TRACING_PROVIDERS_JAEGER_MAX_TAG_VALUE_LENGTH=<value>
+      #
+      max_tag_value_length: 0
+
+      ## sampling ##
+      #
+      # Examples:
+      # - type: const
+      #   value: 1
+      #   server_url: http://localhost:5778/sampling
+      #
+      sampling:
+        ## type ##
+        #
+        # Set this value using environment variables on
+        # - Linux/macOS:
+        #    $ export TRACING_PROVIDERS_JAEGER_SAMPLING_TYPE=<value>
+        # - Windows Command Line (CMD):
+        #    > set TRACING_PROVIDERS_JAEGER_SAMPLING_TYPE=<value>
+        #
+        type: const
+
+        ## value ##
+        #
+        # Set this value using environment variables on
+        # - Linux/macOS:
+        #    $ export TRACING_PROVIDERS_JAEGER_SAMPLING_VALUE=<value>
+        # - Windows Command Line (CMD):
+        #    > set TRACING_PROVIDERS_JAEGER_SAMPLING_VALUE=<value>
+        #
+        value: 1
+
+        ## server_url ##
+        #
+        # Set this value using environment variables on
+        # - Linux/macOS:
+        #    $ export TRACING_PROVIDERS_JAEGER_SAMPLING_SERVER_URL=<value>
+        # - Windows Command Line (CMD):
+        #    > set TRACING_PROVIDERS_JAEGER_SAMPLING_SERVER_URL=<value>
+        #
+        server_url: http://localhost:5778/sampling
+
+      ## local_agent_address ##
+      #
+      # The address of the jaeger-agent where spans should be sent to.
+      #
+      # Examples:
+      # - 127.0.0.1:6831
+      #
+      # Set this value using environment variables on
+      # - Linux/macOS:
+      #    $ export TRACING_PROVIDERS_JAEGER_LOCAL_AGENT_ADDRESS=<value>
+      # - Windows Command Line (CMD):
+      #    > set TRACING_PROVIDERS_JAEGER_LOCAL_AGENT_ADDRESS=<value>
+      #
+      local_agent_address: 127.0.0.1:6831
+
     ## zipkin ##
     #
     # Configures the zipkin tracing backend.
@@ -1488,10 +1577,11 @@ tracing:
 
   ## provider ##
   #
-  # Set this to the tracing backend you wish to use. Supports Zipkin. If omitted or empty, tracing will be disabled.
+  # Set this to the tracing backend you wish to use. Supports Zipkin & Jaeger. If omitted or empty, tracing will be disabled.
   #
   # One of:
   # - zipkin
+  # - jaeger
   #
   # Examples:
   # - zipkin

@@ -234,7 +234,8 @@ authenticator is enabled for this URL.
 The `cookie_session` authenticator will forward the request method, path and
 headers to a session store. If the session store returns `200 OK` and body
 `{ "subject": "...", "extra": {} }` then the authenticator will set the subject
-appropriately.
+appropriately. Please note that Gzipped responses from `check_session_url` are 
+not currently supported, and will fail silently.
 
 ### Configuration
 
@@ -246,6 +247,9 @@ appropriately.
 - `preserve_path` (boolean, optional) - If set, any path in `check_session_url`
   will be preserved instead of replacing the path with the path of the request
   being checked.
+- `preserve_query` (boolean, optional) - If unset or true, query parameters in
+  `check_session_url` will be preserved instead of replacing them with the query
+  of the request being checked.
 - `extra_from` (string, optional - defaults to `extra`) - A
   [GJSON Path](https://github.com/tidwall/gjson/blob/master/SYNTAX.md) pointing
   to the `extra` field. This defaults to `extra`, but it could also be `@this`
@@ -292,6 +296,7 @@ authenticators:
       only:
         - sessionid
       preserve_path: true
+      preserve_query: true
 ```
 
 ### Access Rule Example
@@ -333,7 +338,8 @@ The request is not authorized because the provided credentials are invalid.
 The `bearer_token` authenticator will forward the request method, path and
 headers to a session store. If the session store returns `200 OK` and body
 `{ "subject": "...", "extra": {} }` then the authenticator will set the subject
-appropriately.
+appropriately. Please note that Gzipped responses from `check_session_url` are 
+not currently supported, and will fail silently.
 
 ### Configuration
 
@@ -342,6 +348,9 @@ appropriately.
 - `preserve_path` (boolean, optional) - If set, any path in `check_session_url`
   will be preserved instead of replacing the path with the path of the request
   being checked.
+- `preserve_query` (boolean, optional) - If unset or true, query parameters in
+  `check_session_url` will be preserved instead of replacing them with the query
+  of the request being checked.
 - `extra_from` (string, optional - defaults to `extra`) - A
   [GJSON Path](https://github.com/tidwall/gjson/blob/master/SYNTAX.md) pointing
   to the `extra` field. This defaults to `extra`, but it could also be `@this`
@@ -415,6 +424,7 @@ authenticators:
         # or
         # cookie: auth-token
       preserve_path: true
+      preserve_query: true
 ```
 
 ### Access Rule Example
