@@ -31,13 +31,12 @@ require (
 	github.com/gobwas/glob v0.2.3
 	github.com/golang-jwt/jwt/v4 v4.0.0
 	github.com/golang/gddo v0.0.0-20190904175337-72a348e765d2
-	github.com/golang/mock v1.4.3
+	github.com/golang/mock v1.4.4
 	github.com/google/go-replayers/httpreplay v0.1.0
 	github.com/google/uuid v1.1.1
 	github.com/gorilla/websocket v1.4.2
 	github.com/imdario/mergo v0.3.8
 	github.com/julienschmidt/httprouter v1.2.0
-	github.com/karrick/godirwalk v1.16.1 // indirect
 	github.com/lib/pq v1.3.0
 	github.com/mattn/goveralls v0.0.6
 	github.com/mitchellh/copystructure v1.0.0
@@ -71,11 +70,11 @@ require (
 	github.com/urfave/negroni v1.0.0
 	github.com/xeipuuv/gojsonpointer v0.0.0-20190905194746-02993c407bfb // indirect
 	gocloud.dev v0.20.0
-	golang.org/x/crypto v0.0.0-20201203163018-be400aefbc4c
-	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d
-	golang.org/x/sys v0.0.0-20201029080932-201ba4db2418 // indirect
-	golang.org/x/tools v0.0.0-20201029135353-690a3c245f28
-	google.golang.org/api v0.26.0
+	golang.org/x/crypto v0.0.0-20210921155107-089bfa567519
+	golang.org/x/oauth2 v0.0.0-20210819190943-2bc19b11175f
+	golang.org/x/sys v0.0.0-20210927094055-39ccf1dd6fa6 // indirect
+	golang.org/x/tools v0.1.7
+	google.golang.org/api v0.30.0
 	gopkg.in/square/go-jose.v2 v2.5.1
 )
 

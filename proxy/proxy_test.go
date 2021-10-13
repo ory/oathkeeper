@@ -22,6 +22,7 @@ package proxy_test
 
 import (
 	"context"
+	"crypto/tls"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -425,6 +426,31 @@ func TestConfigureBackendURL(t *testing.T) {
 			require.NoError(t, proxy.ConfigureBackendURL(tc.r, tc.rl))
 			assert.EqualValues(t, tc.eURL, tc.r.URL.String())
 			assert.EqualValues(t, tc.eHost, tc.r.Host)
+		})
+	}
+}
+
+func TestEnrichRequestedURL(t *testing.T) {
+	for k, tc := range []struct {
+		in     *http.Request
+		expect url.URL
+	}{
+		{
+			in:     &http.Request{Host: "test", TLS: &tls.ConnectionState{}, URL: new(url.URL)},
+			expect: url.URL{Scheme: "https", Host: "test"},
+		},
+		{
+			in:     &http.Request{Host: "test", URL: new(url.URL)},
+			expect: url.URL{Scheme: "http", Host: "test"},
+		},
+		{
+			in:     &http.Request{Host: "test", Header: http.Header{"X-Forwarded-Proto": {"https"}}, URL: new(url.URL)},
+			expect: url.URL{Scheme: "https", Host: "test"},
+		},
+	} {
+		t.Run(fmt.Sprintf("case=%d", k), func(t *testing.T) {
+			proxy.EnrichRequestedURL(tc.in)
+			assert.EqualValues(t, tc.expect, *tc.in.URL)
 		})
 	}
 }
