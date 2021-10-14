@@ -94,6 +94,8 @@ func (m *Rule) validateAuthenticators(formats strfmt.Registry) error {
 			if err := m.Authenticators[i].Validate(formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("authenticators" + "." + strconv.Itoa(i))
+				} else if ce, ok := err.(*errors.CompositeError); ok {
+					return ce.ValidateName("authenticators" + "." + strconv.Itoa(i))
 				}
 				return err
 			}
@@ -113,6 +115,8 @@ func (m *Rule) validateAuthorizer(formats strfmt.Registry) error {
 		if err := m.Authorizer.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("authorizer")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("authorizer")
 			}
 			return err
 		}
@@ -130,6 +134,8 @@ func (m *Rule) validateMatch(formats strfmt.Registry) error {
 		if err := m.Match.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("match")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("match")
 			}
 			return err
 		}
@@ -152,6 +158,8 @@ func (m *Rule) validateMutators(formats strfmt.Registry) error {
 			if err := m.Mutators[i].Validate(formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("mutators" + "." + strconv.Itoa(i))
+				} else if ce, ok := err.(*errors.CompositeError); ok {
+					return ce.ValidateName("mutators" + "." + strconv.Itoa(i))
 				}
 				return err
 			}
@@ -171,6 +179,8 @@ func (m *Rule) validateUpstream(formats strfmt.Registry) error {
 		if err := m.Upstream.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("upstream")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("upstream")
 			}
 			return err
 		}
@@ -217,6 +227,8 @@ func (m *Rule) contextValidateAuthenticators(ctx context.Context, formats strfmt
 			if err := m.Authenticators[i].ContextValidate(ctx, formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("authenticators" + "." + strconv.Itoa(i))
+				} else if ce, ok := err.(*errors.CompositeError); ok {
+					return ce.ValidateName("authenticators" + "." + strconv.Itoa(i))
 				}
 				return err
 			}
@@ -233,6 +245,8 @@ func (m *Rule) contextValidateAuthorizer(ctx context.Context, formats strfmt.Reg
 		if err := m.Authorizer.ContextValidate(ctx, formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("authorizer")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("authorizer")
 			}
 			return err
 		}
@@ -247,6 +261,8 @@ func (m *Rule) contextValidateMatch(ctx context.Context, formats strfmt.Registry
 		if err := m.Match.ContextValidate(ctx, formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("match")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("match")
 			}
 			return err
 		}
@@ -263,6 +279,8 @@ func (m *Rule) contextValidateMutators(ctx context.Context, formats strfmt.Regis
 			if err := m.Mutators[i].ContextValidate(ctx, formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("mutators" + "." + strconv.Itoa(i))
+				} else if ce, ok := err.(*errors.CompositeError); ok {
+					return ce.ValidateName("mutators" + "." + strconv.Itoa(i))
 				}
 				return err
 			}
@@ -279,6 +297,8 @@ func (m *Rule) contextValidateUpstream(ctx context.Context, formats strfmt.Regis
 		if err := m.Upstream.ContextValidate(ctx, formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("upstream")
+			} else if ce, ok := err.(*errors.CompositeError); ok {
+				return ce.ValidateName("upstream")
 			}
 			return err
 		}

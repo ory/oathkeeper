@@ -55,6 +55,8 @@ func (m *JSONWebKeySet) validateKeys(formats strfmt.Registry) error {
 			if err := m.Keys[i].Validate(formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("keys" + "." + strconv.Itoa(i))
+				} else if ce, ok := err.(*errors.CompositeError); ok {
+					return ce.ValidateName("keys" + "." + strconv.Itoa(i))
 				}
 				return err
 			}
@@ -87,6 +89,8 @@ func (m *JSONWebKeySet) contextValidateKeys(ctx context.Context, formats strfmt.
 			if err := m.Keys[i].ContextValidate(ctx, formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("keys" + "." + strconv.Itoa(i))
+				} else if ce, ok := err.(*errors.CompositeError); ok {
+					return ce.ValidateName("keys" + "." + strconv.Itoa(i))
 				}
 				return err
 			}
