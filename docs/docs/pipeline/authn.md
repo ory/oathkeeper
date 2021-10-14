@@ -234,7 +234,7 @@ authenticator is enabled for this URL.
 The `cookie_session` authenticator will forward the request method, path and
 headers to a session store. If the session store returns `200 OK` and body
 `{ "subject": "...", "extra": {} }` then the authenticator will set the subject
-appropriately. Please note that Gzipped responses from `check_session_url` are 
+appropriately. Please note that Gzipped responses from `check_session_url` are
 not currently supported, and will fail silently.
 
 ### Configuration
@@ -338,7 +338,7 @@ The request is not authorized because the provided credentials are invalid.
 The `bearer_token` authenticator will forward the request method, path and
 headers to a session store. If the session store returns `200 OK` and body
 `{ "subject": "...", "extra": {} }` then the authenticator will set the subject
-appropriately. Please note that Gzipped responses from `check_session_url` are 
+appropriately. Please note that Gzipped responses from `check_session_url` are
 not currently supported, and will fail silently.
 
 ### Configuration
