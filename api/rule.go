@@ -57,7 +57,7 @@ func (h *RuleHandler) SetRoutes(r *x.RouterAPI) {
 
 // swagger:route GET /rules api listRules
 //
-// List all rules
+// List All Rules
 //
 // This method returns an array of all rules that are stored in the backend. This is useful if you want to get a full
 // view of what rules you have currently in place.
@@ -90,7 +90,7 @@ func (h *RuleHandler) listRules(w http.ResponseWriter, r *http.Request, _ httpro
 
 // swagger:route GET /rules/{id} api getRule
 //
-// Retrieve a rule
+// Retrieve a Rule
 //
 // Use this method to retrieve a rule from the storage. If it does not exist you will receive a 404 error.
 //
