@@ -44,8 +44,6 @@ New feature or request.
       ([oathkeeper#134](https://github.com/ory/oathkeeper/issues/134))
 - [ ] Switch to go-jose key generation lib
       ([oathkeeper#419](https://github.com/ory/oathkeeper/issues/419))
-- [ ] remote_json: Enable timeout configuration for calls to authorization
-      endpoint ([oathkeeper#515](https://github.com/ory/oathkeeper/issues/515))
 - [ ] Start as Envoy AuthService
       ([oathkeeper#560](https://github.com/ory/oathkeeper/issues/560))
 - [ ] Hydator Mutator Client Credential
@@ -68,6 +66,8 @@ New feature or request.
       ([oathkeeper#339](https://github.com/ory/oathkeeper/issues/339))
 - [x] Clean up logging in case of invalid credentials
       ([oathkeeper#505](https://github.com/ory/oathkeeper/issues/505))
+- [x] remote_json: Enable timeout configuration for calls to authorization
+      endpoint ([oathkeeper#515](https://github.com/ory/oathkeeper/issues/515))
 - [x] Fetch JWKs from object storage (S3)
       ([oathkeeper#518](https://github.com/ory/oathkeeper/issues/518))
 - [x] Enable forwarding of original authorization header to (remote) authorizer
