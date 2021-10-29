@@ -4,7 +4,7 @@ package api
 //
 // swagger:route GET /health/alive api isInstanceAlive
 //
-// Check alive status
+// Check Alive Status
 //
 // This endpoint returns a 200 status code when the HTTP server is up running.
 // This status does currently not include checks whether the database connection is working.
@@ -27,7 +27,7 @@ func swaggerIsInstanceAlive() {}
 //
 // swagger:route GET /health/ready api isInstanceReady
 //
-// Check readiness status
+// Check Readiness Status
 //
 // This endpoint returns a 200 status code when the HTTP server is up running and the environment dependencies (e.g.
 // the database) are responsive as well.
@@ -50,7 +50,7 @@ func swaggerIsInstanceReady() {}
 //
 // swagger:route GET /version api getVersion
 //
-// Get service version
+// Get Service Version
 //
 // This endpoint returns the service version typically notated using semantic versioning.
 //

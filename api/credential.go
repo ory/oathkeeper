@@ -43,7 +43,7 @@ func (h *CredentialsHandler) SetRoutes(r *x.RouterAPI) {
 
 // swagger:route GET /.well-known/jwks.json api getWellKnownJSONWebKeys
 //
-// Lists cryptographic keys
+// Lists Cryptographic Keys
 //
 // This endpoint returns cryptographic keys that are required to, for example, verify signatures of ID Tokens.
 //
