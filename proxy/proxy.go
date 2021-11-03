@@ -44,11 +44,12 @@ type proxyRegistry interface {
 }
 
 func NewProxy(r proxyRegistry) *Proxy {
-	return &Proxy{r: r}
+	return &Proxy{r: r, t: NewRoundTripper()}
 }
 
 type Proxy struct {
 	r proxyRegistry
+	t http.RoundTripper
 }
 
 type key int
@@ -88,7 +89,7 @@ func (d *Proxy) RoundTrip(r *http.Request) (*http.Response, error) {
 			Header:     rw.header,
 		}, nil
 	} else if err == nil {
-		res, err := http.DefaultTransport.RoundTrip(r)
+		res, err := d.t.RoundTrip(r)
 		if err != nil {
 			d.r.Logger().
 				WithError(errors.WithStack(err)).
@@ -177,11 +178,13 @@ func ConfigureBackendURL(r *http.Request, rl *rule.Rule) error {
 	backendHost := p.Host
 	backendPath := p.Path
 	backendScheme := p.Scheme
+	backendRawQuery := p.RawQuery
 
 	forwardURL := r.URL
 	forwardURL.Scheme = backendScheme
 	forwardURL.Host = backendHost
 	forwardURL.Path = "/" + strings.TrimLeft("/"+strings.Trim(backendPath, "/")+"/"+strings.TrimLeft(proxyPath, "/"), "/")
+	forwardURL.RawQuery = backendRawQuery
 
 	if rl.Upstream.StripPath != "" {
 		forwardURL.Path = strings.Replace(forwardURL.Path, "/"+strings.Trim(rl.Upstream.StripPath, "/"), "", 1)
