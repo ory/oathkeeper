@@ -131,7 +131,7 @@ func (v *ValidatorDefault) Validate(r *Rule) error {
 
 	if r.Upstream.URL == "" {
 		// Having no upstream URL is fine here because the judge does not need an upstream!
-	} else if !govalidator.IsURL(r.Upstream.URL) {
+	} else if !govalidator.IsRequestURI(r.Upstream.URL) {
 		return errors.WithStack(herodot.ErrInternalServerError.WithReasonf(`Value "%s" of "upstream.url" is not a valid url.`, r.Upstream.URL))
 	}
 
