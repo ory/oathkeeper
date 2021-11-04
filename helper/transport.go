@@ -7,7 +7,6 @@ import (
 	"net"
 	"net/http"
 	"net/url"
-	"strings"
 )
 
 type transport struct {
@@ -50,19 +49,20 @@ func (t *transport) RoundTrip(r *http.Request) (*http.Response, error) {
 		case "http", "https":
 			return http.DefaultTransport.RoundTrip(r)
 		case "unix":
-			if u, err := url.Parse(r.URL.Query().Get("url")); err != nil {
-				return nil, err
+			urlValues := r.URL.Query()
+			req := r.Clone(r.Context())
+			if urlValues.Get("tls") != "" {
+				req.URL.Scheme = "https"
 			} else {
-				req := r.Clone(r.Context())
-				req.URL.Scheme = u.Scheme
-				req.URL.Host = url.QueryEscape(strings.TrimRight(r.URL.Path, "/"))
-				req.URL.Path = u.Path
-				v := req.URL.Query()
-				v.Del("url")
-				req.URL.RawQuery = v.Encode()
-				fmt.Println(req)
-				return t.base.RoundTrip(req)
+				req.URL.Scheme = "http"
 			}
+			req.URL.Host = url.QueryEscape(r.URL.Path)
+			req.URL.Path = urlValues.Get("path")
+			v := req.URL.Query()
+			v.Del("tls")
+			v.Del("path")
+			req.URL.RawQuery = v.Encode()
+			return t.base.RoundTrip(req)
 		default:
 		}
 	}

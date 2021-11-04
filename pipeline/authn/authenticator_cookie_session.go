@@ -134,17 +134,6 @@ func forwardRequestToSessionStore(r *http.Request, checkSessionURL string, prese
 		return nil, errors.WithStack(herodot.ErrInternalServerError.WithReasonf("Unable to parse session check URL: %s", err))
 	}
 
-	path := reqUrl.Path
-	rawQuery := reqUrl.RawQuery
-
-	if !preservePath {
-		path = r.URL.Path
-	}
-
-	if !preserveQuery {
-		rawQuery = r.URL.RawQuery
-	}
-
 	req := http.Request{
 		Method: r.Method,
 		Header: http.Header{},
@@ -164,19 +153,27 @@ func forwardRequestToSessionStore(r *http.Request, checkSessionURL string, prese
 	}
 
 	if reqUrl.Scheme == "unix" {
-		if u, err := url.Parse(reqUrl.Query().Get("url")); err != nil {
-			return nil, err
-		} else {
-			u.Path = path
-			u.RawQuery = rawQuery
-			v := reqUrl.Query()
-			v.Set("url", u.String())
-			reqUrl.RawQuery = v.Encode()
+		urlValues := reqUrl.Query()
+		if !preservePath {
+			urlValues.Set("path", r.URL.Path)
 		}
+
+		if !preserveQuery {
+			v := r.URL.Query()
+			v.Set("path", urlValues.Get("path"))
+			v.Set("tls", urlValues.Get("tls"))
+			urlValues = v
+		}
+		reqUrl.RawQuery = urlValues.Encode()
 		req.URL = reqUrl
 	} else {
-		reqUrl.Path = path
-		reqUrl.RawQuery = rawQuery
+		if !preservePath {
+			reqUrl.Path = r.URL.Path
+		}
+
+		if !preserveQuery {
+			reqUrl.RawQuery = r.URL.RawQuery
+		}
 		req.URL = reqUrl
 	}
 	res, err := (&http.Client{Transport: helper.NewRoundTripper()}).Do(req.WithContext(r.Context()))
