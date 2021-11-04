@@ -482,6 +482,14 @@ header as the subject for this request.
   request against the token endpoint
   - `give_up_after` (string) timeout
   - `max_delay` (string) time to wait between retries
+- `cache` (object, optional) - Enables caching of requested tokens
+  - `enabled` (bool, optional) - Enable the cache, will use exp time of token to
+    determine when to evict from cache. Defaults to false.
+  - `ttl` (string) - Can override the default behaviour of using the token exp
+    time, and specify a set time to live for the token in the cache. If the
+    token exp time is lower than the set value the token exp time will be used
+    instead.
+  - `max_tokens` (int) - Max number of tokens to cache.
 - `required_scope` ([]string, optional) - Sets what scope is required by the URL
   and when making performing OAuth 2.0 Client Credentials request, the scope
   will be included in the request:
