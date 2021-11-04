@@ -179,14 +179,15 @@ func ConfigureBackendURL(r *http.Request, rl *rule.Rule) error {
 	backendHost := p.Host
 	backendPath := p.Path
 	backendScheme := p.Scheme
-	backendRawQuery := p.RawQuery
+	backendQuery := p.Query()
 
 	forwardURL := r.URL
 	forwardURL.Scheme = backendScheme
 	forwardURL.Host = backendHost
 	if r.URL.Scheme == "unix" {
-		forwardURL.Path = "/" + strings.TrimLeft("/"+strings.Trim(backendPath, "/"), "/")
-		forwardURL.RawQuery = backendRawQuery
+		forwardURL.Path = "/" + strings.TrimLeft(backendPath, "/")
+		backendQuery.Set("path", "/"+strings.TrimLeft("/"+strings.Trim(backendQuery.Get("path"), "/")+"/"+strings.TrimLeft(proxyPath, "/"), "/"))
+		forwardURL.RawQuery = backendQuery.Encode()
 	} else {
 		forwardURL.Path = "/" + strings.TrimLeft("/"+strings.Trim(backendPath, "/")+"/"+strings.TrimLeft(proxyPath, "/"), "/")
 	}
