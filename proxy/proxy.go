@@ -27,6 +27,7 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/ory/oathkeeper/helper"
 	"github.com/ory/oathkeeper/pipeline/authn"
 	"github.com/ory/oathkeeper/x"
 
@@ -44,7 +45,7 @@ type proxyRegistry interface {
 }
 
 func NewProxy(r proxyRegistry) *Proxy {
-	return &Proxy{r: r, t: NewRoundTripper()}
+	return &Proxy{r: r, t: helper.NewRoundTripper()}
 }
 
 type Proxy struct {
@@ -183,8 +184,12 @@ func ConfigureBackendURL(r *http.Request, rl *rule.Rule) error {
 	forwardURL := r.URL
 	forwardURL.Scheme = backendScheme
 	forwardURL.Host = backendHost
-	forwardURL.Path = "/" + strings.TrimLeft("/"+strings.Trim(backendPath, "/")+"/"+strings.TrimLeft(proxyPath, "/"), "/")
-	forwardURL.RawQuery = backendRawQuery
+	if r.URL.Scheme == "unix" {
+		forwardURL.Path = "/" + strings.TrimLeft("/"+strings.Trim(backendPath, "/"), "/")
+		forwardURL.RawQuery = backendRawQuery
+	} else {
+		forwardURL.Path = "/" + strings.TrimLeft("/"+strings.Trim(backendPath, "/")+"/"+strings.TrimLeft(proxyPath, "/"), "/")
+	}
 
 	if rl.Upstream.StripPath != "" {
 		forwardURL.Path = strings.Replace(forwardURL.Path, "/"+strings.Trim(rl.Upstream.StripPath, "/"), "", 1)

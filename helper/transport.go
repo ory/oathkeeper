@@ -1,4 +1,4 @@
-package proxy
+package helper
 
 import (
 	"context"
@@ -60,6 +60,7 @@ func (t *transport) RoundTrip(r *http.Request) (*http.Response, error) {
 				v := req.URL.Query()
 				v.Del("url")
 				req.URL.RawQuery = v.Encode()
+				fmt.Println(req)
 				return t.base.RoundTrip(req)
 			}
 		default:
@@ -69,7 +70,7 @@ func (t *transport) RoundTrip(r *http.Request) (*http.Response, error) {
 }
 
 func NewRoundTripper() http.RoundTripper {
-	base := http.DefaultTransport.(*http.Transport)
+	base := http.DefaultTransport.(*http.Transport).Clone()
 	dialer := &net.Dialer{}
 	t := &transport{
 		base:   base,
