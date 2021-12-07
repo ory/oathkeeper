@@ -261,7 +261,7 @@ $ cat ./rules.json
     "handler": "keto_engine_acp_ory",
     "config": {
       "required_action": "my:action:$1",
-      "required_resource": "my:resource:$2:foo:$1"
+      "required_resource": "my:resource:$2:foo:$1",
       "subject": "{{ .Extra.email }}",
       "flavor": "exact"
     }
