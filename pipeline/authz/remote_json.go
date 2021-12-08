@@ -127,5 +127,9 @@ func (a *AuthorizerRemoteJSON) Config(config json.RawMessage) (*AuthorizerRemote
 		return nil, NewErrAuthorizerMisconfigured(a, err)
 	}
 
+	if c.ForwardResponseHeadersToUpstream == nil {
+		c.ForwardResponseHeadersToUpstream = []string{}
+	}
+
 	return &c, nil
 }
