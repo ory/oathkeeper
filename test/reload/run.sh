@@ -34,7 +34,7 @@ waitport 6061
 
 function finish {
   cat ./config.yaml
-  cat ./rules.3.json
+  cat ./rules.3.json || true
   cat ./oathkeeper.log
 }
 trap finish EXIT
