@@ -35,7 +35,7 @@
         "tags": [
           "api"
         ],
-        "summary": "Lists cryptographic keys",
+        "summary": "Lists Cryptographic Keys",
         "operationId": "getWellKnownJSONWebKeys",
         "responses": {
           "200": {
@@ -230,7 +230,7 @@
         "tags": [
           "api"
         ],
-        "summary": "Check alive status",
+        "summary": "Check Alive Status",
         "operationId": "isInstanceAlive",
         "responses": {
           "200": {
@@ -282,7 +282,7 @@
         "tags": [
           "api"
         ],
-        "summary": "Check readiness status",
+        "summary": "Check Readiness Status",
         "operationId": "isInstanceReady",
         "responses": {
           "200": {
@@ -316,7 +316,7 @@
         "tags": [
           "api"
         ],
-        "summary": "List all rules",
+        "summary": "List All Rules",
         "operationId": "listRules",
         "parameters": [
           {
@@ -394,7 +394,7 @@
         "tags": [
           "api"
         ],
-        "summary": "Retrieve a rule",
+        "summary": "Retrieve a Rule",
         "operationId": "getRule",
         "parameters": [
           {
@@ -485,7 +485,7 @@
         "tags": [
           "api"
         ],
-        "summary": "Get service version",
+        "summary": "Get Service Version",
         "operationId": "getVersion",
         "responses": {
           "200": {
