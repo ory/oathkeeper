@@ -127,6 +127,14 @@ func configWithRetriesForMutator(giveUpAfter, retryDelay string) func(*httptest.
 	}
 }
 
+func configWithSpecialCacheKey(key string) func(*httptest.Server) json.RawMessage {
+	return func(s *httptest.Server) json.RawMessage {
+		return []byte(fmt.Sprintf(`{"api": {"url": "%s"}, "cache": {"key": "%s"}}`, s.URL, key))
+	}
+}
+
+
+
 func TestMutatorHydrator(t *testing.T) {
 	conf := internal.NewConfigurationWithDefaults()
 	reg := internal.NewRegistry(conf)
@@ -148,6 +156,7 @@ func TestMutatorHydrator(t *testing.T) {
 		sampleUserId := "user"
 		sampleValidPassword := "passwd1"
 		sampleNotValidPassword := "passwd7"
+
 		var testMap = map[string]struct {
 			Setup   func(*testing.T) http.Handler
 			Session *authn.AuthenticationSession
@@ -344,6 +353,15 @@ func TestMutatorHydrator(t *testing.T) {
 				Config:  defaultConfigForMutator(),
 				Request: &http.Request{URL: &url.URL{RawQuery: "a=b&c=%2612"}},
 				Match:   newAuthenticationSession(),
+				Err:     nil,
+			},
+			"Custom Cache Key": {
+				Setup:   defaultRouterSetup(),
+				Session: newAuthenticationSession(setSubject(sampleSubject)),
+				Rule:    &rule.Rule{ID: "test-rule"},
+				Config:  configWithSpecialCacheKey(sampleSubject),
+				Request: &http.Request{},
+				Match:   newAuthenticationSession(setSubject(sampleSubject)),
 				Err:     nil,
 			},
 		}

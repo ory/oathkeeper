@@ -85,7 +85,7 @@ type externalAPIConfig struct {
 type cacheConfig struct {
 	Enabled bool   `json:"enabled"`
 	TTL     string `json:"ttl"`
-
+	Key     string `json:"key"`
 	ttl time.Duration
 }
 
@@ -147,6 +147,13 @@ func (a *MutatorHydrator) Mutate(r *http.Request, session *authn.AuthenticationS
 		return err
 	}
 
+	if len(cfg.Cache.Key) > 0 {
+		if cacheSession, ok := a.hydrateFromCache(cfg, cfg.Cache.Key); ok {
+			*session = *cacheSession
+			return nil
+		}
+		a.d.Logger().Debugf("Cache key %s was not found. Falling back on default.", cfg.Cache.Key)
+	}
 	var b bytes.Buffer
 	if err := json.NewEncoder(&b).Encode(session); err != nil {
 		return errors.WithStack(err)
