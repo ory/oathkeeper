@@ -133,8 +133,6 @@ func configWithSpecialCacheKey(key string) func(*httptest.Server) json.RawMessag
 	}
 }
 
-
-
 func TestMutatorHydrator(t *testing.T) {
 	conf := internal.NewConfigurationWithDefaults()
 	reg := internal.NewRegistry(conf)

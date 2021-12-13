@@ -86,7 +86,7 @@ type cacheConfig struct {
 	Enabled bool   `json:"enabled"`
 	TTL     string `json:"ttl"`
 	Key     string `json:"key"`
-	ttl time.Duration
+	ttl     time.Duration
 }
 
 type MutatorHydratorConfig struct {
