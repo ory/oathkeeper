@@ -241,8 +241,11 @@ func (a *MutatorHydrator) Mutate(r *http.Request, session *authn.AuthenticationS
 	}
 	*session = sessionFromUpstream
 
-	a.hydrateToCache(cfg, encodedSession, session)
-
+	if len(cfg.Cache.Key) > 0 {
+		a.hydrateToCache(cfg, cfg.Cache.Key, session)
+	} else {
+		a.hydrateToCache(cfg, encodedSession, session)
+	}
 	return nil
 }
 
