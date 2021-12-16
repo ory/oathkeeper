@@ -5,6 +5,7 @@ import (
 	"crypto/ecdsa"
 	"crypto/rsa"
 	"fmt"
+	"strings"
 
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/pkg/errors"
@@ -100,13 +101,14 @@ func (v *VerifierDefault) Verify(
 	parsedClaims := jwtx.ParseMapStringInterfaceClaims(claims)
 	for _, audience := range r.Audiences {
 		if !stringslice.Has(parsedClaims.Audience, audience) {
-			return nil, errors.WithStack(herodot.ErrInternalServerError.WithReasonf("Token audience %v is not intended for target audience %s.", parsedClaims.Audience, audience))
+			return nil, herodot.ErrUnauthorized.WithReasonf("Token audience %v is not intended for target audience %s.", parsedClaims.Audience, audience)
 		}
 	}
 
 	if len(r.Issuers) > 0 {
 		if !stringslice.Has(r.Issuers, parsedClaims.Issuer) {
-			return nil, errors.WithStack(herodot.ErrInternalServerError.WithReason("Token issuer does not match any trusted issuer."))
+			return nil, herodot.ErrUnauthorized.WithReasonf("Token issuer does not match any trusted issuer %s.", parsedClaims.Issuer).
+				WithDetail("received issuers", strings.Join(r.Issuers, ", "))
 		}
 	}
 
@@ -117,7 +119,7 @@ func (v *VerifierDefault) Verify(
 	if r.ScopeStrategy != nil {
 		for _, sc := range r.Scope {
 			if !r.ScopeStrategy(s, sc) {
-				return nil, errors.WithStack(herodot.ErrInternalServerError.WithReasonf(`JSON Web Token is missing required scope "%s".`, sc))
+				return nil, herodot.ErrUnauthorized.WithReasonf(`JSON Web Token is missing required scope "%s".`, sc)
 			}
 		}
 	} else {
