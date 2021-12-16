@@ -225,6 +225,16 @@ func TestAuthorizerRemoteValidate(t *testing.T) {
 			config:  json.RawMessage(`{"remote":"http://host/path"}`),
 		},
 		{
+			name:    "valid configuration with partial retry 1",
+			enabled: true,
+			config:  json.RawMessage(`{"remote":"http://host/path","retry":{"max_delay":"100ms"}}`),
+		},
+		{
+			name:    "valid configuration with partial retry 2",
+			enabled: true,
+			config:  json.RawMessage(`{"remote":"http://host/path","retry":{"give_up_after":"3s"}}`),
+		},
+		{
 			name:    "valid configuration with retry",
 			enabled: true,
 			config:  json.RawMessage(`{"remote":"http://host/path","retry":{"give_up_after":"3s", "max_delay":"100ms"}}`),
