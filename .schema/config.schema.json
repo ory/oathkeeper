@@ -996,6 +996,9 @@
           "minLength": 0,
           "uniqueItems": true,
           "default": []
+        },
+        "retry": {
+          "$ref": "#/definitions/retry"
         }
       },
       "required": [
@@ -1035,6 +1038,9 @@
           "minLength": 0,
           "uniqueItems": true,
           "default": []
+        },
+        "retry": {
+          "$ref": "#/definitions/retry"
         }
       },
       "required": [

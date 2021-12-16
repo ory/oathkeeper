@@ -224,6 +224,11 @@ func TestAuthorizerRemoteValidate(t *testing.T) {
 			enabled: true,
 			config:  json.RawMessage(`{"remote":"http://host/path"}`),
 		},
+		{
+			name:    "valid configuration with retry",
+			enabled: true,
+			config:  json.RawMessage(`{"remote":"http://host/path","retry":{"give_up_after":"3s", "max_delay":"100ms"}}`),
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
