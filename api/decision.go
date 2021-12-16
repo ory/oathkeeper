@@ -21,7 +21,9 @@
 package api
 
 import (
+	"fmt"
 	"net/http"
+	"net/url"
 	"strings"
 
 	"github.com/ory/oathkeeper/pipeline/authn"
@@ -92,27 +94,55 @@ func (h *DecisionHandler) decisions(w http.ResponseWriter, r *http.Request) {
 		"http_user_agent": r.UserAgent(),
 	}
 
+	httpMethod := r.Header.Get("X-Forwarded-Method")
+	proto := r.Header.Get("X-Forwarded-Proto")
+	host := r.Header.Get("X-Forwarded-Host")
+	requestUri := r.Header.Get("X-Forwarded-Uri")
+
+	if httpMethod == "" {
+		httpMethod = r.Method
+	}
+
+	var uri *url.URL
+	var err error
+	if proto != "" && host != "" && requestUri != "" {
+		uri, err = url.Parse(fmt.Sprintf("%s://%s%s", proto, host, requestUri))
+		if err != nil {
+			h.r.Logger().WithError(err).
+				WithFields(fields).
+				WithField("granted", false).
+				Warn("Access request denied")
+			h.r.Logger().Info("Failed to parse the received url. Handling error")
+			h.r.ProxyRequestHandler().HandleError(w, r, nil, err)
+			return
+		}
+	} else {
+		uri = r.URL
+	}
+
 	if sess, ok := r.Context().Value(proxy.ContextKeySession).(*authn.AuthenticationSession); ok {
 		fields["subject"] = sess.Subject
 	}
 
-	rl, err := h.r.RuleMatcher().Match(r.Context(), r.Method, r.URL)
+	rl, err := h.r.RuleMatcher().Match(r.Context(), httpMethod, uri)
 	if err != nil {
 		h.r.Logger().WithError(err).
 			WithFields(fields).
 			WithField("granted", false).
 			Warn("Access request denied")
+		h.r.Logger().Info("Rule matcher failed. Handling error")
 		h.r.ProxyRequestHandler().HandleError(w, r, rl, err)
 		return
 	}
 
+	h.r.Logger().Info("Handling Proxy Request")
 	s, err := h.r.ProxyRequestHandler().HandleRequest(r, rl)
 	if err != nil {
 		h.r.Logger().WithError(err).
 			WithFields(fields).
 			WithField("granted", false).
 			Info("Access request denied")
-
+		h.r.Logger().Info("Proxy request handler failed. Handling error")
 		h.r.ProxyRequestHandler().HandleError(w, r, rl, err)
 		return
 	}

@@ -2,6 +2,7 @@ package errors
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/url"
 
@@ -40,7 +41,22 @@ func (a *ErrorRedirect) Handle(w http.ResponseWriter, r *http.Request, config js
 		return err
 	}
 
-	http.Redirect(w, r, a.RedirectURL(r, c), c.Code)
+	proto := r.Header.Get("X-Forwarded-Proto")
+	host := r.Header.Get("X-Forwarded-Host")
+	requestUri := r.Header.Get("X-Forwarded-Uri")
+
+	fmt.Printf("Headers: %s, %s, %s\n", proto, host, requestUri)
+
+	var uri *url.URL
+	if proto != "" && host != "" && requestUri != "" {
+		if uri, err = url.Parse(fmt.Sprintf("%s://%s%s", proto, host, requestUri)); err != nil {
+			return err
+		}
+	} else {
+		uri = r.URL
+	}
+
+	http.Redirect(w, r, a.RedirectURL(uri, c), c.Code)
 	return nil
 }
 
@@ -69,7 +85,7 @@ func (a *ErrorRedirect) GetID() string {
 	return "redirect"
 }
 
-func (a *ErrorRedirect) RedirectURL(r *http.Request, c *ErrorRedirectConfig) string {
+func (a *ErrorRedirect) RedirectURL(uri *url.URL, c *ErrorRedirectConfig) string {
 	if c.ReturnToQueryParam == "" {
 		return c.To
 	}
@@ -78,8 +94,9 @@ func (a *ErrorRedirect) RedirectURL(r *http.Request, c *ErrorRedirectConfig) str
 	if err != nil {
 		return c.To
 	}
+
 	q := u.Query()
-	q.Set(c.ReturnToQueryParam, r.URL.String())
+	q.Set(c.ReturnToQueryParam, uri.String())
 	u.RawQuery = q.Encode()
 	return u.String()
 }
