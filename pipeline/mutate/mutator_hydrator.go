@@ -141,18 +141,19 @@ func (a *MutatorHydrator) hydrateToCache(config *MutatorHydratorConfig, key stri
 	}
 }
 
-func (a *MutatorHydrator) Mutate(r *http.Request, session *authn.AuthenticationSession, config json.RawMessage, _ pipeline.Rule) error {
+func (a *MutatorHydrator) Mutate(r *http.Request, session *authn.AuthenticationSession, config json.RawMessage, p pipeline.Rule) error {
 	cfg, err := a.Config(config)
 	if err != nil {
 		return err
 	}
 
 	if len(cfg.Cache.Key) > 0 {
-		if cacheSession, ok := a.hydrateFromCache(cfg, cfg.Cache.Key); ok {
+		if cacheSession, ok := a.hydrateFromCache(cfg, cfg.Cache.Key + p.GetID()); ok {
 			*session = *cacheSession
 			return nil
 		}
-		a.d.Logger().Debugf("Cache key %s was not found. Falling back on default.", cfg.Cache.Key)
+		a.d.Logger().Debugf("Cache key %s for rule %s id was not found. Falling back on default.",
+			cfg.Cache.Key, p.GetID())
 	}
 	var b bytes.Buffer
 	if err := json.NewEncoder(&b).Encode(session); err != nil {
@@ -242,7 +243,7 @@ func (a *MutatorHydrator) Mutate(r *http.Request, session *authn.AuthenticationS
 	*session = sessionFromUpstream
 
 	if len(cfg.Cache.Key) > 0 {
-		a.hydrateToCache(cfg, cfg.Cache.Key, session)
+		a.hydrateToCache(cfg, cfg.Cache.Key + p.GetID(), session)
 	} else {
 		a.hydrateToCache(cfg, encodedSession, session)
 	}
