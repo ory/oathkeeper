@@ -5,10 +5,11 @@ RUN addgroup -S ory; \
 
 RUN apk add -U --no-cache ca-certificates
 
+RUN go get -u github.com/gobuffalo/packr/v2/packr2
 ADD . /app
 WORKDIR /app
 ENV GO111MODULE on
-RUN go get -u github.com/gobuffalo/packr/v2/packr2
+RUN go mod download
 RUN packr2
 RUN go mod download && go mod tidy
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build
