@@ -148,7 +148,7 @@ func (a *MutatorHydrator) Mutate(r *http.Request, session *authn.AuthenticationS
 	}
 
 	if len(cfg.Cache.Key) > 0 {
-		if cacheSession, ok := a.hydrateFromCache(cfg, cfg.Cache.Key + p.GetID()); ok {
+		if cacheSession, ok := a.hydrateFromCache(cfg, cfg.Cache.Key+p.GetID()); ok {
 			*session = *cacheSession
 			return nil
 		}
@@ -243,7 +243,7 @@ func (a *MutatorHydrator) Mutate(r *http.Request, session *authn.AuthenticationS
 	*session = sessionFromUpstream
 
 	if len(cfg.Cache.Key) > 0 {
-		a.hydrateToCache(cfg, cfg.Cache.Key + p.GetID(), session)
+		a.hydrateToCache(cfg, cfg.Cache.Key+p.GetID(), session)
 	} else {
 		a.hydrateToCache(cfg, encodedSession, session)
 	}
