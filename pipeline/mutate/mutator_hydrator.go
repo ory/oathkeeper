@@ -114,16 +114,16 @@ func (a *MutatorHydrator) GetID() string {
 	return "hydrator"
 }
 
-func (a *MutatorHydrator) cacheKey(config *MutatorHydratorConfig, session string) string {
-	return fmt.Sprintf("%s|%x", config.Api.URL, md5.Sum([]byte(session)))
+func (a *MutatorHydrator) cacheKey(config *MutatorHydratorConfig, key string) string {
+	return fmt.Sprintf("%s|%x", config.Api.URL, md5.Sum([]byte(key)))
 }
 
-func (a *MutatorHydrator) hydrateFromCache(config *MutatorHydratorConfig, session string) (*authn.AuthenticationSession, bool) {
+func (a *MutatorHydrator) hydrateFromCache(config *MutatorHydratorConfig, key string) (*authn.AuthenticationSession, bool) {
 	if !config.Cache.Enabled {
 		return nil, false
 	}
 
-	item, found := a.hydrateCache.Get(a.cacheKey(config, session))
+	item, found := a.hydrateCache.Get(a.cacheKey(config, key))
 	if !found {
 		return nil, false
 	}
@@ -152,7 +152,7 @@ func (a *MutatorHydrator) Mutate(r *http.Request, session *authn.AuthenticationS
 			*session = *cacheSession
 			return nil
 		}
-		a.d.Logger().Debugf("Cache key %s for rule %s id was not found. Falling back on default.",
+		a.d.Logger().Debugf("Cache key %s in rule %s was not found. Falling back on default.",
 			cfg.Cache.Key, p.GetID())
 	}
 	var b bytes.Buffer
