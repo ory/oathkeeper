@@ -27,6 +27,8 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"strings"
+	"sync"
 	"time"
 
 	"github.com/dgraph-io/ristretto"
@@ -51,13 +53,14 @@ const (
 	ErrNoCredentialsProvided            = "No credentials were provided in mutator configuration"
 	contentTypeHeaderKey                = "Content-Type"
 	contentTypeJSONHeaderValue          = "application/json"
+	poolBufCapacityBytes                = 4096
 )
 
 type MutatorHydrator struct {
-	c      configuration.Provider
-	client *http.Client
-	d      mutatorHydratorDependencies
-
+	c            configuration.Provider
+	client       *http.Client
+	d            mutatorHydratorDependencies
+	p            sync.Pool
 	hydrateCache *ristretto.Cache
 	cacheTTL     *time.Duration
 }
@@ -107,36 +110,36 @@ func NewMutatorHydrator(c configuration.Provider, d mutatorHydratorDependencies)
 		// This is a best-practice value.
 		BufferItems: 64,
 	})
-	return &MutatorHydrator{c: c, d: d, client: httpx.NewResilientClientLatencyToleranceSmall(nil), hydrateCache: cache}
+	return &MutatorHydrator{c: c, d: d,
+		p: sync.Pool{
+			New: func() interface{} {
+				b := &bytes.Buffer{}
+				b.Grow(poolBufCapacityBytes)
+				return b
+			},
+		},
+		client: httpx.NewResilientClientLatencyToleranceSmall(nil), hydrateCache: cache}
 }
 
 func (a *MutatorHydrator) GetID() string {
 	return "hydrator"
 }
 
-func (a *MutatorHydrator) cacheKey(config *MutatorHydratorConfig, key string) string {
-	return fmt.Sprintf("%s|%x", config.Api.URL, md5.Sum([]byte(key)))
+// cacheKey creates a (composite) cache key.
+func (a *MutatorHydrator) cacheKey(keys ...string) string {
+	return fmt.Sprintf("%x", md5.Sum([]byte(strings.Join(keys, ""))))
 }
 
-func (a *MutatorHydrator) hydrateFromCache(config *MutatorHydratorConfig, key string) (*authn.AuthenticationSession, bool) {
-	if !config.Cache.Enabled {
-		return nil, false
-	}
-
-	item, found := a.hydrateCache.Get(a.cacheKey(config, key))
+func (a *MutatorHydrator) hydrateFromCache(key string) (*authn.AuthenticationSession, bool) {
+	item, found := a.hydrateCache.Get(key)
 	if !found {
 		return nil, false
 	}
-
 	return item.(*authn.AuthenticationSession).Copy(), true
 }
 
 func (a *MutatorHydrator) hydrateToCache(config *MutatorHydratorConfig, key string, session *authn.AuthenticationSession) {
-	if !config.Cache.Enabled {
-		return
-	}
-
-	if a.hydrateCache.SetWithTTL(a.cacheKey(config, key), session.Copy(), 0, config.Cache.ttl) {
+	if a.hydrateCache.SetWithTTL(key, session.Copy(), 0, config.Cache.ttl) {
 		a.d.Logger().Debug("Cache reject item")
 	}
 }
@@ -147,36 +150,43 @@ func (a *MutatorHydrator) Mutate(r *http.Request, session *authn.AuthenticationS
 		return err
 	}
 
-	if len(cfg.Cache.Key) > 0 {
-		if cacheSession, ok := a.hydrateFromCache(cfg, cfg.Cache.Key+p.GetID()); ok {
+	sessionCacheKey := a.p.Get().(*bytes.Buffer)
+	defer func() {
+		sessionCacheKey.Reset()
+		a.p.Put(sessionCacheKey)
+	}()
+
+	err = json.NewEncoder(sessionCacheKey).Encode(session)
+	switch {
+	case err != nil:
+		return errors.WithStack(err)
+	case !cfg.Cache.Enabled:
+		break
+	case len(cfg.Cache.Key) > 0:
+		// Build a composite cache key with property from configuration.
+		if cacheSession, ok := a.hydrateFromCache(a.cacheKey(
+			cfg.Api.URL, cfg.Cache.Key, p.GetID(), session.Subject)); ok {
 			*session = *cacheSession
 			return nil
 		}
 		a.d.Logger().Debugf("Cache key %s in rule %s was not found. Falling back on default.",
 			cfg.Cache.Key, p.GetID())
-	}
-	var b bytes.Buffer
-	if err := json.NewEncoder(&b).Encode(session); err != nil {
-		return errors.WithStack(err)
-	}
-
-	encodedSession := b.String()
-	if cacheSession, ok := a.hydrateFromCache(cfg, encodedSession); ok {
-		*session = *cacheSession
-		return nil
+		fallthrough
+	default:
+		if cacheSession, ok := a.hydrateFromCache(a.cacheKey(sessionCacheKey.String())); ok {
+			*session = *cacheSession
+			return nil
+		}
 	}
 
-	if cfg.Api.URL == "" {
-		return errors.New(ErrMissingAPIURL)
-	} else if _, err := url.ParseRequestURI(cfg.Api.URL); err != nil {
+	if _, err = url.ParseRequestURI(cfg.Api.URL); err != nil {
 		return errors.New(ErrInvalidAPIURL)
 	}
-	req, err := http.NewRequest("POST", cfg.Api.URL, &b)
+
+	req, err := http.NewRequest("POST", cfg.Api.URL, sessionCacheKey)
 	if err != nil {
 		return errors.WithStack(err)
-	}
-
-	if r.URL != nil {
+	} else if r.URL != nil {
 		q := r.URL.Query()
 		req.URL.RawQuery = q.Encode()
 	}
@@ -198,19 +208,20 @@ func (a *MutatorHydrator) Mutate(r *http.Request, session *authn.AuthenticationS
 		giveUpAfter := time.Millisecond * 50
 		if len(cfg.Api.Retry.MaxDelay) > 0 {
 			if d, err := time.ParseDuration(cfg.Api.Retry.MaxDelay); err != nil {
-				a.d.Logger().WithError(err).Warn("Unable to parse max_delay in the Hydrator Mutator, falling pack to default.")
+				a.d.Logger().WithError(err).Warn("Unable to parse max_delay in the Hydrator Mutator, " +
+					"falling pack to default.")
 			} else {
 				maxRetryDelay = d
 			}
 		}
 		if len(cfg.Api.Retry.GiveUpAfter) > 0 {
 			if d, err := time.ParseDuration(cfg.Api.Retry.GiveUpAfter); err != nil {
-				a.d.Logger().WithError(err).Warn("Unable to parse max_delay in the Hydrator Mutator, falling pack to default.")
+				a.d.Logger().WithError(err).Warn("Unable to parse max_delay in the Hydrator Mutator, " +
+					"falling pack to default.")
 			} else {
 				giveUpAfter = d
 			}
 		}
-
 		client.Transport = httpx.NewResilientRoundTripper(a.client.Transport, maxRetryDelay, giveUpAfter)
 	}
 
@@ -225,27 +236,28 @@ func (a *MutatorHydrator) Mutate(r *http.Request, session *authn.AuthenticationS
 	case http.StatusUnauthorized:
 		if cfg.Api.Auth != nil {
 			return errors.New(ErrInvalidCredentials)
-		} else {
-			return errors.New(ErrNoCredentialsProvided)
 		}
+		return errors.New(ErrNoCredentialsProvided)
 	default:
 		return errors.New(ErrNon200ResponseFromAPI)
 	}
-
 	sessionFromUpstream := authn.AuthenticationSession{}
-	err = json.NewDecoder(res.Body).Decode(&sessionFromUpstream)
-	if err != nil {
+
+	if err := json.NewDecoder(res.Body).Decode(&sessionFromUpstream); err != nil {
 		return errors.WithStack(err)
-	}
-	if sessionFromUpstream.Subject != session.Subject {
+	} else if sessionFromUpstream.Subject != session.Subject {
 		return errors.New(ErrMalformedResponseFromUpstreamAPI)
 	}
 	*session = sessionFromUpstream
 
-	if len(cfg.Cache.Key) > 0 {
-		a.hydrateToCache(cfg, cfg.Cache.Key+p.GetID(), session)
-	} else {
-		a.hydrateToCache(cfg, encodedSession, session)
+	switch {
+	case !cfg.Cache.Enabled:
+		break
+	case len(cfg.Cache.Key) > 0:
+		a.hydrateToCache(cfg, a.cacheKey(
+			cfg.Api.URL, cfg.Cache.Key, p.GetID(), session.Subject), session)
+	default:
+		a.hydrateToCache(cfg, sessionCacheKey.String(), session)
 	}
 	return nil
 }
@@ -269,14 +281,12 @@ func (a *MutatorHydrator) Config(config json.RawMessage) (*MutatorHydratorConfig
 		var err error
 		c.Cache.ttl, err = time.ParseDuration(c.Cache.TTL)
 		if err != nil {
-			a.d.Logger().WithError(err).WithField("ttl", c.Cache.TTL).Error("Unable to parse cache ttl in the Hydrator Mutator.")
+			a.d.Logger().WithError(err).WithField("ttl",
+				c.Cache.TTL).Error("Unable to parse cache ttl in the Hydrator Mutator.")
 			return nil, NewErrMutatorMisconfigured(a, err)
-		}
-
-		if c.Cache.ttl == 0 {
+		} else if c.Cache.ttl == 0 {
 			c.Cache.ttl = time.Minute
 		}
 	}
-
 	return &c, nil
 }
