@@ -27,10 +27,11 @@ import (
 )
 
 const (
-	cacheTestKeyName            = "cache"
-	cacheTestCustomCacheKeyName = "Custom Cache Key Cache Hit"
-	cacheTestAuthSessionName    = "AuthenticationSession Key Cache Hit"
-	cacheTestWriteSleep         = 10 * time.Millisecond
+	cacheTestKeyName               = "cache"
+	cacheTestCustomCacheKeyName    = "Custom Cache Key Cache Hit"
+	cacheTestAuthSessionName       = "AuthenticationSession Key Cache Hit"
+	cacheTestCustomKeyTemplateName = "Custom Cache Key Template Cache Hit"
+	cacheTestWriteSleep            = 10 * time.Millisecond
 )
 
 func setExtra(key string, value interface{}) func(a *authn.AuthenticationSession) {
@@ -95,14 +96,14 @@ func routerAuthSessionCache(actions ...func(a *authn.AuthenticationSession)) rou
 	return func(t *testing.T) http.Handler {
 		router := httprouter.New()
 
-		i := 0
+		isSeen := false
 		router.POST("/", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-			i++
-
-			if i > 1 {
+			if isSeen {
 				w.WriteHeader(http.StatusInternalServerError)
 				return
 			}
+			isSeen = true
+
 			body, err := ioutil.ReadAll(r.Body)
 			require.NoError(t, err)
 			var data authn.AuthenticationSession
@@ -422,11 +423,20 @@ func TestMutatorHydrator(t *testing.T) {
 				Match:   newAuthenticationSession(setSubject(sampleSubject)),
 				Err:     nil,
 			},
+			cacheTestCustomKeyTemplateName: {
+				Setup:   defaultRouterSetup(),
+				Session: newAuthenticationSession(setSubject(sampleSubject)),
+				Rule:    &rule.Rule{ID: "test-rule"},
+				Config:  configWithSpecialCacheKey(sampleSubject),
+				Request: &http.Request{},
+				Match:   newAuthenticationSession(setSubject(sampleSubject)),
+				Err:     nil,
+			},
 			cacheTestAuthSessionName: {
 				Setup:   routerAuthSessionCache(),
 				Session: newAuthenticationSession(setSubject(sampleSubject)),
 				Rule:    &rule.Rule{ID: "test-rule"},
-				Config:  configWithSpecialCacheKey(""),
+				Config:  configWithSpecialCacheKey("{{ print .Subject }}"),
 				Request: &http.Request{},
 				Match:   newAuthenticationSession(setSubject(sampleSubject)),
 				Err:     nil,
@@ -445,6 +455,8 @@ func TestMutatorHydrator(t *testing.T) {
 				defer ts.Close()
 
 				switch {
+				case testName == cacheTestCustomKeyTemplateName:
+					fallthrough
 				case testName == cacheTestCustomCacheKeyName:
 					specs.Session.Extra = make(map[string]interface{})
 					specs.Session.Extra[cacheTestKeyName] = struct{}{}
@@ -470,6 +482,8 @@ func TestMutatorHydrator(t *testing.T) {
 				}
 
 				switch {
+				case testName == cacheTestCustomKeyTemplateName:
+					fallthrough
 				case testName == cacheTestCustomCacheKeyName:
 					// As specs.Session is served from cache we can't perform
 					// full equality assertion but assert if cache key is set.
