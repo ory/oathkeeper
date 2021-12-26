@@ -46,7 +46,6 @@ import (
 
 const (
 	ErrMalformedResponseFromUpstreamAPI = "The call to an external API returned an invalid JSON object"
-	ErrMissingAPIURL                    = "Missing URL in mutator configuration"
 	ErrInvalidAPIURL                    = "Invalid URL in mutator configuration"
 	ErrNon200ResponseFromAPI            = "The call to an external API returned a non-200 HTTP response"
 	ErrInvalidCredentials               = "Invalid credentials were provided in mutator configuration"
@@ -105,7 +104,7 @@ func NewMutatorHydrator(c configuration.Provider, d mutatorHydratorDependencies)
 	cache, _ := ristretto.NewCache(&ristretto.Config{
 		// This will hold about 1000 unique mutation responses.
 		NumCounters: 10000,
-		// Allocate a max of 32MB
+		// Allocate a max of 32 MB
 		MaxCost: 1 << 25,
 		// This is a best-practice value.
 		BufferItems: 64,
@@ -150,18 +149,17 @@ func (a *MutatorHydrator) Mutate(r *http.Request, session *authn.AuthenticationS
 		return err
 	}
 
-	sessionCacheKey := a.p.Get().(*bytes.Buffer)
+	s := a.p.Get().(*bytes.Buffer)
 	defer func() {
-		sessionCacheKey.Reset()
-		a.p.Put(sessionCacheKey)
+		s.Reset()
+		a.p.Put(s)
 	}()
 
-	err = json.NewEncoder(sessionCacheKey).Encode(session)
+	err = json.NewEncoder(s).Encode(session)
 	switch {
 	case err != nil:
 		return errors.WithStack(err)
 	case !cfg.Cache.Enabled:
-		break
 	case len(cfg.Cache.Key) > 0:
 		// Build a composite cache key with property from configuration.
 		if cacheSession, ok := a.hydrateFromCache(a.cacheKey(
@@ -173,17 +171,16 @@ func (a *MutatorHydrator) Mutate(r *http.Request, session *authn.AuthenticationS
 			cfg.Cache.Key, p.GetID())
 		fallthrough
 	default:
-		if cacheSession, ok := a.hydrateFromCache(a.cacheKey(sessionCacheKey.String())); ok {
+		if cacheSession, ok := a.hydrateFromCache(a.cacheKey(cfg.Api.URL, s.String(), p.GetID())); ok {
 			*session = *cacheSession
 			return nil
 		}
 	}
-
 	if _, err = url.ParseRequestURI(cfg.Api.URL); err != nil {
 		return errors.New(ErrInvalidAPIURL)
 	}
 
-	req, err := http.NewRequest("POST", cfg.Api.URL, sessionCacheKey)
+	req, err := http.NewRequest("POST", cfg.Api.URL, s)
 	if err != nil {
 		return errors.WithStack(err)
 	} else if r.URL != nil {
@@ -224,6 +221,7 @@ func (a *MutatorHydrator) Mutate(r *http.Request, session *authn.AuthenticationS
 		}
 		client.Transport = httpx.NewResilientRoundTripper(a.client.Transport, maxRetryDelay, giveUpAfter)
 	}
+	sessionCacheKey := a.cacheKey(cfg.Api.URL, s.String(), p.GetID())
 
 	res, err := client.Do(req.WithContext(r.Context()))
 	if err != nil {
@@ -241,6 +239,7 @@ func (a *MutatorHydrator) Mutate(r *http.Request, session *authn.AuthenticationS
 	default:
 		return errors.New(ErrNon200ResponseFromAPI)
 	}
+
 	sessionFromUpstream := authn.AuthenticationSession{}
 
 	if err := json.NewDecoder(res.Body).Decode(&sessionFromUpstream); err != nil {
@@ -252,12 +251,11 @@ func (a *MutatorHydrator) Mutate(r *http.Request, session *authn.AuthenticationS
 
 	switch {
 	case !cfg.Cache.Enabled:
-		break
 	case len(cfg.Cache.Key) > 0:
 		a.hydrateToCache(cfg, a.cacheKey(
 			cfg.Api.URL, cfg.Cache.Key, p.GetID(), session.Subject), session)
 	default:
-		a.hydrateToCache(cfg, sessionCacheKey.String(), session)
+		a.hydrateToCache(cfg, sessionCacheKey, session)
 	}
 	return nil
 }

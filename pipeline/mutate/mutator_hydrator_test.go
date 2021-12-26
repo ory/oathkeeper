@@ -27,9 +27,10 @@ import (
 )
 
 const (
-	cacheTestKeyName   = "cache"
-	cacheTestName      = "Custom Cache Key Cache Hit"
-	cacheTestWaitSleep = 10 * time.Millisecond
+	cacheTestKeyName            = "cache"
+	cacheTestCustomCacheKeyName = "Custom Cache Key Cache Hit"
+	cacheTestAuthSessionName    = "AuthenticationSession Key Cache Hit"
+	cacheTestWriteSleep         = 10 * time.Millisecond
 )
 
 func setExtra(key string, value interface{}) func(a *authn.AuthenticationSession) {
@@ -69,6 +70,39 @@ func defaultRouterSetup(actions ...func(a *authn.AuthenticationSession)) routerS
 	return func(t *testing.T) http.Handler {
 		router := httprouter.New()
 		router.POST("/", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+			body, err := ioutil.ReadAll(r.Body)
+			require.NoError(t, err)
+			var data authn.AuthenticationSession
+			err = json.Unmarshal(body, &data)
+			require.NoError(t, err)
+			for _, f := range actions {
+				f(&data)
+			}
+			jsonData, err := json.Marshal(data)
+			require.NoError(t, err)
+			w.WriteHeader(http.StatusOK)
+			_, err = w.Write(jsonData)
+			require.NoError(t, err)
+		})
+		return router
+	}
+}
+
+// routerAuthSessionCache is used with AuthenticationSession cache. We can't modify AuthenticationSession,
+// thus we need to invoke an error if function is triggered twice. Given no error in tests we can assert
+// AuthenticationSession is from cache.
+func routerAuthSessionCache(actions ...func(a *authn.AuthenticationSession)) routerSetupFunction {
+	return func(t *testing.T) http.Handler {
+		router := httprouter.New()
+
+		i := 0
+		router.POST("/", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+			i++
+
+			if i > 1 {
+				w.WriteHeader(http.StatusInternalServerError)
+				return
+			}
 			body, err := ioutil.ReadAll(r.Body)
 			require.NoError(t, err)
 			var data authn.AuthenticationSession
@@ -379,11 +413,20 @@ func TestMutatorHydrator(t *testing.T) {
 				Match:   newAuthenticationSession(setSubject(sampleSubject)),
 				Err:     nil,
 			},
-			cacheTestName: {
+			cacheTestCustomCacheKeyName: {
 				Setup:   defaultRouterSetup(),
 				Session: newAuthenticationSession(setSubject(sampleSubject)),
 				Rule:    &rule.Rule{ID: "test-rule"},
 				Config:  configWithSpecialCacheKey(sampleSubject),
+				Request: &http.Request{},
+				Match:   newAuthenticationSession(setSubject(sampleSubject)),
+				Err:     nil,
+			},
+			cacheTestAuthSessionName: {
+				Setup:   routerAuthSessionCache(),
+				Session: newAuthenticationSession(setSubject(sampleSubject)),
+				Rule:    &rule.Rule{ID: "test-rule"},
+				Config:  configWithSpecialCacheKey(""),
 				Request: &http.Request{},
 				Match:   newAuthenticationSession(setSubject(sampleSubject)),
 				Err:     nil,
@@ -402,7 +445,7 @@ func TestMutatorHydrator(t *testing.T) {
 				defer ts.Close()
 
 				switch {
-				case testName == cacheTestName:
+				case testName == cacheTestCustomCacheKeyName:
 					specs.Session.Extra = make(map[string]interface{})
 					specs.Session.Extra[cacheTestKeyName] = struct{}{}
 					require.NoError(t, a.Mutate(specs.Request, specs.Session, specs.Config(ts), specs.Rule))
@@ -412,7 +455,11 @@ func TestMutatorHydrator(t *testing.T) {
 					// Cache entry is being written asynchronously. Obviously this here is not
 					// a good strategy, however, the alternative would be to replace the cache.
 					// See https://github.com/dgraph-io/ristretto/blob/9d4946d9b973c8e860ae42944e07f5bbe28a506b/cache_test.go#L17
-					time.Sleep(cacheTestWaitSleep)
+					time.Sleep(cacheTestWriteSleep)
+				case testName == cacheTestAuthSessionName:
+					// Ensure session is persisted within cache.
+					require.NoError(t, a.Mutate(specs.Request, specs.Session, specs.Config(ts), specs.Rule))
+					time.Sleep(cacheTestWriteSleep)
 				}
 
 				if err := a.Mutate(specs.Request, specs.Session, specs.Config(ts), specs.Rule); specs.Err == nil {
@@ -423,7 +470,7 @@ func TestMutatorHydrator(t *testing.T) {
 				}
 
 				switch {
-				case testName == cacheTestName:
+				case testName == cacheTestCustomCacheKeyName:
 					// As specs.Session is served from cache we can't perform
 					// full equality assertion but assert if cache key is set.
 					assert.Contains(t, specs.Session.Extra, cacheTestKeyName)
