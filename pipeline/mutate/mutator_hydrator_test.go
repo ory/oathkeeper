@@ -415,7 +415,7 @@ func TestMutatorHydrator(t *testing.T) {
 				Match:   newAuthenticationSession(setSubject(sampleSubject)),
 				Err:     nil,
 			},
-			cacheTestCustomKeyTemplateName: {
+			cacheTestAuthSessionName: {
 				Setup:   defaultRouterSetup(),
 				Session: newAuthenticationSession(setSubject(sampleSubject)),
 				Rule:    &rule.Rule{ID: "test-rule"},
@@ -424,7 +424,7 @@ func TestMutatorHydrator(t *testing.T) {
 				Match:   newAuthenticationSession(setSubject(sampleSubject)),
 				Err:     nil,
 			},
-			cacheTestAuthSessionName: {
+			cacheTestCustomKeyTemplateName: {
 				Setup:   routerAuthSessionCache(),
 				Session: newAuthenticationSession(setSubject(cacheTestTemplateSubject)),
 				Rule:    &rule.Rule{ID: "test-rule"},
