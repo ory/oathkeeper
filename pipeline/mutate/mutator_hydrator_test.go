@@ -26,15 +26,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-const (
-	cacheTestTemplateSubject       = "sub"
-	cacheTestKeyName               = "cache"
-	cacheTestCustomCacheKeyName    = "Custom Cache Key Cache Hit"
-	cacheTestAuthSessionName       = "AuthenticationSession Key Cache Hit"
-	cacheTestCustomKeyTemplateName = "Custom Cache Key Template Cache Hit"
-	cacheTestWriteSleep            = 10 * time.Millisecond
-)
-
 func setExtra(key string, value interface{}) func(a *authn.AuthenticationSession) {
 	return func(a *authn.AuthenticationSession) {
 		if a.Extra == nil {
@@ -406,33 +397,82 @@ func TestMutatorHydrator(t *testing.T) {
 				Match:   newAuthenticationSession(),
 				Err:     nil,
 			},
-			cacheTestCustomCacheKeyName: {
-				Setup:   routerAuthSessionCache(),
-				Session: newAuthenticationSession(setSubject(sampleSubject)),
-				Rule:    &rule.Rule{ID: "test-rule"},
-				Config:  configWithSpecialCacheKey(sampleSubject),
-				Request: &http.Request{},
-				Match:   newAuthenticationSession(setSubject(sampleSubject)),
-				Err:     nil,
+		}
+
+		for testName, specs := range testMap {
+			t.Run(testName, func(t *testing.T) {
+				var router http.Handler
+				var ts *httptest.Server
+
+				if specs.Setup != nil {
+					router = specs.Setup(t)
+				}
+				ts = httptest.NewServer(router)
+				defer ts.Close()
+
+				if err := a.Mutate(specs.Request, specs.Session, specs.Config(ts), specs.Rule); specs.Err == nil {
+					// Issuer must run without error
+					require.NoError(t, err)
+				} else {
+					assert.EqualError(t, err, specs.Err.Error())
+				}
+				assert.Equal(t, specs.Match, specs.Session)
+			})
+		}
+
+	})
+
+	t.Run("method=cache", func(t *testing.T) {
+		const (
+			sampleSubject            = "sub"
+			cacheTestTemplateSubject = "sub"
+			cacheTestKeyName         = "cache"
+			cacheTestWriteSleep      = 10 * time.Millisecond
+		)
+
+		var testMap = map[string]struct {
+			TemplateKey  bool
+			CustomKey    bool
+			SessionCache bool
+			Setup        func(*testing.T) http.Handler
+			Session      *authn.AuthenticationSession
+			Rule         *rule.Rule
+			Config       func(*httptest.Server) json.RawMessage
+			Request      *http.Request
+			Match        *authn.AuthenticationSession
+			Err          error
+		}{
+			"Custom Cache Key Cache Hit": {
+				CustomKey: true,
+				Setup:     routerAuthSessionCache(),
+				Session:   newAuthenticationSession(setSubject(sampleSubject)),
+				Rule:      &rule.Rule{ID: "test-rule"},
+				Config:    configWithSpecialCacheKey(sampleSubject),
+				Request:   &http.Request{},
+				Match:     newAuthenticationSession(setSubject(sampleSubject)),
+				Err:       nil,
 			},
-			cacheTestAuthSessionName: {
-				Setup:   routerAuthSessionCache(),
-				Session: newAuthenticationSession(setSubject(sampleSubject)),
-				Rule:    &rule.Rule{ID: "test-rule"},
+			"AuthenticationSession Key Cache Hit": {
+				SessionCache: true,
+				Setup:        routerAuthSessionCache(),
+				Session:      newAuthenticationSession(setSubject(sampleSubject)),
+				Rule:         &rule.Rule{ID: "test-rule"},
 				// An empty cache key will ensure default (AuthenticationSession) behavior is applied.
 				Config:  configWithSpecialCacheKey(""),
 				Request: &http.Request{},
 				Match:   newAuthenticationSession(setSubject(sampleSubject)),
 				Err:     nil,
 			},
-			cacheTestCustomKeyTemplateName: {
-				Setup:   routerAuthSessionCache(),
-				Session: newAuthenticationSession(setSubject(cacheTestTemplateSubject)),
-				Rule:    &rule.Rule{ID: "test-rule"},
-				Config:  configWithSpecialCacheKey("{{ print .Subject }}"),
-				Request: &http.Request{},
-				Match:   newAuthenticationSession(setSubject(cacheTestTemplateSubject)),
-				Err:     nil,
+			"Custom Cache Key Template Cache Hit": {
+				TemplateKey: true,
+				CustomKey:   true,
+				Setup:       routerAuthSessionCache(),
+				Session:     newAuthenticationSession(setSubject(cacheTestTemplateSubject)),
+				Rule:        &rule.Rule{ID: "test-rule"},
+				Config:      configWithSpecialCacheKey("{{ print .Subject }}"),
+				Request:     &http.Request{},
+				Match:       newAuthenticationSession(setSubject(cacheTestTemplateSubject)),
+				Err:         nil,
 			},
 		}
 
@@ -447,25 +487,20 @@ func TestMutatorHydrator(t *testing.T) {
 				ts = httptest.NewServer(router)
 				defer ts.Close()
 
-				switch {
-				case testName == cacheTestCustomKeyTemplateName:
-					fallthrough
-				case testName == cacheTestCustomCacheKeyName:
+				if specs.SessionCache {
+					require.NoError(t, a.Mutate(specs.Request, specs.Session, specs.Config(ts), specs.Rule))
+				} else {
 					specs.Session.Extra = make(map[string]interface{})
 					specs.Session.Extra[cacheTestKeyName] = struct{}{}
 					require.NoError(t, a.Mutate(specs.Request, specs.Session, specs.Config(ts), specs.Rule))
 					// Delete K/V-combination above. Must be served from the cache,
 					// K/V-combination present ensure session originates from cache.
 					delete(specs.Session.Extra, cacheTestKeyName)
-					// Cache entry is being written asynchronously. Obviously this here is not
-					// a good strategy, however, the alternative would be to replace the cache.
-					// See https://github.com/dgraph-io/ristretto/blob/9d4946d9b973c8e860ae42944e07f5bbe28a506b/cache_test.go#L17
-					time.Sleep(cacheTestWriteSleep)
-				case testName == cacheTestAuthSessionName:
-					// Ensure session is persisted within cache.
-					require.NoError(t, a.Mutate(specs.Request, specs.Session, specs.Config(ts), specs.Rule))
-					time.Sleep(cacheTestWriteSleep)
 				}
+				// Cache entry is being written asynchronously. Obviously this here is not
+				// a good strategy, however, the alternative would be to replace the cache.
+				// See https://github.com/dgraph-io/ristretto/blob/9d4946d9b973c8e860ae42944e07f5bbe28a506b/cache_test.go#L17
+				time.Sleep(cacheTestWriteSleep)
 
 				if err := a.Mutate(specs.Request, specs.Session, specs.Config(ts), specs.Rule); specs.Err == nil {
 					// Issuer must run without error
@@ -474,15 +509,15 @@ func TestMutatorHydrator(t *testing.T) {
 					assert.EqualError(t, err, specs.Err.Error())
 				}
 
-				switch {
-				case testName == cacheTestCustomKeyTemplateName:
+				if specs.TemplateKey {
 					assert.Equal(t, specs.Session.Subject, cacheTestTemplateSubject)
-					fallthrough
-				case testName == cacheTestCustomCacheKeyName:
+				}
+
+				if specs.CustomKey {
 					// As specs.Session is served from cache we can't perform
 					// full equality assertion but assert if cache key is set.
 					assert.Contains(t, specs.Session.Extra, cacheTestKeyName)
-				default:
+				} else {
 					assert.Equal(t, specs.Match, specs.Session)
 				}
 			})

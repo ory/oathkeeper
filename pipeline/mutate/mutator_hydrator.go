@@ -51,7 +51,6 @@ const (
 	ErrNoCredentialsProvided            = "No credentials were provided in mutator configuration"
 	contentTypeHeaderKey                = "Content-Type"
 	contentTypeJSONHeaderValue          = "application/json"
-	poolBufCapacityBytes                = 4096
 )
 
 type MutatorHydrator struct {
@@ -141,6 +140,7 @@ func (a *MutatorHydrator) Mutate(r *http.Request, session *authn.AuthenticationS
 	}
 
 	s := &bytes.Buffer{}
+	s.Grow(2048)
 
 	err = json.NewEncoder(s).Encode(session)
 	switch {
