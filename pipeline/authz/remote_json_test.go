@@ -235,3 +235,39 @@ func TestAuthorizerRemoteJSONValidate(t *testing.T) {
 		})
 	}
 }
+
+func TestAuthorizerRemoteJSONConfig(t *testing.T) {
+	tests := []struct {
+		name     string
+		raw      json.RawMessage
+		expected *AuthorizerRemoteJSONConfiguration
+	}{
+		{
+			name: "valid configuration with forward_response_headers_to_upstream",
+			raw:  json.RawMessage(`{"remote":"http://host/path","payload":"{}","forward_response_headers_to_upstream":["X-Foo"]}`),
+			expected: &AuthorizerRemoteJSONConfiguration{
+				Remote:                           "http://host/path",
+				Payload:                          "{}",
+				ForwardResponseHeadersToUpstream: []string{"X-Foo"},
+			},
+		},
+		{
+			name: "valid configuration without forward_response_headers_to_upstream",
+			raw:  json.RawMessage(`{"remote":"http://host/path","payload":"{}"}`),
+			expected: &AuthorizerRemoteJSONConfiguration{
+				Remote:                           "http://host/path",
+				Payload:                          "{}",
+				ForwardResponseHeadersToUpstream: []string{},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			p := configuration.NewViperProvider(logrusx.New("", ""))
+			a := NewAuthorizerRemoteJSON(p)
+			actual, err := a.Config(tt.raw)
+			assert.NoError(t, err)
+			assert.Equal(t, tt.expected, actual)
+		})
+	}
+}
