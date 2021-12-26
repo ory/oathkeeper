@@ -26,6 +26,12 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+const (
+	cacheTestKeyName   = "cache"
+	cacheTestName      = "Custom Cache Key Cache Hit"
+	cacheTestWaitSleep = 10 * time.Millisecond
+)
+
 func setExtra(key string, value interface{}) func(a *authn.AuthenticationSession) {
 	return func(a *authn.AuthenticationSession) {
 		if a.Extra == nil {
@@ -373,7 +379,7 @@ func TestMutatorHydrator(t *testing.T) {
 				Match:   newAuthenticationSession(setSubject(sampleSubject)),
 				Err:     nil,
 			},
-			"Custom Cache Key Cache Hit": {
+			cacheTestName: {
 				Setup:   defaultRouterSetup(),
 				Session: newAuthenticationSession(setSubject(sampleSubject)),
 				Rule:    &rule.Rule{ID: "test-rule"},
@@ -395,22 +401,18 @@ func TestMutatorHydrator(t *testing.T) {
 				ts = httptest.NewServer(router)
 				defer ts.Close()
 
-				const (
-					ck = "cache"
-					ct = "Custom Cache Key Cache Hit"
-				)
-
 				switch {
-				case testName == ct:
+				case testName == cacheTestName:
 					specs.Session.Extra = make(map[string]interface{})
-					specs.Session.Extra[ck] = struct{}{}
-					_ = a.Mutate(specs.Request, specs.Session, specs.Config(ts), specs.Rule)
-					// Delete the K/V-combination above, needs to be served from the cache,
-					// knowing same K/V-combination asserts session is originating from cache.
-					delete(specs.Session.Extra, ck)
+					specs.Session.Extra[cacheTestKeyName] = struct{}{}
+					require.NoError(t, a.Mutate(specs.Request, specs.Session, specs.Config(ts), specs.Rule))
+					// Delete K/V-combination above. Must be served from the cache,
+					// K/V-combination present ensure session originates from cache.
+					delete(specs.Session.Extra, cacheTestKeyName)
 					// Cache entry is being written asynchronously. Obviously this here is not
 					// a good strategy, however, the alternative would be to replace the cache.
-					time.Sleep(50 * time.Millisecond)
+					// See https://github.com/dgraph-io/ristretto/blob/9d4946d9b973c8e860ae42944e07f5bbe28a506b/cache_test.go#L17
+					time.Sleep(cacheTestWaitSleep)
 				}
 
 				if err := a.Mutate(specs.Request, specs.Session, specs.Config(ts), specs.Rule); specs.Err == nil {
@@ -421,10 +423,10 @@ func TestMutatorHydrator(t *testing.T) {
 				}
 
 				switch {
-				case testName == ct:
+				case testName == cacheTestName:
 					// As specs.Session is served from cache we can't perform
 					// full equality assertion but assert if cache key is set.
-					assert.Contains(t, specs.Session.Extra, ck)
+					assert.Contains(t, specs.Session.Extra, cacheTestKeyName)
 				default:
 					assert.Equal(t, specs.Match, specs.Session)
 				}
