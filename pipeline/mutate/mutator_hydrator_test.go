@@ -419,7 +419,8 @@ func TestMutatorHydrator(t *testing.T) {
 				Setup:   defaultRouterSetup(),
 				Session: newAuthenticationSession(setSubject(sampleSubject)),
 				Rule:    &rule.Rule{ID: "test-rule"},
-				Config:  configWithSpecialCacheKey(sampleSubject),
+				// An empty cache key will ensure default (AuthenticationSession) behavior is applied.
+				Config:  configWithSpecialCacheKey(""),
 				Request: &http.Request{},
 				Match:   newAuthenticationSession(setSubject(sampleSubject)),
 				Err:     nil,
