@@ -1129,8 +1129,8 @@
             },
             "key": {
               "type": "string",
-              "title": "Cache key",
-              "description": "Define custom cache key, i.e '{{ print .Subject }}'. All properties must be part of AuthenticationSession."
+              "title": "Cache Key",
+              "description": "Custom cache key per rule, i.e using templating '{{ print .Subject }}'. All templated properties must be in AuthenticationSession."
             },
             "ttl": {
               "type": "string",
