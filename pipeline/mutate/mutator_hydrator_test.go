@@ -406,15 +406,6 @@ func TestMutatorHydrator(t *testing.T) {
 				Match:   newAuthenticationSession(),
 				Err:     nil,
 			},
-			"Custom Cache Key No Cache Hit": {
-				Setup:   defaultRouterSetup(),
-				Session: newAuthenticationSession(setSubject(sampleSubject)),
-				Rule:    &rule.Rule{ID: "test-rule"},
-				Config:  configWithSpecialCacheKey(sampleSubject),
-				Request: &http.Request{},
-				Match:   newAuthenticationSession(setSubject(sampleSubject)),
-				Err:     nil,
-			},
 			cacheTestCustomCacheKeyName: {
 				Setup:   defaultRouterSetup(),
 				Session: newAuthenticationSession(setSubject(sampleSubject)),
