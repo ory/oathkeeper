@@ -27,6 +27,7 @@ import (
 )
 
 const (
+	cacheTestTemplateSubject       = "sub"
 	cacheTestKeyName               = "cache"
 	cacheTestCustomCacheKeyName    = "Custom Cache Key Cache Hit"
 	cacheTestAuthSessionName       = "AuthenticationSession Key Cache Hit"
@@ -434,7 +435,7 @@ func TestMutatorHydrator(t *testing.T) {
 			},
 			cacheTestAuthSessionName: {
 				Setup:   routerAuthSessionCache(),
-				Session: newAuthenticationSession(setSubject(sampleSubject)),
+				Session: newAuthenticationSession(setSubject(cacheTestTemplateSubject)),
 				Rule:    &rule.Rule{ID: "test-rule"},
 				Config:  configWithSpecialCacheKey("{{ print .Subject }}"),
 				Request: &http.Request{},
@@ -483,6 +484,7 @@ func TestMutatorHydrator(t *testing.T) {
 
 				switch {
 				case testName == cacheTestCustomKeyTemplateName:
+					assert.Equal(t, specs.Session.Subject, cacheTestTemplateSubject)
 					fallthrough
 				case testName == cacheTestCustomCacheKeyName:
 					// As specs.Session is served from cache we can't perform
