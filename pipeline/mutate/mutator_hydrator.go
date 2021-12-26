@@ -171,7 +171,7 @@ func (a *MutatorHydrator) Mutate(r *http.Request, session *authn.AuthenticationS
 			cfg.Cache.Key, p.GetID())
 		fallthrough
 	default:
-		if cacheSession, ok := a.hydrateFromCache(a.cacheKey(cfg.Api.URL, s.String(), p.GetID())); ok {
+		if cacheSession, ok := a.hydrateFromCache(a.cacheKey(cfg.Api.URL, s.String())); ok {
 			*session = *cacheSession
 			return nil
 		}
@@ -221,7 +221,7 @@ func (a *MutatorHydrator) Mutate(r *http.Request, session *authn.AuthenticationS
 		}
 		client.Transport = httpx.NewResilientRoundTripper(a.client.Transport, maxRetryDelay, giveUpAfter)
 	}
-	sessionCacheKey := a.cacheKey(cfg.Api.URL, s.String(), p.GetID())
+	sessionCacheKey := a.cacheKey(cfg.Api.URL, s.String())
 
 	res, err := client.Do(req.WithContext(r.Context()))
 	if err != nil {
