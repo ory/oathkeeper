@@ -28,7 +28,6 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/dgraph-io/ristretto"
@@ -59,7 +58,6 @@ type MutatorHydrator struct {
 	c            configuration.Provider
 	client       *http.Client
 	d            mutatorHydratorDependencies
-	p            sync.Pool
 	hydrateCache *ristretto.Cache
 	cacheTTL     *time.Duration
 }
@@ -110,13 +108,6 @@ func NewMutatorHydrator(c configuration.Provider, d mutatorHydratorDependencies)
 		BufferItems: 64,
 	})
 	return &MutatorHydrator{c: c, d: d,
-		p: sync.Pool{
-			New: func() interface{} {
-				b := &bytes.Buffer{}
-				b.Grow(poolBufCapacityBytes)
-				return b
-			},
-		},
 		client: httpx.NewResilientClientLatencyToleranceSmall(nil), hydrateCache: cache}
 }
 
@@ -149,11 +140,7 @@ func (a *MutatorHydrator) Mutate(r *http.Request, session *authn.AuthenticationS
 		return err
 	}
 
-	s := a.p.Get().(*bytes.Buffer)
-	defer func() {
-		s.Reset()
-		a.p.Put(s)
-	}()
+	s := &bytes.Buffer{}
 
 	err = json.NewEncoder(s).Encode(session)
 	switch {
