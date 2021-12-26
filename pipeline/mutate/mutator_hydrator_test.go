@@ -431,7 +431,7 @@ func TestMutatorHydrator(t *testing.T) {
 				Rule:    &rule.Rule{ID: "test-rule"},
 				Config:  configWithSpecialCacheKey("{{ print .Subject }}"),
 				Request: &http.Request{},
-				Match:   newAuthenticationSession(setSubject(sampleSubject)),
+				Match:   newAuthenticationSession(setSubject(cacheTestTemplateSubject)),
 				Err:     nil,
 			},
 		}
