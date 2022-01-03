@@ -44,8 +44,9 @@ type AuthorizerRemote struct {
 // NewAuthorizerRemote creates a new AuthorizerRemote.
 func NewAuthorizerRemote(c configuration.Provider) *AuthorizerRemote {
 	return &AuthorizerRemote{
-		c: c,
-		t: x.NewTemplate("remote"),
+		c:      c,
+		client: httpx.NewResilientClientLatencyToleranceSmall(nil),
+		t:      x.NewTemplate("remote"),
 	}
 }
 

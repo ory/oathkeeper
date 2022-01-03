@@ -49,8 +49,9 @@ type AuthorizerRemoteJSON struct {
 // NewAuthorizerRemoteJSON creates a new AuthorizerRemoteJSON.
 func NewAuthorizerRemoteJSON(c configuration.Provider) *AuthorizerRemoteJSON {
 	return &AuthorizerRemoteJSON{
-		c: c,
-		t: x.NewTemplate("remote_json"),
+		c:      c,
+		client: httpx.NewResilientClientLatencyToleranceSmall(nil),
+		t:      x.NewTemplate("remote_json"),
 	}
 }
 
