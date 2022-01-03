@@ -141,7 +141,7 @@ func (a *AuthorizerRemoteJSON) Config(config json.RawMessage) (*AuthorizerRemote
 	if c.ForwardResponseHeadersToUpstream == nil {
 		c.ForwardResponseHeadersToUpstream = []string{}
 	}
-	
+
 	if c.Retry == nil {
 		c.Retry = &AuthorizerRemoteJSONRetryConfiguration{Timeout: defaultTimeout, MaxWait: defaultMaxWait}
 	} else {

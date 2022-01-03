@@ -264,6 +264,10 @@ func TestAuthorizerRemoteJSONConfig(t *testing.T) {
 				Remote:                           "http://host/path",
 				Payload:                          "{}",
 				ForwardResponseHeadersToUpstream: []string{"X-Foo"},
+				Retry: &AuthorizerRemoteJSONRetryConfiguration{
+					Timeout: "500ms",
+					MaxWait: "1s",
+				},
 			},
 		},
 		{
@@ -273,6 +277,10 @@ func TestAuthorizerRemoteJSONConfig(t *testing.T) {
 				Remote:                           "http://host/path",
 				Payload:                          "{}",
 				ForwardResponseHeadersToUpstream: []string{},
+				Retry: &AuthorizerRemoteJSONRetryConfiguration{
+					Timeout: "500ms",
+					MaxWait: "1s",
+				},
 			},
 		},
 	}
