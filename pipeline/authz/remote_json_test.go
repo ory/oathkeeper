@@ -223,6 +223,21 @@ func TestAuthorizerRemoteJSONValidate(t *testing.T) {
 			enabled: true,
 			config:  json.RawMessage(`{"remote":"http://host/path","payload":"{}"}`),
 		},
+		{
+			name:    "valid configuration with partial retry 1",
+			enabled: true,
+			config:  json.RawMessage(`{"remote":"http://host/path","payload":"{}","retry":{"max_delay":"100ms"}}`),
+		},
+		{
+			name:    "valid configuration with partial retry 2",
+			enabled: true,
+			config:  json.RawMessage(`{"remote":"http://host/path","payload":"{}","retry":{"give_up_after":"3s"}}`),
+		},
+		{
+			name:    "valid configuration with retry",
+			enabled: true,
+			config:  json.RawMessage(`{"remote":"http://host/path","payload":"{}","retry":{"give_up_after":"3s", "max_delay":"100ms"}}`),
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -249,6 +264,10 @@ func TestAuthorizerRemoteJSONConfig(t *testing.T) {
 				Remote:                           "http://host/path",
 				Payload:                          "{}",
 				ForwardResponseHeadersToUpstream: []string{"X-Foo"},
+				Retry: &AuthorizerRemoteJSONRetryConfiguration{
+					Timeout: "500ms",
+					MaxWait: "1s",
+				},
 			},
 		},
 		{
@@ -258,6 +277,10 @@ func TestAuthorizerRemoteJSONConfig(t *testing.T) {
 				Remote:                           "http://host/path",
 				Payload:                          "{}",
 				ForwardResponseHeadersToUpstream: []string{},
+				Retry: &AuthorizerRemoteJSONRetryConfiguration{
+					Timeout: "500ms",
+					MaxWait: "1s",
+				},
 			},
 		},
 	}
