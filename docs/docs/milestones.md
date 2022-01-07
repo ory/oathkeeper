@@ -76,7 +76,7 @@ New feature or request.
 
 #### Pull Requests
 
-- [x] refactor: refactor decisions API and add traefik (#486)
+- [ ] refactor: refactor decisions API and add traefik (#486)
       ([oathkeeper#487](https://github.com/ory/oathkeeper/pull/487)) -
       [@hackerman](https://github.com/aeneasr)
 
