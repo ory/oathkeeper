@@ -3,7 +3,7 @@
 
 **Table of Contents**
 
-- [0.0.0 (2021-12-17)](#000-2021-12-17)
+- [0.0.0 (2022-01-04)](#000-2022-01-04)
   - [Bug Fixes](#bug-fixes)
   - [Documentation](#documentation)
   - [Features](#features)
@@ -254,7 +254,7 @@
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-# [0.0.0](https://github.com/ory/oathkeeper/compare/v0.38.16-beta.1...v0.0.0) (2021-12-17)
+# [0.0.0](https://github.com/ory/oathkeeper/compare/v0.38.16-beta.1...v0.0.0) (2022-01-04)
 
 ### Bug Fixes
 
@@ -264,6 +264,13 @@
 - Add hiring notice to README
   ([#884](https://github.com/ory/oathkeeper/issues/884))
   ([9dea379](https://github.com/ory/oathkeeper/commit/9dea379a12abed4ceb84067d054d28032a50c783))
+- Building docker image for docker-compose
+  ([#889](https://github.com/ory/oathkeeper/issues/889))
+  ([adf0d1b](https://github.com/ory/oathkeeper/commit/adf0d1baaf466cafdc72cba3818867545a91e0b1))
+- Remote_json default configuration
+  ([#880](https://github.com/ory/oathkeeper/issues/880))
+  ([18788d1](https://github.com/ory/oathkeeper/commit/18788d1393c041c97d89812366f899ed359c67cf)),
+  closes [#797](https://github.com/ory/oathkeeper/issues/797)
 - Use NYT capitalistaion for all Swagger headlines
   ([#859](https://github.com/ory/oathkeeper/issues/859))
   ([8c2da46](https://github.com/ory/oathkeeper/commit/8c2da466edb0e72a4bcb4c854bf80b6a98e3ac7a)),

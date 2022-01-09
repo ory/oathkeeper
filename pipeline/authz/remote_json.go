@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"net/http"
 	"text/template"
+	"time"
 
 	"github.com/pkg/errors"
 
@@ -21,9 +22,15 @@ import (
 
 // AuthorizerRemoteJSONConfiguration represents a configuration for the remote_json authorizer.
 type AuthorizerRemoteJSONConfiguration struct {
-	Remote                           string   `json:"remote"`
-	Payload                          string   `json:"payload"`
-	ForwardResponseHeadersToUpstream []string `json:"forward_response_headers_to_upstream"`
+	Remote                           string                                  `json:"remote"`
+	Payload                          string                                  `json:"payload"`
+	ForwardResponseHeadersToUpstream []string                                `json:"forward_response_headers_to_upstream"`
+	Retry                            *AuthorizerRemoteJSONRetryConfiguration `json:"retry"`
+}
+
+type AuthorizerRemoteJSONRetryConfiguration struct {
+	Timeout string `json:"max_delay"`
+	MaxWait string `json:"give_up_after"`
 }
 
 // PayloadTemplateID returns a string with which to associate the payload template.
@@ -122,10 +129,40 @@ func (a *AuthorizerRemoteJSON) Validate(config json.RawMessage) error {
 // Config merges config and the authorizer's configuration and validates the
 // resulting configuration. It reports an error if the configuration is invalid.
 func (a *AuthorizerRemoteJSON) Config(config json.RawMessage) (*AuthorizerRemoteJSONConfiguration, error) {
+	const (
+		defaultTimeout = "500ms"
+		defaultMaxWait = "1s"
+	)
 	var c AuthorizerRemoteJSONConfiguration
 	if err := a.c.AuthorizerConfig(a.GetID(), config, &c); err != nil {
 		return nil, NewErrAuthorizerMisconfigured(a, err)
 	}
+
+	if c.ForwardResponseHeadersToUpstream == nil {
+		c.ForwardResponseHeadersToUpstream = []string{}
+	}
+
+	if c.Retry == nil {
+		c.Retry = &AuthorizerRemoteJSONRetryConfiguration{Timeout: defaultTimeout, MaxWait: defaultMaxWait}
+	} else {
+		if c.Retry.Timeout == "" {
+			c.Retry.Timeout = defaultTimeout
+		}
+		if c.Retry.MaxWait == "" {
+			c.Retry.MaxWait = defaultMaxWait
+		}
+	}
+	duration, err := time.ParseDuration(c.Retry.Timeout)
+	if err != nil {
+		return nil, err
+	}
+
+	maxWait, err := time.ParseDuration(c.Retry.MaxWait)
+	if err != nil {
+		return nil, err
+	}
+	timeout := time.Millisecond * duration
+	a.client = httpx.NewResilientClientLatencyToleranceConfigurable(nil, timeout, maxWait)
 
 	return &c, nil
 }

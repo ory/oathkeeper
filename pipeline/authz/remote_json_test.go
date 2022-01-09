@@ -223,6 +223,21 @@ func TestAuthorizerRemoteJSONValidate(t *testing.T) {
 			enabled: true,
 			config:  json.RawMessage(`{"remote":"http://host/path","payload":"{}"}`),
 		},
+		{
+			name:    "valid configuration with partial retry 1",
+			enabled: true,
+			config:  json.RawMessage(`{"remote":"http://host/path","payload":"{}","retry":{"max_delay":"100ms"}}`),
+		},
+		{
+			name:    "valid configuration with partial retry 2",
+			enabled: true,
+			config:  json.RawMessage(`{"remote":"http://host/path","payload":"{}","retry":{"give_up_after":"3s"}}`),
+		},
+		{
+			name:    "valid configuration with retry",
+			enabled: true,
+			config:  json.RawMessage(`{"remote":"http://host/path","payload":"{}","retry":{"give_up_after":"3s", "max_delay":"100ms"}}`),
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -232,6 +247,50 @@ func TestAuthorizerRemoteJSONValidate(t *testing.T) {
 			if err := a.Validate(tt.config); (err != nil) != tt.wantErr {
 				t.Errorf("Validate() error = %v, wantErr %v", err, tt.wantErr)
 			}
+		})
+	}
+}
+
+func TestAuthorizerRemoteJSONConfig(t *testing.T) {
+	tests := []struct {
+		name     string
+		raw      json.RawMessage
+		expected *AuthorizerRemoteJSONConfiguration
+	}{
+		{
+			name: "valid configuration with forward_response_headers_to_upstream",
+			raw:  json.RawMessage(`{"remote":"http://host/path","payload":"{}","forward_response_headers_to_upstream":["X-Foo"]}`),
+			expected: &AuthorizerRemoteJSONConfiguration{
+				Remote:                           "http://host/path",
+				Payload:                          "{}",
+				ForwardResponseHeadersToUpstream: []string{"X-Foo"},
+				Retry: &AuthorizerRemoteJSONRetryConfiguration{
+					Timeout: "500ms",
+					MaxWait: "1s",
+				},
+			},
+		},
+		{
+			name: "valid configuration without forward_response_headers_to_upstream",
+			raw:  json.RawMessage(`{"remote":"http://host/path","payload":"{}"}`),
+			expected: &AuthorizerRemoteJSONConfiguration{
+				Remote:                           "http://host/path",
+				Payload:                          "{}",
+				ForwardResponseHeadersToUpstream: []string{},
+				Retry: &AuthorizerRemoteJSONRetryConfiguration{
+					Timeout: "500ms",
+					MaxWait: "1s",
+				},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			p := configuration.NewViperProvider(logrusx.New("", ""))
+			a := NewAuthorizerRemoteJSON(p)
+			actual, err := a.Config(tt.raw)
+			assert.NoError(t, err)
+			assert.Equal(t, tt.expected, actual)
 		})
 	}
 }
