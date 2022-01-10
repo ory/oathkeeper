@@ -3,7 +3,7 @@
 
 **Table of Contents**
 
-- [0.0.0 (2022-01-04)](#000-2022-01-04)
+- [0.0.0 (2022-01-10)](#000-2022-01-10)
   - [Bug Fixes](#bug-fixes)
   - [Documentation](#documentation)
   - [Features](#features)
@@ -254,7 +254,7 @@
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-# [0.0.0](https://github.com/ory/oathkeeper/compare/v0.38.16-beta.1...v0.0.0) (2022-01-04)
+# [0.0.0](https://github.com/ory/oathkeeper/compare/v0.38.16-beta.1...v0.0.0) (2022-01-10)
 
 ### Bug Fixes
 
@@ -284,6 +284,12 @@
   ([b6b5824](https://github.com/ory/oathkeeper/commit/b6b58249aec358d903bee18acc23836fe77b3860))
 
 ### Features
+
+- Add retry and timeout support in authorizers
+  ([#883](https://github.com/ory/oathkeeper/issues/883))
+  ([ec926b0](https://github.com/ory/oathkeeper/commit/ec926b09908e51fe6f4819e281beaf639a22eb69)):
+
+  Adds the ability to define HTTP timeouts for authorizers.
 
 - Add support for X-Forwarded-Proto header
   ([#665](https://github.com/ory/oathkeeper/issues/665))
