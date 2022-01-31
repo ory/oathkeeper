@@ -93,7 +93,7 @@ type MatchContext struct {
 To use the subject extract to the token
 
 ```json
-{ "config_field": "{{ print .subject }}" }
+{ "config_field": "{{ print .Subject }}" }
 ```
 
 To use any arbitrary header value from the request headers
