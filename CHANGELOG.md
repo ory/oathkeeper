@@ -3,7 +3,7 @@
 
 **Table of Contents**
 
-- [0.0.0 (2022-01-27)](#000-2022-01-27)
+- [0.0.0 (2022-01-31)](#000-2022-01-31)
   - [Bug Fixes](#bug-fixes)
   - [Documentation](#documentation)
   - [Features](#features)
@@ -254,7 +254,7 @@
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-# [0.0.0](https://github.com/ory/oathkeeper/compare/v0.38.16-beta.1...v0.0.0) (2022-01-27)
+# [0.0.0](https://github.com/ory/oathkeeper/compare/v0.38.16-beta.1...v0.0.0) (2022-01-31)
 
 ### Bug Fixes
 
@@ -282,6 +282,9 @@
 
 - Update authz.md ([#879](https://github.com/ory/oathkeeper/issues/879))
   ([b6b5824](https://github.com/ory/oathkeeper/commit/b6b58249aec358d903bee18acc23836fe77b3860))
+- Use correct casing
+  ([58b1d43](https://github.com/ory/oathkeeper/commit/58b1d43dd99ebceea22980d5debefdbcc0a4f3c7)),
+  closes [#900](https://github.com/ory/oathkeeper/issues/900)
 
 ### Features
 
