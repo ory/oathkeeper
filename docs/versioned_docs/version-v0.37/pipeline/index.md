@@ -87,7 +87,7 @@ type MatchContext struct {
 To use the subject extract to the token
 
 ```json
-{ "config_field": "{{ print .subject }}" }
+{ "config_field": "{{ print .Subject }}" }
 ```
 
 To use an embedded value in the `Extra` map (most of the time, it's a JWT token
@@ -97,7 +97,7 @@ claim)
 { "config_field": "{{ print .Extra.some.arbitrary.data }}" }
 ```
 
-To use a Regex capture from the request URL  
+To use a Regex capture from the request URL
 Note the usage of `printIndex` to print a value from the array
 
 ```json
