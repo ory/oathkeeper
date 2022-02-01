@@ -21,9 +21,7 @@
 package api
 
 import (
-	"fmt"
 	"net/http"
-	"net/url"
 	"strings"
 
 	"github.com/ory/oathkeeper/pipeline/authn"
@@ -35,6 +33,11 @@ import (
 
 const (
 	DecisionPath = "/decisions"
+
+	xForwardedMethod = "X-Forwarded-Method"
+	xForwardedProto  = "X-Forwarded-Proto"
+	xForwardedHost   = "X-Forwarded-Host"
+	xForwardedUri    = "X-Forwarded-Uri"
 )
 
 type decisionHandlerRegistry interface {
@@ -55,12 +58,29 @@ func NewJudgeHandler(r decisionHandlerRegistry) *DecisionHandler {
 
 func (h *DecisionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
 	if len(r.URL.Path) >= len(DecisionPath) && r.URL.Path[:len(DecisionPath)] == DecisionPath {
-		r.URL.Scheme = "http"
-		r.URL.Host = r.Host
-		if r.TLS != nil || strings.EqualFold(r.Header.Get("X-Forwarded-Proto"), "https") {
-			r.URL.Scheme = "https"
+		var method, scheme, host, path string
+
+		if method = r.Header.Get(xForwardedMethod); method == "" {
+			method = r.Method
 		}
-		r.URL.Path = r.URL.Path[len(DecisionPath):]
+		if scheme = r.Header.Get(xForwardedProto); scheme == "" {
+			if r.TLS != nil {
+				scheme = "https"
+			} else {
+				scheme = "http"
+			}
+		}
+		if host = r.Header.Get(xForwardedHost); host == "" {
+			host = r.Host
+		}
+		if path = r.Header.Get(xForwardedUri); path == "" {
+			path = r.URL.Path[len(DecisionPath):]
+		}
+
+		r.Method = method
+		r.URL.Scheme = scheme
+		r.URL.Host = host
+		r.URL.Path = path
 
 		h.decisions(w, r)
 	} else {
@@ -87,44 +107,18 @@ func (h *DecisionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request, next
 //       404: genericError
 //       500: genericError
 func (h *DecisionHandler) decisions(w http.ResponseWriter, r *http.Request) {
-	var method, scheme, host, requestUri string
-
-	if method = r.Header.Get("X-Forwarded-Method"); method == "" {
-		method = r.Method
-	}
-	if scheme = r.Header.Get("X-Forwarded-Proto"); scheme == "" {
-		scheme = r.URL.Scheme
-	}
-	if host = r.Header.Get("X-Forwarded-Host"); host == "" {
-		host = r.URL.Host
-	}
-	if requestUri = r.Header.Get("X-Forwarded-Uri"); requestUri == "" {
-		requestUri = r.URL.RequestURI()
-	}
-
 	fields := map[string]interface{}{
-		"http_method":      method,
-		"http_scheme":      scheme,
-		"http_host":        host,
-		"http_request_uri": requestUri,
-		"http_user_agent":  r.UserAgent(),
-	}
-
-	uri, err := url.Parse(fmt.Sprintf("%s://%s%s", scheme, host, requestUri))
-	if err != nil {
-		h.r.Logger().WithError(err).
-			WithFields(fields).
-			WithField("granted", false).
-			Warn("Access request denied")
-		h.r.ProxyRequestHandler().HandleError(w, r, nil, err)
-		return
+		"http_method":     r.Method,
+		"http_url":        r.URL.String(),
+		"http_host":       r.Host,
+		"http_user_agent": r.UserAgent(),
 	}
 
 	if sess, ok := r.Context().Value(proxy.ContextKeySession).(*authn.AuthenticationSession); ok {
 		fields["subject"] = sess.Subject
 	}
 
-	rl, err := h.r.RuleMatcher().Match(r.Context(), method, uri)
+	rl, err := h.r.RuleMatcher().Match(r.Context(), r.Method, r.URL)
 	if err != nil {
 		h.r.Logger().WithError(err).
 			WithFields(fields).
