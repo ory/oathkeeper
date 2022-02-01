@@ -87,62 +87,59 @@ func (h *DecisionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request, next
 //       404: genericError
 //       500: genericError
 func (h *DecisionHandler) decisions(w http.ResponseWriter, r *http.Request) {
+	var method, scheme, host, requestUri string
+
+	if method = r.Header.Get("X-Forwarded-Method"); method == "" {
+		method = r.Method
+	}
+	if scheme = r.Header.Get("X-Forwarded-Proto"); scheme == "" {
+		scheme = r.URL.Scheme
+	}
+	if host = r.Header.Get("X-Forwarded-Host"); host == "" {
+		host = r.URL.Host
+	}
+	if requestUri = r.Header.Get("X-Forwarded-Uri"); requestUri == "" {
+		requestUri = r.URL.RequestURI()
+	}
+
 	fields := map[string]interface{}{
-		"http_method":     r.Method,
-		"http_url":        r.URL.String(),
-		"http_host":       r.Host,
-		"http_user_agent": r.UserAgent(),
+		"http_method":      method,
+		"http_scheme":      scheme,
+		"http_host":        host,
+		"http_request_uri": requestUri,
+		"http_user_agent":  r.UserAgent(),
 	}
 
-	httpMethod := r.Header.Get("X-Forwarded-Method")
-	proto := r.Header.Get("X-Forwarded-Proto")
-	host := r.Header.Get("X-Forwarded-Host")
-	requestUri := r.Header.Get("X-Forwarded-Uri")
-
-	if httpMethod == "" {
-		httpMethod = r.Method
-	}
-
-	var uri *url.URL
-	var err error
-	if proto != "" && host != "" && requestUri != "" {
-		uri, err = url.Parse(fmt.Sprintf("%s://%s%s", proto, host, requestUri))
-		if err != nil {
-			h.r.Logger().WithError(err).
-				WithFields(fields).
-				WithField("granted", false).
-				Warn("Access request denied")
-			h.r.Logger().Info("Failed to parse the received url. Handling error")
-			h.r.ProxyRequestHandler().HandleError(w, r, nil, err)
-			return
-		}
-	} else {
-		uri = r.URL
+	uri, err := url.Parse(fmt.Sprintf("%s://%s%s", scheme, host, requestUri))
+	if err != nil {
+		h.r.Logger().WithError(err).
+			WithFields(fields).
+			WithField("granted", false).
+			Warn("Access request denied")
+		h.r.ProxyRequestHandler().HandleError(w, r, nil, err)
+		return
 	}
 
 	if sess, ok := r.Context().Value(proxy.ContextKeySession).(*authn.AuthenticationSession); ok {
 		fields["subject"] = sess.Subject
 	}
 
-	rl, err := h.r.RuleMatcher().Match(r.Context(), httpMethod, uri)
+	rl, err := h.r.RuleMatcher().Match(r.Context(), method, uri)
 	if err != nil {
 		h.r.Logger().WithError(err).
 			WithFields(fields).
 			WithField("granted", false).
 			Warn("Access request denied")
-		h.r.Logger().Info("Rule matcher failed. Handling error")
 		h.r.ProxyRequestHandler().HandleError(w, r, rl, err)
 		return
 	}
 
-	h.r.Logger().Info("Handling Proxy Request")
 	s, err := h.r.ProxyRequestHandler().HandleRequest(r, rl)
 	if err != nil {
 		h.r.Logger().WithError(err).
 			WithFields(fields).
 			WithField("granted", false).
 			Info("Access request denied")
-		h.r.Logger().Info("Proxy request handler failed. Handling error")
 		h.r.ProxyRequestHandler().HandleError(w, r, rl, err)
 		return
 	}

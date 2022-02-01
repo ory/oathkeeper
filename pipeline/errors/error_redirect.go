@@ -41,19 +41,26 @@ func (a *ErrorRedirect) Handle(w http.ResponseWriter, r *http.Request, config js
 		return err
 	}
 
-	proto := r.Header.Get("X-Forwarded-Proto")
-	host := r.Header.Get("X-Forwarded-Host")
-	requestUri := r.Header.Get("X-Forwarded-Uri")
-
-	fmt.Printf("Headers: %s, %s, %s\n", proto, host, requestUri)
+	var scheme, host, requestUri string
+	if scheme = r.Header.Get("X-Forwarded-Proto"); scheme == "" {
+		scheme = r.URL.Scheme
+	}
+	if host = r.Header.Get("X-Forwarded-Host"); host == "" {
+		host = r.URL.Host
+	}
+	if requestUri = r.Header.Get("X-Forwarded-Uri"); requestUri == "" {
+		requestUri = r.URL.RequestURI()
+	}
 
 	var uri *url.URL
-	if proto != "" && host != "" && requestUri != "" {
-		if uri, err = url.Parse(fmt.Sprintf("%s://%s%s", proto, host, requestUri)); err != nil {
-			return err
-		}
+	if scheme == "" || host == "" {
+		// FIXME: I don't think this is applicable for real requests. It is however used by tests.
+		uri, err = url.Parse(fmt.Sprintf("%s", requestUri))
 	} else {
-		uri = r.URL
+		uri, err = url.Parse(fmt.Sprintf("%s://%s%s", scheme, host, requestUri))
+	}
+	if err != nil {
+		return err
 	}
 
 	http.Redirect(w, r, a.RedirectURL(uri, c), c.Code)

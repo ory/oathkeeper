@@ -43,7 +43,7 @@ func (v *VerifierDefault) Verify(
 
 		kid, ok := token.Header["kid"].(string)
 		if !ok || kid == "" {
-			return nil, errors.WithStack(herodot.ErrInternalServerError.WithReason("The JSON Web Token must contain a kid header value but did not."))
+			return nil, errors.WithStack(herodot.ErrBadRequest.WithReason("The JSON Web Token must contain a kid header value but did not."))
 		}
 
 		key, err := v.r.CredentialsFetcher().ResolveKey(ctx, r.KeyURLs, kid, "sig")
@@ -75,10 +75,10 @@ func (v *VerifierDefault) Verify(
 				return k, nil
 			}
 		default:
-			return nil, errors.WithStack(herodot.ErrInternalServerError.WithReasonf(`This request object uses unsupported signing algorithm "%s".`, token.Header["alg"]))
+			return nil, errors.WithStack(herodot.ErrBadRequest.WithReasonf(`This request object uses unsupported signing algorithm "%s".`, token.Header["alg"]))
 		}
 
-		return nil, errors.WithStack(herodot.ErrInternalServerError.WithReasonf(`The signing key algorithm does not match the algorithm from the token header.`))
+		return nil, errors.WithStack(herodot.ErrBadRequest.WithReasonf(`The signing key algorithm does not match the algorithm from the token header.`))
 	})
 	if err != nil {
 		if e, ok := errors.Cause(err).(*jwt.ValidationError); ok {
