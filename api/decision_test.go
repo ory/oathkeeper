@@ -33,20 +33,20 @@ import (
 	"testing"
 
 	"github.com/julienschmidt/httprouter"
-	"github.com/ory/herodot"
-	"github.com/ory/oathkeeper/pipeline/authn"
-	"github.com/ory/oathkeeper/proxy"
-	"github.com/ory/x/logrusx"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 	"github.com/urfave/negroni"
 
+	"github.com/ory/herodot"
 	"github.com/ory/oathkeeper/api"
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/internal"
+	"github.com/ory/oathkeeper/pipeline/authn"
+	"github.com/ory/oathkeeper/proxy"
 	"github.com/ory/oathkeeper/rule"
 	"github.com/ory/viper"
+	"github.com/ory/x/logrusx"
 )
 
 func TestDecisionAPI(t *testing.T) {

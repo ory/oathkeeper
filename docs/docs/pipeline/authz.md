@@ -297,8 +297,11 @@ if it returns a "403 Forbidden" response code, the access is denied.
   headers on this list will be forward to upstream services.
 - `retry` (object, optional) - Configures timeout and delay settings for the
   request against the token endpoint
-  - `give_up_after` (string) max delay duration of retry. The value will be parsed by the Go [duration parser](https://pkg.go.dev/time#ParseDuration).
-  - `max_delay` (string) time to wait between retries and max service response time. The value will be parsed by the Go [duration parser](https://pkg.go.dev/time#ParseDuration).
+  - `give_up_after` (string) max delay duration of retry. The value will be
+    parsed by the Go [duration parser](https://pkg.go.dev/time#ParseDuration).
+  - `max_delay` (string) time to wait between retries and max service response
+    time. The value will be parsed by the Go
+    [duration parser](https://pkg.go.dev/time#ParseDuration).
 
 #### Example
 
@@ -388,8 +391,11 @@ Forbidden" response code, the access is denied.
   headers on this list will be forward to upstream services.
 - `retry` (object, optional) - Configures timeout and delay settings for the
   request against the token endpoint
-  - `give_up_after` (string) max delay duration of retry. The value will be parsed by the Go [duration parser](https://pkg.go.dev/time#ParseDuration).
-  - `max_delay` (string) time to wait between retries and max service response time. The value will be parsed by the Go [duration parser](https://pkg.go.dev/time#ParseDuration).
+  - `give_up_after` (string) max delay duration of retry. The value will be
+    parsed by the Go [duration parser](https://pkg.go.dev/time#ParseDuration).
+  - `max_delay` (string) time to wait between retries and max service response
+    time. The value will be parsed by the Go
+    [duration parser](https://pkg.go.dev/time#ParseDuration).
 
 #### Example
 
