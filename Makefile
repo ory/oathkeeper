@@ -39,7 +39,7 @@ gen:
 		mocks sdk
 
 .bin/ory: Makefile
-		bash <(curl https://raw.githubusercontent.com/ory/meta/master/install.sh) -b .bin v0.0.53
+		bash <(curl https://raw.githubusercontent.com/ory/meta/master/install.sh) -b .bin ory v0.1.22
 		touch -a -m .bin/ory
 
 # Generates the SDKs
