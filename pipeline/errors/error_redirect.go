@@ -13,6 +13,12 @@ import (
 
 var _ Handler = new(ErrorRedirect)
 
+const (
+	xForwardedProto = "X-Forwarded-Proto"
+	xForwardedHost  = "X-Forwarded-Host"
+	xForwardedUri   = "X-Forwarded-Uri"
+)
+
 type (
 	ErrorRedirectConfig struct {
 		To                 string `json:"to"`
@@ -42,13 +48,13 @@ func (a *ErrorRedirect) Handle(w http.ResponseWriter, r *http.Request, config js
 	}
 
 	var scheme, host, requestUri string
-	if scheme = r.Header.Get("X-Forwarded-Proto"); scheme == "" {
+	if scheme = r.Header.Get(xForwardedProto); scheme == "" {
 		scheme = r.URL.Scheme
 	}
-	if host = r.Header.Get("X-Forwarded-Host"); host == "" {
+	if host = r.Header.Get(xForwardedHost); host == "" {
 		host = r.URL.Host
 	}
-	if requestUri = r.Header.Get("X-Forwarded-Uri"); requestUri == "" {
+	if requestUri = r.Header.Get(xForwardedUri); requestUri == "" {
 		requestUri = r.URL.RequestURI()
 	}
 
