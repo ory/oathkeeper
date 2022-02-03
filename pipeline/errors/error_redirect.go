@@ -2,7 +2,6 @@ package errors
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"net/url"
 
@@ -47,30 +46,28 @@ func (a *ErrorRedirect) Handle(w http.ResponseWriter, r *http.Request, config js
 		return err
 	}
 
-	var scheme, host, requestUri string
-	if scheme = r.Header.Get(xForwardedProto); scheme == "" {
-		scheme = r.URL.Scheme
-	}
-	if host = r.Header.Get(xForwardedHost); host == "" {
-		host = r.URL.Host
-	}
-	if requestUri = r.Header.Get(xForwardedUri); requestUri == "" {
-		requestUri = r.URL.RequestURI()
-	}
-
-	var uri *url.URL
-	if scheme == "" || host == "" {
-		// FIXME: I don't think this is applicable for real requests. It is however used by tests.
-		uri, err = url.Parse(fmt.Sprintf("%s", requestUri))
-	} else {
-		uri, err = url.Parse(fmt.Sprintf("%s://%s%s", scheme, host, requestUri))
-	}
-	if err != nil {
-		return err
-	}
-
-	http.Redirect(w, r, a.RedirectURL(uri, c), c.Code)
+	http.Redirect(w, r, a.RedirectURL(a.extractRedirectURL(r), c), c.Code)
 	return nil
+}
+
+func (a *ErrorRedirect) extractRedirectURL(req *http.Request) *url.URL {
+	var scheme, host, path string
+	if scheme = req.Header.Get(xForwardedProto); scheme == "" {
+		scheme = req.URL.Scheme
+	}
+	if host = req.Header.Get(xForwardedHost); host == "" {
+		host = req.URL.Host
+	}
+	if path = req.Header.Get(xForwardedUri); path == "" {
+		path = req.URL.Path
+	}
+
+	u := *req.URL
+	u.Scheme = scheme
+	u.Host = host
+	u.Path = path
+
+	return &u
 }
 
 func (a *ErrorRedirect) Validate(config json.RawMessage) error {
