@@ -78,6 +78,9 @@ Access Rules have four principal keys:
   Oathkeeper Proxy as the Decision API does not forward the request to the
   upstream.
   - `url` (string): The URL the request will be forwarded to.
+    - UNIX sockets: use `unix://path/to/unix.sock` format for unix socket. 
+      HTTP path can be set using `path` parameter. TLS can be enabled using
+      `tls` parameter.
   - `preserve_host` (bool): If set to `false` (default), the forwarded request
     will include the host and port of the `url` value. If `true`, the host and
     port of the ORY Oathkeeper Proxy will be used instead:

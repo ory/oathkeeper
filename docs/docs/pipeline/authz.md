@@ -286,6 +286,9 @@ if it returns a "403 Forbidden" response code, the access is denied.
 - `remote` (string, required) - The remote authorizer's URL. The remote
   authorizer is expected to return either "200 OK" or "403 Forbidden" to
   allow/deny access.
+  - UNIX sockets: use `unix://path/to/unix.sock` format for unix socket. HTTP 
+    path can be set using `path` parameter. TLS can be enabled using `tls` 
+    parameter.
 - `headers` (map of strings, optional) - The HTTP headers sent to the remote
   authorizer. The values will be parsed by the Go
   [`text/template`](https://golang.org/pkg/text/template/) package and applied
@@ -380,6 +383,9 @@ Forbidden" response code, the access is denied.
 - `remote` (string, required) - The remote authorizer's URL. The remote
   authorizer is expected to return either "200 OK" or "403 Forbidden" to
   allow/deny access.
+  - UNIX sockets: use `unix://path/to/unix.sock` format for unix socket. HTTP 
+    path can be set using `path` parameter. TLS can be enabled using `tls` 
+    parameter.
 - `payload` (string, required) - The request's JSON payload sent to the remote
   authorizer. The string will be parsed by the Go
   [`text/template`](https://golang.org/pkg/text/template/) package and applied

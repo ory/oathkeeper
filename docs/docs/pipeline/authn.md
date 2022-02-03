@@ -241,6 +241,9 @@ not currently supported, and will fail silently.
 
 - `check_session_url` (string, required) - The session store to forward request
   method/path/headers to for validation.
+  - UNIX sockets: use `unix://path/to/unix.sock` format for unix socket. HTTP 
+    path can be set using `path` parameter. TLS can be enabled using `tls` 
+    parameter.
 - `only` ([]string, optional) - If set, only requests that have at least one of
   the set cookies will be forwarded, others will be passed to the next
   authenticator. If unset, all requests are forwarded.
@@ -299,6 +302,19 @@ authenticators:
       preserve_query: true
 ```
 
+```yaml
+# Some Access Rule using unix socket endpoint : access-rule-3.yaml
+id: access-rule-3
+# match: ...
+# upstream: ...
+authenticators:
+  - handler: cookie_session
+    config:
+      check_session_url: unix://session/store/host.sock?path=/check-session&tls=true
+      only:
+        - sessionid
+```
+
 ### Access Rule Example
 
 ```shell
@@ -345,6 +361,9 @@ not currently supported, and will fail silently.
 
 - `check_session_url` (string, required) - The session store to forward request
   method/path/headers to for validation.
+  - UNIX sockets: use `unix://path/to/unix.sock` format for unix socket. HTTP 
+    path can be set using `path` parameter. TLS can be enabled using `tls` 
+    parameter.
 - `preserve_path` (boolean, optional) - If set, any path in `check_session_url`
   will be preserved instead of replacing the path with the path of the request
   being checked.

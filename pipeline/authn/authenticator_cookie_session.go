@@ -40,11 +40,18 @@ type AuthenticatorCookieSessionConfiguration struct {
 
 type AuthenticatorCookieSession struct {
 	c configuration.Provider
+	h *http.Client
 }
 
 func NewAuthenticatorCookieSession(c configuration.Provider) *AuthenticatorCookieSession {
 	return &AuthenticatorCookieSession{
 		c: c,
+		h: &http.Client{
+			Transport:     helper.NewRoundTripper(),
+			CheckRedirect: http.DefaultClient.CheckRedirect,
+			Jar:           http.DefaultClient.Jar,
+			Timeout:       http.DefaultClient.Timeout,
+		},
 	}
 }
 
@@ -88,7 +95,7 @@ func (a *AuthenticatorCookieSession) Authenticate(r *http.Request, session *Auth
 		return errors.WithStack(ErrAuthenticatorNotResponsible)
 	}
 
-	body, err := forwardRequestToSessionStore(r, cf.CheckSessionURL, cf.PreserveQuery, cf.PreservePath, cf.PreserveHost, cf.SetHeaders)
+	body, err := forwardRequestToSessionStore(r, a.h, cf.CheckSessionURL, cf.PreserveQuery, cf.PreservePath, cf.PreserveHost, cf.SetHeaders)
 	if err != nil {
 		return err
 	}
@@ -128,23 +135,14 @@ func cookieSessionResponsible(r *http.Request, only []string) bool {
 	return false
 }
 
-func forwardRequestToSessionStore(r *http.Request, checkSessionURL string, preserveQuery bool, preservePath bool, preserveHost bool, setHeaders map[string]string) (json.RawMessage, error) {
+func forwardRequestToSessionStore(r *http.Request, httpClient *http.Client, checkSessionURL string, preserveQuery bool, preservePath bool, preserveHost bool, setHeaders map[string]string) (json.RawMessage, error) {
 	reqUrl, err := url.Parse(checkSessionURL)
 	if err != nil {
 		return nil, errors.WithStack(herodot.ErrInternalServerError.WithReasonf("Unable to parse session check URL: %s", err))
 	}
 
-	if !preservePath {
-		reqUrl.Path = r.URL.Path
-	}
-
-	if !preserveQuery {
-		reqUrl.RawQuery = r.URL.RawQuery
-	}
-
 	req := http.Request{
 		Method: r.Method,
-		URL:    reqUrl,
 		Header: http.Header{},
 	}
 
@@ -161,7 +159,31 @@ func forwardRequestToSessionStore(r *http.Request, checkSessionURL string, prese
 		req.Header.Set("X-Forwarded-Host", r.Host)
 	}
 
-	res, err := http.DefaultClient.Do(req.WithContext(r.Context()))
+	if reqUrl.Scheme == "unix" {
+		urlValues := reqUrl.Query()
+		if !preservePath {
+			urlValues.Set("path", r.URL.Path)
+		}
+
+		if !preserveQuery {
+			v := r.URL.Query()
+			v.Set("path", urlValues.Get("path"))
+			v.Set("tls", urlValues.Get("tls"))
+			urlValues = v
+		}
+		reqUrl.RawQuery = urlValues.Encode()
+		req.URL = reqUrl
+	} else {
+		if !preservePath {
+			reqUrl.Path = r.URL.Path
+		}
+
+		if !preserveQuery {
+			reqUrl.RawQuery = r.URL.RawQuery
+		}
+		req.URL = reqUrl
+	}
+	res, err := httpClient.Do(req.WithContext(r.Context()))
 	if err != nil {
 		return nil, helper.ErrForbidden.WithReason(err.Error()).WithTrace(err)
 	}

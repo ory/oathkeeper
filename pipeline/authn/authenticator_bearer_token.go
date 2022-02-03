@@ -36,11 +36,18 @@ type AuthenticatorBearerTokenConfiguration struct {
 
 type AuthenticatorBearerToken struct {
 	c configuration.Provider
+	h *http.Client
 }
 
 func NewAuthenticatorBearerToken(c configuration.Provider) *AuthenticatorBearerToken {
 	return &AuthenticatorBearerToken{
 		c: c,
+		h: &http.Client{
+			Transport:     helper.NewRoundTripper(),
+			CheckRedirect: http.DefaultClient.CheckRedirect,
+			Jar:           http.DefaultClient.Jar,
+			Timeout:       http.DefaultClient.Timeout,
+		},
 	}
 }
 
@@ -85,7 +92,7 @@ func (a *AuthenticatorBearerToken) Authenticate(r *http.Request, session *Authen
 		return errors.WithStack(ErrAuthenticatorNotResponsible)
 	}
 
-	body, err := forwardRequestToSessionStore(r, cf.CheckSessionURL, cf.PreserveQuery, cf.PreservePath, cf.PreserveHost, cf.SetHeaders)
+	body, err := forwardRequestToSessionStore(r, a.h, cf.CheckSessionURL, cf.PreserveQuery, cf.PreservePath, cf.PreserveHost, cf.SetHeaders)
 	if err != nil {
 		return err
 	}

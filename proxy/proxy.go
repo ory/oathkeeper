@@ -27,6 +27,7 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/ory/oathkeeper/helper"
 	"github.com/ory/oathkeeper/pipeline/authn"
 	"github.com/ory/oathkeeper/x"
 
@@ -44,11 +45,12 @@ type proxyRegistry interface {
 }
 
 func NewProxy(r proxyRegistry) *Proxy {
-	return &Proxy{r: r}
+	return &Proxy{r: r, t: helper.NewRoundTripper()}
 }
 
 type Proxy struct {
 	r proxyRegistry
+	t http.RoundTripper
 }
 
 type key int
@@ -88,7 +90,7 @@ func (d *Proxy) RoundTrip(r *http.Request) (*http.Response, error) {
 			Header:     rw.header,
 		}, nil
 	} else if err == nil {
-		res, err := http.DefaultTransport.RoundTrip(r)
+		res, err := d.t.RoundTrip(r)
 		if err != nil {
 			d.r.Logger().
 				WithError(errors.WithStack(err)).
@@ -177,11 +179,18 @@ func ConfigureBackendURL(r *http.Request, rl *rule.Rule) error {
 	backendHost := p.Host
 	backendPath := p.Path
 	backendScheme := p.Scheme
+	backendQuery := p.Query()
 
 	forwardURL := r.URL
 	forwardURL.Scheme = backendScheme
 	forwardURL.Host = backendHost
-	forwardURL.Path = "/" + strings.TrimLeft("/"+strings.Trim(backendPath, "/")+"/"+strings.TrimLeft(proxyPath, "/"), "/")
+	if r.URL.Scheme == "unix" {
+		forwardURL.Path = "/" + strings.TrimLeft(backendPath, "/")
+		backendQuery.Set("path", "/"+strings.TrimLeft("/"+strings.Trim(backendQuery.Get("path"), "/")+"/"+strings.TrimLeft(proxyPath, "/"), "/"))
+		forwardURL.RawQuery = backendQuery.Encode()
+	} else {
+		forwardURL.Path = "/" + strings.TrimLeft("/"+strings.Trim(backendPath, "/")+"/"+strings.TrimLeft(proxyPath, "/"), "/")
+	}
 
 	if rl.Upstream.StripPath != "" {
 		forwardURL.Path = strings.Replace(forwardURL.Path, "/"+strings.Trim(rl.Upstream.StripPath, "/"), "", 1)
