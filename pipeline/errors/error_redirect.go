@@ -46,17 +46,12 @@ func (a *ErrorRedirect) Handle(w http.ResponseWriter, r *http.Request, config js
 		return err
 	}
 
-	http.Redirect(w, r, a.RedirectURL(a.extractURL(r), c), c.Code)
+	r.URL.Scheme = x.OrDefaultString(r.Header.Get(xForwardedProto), r.URL.Scheme)
+	r.URL.Host = x.OrDefaultString(r.Header.Get(xForwardedHost), r.Host)
+	r.URL.Path = x.OrDefaultString(r.Header.Get(xForwardedUri), r.URL.Path)
+
+	http.Redirect(w, r, a.RedirectURL(r.URL, c), c.Code)
 	return nil
-}
-
-func (a *ErrorRedirect) extractURL(req *http.Request) *url.URL {
-	u := *req.URL
-	u.Scheme = x.OrDefaultString(req.Header.Get(xForwardedProto), req.URL.Scheme)
-	u.Host = x.OrDefaultString(req.Header.Get(xForwardedHost), req.Host)
-	u.Path = x.OrDefaultString(req.Header.Get(xForwardedUri), req.URL.Path)
-
-	return &u
 }
 
 func (a *ErrorRedirect) Validate(config json.RawMessage) error {
