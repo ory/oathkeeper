@@ -1084,6 +1084,29 @@ authorizers:
       forward_response_headers_to_upstream:
         - ''
 
+      ## retry ##
+      #
+      retry:
+        ## max_delay ##
+        #
+        # Set this value using environment variables on
+        # - Linux/macOS:
+        #    $ export AUTHORIZERS_REMOTE_CONFIG_RETRY_MAX_DELAY=<value>
+        # - Windows Command Line (CMD):
+        #    > set AUTHORIZERS_REMOTE_CONFIG_RETRY_MAX_DELAY=<value>
+        #
+        max_delay: 0ns
+
+        ## give_up_after ##
+        #
+        # Set this value using environment variables on
+        # - Linux/macOS:
+        #    $ export AUTHORIZERS_REMOTE_CONFIG_RETRY_GIVE_UP_AFTER=<value>
+        # - Windows Command Line (CMD):
+        #    > set AUTHORIZERS_REMOTE_CONFIG_RETRY_GIVE_UP_AFTER=<value>
+        #
+        give_up_after: 0ns
+
     ## Enabled ##
     #
     # En-/disables this component.
@@ -1128,6 +1151,29 @@ authorizers:
       #    > set AUTHORIZERS_REMOTE_JSON_CONFIG_PAYLOAD=<value>
       #
       payload: '{"subject":"{{ .Subject }}"}'
+
+      ## retry ##
+      #
+      retry:
+        ## max_delay ##
+        #
+        # Set this value using environment variables on
+        # - Linux/macOS:
+        #    $ export AUTHORIZERS_REMOTE_JSON_CONFIG_RETRY_MAX_DELAY=<value>
+        # - Windows Command Line (CMD):
+        #    > set AUTHORIZERS_REMOTE_JSON_CONFIG_RETRY_MAX_DELAY=<value>
+        #
+        max_delay: 0ns
+
+        ## give_up_after ##
+        #
+        # Set this value using environment variables on
+        # - Linux/macOS:
+        #    $ export AUTHORIZERS_REMOTE_JSON_CONFIG_RETRY_GIVE_UP_AFTER=<value>
+        # - Windows Command Line (CMD):
+        #    > set AUTHORIZERS_REMOTE_JSON_CONFIG_RETRY_GIVE_UP_AFTER=<value>
+        #
+        give_up_after: 0ns
 
       ## forward_response_headers_to_upstream ##
       #

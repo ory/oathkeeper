@@ -6,7 +6,6 @@ package api
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
-	"context"
 	"fmt"
 	"io"
 
@@ -37,6 +36,7 @@ func (o *GetWellKnownJSONWebKeysReader) ReadResponse(response runtime.ClientResp
 			return nil, err
 		}
 		return nil, result
+
 	default:
 		return nil, runtime.NewAPIError("response status code does not match any response statuses defined for this endpoint in the swagger spec", response, response.Code())
 	}
@@ -47,7 +47,7 @@ func NewGetWellKnownJSONWebKeysOK() *GetWellKnownJSONWebKeysOK {
 	return &GetWellKnownJSONWebKeysOK{}
 }
 
-/* GetWellKnownJSONWebKeysOK describes a response with status code 200, with default header values.
+/*GetWellKnownJSONWebKeysOK handles this case with default header values.
 
 jsonWebKeySet
 */
@@ -58,6 +58,7 @@ type GetWellKnownJSONWebKeysOK struct {
 func (o *GetWellKnownJSONWebKeysOK) Error() string {
 	return fmt.Sprintf("[GET /.well-known/jwks.json][%d] getWellKnownJsonWebKeysOK  %+v", 200, o.Payload)
 }
+
 func (o *GetWellKnownJSONWebKeysOK) GetPayload() *models.JSONWebKeySet {
 	return o.Payload
 }
@@ -79,7 +80,7 @@ func NewGetWellKnownJSONWebKeysInternalServerError() *GetWellKnownJSONWebKeysInt
 	return &GetWellKnownJSONWebKeysInternalServerError{}
 }
 
-/* GetWellKnownJSONWebKeysInternalServerError describes a response with status code 500, with default header values.
+/*GetWellKnownJSONWebKeysInternalServerError handles this case with default header values.
 
 The standard error format
 */
@@ -90,6 +91,7 @@ type GetWellKnownJSONWebKeysInternalServerError struct {
 func (o *GetWellKnownJSONWebKeysInternalServerError) Error() string {
 	return fmt.Sprintf("[GET /.well-known/jwks.json][%d] getWellKnownJsonWebKeysInternalServerError  %+v", 500, o.Payload)
 }
+
 func (o *GetWellKnownJSONWebKeysInternalServerError) GetPayload() *GetWellKnownJSONWebKeysInternalServerErrorBody {
 	return o.Payload
 }
@@ -132,11 +134,6 @@ type GetWellKnownJSONWebKeysInternalServerErrorBody struct {
 
 // Validate validates this get well known JSON web keys internal server error body
 func (o *GetWellKnownJSONWebKeysInternalServerErrorBody) Validate(formats strfmt.Registry) error {
-	return nil
-}
-
-// ContextValidate validates this get well known JSON web keys internal server error body based on context it is used
-func (o *GetWellKnownJSONWebKeysInternalServerErrorBody) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
 	return nil
 }
 
