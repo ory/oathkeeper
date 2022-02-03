@@ -35,11 +35,6 @@ waitport 6061
 function finish {
   cat ./config.yaml
   cat ./rules.3.json || true
-  cat ./run-1.log || true
-  cat ./run-2.log || true
-  cat ./run-3.log || true
-  cat ./run-4.log || true
-  cat ./run-5.log || true
   cat ./oathkeeper.log
 }
 trap finish EXIT
@@ -47,35 +42,35 @@ trap finish EXIT
 sleep 5
 
 echo "Executing request against no configured rules -> 404"
-[[ $(curl --silent --output /dev/null -f ${OATHKEEPER_PROXY}/rules -w '%{http_code}') -ne 404 ]] && exit 1
+[[ $(curl -f ${OATHKEEPER_PROXY}/rules -w '%{http_code}') -ne 404 ]] && exit 1
 
 echo "Executing request against a now configured rule -> 200"
-cp config.2.yaml config.yaml; sleep 3; [[ $(curl --silent --output /dev/null -f ${OATHKEEPER_PROXY}/rules -w '%{http_code}') -ne 200 ]] && exit 1
+cp config.2.yaml config.yaml; sleep 3; [[ $(curl -f ${OATHKEEPER_PROXY}/rules -w '%{http_code}') -ne 200 ]] && exit 1
 
 echo "Executing request against updated rule with deny in it -> 403"
-cp config.3.yaml config.yaml; sleep 3; [[ $(curl --silent --output /dev/null -f ${OATHKEEPER_PROXY}/rules -w '%{http_code}') -ne 403 ]] && exit 1
+cp config.3.yaml config.yaml; sleep 3; [[ $(curl-f ${OATHKEEPER_PROXY}/rules -w '%{http_code}') -ne 403 ]] && exit 1
 
 echo "Executing request against updated rule with deny deny disabled -> 500"
-cp config.4.yaml config.yaml; sleep 3; [[ $(curl --silent --output /dev/null -f ${OATHKEEPER_PROXY}/rules -w '%{http_code}') -ne 500 ]] && exit 1
+cp config.4.yaml config.yaml; sleep 3; [[ $(curl -f ${OATHKEEPER_PROXY}/rules -w '%{http_code}') -ne 500 ]] && exit 1
 
 echo "Making sure route to be registered is not available yet -> 404"
-[[ $(curl --silent --output /dev/null -f ${OATHKEEPER_PROXY}/other-rules -w '%{http_code}') -ne 404 ]] && exit 1
+[[ $(curl -f ${OATHKEEPER_PROXY}/other-rules -w '%{http_code}') -ne 404 ]] && exit 1
 
 echo "Load another rule set -> all 200"
 cp rules.3.1.json rules.3.json
 cp config.5.yaml config.yaml; sleep 3
-[[ $(curl --silent --output run-1.log -f ${OATHKEEPER_PROXY}/rules -w '%{http_code}') -ne 200 ]] && exit 1
-[[ $(curl --silent --output run-2.log -f ${OATHKEEPER_PROXY}/other-rules -w '%{http_code}') -ne 200 ]] && exit 1
+[[ $(curl -f ${OATHKEEPER_PROXY}/rules -w '%{http_code}') -ne 200 ]] && exit 1
+[[ $(curl -f ${OATHKEEPER_PROXY}/other-rules -w '%{http_code}') -ne 200 ]] && exit 1
 
 echo "Make changes to other rule -> should 403"
 cp rules.3.2.json rules.3.json; sleep 3
-[[ $(curl --silent --output run-3.log -f ${OATHKEEPER_PROXY}/rules -w '%{http_code}') -ne 200 ]] && exit 1
-[[ $(curl --silent --output run-4.log -f ${OATHKEEPER_PROXY}/other-rules -w '%{http_code}') -ne 403 ]] && exit 1
+[[ $(curl -f ${OATHKEEPER_PROXY}/rules -w '%{http_code}') -ne 200 ]] && exit 1
+[[ $(curl -f ${OATHKEEPER_PROXY}/other-rules -w '%{http_code}') -ne 403 ]] && exit 1
 
 echo "Remove all configs -> all 404"
 cp config.6.yaml config.yaml; sleep 3
-[[ $(curl --silent --output run-4.log -f ${OATHKEEPER_PROXY}/rules -w '%{http_code}') -ne 404 ]] && exit 1
-[[ $(curl --silent --output run-5.log -f ${OATHKEEPER_PROXY}/other-rules -w '%{http_code}') -ne 404 ]] && exit 1
+[[ $(curl -f ${OATHKEEPER_PROXY}/rules -w '%{http_code}') -ne 404 ]] && exit 1
+[[ $(curl -f ${OATHKEEPER_PROXY}/other-rules -w '%{http_code}') -ne 404 ]] && exit 1
 
 kill %1 || true
 
