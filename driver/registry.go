@@ -30,7 +30,7 @@ type Registry interface {
 	BuildDate() string
 	BuildHash() string
 
-	ProxyRequestHandler() *proxy.RequestHandler
+	ProxyRequestHandler() proxy.RequestHandler
 	HealthEventManager() health.EventManager
 	HealthHandler() *healthx.Handler
 	RuleHandler() *api.RuleHandler

@@ -45,7 +45,7 @@ type decisionHandlerRegistry interface {
 	x.RegistryLogger
 
 	RuleMatcher() rule.Matcher
-	ProxyRequestHandler() *proxy.RequestHandler
+	ProxyRequestHandler() proxy.RequestHandler
 }
 
 type DecisionHandler struct {
