@@ -48,7 +48,7 @@ echo "Executing request against a now configured rule -> 200"
 cp config.2.yaml config.yaml; sleep 3; [[ $(curl -f ${OATHKEEPER_PROXY}/rules -w '%{http_code}') -ne 200 ]] && exit 1
 
 echo "Executing request against updated rule with deny in it -> 403"
-cp config.3.yaml config.yaml; sleep 3; [[ $(curl-f ${OATHKEEPER_PROXY}/rules -w '%{http_code}') -ne 403 ]] && exit 1
+cp config.3.yaml config.yaml; sleep 3; [[ $(curl -f ${OATHKEEPER_PROXY}/rules -w '%{http_code}') -ne 403 ]] && exit 1
 
 echo "Executing request against updated rule with deny deny disabled -> 500"
 cp config.4.yaml config.yaml; sleep 3; [[ $(curl -f ${OATHKEEPER_PROXY}/rules -w '%{http_code}') -ne 500 ]] && exit 1
