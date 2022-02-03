@@ -58,29 +58,11 @@ func NewJudgeHandler(r decisionHandlerRegistry) *DecisionHandler {
 
 func (h *DecisionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
 	if len(r.URL.Path) >= len(DecisionPath) && r.URL.Path[:len(DecisionPath)] == DecisionPath {
-		var method, scheme, host, path string
-
-		if method = r.Header.Get(xForwardedMethod); method == "" {
-			method = r.Method
-		}
-		if scheme = r.Header.Get(xForwardedProto); scheme == "" {
-			if r.TLS != nil {
-				scheme = "https"
-			} else {
-				scheme = "http"
-			}
-		}
-		if host = r.Header.Get(xForwardedHost); host == "" {
-			host = r.Host
-		}
-		if path = r.Header.Get(xForwardedUri); path == "" {
-			path = r.URL.Path[len(DecisionPath):]
-		}
-
-		r.Method = method
-		r.URL.Scheme = scheme
-		r.URL.Host = host
-		r.URL.Path = path
+		r.Method = x.OrDefaultString(r.Header.Get(xForwardedMethod), r.Method)
+		r.URL.Scheme = x.OrDefaultString(r.Header.Get(xForwardedProto),
+			x.IfThenElseString(r.TLS != nil, "https", "http"))
+		r.URL.Host = x.OrDefaultString(r.Header.Get(xForwardedHost), r.Host)
+		r.URL.Path = x.OrDefaultString(r.Header.Get(xForwardedUri), r.URL.Path[len(DecisionPath):])
 
 		h.decisions(w, r)
 	} else {

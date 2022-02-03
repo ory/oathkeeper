@@ -46,26 +46,15 @@ func (a *ErrorRedirect) Handle(w http.ResponseWriter, r *http.Request, config js
 		return err
 	}
 
-	http.Redirect(w, r, a.RedirectURL(a.extractRedirectURL(r), c), c.Code)
+	http.Redirect(w, r, a.RedirectURL(a.extractURL(r), c), c.Code)
 	return nil
 }
 
-func (a *ErrorRedirect) extractRedirectURL(req *http.Request) *url.URL {
-	var scheme, host, path string
-	if scheme = req.Header.Get(xForwardedProto); scheme == "" {
-		scheme = req.URL.Scheme
-	}
-	if host = req.Header.Get(xForwardedHost); host == "" {
-		host = req.URL.Host
-	}
-	if path = req.Header.Get(xForwardedUri); path == "" {
-		path = req.URL.Path
-	}
-
+func (a *ErrorRedirect) extractURL(req *http.Request) *url.URL {
 	u := *req.URL
-	u.Scheme = scheme
-	u.Host = host
-	u.Path = path
+	u.Scheme = x.OrDefaultString(req.Header.Get(xForwardedProto), req.URL.Scheme)
+	u.Host = x.OrDefaultString(req.Header.Get(xForwardedHost), req.Host)
+	u.Path = x.OrDefaultString(req.Header.Get(xForwardedUri), req.URL.Path)
 
 	return &u
 }
