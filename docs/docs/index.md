@@ -28,6 +28,8 @@ API works with
   [Custom Authorizers](https://aws.amazon.com/de/blogs/compute/introducing-custom-authorizers-in-amazon-api-gateway/)
 - [Nginx](https://www.nginx.com) via
   [Authentication Based on Subrequest Result](https://docs.nginx.com/nginx/admin-guide/security-controls/configuring-subrequest-authentication/)
+- [Traefik Proxy](https://traefik.io/traefik/) via the
+  [ForwardAuth Middleware](https://doc.traefik.io/traefik/middlewares/http/forwardauth/)
 
 among others.
 
