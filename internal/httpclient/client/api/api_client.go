@@ -25,24 +25,21 @@ type Client struct {
 	formats   strfmt.Registry
 }
 
-// ClientOption is the option for Client methods
-type ClientOption func(*runtime.ClientOperation)
-
 // ClientService is the interface for Client methods
 type ClientService interface {
-	Decisions(params *DecisionsParams, opts ...ClientOption) (*DecisionsOK, error)
+	Decisions(params *DecisionsParams) (*DecisionsOK, error)
 
-	GetRule(params *GetRuleParams, opts ...ClientOption) (*GetRuleOK, error)
+	GetRule(params *GetRuleParams) (*GetRuleOK, error)
 
-	GetVersion(params *GetVersionParams, opts ...ClientOption) (*GetVersionOK, error)
+	GetVersion(params *GetVersionParams) (*GetVersionOK, error)
 
-	GetWellKnownJSONWebKeys(params *GetWellKnownJSONWebKeysParams, opts ...ClientOption) (*GetWellKnownJSONWebKeysOK, error)
+	GetWellKnownJSONWebKeys(params *GetWellKnownJSONWebKeysParams) (*GetWellKnownJSONWebKeysOK, error)
 
-	IsInstanceAlive(params *IsInstanceAliveParams, opts ...ClientOption) (*IsInstanceAliveOK, error)
+	IsInstanceAlive(params *IsInstanceAliveParams) (*IsInstanceAliveOK, error)
 
-	IsInstanceReady(params *IsInstanceReadyParams, opts ...ClientOption) (*IsInstanceReadyOK, error)
+	IsInstanceReady(params *IsInstanceReadyParams) (*IsInstanceReadyOK, error)
 
-	ListRules(params *ListRulesParams, opts ...ClientOption) (*ListRulesOK, error)
+	ListRules(params *ListRulesParams) (*ListRulesOK, error)
 
 	SetTransport(transport runtime.ClientTransport)
 }
@@ -56,12 +53,13 @@ This endpoint mirrors the proxy capability of ORY Oathkeeper's proxy functionali
 request to the upstream server, returns 200 (request should be allowed), 401 (unauthorized), or 403 (forbidden)
 status codes. This endpoint can be used to integrate with other API Proxies like Ambassador, Kong, Envoy, and many more.
 */
-func (a *Client) Decisions(params *DecisionsParams, opts ...ClientOption) (*DecisionsOK, error) {
+func (a *Client) Decisions(params *DecisionsParams) (*DecisionsOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewDecisionsParams()
 	}
-	op := &runtime.ClientOperation{
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
 		ID:                 "decisions",
 		Method:             "GET",
 		PathPattern:        "/decisions",
@@ -72,12 +70,7 @@ func (a *Client) Decisions(params *DecisionsParams, opts ...ClientOption) (*Deci
 		Reader:             &DecisionsReader{formats: a.formats},
 		Context:            params.Context,
 		Client:             params.HTTPClient,
-	}
-	for _, opt := range opts {
-		opt(op)
-	}
-
-	result, err := a.transport.Submit(op)
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -96,12 +89,13 @@ func (a *Client) Decisions(params *DecisionsParams, opts ...ClientOption) (*Deci
 
   Use this method to retrieve a rule from the storage. If it does not exist you will receive a 404 error.
 */
-func (a *Client) GetRule(params *GetRuleParams, opts ...ClientOption) (*GetRuleOK, error) {
+func (a *Client) GetRule(params *GetRuleParams) (*GetRuleOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewGetRuleParams()
 	}
-	op := &runtime.ClientOperation{
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
 		ID:                 "getRule",
 		Method:             "GET",
 		PathPattern:        "/rules/{id}",
@@ -112,12 +106,7 @@ func (a *Client) GetRule(params *GetRuleParams, opts ...ClientOption) (*GetRuleO
 		Reader:             &GetRuleReader{formats: a.formats},
 		Context:            params.Context,
 		Client:             params.HTTPClient,
-	}
-	for _, opt := range opts {
-		opt(op)
-	}
-
-	result, err := a.transport.Submit(op)
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -142,12 +131,13 @@ If the service supports TLS Edge Termination, this endpoint does not require the
 Be aware that if you are running multiple nodes of this service, the health status will never
 refer to the cluster state, only to a single instance.
 */
-func (a *Client) GetVersion(params *GetVersionParams, opts ...ClientOption) (*GetVersionOK, error) {
+func (a *Client) GetVersion(params *GetVersionParams) (*GetVersionOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewGetVersionParams()
 	}
-	op := &runtime.ClientOperation{
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
 		ID:                 "getVersion",
 		Method:             "GET",
 		PathPattern:        "/version",
@@ -158,12 +148,7 @@ func (a *Client) GetVersion(params *GetVersionParams, opts ...ClientOption) (*Ge
 		Reader:             &GetVersionReader{formats: a.formats},
 		Context:            params.Context,
 		Client:             params.HTTPClient,
-	}
-	for _, opt := range opts {
-		opt(op)
-	}
-
-	result, err := a.transport.Submit(op)
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -182,12 +167,13 @@ func (a *Client) GetVersion(params *GetVersionParams, opts ...ClientOption) (*Ge
 
   This endpoint returns cryptographic keys that are required to, for example, verify signatures of ID Tokens.
 */
-func (a *Client) GetWellKnownJSONWebKeys(params *GetWellKnownJSONWebKeysParams, opts ...ClientOption) (*GetWellKnownJSONWebKeysOK, error) {
+func (a *Client) GetWellKnownJSONWebKeys(params *GetWellKnownJSONWebKeysParams) (*GetWellKnownJSONWebKeysOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewGetWellKnownJSONWebKeysParams()
 	}
-	op := &runtime.ClientOperation{
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
 		ID:                 "getWellKnownJSONWebKeys",
 		Method:             "GET",
 		PathPattern:        "/.well-known/jwks.json",
@@ -198,12 +184,7 @@ func (a *Client) GetWellKnownJSONWebKeys(params *GetWellKnownJSONWebKeysParams, 
 		Reader:             &GetWellKnownJSONWebKeysReader{formats: a.formats},
 		Context:            params.Context,
 		Client:             params.HTTPClient,
-	}
-	for _, opt := range opts {
-		opt(op)
-	}
-
-	result, err := a.transport.Submit(op)
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -229,12 +210,13 @@ If the service supports TLS Edge Termination, this endpoint does not require the
 Be aware that if you are running multiple nodes of this service, the health status will never
 refer to the cluster state, only to a single instance.
 */
-func (a *Client) IsInstanceAlive(params *IsInstanceAliveParams, opts ...ClientOption) (*IsInstanceAliveOK, error) {
+func (a *Client) IsInstanceAlive(params *IsInstanceAliveParams) (*IsInstanceAliveOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewIsInstanceAliveParams()
 	}
-	op := &runtime.ClientOperation{
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
 		ID:                 "isInstanceAlive",
 		Method:             "GET",
 		PathPattern:        "/health/alive",
@@ -245,12 +227,7 @@ func (a *Client) IsInstanceAlive(params *IsInstanceAliveParams, opts ...ClientOp
 		Reader:             &IsInstanceAliveReader{formats: a.formats},
 		Context:            params.Context,
 		Client:             params.HTTPClient,
-	}
-	for _, opt := range opts {
-		opt(op)
-	}
-
-	result, err := a.transport.Submit(op)
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -276,12 +253,13 @@ If the service supports TLS Edge Termination, this endpoint does not require the
 Be aware that if you are running multiple nodes of this service, the health status will never
 refer to the cluster state, only to a single instance.
 */
-func (a *Client) IsInstanceReady(params *IsInstanceReadyParams, opts ...ClientOption) (*IsInstanceReadyOK, error) {
+func (a *Client) IsInstanceReady(params *IsInstanceReadyParams) (*IsInstanceReadyOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewIsInstanceReadyParams()
 	}
-	op := &runtime.ClientOperation{
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
 		ID:                 "isInstanceReady",
 		Method:             "GET",
 		PathPattern:        "/health/ready",
@@ -292,12 +270,7 @@ func (a *Client) IsInstanceReady(params *IsInstanceReadyParams, opts ...ClientOp
 		Reader:             &IsInstanceReadyReader{formats: a.formats},
 		Context:            params.Context,
 		Client:             params.HTTPClient,
-	}
-	for _, opt := range opts {
-		opt(op)
-	}
-
-	result, err := a.transport.Submit(op)
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -317,12 +290,13 @@ func (a *Client) IsInstanceReady(params *IsInstanceReadyParams, opts ...ClientOp
   This method returns an array of all rules that are stored in the backend. This is useful if you want to get a full
 view of what rules you have currently in place.
 */
-func (a *Client) ListRules(params *ListRulesParams, opts ...ClientOption) (*ListRulesOK, error) {
+func (a *Client) ListRules(params *ListRulesParams) (*ListRulesOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewListRulesParams()
 	}
-	op := &runtime.ClientOperation{
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
 		ID:                 "listRules",
 		Method:             "GET",
 		PathPattern:        "/rules",
@@ -333,12 +307,7 @@ func (a *Client) ListRules(params *ListRulesParams, opts ...ClientOption) (*List
 		Reader:             &ListRulesReader{formats: a.formats},
 		Context:            params.Context,
 		Client:             params.HTTPClient,
-	}
-	for _, opt := range opts {
-		opt(op)
-	}
-
-	result, err := a.transport.Submit(op)
+	})
 	if err != nil {
 		return nil, err
 	}

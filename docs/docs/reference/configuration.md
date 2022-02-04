@@ -194,6 +194,16 @@ authenticators:
       #
       preserve_host: false
 
+      ## force_method ##
+      #
+      # Set this value using environment variables on
+      # - Linux/macOS:
+      #    $ export AUTHENTICATORS_COOKIE_SESSION_CONFIG_FORCE_METHOD=<value>
+      # - Windows Command Line (CMD):
+      #    > set AUTHENTICATORS_COOKIE_SESSION_CONFIG_FORCE_METHOD=<value>
+      #
+      force_method: GET
+
       ## extra_from ##
       #
       # Set this value using environment variables on
@@ -289,6 +299,16 @@ authenticators:
       #    > set AUTHENTICATORS_BEARER_TOKEN_CONFIG_PRESERVE_HOST=<value>
       #
       preserve_host: false
+
+      ## force_method ##
+      #
+      # Set this value using environment variables on
+      # - Linux/macOS:
+      #    $ export AUTHENTICATORS_BEARER_TOKEN_CONFIG_FORCE_METHOD=<value>
+      # - Windows Command Line (CMD):
+      #    > set AUTHENTICATORS_BEARER_TOKEN_CONFIG_FORCE_METHOD=<value>
+      #
+      force_method: GET
 
       ## extra_from ##
       #
