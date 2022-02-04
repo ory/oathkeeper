@@ -47,7 +47,7 @@ func (a *ErrorRedirect) Handle(w http.ResponseWriter, r *http.Request, config js
 	}
 
 	r.URL.Scheme = x.OrDefaultString(r.Header.Get(xForwardedProto), r.URL.Scheme)
-	r.URL.Host = x.OrDefaultString(r.Header.Get(xForwardedHost), r.Host)
+	r.URL.Host = x.OrDefaultString(r.Header.Get(xForwardedHost), r.URL.Host)
 	r.URL.Path = x.OrDefaultString(r.Header.Get(xForwardedUri), r.URL.Path)
 
 	http.Redirect(w, r, a.RedirectURL(r.URL, c), c.Code)

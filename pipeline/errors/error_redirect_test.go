@@ -178,3 +178,81 @@ func TestErrorRedirect(t *testing.T) {
 		}
 	})
 }
+
+func TestErrorReturnToRedirectURLHeaderUsage(t *testing.T) {
+	conf := internal.NewConfigurationWithDefaults()
+	reg := internal.NewRegistry(conf)
+
+	defaultUrl := &url.URL{Scheme: "http", Host: "ory.sh", Path: "/foo"}
+	defaultTransform := func(req *http.Request) {}
+	config := `{"to":"http://test/test","return_to_query_param":"return_to"}`
+
+	a, err := reg.PipelineErrorHandler("redirect")
+	require.NoError(t, err)
+	assert.Equal(t, "redirect", a.GetID())
+
+	for _, tc := range []struct {
+		name        string
+		expectedUrl *url.URL
+		transform   func(req *http.Request)
+	}{
+		{
+			name:        "all arguments are taken from the url and request method",
+			expectedUrl: defaultUrl,
+			transform:   defaultTransform,
+		},
+		{
+			name:        "all arguments are taken from the headers",
+			expectedUrl: &url.URL{Scheme: "https", Host: "test.dev", Path: "/bar"},
+			transform: func(req *http.Request) {
+				req.Header.Add("X-Forwarded-Proto", "https")
+				req.Header.Add("X-Forwarded-Host", "test.dev")
+				req.Header.Add("X-Forwarded-Uri", "/bar")
+			},
+		},
+		{
+			name:        "only scheme is taken from the headers",
+			expectedUrl: &url.URL{Scheme: "https", Host: defaultUrl.Host, Path: defaultUrl.Path},
+			transform: func(req *http.Request) {
+				req.Header.Add("X-Forwarded-Proto", "https")
+			},
+		},
+		{
+			name:        "only host is taken from the headers",
+			expectedUrl: &url.URL{Scheme: defaultUrl.Scheme, Host: "test.dev", Path: defaultUrl.Path},
+			transform: func(req *http.Request) {
+				req.Header.Add("X-Forwarded-Host", "test.dev")
+			},
+		},
+		{
+			name:        "only path is taken from the headers",
+			expectedUrl: &url.URL{Scheme: defaultUrl.Scheme, Host: defaultUrl.Host, Path: "/bar"},
+			transform: func(req *http.Request) {
+				req.Header.Add("X-Forwarded-Uri", "/bar")
+			},
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			w := httptest.NewRecorder()
+			r := httptest.NewRequest("GET", defaultUrl.String(), nil)
+			tc.transform(r)
+
+			err = a.Handle(w, r, json.RawMessage(config), nil, nil)
+			assert.NoError(t, err)
+
+			loc := w.Header().Get("Location")
+			assert.NotEmpty(t, loc)
+
+			locUrl, err := url.Parse(loc)
+			assert.NoError(t, err)
+
+			returnTo := locUrl.Query().Get("return_to")
+			assert.NotEmpty(t, returnTo)
+
+			returnToUrl, err := url.Parse(returnTo)
+			assert.NoError(t, err)
+
+			assert.Equal(t, tc.expectedUrl, returnToUrl)
+		})
+	}
+}
