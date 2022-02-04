@@ -188,10 +188,13 @@ X-User-ID: john.doe
 The decision engine allows to configure how ORY Oathkeeper authorizes HTTP
 requests. Authorization happens in four steps, each of which can be configured:
 
-1. **Access Rule Matching:** Verifies that the HTTP method, path, and host of
-   the incoming HTTP request conform to your access rules. The request is denied
-   if no access rules match. The configuration of the matching access rule
-   becomes the input for the next steps.
+1. **Access Rule Matching:** Verifies that the HTTP method, path, scheme, and
+   host of the incoming HTTP request conform to your access rules. The
+   information is taken either from the URL, or from the `X-Forwarded-Method`,
+   `X-Forwarded-Proto`, `X-Forwarded-Host`, `X-Forwarded-Uri` headers (if
+   present) of the incoming request. The request is denied if no access rules
+   match. The configuration of the matching access rule becomes the input for
+   the next steps.
 2. **Authentication:** Oathkeeper can validate credentials via a variety of
    methods like Bearer Token, Basic Authorization, or cookie. Invalid
    credentials result in denial of the request. The "internal" session state

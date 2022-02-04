@@ -415,7 +415,10 @@ conditions under the `when` key.
 
 If you want to append the current url (where the error happened) to address
 redirected to, You can specify `return_to_query_param` to set the name of
-parameter that will hold the url.
+parameter that will hold the url. The information about the current url is taken
+either from the URL, or from the `X-Forwarded-Method`, `X-Forwarded-Proto`,
+`X-Forwarded-Host`, `X-Forwarded-Uri` headers (if present) of the incoming
+request.
 
 **Example**
 
