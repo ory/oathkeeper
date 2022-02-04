@@ -120,6 +120,21 @@ func TestAuthenticatorBearerToken(t *testing.T) {
 				},
 			},
 			{
+				d: "should pass use the configured method",
+				r: &http.Request{Header: http.Header{"Authorization": {"bearer zyx"}}, URL: &url.URL{Path: "/users/123", RawQuery: "query=string"}, Method: "PUT"},
+				router: func(w http.ResponseWriter, r *http.Request) {
+					assert.Equal(t, r.Method, "GET")
+					assert.Equal(t, r.Header.Get("Authorization"), "bearer zyx")
+					w.WriteHeader(200)
+					w.Write([]byte(`{"sub": "123"}`))
+				},
+				config:    []byte(`{"preserve_path": true, "force_method": "GET"}`),
+				expectErr: false,
+				expectSess: &AuthenticationSession{
+					Subject: "123",
+				},
+			},
+			{
 				d: "should pass through method, headers, and path ONLY to auth server when PreservePath is false and PreserveQuery is true",
 				r: &http.Request{Header: http.Header{"Authorization": {"bearer zyx"}}, URL: &url.URL{Path: "/users/123", RawQuery: "query=string"}, Method: "PUT"},
 				router: func(w http.ResponseWriter, r *http.Request) {

@@ -36,6 +36,7 @@ type AuthenticatorCookieSessionConfiguration struct {
 	SubjectFrom     string            `json:"subject_from"`
 	PreserveHost    bool              `json:"preserve_host"`
 	SetHeaders      map[string]string `json:"additional_headers"`
+	ForceMethod     string            `json:"force_method"`
 }
 
 type AuthenticatorCookieSession struct {
@@ -88,7 +89,7 @@ func (a *AuthenticatorCookieSession) Authenticate(r *http.Request, session *Auth
 		return errors.WithStack(ErrAuthenticatorNotResponsible)
 	}
 
-	body, err := forwardRequestToSessionStore(r, cf.CheckSessionURL, cf.PreserveQuery, cf.PreservePath, cf.PreserveHost, cf.SetHeaders)
+	body, err := forwardRequestToSessionStore(r, cf.CheckSessionURL, cf.PreserveQuery, cf.PreservePath, cf.PreserveHost, cf.SetHeaders, cf.ForceMethod)
 	if err != nil {
 		return err
 	}
@@ -128,7 +129,7 @@ func cookieSessionResponsible(r *http.Request, only []string) bool {
 	return false
 }
 
-func forwardRequestToSessionStore(r *http.Request, checkSessionURL string, preserveQuery bool, preservePath bool, preserveHost bool, setHeaders map[string]string) (json.RawMessage, error) {
+func forwardRequestToSessionStore(r *http.Request, checkSessionURL string, preserveQuery bool, preservePath bool, preserveHost bool, setHeaders map[string]string, m string) (json.RawMessage, error) {
 	reqUrl, err := url.Parse(checkSessionURL)
 	if err != nil {
 		return nil, errors.WithStack(herodot.ErrInternalServerError.WithReasonf("Unable to parse session check URL: %s", err))
@@ -142,8 +143,12 @@ func forwardRequestToSessionStore(r *http.Request, checkSessionURL string, prese
 		reqUrl.RawQuery = r.URL.RawQuery
 	}
 
+	if m == "" {
+		m = r.Method
+	}
+
 	req := http.Request{
-		Method: r.Method,
+		Method: m,
 		URL:    reqUrl,
 		Header: http.Header{},
 	}
