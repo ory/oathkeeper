@@ -19,7 +19,7 @@
     ]
   },
   {
-    "Guides": ["configure-deploy"]
+    "Guides": ["configure-deploy", "guides/traefik-proxy-integration"]
   },
   "reference/api",
   {
