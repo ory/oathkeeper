@@ -250,6 +250,8 @@ not currently supported, and will fail silently.
 - `preserve_query` (boolean, optional) - If unset or true, query parameters in
   `check_session_url` will be preserved instead of replacing them with the query
   of the request being checked.
+- `force_method` (string, optional) - If set uses the given HTTP method when
+  forwarding the request, instead of the original HTTP method.
 - `extra_from` (string, optional - defaults to `extra`) - A
   [GJSON Path](https://github.com/tidwall/gjson/blob/master/SYNTAX.md) pointing
   to the `extra` field. This defaults to `extra`, but it could also be `@this`
@@ -351,6 +353,8 @@ not currently supported, and will fail silently.
 - `preserve_query` (boolean, optional) - If unset or true, query parameters in
   `check_session_url` will be preserved instead of replacing them with the query
   of the request being checked.
+- `force_method` (string, optional) - If set uses the given HTTP method when
+  forwarding the request, instead of the original HTTP method.
 - `extra_from` (string, optional - defaults to `extra`) - A
   [GJSON Path](https://github.com/tidwall/gjson/blob/master/SYNTAX.md) pointing
   to the `extra` field. This defaults to `extra`, but it could also be `@this`

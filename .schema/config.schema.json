@@ -436,6 +436,15 @@
           "type": "boolean",
           "description": "When set to true the HTTP Header X-Forwarded-Host will be set to the original HTTP host."
         },
+        "force_method": {
+          "title": "Force HTTP Method",
+          "type": "string",
+          "description": "When set uses the given HTTP method instead of the request HTTP method.",
+          "examples": [
+            "GET",
+            "POST"
+          ]
+        },
         "additional_headers": {
           "title": "Set Additional HTTP Headers",
           "type": "object",
@@ -533,6 +542,15 @@
           "title": "Preserve Host",
           "type": "boolean",
           "description": "When set to true the HTTP Header X-Forwarded-Host will be set to the original HTTP host."
+        },
+        "force_method": {
+          "title": "Force HTTP Method",
+          "type": "string",
+          "description": "When set uses the given HTTP method instead of the request HTTP method.",
+          "examples": [
+            "GET",
+            "POST"
+          ]
         },
         "additional_headers": {
           "title": "Set Additional HTTP Headers",
