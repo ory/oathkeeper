@@ -11,7 +11,8 @@ import (
 
 	"github.com/go-openapi/runtime"
 	"github.com/go-openapi/strfmt"
-	"github.com/go-openapi/swag"
+
+	"github.com/ory/oathkeeper/internal/httpclient/models"
 )
 
 // DecisionsReader is a Reader for the Decisions structure.
@@ -86,23 +87,23 @@ func NewDecisionsUnauthorized() *DecisionsUnauthorized {
 
 /*DecisionsUnauthorized handles this case with default header values.
 
-The standard error format
+genericError
 */
 type DecisionsUnauthorized struct {
-	Payload *DecisionsUnauthorizedBody
+	Payload *models.GenericError
 }
 
 func (o *DecisionsUnauthorized) Error() string {
 	return fmt.Sprintf("[GET /decisions][%d] decisionsUnauthorized  %+v", 401, o.Payload)
 }
 
-func (o *DecisionsUnauthorized) GetPayload() *DecisionsUnauthorizedBody {
+func (o *DecisionsUnauthorized) GetPayload() *models.GenericError {
 	return o.Payload
 }
 
 func (o *DecisionsUnauthorized) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(DecisionsUnauthorizedBody)
+	o.Payload = new(models.GenericError)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -119,23 +120,23 @@ func NewDecisionsForbidden() *DecisionsForbidden {
 
 /*DecisionsForbidden handles this case with default header values.
 
-The standard error format
+genericError
 */
 type DecisionsForbidden struct {
-	Payload *DecisionsForbiddenBody
+	Payload *models.GenericError
 }
 
 func (o *DecisionsForbidden) Error() string {
 	return fmt.Sprintf("[GET /decisions][%d] decisionsForbidden  %+v", 403, o.Payload)
 }
 
-func (o *DecisionsForbidden) GetPayload() *DecisionsForbiddenBody {
+func (o *DecisionsForbidden) GetPayload() *models.GenericError {
 	return o.Payload
 }
 
 func (o *DecisionsForbidden) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(DecisionsForbiddenBody)
+	o.Payload = new(models.GenericError)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -152,23 +153,23 @@ func NewDecisionsNotFound() *DecisionsNotFound {
 
 /*DecisionsNotFound handles this case with default header values.
 
-The standard error format
+genericError
 */
 type DecisionsNotFound struct {
-	Payload *DecisionsNotFoundBody
+	Payload *models.GenericError
 }
 
 func (o *DecisionsNotFound) Error() string {
 	return fmt.Sprintf("[GET /decisions][%d] decisionsNotFound  %+v", 404, o.Payload)
 }
 
-func (o *DecisionsNotFound) GetPayload() *DecisionsNotFoundBody {
+func (o *DecisionsNotFound) GetPayload() *models.GenericError {
 	return o.Payload
 }
 
 func (o *DecisionsNotFound) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(DecisionsNotFoundBody)
+	o.Payload = new(models.GenericError)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -185,216 +186,28 @@ func NewDecisionsInternalServerError() *DecisionsInternalServerError {
 
 /*DecisionsInternalServerError handles this case with default header values.
 
-The standard error format
+genericError
 */
 type DecisionsInternalServerError struct {
-	Payload *DecisionsInternalServerErrorBody
+	Payload *models.GenericError
 }
 
 func (o *DecisionsInternalServerError) Error() string {
 	return fmt.Sprintf("[GET /decisions][%d] decisionsInternalServerError  %+v", 500, o.Payload)
 }
 
-func (o *DecisionsInternalServerError) GetPayload() *DecisionsInternalServerErrorBody {
+func (o *DecisionsInternalServerError) GetPayload() *models.GenericError {
 	return o.Payload
 }
 
 func (o *DecisionsInternalServerError) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(DecisionsInternalServerErrorBody)
+	o.Payload = new(models.GenericError)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
 		return err
 	}
 
-	return nil
-}
-
-/*DecisionsForbiddenBody decisions forbidden body
-swagger:model DecisionsForbiddenBody
-*/
-type DecisionsForbiddenBody struct {
-
-	// code
-	Code int64 `json:"code,omitempty"`
-
-	// details
-	Details []interface{} `json:"details"`
-
-	// message
-	Message string `json:"message,omitempty"`
-
-	// reason
-	Reason string `json:"reason,omitempty"`
-
-	// request
-	Request string `json:"request,omitempty"`
-
-	// status
-	Status string `json:"status,omitempty"`
-}
-
-// Validate validates this decisions forbidden body
-func (o *DecisionsForbiddenBody) Validate(formats strfmt.Registry) error {
-	return nil
-}
-
-// MarshalBinary interface implementation
-func (o *DecisionsForbiddenBody) MarshalBinary() ([]byte, error) {
-	if o == nil {
-		return nil, nil
-	}
-	return swag.WriteJSON(o)
-}
-
-// UnmarshalBinary interface implementation
-func (o *DecisionsForbiddenBody) UnmarshalBinary(b []byte) error {
-	var res DecisionsForbiddenBody
-	if err := swag.ReadJSON(b, &res); err != nil {
-		return err
-	}
-	*o = res
-	return nil
-}
-
-/*DecisionsInternalServerErrorBody decisions internal server error body
-swagger:model DecisionsInternalServerErrorBody
-*/
-type DecisionsInternalServerErrorBody struct {
-
-	// code
-	Code int64 `json:"code,omitempty"`
-
-	// details
-	Details []interface{} `json:"details"`
-
-	// message
-	Message string `json:"message,omitempty"`
-
-	// reason
-	Reason string `json:"reason,omitempty"`
-
-	// request
-	Request string `json:"request,omitempty"`
-
-	// status
-	Status string `json:"status,omitempty"`
-}
-
-// Validate validates this decisions internal server error body
-func (o *DecisionsInternalServerErrorBody) Validate(formats strfmt.Registry) error {
-	return nil
-}
-
-// MarshalBinary interface implementation
-func (o *DecisionsInternalServerErrorBody) MarshalBinary() ([]byte, error) {
-	if o == nil {
-		return nil, nil
-	}
-	return swag.WriteJSON(o)
-}
-
-// UnmarshalBinary interface implementation
-func (o *DecisionsInternalServerErrorBody) UnmarshalBinary(b []byte) error {
-	var res DecisionsInternalServerErrorBody
-	if err := swag.ReadJSON(b, &res); err != nil {
-		return err
-	}
-	*o = res
-	return nil
-}
-
-/*DecisionsNotFoundBody decisions not found body
-swagger:model DecisionsNotFoundBody
-*/
-type DecisionsNotFoundBody struct {
-
-	// code
-	Code int64 `json:"code,omitempty"`
-
-	// details
-	Details []interface{} `json:"details"`
-
-	// message
-	Message string `json:"message,omitempty"`
-
-	// reason
-	Reason string `json:"reason,omitempty"`
-
-	// request
-	Request string `json:"request,omitempty"`
-
-	// status
-	Status string `json:"status,omitempty"`
-}
-
-// Validate validates this decisions not found body
-func (o *DecisionsNotFoundBody) Validate(formats strfmt.Registry) error {
-	return nil
-}
-
-// MarshalBinary interface implementation
-func (o *DecisionsNotFoundBody) MarshalBinary() ([]byte, error) {
-	if o == nil {
-		return nil, nil
-	}
-	return swag.WriteJSON(o)
-}
-
-// UnmarshalBinary interface implementation
-func (o *DecisionsNotFoundBody) UnmarshalBinary(b []byte) error {
-	var res DecisionsNotFoundBody
-	if err := swag.ReadJSON(b, &res); err != nil {
-		return err
-	}
-	*o = res
-	return nil
-}
-
-/*DecisionsUnauthorizedBody decisions unauthorized body
-swagger:model DecisionsUnauthorizedBody
-*/
-type DecisionsUnauthorizedBody struct {
-
-	// code
-	Code int64 `json:"code,omitempty"`
-
-	// details
-	Details []interface{} `json:"details"`
-
-	// message
-	Message string `json:"message,omitempty"`
-
-	// reason
-	Reason string `json:"reason,omitempty"`
-
-	// request
-	Request string `json:"request,omitempty"`
-
-	// status
-	Status string `json:"status,omitempty"`
-}
-
-// Validate validates this decisions unauthorized body
-func (o *DecisionsUnauthorizedBody) Validate(formats strfmt.Registry) error {
-	return nil
-}
-
-// MarshalBinary interface implementation
-func (o *DecisionsUnauthorizedBody) MarshalBinary() ([]byte, error) {
-	if o == nil {
-		return nil, nil
-	}
-	return swag.WriteJSON(o)
-}
-
-// UnmarshalBinary interface implementation
-func (o *DecisionsUnauthorizedBody) UnmarshalBinary(b []byte) error {
-	var res DecisionsUnauthorizedBody
-	if err := swag.ReadJSON(b, &res); err != nil {
-		return err
-	}
-	*o = res
 	return nil
 }

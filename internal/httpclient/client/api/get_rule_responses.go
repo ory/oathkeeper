@@ -11,7 +11,6 @@ import (
 
 	"github.com/go-openapi/runtime"
 	"github.com/go-openapi/strfmt"
-	"github.com/go-openapi/swag"
 
 	"github.com/ory/oathkeeper/internal/httpclient/models"
 )
@@ -88,23 +87,23 @@ func NewGetRuleNotFound() *GetRuleNotFound {
 
 /*GetRuleNotFound handles this case with default header values.
 
-The standard error format
+genericError
 */
 type GetRuleNotFound struct {
-	Payload *GetRuleNotFoundBody
+	Payload *models.GenericError
 }
 
 func (o *GetRuleNotFound) Error() string {
 	return fmt.Sprintf("[GET /rules/{id}][%d] getRuleNotFound  %+v", 404, o.Payload)
 }
 
-func (o *GetRuleNotFound) GetPayload() *GetRuleNotFoundBody {
+func (o *GetRuleNotFound) GetPayload() *models.GenericError {
 	return o.Payload
 }
 
 func (o *GetRuleNotFound) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(GetRuleNotFoundBody)
+	o.Payload = new(models.GenericError)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -121,122 +120,28 @@ func NewGetRuleInternalServerError() *GetRuleInternalServerError {
 
 /*GetRuleInternalServerError handles this case with default header values.
 
-The standard error format
+genericError
 */
 type GetRuleInternalServerError struct {
-	Payload *GetRuleInternalServerErrorBody
+	Payload *models.GenericError
 }
 
 func (o *GetRuleInternalServerError) Error() string {
 	return fmt.Sprintf("[GET /rules/{id}][%d] getRuleInternalServerError  %+v", 500, o.Payload)
 }
 
-func (o *GetRuleInternalServerError) GetPayload() *GetRuleInternalServerErrorBody {
+func (o *GetRuleInternalServerError) GetPayload() *models.GenericError {
 	return o.Payload
 }
 
 func (o *GetRuleInternalServerError) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(GetRuleInternalServerErrorBody)
+	o.Payload = new(models.GenericError)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
 		return err
 	}
 
-	return nil
-}
-
-/*GetRuleInternalServerErrorBody get rule internal server error body
-swagger:model GetRuleInternalServerErrorBody
-*/
-type GetRuleInternalServerErrorBody struct {
-
-	// code
-	Code int64 `json:"code,omitempty"`
-
-	// details
-	Details []interface{} `json:"details"`
-
-	// message
-	Message string `json:"message,omitempty"`
-
-	// reason
-	Reason string `json:"reason,omitempty"`
-
-	// request
-	Request string `json:"request,omitempty"`
-
-	// status
-	Status string `json:"status,omitempty"`
-}
-
-// Validate validates this get rule internal server error body
-func (o *GetRuleInternalServerErrorBody) Validate(formats strfmt.Registry) error {
-	return nil
-}
-
-// MarshalBinary interface implementation
-func (o *GetRuleInternalServerErrorBody) MarshalBinary() ([]byte, error) {
-	if o == nil {
-		return nil, nil
-	}
-	return swag.WriteJSON(o)
-}
-
-// UnmarshalBinary interface implementation
-func (o *GetRuleInternalServerErrorBody) UnmarshalBinary(b []byte) error {
-	var res GetRuleInternalServerErrorBody
-	if err := swag.ReadJSON(b, &res); err != nil {
-		return err
-	}
-	*o = res
-	return nil
-}
-
-/*GetRuleNotFoundBody get rule not found body
-swagger:model GetRuleNotFoundBody
-*/
-type GetRuleNotFoundBody struct {
-
-	// code
-	Code int64 `json:"code,omitempty"`
-
-	// details
-	Details []interface{} `json:"details"`
-
-	// message
-	Message string `json:"message,omitempty"`
-
-	// reason
-	Reason string `json:"reason,omitempty"`
-
-	// request
-	Request string `json:"request,omitempty"`
-
-	// status
-	Status string `json:"status,omitempty"`
-}
-
-// Validate validates this get rule not found body
-func (o *GetRuleNotFoundBody) Validate(formats strfmt.Registry) error {
-	return nil
-}
-
-// MarshalBinary interface implementation
-func (o *GetRuleNotFoundBody) MarshalBinary() ([]byte, error) {
-	if o == nil {
-		return nil, nil
-	}
-	return swag.WriteJSON(o)
-}
-
-// UnmarshalBinary interface implementation
-func (o *GetRuleNotFoundBody) UnmarshalBinary(b []byte) error {
-	var res GetRuleNotFoundBody
-	if err := swag.ReadJSON(b, &res); err != nil {
-		return err
-	}
-	*o = res
 	return nil
 }
