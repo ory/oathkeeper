@@ -107,6 +107,10 @@ func (a *AuthenticatorBearerToken) Authenticate(r *http.Request, session *Authen
 		return helper.ErrForbidden.WithReasonf("The configured extra_from GJSON path returned an error on JSON output: %s", err.Error()).WithDebugf("GJSON path: %s\nBody: %s\nResult: %s", cf.ExtraFrom, body, extraRaw).WithTrace(err)
 	}
 
+	if len(subject) == 0 {
+		return helper.ErrForbidden.WithReasonf("Could not decode subject from response.")
+	}
+
 	session.Subject = subject
 	session.Extra = extra
 	return nil

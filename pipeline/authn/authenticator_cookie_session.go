@@ -171,13 +171,14 @@ func forwardRequestToSessionStore(r *http.Request, checkSessionURL string, prese
 		return nil, helper.ErrForbidden.WithReason(err.Error()).WithTrace(err)
 	}
 
-	if res.StatusCode == 200 {
-		body, err := ioutil.ReadAll(res.Body)
-		if err != nil {
-			return json.RawMessage{}, errors.WithStack(herodot.ErrInternalServerError.WithReasonf("Unable to fetch cookie session context from remote: %+v", err))
-		}
-		return body, nil
-	} else {
-		return json.RawMessage{}, errors.WithStack(helper.ErrUnauthorized)
+	body, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		return json.RawMessage{}, errors.WithStack(herodot.ErrInternalServerError.WithReasonf("Unable to read session context from remote: %+v", err))
 	}
+
+	if res.StatusCode == 200 {
+		return body, nil
+	}
+
+	return json.RawMessage{}, errors.WithStack(helper.ErrUnauthorized.WithReasonf("API said: %d -- %+v", res.StatusCode, body))
 }
