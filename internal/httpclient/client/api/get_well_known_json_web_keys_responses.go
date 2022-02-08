@@ -11,7 +11,6 @@ import (
 
 	"github.com/go-openapi/runtime"
 	"github.com/go-openapi/strfmt"
-	"github.com/go-openapi/swag"
 
 	"github.com/ory/oathkeeper/internal/httpclient/models"
 )
@@ -82,75 +81,28 @@ func NewGetWellKnownJSONWebKeysInternalServerError() *GetWellKnownJSONWebKeysInt
 
 /*GetWellKnownJSONWebKeysInternalServerError handles this case with default header values.
 
-The standard error format
+genericError
 */
 type GetWellKnownJSONWebKeysInternalServerError struct {
-	Payload *GetWellKnownJSONWebKeysInternalServerErrorBody
+	Payload *models.GenericError
 }
 
 func (o *GetWellKnownJSONWebKeysInternalServerError) Error() string {
 	return fmt.Sprintf("[GET /.well-known/jwks.json][%d] getWellKnownJsonWebKeysInternalServerError  %+v", 500, o.Payload)
 }
 
-func (o *GetWellKnownJSONWebKeysInternalServerError) GetPayload() *GetWellKnownJSONWebKeysInternalServerErrorBody {
+func (o *GetWellKnownJSONWebKeysInternalServerError) GetPayload() *models.GenericError {
 	return o.Payload
 }
 
 func (o *GetWellKnownJSONWebKeysInternalServerError) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(GetWellKnownJSONWebKeysInternalServerErrorBody)
+	o.Payload = new(models.GenericError)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
 		return err
 	}
 
-	return nil
-}
-
-/*GetWellKnownJSONWebKeysInternalServerErrorBody get well known JSON web keys internal server error body
-swagger:model GetWellKnownJSONWebKeysInternalServerErrorBody
-*/
-type GetWellKnownJSONWebKeysInternalServerErrorBody struct {
-
-	// code
-	Code int64 `json:"code,omitempty"`
-
-	// details
-	Details []interface{} `json:"details"`
-
-	// message
-	Message string `json:"message,omitempty"`
-
-	// reason
-	Reason string `json:"reason,omitempty"`
-
-	// request
-	Request string `json:"request,omitempty"`
-
-	// status
-	Status string `json:"status,omitempty"`
-}
-
-// Validate validates this get well known JSON web keys internal server error body
-func (o *GetWellKnownJSONWebKeysInternalServerErrorBody) Validate(formats strfmt.Registry) error {
-	return nil
-}
-
-// MarshalBinary interface implementation
-func (o *GetWellKnownJSONWebKeysInternalServerErrorBody) MarshalBinary() ([]byte, error) {
-	if o == nil {
-		return nil, nil
-	}
-	return swag.WriteJSON(o)
-}
-
-// UnmarshalBinary interface implementation
-func (o *GetWellKnownJSONWebKeysInternalServerErrorBody) UnmarshalBinary(b []byte) error {
-	var res GetWellKnownJSONWebKeysInternalServerErrorBody
-	if err := swag.ReadJSON(b, &res); err != nil {
-		return err
-	}
-	*o = res
 	return nil
 }

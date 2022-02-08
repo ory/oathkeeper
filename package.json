@@ -6,8 +6,7 @@
   "scripts": {
     "doctoc": "doctoc README.md",
     "format": "prettier --write ${npm_package_config_prettierTarget}",
-    "format:check": "prettier --check ${npm_package_config_prettierTarget}",
-    "postinstall": "opencollective postinstall"
+    "format:check": "prettier --check ${npm_package_config_prettierTarget}"
   },
   "browser": {
     "fs": false
@@ -18,13 +17,10 @@
   },
   "devDependencies": {
     "doctoc": "^2.0.0",
-    "opencollective": "^1.0.3",
     "ory-prettier-styles": "^1.1.2",
     "prettier": "^2.2.1"
   },
-  "collective": {
-    "type": "opencollective",
-    "url": "https://opencollective.com/ory",
-    "logo": "https://opencollective.com/ory/logo.txt"
+  "dependencies": {
+    "@openapitools/openapi-generator-cli": "^2.4.26"
   }
 }
