@@ -267,7 +267,7 @@
   "definitions": {
     "UUID": {"type": "string", "format": "uuid4"},
     "Upstream": {
-      "description": "Upstream upstream",
+      "description": "Upstream Upstream upstream",
       "type": "object",
       "properties": {
         "preserve_host": {
@@ -417,7 +417,7 @@
       }
     },
     "jsonWebKeySet": {
-      "description": "JSONWebKeySet json web key set",
+      "description": "JSONWebKeySet JSONWebKeySet json web key set",
       "type": "object",
       "properties": {
         "keys": {
@@ -467,6 +467,7 @@
       }
     },
     "ruleHandler": {
+      "description": "RuleHandler rule handler",
       "type": "object",
       "properties": {
         "config": {
@@ -480,7 +481,6 @@
       }
     },
     "ruleMatch": {
-      "description": "RuleMatch rule match",
       "type": "object",
       "properties": {
         "methods": {
