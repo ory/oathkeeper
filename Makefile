@@ -21,22 +21,14 @@ $(foreach dep, $(GO_DEPENDENCIES), $(eval $(call make-go-dependency, $(dep))))
 node_modules: package.json package-lock.json
 		npm i
 
-docs/node_modules: docs/package.json docs/package-lock.json
-		cd docs; npm i
-
 .bin/clidoc: go.mod
 		go build -o .bin/clidoc ./cmd/clidoc/.
 
 # Formats the code
 .PHONY: format
-format: .bin/goimports node_modules docs/node_modules
+format: .bin/goimports node_modules
 		goimports -w --local github.com/ory .
 		npm run format
-		cd docs; npm run format
-
-.PHONY: gen
-gen:
-		mocks sdk
 
 .bin/ory: Makefile
 		bash <(curl https://raw.githubusercontent.com/ory/meta/master/install.sh) -b .bin ory v0.1.22
