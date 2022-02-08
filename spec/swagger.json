@@ -265,7 +265,9 @@
     }
   },
   "definitions": {
+    "UUID": {"type": "string", "format": "uuid4"},
     "Upstream": {
+      "description": "Upstream upstream",
       "type": "object",
       "properties": {
         "preserve_host": {
@@ -287,10 +289,12 @@
       "type": "object",
       "properties": {
         "code": {
+          "description": "code",
           "type": "integer",
           "format": "int64"
         },
         "details": {
+          "description": "details",
           "type": "array",
           "items": {
             "type": "object",
@@ -298,15 +302,19 @@
           }
         },
         "message": {
+          "description": "message",
           "type": "string"
         },
         "reason": {
+          "description": "reason",
           "type": "string"
         },
         "request": {
+          "description": "request",
           "type": "string"
         },
         "status": {
+          "description": "status",
           "type": "string"
         }
       }
@@ -340,21 +348,27 @@
           "type": "string"
         },
         "crv": {
+          "description": "crv",
           "type": "string"
         },
         "d": {
+          "description": "d",
           "type": "string"
         },
         "dp": {
+          "description": "dp",
           "type": "string"
         },
         "dq": {
+          "description": "dq",
           "type": "string"
         },
         "e": {
+          "description": "e",
           "type": "string"
         },
         "k": {
+          "description": "k",
           "type": "string"
         },
         "kid": {
@@ -366,15 +380,19 @@
           "type": "string"
         },
         "n": {
+          "description": "n",
           "type": "string"
         },
         "p": {
+          "description": "p",
           "type": "string"
         },
         "q": {
+          "description": "q",
           "type": "string"
         },
         "qi": {
+          "description": "qi",
           "type": "string"
         },
         "use": {
@@ -382,6 +400,7 @@
           "type": "string"
         },
         "x": {
+          "description": "x",
           "type": "string"
         },
         "x5c": {
@@ -392,11 +411,13 @@
           }
         },
         "y": {
+          "description": "y",
           "type": "string"
         }
       }
     },
     "jsonWebKeySet": {
+      "description": "JSONWebKeySet json web key set",
       "type": "object",
       "properties": {
         "keys": {
@@ -459,6 +480,7 @@
       }
     },
     "ruleMatch": {
+      "description": "RuleMatch rule match",
       "type": "object",
       "properties": {
         "methods": {
@@ -483,7 +505,7 @@
         }
       }
     }
-  ,"UUID":{"type": "string", "format": "uuid4"}},
+  },
   "responses": {
     "emptyResponse": {
       "description": "An empty response"
