@@ -20,3 +20,4 @@ jobs:
       - uses: ory/ci/docs/cli-next@master
         with:
           token: ${{ secrets.ORY_BOT_PAT }}
+          output-dir: docs/oathkeeper/cli
