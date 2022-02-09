@@ -76,15 +76,6 @@ workflows:
               only: /.*/
             branches:
               ignore: /.*/
-      - docs/build:
-          swag-spec-location: spec/api.json
-          requires:
-            - test
-          filters:
-            tags:
-              only: /.*/
-            branches:
-              only: master
       -
         goreleaser/release:
           requires:
