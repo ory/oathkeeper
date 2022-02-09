@@ -155,6 +155,10 @@ func forwardRequestToSessionStore(r *http.Request, checkSessionURL string, prese
 
 	// We need to make a COPY of the header, not modify r.Header!
 	for k, v := range r.Header {
+		// remove Accept-Encoding to let the transport handle gzip
+		if k == "Accept-Encoding" {
+			continue
+		}
 		req.Header[k] = v
 	}
 
