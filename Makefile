@@ -75,7 +75,8 @@ install: .bin/packr2
 .PHONY: docker
 docker: .bin/packr2
 		packr2 || (GO111MODULE=on go install github.com/gobuffalo/packr/v2/packr2 && packr2)
-		CGO_ENABLED=0 GO111MODULE=on GOOS=linux GOARCH=amd64 go build
+		CGO_ENABLED=0 GO111MODULE=on GOOS=linux GOARCH=amd64 go build \
+			-ldflags "-X github.com/ory/oathkeeper/x.Version=$$(git describe)"
 		packr2 clean
 		docker build -t oryd/oathkeeper:dev .
 		docker build -t oryd/oathkeeper:dev-alpine -f Dockerfile-alpine .
