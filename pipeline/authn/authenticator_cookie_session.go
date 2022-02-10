@@ -177,12 +177,12 @@ func forwardRequestToSessionStore(r *http.Request, checkSessionURL string, prese
 
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
-		return json.RawMessage{}, errors.WithStack(herodot.ErrInternalServerError.WithReasonf("Unable to read session context from remote: %+v", err))
+		return json.RawMessage{}, errors.WithStack(herodot.ErrInternalServerError.WithReasonf("Unable to read response from remote: %s", err))
 	}
 
 	if res.StatusCode == 200 {
 		return body, nil
 	}
 
-	return json.RawMessage{}, errors.WithStack(helper.ErrUnauthorized.WithReasonf("API said: %d -- %+v", res.StatusCode, body))
+	return json.RawMessage{}, errors.WithStack(helper.ErrUnauthorized.WithReasonf("Remote returned non 200 status code: %d", res.StatusCode))
 }
