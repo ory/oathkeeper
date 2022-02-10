@@ -3,7 +3,7 @@
 
 **Table of Contents**
 
-- [0.0.0 (2022-02-09)](#000-2022-02-09)
+- [0.0.0 (2022-02-10)](#000-2022-02-10)
   - [Code Refactoring](#code-refactoring)
   - [Documentation](#documentation)
   - [Features](#features)
@@ -262,7 +262,7 @@
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-# [0.0.0](https://github.com/ory/oathkeeper/compare/v0.38.19-beta.1...v0.0.0) (2022-02-09)
+# [0.0.0](https://github.com/ory/oathkeeper/compare/v0.38.19-beta.1...v0.0.0) (2022-02-10)
 
 ### Code Refactoring
 
@@ -276,6 +276,8 @@
 
 ### Features
 
+- Add post-release step
+  ([e7fd550](https://github.com/ory/oathkeeper/commit/e7fd55030b9408e863f497deeb3e8f1bf66a9855))
 - Migrate to openapi 3.0 generation
   ([190d1a7](https://github.com/ory/oathkeeper/commit/190d1a7d1319f216ca3c9e9289d5282733ecc88c))
 
