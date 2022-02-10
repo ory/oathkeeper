@@ -112,7 +112,7 @@ func (a *AuthenticatorBearerToken) Authenticate(r *http.Request, session *Authen
 	}
 
 	if len(subject) == 0 {
-		return helper.ErrForbidden.WithReasonf("Could not decode subject from response.")
+		return errors.WithStack(helper.ErrForbidden.WithReasonf("Subject field from remote endpoint is empty."))
 	}
 
 	session.Subject = subject
