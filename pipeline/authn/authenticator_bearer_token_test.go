@@ -272,6 +272,19 @@ func TestAuthenticatorBearerToken(t *testing.T) {
 					Extra:   map[string]interface{}{"session": map[string]interface{}{"foo": "bar"}, "identity": map[string]interface{}{"id": "123"}},
 				},
 			},
+			{
+				d: "it should error when the subject is empty",
+				r: &http.Request{Header: http.Header{"Authorization": {"bearer token"}}, URL: &url.URL{Path: ""}},
+				setup: func(t *testing.T, m *httprouter.Router) {
+					m.GET("/", func(w http.ResponseWriter, _ *http.Request, _ httprouter.Params) {
+						w.WriteHeader(200)
+						w.Write([]byte(`{"identity": {"id": ""}, "session": {"foo": "bar"}}`))
+					})
+				},
+				config:     []byte(`{"subject_from": "identity.id", "extra_from": "@this"}`),
+				expectErr:  true,
+				expectSess: &AuthenticationSession{},
+			},
 		} {
 			t.Run(fmt.Sprintf("case=%d/description=%s", k, tc.d), func(t *testing.T) {
 				var ts *httptest.Server
