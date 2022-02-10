@@ -258,7 +258,7 @@ func TestViperProvider(t *testing.T) {
 		})
 
 		t.Run("authenticator=cookie_session", func(t *testing.T) {
-			a := authn.NewAuthenticatorCookieSession(p)
+			a := authn.NewAuthenticatorCookieSession(p, logger)
 			assert.True(t, p.AuthenticatorIsEnabled(a.GetID()))
 			require.NoError(t, a.Validate(nil))
 

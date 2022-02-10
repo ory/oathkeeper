@@ -16,6 +16,8 @@ import (
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/helper"
 	"github.com/ory/oathkeeper/pipeline"
+
+	"github.com/ory/x/logrusx"
 )
 
 func init() {
@@ -40,12 +42,14 @@ type AuthenticatorCookieSessionConfiguration struct {
 }
 
 type AuthenticatorCookieSession struct {
-	c configuration.Provider
+	c      configuration.Provider
+	logger *logrusx.Logger
 }
 
-func NewAuthenticatorCookieSession(c configuration.Provider) *AuthenticatorCookieSession {
+func NewAuthenticatorCookieSession(c configuration.Provider, logger *logrusx.Logger) *AuthenticatorCookieSession {
 	return &AuthenticatorCookieSession{
-		c: c,
+		c:      c,
+		logger: logger,
 	}
 }
 
@@ -89,7 +93,7 @@ func (a *AuthenticatorCookieSession) Authenticate(r *http.Request, session *Auth
 		return errors.WithStack(ErrAuthenticatorNotResponsible)
 	}
 
-	body, err := forwardRequestToSessionStore(r, cf.CheckSessionURL, cf.PreserveQuery, cf.PreservePath, cf.PreserveHost, cf.SetHeaders, cf.ForceMethod)
+	body, err := forwardRequestToSessionStore(r, cf.CheckSessionURL, cf.PreserveQuery, cf.PreservePath, cf.PreserveHost, cf.SetHeaders, cf.ForceMethod, a.logger)
 	if err != nil {
 		return err
 	}
@@ -129,7 +133,7 @@ func cookieSessionResponsible(r *http.Request, only []string) bool {
 	return false
 }
 
-func forwardRequestToSessionStore(r *http.Request, checkSessionURL string, preserveQuery bool, preservePath bool, preserveHost bool, setHeaders map[string]string, m string) (json.RawMessage, error) {
+func forwardRequestToSessionStore(r *http.Request, checkSessionURL string, preserveQuery bool, preservePath bool, preserveHost bool, setHeaders map[string]string, m string, logger *logrusx.Logger) (json.RawMessage, error) {
 	reqUrl, err := url.Parse(checkSessionURL)
 	if err != nil {
 		return nil, errors.WithStack(herodot.ErrInternalServerError.WithReasonf("Unable to parse session check URL: %s", err))
@@ -177,6 +181,7 @@ func forwardRequestToSessionStore(r *http.Request, checkSessionURL string, prese
 
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
+		logger.Tracef("Error reading response from remote: %v", err)
 		return json.RawMessage{}, errors.WithStack(herodot.ErrInternalServerError.WithReasonf("Unable to read response from remote: %s", err))
 	}
 
@@ -184,5 +189,6 @@ func forwardRequestToSessionStore(r *http.Request, checkSessionURL string, prese
 		return body, nil
 	}
 
+	logger.Tracef("Remote returned non-200 status code '%d' with body: %s", res.StatusCode, body)
 	return json.RawMessage{}, errors.WithStack(helper.ErrUnauthorized.WithReasonf("Remote returned non 200 status code: %d", res.StatusCode))
 }
