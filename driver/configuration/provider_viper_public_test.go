@@ -13,10 +13,6 @@ import (
 
 	"github.com/ory/x/logrusx"
 
-	"github.com/ory/x/viperx"
-
-	"github.com/ory/viper"
-
 	_ "github.com/ory/jsonschema/v3/fileloader"
 	_ "github.com/ory/jsonschema/v3/httploader"
 
@@ -29,14 +25,14 @@ import (
 
 func setup(t *testing.T) *ViperProvider {
 	l := logrusx.New("", "")
-	viper.Reset()
-	viperx.InitializeConfig(
+	wiper.Reset()
+	wiperx.InitializeConfig(
 		"oathkeeper",
 		"./../../internal/config/",
 		l,
 	)
 
-	err := viperx.ValidateFromURL("file://../../.schema/config.schema.json")
+	err := wiperx.ValidateFromURL("file://../../.schema/config.schema.json")
 	if err != nil {
 		l.WithError(err).Error("unable to validate")
 	}
@@ -111,15 +107,15 @@ v0.35.2
 */
 
 func BenchmarkPipelineConfig(b *testing.B) {
-	viper.Reset()
+	wiper.Reset()
 	l := logrusx.New("", "")
-	viperx.InitializeConfig(
+	wiperx.InitializeConfig(
 		"oathkeeper",
 		"./../../internal/config/",
 		l,
 	)
 
-	err := viperx.ValidateFromURL("file://../../.schema/config.schema.json")
+	err := wiperx.ValidateFromURL("file://../../.schema/config.schema.json")
 	if err != nil {
 		l.WithError(err).Error("unable to validate")
 	}
@@ -144,15 +140,15 @@ v0.35.5
 */
 
 func BenchmarkPipelineEnabled(b *testing.B) {
-	viper.Reset()
+	wiper.Reset()
 	logger := logrusx.New("", "")
-	viperx.InitializeConfig(
+	wiperx.InitializeConfig(
 		"oathkeeper",
 		"./../../internal/config/",
 		logger,
 	)
 
-	err := viperx.ValidateFromURL("file://../../.schema/config.schema.json")
+	err := wiperx.ValidateFromURL("file://../../.schema/config.schema.json")
 	if err != nil {
 		logger.WithError(err).Error("unable to validate")
 	}
@@ -168,15 +164,15 @@ func BenchmarkPipelineEnabled(b *testing.B) {
 }
 
 func TestViperProvider(t *testing.T) {
-	viper.Reset()
+	wiper.Reset()
 	logger := logrusx.New("", "")
-	viperx.InitializeConfig(
+	wiperx.InitializeConfig(
 		"oathkeeper",
 		"./../../internal/config/",
 		logger,
 	)
 
-	err := viperx.ValidateFromURL("file://../../.schema/config.schema.json")
+	err := wiperx.ValidateFromURL("file://../../.schema/config.schema.json")
 	if err != nil {
 		logger.WithError(err).Error("unable to validate")
 	}
@@ -193,8 +189,10 @@ func TestViperProvider(t *testing.T) {
 		})
 
 		t.Run("group=cors", func(t *testing.T) {
-			assert.True(t, p.CORSEnabled("proxy"))
-			assert.True(t, p.CORSEnabled("api"))
+			_, proxyCorsEnabled := p.CORS("proxy")
+			_, apiCorsEnabled := p.CORS("api")
+			assert.True(t, proxyCorsEnabled)
+			assert.True(t, apiCorsEnabled)
 
 			assert.Equal(t, cors.Options{
 				AllowedOrigins:     []string{"https://example.com", "https://*.example.com"},
@@ -205,7 +203,7 @@ func TestViperProvider(t *testing.T) {
 				AllowCredentials:   true,
 				OptionsPassthrough: false,
 				Debug:              true,
-			}, p.CORSOptions("proxy"))
+			}, proxyCorsEnabled)
 
 			assert.Equal(t, cors.Options{
 				AllowedOrigins:     []string{"https://example.org", "https://*.example.org"},
@@ -216,16 +214,16 @@ func TestViperProvider(t *testing.T) {
 				AllowCredentials:   true,
 				OptionsPassthrough: false,
 				Debug:              true,
-			}, p.CORSOptions("api"))
+			}, apiCorsEnabled)
 		})
 
 		t.Run("group=tls", func(t *testing.T) {
 			for _, daemon := range []string{"proxy", "api"} {
 				t.Run(fmt.Sprintf("daemon="+daemon), func(t *testing.T) {
-					assert.Equal(t, "LS0tLS1CRUdJTiBFTkNSWVBURUQgUFJJVkFURSBLRVktLS0tLVxuTUlJRkRqQkFCZ2txaGtpRzl3MEJCUTB3...", viper.GetString("serve."+daemon+".tls.key.base64"))
-					assert.Equal(t, "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tXG5NSUlEWlRDQ0FrMmdBd0lCQWdJRVY1eE90REFOQmdr...", viper.GetString("serve."+daemon+".tls.cert.base64"))
-					assert.Equal(t, "/path/to/key.pem", viper.GetString("serve."+daemon+".tls.key.path"))
-					assert.Equal(t, "/path/to/cert.pem", viper.GetString("serve."+daemon+".tls.cert.path"))
+					assert.Equal(t, "LS0tLS1CRUdJTiBFTkNSWVBURUQgUFJJVkFURSBLRVktLS0tLVxuTUlJRkRqQkFCZ2txaGtpRzl3MEJCUTB3...", wiper.GetString("serve."+daemon+".tls.key.base64"))
+					assert.Equal(t, "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tXG5NSUlEWlRDQ0FrMmdBd0lCQWdJRVY1eE90REFOQmdr...", wiper.GetString("serve."+daemon+".tls.cert.base64"))
+					assert.Equal(t, "/path/to/key.pem", wiper.GetString("serve."+daemon+".tls.key.path"))
+					assert.Equal(t, "/path/to/cert.pem", wiper.GetString("serve."+daemon+".tls.cert.path"))
 				})
 			}
 		})
@@ -408,10 +406,10 @@ func TestToScopeStrategy(t *testing.T) {
 }
 
 func TestAuthenticatorOAuth2TokenIntrospectionPreAuthorization(t *testing.T) {
-	viper.Reset()
+	wiper.Reset()
 	v := NewViperProvider(logrusx.New("", ""))
-	viper.Set("authenticators.oauth2_introspection.enabled", true)
-	viper.Set("authenticators.oauth2_introspection.config.introspection_url", "http://some-url/")
+	wiper.Set("authenticators.oauth2_introspection.enabled", true)
+	wiper.Set("authenticators.oauth2_introspection.config.introspection_url", "http://some-url/")
 
 	for k, tc := range []struct {
 		enabled bool

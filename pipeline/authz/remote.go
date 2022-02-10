@@ -9,6 +9,7 @@ import (
 	"text/template"
 	"time"
 
+	"github.com/hashicorp/go-retryablehttp"
 	"github.com/pkg/errors"
 
 	"github.com/ory/x/httpx"
@@ -37,7 +38,7 @@ type AuthorizerRemoteRetryConfiguration struct {
 type AuthorizerRemote struct {
 	c configuration.Provider
 
-	client *http.Client
+	client *retryablehttp.Client
 	t      *template.Template
 }
 
@@ -45,7 +46,7 @@ type AuthorizerRemote struct {
 func NewAuthorizerRemote(c configuration.Provider) *AuthorizerRemote {
 	return &AuthorizerRemote{
 		c:      c,
-		client: httpx.NewResilientClientLatencyToleranceSmall(nil),
+		client: httpx.NewResilientClient(httpx.ResilientClientWithConnectionTimeout(time.Millisecond * 500)),
 		t:      x.NewTemplate("remote"),
 	}
 }
@@ -68,7 +69,7 @@ func (a *AuthorizerRemote) Authorize(r *http.Request, session *authn.Authenticat
 		write.CloseWithError(errors.Wrapf(err, `could not pipe request body in rule "%s"`, rl.GetID()))
 	}()
 
-	req, err := http.NewRequest("POST", c.Remote, read)
+	req, err := retryablehttp.NewRequest("POST", c.Remote, read)
 	if err != nil {
 		return errors.WithStack(err)
 	}
@@ -165,7 +166,9 @@ func (a *AuthorizerRemote) Config(config json.RawMessage) (*AuthorizerRemoteConf
 		return nil, err
 	}
 	timeout := time.Millisecond * duration
-	a.client = httpx.NewResilientClientLatencyToleranceConfigurable(nil, timeout, maxWait)
+	a.client = httpx.NewResilientClient(
+		httpx.ResilientClientWithConnectionTimeout(timeout),
+		httpx.ResilientClientWithMaxRetryWait(maxWait))
 
 	return &c, nil
 }

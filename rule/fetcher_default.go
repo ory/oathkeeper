@@ -15,8 +15,10 @@ import (
 	"reflect"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/fsnotify/fsnotify"
+	"github.com/hashicorp/go-retryablehttp"
 
 	"github.com/ory/x/stringslice"
 	"github.com/ory/x/urlx"
@@ -25,7 +27,6 @@ import (
 
 	"github.com/ory/viper"
 	"github.com/ory/x/httpx"
-	"github.com/ory/x/viperx"
 
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/x"
@@ -63,7 +64,7 @@ type fetcherRegistry interface {
 type FetcherDefault struct {
 	c   configuration.Provider
 	r   fetcherRegistry
-	hc  *http.Client
+	hc  *retryablehttp.Client
 	mux *blob.URLMux
 
 	cache map[string][]Rule
@@ -83,7 +84,7 @@ func NewFetcherDefault(
 		r:     r,
 		c:     c,
 		mux:   cloudstorage.NewURLMux(),
-		hc:    httpx.NewResilientClientLatencyToleranceHigh(nil),
+		hc:    httpx.NewResilientClient(httpx.ResilientClientWithConnectionTimeout(time.Second * 5)),
 		cache: map[string][]Rule{},
 	}
 }
@@ -192,7 +193,7 @@ func (f *FetcherDefault) Watch(ctx context.Context) error {
 func (f *FetcherDefault) watch(ctx context.Context, watcher *fsnotify.Watcher, events chan event) error {
 	var pc map[string]interface{}
 
-	viperx.AddWatcher(func(e fsnotify.Event) error {
+	wiperx.AddWatcher(func(e fsnotify.Event) error {
 		if reflect.DeepEqual(pc, viper.Get(configuration.ViperKeyAccessRuleRepositories)) {
 			f.r.Logger().
 				Debug("Not reloading access rule repositories because configuration value has not changed.")
@@ -206,7 +207,7 @@ func (f *FetcherDefault) watch(ctx context.Context, watcher *fsnotify.Watcher, e
 	f.enqueueEvent(events, event{et: eventRepositoryConfigChanged, source: "entrypoint"})
 
 	var strategy map[string]interface{}
-	viperx.AddWatcher(func(e fsnotify.Event) error {
+	wiperx.AddWatcher(func(e fsnotify.Event) error {
 		if reflect.DeepEqual(strategy, viper.Get(configuration.ViperKeyAccessRuleMatchingStrategy)) {
 			f.r.Logger().
 				Debug("Not reloading access rule matching strategy because configuration value has not changed.")

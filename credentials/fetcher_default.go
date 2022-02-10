@@ -18,6 +18,7 @@
  * @license 	Apache-2.0
  *
  */
+
 package credentials
 
 import (
@@ -25,27 +26,27 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"net/http"
 	"net/url"
 	"os"
 	"sync"
 	"time"
 
-	"github.com/ory/oathkeeper/internal/cloudstorage"
-
+	"github.com/hashicorp/go-retryablehttp"
 	"github.com/pkg/errors"
-	"gopkg.in/square/go-jose.v2"
-
-	"github.com/ory/x/logrusx"
-	"github.com/ory/x/urlx"
-
-	"github.com/ory/herodot"
-	"github.com/ory/x/httpx"
 
 	"gocloud.dev/blob"
 	_ "gocloud.dev/blob/azureblob"
 	_ "gocloud.dev/blob/gcsblob"
 	_ "gocloud.dev/blob/s3blob"
+
+	"gopkg.in/square/go-jose.v2"
+
+	"github.com/ory/herodot"
+	"github.com/ory/x/httpx"
+	"github.com/ory/x/logrusx"
+	"github.com/ory/x/urlx"
+
+	"github.com/ory/oathkeeper/internal/cloudstorage"
 )
 
 type reasoner interface {
@@ -59,7 +60,7 @@ type FetcherDefault struct {
 
 	ttl         time.Duration
 	cancelAfter time.Duration
-	client      *http.Client
+	client      *retryablehttp.Client
 	keys        map[string]jose.JSONWebKeySet
 	fetchedAt   map[string]time.Time
 	l           *logrusx.Logger
@@ -78,7 +79,7 @@ func NewFetcherDefault(l *logrusx.Logger, cancelAfter time.Duration, ttl time.Du
 		ttl:         ttl,
 		keys:        make(map[string]jose.JSONWebKeySet),
 		fetchedAt:   make(map[string]time.Time),
-		client:      httpx.NewResilientClientLatencyToleranceHigh(nil),
+		client:      httpx.NewResilientClient(httpx.ResilientClientWithConnectionTimeout(time.Second * 5)),
 		mux:         cloudstorage.NewURLMux(),
 	}
 }

@@ -12,6 +12,7 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"github.com/rs/cors"
 	"github.com/spf13/cobra"
 	"github.com/urfave/negroni"
 
@@ -19,7 +20,6 @@ import (
 	"github.com/ory/graceful"
 	"github.com/ory/viper"
 
-	"github.com/ory/x/corsx"
 	"github.com/ory/x/healthx"
 	"github.com/ory/x/logrusx"
 	telemetry "github.com/ory/x/metricsx"
@@ -48,7 +48,12 @@ func runProxy(d driver.Driver, n *negroni.Negroni, logger *logrusx.Logger, prom 
 		n.Use(reqlog.NewMiddlewareFromLogger(logger, "oathkeeper-proxy").ExcludePaths(healthx.ReadyCheckPath, healthx.AliveCheckPath))
 		n.UseHandler(handler)
 
-		h := corsx.Initialize(n, logger, "serve.proxy")
+		var h http.Handler
+		if ops, b := d.Configuration().CORS("serve.proxy"); b {
+			h = cors.New(ops).Handler(n)
+		} else {
+			h = n
+		}
 		certs := cert("proxy", logger)
 
 		addr := d.Configuration().ProxyServeAddress()
@@ -80,7 +85,7 @@ func runAPI(d driver.Driver, n *negroni.Negroni, logger *logrusx.Logger, prom *m
 	return func() {
 		router := x.NewAPIRouter()
 		d.Registry().RuleHandler().SetRoutes(router)
-		d.Registry().HealthHandler().SetRoutes(router.Router, true)
+		d.Registry().HealthHandler().SetHealthRoutes(router.Router, true)
 		d.Registry().CredentialHandler().SetRoutes(router)
 
 		promCollapsePaths := d.Configuration().PrometheusCollapseRequestPaths()
@@ -91,7 +96,12 @@ func runAPI(d driver.Driver, n *negroni.Negroni, logger *logrusx.Logger, prom *m
 
 		n.UseHandler(router)
 
-		h := corsx.Initialize(n, logger, "serve.api")
+		var h http.Handler
+		if ops, b := d.Configuration().CORS("serve.api"); b {
+			h = cors.New(ops).Handler(n)
+		} else {
+			h = n
+		}
 		certs := cert("api", logger)
 		addr := d.Configuration().APIServeAddress()
 		server := graceful.WithDefaults(&http.Server{
@@ -191,7 +201,7 @@ func RunServe(version, build, date string) func(cmd *cobra.Command, args []strin
 		adminmw := negroni.New()
 		publicmw := negroni.New()
 
-		telemetry := telemetry.New(cmd, logger,
+		telemetry := telemetry.New(cmd, logger, d.Configuration().Source(),
 			&telemetry.Options{
 				Service:       "ory-oathkeeper",
 				ClusterID:     telemetry.Hash(clusterID(d.Configuration())),

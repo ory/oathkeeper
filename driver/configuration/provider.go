@@ -6,11 +6,11 @@ import (
 	"time"
 
 	"github.com/gobuffalo/packr/v2"
+	"github.com/ory/x/configx"
+	"github.com/rs/cors"
 
 	"github.com/ory/fosite"
 	"github.com/ory/x/tracing"
-
-	"github.com/rs/cors"
 )
 
 var schemas = packr.New("schemas", "../../.schema")
@@ -30,8 +30,7 @@ const (
 )
 
 type Provider interface {
-	CORSEnabled(iface string) bool
-	CORSOptions(iface string) cors.Options
+	CORS(iface string) (cors.Options, bool)
 
 	ProviderAuthenticators
 	ProviderErrorHandlers
@@ -60,10 +59,9 @@ type Provider interface {
 	ParseURLs(sources []string) ([]url.URL, error)
 	JSONWebKeyURLs() []string
 
-	TracingServiceName() string
-	TracingProvider() string
-	TracingJaegerConfig() *tracing.JaegerConfig
-	TracingZipkinConfig() *tracing.ZipkinConfig
+	Tracing() *tracing.Config
+
+	Source() *configx.Provider
 }
 
 type ProviderErrorHandlers interface {

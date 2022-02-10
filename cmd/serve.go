@@ -21,9 +21,6 @@
 package cmd
 
 import (
-	"github.com/ory/x/logrusx"
-	"github.com/ory/x/viperx"
-
 	"github.com/spf13/cobra"
 
 	"github.com/ory/oathkeeper/cmd/server"
@@ -43,9 +40,6 @@ on configuration options, open the configuration documentation:
 >> https://www.ory.sh/oathkeeper/docs/configuration <<
 `,
 	Run: func(cmd *cobra.Command, args []string) {
-		logger = viperx.InitializeConfig("oathkeeper", "", logger)
-
-		watchAndValidateViper()
 		server.RunServe(x.Version, x.Commit, x.Date)(cmd, args)
 	},
 }
@@ -53,7 +47,6 @@ on configuration options, open the configuration documentation:
 func init() {
 	RootCmd.AddCommand(serveCmd)
 
-	disableTelemetryEnv := viperx.GetBool(logrusx.New("ORY Oathkeeper", x.Version), "sqa.opt_out", false, "DISABLE_TELEMETRY")
-	serveCmd.PersistentFlags().Bool("disable-telemetry", disableTelemetryEnv, "Disable anonymized telemetry reports - for more information please visit https://www.ory.sh/docs/ecosystem/sqa")
-	serveCmd.PersistentFlags().Bool("sqa-opt-out", disableTelemetryEnv, "Disable anonymized telemetry reports - for more information please visit https://www.ory.sh/docs/ecosystem/sqa")
+	serveCmd.PersistentFlags().Bool("disable-telemetry", false, "Disable anonymized telemetry reports - for more information please visit https://www.ory.sh/docs/ecosystem/sqa")
+	serveCmd.PersistentFlags().Bool("sqa-opt-out", false, "Disable anonymized telemetry reports - for more information please visit https://www.ory.sh/docs/ecosystem/sqa")
 }

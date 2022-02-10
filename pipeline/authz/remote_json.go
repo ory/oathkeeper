@@ -9,6 +9,7 @@ import (
 	"text/template"
 	"time"
 
+	"github.com/hashicorp/go-retryablehttp"
 	"github.com/pkg/errors"
 
 	"github.com/ory/x/httpx"
@@ -42,7 +43,7 @@ func (c *AuthorizerRemoteJSONConfiguration) PayloadTemplateID() string {
 type AuthorizerRemoteJSON struct {
 	c configuration.Provider
 
-	client *http.Client
+	client *retryablehttp.Client
 	t      *template.Template
 }
 
@@ -50,7 +51,7 @@ type AuthorizerRemoteJSON struct {
 func NewAuthorizerRemoteJSON(c configuration.Provider) *AuthorizerRemoteJSON {
 	return &AuthorizerRemoteJSON{
 		c:      c,
-		client: httpx.NewResilientClientLatencyToleranceSmall(nil),
+		client: httpx.NewResilientClient(httpx.ResilientClientWithConnectionTimeout(time.Millisecond * 500)),
 		t:      x.NewTemplate("remote_json"),
 	}
 }
@@ -87,7 +88,7 @@ func (a *AuthorizerRemoteJSON) Authorize(r *http.Request, session *authn.Authent
 		return errors.Wrap(err, "payload is not a JSON text")
 	}
 
-	req, err := http.NewRequest("POST", c.Remote, &body)
+	req, err := retryablehttp.NewRequest("POST", c.Remote, &body)
 	if err != nil {
 		return errors.WithStack(err)
 	}
@@ -162,7 +163,9 @@ func (a *AuthorizerRemoteJSON) Config(config json.RawMessage) (*AuthorizerRemote
 		return nil, err
 	}
 	timeout := time.Millisecond * duration
-	a.client = httpx.NewResilientClientLatencyToleranceConfigurable(nil, timeout, maxWait)
+	a.client = httpx.NewResilientClient(
+		httpx.ResilientClientWithConnectionTimeout(timeout),
+		httpx.ResilientClientWithMaxRetryWait(maxWait))
 
 	return &c, nil
 }

@@ -30,6 +30,7 @@ import (
 	"text/template"
 	"time"
 
+	"github.com/hashicorp/go-retryablehttp"
 	"github.com/ory/x/httpx"
 
 	"github.com/ory/oathkeeper/driver/configuration"
@@ -68,7 +69,7 @@ func (c *AuthorizerKetoEngineACPORYConfiguration) ResourceTemplateID() string {
 type AuthorizerKetoEngineACPORY struct {
 	c configuration.Provider
 
-	client         *http.Client
+	client         *retryablehttp.Client
 	contextCreator authorizerKetoWardenContext
 	t              *template.Template
 }
@@ -76,7 +77,7 @@ type AuthorizerKetoEngineACPORY struct {
 func NewAuthorizerKetoEngineACPORY(c configuration.Provider) *AuthorizerKetoEngineACPORY {
 	return &AuthorizerKetoEngineACPORY{
 		c:      c,
-		client: httpx.NewResilientClientLatencyToleranceSmall(nil),
+		client: httpx.NewResilientClient(httpx.ResilientClientWithConnectionTimeout(time.Millisecond * 500)),
 		contextCreator: func(r *http.Request) map[string]interface{} {
 			return map[string]interface{}{
 				"remoteIpAddress": realip.RealIP(r),
@@ -154,7 +155,7 @@ func (a *AuthorizerKetoEngineACPORY) Authorize(r *http.Request, session *authn.A
 		return errors.WithStack(err)
 	}
 
-	req, err := http.NewRequest("POST", urlx.AppendPaths(baseURL, "/engines/acp/ory", flavor, "/allowed").String(), &b)
+	req, err := retryablehttp.NewRequest("POST", urlx.AppendPaths(baseURL, "/engines/acp/ory", flavor, "/allowed").String(), &b)
 	if err != nil {
 		return errors.WithStack(err)
 	}

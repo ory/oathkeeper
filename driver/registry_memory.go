@@ -179,7 +179,7 @@ func (r *RegistryMemory) RuleRepository() rule.Repository {
 
 func (r *RegistryMemory) Writer() herodot.Writer {
 	if r.writer == nil {
-		r.writer = herodot.NewJSONWriter(r.Logger().Logger)
+		r.writer = herodot.NewJSONWriter(r.Logger())
 	}
 	return r.writer
 }
@@ -421,17 +421,12 @@ func (r *RegistryMemory) prepareMutators() {
 
 func (r *RegistryMemory) Tracer() *tracing.Tracer {
 	if r.trc == nil {
-		r.trc = &tracing.Tracer{
-			ServiceName:  r.c.TracingServiceName(),
-			JaegerConfig: r.c.TracingJaegerConfig(),
-			ZipkinConfig: r.c.TracingZipkinConfig(),
-			Provider:     r.c.TracingProvider(),
-			Logger:       r.Logger(),
-		}
-
-		if err := r.trc.Setup(); err != nil {
+		// Tracing is initialized only once so it can not be hot reloaded or context-aware.
+		t, err := tracing.New(r.logger, r.c.Tracing())
+		if err != nil {
 			r.Logger().WithError(err).Fatalf("Unable to initialize Tracer.")
 		}
+		r.trc = t
 	}
 
 	return r.trc

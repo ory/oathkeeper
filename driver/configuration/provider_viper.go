@@ -12,30 +12,21 @@ import (
 	"time"
 
 	"github.com/imdario/mergo"
+	"github.com/ory/viper"
 	"github.com/pkg/errors"
 	"github.com/rs/cors"
 
-	"github.com/ory/viper"
-	"github.com/ory/x/logrusx"
-	"github.com/ory/x/urlx"
-
-	"github.com/ory/go-convenience/stringsx"
-
 	"github.com/ory/fosite"
+	"github.com/ory/go-convenience/stringsx"
 	"github.com/ory/gojsonschema"
-	"github.com/ory/x/corsx"
-	"github.com/ory/x/tracing"
-	"github.com/ory/x/viperx"
-
 	"github.com/ory/oathkeeper/x"
+	"github.com/ory/x/configx"
+	"github.com/ory/x/logrusx"
+	"github.com/ory/x/tracing"
+	"github.com/ory/x/urlx"
 )
 
 var _ Provider = new(ViperProvider)
-
-func init() {
-	// The JSON error handler is the default error handler and must be enabled by default.
-	viper.SetDefault(ViperKeyErrorsJSONIsEnabled, true)
-}
 
 const (
 	ViperKeyProxyReadTimeout                    = "serve.proxy.timeout.read"
@@ -58,29 +49,21 @@ const (
 
 // Authorizers
 const (
-	ViperKeyAuthorizerAllowIsEnabled = "authorizers.allow.enabled"
-
-	ViperKeyAuthorizerDenyIsEnabled = "authorizers.deny.enabled"
-
+	ViperKeyAuthorizerAllowIsEnabled            = "authorizers.allow.enabled"
+	ViperKeyAuthorizerDenyIsEnabled             = "authorizers.deny.enabled"
 	ViperKeyAuthorizerKetoEngineACPORYIsEnabled = "authorizers.keto_engine_acp_ory.enabled"
-
-	ViperKeyAuthorizerRemoteIsEnabled = "authorizers.remote.enabled"
-
-	ViperKeyAuthorizerRemoteJSONIsEnabled = "authorizers.remote_json.enabled"
+	ViperKeyAuthorizerRemoteIsEnabled           = "authorizers.remote.enabled"
+	ViperKeyAuthorizerRemoteJSONIsEnabled       = "authorizers.remote_json.enabled"
 )
 
 // Mutators
 const (
-	ViperKeyMutatorCookieIsEnabled = "mutators.cookie.enabled"
-
-	ViperKeyMutatorHeaderIsEnabled = "mutators.header.enabled"
-
-	ViperKeyMutatorNoopIsEnabled = "mutators.noop.enabled"
-
+	ViperKeyMutatorCookieIsEnabled   = "mutators.cookie.enabled"
+	ViperKeyMutatorHeaderIsEnabled   = "mutators.header.enabled"
+	ViperKeyMutatorNoopIsEnabled     = "mutators.noop.enabled"
 	ViperKeyMutatorHydratorIsEnabled = "mutators.hydrator.enabled"
-
-	ViperKeyMutatorIDTokenIsEnabled = "mutators.id_token.enabled"
-	ViperKeyMutatorIDTokenJWKSURL   = "mutators.id_token.config.jwks_url"
+	ViperKeyMutatorIDTokenIsEnabled  = "mutators.id_token.enabled"
+	ViperKeyMutatorIDTokenJWKSURL    = "mutators.id_token.config.jwks_url"
 )
 
 // Authenticators
@@ -126,6 +109,8 @@ type ViperProvider struct {
 
 	configMutex sync.RWMutex
 	configCache map[uint64]json.RawMessage
+
+	p *configx.Provider
 }
 
 func NewViperProvider(l *logrusx.Logger) *ViperProvider {
@@ -137,7 +122,7 @@ func NewViperProvider(l *logrusx.Logger) *ViperProvider {
 }
 
 func (v *ViperProvider) AccessRuleRepositories() []url.URL {
-	sources := viperx.GetStringSlice(v.l, ViperKeyAccessRuleRepositories, []string{})
+	sources := v.p.Strings(ViperKeyAccessRuleRepositories)
 	repositories := make([]url.URL, len(sources))
 	for k, source := range sources {
 		repositories[k] = *x.ParseURLOrFatal(v.l, source)
@@ -148,71 +133,72 @@ func (v *ViperProvider) AccessRuleRepositories() []url.URL {
 
 // AccessRuleMatchingStrategy returns current MatchingStrategy.
 func (v *ViperProvider) AccessRuleMatchingStrategy() MatchingStrategy {
-	return MatchingStrategy(viperx.GetString(v.l, ViperKeyAccessRuleMatchingStrategy, ""))
+	return MatchingStrategy(v.p.String(ViperKeyAccessRuleMatchingStrategy))
 }
 
-func (v *ViperProvider) CORSEnabled(iface string) bool {
-	return corsx.IsEnabled(v.l, "serve."+iface)
-}
-
-func (v *ViperProvider) CORSOptions(iface string) cors.Options {
-	return corsx.ParseOptions(v.l, "serve."+iface)
+func (v *ViperProvider) CORS(iface string) (cors.Options, bool) {
+	return v.p.CORS("serve."+iface, cors.Options{
+		AllowedMethods:   []string{"GET", "POST", "PUT", "PATCH", "DELETE"},
+		AllowedHeaders:   []string{"Authorization", "Content-Type", "Cookie"},
+		ExposedHeaders:   []string{"Content-Type", "Set-Cookie"},
+		AllowCredentials: true,
+	})
 }
 
 func (v *ViperProvider) ProxyReadTimeout() time.Duration {
-	return viperx.GetDuration(v.l, ViperKeyProxyReadTimeout, time.Second*5, "PROXY_SERVER_READ_TIMEOUT")
+	return v.p.DurationF(ViperKeyProxyReadTimeout, time.Second*5)
 }
 
 func (v *ViperProvider) ProxyWriteTimeout() time.Duration {
-	return viperx.GetDuration(v.l, ViperKeyProxyWriteTimeout, time.Second*10, "PROXY_SERVER_WRITE_TIMEOUT")
+	return v.p.DurationF(ViperKeyProxyWriteTimeout, time.Second*10)
 }
 
 func (v *ViperProvider) ProxyIdleTimeout() time.Duration {
-	return viperx.GetDuration(v.l, ViperKeyProxyIdleTimeout, time.Second*120, "PROXY_SERVER_IDLE_TIMEOUT")
+	return v.p.DurationF(ViperKeyProxyIdleTimeout, time.Second*120)
 }
 
 func (v *ViperProvider) ProxyServeAddress() string {
 	return fmt.Sprintf(
 		"%s:%d",
-		viperx.GetString(v.l, ViperKeyProxyServeAddressHost, ""),
-		viperx.GetInt(v.l, ViperKeyProxyServeAddressPort, 4455),
+		v.p.String(ViperKeyProxyServeAddressHost),
+		v.p.IntF(ViperKeyProxyServeAddressPort, 4455),
 	)
 }
 
 func (v *ViperProvider) APIReadTimeout() time.Duration {
-	return viperx.GetDuration(v.l, ViperKeyAPIReadTimeout, time.Second*5)
+	return v.p.DurationF(ViperKeyAPIReadTimeout, time.Second*5)
 }
 
 func (v *ViperProvider) APIWriteTimeout() time.Duration {
-	return viperx.GetDuration(v.l, ViperKeyAPIWriteTimeout, time.Second*10)
+	return v.p.DurationF(ViperKeyAPIWriteTimeout, time.Second*10)
 }
 
 func (v *ViperProvider) APIIdleTimeout() time.Duration {
-	return viperx.GetDuration(v.l, ViperKeyAPIIdleTimeout, time.Second*120)
+	return v.p.DurationF(ViperKeyAPIIdleTimeout, time.Second*120)
 }
 
 func (v *ViperProvider) APIServeAddress() string {
 	return fmt.Sprintf(
 		"%s:%d",
-		viperx.GetString(v.l, ViperKeyAPIServeAddressHost, ""),
-		viperx.GetInt(v.l, ViperKeyAPIServeAddressPort, 4456),
+		v.p.String(ViperKeyAPIServeAddressHost),
+		v.p.IntF(ViperKeyAPIServeAddressPort, 4456),
 	)
 }
 
 func (v *ViperProvider) PrometheusServeAddress() string {
 	return fmt.Sprintf(
 		"%s:%d",
-		viperx.GetString(v.l, ViperKeyPrometheusServeAddressHost, ""),
-		viperx.GetInt(v.l, ViperKeyPrometheusServeAddressPort, 9000),
+		v.p.String(ViperKeyPrometheusServeAddressHost),
+		v.p.IntF(ViperKeyPrometheusServeAddressPort, 9000),
 	)
 }
 
 func (v *ViperProvider) PrometheusMetricsPath() string {
-	return viperx.GetString(v.l, ViperKeyPrometheusServeMetricsPath, "/metrics")
+	return v.p.StringF(ViperKeyPrometheusServeMetricsPath, "/metrics")
 }
 
 func (v *ViperProvider) PrometheusCollapseRequestPaths() bool {
-	return viperx.GetBool(v.l, ViperKeyPrometheusServeCollapseRequestPaths, true)
+	return v.p.BoolF(ViperKeyPrometheusServeCollapseRequestPaths, true)
 }
 
 func (v *ViperProvider) ParseURLs(sources []string) ([]url.URL, error) {
@@ -269,7 +255,7 @@ func (v *ViperProvider) pipelineIsEnabled(prefix, id string) bool {
 	}
 
 	v.enabledMutex.Lock()
-	v.enabledCache[hash] = viperx.GetBool(v.l, fmt.Sprintf("%s.%s.enabled", prefix, id), false)
+	v.enabledCache[hash] = v.p.Bool(fmt.Sprintf("%s.%s.enabled", prefix, id))
 	v.enabledMutex.Unlock()
 
 	return v.enabledCache[hash]
@@ -284,7 +270,7 @@ func (v *ViperProvider) hashPipelineConfig(prefix, id string, override json.RawM
 		[]byte(prefix),
 		[]byte(id),
 		[]byte(override),
-		[]byte(b),
+		b,
 	}
 
 	var hashSlices []byte
@@ -316,7 +302,7 @@ func (v *ViperProvider) PipelineConfig(prefix, id string, override json.RawMessa
 	}
 
 	// we need to create a copy for config otherwise we will accidentally override values
-	config, err := x.Deepcopy(viperx.GetStringMapConfig(stringsx.Splitx(fmt.Sprintf("%s.%s.config", prefix, id), ".")...))
+	config, err := x.Deepcopy(wiperx.GetStringMapConfig(stringsx.Splitx(fmt.Sprintf("%s.%s.config", prefix, id), ".")...))
 	if err != nil {
 		return errors.WithStack(err)
 	}
@@ -381,7 +367,7 @@ func (v *ViperProvider) ErrorHandlerConfig(id string, override json.RawMessage, 
 }
 
 func (v *ViperProvider) ErrorHandlerFallbackSpecificity() []string {
-	return viperx.GetStringSlice(v.l, ViperKeyErrorsFallback, []string{"json"})
+	return v.p.StringsF(ViperKeyErrorsFallback, []string{"json"})
 }
 
 func (v *ViperProvider) ErrorHandlerIsEnabled(id string) bool {
@@ -397,11 +383,11 @@ func (v *ViperProvider) AuthenticatorConfig(id string, override json.RawMessage,
 }
 
 func (v *ViperProvider) AuthenticatorJwtJwkMaxWait() time.Duration {
-	return viperx.GetDuration(v.l, ViperKeyAuthenticatorJwtJwkMaxWait, time.Second)
+	return v.p.DurationF(ViperKeyAuthenticatorJwtJwkMaxWait, time.Second)
 }
 
 func (v *ViperProvider) AuthenticatorJwtJwkTtl() time.Duration {
-	return viperx.GetDuration(v.l, ViperKeyAuthenticatorJwtJwkTtl, time.Second*30)
+	return v.p.DurationF(ViperKeyAuthenticatorJwtJwkTtl, time.Second*30)
 }
 
 func (v *ViperProvider) AuthorizerIsEnabled(id string) bool {
@@ -421,31 +407,13 @@ func (v *ViperProvider) MutatorConfig(id string, override json.RawMessage, dest 
 }
 
 func (v *ViperProvider) JSONWebKeyURLs() []string {
-	return viperx.GetStringSlice(v.l, ViperKeyMutatorIDTokenJWKSURL, []string{})
+	return v.p.Strings(ViperKeyMutatorIDTokenJWKSURL)
 }
 
-func (v *ViperProvider) TracingServiceName() string {
-	return viperx.GetString(v.l, "tracing.service_name", "ORY Oathkeeper")
+func (v *ViperProvider) Tracing() *tracing.Config {
+	return v.p.TracingConfig("ORY Oathkeeper")
 }
 
-func (v *ViperProvider) TracingProvider() string {
-	return viperx.GetString(v.l, "tracing.provider", "", "TRACING_PROVIDER")
-}
-
-func (v *ViperProvider) TracingJaegerConfig() *tracing.JaegerConfig {
-	return &tracing.JaegerConfig{
-		LocalAgentHostPort: viperx.GetString(v.l, "tracing.providers.jaeger.local_agent_address", "", "TRACING_PROVIDER_JAEGER_LOCAL_AGENT_ADDRESS"),
-		SamplerType:        viperx.GetString(v.l, "tracing.providers.jaeger.sampling.type", "const", "TRACING_PROVIDER_JAEGER_SAMPLING_TYPE"),
-		SamplerValue:       viperx.GetFloat64(v.l, "tracing.providers.jaeger.sampling.value", float64(1), "TRACING_PROVIDER_JAEGER_SAMPLING_VALUE"),
-		SamplerServerURL:   viperx.GetString(v.l, "tracing.providers.jaeger.sampling.server_url", "", "TRACING_PROVIDER_JAEGER_SAMPLING_SERVER_URL"),
-		Propagation: stringsx.Coalesce(
-			viper.GetString("JAEGER_PROPAGATION"), // Standard Jaeger client config
-			viperx.GetString(v.l, "tracing.providers.jaeger.propagation", "", "TRACING_PROVIDER_JAEGER_PROPAGATION"),
-		),
-	}
-}
-func (v *ViperProvider) TracingZipkinConfig() *tracing.ZipkinConfig {
-	return &tracing.ZipkinConfig{
-		ServerURL: viperx.GetString(v.l, "tracing.providers.zipkin.server_url", "", "TRACING_PROVIDER_ZIPKIN_SERVER_URL"),
-	}
+func (v *ViperProvider) Source() *configx.Provider {
+	return v.p
 }

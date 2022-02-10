@@ -30,6 +30,7 @@ import (
 	"time"
 
 	"github.com/dgraph-io/ristretto"
+	"github.com/hashicorp/go-retryablehttp"
 
 	"github.com/ory/oathkeeper/pipeline/authn"
 	"github.com/ory/oathkeeper/x"
@@ -54,9 +55,8 @@ const (
 )
 
 type MutatorHydrator struct {
-	c      configuration.Provider
-	client *http.Client
-	d      mutatorHydratorDependencies
+	c configuration.Provider
+	d mutatorHydratorDependencies
 
 	hydrateCache *ristretto.Cache
 	cacheTTL     *time.Duration
@@ -107,7 +107,11 @@ func NewMutatorHydrator(c configuration.Provider, d mutatorHydratorDependencies)
 		// This is a best-practice value.
 		BufferItems: 64,
 	})
-	return &MutatorHydrator{c: c, d: d, client: httpx.NewResilientClientLatencyToleranceSmall(nil), hydrateCache: cache}
+	return &MutatorHydrator{
+		c:            c,
+		d:            d,
+		hydrateCache: cache,
+	}
 }
 
 func (a *MutatorHydrator) GetID() string {
@@ -163,7 +167,7 @@ func (a *MutatorHydrator) Mutate(r *http.Request, session *authn.AuthenticationS
 	} else if _, err := url.ParseRequestURI(cfg.Api.URL); err != nil {
 		return errors.New(ErrInvalidAPIURL)
 	}
-	req, err := http.NewRequest("POST", cfg.Api.URL, &b)
+	req, err := retryablehttp.NewRequest("POST", cfg.Api.URL, &b)
 	if err != nil {
 		return errors.WithStack(err)
 	}
@@ -184,7 +188,7 @@ func (a *MutatorHydrator) Mutate(r *http.Request, session *authn.AuthenticationS
 	}
 	req.Header.Set(contentTypeHeaderKey, contentTypeJSONHeaderValue)
 
-	var client http.Client
+	var client *retryablehttp.Client
 	if cfg.Api.Retry != nil {
 		maxRetryDelay := time.Second
 		giveUpAfter := time.Millisecond * 50
@@ -203,7 +207,9 @@ func (a *MutatorHydrator) Mutate(r *http.Request, session *authn.AuthenticationS
 			}
 		}
 
-		client.Transport = httpx.NewResilientRoundTripper(a.client.Transport, maxRetryDelay, giveUpAfter)
+		client = httpx.NewResilientClient(
+			httpx.ResilientClientWithConnectionTimeout(time.Millisecond*500),
+			httpx.ResilientClientWithMaxRetryWait(maxRetryDelay))
 	}
 
 	res, err := client.Do(req.WithContext(r.Context()))

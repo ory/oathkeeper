@@ -39,7 +39,7 @@ func TestFetcherDefault(t *testing.T) {
 	})
 
 	l := logrusx.New("", "", logrusx.ForceLevel(logrus.DebugLevel))
-	w := herodot.NewJSONWriter(l.Logger)
+	w := herodot.NewJSONWriter(l)
 	s := NewFetcherDefault(l, maxWait, JWKsTTL)
 
 	timeOutServer := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
