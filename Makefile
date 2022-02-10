@@ -87,3 +87,7 @@ docker: .bin/packr2
 
 docs/cli: .bin/clidoc
 		clidoc .
+
+.PHONY: post-release
+post-release:
+		echo "nothing to do"
