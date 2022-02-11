@@ -1,0 +1,23 @@
+name: CI Tasks for Ory Oathkeeper
+on:
+  push:
+    branches:
+      - master
+    tags:
+      - '*'
+  pull_request:
+
+# Cancel in-progress runs in current workflow.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  docs-cli:
+    runs-on: ubuntu-latest
+    name: Build CLI docs
+    steps:
+      - uses: ory/ci/docs/cli-next@master
+        with:
+          token: ${{ secrets.ORY_BOT_PAT }}
+          output-dir: docs/oathkeeper/cli

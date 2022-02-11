@@ -9,7 +9,7 @@ replace github.com/oleiade/reflections => github.com/oleiade/reflections v1.0.1
 require (
 	github.com/Azure/azure-pipeline-go v0.2.2
 	github.com/Azure/azure-storage-blob-go v0.9.0
-	github.com/Masterminds/sprig/v3 v3.1.0
+	github.com/Masterminds/sprig/v3 v3.2.2
 	github.com/asaskevich/govalidator v0.0.0-20200428143746-21a406dcc535
 	github.com/auth0/go-jwt-middleware v1.0.1
 	github.com/aws/aws-sdk-go v1.31.13
@@ -24,6 +24,7 @@ require (
 	github.com/go-openapi/runtime v0.19.20
 	github.com/go-openapi/strfmt v0.19.5
 	github.com/go-openapi/swag v0.19.9
+	github.com/go-openapi/validate v0.19.10
 	github.com/go-sql-driver/mysql v1.5.0
 	github.com/go-swagger/go-swagger v0.25.0
 	github.com/gobuffalo/httptest v1.0.2
@@ -35,7 +36,7 @@ require (
 	github.com/google/go-replayers/httpreplay v0.1.0
 	github.com/google/uuid v1.1.1
 	github.com/gorilla/websocket v1.4.2
-	github.com/imdario/mergo v0.3.8
+	github.com/imdario/mergo v0.3.11
 	github.com/julienschmidt/httprouter v1.2.0
 	github.com/lib/pq v1.3.0
 	github.com/mattn/goveralls v0.0.6

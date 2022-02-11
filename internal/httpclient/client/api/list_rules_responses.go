@@ -11,7 +11,6 @@ import (
 
 	"github.com/go-openapi/runtime"
 	"github.com/go-openapi/strfmt"
-	"github.com/go-openapi/swag"
 
 	"github.com/ory/oathkeeper/internal/httpclient/models"
 )
@@ -80,75 +79,28 @@ func NewListRulesInternalServerError() *ListRulesInternalServerError {
 
 /*ListRulesInternalServerError handles this case with default header values.
 
-The standard error format
+genericError
 */
 type ListRulesInternalServerError struct {
-	Payload *ListRulesInternalServerErrorBody
+	Payload *models.GenericError
 }
 
 func (o *ListRulesInternalServerError) Error() string {
 	return fmt.Sprintf("[GET /rules][%d] listRulesInternalServerError  %+v", 500, o.Payload)
 }
 
-func (o *ListRulesInternalServerError) GetPayload() *ListRulesInternalServerErrorBody {
+func (o *ListRulesInternalServerError) GetPayload() *models.GenericError {
 	return o.Payload
 }
 
 func (o *ListRulesInternalServerError) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(ListRulesInternalServerErrorBody)
+	o.Payload = new(models.GenericError)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
 		return err
 	}
 
-	return nil
-}
-
-/*ListRulesInternalServerErrorBody list rules internal server error body
-swagger:model ListRulesInternalServerErrorBody
-*/
-type ListRulesInternalServerErrorBody struct {
-
-	// code
-	Code int64 `json:"code,omitempty"`
-
-	// details
-	Details []interface{} `json:"details"`
-
-	// message
-	Message string `json:"message,omitempty"`
-
-	// reason
-	Reason string `json:"reason,omitempty"`
-
-	// request
-	Request string `json:"request,omitempty"`
-
-	// status
-	Status string `json:"status,omitempty"`
-}
-
-// Validate validates this list rules internal server error body
-func (o *ListRulesInternalServerErrorBody) Validate(formats strfmt.Registry) error {
-	return nil
-}
-
-// MarshalBinary interface implementation
-func (o *ListRulesInternalServerErrorBody) MarshalBinary() ([]byte, error) {
-	if o == nil {
-		return nil, nil
-	}
-	return swag.WriteJSON(o)
-}
-
-// UnmarshalBinary interface implementation
-func (o *ListRulesInternalServerErrorBody) UnmarshalBinary(b []byte) error {
-	var res ListRulesInternalServerErrorBody
-	if err := swag.ReadJSON(b, &res); err != nil {
-		return err
-	}
-	*o = res
 	return nil
 }
