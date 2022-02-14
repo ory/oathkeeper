@@ -23,25 +23,30 @@ package api_test
 import (
 	"bytes"
 	"context"
+	"crypto/tls"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"strconv"
 	"testing"
 
-	"github.com/ory/viper"
-
-	"github.com/urfave/negroni"
-
-	"github.com/ory/oathkeeper/driver/configuration"
-	"github.com/ory/oathkeeper/internal"
-
 	"github.com/julienschmidt/httprouter"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
+	"github.com/urfave/negroni"
 
+	"github.com/ory/herodot"
+	"github.com/ory/oathkeeper/api"
+	"github.com/ory/oathkeeper/driver/configuration"
+	"github.com/ory/oathkeeper/internal"
+	"github.com/ory/oathkeeper/pipeline/authn"
+	"github.com/ory/oathkeeper/proxy"
 	"github.com/ory/oathkeeper/rule"
+	"github.com/ory/viper"
+	"github.com/ory/x/logrusx"
 )
 
 func TestDecisionAPI(t *testing.T) {
@@ -341,6 +346,131 @@ func TestDecisionAPI(t *testing.T) {
 				reg.RuleRepository().(*rule.RepositoryMemory).WithRules(tc.rulesRegexp)
 				testFunc(configuration.Glob)
 			})
+		})
+	}
+}
+
+type decisionHandlerRegistryMock struct {
+	mock.Mock
+}
+
+func (m *decisionHandlerRegistryMock) RuleMatcher() rule.Matcher {
+	return m
+}
+
+func (m *decisionHandlerRegistryMock) ProxyRequestHandler() proxy.RequestHandler {
+	return m
+}
+
+func (*decisionHandlerRegistryMock) Writer() herodot.Writer {
+	return nil
+}
+
+func (*decisionHandlerRegistryMock) Logger() *logrusx.Logger {
+	return logrusx.New("", "")
+}
+
+func (m *decisionHandlerRegistryMock) Match(ctx context.Context, method string, u *url.URL) (*rule.Rule, error) {
+	args := m.Called(ctx, method, u)
+	return args.Get(0).(*rule.Rule), args.Error(1)
+}
+
+func (*decisionHandlerRegistryMock) HandleError(w http.ResponseWriter, r *http.Request, rl *rule.Rule, handleErr error) {
+}
+
+func (*decisionHandlerRegistryMock) HandleRequest(r *http.Request, rl *rule.Rule) (session *authn.AuthenticationSession, err error) {
+	return &authn.AuthenticationSession{}, nil
+}
+
+func (*decisionHandlerRegistryMock) InitializeAuthnSession(r *http.Request, rl *rule.Rule) *authn.AuthenticationSession {
+	return nil
+}
+
+func TestDecisionAPIHeaderUsage(t *testing.T) {
+	r := new(decisionHandlerRegistryMock)
+	h := api.NewJudgeHandler(r)
+	defaultUrl := &url.URL{Scheme: "http", Host: "ory.sh", Path: "/foo"}
+	defaultMethod := "GET"
+	defaultTransform := func(req *http.Request) {}
+
+	for _, tc := range []struct {
+		name           string
+		expectedMethod string
+		expectedUrl    *url.URL
+		transform      func(req *http.Request)
+	}{
+		{
+			name:           "all arguments are taken from the url and request method",
+			expectedUrl:    defaultUrl,
+			expectedMethod: defaultMethod,
+			transform:      defaultTransform,
+		},
+		{
+			name:           "all arguments are taken from the url and request method, but scheme from URL TLS settings",
+			expectedUrl:    &url.URL{Scheme: "https", Host: defaultUrl.Host, Path: defaultUrl.Path},
+			expectedMethod: defaultMethod,
+			transform: func(req *http.Request) {
+				req.TLS = &tls.ConnectionState{}
+			},
+		},
+		{
+			name:           "all arguments are taken from the headers",
+			expectedUrl:    &url.URL{Scheme: "https", Host: "test.dev", Path: "/bar"},
+			expectedMethod: "POST",
+			transform: func(req *http.Request) {
+				req.Header.Add("X-Forwarded-Method", "POST")
+				req.Header.Add("X-Forwarded-Proto", "https")
+				req.Header.Add("X-Forwarded-Host", "test.dev")
+				req.Header.Add("X-Forwarded-Uri", "/bar")
+			},
+		},
+		{
+			name:           "only scheme is taken from the headers",
+			expectedUrl:    &url.URL{Scheme: "https", Host: defaultUrl.Host, Path: defaultUrl.Path},
+			expectedMethod: defaultMethod,
+			transform: func(req *http.Request) {
+				req.Header.Add("X-Forwarded-Proto", "https")
+			},
+		},
+		{
+			name:           "only method is taken from the headers",
+			expectedUrl:    defaultUrl,
+			expectedMethod: "POST",
+			transform: func(req *http.Request) {
+				req.Header.Add("X-Forwarded-Method", "POST")
+			},
+		},
+		{
+			name:           "only host is taken from the headers",
+			expectedUrl:    &url.URL{Scheme: defaultUrl.Scheme, Host: "test.dev", Path: defaultUrl.Path},
+			expectedMethod: defaultMethod,
+			transform: func(req *http.Request) {
+				req.Header.Add("X-Forwarded-Host", "test.dev")
+			},
+		},
+		{
+			name:           "only path is taken from the headers",
+			expectedUrl:    &url.URL{Scheme: defaultUrl.Scheme, Host: defaultUrl.Host, Path: "/bar"},
+			expectedMethod: defaultMethod,
+			transform: func(req *http.Request) {
+				req.Header.Add("X-Forwarded-Uri", "/bar")
+			},
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			res := httptest.NewRecorder()
+			reqUrl := *defaultUrl
+			reqUrl.Path = api.DecisionPath + reqUrl.Path
+			req := httptest.NewRequest(defaultMethod, reqUrl.String(), nil)
+			tc.transform(req)
+
+			r.On("Match", mock.Anything,
+				mock.MatchedBy(func(val string) bool { return val == tc.expectedMethod }),
+				mock.MatchedBy(func(val *url.URL) bool { return *val == *tc.expectedUrl })).
+				Return(&rule.Rule{}, nil)
+			h.ServeHTTP(res, req, nil)
+
+			r.AssertExpectations(t)
 		})
 	}
 }

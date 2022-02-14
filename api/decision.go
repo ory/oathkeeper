@@ -33,6 +33,11 @@ import (
 
 const (
 	DecisionPath = "/decisions"
+
+	xForwardedMethod = "X-Forwarded-Method"
+	xForwardedProto  = "X-Forwarded-Proto"
+	xForwardedHost   = "X-Forwarded-Host"
+	xForwardedUri    = "X-Forwarded-Uri"
 )
 
 type decisionHandlerRegistry interface {
@@ -40,7 +45,7 @@ type decisionHandlerRegistry interface {
 	x.RegistryLogger
 
 	RuleMatcher() rule.Matcher
-	ProxyRequestHandler() *proxy.RequestHandler
+	ProxyRequestHandler() proxy.RequestHandler
 }
 
 type DecisionHandler struct {
@@ -53,12 +58,11 @@ func NewJudgeHandler(r decisionHandlerRegistry) *DecisionHandler {
 
 func (h *DecisionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
 	if len(r.URL.Path) >= len(DecisionPath) && r.URL.Path[:len(DecisionPath)] == DecisionPath {
-		r.URL.Scheme = "http"
-		r.URL.Host = r.Host
-		if r.TLS != nil || strings.EqualFold(r.Header.Get("X-Forwarded-Proto"), "https") {
-			r.URL.Scheme = "https"
-		}
-		r.URL.Path = r.URL.Path[len(DecisionPath):]
+		r.Method = x.OrDefaultString(r.Header.Get(xForwardedMethod), r.Method)
+		r.URL.Scheme = x.OrDefaultString(r.Header.Get(xForwardedProto),
+			x.IfThenElseString(r.TLS != nil, "https", "http"))
+		r.URL.Host = x.OrDefaultString(r.Header.Get(xForwardedHost), r.Host)
+		r.URL.Path = x.OrDefaultString(r.Header.Get(xForwardedUri), r.URL.Path[len(DecisionPath):])
 
 		h.decisions(w, r)
 	} else {
@@ -112,7 +116,6 @@ func (h *DecisionHandler) decisions(w http.ResponseWriter, r *http.Request) {
 			WithFields(fields).
 			WithField("granted", false).
 			Info("Access request denied")
-
 		h.r.ProxyRequestHandler().HandleError(w, r, rl, err)
 		return
 	}

@@ -5,6 +5,7 @@ import (
 	"crypto/ecdsa"
 	"crypto/rsa"
 	"fmt"
+	"strings"
 
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/pkg/errors"
@@ -42,7 +43,7 @@ func (v *VerifierDefault) Verify(
 
 		kid, ok := token.Header["kid"].(string)
 		if !ok || kid == "" {
-			return nil, errors.WithStack(herodot.ErrInternalServerError.WithReason("The JSON Web Token must contain a kid header value but did not."))
+			return nil, errors.WithStack(herodot.ErrBadRequest.WithReason("The JSON Web Token must contain a kid header value but did not."))
 		}
 
 		key, err := v.r.CredentialsFetcher().ResolveKey(ctx, r.KeyURLs, kid, "sig")
@@ -74,10 +75,10 @@ func (v *VerifierDefault) Verify(
 				return k, nil
 			}
 		default:
-			return nil, errors.WithStack(herodot.ErrInternalServerError.WithReasonf(`This request object uses unsupported signing algorithm "%s".`, token.Header["alg"]))
+			return nil, errors.WithStack(herodot.ErrBadRequest.WithReasonf(`This request object uses unsupported signing algorithm "%s".`, token.Header["alg"]))
 		}
 
-		return nil, errors.WithStack(herodot.ErrInternalServerError.WithReasonf(`The signing key algorithm does not match the algorithm from the token header.`))
+		return nil, errors.WithStack(herodot.ErrBadRequest.WithReasonf(`The signing key algorithm does not match the algorithm from the token header.`))
 	})
 	if err != nil {
 		if e, ok := errors.Cause(err).(*jwt.ValidationError); ok {
@@ -100,13 +101,14 @@ func (v *VerifierDefault) Verify(
 	parsedClaims := jwtx.ParseMapStringInterfaceClaims(claims)
 	for _, audience := range r.Audiences {
 		if !stringslice.Has(parsedClaims.Audience, audience) {
-			return nil, errors.WithStack(herodot.ErrInternalServerError.WithReasonf("Token audience %v is not intended for target audience %s.", parsedClaims.Audience, audience))
+			return nil, herodot.ErrUnauthorized.WithReasonf("Token audience %v is not intended for target audience %s.", parsedClaims.Audience, audience)
 		}
 	}
 
 	if len(r.Issuers) > 0 {
 		if !stringslice.Has(r.Issuers, parsedClaims.Issuer) {
-			return nil, errors.WithStack(herodot.ErrInternalServerError.WithReason("Token issuer does not match any trusted issuer."))
+			return nil, herodot.ErrUnauthorized.WithReasonf("Token issuer does not match any trusted issuer %s.", parsedClaims.Issuer).
+				WithDetail("received issuers", strings.Join(r.Issuers, ", "))
 		}
 	}
 
@@ -117,7 +119,7 @@ func (v *VerifierDefault) Verify(
 	if r.ScopeStrategy != nil {
 		for _, sc := range r.Scope {
 			if !r.ScopeStrategy(s, sc) {
-				return nil, errors.WithStack(herodot.ErrInternalServerError.WithReasonf(`JSON Web Token is missing required scope "%s".`, sc))
+				return nil, herodot.ErrUnauthorized.WithReasonf(`JSON Web Token is missing required scope "%s".`, sc)
 			}
 		}
 	} else {

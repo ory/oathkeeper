@@ -51,7 +51,13 @@ type requestHandlerRegistry interface {
 	pe.Registry
 }
 
-type RequestHandler struct {
+type RequestHandler interface {
+	HandleError(w http.ResponseWriter, r *http.Request, rl *rule.Rule, handleErr error)
+	HandleRequest(r *http.Request, rl *rule.Rule) (session *authn.AuthenticationSession, err error)
+	InitializeAuthnSession(r *http.Request, rl *rule.Rule) *authn.AuthenticationSession
+}
+
+type requestHandler struct {
 	r requestHandlerRegistry
 	c configuration.Provider
 }
@@ -60,12 +66,12 @@ type whenConfig struct {
 	When pe.Whens `json:"when"`
 }
 
-func NewRequestHandler(r requestHandlerRegistry, c configuration.Provider) *RequestHandler {
-	return &RequestHandler{r: r, c: c}
+func NewRequestHandler(r requestHandlerRegistry, c configuration.Provider) RequestHandler {
+	return &requestHandler{r: r, c: c}
 }
 
 // matchesWhen
-func (d *RequestHandler) matchesWhen(w http.ResponseWriter, r *http.Request, h pe.Handler, config json.RawMessage, handleErr error) error {
+func (d *requestHandler) matchesWhen(w http.ResponseWriter, r *http.Request, h pe.Handler, config json.RawMessage, handleErr error) error {
 	var when whenConfig
 	if err := d.c.ErrorHandlerConfig(h.GetID(), config, &when); err != nil {
 		d.r.Writer().WriteError(w, r, pe.NewErrErrorHandlerMisconfigured(h, err))
@@ -83,7 +89,7 @@ func (d *RequestHandler) matchesWhen(w http.ResponseWriter, r *http.Request, h p
 	return nil
 }
 
-func (d *RequestHandler) HandleError(w http.ResponseWriter, r *http.Request, rl *rule.Rule, handleErr error) {
+func (d *requestHandler) HandleError(w http.ResponseWriter, r *http.Request, rl *rule.Rule, handleErr error) {
 	if rl == nil {
 		// Create a new, empty rule.
 		rl = new(rule.Rule)
@@ -167,7 +173,7 @@ func (d *RequestHandler) HandleError(w http.ResponseWriter, r *http.Request, rl 
 	}
 }
 
-func (d *RequestHandler) HandleRequest(r *http.Request, rl *rule.Rule) (session *authn.AuthenticationSession, err error) {
+func (d *requestHandler) HandleRequest(r *http.Request, rl *rule.Rule) (session *authn.AuthenticationSession, err error) {
 	var found bool
 
 	fields := map[string]interface{}{
@@ -333,7 +339,7 @@ func (d *RequestHandler) HandleRequest(r *http.Request, rl *rule.Rule) (session 
 }
 
 // InitializeAuthnSession creates an authentication session and initializes it with a Match context if possible
-func (d *RequestHandler) InitializeAuthnSession(r *http.Request, rl *rule.Rule) *authn.AuthenticationSession {
+func (d *requestHandler) InitializeAuthnSession(r *http.Request, rl *rule.Rule) *authn.AuthenticationSession {
 
 	session := &authn.AuthenticationSession{
 		Subject: "",
