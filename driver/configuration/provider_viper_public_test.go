@@ -286,7 +286,7 @@ func TestViperProvider(t *testing.T) {
 		})
 
 		t.Run("authenticator=oauth2_client_credentials", func(t *testing.T) {
-			a := authn.NewAuthenticatorOAuth2ClientCredentials(p)
+			a := authn.NewAuthenticatorOAuth2ClientCredentials(p, logger)
 			assert.True(t, p.AuthenticatorIsEnabled(a.GetID()))
 			require.NoError(t, a.Validate(nil))
 

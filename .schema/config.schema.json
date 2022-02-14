@@ -719,6 +719,30 @@
         },
         "retry": {
           "$ref": "#/definitions/retry"
+        },
+        "cache": {
+          "additionalProperties": false,
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "$ref": "#/definitions/handlerSwitch"
+            },
+            "ttl": {
+              "type": "string",
+              "pattern": "^[0-9]+(ns|us|ms|s|m|h)$",
+              "title": "Cache Time to Live",
+              "description": "Can override the default behaviour of using the token exp time, and specify a set time to live for the token in the cache. If the token exp time is lower than the set value the token exp time will be used instead.",
+              "examples": [
+                "5s"
+              ]
+            },
+            "max_tokens": {
+              "type": "integer",
+              "default": 1000,
+              "title": "Maximum Cached Tokens",
+              "description": "Max number of tokens to cache."
+            }
+          }
         }
       },
       "required": [

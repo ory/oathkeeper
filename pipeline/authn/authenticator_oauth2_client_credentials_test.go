@@ -26,6 +26,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	"github.com/ory/viper"
 
@@ -38,12 +39,18 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-
 	"github.com/tidwall/sjson"
 
 	"github.com/ory/herodot"
 	"github.com/ory/oathkeeper/helper"
 )
+
+func authOkDynamic(u string) *http.Request {
+	authOk := &http.Request{Header: http.Header{}}
+	authOk.SetBasicAuth(u, "secret")
+
+	return authOk
+}
 
 func TestAuthenticatorOAuth2ClientCredentials(t *testing.T) {
 	conf := internal.NewConfigurationWithDefaults()
@@ -62,12 +69,14 @@ func TestAuthenticatorOAuth2ClientCredentials(t *testing.T) {
 	upstreamFailure := &http.Request{Header: http.Header{}}
 	upstreamFailure.SetBasicAuth("client", "secret")
 
+	calls := 0
 	for k, tc := range []struct {
 		d             string
 		r             *http.Request
 		config        json.RawMessage
 		token_url     string
-		setup         func(*testing.T, *httprouter.Router)
+		setup         func(*testing.T, *httprouter.Router, json.RawMessage)
+		check         func(*testing.T, *httprouter.Router, json.RawMessage)
 		expectErr     error
 		expectSession *authn.AuthenticationSession
 	}{
@@ -84,7 +93,7 @@ func TestAuthenticatorOAuth2ClientCredentials(t *testing.T) {
 			expectErr: helper.ErrUnauthorized,
 			config:    json.RawMessage(`{}`),
 			token_url: "",
-			setup: func(t *testing.T, h *httprouter.Router) {
+			setup: func(t *testing.T, h *httprouter.Router, _ json.RawMessage) {
 				h.POST("/oauth2/token", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 					h := herodot.NewJSONWriter(logrus.New())
 					h.WriteError(w, r, helper.ErrUnauthorized)
@@ -98,11 +107,184 @@ func TestAuthenticatorOAuth2ClientCredentials(t *testing.T) {
 			expectSession: &authn.AuthenticationSession{Subject: "client"},
 			config:        json.RawMessage(`{}`),
 			token_url:     "",
-			setup: func(t *testing.T, h *httprouter.Router) {
+			setup: func(t *testing.T, h *httprouter.Router, _ json.RawMessage) {
 				h.POST("/oauth2/token", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 					h := herodot.NewJSONWriter(logrus.New())
-					h.Write(w, r, map[string]interface{}{"access_token": "foo-token"})
+					h.Write(w, r, map[string]interface{}{"access_token": "foo-token", "expires_in": 3600})
 				})
+			},
+		},
+		{
+			d:             "passes due to enabled cache",
+			r:             authOkDynamic("cache-case-1"),
+			expectErr:     nil,
+			expectSession: &authn.AuthenticationSession{Subject: "cache-case-1"},
+			config:        json.RawMessage(`{ "cache": { "enabled": true } }`),
+			token_url:     "",
+			setup: func(t *testing.T, h *httprouter.Router, c json.RawMessage) {
+				calls := 0
+				h.POST("/oauth2/token", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+					calls++
+					if calls == 2 {
+						h := herodot.NewJSONWriter(logrus.New())
+						h.WriteError(w, r, helper.ErrUpstreamServiceNotAvailable)
+						return
+					}
+
+					h := herodot.NewJSONWriter(logrus.New())
+					h.Write(w, r, map[string]interface{}{"access_token": "foo-token", "expires_in": 3600})
+				})
+
+				session := new(authn.AuthenticationSession)
+				err := a.Authenticate(authOkDynamic("cache-case-1"), session, c, nil)
+
+				require.NoError(t, err)
+
+				// wait cache to save value
+				time.Sleep(time.Millisecond * 10)
+			},
+		},
+		{
+			d:             "passes due to enabled cache with expired cache",
+			r:             authOkDynamic("cache-case-2"),
+			expectErr:     nil,
+			expectSession: &authn.AuthenticationSession{Subject: "cache-case-2"},
+			config:        json.RawMessage(`{ "cache": { "enabled": true } }`),
+			token_url:     "",
+			setup: func(t *testing.T, h *httprouter.Router, c json.RawMessage) {
+				h.POST("/oauth2/token", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+					h := herodot.NewJSONWriter(logrus.New())
+					h.Write(w, r, map[string]interface{}{"access_token": "foo-token", "expires_in": 1})
+				})
+
+				session := new(authn.AuthenticationSession)
+				err := a.Authenticate(authOkDynamic("cache-case-2"), session, c, nil)
+
+				require.NoError(t, err)
+
+				// wait for cache to expire
+				time.Sleep(time.Second * 1)
+			},
+		},
+		{
+			d:             "passes due to enabled cache with no expiry",
+			r:             authOkDynamic("cache-case-3"),
+			expectErr:     nil,
+			expectSession: &authn.AuthenticationSession{Subject: "cache-case-3"},
+			config:        json.RawMessage(`{ "cache": { "enabled": true } }`),
+			token_url:     "",
+			setup: func(t *testing.T, h *httprouter.Router, c json.RawMessage) {
+				calls := 0
+				h.POST("/oauth2/token", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+					calls++
+					if calls == 2 {
+						h := herodot.NewJSONWriter(logrus.New())
+						h.WriteError(w, r, helper.ErrUpstreamServiceNotAvailable)
+						return
+					}
+
+					h := herodot.NewJSONWriter(logrus.New())
+					h.Write(w, r, map[string]interface{}{"access_token": "foo-token", "expires_in": 3600})
+				})
+
+				session := new(authn.AuthenticationSession)
+				err := a.Authenticate(authOkDynamic("cache-case-3"), session, c, nil)
+
+				require.NoError(t, err)
+
+				// wait cache to save value
+				time.Sleep(time.Millisecond * 10)
+			},
+		},
+		{
+			d:             "passes with no shared cache between different token URLs",
+			r:             authOkDynamic("cache-case-4"),
+			expectErr:     nil,
+			expectSession: &authn.AuthenticationSession{Subject: "cache-case-4"},
+			config:        json.RawMessage(`{ "cache": { "enabled": true } }`),
+			token_url:     "",
+			setup: func(t *testing.T, h *httprouter.Router, c json.RawMessage) {
+				calls = 0
+				h.POST("/oauth2/token", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+					calls++
+					if calls == 3 {
+						h := herodot.NewJSONWriter(logrus.New())
+						t.Errorf("expected only 2 calls to token endpoint this is number %d", calls)
+						h.WriteError(w, r, helper.ErrUpstreamServiceNotAvailable)
+						return
+					}
+
+					h := herodot.NewJSONWriter(logrus.New())
+					h.Write(w, r, map[string]interface{}{"access_token": "foo-token", "expires_in": 3600})
+				})
+
+				ts := httptest.NewServer(h)
+
+				session := new(authn.AuthenticationSession)
+				// First request
+				err = a.Authenticate(authOkDynamic("cache-case-4"), session, json.RawMessage(`{ "token_url": "`+ts.URL+`/oauth2/token", "cache": { "enabled": true } }`), nil)
+
+				// wait cache to save value
+				time.Sleep(time.Millisecond * 10)
+
+				// Second request to test caching
+				err = a.Authenticate(authOkDynamic("cache-case-4"), session, json.RawMessage(`{ "token_url": "`+ts.URL+`/oauth2/token", "cache": { "enabled": true } }`), nil)
+
+				require.NoError(t, err)
+
+				// wait cache to save value
+				time.Sleep(time.Millisecond * 10)
+			},
+			check: func(t *testing.T, router *httprouter.Router, message json.RawMessage) {
+				require.Equal(t, 2, calls, "expected a call to the token endpoint per token URL config")
+			},
+		},
+		{
+			d:             "passes with no shared cache between different token URLs",
+			r:             authOkDynamic("cache-case-5"),
+			expectErr:     nil,
+			expectSession: &authn.AuthenticationSession{Subject: "cache-case-5"},
+			config:        json.RawMessage(`{ "cache": { "enabled": true } }`),
+			token_url:     "",
+			setup: func(t *testing.T, h *httprouter.Router, c json.RawMessage) {
+				calls = 0
+				h.POST("/oauth2/token", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+					calls++
+					if calls == 3 {
+						h := herodot.NewJSONWriter(logrus.New())
+						t.Errorf("expected only 2 calls to token endpoint this is number %d", calls)
+						h.WriteError(w, r, helper.ErrUpstreamServiceNotAvailable)
+						return
+					}
+
+					h := herodot.NewJSONWriter(logrus.New())
+					h.Write(w, r, map[string]interface{}{"access_token": "foo-token", "expires_in": 3600})
+				})
+
+				var authnConfig authn.AuthenticatorOAuth2Configuration
+				json.Unmarshal(c, &authnConfig)
+
+				authnConfig.Scopes = []string{"some-scope"}
+				authnConfig.Cache.TTL = "6h"
+				scopeConfig, _ := json.Marshal(authnConfig)
+
+				session := new(authn.AuthenticationSession)
+				// First request
+				err = a.Authenticate(authOkDynamic("cache-case-5"), session, scopeConfig, nil)
+
+				// wait cache to save value
+				time.Sleep(time.Millisecond * 10)
+
+				// Second request to check caching
+				err = a.Authenticate(authOkDynamic("cache-case-5"), session, scopeConfig, nil)
+
+				require.NoError(t, err)
+
+				// wait cache to save value
+				time.Sleep(time.Millisecond * 10)
+			},
+			check: func(t *testing.T, router *httprouter.Router, message json.RawMessage) {
+				require.Equal(t, 2, calls, "expected a call to the token endpoint per scope config")
 			},
 		},
 		{
@@ -111,7 +293,7 @@ func TestAuthenticatorOAuth2ClientCredentials(t *testing.T) {
 			expectErr: helper.ErrUpstreamServiceNotAvailable,
 			config:    json.RawMessage(`{}`),
 			token_url: "",
-			setup: func(t *testing.T, h *httprouter.Router) {
+			setup: func(t *testing.T, h *httprouter.Router, _ json.RawMessage) {
 				h.POST("/oauth2/token", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 					h := herodot.NewJSONWriter(logrus.New())
 					h.WriteError(w, r, helper.ErrUpstreamServiceNotAvailable)
@@ -124,7 +306,7 @@ func TestAuthenticatorOAuth2ClientCredentials(t *testing.T) {
 			expectErr: helper.ErrUpstreamServiceTimeout,
 			config:    json.RawMessage(`{}`),
 			token_url: "",
-			setup: func(t *testing.T, h *httprouter.Router) {
+			setup: func(t *testing.T, h *httprouter.Router, _ json.RawMessage) {
 				h.POST("/oauth2/token", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 					h := herodot.NewJSONWriter(logrus.New())
 					h.WriteError(w, r, helper.ErrUpstreamServiceTimeout)
@@ -137,7 +319,7 @@ func TestAuthenticatorOAuth2ClientCredentials(t *testing.T) {
 			expectErr: helper.ErrUpstreamServiceInternalServerError,
 			config:    json.RawMessage(`{}`),
 			token_url: "",
-			setup: func(t *testing.T, h *httprouter.Router) {
+			setup: func(t *testing.T, h *httprouter.Router, _ json.RawMessage) {
 				h.POST("/oauth2/token", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 					h := herodot.NewJSONWriter(logrus.New())
 					h.WriteError(w, r, helper.ErrUpstreamServiceInternalServerError)
@@ -150,7 +332,7 @@ func TestAuthenticatorOAuth2ClientCredentials(t *testing.T) {
 			expectErr: helper.ErrUpstreamServiceNotFound,
 			config:    json.RawMessage(`{}`),
 			token_url: "",
-			setup: func(t *testing.T, h *httprouter.Router) {
+			setup: func(t *testing.T, h *httprouter.Router, _ json.RawMessage) {
 				h.POST("/oauth2/v1/token", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 					h := herodot.NewJSONWriter(logrus.New())
 					h.Write(w, r, map[string]interface{}{"access_token": "foo-token"})
@@ -163,7 +345,7 @@ func TestAuthenticatorOAuth2ClientCredentials(t *testing.T) {
 			expectErr: helper.ErrUnauthorized,
 			config:    json.RawMessage(`{}`),
 			token_url: "",
-			setup: func(t *testing.T, h *httprouter.Router) {
+			setup: func(t *testing.T, h *httprouter.Router, _ json.RawMessage) {
 				h.POST("/oauth2/token", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 					h := herodot.NewJSONWriter(logrus.New())
 					h.WriteError(w, r, helper.ErrForbidden)
@@ -174,16 +356,16 @@ func TestAuthenticatorOAuth2ClientCredentials(t *testing.T) {
 		t.Run(fmt.Sprintf("method=authenticate/case=%d", k), func(t *testing.T) {
 			router := httprouter.New()
 
-			if tc.setup != nil {
-				tc.setup(t, router)
-			}
-
 			ts := httptest.NewServer(router)
 
 			if tc.token_url != "" {
 				tc.config, _ = sjson.SetBytes(tc.config, "token_url", tc.token_url)
 			} else {
 				tc.config, _ = sjson.SetBytes(tc.config, "token_url", ts.URL+"/oauth2/token")
+			}
+
+			if tc.setup != nil {
+				tc.setup(t, router, tc.config)
 			}
 
 			session := new(authn.AuthenticationSession)
@@ -197,6 +379,10 @@ func TestAuthenticatorOAuth2ClientCredentials(t *testing.T) {
 
 			if tc.expectSession != nil {
 				assert.EqualValues(t, tc.expectSession, session)
+			}
+
+			if tc.check != nil {
+				tc.check(t, router, tc.config)
 			}
 		})
 	}
