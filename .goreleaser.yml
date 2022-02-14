@@ -5,6 +5,9 @@ includes:
 before:
   hooks:
     - go mod download
+    - git checkout -- go.sum go.mod
+    - curl -Lo /tmp/cosign.key https://raw.githubusercontent.com/ory/xgoreleaser/master/cosign.key
+    - curl -Lo /tmp/cosign.pub https://raw.githubusercontent.com/ory/xgoreleaser/master/cosign.pub
     - go install github.com/gobuffalo/packr/v2/packr2
     - packr2
 
