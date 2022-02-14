@@ -13,11 +13,191 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  sdk-generate:
+    name: Generate SDKs
+    runs-on: ubuntu-latest
+    outputs:
+      sdk-cache-key: ${{ steps.sdk-generate.outputs.sdk-cache-key }}
+    steps:
+      - uses: ory/ci/sdk/generate@master
+        with:
+          token: ${{ secrets.ORY_BOT_PAT }}
+        id: sdk-generate
+
+  validate:
+    runs-on: ubuntu-latest
+    name: Run tests and lints
+    needs:
+      - sdk-generate
+    steps:
+      - uses: ory/ci/checkout@master
+      - uses: actions/cache@v2
+        with:
+          path: |
+            internal/httpclient
+          key: ${{ needs.sdk-generate.outputs.sdk-cache-key }}
+      - uses: actions/setup-go@v2
+        with:
+          go-version: ^1.17
+      - run: go list -json > go.list
+      - name: Run nancy
+        uses: sonatype-nexus-community/nancy-github-action@v1.0.2
+      - name: Run prettier
+        uses: ory/ci/prettier@master
+      - name: Run golangci-lint
+        uses: golangci/golangci-lint-action@v2
+        env:
+          GOGC: 100
+        with:
+          args: --timeout 10m0s
+          skip-go-installation: true
+          skip-pkg-cache: true
+      - name: Run go-acc (tests)
+        run: |
+          make .bin/go-acc
+          .bin/go-acc -o coverage.out ./... -- -failfast -timeout=20m
+      - name: Submit to Codecov
+        run: |
+          bash <(curl -s https://codecov.io/bash)
+
+  setup-tests:
+    runs-on: ubuntu-latest
+    name: Setup tests
+    steps:
+      - uses: ory/ci/checkout@master
+      - uses: actions/setup-go@v2
+        with:
+          go-version: '^1.17'
+      - run: make install
+      - uses: actions/cache@v2
+        with:
+          path: ~/go/bin/oathkeeper
+          key: oathkeeper-${{ hashFiles('~/go/bin/oathkeeper') }}
+          restore-keys: |
+            oathkeeper-
+
+  test:
+    runs-on: ubuntu-latest
+    name: Run tests
+    strategy:
+      matrix: 
+        name: ['reload', 'e2e', 'forwarded-header']
+    needs:
+      - sdk-generate
+      - setup-tests
+    steps:
+      - uses: ory/ci/checkout@master
+      - uses: actions/setup-go@v2
+        with:
+          go-version: '^1.17'
+      - uses: actions/cache@v2
+        with:
+          path: ~/go/bin/oathkeeper
+          key: oathkeeper-${{ hashFiles('~/go/bin/oathkeeper') }}
+      - run: ./test/${{ matrix.name }}/run.sh
+
   docs-cli:
     runs-on: ubuntu-latest
     name: Build CLI docs
+    needs:
+      - test
     steps:
       - uses: ory/ci/docs/cli-next@master
         with:
           token: ${{ secrets.ORY_BOT_PAT }}
           output-dir: docs/oathkeeper/cli
+
+  changelog:
+    name: Generate changelog
+    runs-on: ubuntu-latest
+    if: ${{ github.ref_type == 'tag' || github.ref_name == 'master' }}
+    needs:
+      - test
+      - validate
+    steps:
+      - uses: ory/ci/changelog@master
+        with:
+          token: ${{ secrets.ORY_BOT_PAT }}
+
+  sdk-release:
+    name: Release SDKs
+    runs-on: ubuntu-latest
+    if: ${{ github.ref_type == 'tag' }}
+    needs:
+      - test
+      - sdk-generate
+      - release
+    steps:
+      - uses: ory/ci/sdk/release@master
+        with:
+          token: ${{ secrets.ORY_BOT_PAT }}
+
+  release:
+    name: Generate release
+    runs-on: ubuntu-latest
+    if: ${{ github.ref_type == 'tag' }}
+    needs:
+      - test
+      - validate
+      - changelog
+    steps:
+      - uses: ory/ci/releaser@master
+        with:
+          token: ${{ secrets.ORY_BOT_PAT }}
+          goreleaser_key: ${{ secrets.GORELEASER_KEY }}
+          cosign_pwd: ${{ secrets.COSIGN_PWD }}
+          docker_username: ${{ secrets.DOCKERHUB_USERNAME }}
+          docker_password: ${{ secrets.DOCKERHUB_PASSWORD }}
+
+  render-version-schema:
+    name: Render version schema
+    runs-on: ubuntu-latest
+    if: ${{ github.ref_type == 'tag' }}
+    needs:
+      - release
+    steps:
+      - uses: ory/ci/releaser/render-version-schema@master
+        with:
+          schema-path: spec/config.json
+
+  newsletter-draft:
+    name: Draft newsletter
+    runs-on: ubuntu-latest
+    if: ${{ github.ref_type == 'tag' }}
+    needs:
+      - release
+    steps:
+      - uses: ory/ci/newsletter@master
+        with:
+          mailchimp_list_id: 058a056618
+          mailchmip_segment_id: 11398953
+          mailchimp_api_key: ${{ secrets.MAILCHIMP_API_KEY }}
+          draft: 'true'
+          ssh_key: ${{ secrets.ORY_BOT_SSH_KEY }}
+
+  slack-approval-notification:
+    name: Pending approval Slack notification
+    runs-on: ubuntu-latest
+    if: ${{ github.ref_type == 'tag' }}
+    needs:
+      - newsletter-draft
+    steps:
+      - uses: ory/ci/newsletter/slack-notify@master
+        with:
+          slack-webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+  newsletter-send:
+    name: Send newsletter
+    runs-on: ubuntu-latest
+    needs:
+      - newsletter-draft
+    if: ${{ github.ref_type == 'tag' }}
+    environment: production
+    steps:
+      - uses: ory/ci/newsletter@master
+        with:
+          mailchimp_list_id: 058a056618
+          mailchmip_segment_id: 11398953
+          mailchimp_api_key: ${{ secrets.MAILCHIMP_API_KEY }}
+          draft: 'false'
+          ssh_key: ${{ secrets.ORY_BOT_SSH_KEY }}
