@@ -26,7 +26,9 @@ export OATHKEEPER_PROXY=http://127.0.0.1:6660
 export OATHKEEPER_API=http://127.0.0.1:6661
 export GO111MODULE=on
 
-(cd ../../; make install)
+[[ "$(command -v oathkeeper)" == "" ]] &&
+    (cd ../../; make install)
+
 go install github.com/ory/oathkeeper/test/e2e/okapi
 go install github.com/ory/oathkeeper/test/e2e/okclient
 

@@ -20,7 +20,8 @@ cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
 export GO111MODULE=on
 
-(cd ../../; make install)
+[[ "$(command -v oathkeeper)" == "" ]] &&
+    (cd ../../; make install)
 
 run_oathkekeper() {
   killall oathkeeper || true
