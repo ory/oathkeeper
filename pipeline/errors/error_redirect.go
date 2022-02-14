@@ -12,6 +12,12 @@ import (
 
 var _ Handler = new(ErrorRedirect)
 
+const (
+	xForwardedProto = "X-Forwarded-Proto"
+	xForwardedHost  = "X-Forwarded-Host"
+	xForwardedUri   = "X-Forwarded-Uri"
+)
+
 type (
 	ErrorRedirectConfig struct {
 		To                 string `json:"to"`
@@ -40,7 +46,11 @@ func (a *ErrorRedirect) Handle(w http.ResponseWriter, r *http.Request, config js
 		return err
 	}
 
-	http.Redirect(w, r, a.RedirectURL(r, c), c.Code)
+	r.URL.Scheme = x.OrDefaultString(r.Header.Get(xForwardedProto), r.URL.Scheme)
+	r.URL.Host = x.OrDefaultString(r.Header.Get(xForwardedHost), r.URL.Host)
+	r.URL.Path = x.OrDefaultString(r.Header.Get(xForwardedUri), r.URL.Path)
+
+	http.Redirect(w, r, a.RedirectURL(r.URL, c), c.Code)
 	return nil
 }
 
@@ -69,7 +79,7 @@ func (a *ErrorRedirect) GetID() string {
 	return "redirect"
 }
 
-func (a *ErrorRedirect) RedirectURL(r *http.Request, c *ErrorRedirectConfig) string {
+func (a *ErrorRedirect) RedirectURL(uri *url.URL, c *ErrorRedirectConfig) string {
 	if c.ReturnToQueryParam == "" {
 		return c.To
 	}
@@ -78,8 +88,9 @@ func (a *ErrorRedirect) RedirectURL(r *http.Request, c *ErrorRedirectConfig) str
 	if err != nil {
 		return c.To
 	}
+
 	q := u.Query()
-	q.Set(c.ReturnToQueryParam, r.URL.String())
+	q.Set(c.ReturnToQueryParam, uri.String())
 	u.RawQuery = q.Encode()
 	return u.String()
 }

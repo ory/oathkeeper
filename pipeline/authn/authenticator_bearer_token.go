@@ -32,6 +32,7 @@ type AuthenticatorBearerTokenConfiguration struct {
 	ExtraFrom           string                      `json:"extra_from"`
 	SubjectFrom         string                      `json:"subject_from"`
 	SetHeaders          map[string]string           `json:"additional_headers"`
+	ForceMethod         string                      `json:"force_method"`
 }
 
 type AuthenticatorBearerToken struct {
@@ -85,7 +86,7 @@ func (a *AuthenticatorBearerToken) Authenticate(r *http.Request, session *Authen
 		return errors.WithStack(ErrAuthenticatorNotResponsible)
 	}
 
-	body, err := forwardRequestToSessionStore(r, cf.CheckSessionURL, cf.PreserveQuery, cf.PreservePath, cf.PreserveHost, cf.SetHeaders)
+	body, err := forwardRequestToSessionStore(r, cf.CheckSessionURL, cf.PreserveQuery, cf.PreservePath, cf.PreserveHost, cf.SetHeaders, cf.ForceMethod)
 	if err != nil {
 		return err
 	}

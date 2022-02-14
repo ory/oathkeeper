@@ -39,7 +39,7 @@ type proxyRegistry interface {
 	x.RegistryLogger
 	x.RegistryWriter
 
-	ProxyRequestHandler() *RequestHandler
+	ProxyRequestHandler() RequestHandler
 	RuleMatcher() rule.Matcher
 }
 

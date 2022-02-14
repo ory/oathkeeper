@@ -6,13 +6,11 @@ package models
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
-	"context"
-
 	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
 )
 
-// Upstream upstream
+// Upstream Upstream Upstream upstream
 //
 // swagger:model Upstream
 type Upstream struct {
@@ -30,11 +28,6 @@ type Upstream struct {
 
 // Validate validates this upstream
 func (m *Upstream) Validate(formats strfmt.Registry) error {
-	return nil
-}
-
-// ContextValidate validates this upstream based on context it is used
-func (m *Upstream) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
 	return nil
 }
 

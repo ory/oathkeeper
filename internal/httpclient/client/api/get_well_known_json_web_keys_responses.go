@@ -6,13 +6,11 @@ package api
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
-	"context"
 	"fmt"
 	"io"
 
 	"github.com/go-openapi/runtime"
 	"github.com/go-openapi/strfmt"
-	"github.com/go-openapi/swag"
 
 	"github.com/ory/oathkeeper/internal/httpclient/models"
 )
@@ -37,6 +35,7 @@ func (o *GetWellKnownJSONWebKeysReader) ReadResponse(response runtime.ClientResp
 			return nil, err
 		}
 		return nil, result
+
 	default:
 		return nil, runtime.NewAPIError("response status code does not match any response statuses defined for this endpoint in the swagger spec", response, response.Code())
 	}
@@ -47,7 +46,7 @@ func NewGetWellKnownJSONWebKeysOK() *GetWellKnownJSONWebKeysOK {
 	return &GetWellKnownJSONWebKeysOK{}
 }
 
-/* GetWellKnownJSONWebKeysOK describes a response with status code 200, with default header values.
+/*GetWellKnownJSONWebKeysOK handles this case with default header values.
 
 jsonWebKeySet
 */
@@ -58,6 +57,7 @@ type GetWellKnownJSONWebKeysOK struct {
 func (o *GetWellKnownJSONWebKeysOK) Error() string {
 	return fmt.Sprintf("[GET /.well-known/jwks.json][%d] getWellKnownJsonWebKeysOK  %+v", 200, o.Payload)
 }
+
 func (o *GetWellKnownJSONWebKeysOK) GetPayload() *models.JSONWebKeySet {
 	return o.Payload
 }
@@ -79,81 +79,30 @@ func NewGetWellKnownJSONWebKeysInternalServerError() *GetWellKnownJSONWebKeysInt
 	return &GetWellKnownJSONWebKeysInternalServerError{}
 }
 
-/* GetWellKnownJSONWebKeysInternalServerError describes a response with status code 500, with default header values.
+/*GetWellKnownJSONWebKeysInternalServerError handles this case with default header values.
 
-The standard error format
+genericError
 */
 type GetWellKnownJSONWebKeysInternalServerError struct {
-	Payload *GetWellKnownJSONWebKeysInternalServerErrorBody
+	Payload *models.GenericError
 }
 
 func (o *GetWellKnownJSONWebKeysInternalServerError) Error() string {
 	return fmt.Sprintf("[GET /.well-known/jwks.json][%d] getWellKnownJsonWebKeysInternalServerError  %+v", 500, o.Payload)
 }
-func (o *GetWellKnownJSONWebKeysInternalServerError) GetPayload() *GetWellKnownJSONWebKeysInternalServerErrorBody {
+
+func (o *GetWellKnownJSONWebKeysInternalServerError) GetPayload() *models.GenericError {
 	return o.Payload
 }
 
 func (o *GetWellKnownJSONWebKeysInternalServerError) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(GetWellKnownJSONWebKeysInternalServerErrorBody)
+	o.Payload = new(models.GenericError)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
 		return err
 	}
 
-	return nil
-}
-
-/*GetWellKnownJSONWebKeysInternalServerErrorBody get well known JSON web keys internal server error body
-swagger:model GetWellKnownJSONWebKeysInternalServerErrorBody
-*/
-type GetWellKnownJSONWebKeysInternalServerErrorBody struct {
-
-	// code
-	Code int64 `json:"code,omitempty"`
-
-	// details
-	Details []interface{} `json:"details"`
-
-	// message
-	Message string `json:"message,omitempty"`
-
-	// reason
-	Reason string `json:"reason,omitempty"`
-
-	// request
-	Request string `json:"request,omitempty"`
-
-	// status
-	Status string `json:"status,omitempty"`
-}
-
-// Validate validates this get well known JSON web keys internal server error body
-func (o *GetWellKnownJSONWebKeysInternalServerErrorBody) Validate(formats strfmt.Registry) error {
-	return nil
-}
-
-// ContextValidate validates this get well known JSON web keys internal server error body based on context it is used
-func (o *GetWellKnownJSONWebKeysInternalServerErrorBody) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
-	return nil
-}
-
-// MarshalBinary interface implementation
-func (o *GetWellKnownJSONWebKeysInternalServerErrorBody) MarshalBinary() ([]byte, error) {
-	if o == nil {
-		return nil, nil
-	}
-	return swag.WriteJSON(o)
-}
-
-// UnmarshalBinary interface implementation
-func (o *GetWellKnownJSONWebKeysInternalServerErrorBody) UnmarshalBinary(b []byte) error {
-	var res GetWellKnownJSONWebKeysInternalServerErrorBody
-	if err := swag.ReadJSON(b, &res); err != nil {
-		return err
-	}
-	*o = res
 	return nil
 }

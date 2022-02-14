@@ -53,7 +53,7 @@ type RegistryMemory struct {
 	apiJudgeHandler     *api.DecisionHandler
 	healthxHandler      *healthx.Handler
 
-	proxyRequestHandler *proxy.RequestHandler
+	proxyRequestHandler proxy.RequestHandler
 	proxyProxy          *proxy.Proxy
 	ruleFetcher         rule.Fetcher
 
@@ -89,7 +89,7 @@ func (r *RegistryMemory) WithRuleFetcher(fetcher rule.Fetcher) Registry {
 	return r
 }
 
-func (r *RegistryMemory) ProxyRequestHandler() *proxy.RequestHandler {
+func (r *RegistryMemory) ProxyRequestHandler() proxy.RequestHandler {
 	if r.proxyRequestHandler == nil {
 		r.proxyRequestHandler = proxy.NewRequestHandler(r, r.c)
 	}

@@ -6,7 +6,6 @@ package models
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
-	"context"
 	"strconv"
 
 	"github.com/go-openapi/errors"
@@ -14,7 +13,7 @@ import (
 	"github.com/go-openapi/swag"
 )
 
-// JSONWebKeySet json web key set
+// JSONWebKeySet JSONWebKeySet JSONWebKeySet json web key set
 //
 // swagger:model jsonWebKeySet
 type JSONWebKeySet struct {
@@ -42,6 +41,7 @@ func (m *JSONWebKeySet) Validate(formats strfmt.Registry) error {
 }
 
 func (m *JSONWebKeySet) validateKeys(formats strfmt.Registry) error {
+
 	if swag.IsZero(m.Keys) { // not required
 		return nil
 	}
@@ -55,42 +55,6 @@ func (m *JSONWebKeySet) validateKeys(formats strfmt.Registry) error {
 			if err := m.Keys[i].Validate(formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("keys" + "." + strconv.Itoa(i))
-				} else if ce, ok := err.(*errors.CompositeError); ok {
-					return ce.ValidateName("keys" + "." + strconv.Itoa(i))
-				}
-				return err
-			}
-		}
-
-	}
-
-	return nil
-}
-
-// ContextValidate validate this json web key set based on the context it is used
-func (m *JSONWebKeySet) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
-	var res []error
-
-	if err := m.contextValidateKeys(ctx, formats); err != nil {
-		res = append(res, err)
-	}
-
-	if len(res) > 0 {
-		return errors.CompositeValidationError(res...)
-	}
-	return nil
-}
-
-func (m *JSONWebKeySet) contextValidateKeys(ctx context.Context, formats strfmt.Registry) error {
-
-	for i := 0; i < len(m.Keys); i++ {
-
-		if m.Keys[i] != nil {
-			if err := m.Keys[i].ContextValidate(ctx, formats); err != nil {
-				if ve, ok := err.(*errors.Validation); ok {
-					return ve.ValidateName("keys" + "." + strconv.Itoa(i))
-				} else if ce, ok := err.(*errors.CompositeError); ok {
-					return ce.ValidateName("keys" + "." + strconv.Itoa(i))
 				}
 				return err
 			}

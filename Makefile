@@ -21,37 +21,42 @@ $(foreach dep, $(GO_DEPENDENCIES), $(eval $(call make-go-dependency, $(dep))))
 node_modules: package.json package-lock.json
 		npm i
 
-docs/node_modules: docs/package.json docs/package-lock.json
-		cd docs; npm i
-
 .bin/clidoc: go.mod
 		go build -o .bin/clidoc ./cmd/clidoc/.
 
 # Formats the code
 .PHONY: format
-format: .bin/goimports node_modules docs/node_modules
+format: .bin/goimports node_modules
 		goimports -w --local github.com/ory .
 		npm run format
-		cd docs; npm run format
-
-.PHONY: gen
-gen:
-		mocks sdk
 
 .bin/ory: Makefile
-		bash <(curl https://raw.githubusercontent.com/ory/meta/master/install.sh) -b .bin v0.0.53
+		bash <(curl https://raw.githubusercontent.com/ory/meta/master/install.sh) -b .bin ory v0.1.22
 		touch -a -m .bin/ory
 
 # Generates the SDKs
 .PHONY: sdk
 sdk: .bin/packr2 .bin/swagger .bin/ory
-		swagger generate spec -m -o ./spec/api.json -x internal/httpclient
-		ory dev swagger sanitize ./spec/api.json
-		swagger flatten --with-flatten=remove-unused -o ./spec/api.json ./spec/api.json
-		swagger validate ./spec/api.json
+
+# Generates the SDK
+.PHONY: sdk
+sdk: .bin/swagger .bin/ory node_modules
+		swagger generate spec -m -o spec/swagger.json \
+			-c github.com/ory/oathkeeper \
+			-c github.com/ory/x/healthx
+		ory dev swagger sanitize ./spec/swagger.json
+		swagger validate ./spec/swagger.json
+		CIRCLE_PROJECT_USERNAME=ory CIRCLE_PROJECT_REPONAME=oathkeeper \
+				ory dev openapi migrate \
+					--health-path-tags metadata \
+					-p https://raw.githubusercontent.com/ory/x/master/healthx/openapi/patch.yaml \
+					-p file://.schema/openapi/patches/meta.yaml \
+					spec/swagger.json spec/api.json
+
 		rm -rf internal/httpclient
 		mkdir -p internal/httpclient
-		swagger generate client -f ./spec/api.json -t internal/httpclient -A Ory_Oathkeeper
+		swagger generate client -f ./spec/swagger.json -t internal/httpclient -A Ory_Oathkeeper
+
 		make format
 
 .PHONY: install-stable
@@ -82,3 +87,7 @@ docker: .bin/packr2
 
 docs/cli: .bin/clidoc
 		clidoc .
+
+.PHONY: post-release
+post-release:
+		echo "nothing to do"

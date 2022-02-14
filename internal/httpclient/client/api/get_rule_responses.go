@@ -6,13 +6,11 @@ package api
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
-	"context"
 	"fmt"
 	"io"
 
 	"github.com/go-openapi/runtime"
 	"github.com/go-openapi/strfmt"
-	"github.com/go-openapi/swag"
 
 	"github.com/ory/oathkeeper/internal/httpclient/models"
 )
@@ -43,6 +41,7 @@ func (o *GetRuleReader) ReadResponse(response runtime.ClientResponse, consumer r
 			return nil, err
 		}
 		return nil, result
+
 	default:
 		return nil, runtime.NewAPIError("response status code does not match any response statuses defined for this endpoint in the swagger spec", response, response.Code())
 	}
@@ -53,7 +52,7 @@ func NewGetRuleOK() *GetRuleOK {
 	return &GetRuleOK{}
 }
 
-/* GetRuleOK describes a response with status code 200, with default header values.
+/*GetRuleOK handles this case with default header values.
 
 A rule
 */
@@ -64,6 +63,7 @@ type GetRuleOK struct {
 func (o *GetRuleOK) Error() string {
 	return fmt.Sprintf("[GET /rules/{id}][%d] getRuleOK  %+v", 200, o.Payload)
 }
+
 func (o *GetRuleOK) GetPayload() *models.Rule {
 	return o.Payload
 }
@@ -85,24 +85,25 @@ func NewGetRuleNotFound() *GetRuleNotFound {
 	return &GetRuleNotFound{}
 }
 
-/* GetRuleNotFound describes a response with status code 404, with default header values.
+/*GetRuleNotFound handles this case with default header values.
 
-The standard error format
+genericError
 */
 type GetRuleNotFound struct {
-	Payload *GetRuleNotFoundBody
+	Payload *models.GenericError
 }
 
 func (o *GetRuleNotFound) Error() string {
 	return fmt.Sprintf("[GET /rules/{id}][%d] getRuleNotFound  %+v", 404, o.Payload)
 }
-func (o *GetRuleNotFound) GetPayload() *GetRuleNotFoundBody {
+
+func (o *GetRuleNotFound) GetPayload() *models.GenericError {
 	return o.Payload
 }
 
 func (o *GetRuleNotFound) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(GetRuleNotFoundBody)
+	o.Payload = new(models.GenericError)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -117,133 +118,30 @@ func NewGetRuleInternalServerError() *GetRuleInternalServerError {
 	return &GetRuleInternalServerError{}
 }
 
-/* GetRuleInternalServerError describes a response with status code 500, with default header values.
+/*GetRuleInternalServerError handles this case with default header values.
 
-The standard error format
+genericError
 */
 type GetRuleInternalServerError struct {
-	Payload *GetRuleInternalServerErrorBody
+	Payload *models.GenericError
 }
 
 func (o *GetRuleInternalServerError) Error() string {
 	return fmt.Sprintf("[GET /rules/{id}][%d] getRuleInternalServerError  %+v", 500, o.Payload)
 }
-func (o *GetRuleInternalServerError) GetPayload() *GetRuleInternalServerErrorBody {
+
+func (o *GetRuleInternalServerError) GetPayload() *models.GenericError {
 	return o.Payload
 }
 
 func (o *GetRuleInternalServerError) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(GetRuleInternalServerErrorBody)
+	o.Payload = new(models.GenericError)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
 		return err
 	}
 
-	return nil
-}
-
-/*GetRuleInternalServerErrorBody get rule internal server error body
-swagger:model GetRuleInternalServerErrorBody
-*/
-type GetRuleInternalServerErrorBody struct {
-
-	// code
-	Code int64 `json:"code,omitempty"`
-
-	// details
-	Details []interface{} `json:"details"`
-
-	// message
-	Message string `json:"message,omitempty"`
-
-	// reason
-	Reason string `json:"reason,omitempty"`
-
-	// request
-	Request string `json:"request,omitempty"`
-
-	// status
-	Status string `json:"status,omitempty"`
-}
-
-// Validate validates this get rule internal server error body
-func (o *GetRuleInternalServerErrorBody) Validate(formats strfmt.Registry) error {
-	return nil
-}
-
-// ContextValidate validates this get rule internal server error body based on context it is used
-func (o *GetRuleInternalServerErrorBody) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
-	return nil
-}
-
-// MarshalBinary interface implementation
-func (o *GetRuleInternalServerErrorBody) MarshalBinary() ([]byte, error) {
-	if o == nil {
-		return nil, nil
-	}
-	return swag.WriteJSON(o)
-}
-
-// UnmarshalBinary interface implementation
-func (o *GetRuleInternalServerErrorBody) UnmarshalBinary(b []byte) error {
-	var res GetRuleInternalServerErrorBody
-	if err := swag.ReadJSON(b, &res); err != nil {
-		return err
-	}
-	*o = res
-	return nil
-}
-
-/*GetRuleNotFoundBody get rule not found body
-swagger:model GetRuleNotFoundBody
-*/
-type GetRuleNotFoundBody struct {
-
-	// code
-	Code int64 `json:"code,omitempty"`
-
-	// details
-	Details []interface{} `json:"details"`
-
-	// message
-	Message string `json:"message,omitempty"`
-
-	// reason
-	Reason string `json:"reason,omitempty"`
-
-	// request
-	Request string `json:"request,omitempty"`
-
-	// status
-	Status string `json:"status,omitempty"`
-}
-
-// Validate validates this get rule not found body
-func (o *GetRuleNotFoundBody) Validate(formats strfmt.Registry) error {
-	return nil
-}
-
-// ContextValidate validates this get rule not found body based on context it is used
-func (o *GetRuleNotFoundBody) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
-	return nil
-}
-
-// MarshalBinary interface implementation
-func (o *GetRuleNotFoundBody) MarshalBinary() ([]byte, error) {
-	if o == nil {
-		return nil, nil
-	}
-	return swag.WriteJSON(o)
-}
-
-// UnmarshalBinary interface implementation
-func (o *GetRuleNotFoundBody) UnmarshalBinary(b []byte) error {
-	var res GetRuleNotFoundBody
-	if err := swag.ReadJSON(b, &res); err != nil {
-		return err
-	}
-	*o = res
 	return nil
 }

@@ -109,6 +109,20 @@ func TestAuthenticatorCookieSession(t *testing.T) {
 			assert.Equal(t, &AuthenticationSession{Subject: "123"}, session)
 		})
 
+		t.Run("should override method", func(t *testing.T) {
+			testServer, requestRecorder := makeServer(200, `{"subject": "123"}`)
+			err := pipelineAuthenticator.Authenticate(
+				makeRequest("PUT", "/client/request/path", "q=client-request-query", map[string]string{"sessionid": "zyx"}, ""),
+				session,
+				json.RawMessage(fmt.Sprintf(`{"check_session_url": "%s/configured/path?q=configured-query", "force_method": "GET"}`, testServer.URL)),
+				nil,
+			)
+			require.NoError(t, err, "%#v", errors.Cause(err))
+			assert.Len(t, requestRecorder.requests, 1)
+			r := requestRecorder.requests[0]
+			assert.Equal(t, r.Method, "GET")
+		})
+
 		t.Run("description=should pass through x-forwarded-host if preserve_host is set to true", func(t *testing.T) {
 			testServer, requestRecorder := makeServer(200, `{"subject": "123"}`)
 			req := makeRequest("PUT", "/users/123", "query=string", map[string]string{"sessionid": "zyx"}, "")
