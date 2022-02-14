@@ -27,10 +27,10 @@ import (
 )
 
 type AuthenticatorOAuth2Configuration struct {
-	Scopes   []string `json:"required_scope"`
-	TokenURL string   `json:"token_url"`
-	Retry    *AuthenticatorOAuth2ClientCredentialsRetryConfiguration
-	Cache    clientCredentialsCacheConfig `json:"cache"`
+	Scopes   []string                                                `json:"required_scope"`
+	TokenURL string                                                  `json:"token_url"`
+	Retry    *AuthenticatorOAuth2ClientCredentialsRetryConfiguration `json:"retry,omitempty"`
+	Cache    clientCredentialsCacheConfig                            `json:"cache"`
 }
 
 type clientCredentialsCacheConfig struct {
