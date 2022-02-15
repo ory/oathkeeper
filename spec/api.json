@@ -34,7 +34,7 @@
         "type": "string"
       },
       "Upstream": {
-        "description": "Upstream Upstream Upstream upstream",
+        "description": "Upstream Upstream Upstream Upstream upstream",
         "properties": {
           "preserve_host": {
             "description": "PreserveHost, if false (the default), tells ORY Oathkeeper to set the upstream request's Host header to the\nhostname of the API's upstream's URL. Setting this flag to true instructs ORY Oathkeeper not to do so.",
@@ -52,7 +52,7 @@
         "type": "object"
       },
       "genericError": {
-        "description": "The standard error format",
+        "description": "GenericError The standard error format",
         "properties": {
           "code": {
             "description": "code",
@@ -87,7 +87,6 @@
         "type": "object"
       },
       "healthNotReadyStatus": {
-        "description": "HealthNotReadyStatus health not ready status",
         "properties": {
           "errors": {
             "additionalProperties": {
@@ -109,6 +108,7 @@
         "type": "object"
       },
       "jsonWebKey": {
+        "description": "JSONWebKey json web key",
         "properties": {
           "alg": {
             "description": "The \"alg\" (algorithm) parameter identifies the algorithm intended for\nuse with the key.  The values used should either be registered in the\nIANA \"JSON Web Signature and Encryption Algorithms\" registry\nestablished by [JWA] or be a value that contains a Collision-\nResistant Name.",
@@ -185,7 +185,7 @@
         "type": "object"
       },
       "jsonWebKeySet": {
-        "description": "JSONWebKeySet JSONWebKeySet JSONWebKeySet json web key set",
+        "description": "JSONWebKeySet JSONWebKeySet JSONWebKeySet JSONWebKeySet json web key set",
         "properties": {
           "keys": {
             "description": "The value of the \"keys\" parameter is an array of JWK values.  By\ndefault, the order of the JWK values within the array does not imply\nan order of preference among them, although applications of JWK Sets\ncan choose to assign a meaning to the order for their purposes, if\ndesired.",
@@ -231,11 +231,10 @@
             "$ref": "#/components/schemas/Upstream"
           }
         },
-        "title": "Rule swaggerRule is a single rule that will get checked on every HTTP request.",
+        "title": "Rule Rule swaggerRule is a single rule that will get checked on every HTTP request.",
         "type": "object"
       },
       "ruleHandler": {
-        "description": "RuleHandler RuleHandler rule handler",
         "properties": {
           "config": {
             "description": "Config contains the configuration for the handler. Please read the user\nguide for a complete list of each handler's available settings.",
