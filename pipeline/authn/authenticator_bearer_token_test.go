@@ -2,31 +2,38 @@ package authn_test
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"net/http/httptest"
 	"net/url"
 	"reflect"
 	"testing"
 
+	"github.com/ory/oathkeeper/driver"
+	"github.com/ory/oathkeeper/driver/configuration"
+	"github.com/ory/x/configx"
+	"github.com/ory/x/logrusx"
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
-
-	"net/http/httptest"
 
 	"github.com/julienschmidt/httprouter"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/ory/oathkeeper/internal"
 	. "github.com/ory/oathkeeper/pipeline/authn"
 )
 
 func TestAuthenticatorBearerToken(t *testing.T) {
-	conf := internal.NewConfigurationWithDefaults()
-	reg := internal.NewRegistry(conf)
+	conf, err := configuration.NewViperProvider(context.Background(), logrusx.New("", ""),
+		configx.WithValue("log.level", "debug"),
+		configx.WithValue(configuration.ViperKeyErrorsJSONIsEnabled, true))
+	require.NoError(t, err)
+
+	reg := driver.NewRegistryMemory().WithConfig(conf)
 
 	pipelineAuthenticator, err := reg.PipelineAuthenticator("bearer_token")
 	require.NoError(t, err)

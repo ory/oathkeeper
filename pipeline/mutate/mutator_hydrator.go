@@ -191,7 +191,8 @@ func (a *MutatorHydrator) Mutate(r *http.Request, session *authn.AuthenticationS
 	var client *retryablehttp.Client
 	if cfg.Api.Retry != nil {
 		maxRetryDelay := time.Second
-		giveUpAfter := time.Millisecond * 50
+		// giveUpAfter := time.Millisecond * 50 this was previously used as maxelapsedtime for the old transport implementation
+		// TODO: check the above line
 		if len(cfg.Api.Retry.MaxDelay) > 0 {
 			if d, err := time.ParseDuration(cfg.Api.Retry.MaxDelay); err != nil {
 				a.d.Logger().WithError(err).Warn("Unable to parse max_delay in the Hydrator Mutator, falling pack to default.")
@@ -199,13 +200,15 @@ func (a *MutatorHydrator) Mutate(r *http.Request, session *authn.AuthenticationS
 				maxRetryDelay = d
 			}
 		}
-		if len(cfg.Api.Retry.GiveUpAfter) > 0 {
-			if d, err := time.ParseDuration(cfg.Api.Retry.GiveUpAfter); err != nil {
-				a.d.Logger().WithError(err).Warn("Unable to parse max_delay in the Hydrator Mutator, falling pack to default.")
-			} else {
-				giveUpAfter = d
-			}
-		}
+
+		// TODO: for the below block (related to the todo above)
+		// if len(cfg.Api.Retry.GiveUpAfter) > 0 {
+		//	if d, err := time.ParseDuration(cfg.Api.Retry.GiveUpAfter); err != nil {
+		//		a.d.Logger().WithError(err).Warn("Unable to parse max_delay in the Hydrator Mutator, falling pack to default.")
+		//	} else {
+		//		giveUpAfter = d
+		//	}
+		// }
 
 		client = httpx.NewResilientClient(
 			httpx.ResilientClientWithConnectionTimeout(time.Millisecond*500),

@@ -2,6 +2,7 @@ package authn_test
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -12,17 +13,24 @@ import (
 	"strconv"
 	"testing"
 
+	"github.com/ory/oathkeeper/driver"
+	"github.com/ory/oathkeeper/driver/configuration"
+	"github.com/ory/x/configx"
+	"github.com/ory/x/logrusx"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/ory/oathkeeper/internal"
 	. "github.com/ory/oathkeeper/pipeline/authn"
 )
 
 func TestAuthenticatorCookieSession(t *testing.T) {
-	conf := internal.NewConfigurationWithDefaults()
-	reg := internal.NewRegistry(conf)
+	conf, err := configuration.NewViperProvider(context.Background(), logrusx.New("", ""),
+		configx.WithValue("log.level", "debug"),
+		configx.WithValue(configuration.ViperKeyErrorsJSONIsEnabled, true))
+	require.NoError(t, err)
+
+	reg := driver.NewRegistryMemory().WithConfig(conf)
 	session := new(AuthenticationSession)
 
 	pipelineAuthenticator, err := reg.PipelineAuthenticator("cookie_session")

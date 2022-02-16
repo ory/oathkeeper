@@ -28,12 +28,14 @@ import (
 	"net/url"
 	"testing"
 
+	"github.com/ory/oathkeeper/driver"
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/x"
+	"github.com/ory/x/configx"
+	"github.com/ory/x/logrusx"
 
 	"github.com/ory/x/pointerx"
 
-	"github.com/ory/oathkeeper/internal"
 	"github.com/ory/oathkeeper/internal/httpclient/client"
 	sdkrule "github.com/ory/oathkeeper/internal/httpclient/client/api"
 	"github.com/ory/oathkeeper/rule"
@@ -43,8 +45,13 @@ import (
 )
 
 func TestHandler(t *testing.T) {
-	conf := internal.NewConfigurationWithDefaults()
-	reg := internal.NewRegistry(conf).WithBrokenPipelineMutator()
+	conf, err := configuration.NewViperProvider(context.Background(), logrusx.New("", ""),
+		configx.WithValue("log.level", "debug"),
+		configx.WithValue(configuration.ViperKeyErrorsJSONIsEnabled, true))
+	require.NoError(t, err)
+
+	reg := driver.NewRegistryMemory().WithConfig(conf).(*driver.RegistryMemory).
+		WithBrokenPipelineMutator()
 
 	router := x.NewAPIRouter()
 	reg.RuleHandler().SetRoutes(router)

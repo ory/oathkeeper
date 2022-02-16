@@ -1,6 +1,7 @@
 package mutate_test
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -11,16 +12,15 @@ import (
 	"testing"
 
 	"github.com/julienschmidt/httprouter"
+	"github.com/ory/oathkeeper/driver"
+	"github.com/ory/x/configx"
+	"github.com/ory/x/logrusx"
 
 	"github.com/ory/oathkeeper/pipeline/authn"
 	"github.com/ory/oathkeeper/pipeline/mutate"
 	"github.com/ory/oathkeeper/rule"
 
-	"github.com/ory/viper"
-
 	"github.com/ory/oathkeeper/driver/configuration"
-	"github.com/ory/oathkeeper/internal"
-
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -128,8 +128,12 @@ func configWithRetriesForMutator(giveUpAfter, retryDelay string) func(*httptest.
 }
 
 func TestMutatorHydrator(t *testing.T) {
-	conf := internal.NewConfigurationWithDefaults()
-	reg := internal.NewRegistry(conf)
+	conf, err := configuration.NewViperProvider(context.Background(), logrusx.New("", ""),
+		configx.WithValue("log.level", "debug"),
+		configx.WithValue(configuration.ViperKeyErrorsJSONIsEnabled, true))
+	require.NoError(t, err)
+
+	reg := driver.NewRegistryMemory().WithConfig(conf)
 
 	a, err := reg.PipelineMutator("hydrator")
 	require.NoError(t, err)
@@ -382,8 +386,7 @@ func TestMutatorHydrator(t *testing.T) {
 			{enabled: true, shouldPass: true, apiUrl: "http://api/bar"},
 		} {
 			t.Run(fmt.Sprintf("case=%d", k), func(t *testing.T) {
-				viper.Reset()
-				viper.Set(configuration.ViperKeyMutatorHydratorIsEnabled, testCase.enabled)
+				conf.Source().Set(configuration.ViperKeyMutatorHydratorIsEnabled, testCase.enabled)
 
 				err := a.Validate(json.RawMessage(`{"api":{"url":"` + testCase.apiUrl + `"}}`))
 				if testCase.shouldPass {

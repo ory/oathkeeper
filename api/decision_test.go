@@ -33,6 +33,8 @@ import (
 	"testing"
 
 	"github.com/julienschmidt/httprouter"
+	"github.com/ory/oathkeeper/driver"
+	"github.com/ory/x/configx"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
@@ -41,24 +43,28 @@ import (
 	"github.com/ory/herodot"
 	"github.com/ory/oathkeeper/api"
 	"github.com/ory/oathkeeper/driver/configuration"
-	"github.com/ory/oathkeeper/internal"
 	"github.com/ory/oathkeeper/pipeline/authn"
 	"github.com/ory/oathkeeper/proxy"
 	"github.com/ory/oathkeeper/rule"
-	"github.com/ory/viper"
 	"github.com/ory/x/logrusx"
 )
 
 func TestDecisionAPI(t *testing.T) {
-	conf := internal.NewConfigurationWithDefaults()
-	viper.Set(configuration.ViperKeyAuthenticatorNoopIsEnabled, true)
-	viper.Set(configuration.ViperKeyAuthenticatorUnauthorizedIsEnabled, true)
-	viper.Set(configuration.ViperKeyAuthenticatorAnonymousIsEnabled, true)
-	viper.Set(configuration.ViperKeyAuthorizerAllowIsEnabled, true)
-	viper.Set(configuration.ViperKeyAuthorizerDenyIsEnabled, true)
-	viper.Set(configuration.ViperKeyMutatorNoopIsEnabled, true)
-	viper.Set(configuration.ViperKeyErrorsWWWAuthenticateIsEnabled, true)
-	reg := internal.NewRegistry(conf).WithBrokenPipelineMutator()
+	conf, err := configuration.NewViperProvider(context.Background(), logrusx.New("", ""),
+		configx.WithValue("log.level", "debug"),
+		configx.WithValue(configuration.ViperKeyErrorsJSONIsEnabled, true),
+		configx.WithValue(configuration.ViperKeyAuthenticatorNoopIsEnabled, true),
+		configx.WithValue(configuration.ViperKeyAuthenticatorUnauthorizedIsEnabled, true),
+		configx.WithValue(configuration.ViperKeyAuthenticatorAnonymousIsEnabled, true),
+		configx.WithValue(configuration.ViperKeyAuthorizerAllowIsEnabled, true),
+		configx.WithValue(configuration.ViperKeyAuthorizerDenyIsEnabled, true),
+		configx.WithValue(configuration.ViperKeyMutatorNoopIsEnabled, true),
+		configx.WithValue(configuration.ViperKeyErrorsWWWAuthenticateIsEnabled, true),
+	)
+	require.NoError(t, err)
+
+	reg := driver.NewRegistryMemory().WithConfig(conf).(*driver.RegistryMemory).
+		WithBrokenPipelineMutator()
 
 	d := reg.DecisionHandler()
 

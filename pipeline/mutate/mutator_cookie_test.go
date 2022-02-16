@@ -2,17 +2,18 @@ package mutate_test
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"testing"
 	"text/template"
 
-	"github.com/ory/viper"
+	"github.com/ory/oathkeeper/driver"
+	"github.com/ory/x/configx"
+	"github.com/ory/x/logrusx"
 
 	"github.com/ory/oathkeeper/driver/configuration"
-	"github.com/ory/oathkeeper/internal"
-
 	"github.com/ory/oathkeeper/pipeline/authn"
 	. "github.com/ory/oathkeeper/pipeline/mutate"
 
@@ -24,8 +25,12 @@ import (
 )
 
 func TestCredentialsIssuerCookies(t *testing.T) {
-	conf := internal.NewConfigurationWithDefaults()
-	reg := internal.NewRegistry(conf)
+	conf, err := configuration.NewViperProvider(context.Background(), logrusx.New("", ""),
+		configx.WithValue("log.level", "debug"),
+		configx.WithValue(configuration.ViperKeyErrorsJSONIsEnabled, true))
+	require.NoError(t, err)
+
+	reg := driver.NewRegistryMemory().WithConfig(conf)
 
 	a, err := reg.PipelineMutator("cookie")
 	require.NoError(t, err)
@@ -206,11 +211,10 @@ func TestCredentialsIssuerCookies(t *testing.T) {
 		})
 
 		t.Run("method=validate", func(t *testing.T) {
-			viper.Set(configuration.ViperKeyMutatorCookieIsEnabled, true)
+			conf.Source().Set(configuration.ViperKeyMutatorCookieIsEnabled, true)
 			require.Error(t, a.Validate(json.RawMessage(`{}`)))
 
-			viper.Reset()
-			viper.Set(configuration.ViperKeyMutatorCookieIsEnabled, false)
+			conf.Source().Set(configuration.ViperKeyMutatorCookieIsEnabled, false)
 			require.Error(t, a.Validate(json.RawMessage(`{"cookies":{}}`)))
 		})
 	})

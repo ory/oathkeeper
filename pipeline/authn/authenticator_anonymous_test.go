@@ -21,14 +21,16 @@
 package authn_test
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 	"testing"
 
-	"github.com/ory/viper"
+	"github.com/ory/oathkeeper/driver"
+	"github.com/ory/x/configx"
+	"github.com/ory/x/logrusx"
 
 	"github.com/ory/oathkeeper/driver/configuration"
-	"github.com/ory/oathkeeper/internal"
 	"github.com/ory/oathkeeper/pipeline/authn"
 
 	"github.com/stretchr/testify/assert"
@@ -36,9 +38,12 @@ import (
 )
 
 func TestAuthenticatorAnonymous(t *testing.T) {
-	conf := internal.NewConfigurationWithDefaults()
-	// viper.Set(configuration.ViperKeyAuthenticatorAnonymousIdentifier, "anon")
-	reg := internal.NewRegistry(conf)
+	conf, err := configuration.NewViperProvider(context.Background(), logrusx.New("", ""),
+		configx.WithValue("log.level", "debug"),
+		configx.WithValue(configuration.ViperKeyErrorsJSONIsEnabled, true))
+	require.NoError(t, err)
+
+	reg := driver.NewRegistryMemory().WithConfig(conf)
 
 	session := new(authn.AuthenticationSession)
 
@@ -66,11 +71,10 @@ func TestAuthenticatorAnonymous(t *testing.T) {
 	})
 
 	t.Run("method=validate", func(t *testing.T) {
-		viper.Set(configuration.ViperKeyAuthenticatorAnonymousIsEnabled, true)
+		conf.Source().Set(configuration.ViperKeyAuthenticatorAnonymousIsEnabled, true)
 		require.NoError(t, a.Validate(json.RawMessage(`{"subject":"foo"}`)))
 
-		viper.Reset()
-		viper.Set(configuration.ViperKeyAuthenticatorAnonymousIsEnabled, false)
+		conf.Source().Set(configuration.ViperKeyAuthenticatorAnonymousIsEnabled, false)
 		require.Error(t, a.Validate(json.RawMessage(`{"subject":"foo"}`)))
 	})
 }

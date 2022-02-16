@@ -33,6 +33,9 @@ import (
 	"text/template"
 	"time"
 
+	"github.com/ory/oathkeeper/driver"
+	"github.com/ory/x/configx"
+	"github.com/ory/x/logrusx"
 	"github.com/tidwall/sjson"
 
 	"github.com/ory/oathkeeper/rule"
@@ -40,11 +43,8 @@ import (
 
 	"github.com/golang-jwt/jwt/v4"
 
-	"github.com/ory/viper"
-
 	"github.com/ory/oathkeeper/credentials"
 	"github.com/ory/oathkeeper/driver/configuration"
-	"github.com/ory/oathkeeper/internal"
 	"github.com/ory/oathkeeper/pipeline/authn"
 	. "github.com/ory/oathkeeper/pipeline/mutate"
 
@@ -200,14 +200,17 @@ func parseToken(h http.Header) string {
 }
 
 func TestMutatorIDToken(t *testing.T) {
-	conf := internal.NewConfigurationWithDefaults()
-	reg := internal.NewRegistry(conf)
+	conf, err := configuration.NewViperProvider(context.Background(), logrusx.New("", ""),
+		configx.WithValue("log.level", "debug"),
+		configx.WithValue(configuration.ViperKeyErrorsJSONIsEnabled, true),
+		configx.WithValue("mutators.id_token.config.issuer_url", "/foo/bar"))
+	require.NoError(t, err)
+
+	reg := driver.NewRegistryMemory().WithConfig(conf)
 
 	a, err := reg.PipelineMutator("id_token")
 	require.NoError(t, err)
 	assert.Equal(t, "id_token", a.GetID())
-
-	viper.Set("mutators.id_token.config.issuer_url", "/foo/bar")
 
 	t.Run("method=mutate", func(t *testing.T) {
 		r := &http.Request{}
@@ -372,8 +375,7 @@ func TestMutatorIDToken(t *testing.T) {
 			{e: true, i: "http://baz/foo", j: "http://baz/foo", pass: true},
 		} {
 			t.Run(fmt.Sprintf("case=%d", k), func(t *testing.T) {
-				viper.Reset()
-				viper.Set(configuration.ViperKeyMutatorIDTokenIsEnabled, tc.e)
+				conf.Source().Set(configuration.ViperKeyMutatorIDTokenIsEnabled, tc.e)
 				err := a.Validate(json.RawMessage(`{"issuer_url":"` + tc.i + `", "jwks_url": "` + tc.j + `"}`))
 				if tc.pass {
 					require.NoError(t, err)
@@ -388,8 +390,12 @@ func TestMutatorIDToken(t *testing.T) {
 func BenchmarkMutatorIDToken(b *testing.B) {
 	issuers := []string{"foo", "bar", "baz", "zab"}
 
-	conf := internal.NewConfigurationWithDefaults()
-	reg := internal.NewRegistry(conf)
+	conf, err := configuration.NewViperProvider(context.Background(), logrusx.New("", ""),
+		configx.WithValue("log.level", "debug"),
+		configx.WithValue(configuration.ViperKeyErrorsJSONIsEnabled, true))
+	require.NoError(b, err)
+
+	reg := driver.NewRegistryMemory().WithConfig(conf)
 	rl := &rule.Rule{ID: "test-rule"}
 	r := &http.Request{}
 
@@ -419,7 +425,7 @@ func BenchmarkMutatorIDToken(b *testing.B) {
 					for i := 0; i < b.N; i++ {
 						tc = tcs[i%len(tcs)]
 						config, _ = sjson.SetBytes(tc.Config, "jwks_url", key)
-						viper.Set("mutators.id_token.config.issuer_url", "/"+issuers[i%len(issuers)])
+						conf.Source().Set("mutators.id_token.config.issuer_url", "/"+issuers[i%len(issuers)])
 
 						b.StartTimer()
 						err := a.Mutate(r, tc.Session, config, rl)

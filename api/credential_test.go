@@ -8,22 +8,26 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/ory/oathkeeper/driver"
+	"github.com/ory/x/configx"
+	"github.com/ory/x/logrusx"
 	"github.com/square/go-jose"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/ory/viper"
-
 	"github.com/ory/oathkeeper/driver/configuration"
-	"github.com/ory/oathkeeper/internal"
 	"github.com/ory/oathkeeper/rule"
 	"github.com/ory/oathkeeper/x"
 )
 
 func TestCredentialsHandler(t *testing.T) {
-	conf := internal.NewConfigurationWithDefaults()
-	viper.Set(configuration.ViperKeyMutatorIDTokenJWKSURL, "file://../test/stub/jwks-rsa-multiple.json")
-	r := internal.NewRegistry(conf)
+	conf, err := configuration.NewViperProvider(context.Background(), logrusx.New("", ""),
+		configx.WithValue("log.level", "debug"),
+		configx.WithValue(configuration.ViperKeyErrorsJSONIsEnabled, true),
+		configx.WithValue(configuration.ViperKeyMutatorIDTokenJWKSURL, "file://../test/stub/jwks-rsa-multiple.json"))
+	require.NoError(t, err)
+
+	r := driver.NewRegistryMemory().WithConfig(conf)
 
 	require.NoError(t, r.RuleRepository().Set(
 		context.Background(),

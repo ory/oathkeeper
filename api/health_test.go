@@ -1,16 +1,20 @@
 package api_test
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 	"time"
 
+	"github.com/ory/oathkeeper/driver"
+	"github.com/ory/oathkeeper/driver/configuration"
+	"github.com/ory/x/configx"
+	"github.com/ory/x/logrusx"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/ory/oathkeeper/internal"
 	rulereadiness "github.com/ory/oathkeeper/rule/readiness"
 	"github.com/ory/oathkeeper/x"
 )
@@ -23,11 +27,14 @@ type statusResult struct {
 }
 
 func TestHealth(t *testing.T) {
-	conf := internal.NewConfigurationWithDefaults()
-	r := internal.NewRegistry(conf)
+	conf, err := configuration.NewViperProvider(context.Background(), logrusx.New("", ""),
+		configx.WithValue("log.level", "debug"),
+		configx.WithValue(configuration.ViperKeyErrorsJSONIsEnabled, true))
+	require.NoError(t, err)
+	r := driver.NewRegistryMemory().WithConfig(conf)
 
 	router := x.NewAPIRouter()
-	r.HealthHandler().SetRoutes(router.Router, true)
+	r.HealthHandler().SetHealthRoutes(router.Router, true)
 	server := httptest.NewServer(router)
 	defer server.Close()
 

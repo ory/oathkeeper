@@ -21,21 +21,26 @@
 package authn_test
 
 import (
+	"context"
 	"net/http"
 	"testing"
 
-	"github.com/ory/viper"
+	"github.com/ory/oathkeeper/driver"
+	"github.com/ory/x/configx"
+	"github.com/ory/x/logrusx"
 
 	"github.com/ory/oathkeeper/driver/configuration"
-	"github.com/ory/oathkeeper/internal"
-
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func TestAuthenticatorBroken(t *testing.T) {
-	conf := internal.NewConfigurationWithDefaults()
-	reg := internal.NewRegistry(conf)
+	conf, err := configuration.NewViperProvider(context.Background(), logrusx.New("", ""),
+		configx.WithValue("log.level", "debug"),
+		configx.WithValue(configuration.ViperKeyErrorsJSONIsEnabled, true))
+	require.NoError(t, err)
+
+	reg := driver.NewRegistryMemory().WithConfig(conf)
 
 	a, err := reg.PipelineAuthenticator("unauthorized")
 	require.NoError(t, err)
@@ -47,11 +52,10 @@ func TestAuthenticatorBroken(t *testing.T) {
 	})
 
 	t.Run("method=validate", func(t *testing.T) {
-		viper.Set(configuration.ViperKeyAuthenticatorUnauthorizedIsEnabled, true)
+		conf.Source().Set(configuration.ViperKeyAuthenticatorUnauthorizedIsEnabled, true)
 		require.NoError(t, a.Validate(nil))
 
-		viper.Reset()
-		viper.Set(configuration.ViperKeyAuthenticatorUnauthorizedIsEnabled, false)
+		conf.Source().Set(configuration.ViperKeyAuthenticatorUnauthorizedIsEnabled, false)
 		require.Error(t, a.Validate(nil))
 	})
 }

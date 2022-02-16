@@ -1,31 +1,31 @@
 package authn
 
 import (
+	"context"
 	"net/http/httptest"
 	"testing"
 	"time"
 
 	"github.com/julienschmidt/httprouter"
+	"github.com/ory/x/configx"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/clientcredentials"
 
 	"github.com/ory/oathkeeper/driver/configuration"
-	"github.com/ory/viper"
 	"github.com/ory/x/logrusx"
 )
 
 func TestClientCredentialsCache(t *testing.T) {
-	viper.Reset()
-
 	ts := httptest.NewServer(httprouter.New())
 
-	viper.Set("authenticators.oauth2_client_credentials.config.token_url", ts.URL+"/oauth2/token")
-	viper.Set("authenticators.oauth2_client_credentials.config.cache.enabled", true)
-
 	logger := logrusx.New("", "")
-	c := configuration.NewViperProvider(logger)
+	c, err := configuration.NewViperProvider(context.Background(), logger,
+		configx.WithValue("authenticators.oauth2_client_credentials.config.token_url", ts.URL+"/oauth2/token"),
+		configx.WithValue("authenticators.oauth2_client_credentials.config.cache.enabled", true))
+	require.NoError(t, err)
+
 	a := NewAuthenticatorOAuth2ClientCredentials(c, logger)
 	assert.Equal(t, "oauth2_client_credentials", a.GetID())
 

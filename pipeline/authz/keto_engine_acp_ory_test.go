@@ -21,6 +21,7 @@
 package authz_test
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -28,12 +29,12 @@ import (
 	"net/url"
 	"testing"
 
+	"github.com/ory/oathkeeper/driver"
+	"github.com/ory/x/configx"
+	"github.com/ory/x/logrusx"
 	"github.com/tidwall/sjson"
 
-	"github.com/ory/viper"
-
 	"github.com/ory/oathkeeper/driver/configuration"
-	"github.com/ory/oathkeeper/internal"
 	"github.com/ory/oathkeeper/x"
 
 	"github.com/ory/oathkeeper/pipeline/authn"
@@ -47,8 +48,12 @@ import (
 )
 
 func TestAuthorizerKetoWarden(t *testing.T) {
-	conf := internal.NewConfigurationWithDefaults()
-	reg := internal.NewRegistry(conf)
+	conf, err := configuration.NewViperProvider(context.Background(), logrusx.New("", ""),
+		configx.WithValue("log.level", "debug"),
+		configx.WithValue(configuration.ViperKeyErrorsJSONIsEnabled, true))
+	require.NoError(t, err)
+
+	reg := driver.NewRegistryMemory().WithConfig(conf)
 
 	rule := &rule.Rule{ID: "TestAuthorizer"}
 
@@ -198,17 +203,16 @@ func TestAuthorizerKetoWarden(t *testing.T) {
 	}
 
 	t.Run("method=validate", func(t *testing.T) {
-		viper.Set(configuration.ViperKeyAuthorizerKetoEngineACPORYIsEnabled, false)
+		conf.Source().Set(configuration.ViperKeyAuthorizerKetoEngineACPORYIsEnabled, false)
 		require.Error(t, a.Validate(json.RawMessage(`{"base_url":"","required_action":"foo","required_resource":"bar"}`)))
 
-		viper.Set(configuration.ViperKeyAuthorizerKetoEngineACPORYIsEnabled, false)
+		conf.Source().Set(configuration.ViperKeyAuthorizerKetoEngineACPORYIsEnabled, false)
 		require.Error(t, a.Validate(json.RawMessage(`{"base_url":"http://foo/bar","required_action":"foo","required_resource":"bar"}`)))
 
-		viper.Reset()
-		viper.Set(configuration.ViperKeyAuthorizerKetoEngineACPORYIsEnabled, true)
+		conf.Source().Set(configuration.ViperKeyAuthorizerKetoEngineACPORYIsEnabled, true)
 		require.Error(t, a.Validate(json.RawMessage(`{"base_url":"","required_action":"foo","required_resource":"bar"}`)))
 
-		viper.Set(configuration.ViperKeyAuthorizerKetoEngineACPORYIsEnabled, true)
+		conf.Source().Set(configuration.ViperKeyAuthorizerKetoEngineACPORYIsEnabled, true)
 		require.NoError(t, a.Validate(json.RawMessage(`{"base_url":"http://foo/bar","required_action":"foo","required_resource":"bar"}`)))
 	})
 }

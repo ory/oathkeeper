@@ -21,14 +21,16 @@
 package rule_test
 
 import (
+	"context"
 	"fmt"
 	"strings"
 	"testing"
 
-	"github.com/ory/viper"
+	"github.com/ory/oathkeeper/driver"
+	"github.com/ory/x/configx"
+	"github.com/ory/x/logrusx"
 
 	"github.com/ory/oathkeeper/driver/configuration"
-	"github.com/ory/oathkeeper/internal"
 	. "github.com/ory/oathkeeper/rule"
 
 	"github.com/pkg/errors"
@@ -39,28 +41,23 @@ import (
 )
 
 func TestValidateRule(t *testing.T) {
-	var prep = func(an, az, m bool) func() {
-		return func() {
-			viper.Set(configuration.ViperKeyAuthenticatorNoopIsEnabled, an)
-			viper.Set(configuration.ViperKeyAuthorizerAllowIsEnabled, az)
-			viper.Set(configuration.ViperKeyMutatorNoopIsEnabled, m)
-		}
-	}
-
 	for k, tc := range []struct {
-		setup     func()
-		r         *Rule
-		expectErr string
+		configOpts func() []configx.OptionModifier
+		r          *Rule
+		expectErr  string
 	}{
 		{
-			r:         &Rule{},
-			expectErr: `Value "match" is empty but must be set.`,
+			configOpts: func() []configx.OptionModifier { return nil },
+			r:          &Rule{},
+			expectErr:  `Value "match" is empty but must be set.`,
 		},
 		{
-			r:         &Rule{Match: &Match{}},
-			expectErr: `Value "" of "match.url" field is not a valid url.`,
+			configOpts: func() []configx.OptionModifier { return nil },
+			r:          &Rule{Match: &Match{}},
+			expectErr:  `Value "" of "match.url" field is not a valid url.`,
 		},
 		{
+			configOpts: func() []configx.OptionModifier { return nil },
 			r: &Rule{
 				Match:    &Match{URL: "https://www.ory.sh", Methods: []string{"POST"}},
 				Upstream: Upstream{URL: "https://www.ory.sh"},
@@ -68,7 +65,13 @@ func TestValidateRule(t *testing.T) {
 			expectErr: `Value of "authenticators" must be set and can not be an empty array.`,
 		},
 		{
-			setup: prep(true, false, false),
+			configOpts: func() []configx.OptionModifier {
+				return []configx.OptionModifier{
+					configx.WithValue(configuration.ViperKeyAuthenticatorNoopIsEnabled, true),
+					configx.WithValue(configuration.ViperKeyAuthorizerAllowIsEnabled, false),
+					configx.WithValue(configuration.ViperKeyMutatorNoopIsEnabled, false),
+				}
+			},
 			r: &Rule{
 				Match:          &Match{URL: "https://www.ory.sh", Methods: []string{"POST"}},
 				Upstream:       Upstream{URL: "https://www.ory.sh"},
@@ -77,7 +80,13 @@ func TestValidateRule(t *testing.T) {
 			expectErr: `Value "foo" of "authenticators[0]" is not in list of supported authenticators: `,
 		},
 		{
-			setup: prep(false, false, false),
+			configOpts: func() []configx.OptionModifier {
+				return []configx.OptionModifier{
+					configx.WithValue(configuration.ViperKeyAuthenticatorNoopIsEnabled, false),
+					configx.WithValue(configuration.ViperKeyAuthorizerAllowIsEnabled, false),
+					configx.WithValue(configuration.ViperKeyMutatorNoopIsEnabled, false),
+				}
+			},
 			r: &Rule{
 				Match:          &Match{URL: "https://www.ory.sh", Methods: []string{"POST"}},
 				Upstream:       Upstream{URL: "https://www.ory.sh"},
@@ -86,7 +95,13 @@ func TestValidateRule(t *testing.T) {
 			expectErr: `Authenticator "noop" is disabled per configuration.`,
 		},
 		{
-			setup: prep(true, false, false),
+			configOpts: func() []configx.OptionModifier {
+				return []configx.OptionModifier{
+					configx.WithValue(configuration.ViperKeyAuthenticatorNoopIsEnabled, true),
+					configx.WithValue(configuration.ViperKeyAuthorizerAllowIsEnabled, false),
+					configx.WithValue(configuration.ViperKeyMutatorNoopIsEnabled, false),
+				}
+			},
 			r: &Rule{
 				Match:          &Match{URL: "https://www.ory.sh", Methods: []string{"POST"}},
 				Upstream:       Upstream{URL: "https://www.ory.sh"},
@@ -95,7 +110,13 @@ func TestValidateRule(t *testing.T) {
 			expectErr: `Value of "authorizer.handler" can not be empty.`,
 		},
 		{
-			setup: prep(true, true, false),
+			configOpts: func() []configx.OptionModifier {
+				return []configx.OptionModifier{
+					configx.WithValue(configuration.ViperKeyAuthenticatorNoopIsEnabled, true),
+					configx.WithValue(configuration.ViperKeyAuthorizerAllowIsEnabled, true),
+					configx.WithValue(configuration.ViperKeyMutatorNoopIsEnabled, false),
+				}
+			},
 			r: &Rule{
 				Match:          &Match{URL: "https://www.ory.sh", Methods: []string{"POST"}},
 				Upstream:       Upstream{URL: "https://www.ory.sh"},
@@ -105,7 +126,13 @@ func TestValidateRule(t *testing.T) {
 			expectErr: `Value "foo" of "authorizer.handler" is not in list of supported authorizers: `,
 		},
 		{
-			setup: prep(true, true, false),
+			configOpts: func() []configx.OptionModifier {
+				return []configx.OptionModifier{
+					configx.WithValue(configuration.ViperKeyAuthenticatorNoopIsEnabled, true),
+					configx.WithValue(configuration.ViperKeyAuthorizerAllowIsEnabled, true),
+					configx.WithValue(configuration.ViperKeyMutatorNoopIsEnabled, false),
+				}
+			},
 			r: &Rule{
 				Match:          &Match{URL: "https://www.ory.sh", Methods: []string{"POST"}},
 				Upstream:       Upstream{URL: "https://www.ory.sh"},
@@ -115,7 +142,13 @@ func TestValidateRule(t *testing.T) {
 			expectErr: `Value of "mutators" must be set and can not be an empty array.`,
 		},
 		{
-			setup: prep(true, true, true),
+			configOpts: func() []configx.OptionModifier {
+				return []configx.OptionModifier{
+					configx.WithValue(configuration.ViperKeyAuthenticatorNoopIsEnabled, true),
+					configx.WithValue(configuration.ViperKeyAuthorizerAllowIsEnabled, true),
+					configx.WithValue(configuration.ViperKeyMutatorNoopIsEnabled, true),
+				}
+			},
 			r: &Rule{
 				Match:          &Match{URL: "https://www.ory.sh", Methods: []string{"POST"}},
 				Upstream:       Upstream{URL: "https://www.ory.sh"},
@@ -126,7 +159,13 @@ func TestValidateRule(t *testing.T) {
 			expectErr: `Value "foo" of "mutators[0]" is not in list of supported mutators: `,
 		},
 		{
-			setup: prep(true, true, true),
+			configOpts: func() []configx.OptionModifier {
+				return []configx.OptionModifier{
+					configx.WithValue(configuration.ViperKeyAuthenticatorNoopIsEnabled, true),
+					configx.WithValue(configuration.ViperKeyAuthorizerAllowIsEnabled, true),
+					configx.WithValue(configuration.ViperKeyMutatorNoopIsEnabled, true),
+				}
+			},
 			r: &Rule{
 				Match:          &Match{URL: "https://www.ory.sh", Methods: []string{"POST"}},
 				Upstream:       Upstream{URL: "https://www.ory.sh"},
@@ -136,7 +175,13 @@ func TestValidateRule(t *testing.T) {
 			},
 		},
 		{
-			setup: prep(true, true, true),
+			configOpts: func() []configx.OptionModifier {
+				return []configx.OptionModifier{
+					configx.WithValue(configuration.ViperKeyAuthenticatorNoopIsEnabled, true),
+					configx.WithValue(configuration.ViperKeyAuthorizerAllowIsEnabled, true),
+					configx.WithValue(configuration.ViperKeyMutatorNoopIsEnabled, true),
+				}
+			},
 			r: &Rule{
 				Match:          &Match{URL: "https://www.ory.sh", Methods: []string{"MKCOL"}},
 				Upstream:       Upstream{URL: "https://www.ory.sh"},
@@ -146,7 +191,13 @@ func TestValidateRule(t *testing.T) {
 			},
 		},
 		{
-			setup: prep(true, true, false),
+			configOpts: func() []configx.OptionModifier {
+				return []configx.OptionModifier{
+					configx.WithValue(configuration.ViperKeyAuthenticatorNoopIsEnabled, true),
+					configx.WithValue(configuration.ViperKeyAuthorizerAllowIsEnabled, true),
+					configx.WithValue(configuration.ViperKeyMutatorNoopIsEnabled, false),
+				}
+			},
 			r: &Rule{
 				Match:          &Match{URL: "https://www.ory.sh", Methods: []string{"POST"}},
 				Upstream:       Upstream{URL: "https://www.ory.sh"},
@@ -158,15 +209,16 @@ func TestValidateRule(t *testing.T) {
 		},
 	} {
 		t.Run(fmt.Sprintf("case=%d", k), func(t *testing.T) {
-			conf := internal.NewConfigurationWithDefaults()
-			if tc.setup != nil {
-				tc.setup()
-			}
+			conf, err := configuration.NewViperProvider(context.Background(), logrusx.New("", ""),
+				append(tc.configOpts(),
+					configx.WithValue("log.level", "debug"),
+					configx.WithValue(configuration.ViperKeyErrorsJSONIsEnabled, true))...)
+			require.NoError(t, err)
 
-			r := internal.NewRegistry(conf)
+			r := driver.NewRegistryMemory().WithConfig(conf)
 			v := NewValidatorDefault(r)
 
-			err := v.Validate(tc.r)
+			err = v.Validate(tc.r)
 			if tc.expectErr == "" {
 				require.NoError(t, err)
 				return

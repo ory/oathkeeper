@@ -7,13 +7,20 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
-
-	"github.com/ory/oathkeeper/internal"
+	"github.com/ory/oathkeeper/driver"
+	"github.com/ory/oathkeeper/driver/configuration"
+	"github.com/ory/x/configx"
+	"github.com/ory/x/logrusx"
+	"github.com/stretchr/testify/require"
 )
 
 func BenchmarkDefaultSigner(b *testing.B) {
-	conf := internal.NewConfigurationWithDefaults()
-	reg := internal.NewRegistry(conf)
+	conf, err := configuration.NewViperProvider(context.Background(), logrusx.New("", ""),
+		configx.WithValue("log.level", "debug"),
+		configx.WithValue(configuration.ViperKeyErrorsJSONIsEnabled, true))
+	require.NoError(b, err)
+
+	reg := driver.NewRegistryMemory().WithConfig(conf)
 	ctx := context.Background()
 
 	for alg, keys := range map[string]string{

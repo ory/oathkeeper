@@ -1,23 +1,30 @@
 package errors_test
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"testing"
 
 	"github.com/gobuffalo/httptest"
+	"github.com/ory/oathkeeper/driver"
+	"github.com/ory/oathkeeper/driver/configuration"
+	"github.com/ory/x/configx"
+	"github.com/ory/x/logrusx"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/tidwall/gjson"
 
 	"github.com/ory/herodot"
-
-	"github.com/ory/oathkeeper/internal"
 )
 
 func TestErrorJSON(t *testing.T) {
-	conf := internal.NewConfigurationWithDefaults()
-	reg := internal.NewRegistry(conf)
+	conf, err := configuration.NewViperProvider(context.Background(), logrusx.New("", ""),
+		configx.WithValue("log.level", "debug"),
+		configx.WithValue(configuration.ViperKeyErrorsJSONIsEnabled, true))
+	require.NoError(t, err)
+
+	reg := driver.NewRegistryMemory().WithConfig(conf)
 
 	a, err := reg.PipelineErrorHandler("json")
 	require.NoError(t, err)

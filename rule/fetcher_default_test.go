@@ -15,6 +15,8 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/ory/oathkeeper/driver"
+	"github.com/ory/x/configx"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -24,16 +26,18 @@ import (
 	"github.com/ory/x/stringslice"
 
 	"github.com/ory/oathkeeper/driver/configuration"
-	"github.com/ory/oathkeeper/internal"
 	"github.com/ory/oathkeeper/internal/cloudstorage"
 )
 
 const testRule = `[{"id":"test-rule-5","upstream":{"preserve_host":true,"strip_path":"/api","url":"mybackend.com/api"},"match":{"url":"myproxy.com/api","methods":["GET","POST"]},"authenticators":[{"handler":"noop"},{"handler":"anonymous"}],"authorizer":{"handler":"allow"},"mutators":[{"handler":"noop"}]}]`
 
 func TestFetcherReload(t *testing.T) {
-	wiper.Reset()
-	conf := internal.NewConfigurationWithDefaults() // this resets viper and must be at the top
-	r := internal.NewRegistry(conf)
+	conf, err := configuration.NewViperProvider(context.Background(), logrusx.New("", ""),
+		configx.WithValue("log.level", "debug"),
+		configx.WithValue(configuration.ViperKeyErrorsJSONIsEnabled, true))
+	require.NoError(t, err)
+
+	r := driver.NewRegistryMemory().WithConfig(conf)
 	testConfigPath := "../test/update"
 
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -131,9 +135,12 @@ func TestFetcherReload(t *testing.T) {
 }
 
 func TestFetcherWatchConfig(t *testing.T) {
-	wiper.Reset()
-	conf := internal.NewConfigurationWithDefaults() // this resets viper and must be at the top
-	r := internal.NewRegistry(conf)
+	conf, err := configuration.NewViperProvider(context.Background(), logrusx.New("", ""),
+		configx.WithValue("log.level", "debug"),
+		configx.WithValue(configuration.ViperKeyErrorsJSONIsEnabled, true))
+	require.NoError(t, err)
+
+	r := driver.NewRegistryMemory().WithConfig(conf)
 
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		_, _ = w.Write([]byte(testRule))
@@ -231,8 +238,12 @@ func TestFetcherWatchRepositoryFromFS(t *testing.T) {
 		t.Skip("Skipping watcher tests on windows")
 	}
 
-	conf := internal.NewConfigurationWithDefaults() // this resets viper!!
-	r := internal.NewRegistry(conf)
+	conf, err := configuration.NewViperProvider(context.Background(), logrusx.New("", ""),
+		configx.WithValue("log.level", "debug"),
+		configx.WithValue(configuration.ViperKeyErrorsJSONIsEnabled, true))
+	require.NoError(t, err)
+
+	r := driver.NewRegistryMemory().WithConfig(conf)
 
 	dir := path.Join(os.TempDir(), uuid.New().String())
 	require.NoError(t, os.MkdirAll(dir, 0777))
@@ -287,17 +298,19 @@ func TestFetcherWatchRepositoryFromKubernetesConfigMap(t *testing.T) {
 	if runtime.GOOS == "windows" {
 		t.Skip()
 	}
-	wiper.Reset()
-	conf := internal.NewConfigurationWithDefaults() // this must be at the top because it resets viper
-	r := internal.NewRegistry(conf)
 
 	// Set up temp dir and file to watch
 	watchDir, err := ioutil.TempDir("", uuid.New().String())
 	require.NoError(t, err)
 	watchFile := path.Join(watchDir, "access-rules.json")
 
-	// Configure watcher
-	wiper.Set(configuration.ViperKeyAccessRuleRepositories, []string{"file://" + watchFile})
+	conf, err := configuration.NewViperProvider(context.Background(), logrusx.New("", ""),
+		configx.WithValue("log.level", "debug"),
+		configx.WithValue(configuration.ViperKeyErrorsJSONIsEnabled, true),
+		configx.WithValue(configuration.ViperKeyAccessRuleRepositories, []string{"file://" + watchFile}))
+	require.NoError(t, err)
+
+	r := driver.NewRegistryMemory().WithConfig(conf)
 
 	// This emulates a config map update
 	// drwxr-xr-x    2 root     root          4096 Aug  1 07:42 ..2019_08_01_07_42_33.068812649
@@ -371,8 +384,11 @@ func TestFetchRulesFromObjectStorage(t *testing.T) {
 
 	cloudstorage.SetCurrentTest(t)
 
-	conf := internal.NewConfigurationWithDefaults() // this must be at the top because it resets viper
-	r := internal.NewRegistry(conf)
+	conf, err := configuration.NewViperProvider(context.Background(), logrusx.New("", ""),
+		configx.WithValue("log.level", "debug"),
+		configx.WithValue(configuration.ViperKeyErrorsJSONIsEnabled, true))
+	require.NoError(t, err)
+	r := driver.NewRegistryMemory().WithConfig(conf)
 
 	dir := path.Join(os.TempDir(), uuid.New().String())
 	require.NoError(t, os.MkdirAll(dir, 0777))

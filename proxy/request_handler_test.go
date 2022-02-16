@@ -21,26 +21,29 @@
 package proxy_test
 
 import (
-	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
+	"github.com/ory/oathkeeper/driver"
+	"github.com/ory/x/configx"
+	"github.com/ory/x/logrusx"
 	"github.com/stretchr/testify/assert"
 
 	"github.com/ory/herodot"
-	"github.com/ory/viper"
 
 	"github.com/ory/oathkeeper/driver/configuration"
-	"github.com/ory/oathkeeper/internal"
 	"github.com/ory/oathkeeper/pipeline/authn"
 	"github.com/ory/oathkeeper/x"
 
 	"github.com/stretchr/testify/require"
 
 	"github.com/ory/oathkeeper/rule"
+
+	"github.com/knadh/koanf/parsers/yaml"
 )
 
 var TestHeader = http.Header{"Test-Header": []string{"Test-Value"}}
@@ -51,12 +54,12 @@ func newTestRequest(u string) *http.Request {
 
 func TestHandleError(t *testing.T) {
 	for k, tc := range []struct {
-		d        string
-		inputErr error
-		rule     *rule.Rule
-		header   http.Header
-		assert   func(t *testing.T, w *httptest.ResponseRecorder)
-		setup    func(t *testing.T)
+		d          string
+		inputErr   error
+		rule       *rule.Rule
+		header     http.Header
+		assert     func(t *testing.T, w *httptest.ResponseRecorder)
+		configOpts func(t *testing.T) []configx.OptionModifier
 	}{
 		{
 			d:        "should return a JSON error per default and work with nil rules",
@@ -69,8 +72,10 @@ func TestHandleError(t *testing.T) {
 		{
 			d:        "should return a 500 error when no handler is enabled",
 			inputErr: &herodot.ErrNotFound,
-			setup: func(t *testing.T) {
-				viper.Set(configuration.ViperKeyErrorsJSONIsEnabled, false)
+			configOpts: func(t *testing.T) []configx.OptionModifier {
+				return []configx.OptionModifier{
+					configx.WithValue(configuration.ViperKeyErrorsJSONIsEnabled, false),
+				}
 			},
 			assert: func(t *testing.T, w *httptest.ResponseRecorder) {
 				assert.Equal(t, 500, w.Code)
@@ -79,8 +84,10 @@ func TestHandleError(t *testing.T) {
 		{
 			d:        "should return the found response",
 			inputErr: &herodot.ErrUnauthorized,
-			setup: func(t *testing.T) {
-				viper.Set(configuration.ViperKeyErrorsRedirectIsEnabled, true)
+			configOpts: func(t *testing.T) []configx.OptionModifier {
+				return []configx.OptionModifier{
+					configx.WithValue(configuration.ViperKeyErrorsRedirectIsEnabled, true),
+				}
 			},
 			rule: &rule.Rule{
 				Errors: []rule.ErrorHandler{{
@@ -96,9 +103,11 @@ func TestHandleError(t *testing.T) {
 		{
 			d:        "should return a JSON error because the error is not unauthorized and JSON is the default",
 			inputErr: &herodot.ErrNotFound,
-			setup: func(t *testing.T) {
-				viper.Set(configuration.ViperKeyErrorsRedirectIsEnabled, true)
-				viper.Set(configuration.ViperKeyErrors+".redirect.config.to", "http://test/test")
+			configOpts: func(t *testing.T) []configx.OptionModifier {
+				return []configx.OptionModifier{
+					configx.WithValue(configuration.ViperKeyErrorsRedirectIsEnabled, true),
+					configx.WithValue(configuration.ViperKeyErrors+".redirect.config.to", "http://test/test"),
+				}
 			},
 			rule: &rule.Rule{
 				Errors: []rule.ErrorHandler{{
@@ -114,8 +123,10 @@ func TestHandleError(t *testing.T) {
 		{
 			d:        "should pick the appropriate (json) error handler for the request when multiple are configured",
 			inputErr: &herodot.ErrNotFound,
-			setup: func(t *testing.T) {
-				viper.Set(configuration.ViperKeyErrorsRedirectIsEnabled, true)
+			configOpts: func(t *testing.T) []configx.OptionModifier {
+				return []configx.OptionModifier{
+					configx.WithValue(configuration.ViperKeyErrorsRedirectIsEnabled, true),
+				}
 			},
 			header: map[string][]string{"Accept": {"application/json"}},
 			rule: &rule.Rule{
@@ -135,8 +146,10 @@ func TestHandleError(t *testing.T) {
 		{
 			d:        "should redirect to the specified endpoint by picking the appropriate error handler (redirect)",
 			inputErr: &herodot.ErrUnauthorized,
-			setup: func(t *testing.T) {
-				viper.Set(configuration.ViperKeyErrorsRedirectIsEnabled, true)
+			configOpts: func(t *testing.T) []configx.OptionModifier {
+				return []configx.OptionModifier{
+					configx.WithValue(configuration.ViperKeyErrorsRedirectIsEnabled, true),
+				}
 			},
 			header: map[string][]string{"Accept": {"application/xml"}},
 			rule: &rule.Rule{
@@ -156,10 +169,12 @@ func TestHandleError(t *testing.T) {
 		{
 			d:        "should respond with the appropriate fallback handler (here www_authenticate)",
 			inputErr: &herodot.ErrUnauthorized,
-			setup: func(t *testing.T) {
-				viper.Set(configuration.ViperKeyErrorsRedirectIsEnabled, true)
-				viper.Set(configuration.ViperKeyErrorsWWWAuthenticateIsEnabled, true)
-				viper.Set(configuration.ViperKeyErrorsFallback, []string{"www_authenticate", "json"})
+			configOpts: func(t *testing.T) []configx.OptionModifier {
+				return []configx.OptionModifier{
+					configx.WithValue(configuration.ViperKeyErrorsRedirectIsEnabled, true),
+					configx.WithValue(configuration.ViperKeyErrorsWWWAuthenticateIsEnabled, true),
+					configx.WithValue(configuration.ViperKeyErrorsFallback, []string{"www_authenticate", "json"}),
+				}
 			},
 			header: map[string][]string{"Accept": {"mime/undefined"}},
 			rule: &rule.Rule{
@@ -179,12 +194,10 @@ func TestHandleError(t *testing.T) {
 		{
 			d:        "should respond with the appropriate fallback handler (here json)",
 			inputErr: &herodot.ErrForbidden,
-			setup: func(t *testing.T) {
-				viper.SetConfigType("yaml")
-
+			configOpts: func(t *testing.T) []configx.OptionModifier {
 				// We set the fallback to first run www_authenticate. But because the error is not_found, as
 				// is defined in the when clause, we should see a json error instead!
-				require.NoError(t, viper.ReadConfig(bytes.NewBufferString(`
+				vals, err := yaml.Parser().Unmarshal([]byte(`
 errors:
   fallback:
     - www_authenticate
@@ -200,7 +213,12 @@ errors:
         when:
           - error:
             - not_found
-`)))
+`))
+				require.NoError(t, err)
+
+				return []configx.OptionModifier{
+					configx.WithValues(vals),
+				}
 			},
 			header: map[string][]string{"Accept": {"mime/undefined"}},
 			rule: &rule.Rule{
@@ -220,12 +238,10 @@ errors:
 		{
 			d:        "should return a 500 error because no fallback could handle the error",
 			inputErr: &herodot.ErrForbidden,
-			setup: func(t *testing.T) {
-				viper.SetConfigType("yaml")
-
+			configOpts: func(t *testing.T) []configx.OptionModifier {
 				// We set the fallback to first run www_authenticate. But because the error is not_found, as
 				// is defined in the when clause, we should see the 500 misconfigured error
-				require.NoError(t, viper.ReadConfig(bytes.NewBufferString(`
+				vals, err := yaml.Parser().Unmarshal([]byte(`
 errors:
   fallback:
     - www_authenticate
@@ -236,7 +252,12 @@ errors:
         when:
           - error:
             - not_found
-`)))
+`))
+				require.NoError(t, err)
+
+				return []configx.OptionModifier{
+					configx.WithValues(vals),
+				}
 			},
 			header: map[string][]string{"Accept": {"mime/undefined"}},
 			rule: &rule.Rule{
@@ -256,12 +277,13 @@ errors:
 		},
 	} {
 		t.Run(fmt.Sprintf("case=%d/description=%s", k, tc.d), func(t *testing.T) {
-			conf := internal.NewConfigurationWithDefaults()
-			reg := internal.NewRegistry(conf)
+			conf, err := configuration.NewViperProvider(context.Background(), logrusx.New("", ""),
+				append(tc.configOpts(t),
+					configx.WithValue("log.level", "debug"),
+					configx.WithValue(configuration.ViperKeyErrorsJSONIsEnabled, true))...)
+			require.NoError(t, err)
 
-			if tc.setup != nil {
-				tc.setup(t)
-			}
+			reg := driver.NewRegistryMemory().WithConfig(conf)
 
 			r := httptest.NewRequest("GET", "/test", nil)
 			w := httptest.NewRecorder()
@@ -275,11 +297,11 @@ errors:
 
 func TestRequestHandler(t *testing.T) {
 	for k, tc := range []struct {
-		d         string
-		setup     func()
-		rule      rule.Rule
-		r         *http.Request
-		expectErr bool
+		d          string
+		configOpts func() []configx.OptionModifier
+		rule       rule.Rule
+		r          *http.Request
+		expectErr  bool
 	}{
 		{
 			d:         "should fail because the rule is missing authn, authz, and mutator",
@@ -293,10 +315,12 @@ func TestRequestHandler(t *testing.T) {
 		},
 		{
 			d: "should fail because the rule is missing authn, authz, and mutator even when some pipelines are enabled",
-			setup: func() {
-				viper.Set(configuration.ViperKeyAuthenticatorNoopIsEnabled, true)
-				viper.Set(configuration.ViperKeyAuthorizerAllowIsEnabled, true)
-				viper.Set(configuration.ViperKeyMutatorNoopIsEnabled, true)
+			configOpts: func() []configx.OptionModifier {
+				return []configx.OptionModifier{
+					configx.WithValue(configuration.ViperKeyAuthenticatorNoopIsEnabled, true),
+					configx.WithValue(configuration.ViperKeyAuthorizerAllowIsEnabled, true),
+					configx.WithValue(configuration.ViperKeyMutatorNoopIsEnabled, true),
+				}
 			},
 			expectErr: true,
 			r:         newTestRequest("http://localhost"),
@@ -308,10 +332,12 @@ func TestRequestHandler(t *testing.T) {
 		},
 		{
 			d: "should pass",
-			setup: func() {
-				viper.Set(configuration.ViperKeyAuthenticatorNoopIsEnabled, true)
-				viper.Set(configuration.ViperKeyAuthorizerAllowIsEnabled, true)
-				viper.Set(configuration.ViperKeyMutatorNoopIsEnabled, true)
+			configOpts: func() []configx.OptionModifier {
+				return []configx.OptionModifier{
+					configx.WithValue(configuration.ViperKeyAuthenticatorNoopIsEnabled, true),
+					configx.WithValue(configuration.ViperKeyAuthorizerAllowIsEnabled, true),
+					configx.WithValue(configuration.ViperKeyMutatorNoopIsEnabled, true),
+				}
 			},
 			expectErr: false,
 			r:         newTestRequest("http://localhost"),
@@ -323,10 +349,12 @@ func TestRequestHandler(t *testing.T) {
 		},
 		{
 			d: "should fail when authn is set but not authz nor mutator",
-			setup: func() {
-				viper.Set(configuration.ViperKeyAuthenticatorAnonymousIsEnabled, true)
-				viper.Set(configuration.ViperKeyAuthorizerAllowIsEnabled, true)
-				viper.Set(configuration.ViperKeyMutatorNoopIsEnabled, true)
+			configOpts: func() []configx.OptionModifier {
+				return []configx.OptionModifier{
+					configx.WithValue(configuration.ViperKeyAuthenticatorAnonymousIsEnabled, true),
+					configx.WithValue(configuration.ViperKeyAuthorizerAllowIsEnabled, true),
+					configx.WithValue(configuration.ViperKeyMutatorNoopIsEnabled, true),
+				}
 			},
 			expectErr: true,
 			r:         newTestRequest("http://localhost"),
@@ -338,10 +366,12 @@ func TestRequestHandler(t *testing.T) {
 		},
 		{
 			d: "should fail when authn, authz is set but not mutator",
-			setup: func() {
-				viper.Set(configuration.ViperKeyAuthenticatorAnonymousIsEnabled, true)
-				viper.Set(configuration.ViperKeyAuthorizerAllowIsEnabled, true)
-				viper.Set(configuration.ViperKeyMutatorNoopIsEnabled, true)
+			configOpts: func() []configx.OptionModifier {
+				return []configx.OptionModifier{
+					configx.WithValue(configuration.ViperKeyAuthenticatorAnonymousIsEnabled, true),
+					configx.WithValue(configuration.ViperKeyAuthorizerAllowIsEnabled, true),
+					configx.WithValue(configuration.ViperKeyMutatorNoopIsEnabled, true),
+				}
 			},
 			expectErr: true,
 			r:         newTestRequest("http://localhost"),
@@ -353,10 +383,12 @@ func TestRequestHandler(t *testing.T) {
 		},
 		{
 			d: "should fail when authn is invalid because not enabled",
-			setup: func() {
-				viper.Set(configuration.ViperKeyAuthenticatorAnonymousIsEnabled, false)
-				viper.Set(configuration.ViperKeyAuthorizerAllowIsEnabled, true)
-				viper.Set(configuration.ViperKeyMutatorNoopIsEnabled, true)
+			configOpts: func() []configx.OptionModifier {
+				return []configx.OptionModifier{
+					configx.WithValue(configuration.ViperKeyAuthenticatorAnonymousIsEnabled, false),
+					configx.WithValue(configuration.ViperKeyAuthorizerAllowIsEnabled, true),
+					configx.WithValue(configuration.ViperKeyMutatorNoopIsEnabled, true),
+				}
 			},
 			expectErr: true,
 			r:         newTestRequest("http://localhost"),
@@ -368,10 +400,12 @@ func TestRequestHandler(t *testing.T) {
 		},
 		{
 			d: "should fail when authz is invalid because not enabled",
-			setup: func() {
-				viper.Set(configuration.ViperKeyAuthenticatorAnonymousIsEnabled, true)
-				viper.Set(configuration.ViperKeyAuthorizerAllowIsEnabled, false)
-				viper.Set(configuration.ViperKeyMutatorNoopIsEnabled, true)
+			configOpts: func() []configx.OptionModifier {
+				return []configx.OptionModifier{
+					configx.WithValue(configuration.ViperKeyAuthenticatorAnonymousIsEnabled, true),
+					configx.WithValue(configuration.ViperKeyAuthorizerAllowIsEnabled, false),
+					configx.WithValue(configuration.ViperKeyMutatorNoopIsEnabled, true),
+				}
 			},
 			expectErr: true,
 			r:         newTestRequest("http://localhost"),
@@ -383,10 +417,12 @@ func TestRequestHandler(t *testing.T) {
 		},
 		{
 			d: "should fail when mutator is invalid because not enabled",
-			setup: func() {
-				viper.Set(configuration.ViperKeyAuthenticatorAnonymousIsEnabled, true)
-				viper.Set(configuration.ViperKeyAuthorizerAllowIsEnabled, true)
-				viper.Set(configuration.ViperKeyMutatorNoopIsEnabled, false)
+			configOpts: func() []configx.OptionModifier {
+				return []configx.OptionModifier{
+					configx.WithValue(configuration.ViperKeyAuthenticatorAnonymousIsEnabled, true),
+					configx.WithValue(configuration.ViperKeyAuthorizerAllowIsEnabled, true),
+					configx.WithValue(configuration.ViperKeyMutatorNoopIsEnabled, false),
+				}
 			},
 			expectErr: true,
 			r:         newTestRequest("http://localhost"),
@@ -398,10 +434,12 @@ func TestRequestHandler(t *testing.T) {
 		},
 		{
 			d: "should fail when authn does not exist",
-			setup: func() {
-				viper.Set(configuration.ViperKeyAuthenticatorAnonymousIsEnabled, true)
-				viper.Set(configuration.ViperKeyAuthorizerAllowIsEnabled, true)
-				viper.Set(configuration.ViperKeyMutatorNoopIsEnabled, true)
+			configOpts: func() []configx.OptionModifier {
+				return []configx.OptionModifier{
+					configx.WithValue(configuration.ViperKeyAuthenticatorAnonymousIsEnabled, true),
+					configx.WithValue(configuration.ViperKeyAuthorizerAllowIsEnabled, true),
+					configx.WithValue(configuration.ViperKeyMutatorNoopIsEnabled, true),
+				}
 			},
 			expectErr: true,
 			r:         newTestRequest("http://localhost"),
@@ -413,10 +451,12 @@ func TestRequestHandler(t *testing.T) {
 		},
 		{
 			d: "should fail when authz does not exist",
-			setup: func() {
-				viper.Set(configuration.ViperKeyAuthenticatorAnonymousIsEnabled, true)
-				viper.Set(configuration.ViperKeyAuthorizerAllowIsEnabled, true)
-				viper.Set(configuration.ViperKeyMutatorNoopIsEnabled, true)
+			configOpts: func() []configx.OptionModifier {
+				return []configx.OptionModifier{
+					configx.WithValue(configuration.ViperKeyAuthenticatorAnonymousIsEnabled, true),
+					configx.WithValue(configuration.ViperKeyAuthorizerAllowIsEnabled, true),
+					configx.WithValue(configuration.ViperKeyMutatorNoopIsEnabled, true),
+				}
 			},
 			expectErr: true,
 			r:         newTestRequest("http://localhost"),
@@ -428,10 +468,12 @@ func TestRequestHandler(t *testing.T) {
 		},
 		{
 			d: "should fail when mutator does not exist",
-			setup: func() {
-				viper.Set(configuration.ViperKeyAuthenticatorAnonymousIsEnabled, true)
-				viper.Set(configuration.ViperKeyAuthorizerAllowIsEnabled, true)
-				viper.Set(configuration.ViperKeyMutatorNoopIsEnabled, true)
+			configOpts: func() []configx.OptionModifier {
+				return []configx.OptionModifier{
+					configx.WithValue(configuration.ViperKeyAuthenticatorAnonymousIsEnabled, true),
+					configx.WithValue(configuration.ViperKeyAuthorizerAllowIsEnabled, true),
+					configx.WithValue(configuration.ViperKeyMutatorNoopIsEnabled, true),
+				}
 			},
 			expectErr: true,
 			r:         newTestRequest("http://localhost"),
@@ -443,15 +485,15 @@ func TestRequestHandler(t *testing.T) {
 		},
 	} {
 		t.Run(fmt.Sprintf("case=%d/description=%s", k, tc.d), func(t *testing.T) {
+			conf, err := configuration.NewViperProvider(context.Background(), logrusx.New("", ""),
+				append(tc.configOpts(),
+					configx.WithValue("log.level", "debug"),
+					configx.WithValue(configuration.ViperKeyErrorsJSONIsEnabled, true))...)
+			require.NoError(t, err)
 
-			conf := internal.NewConfigurationWithDefaults()
-			reg := internal.NewRegistry(conf)
+			reg := driver.NewRegistryMemory().WithConfig(conf)
 
-			if tc.setup != nil {
-				tc.setup()
-			}
-
-			_, err := reg.ProxyRequestHandler().HandleRequest(tc.r, &tc.rule)
+			_, err = reg.ProxyRequestHandler().HandleRequest(tc.r, &tc.rule)
 			if tc.expectErr {
 				require.Error(t, err)
 			} else {
@@ -542,9 +584,13 @@ func TestInitializeSession(t *testing.T) {
 	} {
 		t.Run(fmt.Sprintf("case=%d/description=%s", k, tc.d), func(t *testing.T) {
 
-			conf := internal.NewConfigurationWithDefaults()
-			reg := internal.NewRegistry(conf)
-			viper.Set(configuration.ViperKeyAccessRuleMatchingStrategy, string(tc.matchingStrategy))
+			conf, err := configuration.NewViperProvider(context.Background(), logrusx.New("", ""),
+				configx.WithValue("log.level", "debug"),
+				configx.WithValue(configuration.ViperKeyErrorsJSONIsEnabled, true),
+				configx.WithValue(configuration.ViperKeyAccessRuleMatchingStrategy, string(tc.matchingStrategy)))
+			require.NoError(t, err)
+
+			reg := driver.NewRegistryMemory().WithConfig(conf)
 
 			rule := rule.Rule{
 				Match:          &tc.ruleMatch,

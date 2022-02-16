@@ -1,6 +1,7 @@
 package errors_test
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -8,17 +9,23 @@ import (
 	"net/url"
 	"testing"
 
+	"github.com/ory/oathkeeper/driver"
+	"github.com/ory/oathkeeper/driver/configuration"
+	"github.com/ory/x/configx"
+	"github.com/ory/x/logrusx"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
 	"github.com/ory/herodot"
-
-	"github.com/ory/oathkeeper/internal"
 )
 
 func TestErrorRedirect(t *testing.T) {
-	conf := internal.NewConfigurationWithDefaults()
-	reg := internal.NewRegistry(conf)
+	conf, err := configuration.NewViperProvider(context.Background(), logrusx.New("", ""),
+		configx.WithValue("log.level", "debug"),
+		configx.WithValue(configuration.ViperKeyErrorsJSONIsEnabled, true))
+	require.NoError(t, err)
+
+	reg := driver.NewRegistryMemory().WithConfig(conf)
 
 	a, err := reg.PipelineErrorHandler("redirect")
 	require.NoError(t, err)
@@ -180,8 +187,12 @@ func TestErrorRedirect(t *testing.T) {
 }
 
 func TestErrorReturnToRedirectURLHeaderUsage(t *testing.T) {
-	conf := internal.NewConfigurationWithDefaults()
-	reg := internal.NewRegistry(conf)
+	conf, err := configuration.NewViperProvider(context.Background(), logrusx.New("", ""),
+		configx.WithValue("log.level", "debug"),
+		configx.WithValue(configuration.ViperKeyErrorsJSONIsEnabled, true))
+	require.NoError(t, err)
+
+	reg := driver.NewRegistryMemory().WithConfig(conf)
 
 	defaultUrl := &url.URL{Scheme: "http", Host: "ory.sh", Path: "/foo"}
 	defaultTransform := func(req *http.Request) {}

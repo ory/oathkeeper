@@ -25,7 +25,6 @@ import (
 
 	"github.com/ory/oathkeeper/internal/cloudstorage"
 
-	"github.com/ory/viper"
 	"github.com/ory/x/httpx"
 
 	"github.com/ory/oathkeeper/driver/configuration"
@@ -140,7 +139,7 @@ func (f *FetcherDefault) configUpdate(ctx context.Context, watcher *fsnotify.Wat
 
 	// If there are no more sources to watch we reset the rule repository as a whole
 	if len(replace) == 0 {
-		f.r.Logger().WithField("repos", viper.AllSettings()).Warn("No access rule repositories have been defined in the updated config.")
+		f.r.Logger().WithField("repos", wiper.AllSettings()).Warn("No access rule repositories have been defined in the updated config.")
 		if err := f.r.RuleRepository().Set(ctx, []Rule{}); err != nil {
 			return err
 		}
@@ -193,8 +192,8 @@ func (f *FetcherDefault) Watch(ctx context.Context) error {
 func (f *FetcherDefault) watch(ctx context.Context, watcher *fsnotify.Watcher, events chan event) error {
 	var pc map[string]interface{}
 
-	wiperx.AddWatcher(func(e fsnotify.Event) error {
-		if reflect.DeepEqual(pc, viper.Get(configuration.ViperKeyAccessRuleRepositories)) {
+	f.c.AddWatcher(func(e fsnotify.Event) error {
+		if reflect.DeepEqual(pc, f.c.Source().String(configuration.ViperKeyAccessRuleRepositories)) {
 			f.r.Logger().
 				Debug("Not reloading access rule repositories because configuration value has not changed.")
 			return nil
@@ -207,8 +206,8 @@ func (f *FetcherDefault) watch(ctx context.Context, watcher *fsnotify.Watcher, e
 	f.enqueueEvent(events, event{et: eventRepositoryConfigChanged, source: "entrypoint"})
 
 	var strategy map[string]interface{}
-	wiperx.AddWatcher(func(e fsnotify.Event) error {
-		if reflect.DeepEqual(strategy, viper.Get(configuration.ViperKeyAccessRuleMatchingStrategy)) {
+	f.c.AddWatcher(func(e fsnotify.Event) error {
+		if reflect.DeepEqual(strategy, f.c.Source().String(configuration.ViperKeyAccessRuleMatchingStrategy)) {
 			f.r.Logger().
 				Debug("Not reloading access rule matching strategy because configuration value has not changed.")
 			return nil

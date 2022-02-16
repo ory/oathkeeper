@@ -2,6 +2,7 @@ package configuration
 
 import (
 	"bytes"
+	"context"
 	"encoding/binary"
 	"encoding/json"
 	"fmt"
@@ -12,6 +13,7 @@ import (
 	"time"
 
 	"github.com/imdario/mergo"
+	"github.com/ory/oathkeeper/embedx"
 	"github.com/ory/viper"
 	"github.com/pkg/errors"
 	"github.com/rs/cors"
@@ -113,12 +115,37 @@ type ViperProvider struct {
 	p *configx.Provider
 }
 
-func NewViperProvider(l *logrusx.Logger) *ViperProvider {
-	return &ViperProvider{
+func NewViperProvider(ctx context.Context, l *logrusx.Logger, opts ...configx.OptionModifier) (*ViperProvider, error) {
+	// TODO: check settings
+	opts = append([]configx.OptionModifier{
+		configx.WithStderrValidationReporter(),
+		configx.OmitKeysFromTracing("dsn", "courier.smtp.connection_uri", "secrets.default", "secrets.cookie", "secrets.cipher", "client_secret"),
+		configx.WithImmutables("serve", "profiling", "log"),
+		configx.WithLogrusWatcher(l),
+		configx.WithLogger(l),
+		configx.WithContext(ctx),
+		// TODO: add watch for the rules
+	}, opts...)
+
+	p, err := configx.New(ctx, []byte(embedx.ConfigSchema), opts...)
+	if err != nil {
+		return nil, err
+	}
+
+	l.UseConfig(p)
+
+	prov := &ViperProvider{
 		l:            l,
+		p:            p,
 		enabledCache: make(map[uint64]bool),
 		configCache:  make(map[uint64]json.RawMessage),
 	}
+
+	if !p.SkipValidation() {
+		// TODO: validate schemas
+	}
+
+	return prov, nil
 }
 
 func (v *ViperProvider) AccessRuleRepositories() []url.URL {

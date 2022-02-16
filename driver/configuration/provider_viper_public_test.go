@@ -1,12 +1,14 @@
 package configuration_test
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/url"
 	"os"
 	"testing"
 
+	"github.com/ory/x/configx"
 	"github.com/rs/cors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -23,29 +25,20 @@ import (
 	"github.com/ory/oathkeeper/x"
 )
 
-func setup(t *testing.T) *ViperProvider {
+func setup(t require.TestingT, opts ...configx.OptionModifier) (*ViperProvider, *logrusx.Logger) {
 	l := logrusx.New("", "")
-	wiper.Reset()
-	wiperx.InitializeConfig(
-		"oathkeeper",
-		"./../../internal/config/",
-		l,
-	)
 
-	err := wiperx.ValidateFromURL("file://../../.schema/config.schema.json")
-	if err != nil {
-		l.WithError(err).Error("unable to validate")
-	}
+	p, err := NewViperProvider(context.Background(), l, append(opts, configx.WithConfigFiles("./../../internal/config/.oathkeeper.yaml"))...)
 	require.NoError(t, err)
 
-	return NewViperProvider(l)
+	return p, l
 }
 
 func TestPipelineConfig(t *testing.T) {
 	t.Run("case=should use config from environment variables", func(t *testing.T) {
 		var res json.RawMessage
 		require.NoError(t, os.Setenv("AUTHENTICATORS_OAUTH2_INTROSPECTION_CONFIG_INTROSPECTION_URL", "https://override/path"))
-		p := setup(t)
+		p, _ := setup(t)
 
 		require.NoError(t, p.PipelineConfig("authenticators", "oauth2_introspection", nil, &res))
 		assert.JSONEq(t, `{"cache":{"enabled":false, "max_cost":1000},"introspection_url":"https://override/path","pre_authorization":{"client_id":"some_id","client_secret":"some_secret","enabled":true,"audience":"some_audience","scope":["foo","bar"],"token_url":"https://my-website.com/oauth2/token"},"retry":{"max_delay":"100ms", "give_up_after":"1s"},"scope_strategy":"exact"}`, string(res), "%s", res)
@@ -56,7 +49,7 @@ func TestPipelineConfig(t *testing.T) {
 	})
 
 	t.Run("case=should fail when invalid value is used in override", func(t *testing.T) {
-		p := setup(t)
+		p, _ := setup(t)
 		res := json.RawMessage{}
 		require.Error(t, p.PipelineConfig("mutators", "hydrator", json.RawMessage(`{"not-api":"invalid"}`), &res))
 		assert.JSONEq(t, `{"cache":{"enabled":false,"ttl":"1m"},"api":{"url":"https://some-url/","retry":{"give_up_after":"1s","max_delay":"100ms"}},"not-api":"invalid"}`, string(res))
@@ -70,7 +63,7 @@ func TestPipelineConfig(t *testing.T) {
 
 	t.Run("case=should pass and override values", func(t *testing.T) {
 		var dec mutate.MutatorHydratorConfig
-		p := setup(t)
+		p, _ := setup(t)
 		require.NoError(t, p.PipelineConfig("mutators", "hydrator", json.RawMessage(``), &dec))
 		assert.Equal(t, "https://some-url/", dec.Api.URL)
 
@@ -81,7 +74,7 @@ func TestPipelineConfig(t *testing.T) {
 
 	t.Run("case=should pass array values", func(t *testing.T) {
 		var dec authn.AuthenticatorOAuth2JWTConfiguration
-		p := setup(t)
+		p, _ := setup(t)
 		require.NoError(t, p.PipelineConfig("authenticators", "jwt", json.RawMessage(`{}`), &dec))
 		assert.Equal(t,
 			[]string{"https://my-website.com/.well-known/jwks.json", "https://my-other-website.com/.well-known/jwks.json", "file://path/to/local/jwks.json"},
@@ -107,21 +100,7 @@ v0.35.2
 */
 
 func BenchmarkPipelineConfig(b *testing.B) {
-	wiper.Reset()
-	l := logrusx.New("", "")
-	wiperx.InitializeConfig(
-		"oathkeeper",
-		"./../../internal/config/",
-		l,
-	)
-
-	err := wiperx.ValidateFromURL("file://../../.schema/config.schema.json")
-	if err != nil {
-		l.WithError(err).Error("unable to validate")
-	}
-	require.NoError(b, err)
-
-	p := NewViperProvider(logrusx.New("", ""))
+	p, _ := setup(b)
 
 	for n := 0; n < b.N; n++ {
 		res := json.RawMessage{}
@@ -140,21 +119,7 @@ v0.35.5
 */
 
 func BenchmarkPipelineEnabled(b *testing.B) {
-	wiper.Reset()
-	logger := logrusx.New("", "")
-	wiperx.InitializeConfig(
-		"oathkeeper",
-		"./../../internal/config/",
-		logger,
-	)
-
-	err := wiperx.ValidateFromURL("file://../../.schema/config.schema.json")
-	if err != nil {
-		logger.WithError(err).Error("unable to validate")
-	}
-	require.NoError(b, err)
-
-	p := NewViperProvider(logrusx.New("", ""))
+	p, _ := setup(b)
 
 	for n := 0; n < b.N; n++ {
 		p.AuthorizerIsEnabled("allow")
@@ -164,19 +129,7 @@ func BenchmarkPipelineEnabled(b *testing.B) {
 }
 
 func TestViperProvider(t *testing.T) {
-	wiper.Reset()
-	logger := logrusx.New("", "")
-	wiperx.InitializeConfig(
-		"oathkeeper",
-		"./../../internal/config/",
-		logger,
-	)
-
-	err := wiperx.ValidateFromURL("file://../../.schema/config.schema.json")
-	if err != nil {
-		logger.WithError(err).Error("unable to validate")
-	}
-	p := NewViperProvider(logrusx.New("", ""))
+	p, l := setup(t)
 
 	t.Run("group=serve", func(t *testing.T) {
 		assert.Equal(t, "127.0.0.1:1234", p.ProxyServeAddress())
@@ -220,10 +173,10 @@ func TestViperProvider(t *testing.T) {
 		t.Run("group=tls", func(t *testing.T) {
 			for _, daemon := range []string{"proxy", "api"} {
 				t.Run(fmt.Sprintf("daemon="+daemon), func(t *testing.T) {
-					assert.Equal(t, "LS0tLS1CRUdJTiBFTkNSWVBURUQgUFJJVkFURSBLRVktLS0tLVxuTUlJRkRqQkFCZ2txaGtpRzl3MEJCUTB3...", wiper.GetString("serve."+daemon+".tls.key.base64"))
-					assert.Equal(t, "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tXG5NSUlEWlRDQ0FrMmdBd0lCQWdJRVY1eE90REFOQmdr...", wiper.GetString("serve."+daemon+".tls.cert.base64"))
-					assert.Equal(t, "/path/to/key.pem", wiper.GetString("serve."+daemon+".tls.key.path"))
-					assert.Equal(t, "/path/to/cert.pem", wiper.GetString("serve."+daemon+".tls.cert.path"))
+					assert.Equal(t, "LS0tLS1CRUdJTiBFTkNSWVBURUQgUFJJVkFURSBLRVktLS0tLVxuTUlJRkRqQkFCZ2txaGtpRzl3MEJCUTB3...", p.Source().String("serve."+daemon+".tls.key.base64"))
+					assert.Equal(t, "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tXG5NSUlEWlRDQ0FrMmdBd0lCQWdJRVY1eE90REFOQmdr...", p.Source().String("serve."+daemon+".tls.cert.base64"))
+					assert.Equal(t, "/path/to/key.pem", p.Source().String("serve."+daemon+".tls.key.path"))
+					assert.Equal(t, "/path/to/cert.pem", p.Source().String("serve."+daemon+".tls.cert.path"))
 				})
 			}
 		})
@@ -284,7 +237,7 @@ func TestViperProvider(t *testing.T) {
 		})
 
 		t.Run("authenticator=oauth2_client_credentials", func(t *testing.T) {
-			a := authn.NewAuthenticatorOAuth2ClientCredentials(p, logger)
+			a := authn.NewAuthenticatorOAuth2ClientCredentials(p, l)
 			assert.True(t, p.AuthenticatorIsEnabled(a.GetID()))
 			require.NoError(t, a.Validate(nil))
 
@@ -294,7 +247,7 @@ func TestViperProvider(t *testing.T) {
 		})
 
 		t.Run("authenticator=oauth2_introspection", func(t *testing.T) {
-			a := authn.NewAuthenticatorOAuth2Introspection(p, logger)
+			a := authn.NewAuthenticatorOAuth2Introspection(p, l)
 			assert.True(t, p.AuthenticatorIsEnabled(a.GetID()))
 			require.NoError(t, a.Validate(nil))
 
@@ -396,20 +349,20 @@ func TestViperProvider(t *testing.T) {
 }
 
 func TestToScopeStrategy(t *testing.T) {
-	v := NewViperProvider(logrusx.New("", ""))
+	p, _ := setup(t)
 
-	assert.True(t, v.ToScopeStrategy("exact", "foo")([]string{"foo"}, "foo"))
-	assert.True(t, v.ToScopeStrategy("hierarchic", "foo")([]string{"foo"}, "foo.bar"))
-	assert.True(t, v.ToScopeStrategy("wildcard", "foo")([]string{"foo.*"}, "foo.bar"))
-	assert.Nil(t, v.ToScopeStrategy("none", "foo"))
-	assert.Nil(t, v.ToScopeStrategy("whatever", "foo"))
+	assert.True(t, p.ToScopeStrategy("exact", "foo")([]string{"foo"}, "foo"))
+	assert.True(t, p.ToScopeStrategy("hierarchic", "foo")([]string{"foo"}, "foo.bar"))
+	assert.True(t, p.ToScopeStrategy("wildcard", "foo")([]string{"foo.*"}, "foo.bar"))
+	assert.Nil(t, p.ToScopeStrategy("none", "foo"))
+	assert.Nil(t, p.ToScopeStrategy("whatever", "foo"))
 }
 
 func TestAuthenticatorOAuth2TokenIntrospectionPreAuthorization(t *testing.T) {
-	wiper.Reset()
-	v := NewViperProvider(logrusx.New("", ""))
-	wiper.Set("authenticators.oauth2_introspection.enabled", true)
-	wiper.Set("authenticators.oauth2_introspection.config.introspection_url", "http://some-url/")
+	v, _ := setup(t,
+		configx.WithValue("authenticators.oauth2_introspection.enabled", true),
+		configx.WithValue("authenticators.oauth2_introspection.config.introspection_url", "http://some-url/"),
+	)
 
 	for k, tc := range []struct {
 		enabled bool
