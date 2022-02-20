@@ -556,7 +556,9 @@
           "title": "Set Additional HTTP Headers",
           "type": "object",
           "description": "Set additional HTTP Headers for the Session Check URL.",
-          "additionalProperties": { "type": "string" }
+          "additionalProperties": {
+            "type": "string"
+          }
         },
         "extra_from": {
           "title": "Extra JSON Path",
@@ -632,7 +634,7 @@
           "title": "Max await interval for the JWK fetch",
           "type": "string",
           "description": "The configuration which sets the max wait threshold when fetching new JWKs",
-          "default" : "1s",
+          "default": "1s",
           "examples": [
             "100ms",
             "1s"
@@ -642,7 +644,7 @@
           "title": "JWK cache TTL configuration",
           "type": "string",
           "description": "The time interval for which fetched JWKs are cached",
-          "default" : "30s",
+          "default": "30s",
           "examples": [
             "30m",
             "6h"
@@ -1349,8 +1351,8 @@
       "properties": {
         "repositories": {
           "title": "Repositories",
-           "description": "Locations (list of URLs) where access rules should be fetched from on boot. It is expected that the documents at those locations return a JSON or YAML Array containing ORY Oathkeeper Access Rules:\n\n- If the URL Scheme is `file://`, the access rules (an array of access rules is expected) will be fetched from the local file system.\n- If the URL Scheme is `inline://`, the access rules (an array of access rules is expected) are expected to be a base64 encoded (with padding!) JSON/YAML string (base64_encode(`[{\"id\":\"foo-rule\",\"authenticators\":[....]}]`)).\n- If the URL Scheme is `http://` or `https://`, the access rules (an array of access rules is expected) will be fetched from the provided HTTP(s) location.\n- If the URL Scheme is `s3://`, `gs://` or `azblob://`, the access rules (an array of access rules is expected) will be fetched by an object storage (AWS S3, Google Cloud Storage, Azure Blob Storage).\n\nS3 storage also supports S3-compatible endpoints served by Minio or Ceph. See aws.ConfigFromURLParams (https://godoc.org/gocloud.dev/aws#ConfigFromURLParams) for more details on supported URL options for S3.",
-	  "type": "array",
+          "description": "Locations (list of URLs) where access rules should be fetched from on boot. It is expected that the documents at those locations return a JSON or YAML Array containing ORY Oathkeeper Access Rules:\n\n- If the URL Scheme is `file://`, the access rules (an array of access rules is expected) will be fetched from the local file system.\n- If the URL Scheme is `inline://`, the access rules (an array of access rules is expected) are expected to be a base64 encoded (with padding!) JSON/YAML string (base64_encode(`[{\"id\":\"foo-rule\",\"authenticators\":[....]}]`)).\n- If the URL Scheme is `http://` or `https://`, the access rules (an array of access rules is expected) will be fetched from the provided HTTP(s) location.\n- If the URL Scheme is `s3://`, `gs://` or `azblob://`, the access rules (an array of access rules is expected) will be fetched by an object storage (AWS S3, Google Cloud Storage, Azure Blob Storage).\n\nS3 storage also supports S3-compatible endpoints served by Minio or Ceph. See aws.ConfigFromURLParams (https://godoc.org/gocloud.dev/aws#ConfigFromURLParams) for more details on supported URL options for S3.",
+          "type": "array",
           "items": {
             "type": "string",
             "format": "uri"
@@ -2000,10 +2002,12 @@
       "properties": {
         "provider": {
           "type": "string",
-          "description": "Set this to the tracing backend you wish to use. Supports Zipkin & Jaeger. If omitted or empty, tracing will be disabled.",
+          "description": "Set this to the tracing backend you wish to use. Supports Jaeger, Zipkin, DataDog and elastic-apm. If omitted or empty, tracing will be disabled. Use environment variables to configure DataDog (see https://docs.datadoghq.com/tracing/setup/go/#configuration).",
           "enum": [
             "zipkin",
-	    "jaeger"
+            "jaeger",
+            "datadog",
+            "elastic-apm"
           ],
           "examples": [
             "zipkin"
@@ -2036,7 +2040,7 @@
                   "server_url": "http://localhost:9411/api/v2/spans"
                 }
               ]
-	    },
+            },
             "jaeger": {
               "type": "object",
               "additionalProperties": false,
@@ -2178,7 +2182,10 @@
         "format": {
           "description": "The log format can either be text or JSON.",
           "type": "string",
-          "enum": ["json", "text"]
+          "enum": [
+            "json",
+            "text"
+          ]
         }
       },
       "additionalProperties": false
