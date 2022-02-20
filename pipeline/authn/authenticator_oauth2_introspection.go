@@ -28,6 +28,7 @@ import (
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/helper"
 	"github.com/ory/oathkeeper/pipeline"
+	"github.com/ory/oathkeeper/x"
 )
 
 type AuthenticatorOAuth2IntrospectionConfiguration struct {
@@ -229,7 +230,7 @@ func (a *AuthenticatorOAuth2Introspection) Authenticate(r *http.Request, session
 		introspectReq.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
 		// add tracing
-		closeSpan := a.traceRequest(r.Context(), introspectReq)
+		closeSpan := x.TraceRequest(r.Context(), introspectReq)
 
 		resp, err := client.Do(introspectReq.WithContext(r.Context()))
 
