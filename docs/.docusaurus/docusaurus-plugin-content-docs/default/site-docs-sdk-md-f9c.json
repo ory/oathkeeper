@@ -1,0 +1,24 @@
+{
+  "unversionedId": "sdk",
+  "id": "sdk",
+  "isDocsHomePage": false,
+  "title": "ORY Oathkeeper SDKs",
+  "description": "All SDKs use automated code generation provided by",
+  "source": "@site/docs/sdk.md",
+  "slug": "/sdk",
+  "permalink": "/oathkeeper/docs/next/sdk",
+  "editUrl": "https://github.com/ory/oathkeeper/edit/master/docs/docs/sdk.md",
+  "version": "current",
+  "lastUpdatedBy": "Author",
+  "lastUpdatedAt": 1539502055,
+  "sidebar_label": "Overview",
+  "sidebar": "docs",
+  "previous": {
+    "title": "REST API",
+    "permalink": "/oathkeeper/docs/next/reference/api"
+  },
+  "next": {
+    "title": "Milestones and Roadmap",
+    "permalink": "/oathkeeper/docs/next/milestones"
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "unversionedId": "pipeline/index",
+  "id": "version-v0.38/pipeline/index",
+  "isDocsHomePage": false,
+  "title": "Access Rule Pipeline",
+  "description": "Read more about the",
+  "source": "@site/versioned_docs/version-v0.38/pipeline/index.md",
+  "slug": "/pipeline/index",
+  "permalink": "/oathkeeper/docs/pipeline/index",
+  "editUrl": "https://github.com/ory/oathkeeper/edit/master/docs/versioned_docs/version-v0.38/pipeline/index.md",
+  "version": "v0.38",
+  "lastUpdatedBy": "Author",
+  "lastUpdatedAt": 1539502055,
+  "sidebar": "version-v0.38/docs",
+  "previous": {
+    "title": "API Access Rules",
+    "permalink": "/oathkeeper/docs/api-access-rules"
+  },
+  "next": {
+    "title": "Authenticators",
+    "permalink": "/oathkeeper/docs/pipeline/authn"
+  }
+}

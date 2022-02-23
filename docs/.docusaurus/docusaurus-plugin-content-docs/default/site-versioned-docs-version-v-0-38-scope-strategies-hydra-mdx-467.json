@@ -1,0 +1,23 @@
+{
+  "unversionedId": "oauth2-token-introspection-hydra",
+  "id": "version-v0.38/oauth2-token-introspection-hydra",
+  "isDocsHomePage": false,
+  "title": "Connect to ORY Hydra OAuth2 Token Introspection",
+  "description": "This document is a work in progress.",
+  "source": "@site/versioned_docs/version-v0.38/scope-strategies-hydra.mdx",
+  "slug": "/oauth2-token-introspection-hydra",
+  "permalink": "/oathkeeper/docs/oauth2-token-introspection-hydra",
+  "editUrl": "https://github.com/ory/oathkeeper/edit/master/docs/versioned_docs/version-v0.38/scope-strategies-hydra.mdx",
+  "version": "v0.38",
+  "lastUpdatedBy": "Author",
+  "lastUpdatedAt": 1539502055,
+  "sidebar": "version-v0.38/docs",
+  "previous": {
+    "title": "Configure and Deploy",
+    "permalink": "/oathkeeper/docs/configure-deploy"
+  },
+  "next": {
+    "title": "Configuration",
+    "permalink": "/oathkeeper/docs/reference/configuration"
+  }
+}

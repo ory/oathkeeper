@@ -1,0 +1,18 @@
+{
+  "unversionedId": "index",
+  "id": "index",
+  "isDocsHomePage": true,
+  "title": "Introduction",
+  "description": "ORY Oathkeeper authorizes incoming HTTP requests. It can be the Policy",
+  "source": "@site/docs/index.md",
+  "permalink": "/oathkeeper/docs/next/",
+  "editUrl": "https://github.com/ory/oathkeeper/edit/master/docs/docs/index.md",
+  "version": "next",
+  "lastUpdatedBy": "hackerman",
+  "lastUpdatedAt": 1586177132,
+  "sidebar": "docs",
+  "next": {
+    "title": "Installation",
+    "permalink": "/oathkeeper/docs/next/install"
+  }
+}

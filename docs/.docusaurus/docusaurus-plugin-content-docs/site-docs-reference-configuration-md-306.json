@@ -1,0 +1,22 @@
+{
+  "unversionedId": "reference/configuration",
+  "id": "reference/configuration",
+  "isDocsHomePage": false,
+  "title": "Configuration",
+  "description": "<!-- THIS FILE IS BEING AUTO-GENERATED. DO NOT MODIFY IT AS ALL CHANGES WILL BE OVERWRITTEN.",
+  "source": "@site/docs/reference/configuration.md",
+  "permalink": "/oathkeeper/docs/next/reference/configuration",
+  "editUrl": "https://github.com/ory/oathkeeper/edit/master/docs/docs/reference/configuration.md",
+  "version": "next",
+  "lastUpdatedBy": "aeneasr",
+  "lastUpdatedAt": 1596013699,
+  "sidebar": "docs",
+  "previous": {
+    "title": "Configure and Deploy",
+    "permalink": "/oathkeeper/docs/next/configure-deploy"
+  },
+  "next": {
+    "title": "REST API",
+    "permalink": "/oathkeeper/docs/next/reference/api"
+  }
+}

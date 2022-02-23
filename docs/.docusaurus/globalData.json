@@ -1,0 +1,246 @@
+{
+  "docusaurus-plugin-content-docs": {
+    "default": {
+      "path": "/oathkeeper/docs/",
+      "versions": [
+        {
+          "name": "current",
+          "label": "Next",
+          "isLast": false,
+          "path": "/oathkeeper/docs/next",
+          "mainDocId": "index",
+          "docs": [
+            {
+              "id": "api-access-rules",
+              "path": "/oathkeeper/docs/next/api-access-rules",
+              "sidebar": "docs"
+            },
+            {
+              "id": "configure-deploy",
+              "path": "/oathkeeper/docs/next/configure-deploy",
+              "sidebar": "docs"
+            },
+            {
+              "id": "contributing",
+              "path": "/oathkeeper/docs/next/contributing",
+              "sidebar": "docs"
+            },
+            {
+              "id": "index",
+              "path": "/oathkeeper/docs/next/",
+              "sidebar": "docs"
+            },
+            {
+              "id": "install",
+              "path": "/oathkeeper/docs/next/install",
+              "sidebar": "docs"
+            },
+            {
+              "id": "milestones",
+              "path": "/oathkeeper/docs/next/milestones",
+              "sidebar": "docs"
+            },
+            {
+              "id": "oauth2-token-introspection-hydra",
+              "path": "/oathkeeper/docs/next/oauth2-token-introspection-hydra",
+              "sidebar": "docs"
+            },
+            {
+              "id": "pipeline",
+              "path": "/oathkeeper/docs/next/pipeline",
+              "sidebar": "docs"
+            },
+            {
+              "id": "pipeline/authn",
+              "path": "/oathkeeper/docs/next/pipeline/authn",
+              "sidebar": "docs"
+            },
+            {
+              "id": "pipeline/authz",
+              "path": "/oathkeeper/docs/next/pipeline/authz",
+              "sidebar": "docs"
+            },
+            {
+              "id": "pipeline/error",
+              "path": "/oathkeeper/docs/next/pipeline/error",
+              "sidebar": "docs"
+            },
+            {
+              "id": "pipeline/mutator",
+              "path": "/oathkeeper/docs/next/pipeline/mutator",
+              "sidebar": "docs"
+            },
+            {
+              "id": "reference/api",
+              "path": "/oathkeeper/docs/next/reference/api",
+              "sidebar": "docs"
+            },
+            {
+              "id": "reference/configuration",
+              "path": "/oathkeeper/docs/next/reference/configuration",
+              "sidebar": "docs"
+            },
+            {
+              "id": "sdk",
+              "path": "/oathkeeper/docs/next/sdk",
+              "sidebar": "docs"
+            }
+          ]
+        },
+        {
+          "name": "v0.38",
+          "label": "v0.38",
+          "isLast": true,
+          "path": "/oathkeeper/docs/",
+          "mainDocId": "index",
+          "docs": [
+            {
+              "id": "api-access-rules",
+              "path": "/oathkeeper/docs/api-access-rules",
+              "sidebar": "version-v0.38/docs"
+            },
+            {
+              "id": "configure-deploy",
+              "path": "/oathkeeper/docs/configure-deploy",
+              "sidebar": "version-v0.38/docs"
+            },
+            {
+              "id": "contributing",
+              "path": "/oathkeeper/docs/contributing",
+              "sidebar": "version-v0.38/docs"
+            },
+            {
+              "id": "index",
+              "path": "/oathkeeper/docs/",
+              "sidebar": "version-v0.38/docs"
+            },
+            {
+              "id": "install",
+              "path": "/oathkeeper/docs/install",
+              "sidebar": "version-v0.38/docs"
+            },
+            {
+              "id": "milestones",
+              "path": "/oathkeeper/docs/milestones",
+              "sidebar": "version-v0.38/docs"
+            },
+            {
+              "id": "oauth2-token-introspection-hydra",
+              "path": "/oathkeeper/docs/oauth2-token-introspection-hydra",
+              "sidebar": "version-v0.38/docs"
+            },
+            {
+              "id": "pipeline",
+              "path": "/oathkeeper/docs/pipeline",
+              "sidebar": "version-v0.38/docs"
+            },
+            {
+              "id": "pipeline/authn",
+              "path": "/oathkeeper/docs/pipeline/authn",
+              "sidebar": "version-v0.38/docs"
+            },
+            {
+              "id": "pipeline/authz",
+              "path": "/oathkeeper/docs/pipeline/authz",
+              "sidebar": "version-v0.38/docs"
+            },
+            {
+              "id": "pipeline/error",
+              "path": "/oathkeeper/docs/pipeline/error",
+              "sidebar": "version-v0.38/docs"
+            },
+            {
+              "id": "pipeline/mutator",
+              "path": "/oathkeeper/docs/pipeline/mutator",
+              "sidebar": "version-v0.38/docs"
+            },
+            {
+              "id": "reference/api",
+              "path": "/oathkeeper/docs/reference/api",
+              "sidebar": "version-v0.38/docs"
+            },
+            {
+              "id": "reference/configuration",
+              "path": "/oathkeeper/docs/reference/configuration",
+              "sidebar": "version-v0.38/docs"
+            },
+            {
+              "id": "sdk",
+              "path": "/oathkeeper/docs/sdk",
+              "sidebar": "version-v0.38/docs"
+            }
+          ]
+        },
+        {
+          "name": "v0.37",
+          "label": "v0.37",
+          "isLast": false,
+          "path": "/oathkeeper/docs/v0.37",
+          "mainDocId": "index",
+          "docs": [
+            {
+              "id": "api-access-rules",
+              "path": "/oathkeeper/docs/v0.37/api-access-rules",
+              "sidebar": "version-v0.37/docs"
+            },
+            {
+              "id": "configure-deploy",
+              "path": "/oathkeeper/docs/v0.37/configure-deploy",
+              "sidebar": "version-v0.37/docs"
+            },
+            {
+              "id": "index",
+              "path": "/oathkeeper/docs/v0.37/",
+              "sidebar": "version-v0.37/docs"
+            },
+            {
+              "id": "install",
+              "path": "/oathkeeper/docs/v0.37/install",
+              "sidebar": "version-v0.37/docs"
+            },
+            {
+              "id": "pipeline/authn",
+              "path": "/oathkeeper/docs/v0.37/pipeline/authn",
+              "sidebar": "version-v0.37/docs"
+            },
+            {
+              "id": "pipeline/authz",
+              "path": "/oathkeeper/docs/v0.37/pipeline/authz",
+              "sidebar": "version-v0.37/docs"
+            },
+            {
+              "id": "pipeline/error",
+              "path": "/oathkeeper/docs/v0.37/pipeline/error",
+              "sidebar": "version-v0.37/docs"
+            },
+            {
+              "id": "pipeline/index",
+              "path": "/oathkeeper/docs/v0.37/pipeline/index",
+              "sidebar": "version-v0.37/docs"
+            },
+            {
+              "id": "pipeline/mutator",
+              "path": "/oathkeeper/docs/v0.37/pipeline/mutator",
+              "sidebar": "version-v0.37/docs"
+            },
+            {
+              "id": "reference/api",
+              "path": "/oathkeeper/docs/v0.37/reference/api",
+              "sidebar": "version-v0.37/docs"
+            },
+            {
+              "id": "reference/configuration",
+              "path": "/oathkeeper/docs/v0.37/reference/configuration",
+              "sidebar": "version-v0.37/docs"
+            },
+            {
+              "id": "sdk/index",
+              "path": "/oathkeeper/docs/v0.37/sdk/index",
+              "sidebar": "version-v0.37/docs"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

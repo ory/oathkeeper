@@ -1,0 +1,23 @@
+{
+  "unversionedId": "reference/api",
+  "id": "version-v0.37/reference/api",
+  "isDocsHomePage": false,
+  "title": "REST API",
+  "description": "ORY Oathkeeper is a reverse proxy that checks the HTTP Authorization for validity against a set of rules. This service uses Hydra to validate access tokens and policies.",
+  "source": "@site/versioned_docs/version-v0.37/reference/api.md",
+  "slug": "/reference/api",
+  "permalink": "/oathkeeper/docs/v0.37/reference/api",
+  "editUrl": "https://github.com/ory/oathkeeper/edit/master/docs/versioned_docs/version-v0.37/reference/api.md",
+  "version": "v0.37",
+  "lastUpdatedBy": "Author",
+  "lastUpdatedAt": 1539502055,
+  "sidebar": "version-v0.37/docs",
+  "previous": {
+    "title": "Configuration",
+    "permalink": "/oathkeeper/docs/v0.37/reference/configuration"
+  },
+  "next": {
+    "title": "Overview",
+    "permalink": "/oathkeeper/docs/v0.37/sdk/index"
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "unversionedId": "pipeline/authz",
+  "id": "version-v0.38/pipeline/authz",
+  "isDocsHomePage": false,
+  "title": "Authorizers",
+  "description": "An \"authorizer\" is responsible for properly permissioning a subject. ORY",
+  "source": "@site/versioned_docs/version-v0.38/pipeline/authz.md",
+  "slug": "/pipeline/authz",
+  "permalink": "/oathkeeper/docs/pipeline/authz",
+  "editUrl": "https://github.com/ory/oathkeeper/edit/master/docs/versioned_docs/version-v0.38/pipeline/authz.md",
+  "version": "v0.38",
+  "lastUpdatedBy": "Author",
+  "lastUpdatedAt": 1539502055,
+  "sidebar": "version-v0.38/docs",
+  "previous": {
+    "title": "Authenticators",
+    "permalink": "/oathkeeper/docs/pipeline/authn"
+  },
+  "next": {
+    "title": "Mutators",
+    "permalink": "/oathkeeper/docs/pipeline/mutator"
+  }
+}

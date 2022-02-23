@@ -1,0 +1,22 @@
+{
+  "unversionedId": "install",
+  "id": "install",
+  "isDocsHomePage": false,
+  "title": "Installation",
+  "description": "Installing ORY Oathkeeper on any system is straight forward. We provide",
+  "source": "@site/docs/install.md",
+  "permalink": "/oathkeeper/docs/next/install",
+  "editUrl": "https://github.com/ory/oathkeeper/edit/master/docs/docs/install.md",
+  "version": "next",
+  "lastUpdatedBy": "aeneasr",
+  "lastUpdatedAt": 1596013699,
+  "sidebar": "docs",
+  "previous": {
+    "title": "Introduction",
+    "permalink": "/oathkeeper/docs/next/"
+  },
+  "next": {
+    "title": "API Access Rules",
+    "permalink": "/oathkeeper/docs/next/api-access-rules"
+  }
+}

@@ -1,0 +1,783 @@
+{
+  "entrypoints": [
+    "main"
+  ],
+  "origins": {
+    "1": [
+      0,
+      2,
+      5,
+      6,
+      7,
+      28,
+      54,
+      55,
+      56,
+      1
+    ],
+    "2": [
+      0,
+      1,
+      6,
+      7,
+      28,
+      54,
+      55,
+      56,
+      2
+    ],
+    "./styles.css": [
+      1,
+      2,
+      5,
+      6,
+      7,
+      28,
+      49,
+      50,
+      52,
+      53,
+      54,
+      55,
+      56,
+      58,
+      0
+    ],
+    "@site/docs/scope-strategies-hydra.mdx": [
+      3
+    ],
+    "@site/versioned_docs/version-v0.37/index.md": [
+      4
+    ],
+    "@theme/DocItem": [
+      0,
+      1,
+      5
+    ],
+    "@site/src/pages/versions.js": [
+      0,
+      1,
+      2,
+      28
+    ],
+    "1be78505": [
+      0,
+      1,
+      2,
+      55,
+      28
+    ],
+    "@site/versioned_docs/version-v0.38/contributing.md": [
+      8
+    ],
+    "@site/versioned_docs/version-v0.37/configure-deploy.md": [
+      9
+    ],
+    "@site/versioned_docs/version-v0.37/reference/configuration.md": [
+      10
+    ],
+    "@site/docs/reference/configuration.md": [
+      11
+    ],
+    "@site/versioned_docs/version-v0.37/pipeline/authz.md": [
+      12
+    ],
+    "@site/versioned_docs/version-v0.38/configure-deploy.md": [
+      13
+    ],
+    "@site/docs/pipeline.md": [
+      14
+    ],
+    "@site/versioned_docs/version-v0.38/pipeline/authz.md": [
+      15
+    ],
+    "@site/versioned_docs/version-v0.38/api-access-rules.md": [
+      16
+    ],
+    "~docs/default/version-v-0-37-metadata-prop-b8b.json": [
+      17
+    ],
+    "@site/versioned_docs/version-v0.37/pipeline/error.md": [
+      18
+    ],
+    "@site/versioned_docs/version-v0.38/scope-strategies-hydra.mdx": [
+      19
+    ],
+    "@site/docs/contributing.md": [
+      20
+    ],
+    "@site/versioned_docs/version-v0.38/pipeline/error.md": [
+      21
+    ],
+    "@site/versioned_docs/version-v0.37/api-access-rules.md": [
+      22
+    ],
+    "@site/versioned_docs/version-v0.37/pipeline/index.md": [
+      23
+    ],
+    "@site/docs/pipeline/authn.md": [
+      24
+    ],
+    "@site/versioned_docs/version-v0.37/install.md": [
+      25
+    ],
+    "@site/versioned_docs/version-v0.37/pipeline/authn.md": [
+      26
+    ],
+    "@site/docs/pipeline/mutator.md": [
+      27
+    ],
+    "7d7ff3cd": [
+      0,
+      1,
+      2,
+      54,
+      7
+    ],
+    "@site/versioned_docs/version-v0.38/pipeline.md": [
+      29
+    ],
+    "@site/docs/milestones.md": [
+      30
+    ],
+    "@site/versioned_docs/version-v0.38/pipeline/authn.md": [
+      31
+    ],
+    "~docs/default/version-current-metadata-prop-751.json": [
+      32
+    ],
+    "@site/docs/api-access-rules.md": [
+      33
+    ],
+    "@site/docs/configure-deploy.md": [
+      34
+    ],
+    "@site/versioned_docs/version-v0.38/pipeline/mutator.md": [
+      35
+    ],
+    "@site/versioned_docs/version-v0.38/reference/configuration.md": [
+      36
+    ],
+    "@site/docs/pipeline/authz.md": [
+      37
+    ],
+    "@site/versioned_docs/version-v0.38/sdk.md": [
+      38
+    ],
+    "@site/docs/pipeline/error.md": [
+      39
+    ],
+    "@site/versioned_docs/version-v0.38/install.md": [
+      40
+    ],
+    "@site/docs/index.md": [
+      41
+    ],
+    "@site/versioned_docs/version-v0.37/reference/api.md": [
+      42
+    ],
+    "@site/docs/install.md": [
+      43
+    ],
+    "@site/versioned_docs/version-v0.38/milestones.md": [
+      44
+    ],
+    "@site/versioned_docs/version-v0.38/index.md": [
+      45
+    ],
+    "@site/versioned_docs/version-v0.37/sdk/index.md": [
+      46
+    ],
+    "~docs/default/version-v-0-38-metadata-prop-125.json": [
+      47
+    ],
+    "@site/versioned_docs/version-v0.37/pipeline/mutator.md": [
+      48
+    ],
+    "@site/versioned_docs/version-v0.38/reference/api.mdx": [
+      0,
+      49
+    ],
+    "@site/docs/reference/api.mdx": [
+      0,
+      50
+    ],
+    "@site/docs/sdk.md": [
+      51
+    ],
+    "@generated/docusaurus.config": [
+      0,
+      53,
+      52
+    ],
+    "main": [
+      0,
+      53,
+      52
+    ],
+    "runtime~main": [
+      0,
+      52,
+      53
+    ],
+    "/Users/foobar/workspace/go/src/github.com/ory/oathkeeper/docs/node_modules/@docusaurus/theme-search-algolia/src/theme/SearchPage/index.js": [
+      0,
+      1,
+      2,
+      28,
+      54
+    ],
+    "@theme/DocPage": [
+      0,
+      1,
+      2,
+      7,
+      55
+    ],
+    "@theme/NotFound": [
+      0,
+      1,
+      2,
+      28
+    ],
+    "@docsearch/react/modal": [
+      57
+    ],
+    "@docsearch/react/style": [
+      0,
+      58
+    ]
+  },
+  "assets": {
+    "0": {
+      "css": [
+        {
+          "file": "styles.a015a8eb.css",
+          "hash": "3317e3019aaa568d4c41",
+          "publicPath": "/oathkeeper/docs/styles.a015a8eb.css"
+        }
+      ],
+      "js": [
+        {
+          "file": "styles.b01e86d3.js",
+          "hash": "3317e3019aaa568d4c41",
+          "publicPath": "/oathkeeper/docs/styles.b01e86d3.js"
+        }
+      ]
+    },
+    "1": {
+      "js": [
+        {
+          "file": "1.b33e50d1.js",
+          "hash": "77bb3db2e6732a6fa404",
+          "publicPath": "/oathkeeper/docs/1.b33e50d1.js"
+        }
+      ]
+    },
+    "2": {
+      "js": [
+        {
+          "file": "2.caf8f6d7.js",
+          "hash": "cee1f352de1707c193a8",
+          "publicPath": "/oathkeeper/docs/2.caf8f6d7.js"
+        }
+      ]
+    },
+    "3": {
+      "js": [
+        {
+          "file": "115238d2.fd5bf5ee.js",
+          "hash": "eab30f0d97299801a0cd",
+          "publicPath": "/oathkeeper/docs/115238d2.fd5bf5ee.js"
+        }
+      ]
+    },
+    "4": {
+      "js": [
+        {
+          "file": "1295b558.c0cba761.js",
+          "hash": "81b90c00d2dd8c757cba",
+          "publicPath": "/oathkeeper/docs/1295b558.c0cba761.js"
+        }
+      ]
+    },
+    "5": {
+      "js": [
+        {
+          "file": "17896441.7654b21d.js",
+          "hash": "7cfcdf269c27b8d6f33f",
+          "publicPath": "/oathkeeper/docs/17896441.7654b21d.js"
+        }
+      ]
+    },
+    "7": {
+      "js": [
+        {
+          "file": "7d7ff3cd.a295df35.js",
+          "hash": "b49e5e733412f3f07a53",
+          "publicPath": "/oathkeeper/docs/7d7ff3cd.a295df35.js"
+        }
+      ]
+    },
+    "8": {
+      "js": [
+        {
+          "file": "20ce8b29.1874e7c8.js",
+          "hash": "2de813293125e8da1922",
+          "publicPath": "/oathkeeper/docs/20ce8b29.1874e7c8.js"
+        }
+      ]
+    },
+    "9": {
+      "js": [
+        {
+          "file": "26d156df.c3d26efd.js",
+          "hash": "1d6e299b34e82dccca23",
+          "publicPath": "/oathkeeper/docs/26d156df.c3d26efd.js"
+        }
+      ]
+    },
+    "10": {
+      "js": [
+        {
+          "file": "295efbd4.2f51e480.js",
+          "hash": "002425aebba8133ac18c",
+          "publicPath": "/oathkeeper/docs/295efbd4.2f51e480.js"
+        }
+      ]
+    },
+    "11": {
+      "js": [
+        {
+          "file": "306919cb.f2be7680.js",
+          "hash": "4e94ef5a585bc25ab6f7",
+          "publicPath": "/oathkeeper/docs/306919cb.f2be7680.js"
+        }
+      ]
+    },
+    "12": {
+      "js": [
+        {
+          "file": "385ffb5f.f9bf0305.js",
+          "hash": "242f9e5bdef4971280f8",
+          "publicPath": "/oathkeeper/docs/385ffb5f.f9bf0305.js"
+        }
+      ]
+    },
+    "13": {
+      "js": [
+        {
+          "file": "3b9b91e9.d1efc7fb.js",
+          "hash": "a9305c134199352215ac",
+          "publicPath": "/oathkeeper/docs/3b9b91e9.d1efc7fb.js"
+        }
+      ]
+    },
+    "14": {
+      "js": [
+        {
+          "file": "3bbefbd3.ec238c10.js",
+          "hash": "47311c53a7d9ae60f991",
+          "publicPath": "/oathkeeper/docs/3bbefbd3.ec238c10.js"
+        }
+      ]
+    },
+    "15": {
+      "js": [
+        {
+          "file": "3bc4b95d.adf4a00b.js",
+          "hash": "dd958e96baf48175c0b5",
+          "publicPath": "/oathkeeper/docs/3bc4b95d.adf4a00b.js"
+        }
+      ]
+    },
+    "16": {
+      "js": [
+        {
+          "file": "3dbc79cf.6dc143e2.js",
+          "hash": "42eae56a3d44cacdcc88",
+          "publicPath": "/oathkeeper/docs/3dbc79cf.6dc143e2.js"
+        }
+      ]
+    },
+    "17": {
+      "js": [
+        {
+          "file": "3f007664.b6bc8d48.js",
+          "hash": "8a786878e1ee6acb7141",
+          "publicPath": "/oathkeeper/docs/3f007664.b6bc8d48.js"
+        }
+      ]
+    },
+    "18": {
+      "js": [
+        {
+          "file": "40fb4cf7.e9f1a000.js",
+          "hash": "a9a165bbe9df45767be1",
+          "publicPath": "/oathkeeper/docs/40fb4cf7.e9f1a000.js"
+        }
+      ]
+    },
+    "19": {
+      "js": [
+        {
+          "file": "4678bfa9.fd37b129.js",
+          "hash": "87777a0ed60b5248d327",
+          "publicPath": "/oathkeeper/docs/4678bfa9.fd37b129.js"
+        }
+      ]
+    },
+    "20": {
+      "js": [
+        {
+          "file": "4d54d076.d38c8f0b.js",
+          "hash": "058962fe8152b6d3e41f",
+          "publicPath": "/oathkeeper/docs/4d54d076.d38c8f0b.js"
+        }
+      ]
+    },
+    "21": {
+      "js": [
+        {
+          "file": "4de6d619.0162c5e8.js",
+          "hash": "e820910aa267d652d66a",
+          "publicPath": "/oathkeeper/docs/4de6d619.0162c5e8.js"
+        }
+      ]
+    },
+    "22": {
+      "js": [
+        {
+          "file": "56f6089f.5478d5c6.js",
+          "hash": "f273b7e496209348030b",
+          "publicPath": "/oathkeeper/docs/56f6089f.5478d5c6.js"
+        }
+      ]
+    },
+    "23": {
+      "js": [
+        {
+          "file": "6bd0dfb0.9175b13b.js",
+          "hash": "d9238393d3e7f3d564ea",
+          "publicPath": "/oathkeeper/docs/6bd0dfb0.9175b13b.js"
+        }
+      ]
+    },
+    "24": {
+      "js": [
+        {
+          "file": "7684a692.e30b423d.js",
+          "hash": "68a4e368d005ece407f9",
+          "publicPath": "/oathkeeper/docs/7684a692.e30b423d.js"
+        }
+      ]
+    },
+    "25": {
+      "js": [
+        {
+          "file": "7761d2e0.14533cf7.js",
+          "hash": "dfae377a39e2bb696707",
+          "publicPath": "/oathkeeper/docs/7761d2e0.14533cf7.js"
+        }
+      ]
+    },
+    "26": {
+      "js": [
+        {
+          "file": "7815347d.fc2e1ab8.js",
+          "hash": "15efdd4d06099b58fa03",
+          "publicPath": "/oathkeeper/docs/7815347d.fc2e1ab8.js"
+        }
+      ]
+    },
+    "27": {
+      "js": [
+        {
+          "file": "7b771374.d6a4acf8.js",
+          "hash": "1b3478efd00fa651d8b3",
+          "publicPath": "/oathkeeper/docs/7b771374.d6a4acf8.js"
+        }
+      ]
+    },
+    "28": {
+      "js": [
+        {
+          "file": "18b93cb3.ec083484.js",
+          "hash": "10b11252792de03844f4",
+          "publicPath": "/oathkeeper/docs/18b93cb3.ec083484.js"
+        },
+        {
+          "file": "1be78505.0eed7041.js",
+          "hash": "b40f37192cb4a0d4dd72",
+          "publicPath": "/oathkeeper/docs/1be78505.0eed7041.js"
+        },
+        {
+          "file": "56.bf9ae09e.js",
+          "hash": "012dcc4d47d79c77ff59",
+          "publicPath": "/oathkeeper/docs/56.bf9ae09e.js"
+        }
+      ]
+    },
+    "29": {
+      "js": [
+        {
+          "file": "7ec5653a.a4d399b1.js",
+          "hash": "647734df254422d063c3",
+          "publicPath": "/oathkeeper/docs/7ec5653a.a4d399b1.js"
+        }
+      ]
+    },
+    "30": {
+      "js": [
+        {
+          "file": "817f7194.5fca26d4.js",
+          "hash": "cebf477609f5b88bec54",
+          "publicPath": "/oathkeeper/docs/817f7194.5fca26d4.js"
+        }
+      ]
+    },
+    "31": {
+      "js": [
+        {
+          "file": "8306c3dc.d88995ea.js",
+          "hash": "6eab878b4c045ed01b7b",
+          "publicPath": "/oathkeeper/docs/8306c3dc.d88995ea.js"
+        }
+      ]
+    },
+    "32": {
+      "js": [
+        {
+          "file": "935f2afb.7d9608a5.js",
+          "hash": "bce93b28170295c10b74",
+          "publicPath": "/oathkeeper/docs/935f2afb.7d9608a5.js"
+        }
+      ]
+    },
+    "33": {
+      "js": [
+        {
+          "file": "98149078.77f3b9ff.js",
+          "hash": "47bb75f08a5f458709aa",
+          "publicPath": "/oathkeeper/docs/98149078.77f3b9ff.js"
+        }
+      ]
+    },
+    "34": {
+      "js": [
+        {
+          "file": "9a7ecc5b.6a596c2d.js",
+          "hash": "1bf6917f08b30337ff20",
+          "publicPath": "/oathkeeper/docs/9a7ecc5b.6a596c2d.js"
+        }
+      ]
+    },
+    "35": {
+      "js": [
+        {
+          "file": "a1b6e402.b1a15d8e.js",
+          "hash": "124345a39ca4934311d1",
+          "publicPath": "/oathkeeper/docs/a1b6e402.b1a15d8e.js"
+        }
+      ]
+    },
+    "36": {
+      "js": [
+        {
+          "file": "a284cb16.ad49fec9.js",
+          "hash": "889d056a7986343e00cf",
+          "publicPath": "/oathkeeper/docs/a284cb16.ad49fec9.js"
+        }
+      ]
+    },
+    "37": {
+      "js": [
+        {
+          "file": "a62a6c65.71f3eda9.js",
+          "hash": "bed02fe79e8353b32831",
+          "publicPath": "/oathkeeper/docs/a62a6c65.71f3eda9.js"
+        }
+      ]
+    },
+    "38": {
+      "js": [
+        {
+          "file": "a6f79c22.80f1a2f0.js",
+          "hash": "e3e04d4437ee760e4be6",
+          "publicPath": "/oathkeeper/docs/a6f79c22.80f1a2f0.js"
+        }
+      ]
+    },
+    "39": {
+      "js": [
+        {
+          "file": "aee91356.1cb2b541.js",
+          "hash": "d2aa776949ae8d44ef51",
+          "publicPath": "/oathkeeper/docs/aee91356.1cb2b541.js"
+        }
+      ]
+    },
+    "40": {
+      "js": [
+        {
+          "file": "b5887b81.372f64f9.js",
+          "hash": "d86edf4ff14044857933",
+          "publicPath": "/oathkeeper/docs/b5887b81.372f64f9.js"
+        }
+      ]
+    },
+    "41": {
+      "js": [
+        {
+          "file": "c377a04b.bff243f4.js",
+          "hash": "692a4c89cc463d881e24",
+          "publicPath": "/oathkeeper/docs/c377a04b.bff243f4.js"
+        }
+      ]
+    },
+    "42": {
+      "js": [
+        {
+          "file": "c41b5e65.15aaadb0.js",
+          "hash": "6c641751c2ebe77b016a",
+          "publicPath": "/oathkeeper/docs/c41b5e65.15aaadb0.js"
+        }
+      ]
+    },
+    "43": {
+      "js": [
+        {
+          "file": "c4de80f8.0a430b92.js",
+          "hash": "edc0aef2ad6c0019cb6f",
+          "publicPath": "/oathkeeper/docs/c4de80f8.0a430b92.js"
+        }
+      ]
+    },
+    "44": {
+      "js": [
+        {
+          "file": "c5749069.906ac064.js",
+          "hash": "284d0c45257568f97df4",
+          "publicPath": "/oathkeeper/docs/c5749069.906ac064.js"
+        }
+      ]
+    },
+    "45": {
+      "js": [
+        {
+          "file": "ce5f25bc.6b9ac2c4.js",
+          "hash": "74d1295b04f92e72fd86",
+          "publicPath": "/oathkeeper/docs/ce5f25bc.6b9ac2c4.js"
+        }
+      ]
+    },
+    "46": {
+      "js": [
+        {
+          "file": "db019379.50e3ae14.js",
+          "hash": "16a29f70b951a1e0d5c1",
+          "publicPath": "/oathkeeper/docs/db019379.50e3ae14.js"
+        }
+      ]
+    },
+    "47": {
+      "js": [
+        {
+          "file": "dcc3b313.8222ac38.js",
+          "hash": "0d8d347254c0a2fcdc64",
+          "publicPath": "/oathkeeper/docs/dcc3b313.8222ac38.js"
+        }
+      ]
+    },
+    "48": {
+      "js": [
+        {
+          "file": "df0f349b.c77ee59b.js",
+          "hash": "3c5eba733f7af528191b",
+          "publicPath": "/oathkeeper/docs/df0f349b.c77ee59b.js"
+        }
+      ]
+    },
+    "49": {
+      "js": [
+        {
+          "file": "e5343c99.0a1713f7.js",
+          "hash": "c6f92a136d709b2aa3cd",
+          "publicPath": "/oathkeeper/docs/e5343c99.0a1713f7.js"
+        }
+      ]
+    },
+    "50": {
+      "js": [
+        {
+          "file": "efeac89c.f9e9ffea.js",
+          "hash": "cfceaaf97dbaa58d4477",
+          "publicPath": "/oathkeeper/docs/efeac89c.f9e9ffea.js"
+        }
+      ]
+    },
+    "51": {
+      "js": [
+        {
+          "file": "f9c2c370.bfc4a40e.js",
+          "hash": "593fb61a3b11c8145b04",
+          "publicPath": "/oathkeeper/docs/f9c2c370.bfc4a40e.js"
+        }
+      ]
+    },
+    "52": {
+      "js": [
+        {
+          "file": "main.4987bb24.js",
+          "hash": "a7b3d297ff905b0cf04b",
+          "publicPath": "/oathkeeper/docs/main.4987bb24.js"
+        }
+      ]
+    },
+    "53": {
+      "js": [
+        {
+          "file": "runtime~main.0e3cfc22.js",
+          "hash": "422416bb525eba2db279",
+          "publicPath": "/oathkeeper/docs/runtime~main.0e3cfc22.js"
+        }
+      ]
+    },
+    "54": {
+      "js": [
+        {
+          "file": "54.cfc24dfc.js",
+          "hash": "c5c2e07c6659b3aa6872",
+          "publicPath": "/oathkeeper/docs/54.cfc24dfc.js"
+        }
+      ]
+    },
+    "55": {
+      "js": [
+        {
+          "file": "55.f36f5c67.js",
+          "hash": "d5d58b1aab2c60cdbeb6",
+          "publicPath": "/oathkeeper/docs/55.f36f5c67.js"
+        }
+      ]
+    },
+    "57": {
+      "js": [
+        {
+          "file": "57.424d0f75.js",
+          "hash": "2c67ef3abec0a4263c04",
+          "publicPath": "/oathkeeper/docs/57.424d0f75.js"
+        }
+      ]
+    },
+    "58": {
+      "js": [
+        {
+          "file": "58.ce16da9f.js",
+          "hash": "f5dd60cfd0f2af9b07f6",
+          "publicPath": "/oathkeeper/docs/58.ce16da9f.js"
+        }
+      ]
+    }
+  }
+}
