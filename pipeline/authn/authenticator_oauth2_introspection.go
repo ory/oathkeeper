@@ -15,9 +15,6 @@ import (
 
 	"github.com/dgraph-io/ristretto"
 
-	"github.com/opentracing/opentracing-go"
-	"github.com/opentracing/opentracing-go/ext"
-
 	"github.com/pkg/errors"
 	"golang.org/x/oauth2/clientcredentials"
 
@@ -170,29 +167,6 @@ func (a *AuthenticatorOAuth2Introspection) tokenToCache(config *AuthenticatorOAu
 	} else {
 		a.tokenCache.Set(token, v, 1)
 	}
-}
-
-func (a *AuthenticatorOAuth2Introspection) traceRequest(ctx context.Context, req *http.Request) func() {
-	tracer := opentracing.GlobalTracer()
-	if tracer == nil {
-		return func() {}
-	}
-
-	parentSpan := opentracing.SpanFromContext(ctx)
-	opts := make([]opentracing.StartSpanOption, 0, 1)
-	if parentSpan != nil {
-		opts = append(opts, opentracing.ChildOf(parentSpan.Context()))
-	}
-
-	urlStr := req.URL.String()
-	clientSpan := tracer.StartSpan(req.Method+" "+urlStr, opts...)
-
-	ext.SpanKindRPCClient.Set(clientSpan)
-	ext.HTTPUrl.Set(clientSpan, urlStr)
-	ext.HTTPMethod.Set(clientSpan, req.Method)
-
-	_ = tracer.Inject(clientSpan.Context(), opentracing.HTTPHeaders, opentracing.HTTPHeadersCarrier(req.Header))
-	return clientSpan.Finish
 }
 
 func (a *AuthenticatorOAuth2Introspection) Authenticate(r *http.Request, session *AuthenticationSession, config json.RawMessage, _ pipeline.Rule) error {
