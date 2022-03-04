@@ -10,6 +10,8 @@ import (
 	"time"
 
 	"github.com/dgraph-io/ristretto"
+	"github.com/hashicorp/go-retryablehttp"
+	"github.com/opentracing/opentracing-go"
 	"golang.org/x/oauth2"
 
 	"github.com/ory/x/logrusx"
@@ -41,7 +43,8 @@ type clientCredentialsCacheConfig struct {
 
 type AuthenticatorOAuth2ClientCredentials struct {
 	c      configuration.Provider
-	client *http.Client
+	client *retryablehttp.Client
+	tracer opentracing.Tracer
 
 	tokenCache *ristretto.Cache
 	cacheTTL   *time.Duration
@@ -53,8 +56,8 @@ type AuthenticatorOAuth2ClientCredentialsRetryConfiguration struct {
 	MaxWait string `json:"give_up_after"`
 }
 
-func NewAuthenticatorOAuth2ClientCredentials(c configuration.Provider, logger *logrusx.Logger) *AuthenticatorOAuth2ClientCredentials {
-	return &AuthenticatorOAuth2ClientCredentials{c: c, logger: logger}
+func NewAuthenticatorOAuth2ClientCredentials(c configuration.Provider, logger *logrusx.Logger, tracer opentracing.Tracer) *AuthenticatorOAuth2ClientCredentials {
+	return &AuthenticatorOAuth2ClientCredentials{c: c, logger: logger, tracer: tracer}
 }
 
 func (a *AuthenticatorOAuth2ClientCredentials) GetID() string {
@@ -99,8 +102,11 @@ func (a *AuthenticatorOAuth2ClientCredentials) Config(config json.RawMessage) (*
 	if err != nil {
 		return nil, err
 	}
-	timeout := time.Millisecond * duration
-	a.client = httpx.NewResilientClientLatencyToleranceConfigurable(nil, timeout, maxWait)
+
+	a.client = httpx.NewResilientClient(
+		httpx.ResilientClientWithTracer(a.tracer),
+		httpx.ResilientClientWithConnectionTimeout(time.Millisecond*duration),
+		httpx.ResilientClientWithMaxRetryWait(maxWait))
 
 	if c.Cache.TTL != "" {
 		cacheTTL, err := time.ParseDuration(c.Cache.TTL)

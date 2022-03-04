@@ -2,6 +2,7 @@ package health
 
 import (
 	"context"
+	"net/http"
 
 	"github.com/pkg/errors"
 
@@ -61,7 +62,9 @@ func (h *DefaultHealthEventManager) Watch(ctx context.Context) {
 func (h *DefaultHealthEventManager) HealthxReadyCheckers() healthx.ReadyCheckers {
 	var checkers = make(healthx.ReadyCheckers)
 	for _, listener := range h.listeners {
-		checkers[listener.ID()] = listener.Validate
+		checkers[listener.ID()] = func(_ *http.Request) error {
+			return listener.Validate()
+		}
 	}
 	return checkers
 }

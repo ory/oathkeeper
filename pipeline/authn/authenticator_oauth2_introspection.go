@@ -11,13 +11,11 @@ import (
 	"sync"
 	"time"
 
+	"github.com/dgraph-io/ristretto"
+	"github.com/hashicorp/go-retryablehttp"
 	"github.com/ory/fosite"
 
-	"github.com/dgraph-io/ristretto"
-
 	"github.com/opentracing/opentracing-go"
-	"github.com/opentracing/opentracing-go/ext"
-
 	"github.com/pkg/errors"
 	"golang.org/x/oauth2/clientcredentials"
 
@@ -66,16 +64,17 @@ type cacheConfig struct {
 type AuthenticatorOAuth2Introspection struct {
 	c configuration.Provider
 
-	clientMap map[string]*http.Client
+	clientMap map[string]*retryablehttp.Client
 	mu        sync.RWMutex
 
 	tokenCache *ristretto.Cache
 	cacheTTL   *time.Duration
 	logger     *logrusx.Logger
+	tracer     opentracing.Tracer
 }
 
-func NewAuthenticatorOAuth2Introspection(c configuration.Provider, logger *logrusx.Logger) *AuthenticatorOAuth2Introspection {
-	return &AuthenticatorOAuth2Introspection{c: c, logger: logger, clientMap: make(map[string]*http.Client)}
+func NewAuthenticatorOAuth2Introspection(c configuration.Provider, logger *logrusx.Logger, tracer opentracing.Tracer) *AuthenticatorOAuth2Introspection {
+	return &AuthenticatorOAuth2Introspection{c: c, logger: logger, tracer: tracer, clientMap: make(map[string]*retryablehttp.Client)}
 }
 
 func (a *AuthenticatorOAuth2Introspection) GetID() string {
@@ -171,29 +170,6 @@ func (a *AuthenticatorOAuth2Introspection) tokenToCache(config *AuthenticatorOAu
 	}
 }
 
-func (a *AuthenticatorOAuth2Introspection) traceRequest(ctx context.Context, req *http.Request) func() {
-	tracer := opentracing.GlobalTracer()
-	if tracer == nil {
-		return func() {}
-	}
-
-	parentSpan := opentracing.SpanFromContext(ctx)
-	opts := make([]opentracing.StartSpanOption, 0, 1)
-	if parentSpan != nil {
-		opts = append(opts, opentracing.ChildOf(parentSpan.Context()))
-	}
-
-	urlStr := req.URL.String()
-	clientSpan := tracer.StartSpan(req.Method+" "+urlStr, opts...)
-
-	ext.SpanKindRPCClient.Set(clientSpan)
-	ext.HTTPUrl.Set(clientSpan, urlStr)
-	ext.HTTPMethod.Set(clientSpan, req.Method)
-
-	_ = tracer.Inject(clientSpan.Context(), opentracing.HTTPHeaders, opentracing.HTTPHeadersCarrier(req.Header))
-	return clientSpan.Finish
-}
-
 func (a *AuthenticatorOAuth2Introspection) Authenticate(r *http.Request, session *AuthenticationSession, config json.RawMessage, _ pipeline.Rule) error {
 	cf, client, err := a.Config(config)
 	if err != nil {
@@ -217,7 +193,7 @@ func (a *AuthenticatorOAuth2Introspection) Authenticate(r *http.Request, session
 			body.Add("scope", strings.Join(cf.Scopes, " "))
 		}
 
-		introspectReq, err := http.NewRequest(http.MethodPost, cf.IntrospectionURL, strings.NewReader(body.Encode()))
+		introspectReq, err := retryablehttp.NewRequest(http.MethodPost, cf.IntrospectionURL, strings.NewReader(body.Encode()))
 		if err != nil {
 			return errors.WithStack(err)
 		}
@@ -228,13 +204,8 @@ func (a *AuthenticatorOAuth2Introspection) Authenticate(r *http.Request, session
 		// set/override the content-type header
 		introspectReq.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
-		// add tracing
-		closeSpan := a.traceRequest(r.Context(), introspectReq)
-
 		resp, err := client.Do(introspectReq.WithContext(r.Context()))
 
-		// close the span so it represents just the http request
-		closeSpan()
 		if err != nil {
 			return errors.WithStack(err)
 		}
@@ -310,7 +281,7 @@ func (a *AuthenticatorOAuth2Introspection) Validate(config json.RawMessage) erro
 	return err
 }
 
-func (a *AuthenticatorOAuth2Introspection) Config(config json.RawMessage) (*AuthenticatorOAuth2IntrospectionConfiguration, *http.Client, error) {
+func (a *AuthenticatorOAuth2Introspection) Config(config json.RawMessage) (*AuthenticatorOAuth2IntrospectionConfiguration, *retryablehttp.Client, error) {
 	var c AuthenticatorOAuth2IntrospectionConfiguration
 	if err := a.c.AuthenticatorConfig(a.GetID(), config, &c); err != nil {
 		return nil, nil, NewErrAuthenticatorMisconfigured(a, err)
@@ -359,14 +330,17 @@ func (a *AuthenticatorOAuth2Introspection) Config(config json.RawMessage) (*Auth
 		if err != nil {
 			return nil, nil, errors.WithStack(err)
 		}
-		timeout := time.Millisecond * duration
 
 		maxWait, err := time.ParseDuration(c.Retry.MaxWait)
 		if err != nil {
 			return nil, nil, errors.WithStack(err)
 		}
 
-		client = httpx.NewResilientClientLatencyToleranceConfigurable(rt, timeout, maxWait)
+		client = httpx.NewResilientClient(
+			httpx.ResilientClientWithClient(&http.Client{Transport: rt}),
+			httpx.ResilientClientWithTracer(a.tracer),
+			httpx.ResilientClientWithConnectionTimeout(time.Millisecond*duration),
+			httpx.ResilientClientWithMaxRetryWait(maxWait))
 		a.mu.Lock()
 		a.clientMap[clientKey] = client
 		a.mu.Unlock()

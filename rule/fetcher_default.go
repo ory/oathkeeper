@@ -192,7 +192,7 @@ func (f *FetcherDefault) Watch(ctx context.Context) error {
 func (f *FetcherDefault) watch(ctx context.Context, watcher *fsnotify.Watcher, events chan event) error {
 	var pc map[string]interface{}
 
-	f.c.AddWatcher(func(e fsnotify.Event) error {
+	f.c.Watcher(func(e fsnotify.Event) error {
 		if reflect.DeepEqual(pc, f.c.Source().String(configuration.ViperKeyAccessRuleRepositories)) {
 			f.r.Logger().
 				Debug("Not reloading access rule repositories because configuration value has not changed.")

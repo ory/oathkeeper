@@ -1,12 +1,9 @@
 package configuration
 
 import (
-	"bytes"
 	"context"
-	"encoding/binary"
 	"encoding/json"
 	"fmt"
-	"hash/crc64"
 	"net/url"
 	"strings"
 	"sync"
@@ -14,12 +11,10 @@ import (
 
 	"github.com/imdario/mergo"
 	"github.com/ory/oathkeeper/embedx"
-	"github.com/ory/viper"
 	"github.com/pkg/errors"
 	"github.com/rs/cors"
 
 	"github.com/ory/fosite"
-	"github.com/ory/go-convenience/stringsx"
 	"github.com/ory/gojsonschema"
 	"github.com/ory/oathkeeper/x"
 	"github.com/ory/x/configx"
@@ -268,69 +263,11 @@ func (v *ViperProvider) ToScopeStrategy(value string, key string) fosite.ScopeSt
 }
 
 func (v *ViperProvider) pipelineIsEnabled(prefix, id string) bool {
-	hash, err := v.hashPipelineConfig(prefix, id, nil)
-	if err != nil {
-		return false
-	}
-
-	v.enabledMutex.RLock()
-	e, ok := v.enabledCache[hash]
-	v.enabledMutex.RUnlock()
-
-	if ok {
-		return e
-	}
-
-	v.enabledMutex.Lock()
-	v.enabledCache[hash] = v.p.Bool(fmt.Sprintf("%s.%s.enabled", prefix, id))
-	v.enabledMutex.Unlock()
-
-	return v.enabledCache[hash]
-}
-
-func (v *ViperProvider) hashPipelineConfig(prefix, id string, override json.RawMessage) (uint64, error) {
-	ts := viper.ConfigChangeAt().UnixNano()
-	b := make([]byte, 8)
-	binary.LittleEndian.PutUint64(b, uint64(ts))
-
-	slices := [][]byte{
-		[]byte(prefix),
-		[]byte(id),
-		[]byte(override),
-		b,
-	}
-
-	var hashSlices []byte
-	for _, s := range slices {
-		hashSlices = append(hashSlices, s...)
-	}
-
-	return crc64.Checksum(hashSlices, crc64.MakeTable(crc64.ECMA)), nil
+	return v.p.Bool(fmt.Sprintf("%s.%s.enabled", prefix, id))
 }
 
 func (v *ViperProvider) PipelineConfig(prefix, id string, override json.RawMessage, dest interface{}) error {
-	hash, err := v.hashPipelineConfig(prefix, id, override)
-	if err != nil {
-		return errors.WithStack(err)
-	}
-
-	v.configMutex.RLock()
-	c, ok := v.configCache[hash]
-	v.configMutex.RUnlock()
-
-	if ok {
-		if dest != nil {
-			if err := json.NewDecoder(bytes.NewBuffer(c)).Decode(dest); err != nil {
-				return errors.WithStack(err)
-			}
-		}
-
-		return nil
-	}
-
-	// we need to create a copy for config otherwise we will accidentally override values
-	config, err := x.Deepcopy(wiperx.GetStringMapConfig(stringsx.Splitx(fmt.Sprintf("%s.%s.config", prefix, id), ".")...))
-	if err != nil {
+	if err := v.p.Unmarshal(fmt.Sprintf("%s.%s.config", prefix, id), dest); err != nil {
 		return errors.WithStack(err)
 	}
 
@@ -340,20 +277,15 @@ func (v *ViperProvider) PipelineConfig(prefix, id string, override json.RawMessa
 			return errors.WithStack(err)
 		}
 
-		if err := mergo.Merge(&config, &overrideMap, mergo.WithOverride); err != nil {
+		if err := mergo.Map(dest, &overrideMap, mergo.WithOverride); err != nil {
 			return errors.WithStack(err)
 		}
 	}
 
-	marshalled, err := json.Marshal(config)
+	// TODO: do we really need the following checks?
+	marshalled, err := json.Marshal(dest)
 	if err != nil {
 		return errors.WithStack(err)
-	}
-
-	if dest != nil {
-		if err := json.NewDecoder(bytes.NewBuffer(marshalled)).Decode(dest); err != nil {
-			return errors.WithStack(err)
-		}
 	}
 
 	rawComponentSchema, err := schemas.Find(fmt.Sprintf("pipeline/%s.%s.schema.json", strings.Split(prefix, ".")[0], id))
@@ -381,10 +313,6 @@ func (v *ViperProvider) PipelineConfig(prefix, id string, override json.RawMessa
 	} else if !result.Valid() {
 		return errors.WithStack(result.Errors())
 	}
-
-	v.configMutex.Lock()
-	v.configCache[hash] = marshalled
-	v.configMutex.Unlock()
 
 	return nil
 }
