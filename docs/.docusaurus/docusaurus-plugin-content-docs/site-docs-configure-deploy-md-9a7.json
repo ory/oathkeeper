@@ -1,0 +1,22 @@
+{
+  "unversionedId": "configure-deploy",
+  "id": "configure-deploy",
+  "isDocsHomePage": false,
+  "title": "Configure and Deploy",
+  "description": "The ORY Oathkeeper HTTP serve process oathkeeper serve opens two ports",
+  "source": "@site/docs/configure-deploy.md",
+  "permalink": "/oathkeeper/docs/next/configure-deploy",
+  "editUrl": "https://github.com/ory/oathkeeper/edit/master/docs/docs/configure-deploy.md",
+  "version": "next",
+  "lastUpdatedBy": "aeneasr",
+  "lastUpdatedAt": 1596013699,
+  "sidebar": "docs",
+  "previous": {
+    "title": "Error Handlers",
+    "permalink": "/oathkeeper/docs/next/pipeline/error"
+  },
+  "next": {
+    "title": "Configuration",
+    "permalink": "/oathkeeper/docs/next/reference/configuration"
+  }
+}

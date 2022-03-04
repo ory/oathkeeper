@@ -1,0 +1,22 @@
+{
+  "unversionedId": "api-access-rules",
+  "id": "api-access-rules",
+  "isDocsHomePage": false,
+  "title": "API Access Rules",
+  "description": "ORY Oathkeeper reaches decisions to allow or deny access by applying Access",
+  "source": "@site/docs/api-access-rules.md",
+  "permalink": "/oathkeeper/docs/next/api-access-rules",
+  "editUrl": "https://github.com/ory/oathkeeper/edit/master/docs/docs/api-access-rules.md",
+  "version": "next",
+  "lastUpdatedBy": "hackerman",
+  "lastUpdatedAt": 1591338663,
+  "sidebar": "docs",
+  "previous": {
+    "title": "Installation",
+    "permalink": "/oathkeeper/docs/next/install"
+  },
+  "next": {
+    "title": "Access Rule Pipeline",
+    "permalink": "/oathkeeper/docs/next/pipeline/index"
+  }
+}

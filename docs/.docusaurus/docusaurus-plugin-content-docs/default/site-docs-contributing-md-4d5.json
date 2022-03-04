@@ -1,0 +1,23 @@
+{
+  "unversionedId": "contributing",
+  "id": "contributing",
+  "isDocsHomePage": false,
+  "title": "Contribution Guidelines",
+  "description": "<!--",
+  "source": "@site/docs/contributing.md",
+  "slug": "/contributing",
+  "permalink": "/oathkeeper/docs/next/contributing",
+  "editUrl": "https://github.com/ory/oathkeeper/edit/master/docs/docs/contributing.md",
+  "version": "current",
+  "lastUpdatedBy": "Author",
+  "lastUpdatedAt": 1539502055,
+  "sidebar": "docs",
+  "previous": {
+    "title": "Installation",
+    "permalink": "/oathkeeper/docs/next/install"
+  },
+  "next": {
+    "title": "API Access Rules",
+    "permalink": "/oathkeeper/docs/next/api-access-rules"
+  }
+}

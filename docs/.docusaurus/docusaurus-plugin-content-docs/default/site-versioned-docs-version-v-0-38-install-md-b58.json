@@ -1,0 +1,23 @@
+{
+  "unversionedId": "install",
+  "id": "version-v0.38/install",
+  "isDocsHomePage": false,
+  "title": "Installation",
+  "description": "Installing ORY Oathkeeper on any system is straight forward. We provide",
+  "source": "@site/versioned_docs/version-v0.38/install.md",
+  "slug": "/install",
+  "permalink": "/oathkeeper/docs/install",
+  "editUrl": "https://github.com/ory/oathkeeper/edit/master/docs/versioned_docs/version-v0.38/install.md",
+  "version": "v0.38",
+  "lastUpdatedBy": "Author",
+  "lastUpdatedAt": 1539502055,
+  "sidebar": "version-v0.38/docs",
+  "previous": {
+    "title": "Introduction",
+    "permalink": "/oathkeeper/docs/"
+  },
+  "next": {
+    "title": "Contribution Guidelines",
+    "permalink": "/oathkeeper/docs/contributing"
+  }
+}

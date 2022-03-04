@@ -1,0 +1,23 @@
+{
+  "unversionedId": "pipeline/authn",
+  "id": "version-v0.38/pipeline/authn",
+  "isDocsHomePage": false,
+  "title": "Authenticators",
+  "description": "An authenticator is responsible for authenticating request credentials. ORY",
+  "source": "@site/versioned_docs/version-v0.38/pipeline/authn.md",
+  "slug": "/pipeline/authn",
+  "permalink": "/oathkeeper/docs/pipeline/authn",
+  "editUrl": "https://github.com/ory/oathkeeper/edit/master/docs/versioned_docs/version-v0.38/pipeline/authn.md",
+  "version": "v0.38",
+  "lastUpdatedBy": "Author",
+  "lastUpdatedAt": 1539502055,
+  "sidebar": "version-v0.38/docs",
+  "previous": {
+    "title": "Access Rule Pipeline",
+    "permalink": "/oathkeeper/docs/pipeline"
+  },
+  "next": {
+    "title": "Authorizers",
+    "permalink": "/oathkeeper/docs/pipeline/authz"
+  }
+}

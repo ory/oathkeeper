@@ -1,0 +1,18 @@
+{
+  "unversionedId": "sdk/index",
+  "id": "sdk/index",
+  "isDocsHomePage": false,
+  "title": "Overview",
+  "description": "All SDKs use automated code generation provided by",
+  "source": "@site/docs/sdk/index.md",
+  "permalink": "/oathkeeper/docs/next/sdk/index",
+  "editUrl": "https://github.com/ory/oathkeeper/edit/master/docs/docs/sdk/index.md",
+  "version": "next",
+  "lastUpdatedBy": "aeneasr",
+  "lastUpdatedAt": 1590770922,
+  "sidebar": "docs",
+  "previous": {
+    "title": "REST API",
+    "permalink": "/oathkeeper/docs/next/reference/api"
+  }
+}

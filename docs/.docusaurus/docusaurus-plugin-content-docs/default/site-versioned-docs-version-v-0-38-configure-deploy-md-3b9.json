@@ -1,0 +1,23 @@
+{
+  "unversionedId": "configure-deploy",
+  "id": "version-v0.38/configure-deploy",
+  "isDocsHomePage": false,
+  "title": "Configure and Deploy",
+  "description": "The ORY Oathkeeper HTTP serve process oathkeeper serve opens two ports",
+  "source": "@site/versioned_docs/version-v0.38/configure-deploy.md",
+  "slug": "/configure-deploy",
+  "permalink": "/oathkeeper/docs/configure-deploy",
+  "editUrl": "https://github.com/ory/oathkeeper/edit/master/docs/versioned_docs/version-v0.38/configure-deploy.md",
+  "version": "v0.38",
+  "lastUpdatedBy": "Author",
+  "lastUpdatedAt": 1539502055,
+  "sidebar": "version-v0.38/docs",
+  "previous": {
+    "title": "Error Handlers",
+    "permalink": "/oathkeeper/docs/pipeline/error"
+  },
+  "next": {
+    "title": "Connect to ORY Hydra OAuth2 Token Introspection",
+    "permalink": "/oathkeeper/docs/oauth2-token-introspection-hydra"
+  }
+}

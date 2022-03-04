@@ -159,6 +159,7 @@ jobs:
       - uses: ory/ci/releaser/render-version-schema@master
         with:
           schema-path: spec/config.json
+          token: ${{ secrets.ORY_BOT_PAT }}
 
   newsletter-draft:
     name: Draft newsletter
@@ -169,8 +170,8 @@ jobs:
     steps:
       - uses: ory/ci/newsletter@master
         with:
-          mailchimp_list_id: 058a056618
-          mailchmip_segment_id: 11398953
+          mailchimp_list_id: f605a41b53
+          mailchmip_segment_id: 6479485
           mailchimp_api_key: ${{ secrets.MAILCHIMP_API_KEY }}
           draft: 'true'
           ssh_key: ${{ secrets.ORY_BOT_SSH_KEY }}
@@ -196,8 +197,8 @@ jobs:
     steps:
       - uses: ory/ci/newsletter@master
         with:
-          mailchimp_list_id: 058a056618
-          mailchmip_segment_id: 11398953
+          mailchimp_list_id: f605a41b53
+          mailchmip_segment_id: 6479485
           mailchimp_api_key: ${{ secrets.MAILCHIMP_API_KEY }}
           draft: 'false'
           ssh_key: ${{ secrets.ORY_BOT_SSH_KEY }}

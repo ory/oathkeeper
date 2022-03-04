@@ -1,0 +1,23 @@
+{
+  "unversionedId": "pipeline/mutator",
+  "id": "pipeline/mutator",
+  "isDocsHomePage": false,
+  "title": "Mutators",
+  "description": "A mutator transforms the credentials from incoming requests to credentials that",
+  "source": "@site/docs/pipeline/mutator.md",
+  "slug": "/pipeline/mutator",
+  "permalink": "/oathkeeper/docs/next/pipeline/mutator",
+  "editUrl": "https://github.com/ory/oathkeeper/edit/master/docs/docs/pipeline/mutator.md",
+  "version": "current",
+  "lastUpdatedBy": "Author",
+  "lastUpdatedAt": 1539502055,
+  "sidebar": "docs",
+  "previous": {
+    "title": "Authorizers",
+    "permalink": "/oathkeeper/docs/next/pipeline/authz"
+  },
+  "next": {
+    "title": "Error Handlers",
+    "permalink": "/oathkeeper/docs/next/pipeline/error"
+  }
+}

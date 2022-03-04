@@ -1,0 +1,22 @@
+{
+  "unversionedId": "pipeline/error",
+  "id": "pipeline/error",
+  "isDocsHomePage": false,
+  "title": "Error Handlers",
+  "description": "A error handler is responsible for executing logic after, for example,",
+  "source": "@site/docs/pipeline/error.md",
+  "permalink": "/oathkeeper/docs/next/pipeline/error",
+  "editUrl": "https://github.com/ory/oathkeeper/edit/master/docs/docs/pipeline/error.md",
+  "version": "next",
+  "lastUpdatedBy": "aeneasr",
+  "lastUpdatedAt": 1593786473,
+  "sidebar": "docs",
+  "previous": {
+    "title": "Mutators",
+    "permalink": "/oathkeeper/docs/next/pipeline/mutator"
+  },
+  "next": {
+    "title": "Configure and Deploy",
+    "permalink": "/oathkeeper/docs/next/configure-deploy"
+  }
+}

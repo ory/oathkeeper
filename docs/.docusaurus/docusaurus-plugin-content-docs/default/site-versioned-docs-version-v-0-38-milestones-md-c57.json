@@ -1,0 +1,19 @@
+{
+  "unversionedId": "milestones",
+  "id": "version-v0.38/milestones",
+  "isDocsHomePage": false,
+  "title": "Milestones and Roadmap",
+  "description": "v0.39.0",
+  "source": "@site/versioned_docs/version-v0.38/milestones.md",
+  "slug": "/milestones",
+  "permalink": "/oathkeeper/docs/milestones",
+  "editUrl": "https://github.com/ory/oathkeeper/edit/master/docs/versioned_docs/version-v0.38/milestones.md",
+  "version": "v0.38",
+  "lastUpdatedBy": "Author",
+  "lastUpdatedAt": 1539502055,
+  "sidebar": "version-v0.38/docs",
+  "previous": {
+    "title": "ORY Oathkeeper SDKs",
+    "permalink": "/oathkeeper/docs/sdk"
+  }
+}

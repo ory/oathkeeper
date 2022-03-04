@@ -1,0 +1,22 @@
+{
+  "unversionedId": "reference/api",
+  "id": "reference/api",
+  "isDocsHomePage": false,
+  "title": "REST API",
+  "description": "ORY Oathkeeper is a reverse proxy that checks the HTTP Authorization for",
+  "source": "@site/docs/reference/api.mdx",
+  "permalink": "/oathkeeper/docs/next/reference/api",
+  "editUrl": "https://github.com/ory/oathkeeper/edit/master/docs/docs/reference/api.mdx",
+  "version": "next",
+  "lastUpdatedBy": "aeneasr",
+  "lastUpdatedAt": 1593786473,
+  "sidebar": "docs",
+  "previous": {
+    "title": "Configuration",
+    "permalink": "/oathkeeper/docs/next/reference/configuration"
+  },
+  "next": {
+    "title": "Overview",
+    "permalink": "/oathkeeper/docs/next/sdk/index"
+  }
+}
