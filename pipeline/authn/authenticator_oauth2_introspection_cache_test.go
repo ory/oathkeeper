@@ -5,9 +5,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ory/x/configx"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/ory/x/configx"
 
 	"github.com/ory/fosite"
 	"github.com/ory/oathkeeper/driver/configuration"

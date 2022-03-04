@@ -12,12 +12,13 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/tidwall/gjson"
+	"github.com/tidwall/sjson"
+
 	"github.com/ory/oathkeeper/driver"
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/x/configx"
 	"github.com/ory/x/logrusx"
-	"github.com/tidwall/gjson"
-	"github.com/tidwall/sjson"
 
 	"github.com/julienschmidt/httprouter"
 

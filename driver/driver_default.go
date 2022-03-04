@@ -1,6 +1,8 @@
 package driver
 
 import (
+	"context"
+
 	"github.com/ory/x/logrusx"
 
 	"github.com/ory/oathkeeper/driver/configuration"
@@ -11,11 +13,14 @@ type DefaultDriver struct {
 	r Registry
 }
 
-func NewDefaultDriver(l *logrusx.Logger, version, build, date string) Driver {
-	c := configuration.NewViperProvider(l)
+func NewDefaultDriver(ctx context.Context, l *logrusx.Logger, version, build, date string) (Driver, error) {
+	c, err := configuration.NewViperProvider(ctx, l)
+	if err != nil {
+		return nil, err
+	}
 	r := NewRegistry(c).WithLogger(l).WithBuildInfo(version, build, date)
 
-	return &DefaultDriver{r: r, c: c}
+	return &DefaultDriver{r: r, c: c}, nil
 }
 
 func (r *DefaultDriver) Configuration() configuration.Provider {

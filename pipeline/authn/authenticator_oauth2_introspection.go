@@ -13,6 +13,7 @@ import (
 
 	"github.com/dgraph-io/ristretto"
 	"github.com/hashicorp/go-retryablehttp"
+
 	"github.com/ory/fosite"
 
 	"github.com/opentracing/opentracing-go"

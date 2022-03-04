@@ -8,10 +8,11 @@ import (
 	"os"
 	"testing"
 
-	"github.com/ory/x/configx"
 	"github.com/rs/cors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/ory/x/configx"
 
 	"github.com/ory/x/logrusx"
 

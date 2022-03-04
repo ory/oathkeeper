@@ -8,10 +8,11 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/ory/x/configx"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/tidwall/sjson"
+
+	"github.com/ory/x/configx"
 
 	"github.com/ory/x/logrusx"
 
@@ -291,7 +292,7 @@ func TestAuthorizerRemoteJSONConfig(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			p, err := configuration.NewViperProvider(context.Background(), logrusx.New("", ""))
 			require.NoError(t, err)
-			
+
 			a := NewAuthorizerRemoteJSON(p)
 			actual, err := a.Config(tt.raw)
 			assert.NoError(t, err)

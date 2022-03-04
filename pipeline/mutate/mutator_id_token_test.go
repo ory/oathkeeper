@@ -33,10 +33,11 @@ import (
 	"text/template"
 	"time"
 
+	"github.com/tidwall/sjson"
+
 	"github.com/ory/oathkeeper/driver"
 	"github.com/ory/x/configx"
 	"github.com/ory/x/logrusx"
-	"github.com/tidwall/sjson"
 
 	"github.com/ory/oathkeeper/rule"
 	"github.com/ory/oathkeeper/x"

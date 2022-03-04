@@ -9,10 +9,13 @@ import (
 	"sync"
 	"time"
 
+	"github.com/ory/x/watcherx"
+
 	"github.com/imdario/mergo"
-	"github.com/ory/oathkeeper/embedx"
 	"github.com/pkg/errors"
 	"github.com/rs/cors"
+
+	"github.com/ory/oathkeeper/embedx"
 
 	"github.com/ory/fosite"
 	"github.com/ory/gojsonschema"
@@ -107,10 +110,19 @@ type ViperProvider struct {
 	configMutex sync.RWMutex
 	configCache map[uint64]json.RawMessage
 
+	watchersLock sync.RWMutex
+	watchers     []func(watcherx.Event)
+
 	p *configx.Provider
 }
 
 func NewViperProvider(ctx context.Context, l *logrusx.Logger, opts ...configx.OptionModifier) (*ViperProvider, error) {
+	prov := &ViperProvider{
+		l:            l,
+		enabledCache: make(map[uint64]bool),
+		configCache:  make(map[uint64]json.RawMessage),
+	}
+
 	// TODO: check settings
 	opts = append([]configx.OptionModifier{
 		configx.WithStderrValidationReporter(),
@@ -119,6 +131,13 @@ func NewViperProvider(ctx context.Context, l *logrusx.Logger, opts ...configx.Op
 		configx.WithLogrusWatcher(l),
 		configx.WithLogger(l),
 		configx.WithContext(ctx),
+		configx.AttachWatcher(func(e watcherx.Event, err error) {
+			if err != nil {
+				l.WithError(err).Errorf("failed to process config event: %s", e)
+				return
+			}
+			prov.onChange(e)
+		}),
 		// TODO: add watch for the rules
 	}, opts...)
 
@@ -127,20 +146,31 @@ func NewViperProvider(ctx context.Context, l *logrusx.Logger, opts ...configx.Op
 		return nil, err
 	}
 
-	l.UseConfig(p)
+	prov.p = p
 
-	prov := &ViperProvider{
-		l:            l,
-		p:            p,
-		enabledCache: make(map[uint64]bool),
-		configCache:  make(map[uint64]json.RawMessage),
-	}
+	l.UseConfig(p)
 
 	if !p.SkipValidation() {
 		// TODO: validate schemas
 	}
 
 	return prov, nil
+}
+
+func (v *ViperProvider) onChange(e watcherx.Event) {
+	v.watchersLock.RLock()
+	defer v.watchersLock.RUnlock()
+
+	for _, fn := range v.watchers {
+		fn(e)
+	}
+}
+
+func (v *ViperProvider) AddWatcher(fn func(watcherx.Event)) {
+	v.watchersLock.Lock()
+	defer v.watchersLock.Unlock()
+
+	v.watchers = append(v.watchers, fn)
 }
 
 func (v *ViperProvider) AccessRuleRepositories() []url.URL {

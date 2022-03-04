@@ -5,9 +5,12 @@ import (
 	"net/url"
 	"time"
 
+	"github.com/ory/x/watcherx"
+
 	"github.com/gobuffalo/packr/v2"
-	"github.com/ory/x/configx"
 	"github.com/rs/cors"
+
+	"github.com/ory/x/configx"
 
 	"github.com/ory/fosite"
 	"github.com/ory/x/tracing"
@@ -62,6 +65,8 @@ type Provider interface {
 	Tracing() *tracing.Config
 
 	Source() *configx.Provider
+
+	AddWatcher(func(watcherx.Event))
 }
 
 type ProviderErrorHandlers interface {

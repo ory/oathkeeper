@@ -7,8 +7,9 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httputil"
-	"sync"
 	"time"
+
+	"golang.org/x/sync/errgroup"
 
 	"github.com/pkg/errors"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -33,8 +34,8 @@ import (
 	"github.com/ory/oathkeeper/x"
 )
 
-func runProxy(d driver.Driver, n *negroni.Negroni, logger *logrusx.Logger, prom *metrics.PrometheusRepository) func() {
-	return func() {
+func runProxy(d driver.Driver, n *negroni.Negroni, logger *logrusx.Logger, prom *metrics.PrometheusRepository) func() error {
+	return func() error {
 		proxy := d.Registry().Proxy()
 
 		handler := &httputil.ReverseProxy{
@@ -74,15 +75,16 @@ func runProxy(d driver.Driver, n *negroni.Negroni, logger *logrusx.Logger, prom 
 			logger.Infof("Listening on http://%s", addr)
 			return server.ListenAndServe()
 		}, server.Shutdown); err != nil {
-			logger.Fatalf("Unable to gracefully shutdown HTTP(s) server because %v", err)
-			return
+			logger.Errorf("Unable to gracefully shutdown HTTP(s) server because %v", err)
+			return err
 		}
 		logger.Println("HTTP(s) server was shutdown gracefully")
+		return nil
 	}
 }
 
-func runAPI(d driver.Driver, n *negroni.Negroni, logger *logrusx.Logger, prom *metrics.PrometheusRepository) func() {
-	return func() {
+func runAPI(d driver.Driver, n *negroni.Negroni, logger *logrusx.Logger, prom *metrics.PrometheusRepository) func() error {
+	return func() error {
 		router := x.NewAPIRouter()
 		d.Registry().RuleHandler().SetRoutes(router)
 		d.Registry().HealthHandler().SetHealthRoutes(router.Router, true)
@@ -121,15 +123,16 @@ func runAPI(d driver.Driver, n *negroni.Negroni, logger *logrusx.Logger, prom *m
 			logger.Infof("Listening on http://%s", addr)
 			return server.ListenAndServe()
 		}, server.Shutdown); err != nil {
-			logger.Fatalf("Unable to gracefully shutdown HTTP(s) server because %v", err)
-			return
+			logger.Errorf("Unable to gracefully shutdown HTTP(s) server because %v", err)
+			return err
 		}
 		logger.Println("HTTP server was shutdown gracefully")
+		return nil
 	}
 }
 
-func runPrometheus(d driver.Driver, logger *logrusx.Logger, prom *metrics.PrometheusRepository) func() {
-	return func() {
+func runPrometheus(d driver.Driver, logger *logrusx.Logger, prom *metrics.PrometheusRepository) func() error {
+	return func() error {
 		promPath := d.Configuration().PrometheusMetricsPath()
 		promAddr := d.Configuration().PrometheusServeAddress()
 
@@ -144,10 +147,11 @@ func runPrometheus(d driver.Driver, logger *logrusx.Logger, prom *metrics.Promet
 			logger.Infof("Listening on http://%s", promAddr)
 			return server.ListenAndServe()
 		}, server.Shutdown); err != nil {
-			logger.Fatalf("Unable to gracefully shutdown HTTP(s) server because %v", err)
-			return
+			logger.Errorf("Unable to gracefully shutdown HTTP(s) server because %v", err)
+			return err
 		}
 		logger.Println("HTTP server was shutdown gracefully")
+		return nil
 	}
 }
 
@@ -190,12 +194,15 @@ func isDevelopment(c configuration.Provider) bool {
 	return len(c.AccessRuleRepositories()) == 0
 }
 
-func RunServe(version, build, date string) func(cmd *cobra.Command, args []string) {
-	return func(cmd *cobra.Command, args []string) {
+func RunServe(version, build, date string) func(cmd *cobra.Command, args []string) error {
+	return func(cmd *cobra.Command, args []string) error {
 		fmt.Println(banner(version))
 
 		logger := logrusx.New("ORY Oathkeeper", version)
-		d := driver.NewDefaultDriver(logger, version, build, date)
+		d, err := driver.NewDefaultDriver(cmd.Context(), logger, version, build, date)
+		if err != nil {
+			return err
+		}
 		d.Registry().Init()
 
 		adminmw := negroni.New()
@@ -239,19 +246,11 @@ func RunServe(version, build, date string) func(cmd *cobra.Command, args []strin
 
 		prometheusRepo := metrics.NewPrometheusRepository(logger)
 
-		var wg sync.WaitGroup
-		tasks := []func(){
-			runAPI(d, adminmw, logger, prometheusRepo),
-			runProxy(d, publicmw, logger, prometheusRepo),
-			runPrometheus(d, logger, prometheusRepo),
-		}
-		wg.Add(len(tasks))
-		for _, t := range tasks {
-			go func(t func()) {
-				defer wg.Done()
-				t()
-			}(t)
-		}
-		wg.Wait()
+		var eg errgroup.Group
+		eg.Go(runAPI(d, adminmw, logger, prometheusRepo))
+		eg.Go(runProxy(d, publicmw, logger, prometheusRepo))
+		eg.Go(runPrometheus(d, logger, prometheusRepo))
+
+		return eg.Wait()
 	}
 }

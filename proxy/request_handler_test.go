@@ -28,10 +28,11 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+
 	"github.com/ory/oathkeeper/driver"
 	"github.com/ory/x/configx"
 	"github.com/ory/x/logrusx"
-	"github.com/stretchr/testify/assert"
 
 	"github.com/ory/herodot"
 

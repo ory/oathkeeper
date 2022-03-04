@@ -15,11 +15,12 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/ory/oathkeeper/driver"
-	"github.com/ory/x/configx"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/ory/oathkeeper/driver"
+	"github.com/ory/x/configx"
 
 	"github.com/ory/x/logrusx"
 

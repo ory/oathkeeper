@@ -29,11 +29,12 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
+	"github.com/tidwall/sjson"
+
 	"github.com/ory/oathkeeper/driver"
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/x/configx"
 	"github.com/ory/x/logrusx"
-	"github.com/tidwall/sjson"
 
 	"github.com/ory/herodot"
 	. "github.com/ory/oathkeeper/pipeline/authn"

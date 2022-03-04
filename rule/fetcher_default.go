@@ -17,6 +17,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/ory/x/watcherx"
+
 	"github.com/fsnotify/fsnotify"
 	"github.com/hashicorp/go-retryablehttp"
 
@@ -139,7 +141,7 @@ func (f *FetcherDefault) configUpdate(ctx context.Context, watcher *fsnotify.Wat
 
 	// If there are no more sources to watch we reset the rule repository as a whole
 	if len(replace) == 0 {
-		f.r.Logger().WithField("repos", wiper.AllSettings()).Warn("No access rule repositories have been defined in the updated config.")
+		f.r.Logger().WithField("repos", f.c.Source().All()).Warn("No access rule repositories have been defined in the updated config.")
 		if err := f.r.RuleRepository().Set(ctx, []Rule{}); err != nil {
 			return err
 		}
@@ -192,29 +194,26 @@ func (f *FetcherDefault) Watch(ctx context.Context) error {
 func (f *FetcherDefault) watch(ctx context.Context, watcher *fsnotify.Watcher, events chan event) error {
 	var pc map[string]interface{}
 
-	f.c.Watcher(func(e fsnotify.Event) error {
+	f.c.AddWatcher(func(e watcherx.Event) {
 		if reflect.DeepEqual(pc, f.c.Source().String(configuration.ViperKeyAccessRuleRepositories)) {
 			f.r.Logger().
 				Debug("Not reloading access rule repositories because configuration value has not changed.")
-			return nil
+			return
 		}
 
 		f.enqueueEvent(events, event{et: eventRepositoryConfigChanged, source: "viper_watcher"})
-
-		return nil
 	})
 	f.enqueueEvent(events, event{et: eventRepositoryConfigChanged, source: "entrypoint"})
 
 	var strategy map[string]interface{}
-	f.c.AddWatcher(func(e fsnotify.Event) error {
+	f.c.AddWatcher(func(e watcherx.Event) {
 		if reflect.DeepEqual(strategy, f.c.Source().String(configuration.ViperKeyAccessRuleMatchingStrategy)) {
 			f.r.Logger().
 				Debug("Not reloading access rule matching strategy because configuration value has not changed.")
-			return nil
+			return
 		}
 
 		f.enqueueEvent(events, event{et: eventMatchingStrategyChanged, source: "viper_watcher"})
-		return nil
 	})
 	f.enqueueEvent(events, event{et: eventMatchingStrategyChanged, source: "entrypoint"})
 

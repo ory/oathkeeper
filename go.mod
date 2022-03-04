@@ -75,6 +75,7 @@ require (
 	gocloud.dev v0.20.0
 	golang.org/x/crypto v0.0.0-20220112180741-5e0467b6c7ce
 	golang.org/x/oauth2 v0.0.0-20211104180415-d3ed0bb246c8
+	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
 	golang.org/x/tools v0.1.8
 	google.golang.org/api v0.63.0
 	gopkg.in/square/go-jose.v2 v2.6.0

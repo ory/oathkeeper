@@ -28,9 +28,10 @@ import (
 	"github.com/ory/x/configx"
 	"github.com/ory/x/logrusx"
 
-	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/ory/oathkeeper/driver/configuration"
 )
 
 func TestAuthorizerAllow(t *testing.T) {

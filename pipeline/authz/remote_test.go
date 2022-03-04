@@ -9,10 +9,11 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/ory/x/configx"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/tidwall/sjson"
+
+	"github.com/ory/x/configx"
 
 	"github.com/ory/x/logrusx"
 

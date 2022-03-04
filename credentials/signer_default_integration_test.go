@@ -7,11 +7,12 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
+	"github.com/stretchr/testify/require"
+
 	"github.com/ory/oathkeeper/driver"
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/x/configx"
 	"github.com/ory/x/logrusx"
-	"github.com/stretchr/testify/require"
 )
 
 func BenchmarkDefaultSigner(b *testing.B) {

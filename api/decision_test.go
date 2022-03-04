@@ -33,12 +33,13 @@ import (
 	"testing"
 
 	"github.com/julienschmidt/httprouter"
-	"github.com/ory/oathkeeper/driver"
-	"github.com/ory/x/configx"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 	"github.com/urfave/negroni"
+
+	"github.com/ory/oathkeeper/driver"
+	"github.com/ory/x/configx"
 
 	"github.com/ory/herodot"
 	"github.com/ory/oathkeeper/api"
