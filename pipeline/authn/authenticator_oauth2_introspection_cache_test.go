@@ -5,6 +5,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/ory/x/tracing"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
@@ -22,7 +23,10 @@ func TestCache(t *testing.T) {
 		configx.WithValue("authenticators.oauth2_introspection.config.introspection_url", "http://localhost:8080/"))
 	require.NoError(t, err)
 
-	a := NewAuthenticatorOAuth2Introspection(c, logger)
+	trc, err := tracing.New(logger, c.Tracing())
+	assert.NoError(t, err)
+
+	a := NewAuthenticatorOAuth2Introspection(c, logger, trc.Tracer())
 	assert.Equal(t, "oauth2_introspection", a.GetID())
 
 	config, _, err := a.Config(nil)

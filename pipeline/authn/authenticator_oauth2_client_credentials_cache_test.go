@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/julienschmidt/httprouter"
+	"github.com/ory/x/tracing"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"golang.org/x/oauth2"
@@ -27,7 +28,10 @@ func TestClientCredentialsCache(t *testing.T) {
 		configx.WithValue("authenticators.oauth2_client_credentials.config.cache.enabled", true))
 	require.NoError(t, err)
 
-	a := NewAuthenticatorOAuth2ClientCredentials(c, logger)
+	trc, err := tracing.New(logger, c.Tracing())
+	assert.NoError(t, err)
+
+	a := NewAuthenticatorOAuth2ClientCredentials(c, logger, trc.Tracer())
 	assert.Equal(t, "oauth2_client_credentials", a.GetID())
 
 	config, err := a.Config(nil)

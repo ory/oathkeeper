@@ -8,6 +8,7 @@ import (
 	"os"
 	"testing"
 
+	"github.com/ory/x/tracing"
 	"github.com/rs/cors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -131,6 +132,8 @@ func BenchmarkPipelineEnabled(b *testing.B) {
 
 func TestViperProvider(t *testing.T) {
 	p, l := setup(t)
+	tracing, err := tracing.New(l, p.Tracing())
+	assert.NoError(t, err)
 
 	t.Run("group=serve", func(t *testing.T) {
 		assert.Equal(t, "127.0.0.1:1234", p.ProxyServeAddress())
@@ -238,7 +241,7 @@ func TestViperProvider(t *testing.T) {
 		})
 
 		t.Run("authenticator=oauth2_client_credentials", func(t *testing.T) {
-			a := authn.NewAuthenticatorOAuth2ClientCredentials(p, l)
+			a := authn.NewAuthenticatorOAuth2ClientCredentials(p, l, tracing.Tracer())
 			assert.True(t, p.AuthenticatorIsEnabled(a.GetID()))
 			require.NoError(t, a.Validate(nil))
 
@@ -248,7 +251,7 @@ func TestViperProvider(t *testing.T) {
 		})
 
 		t.Run("authenticator=oauth2_introspection", func(t *testing.T) {
-			a := authn.NewAuthenticatorOAuth2Introspection(p, l)
+			a := authn.NewAuthenticatorOAuth2Introspection(p, l, tracing.Tracer())
 			assert.True(t, p.AuthenticatorIsEnabled(a.GetID()))
 			require.NoError(t, a.Validate(nil))
 
@@ -360,10 +363,13 @@ func TestToScopeStrategy(t *testing.T) {
 }
 
 func TestAuthenticatorOAuth2TokenIntrospectionPreAuthorization(t *testing.T) {
-	v, _ := setup(t,
+	p, l := setup(t,
 		configx.WithValue("authenticators.oauth2_introspection.enabled", true),
 		configx.WithValue("authenticators.oauth2_introspection.config.introspection_url", "http://some-url/"),
 	)
+
+	tracing, err := tracing.New(l, p.Tracing())
+	assert.NoError(t, err)
 
 	for k, tc := range []struct {
 		enabled bool
@@ -383,7 +389,7 @@ func TestAuthenticatorOAuth2TokenIntrospectionPreAuthorization(t *testing.T) {
 		{enabled: true, id: "a", secret: "b", turl: "https://some-url", err: false},
 	} {
 		t.Run(fmt.Sprintf("case=%d", k), func(t *testing.T) {
-			a := authn.NewAuthenticatorOAuth2Introspection(v, logrusx.New("", ""))
+			a := authn.NewAuthenticatorOAuth2Introspection(p, l, tracing.Tracer())
 
 			config, _, err := a.Config(json.RawMessage(fmt.Sprintf(`{
 	"pre_authorization": {

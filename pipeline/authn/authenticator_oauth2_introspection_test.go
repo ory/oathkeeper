@@ -33,6 +33,7 @@ import (
 	"github.com/ory/oathkeeper/driver"
 	"github.com/ory/x/assertx"
 	"github.com/ory/x/configx"
+	"github.com/ory/x/tracing"
 
 	"github.com/julienschmidt/httprouter"
 	"github.com/stretchr/testify/assert"
@@ -792,7 +793,10 @@ func TestAuthenticatorOAuth2Introspection(t *testing.T) {
 
 	t.Run("method=config", func(t *testing.T) {
 		logger := logrusx.New("test", "1")
-		authenticator := NewAuthenticatorOAuth2Introspection(conf, logger)
+		trc, err := tracing.New(logger, conf.Tracing())
+		assert.NoError(t, err)
+
+		authenticator := NewAuthenticatorOAuth2Introspection(conf, logger, trc.Tracer())
 
 		noPreauthConfig := []byte(`{ "introspection_url":"http://localhost/oauth2/token" }`)
 		preAuthConfigOne := []byte(`{ "introspection_url":"http://localhost/oauth2/token","pre_authorization":{"token_url":"http://localhost/oauth2/token","client_id":"some_id","client_secret":"some_secret","enabled":true} }`)
