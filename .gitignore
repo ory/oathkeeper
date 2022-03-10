@@ -6,3 +6,6 @@ LICENSE.txt
 *-packr.go
 dev
 dist/
+# local dev setup
+.netrc
+.vscode
