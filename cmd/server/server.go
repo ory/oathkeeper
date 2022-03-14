@@ -40,6 +40,10 @@ func runProxy(d driver.Driver, n *negroni.Negroni, logger *logrusx.Logger, prom 
 		handler := &httputil.ReverseProxy{
 			Director:  proxy.Director,
 			Transport: proxy,
+			ErrorHandler: func(w http.ResponseWriter, r *http.Request, err error) {
+				logger.WithError(err).Errorf("http: proxy error: %v", err)
+				w.WriteHeader(http.StatusBadGateway)
+			},
 		}
 
 		promCollapsePaths := d.Configuration().PrometheusCollapseRequestPaths()
