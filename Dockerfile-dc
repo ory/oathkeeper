@@ -3,7 +3,7 @@ FROM golang:1.16-alpine3.14
 RUN addgroup -S ory; \
     adduser -S ory -G ory -D -H -s /bin/nologin
 
-RUN apk add -U --no-cache ca-certificates
+RUN apk --no-cache --update-cache --upgrade --latest add ca-certificates
 
 ADD . /app
 WORKDIR /app
