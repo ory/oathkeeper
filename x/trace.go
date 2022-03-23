@@ -15,13 +15,14 @@ func TraceRequest(ctx context.Context, req *http.Request) func() {
 	}
 
 	parentSpan := opentracing.SpanFromContext(ctx)
-	opts := make([]opentracing.StartSpanOption, 0, 1)
+	opts := make([]opentracing.StartSpanOption, 0, 2)
+	opts = append(opts, ext.SpanKindRPCClient)
 	if parentSpan != nil {
 		opts = append(opts, opentracing.ChildOf(parentSpan.Context()))
 	}
 
 	urlStr := req.URL.String()
-	clientSpan := tracer.StartSpan(req.Method+" "+urlStr, opts...)
+	clientSpan := tracer.StartSpan("HTTP "+req.Method, opts...)
 
 	ext.SpanKindRPCClient.Set(clientSpan)
 	ext.HTTPUrl.Set(clientSpan, urlStr)
