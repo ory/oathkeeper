@@ -10,7 +10,7 @@ import (
 	"github.com/go-openapi/swag"
 )
 
-// RuleMatch rule match
+// RuleMatch RuleMatch rule match
 //
 // swagger:model ruleMatch
 type RuleMatch struct {
