@@ -15,9 +15,6 @@ import (
 
 	"github.com/dgraph-io/ristretto"
 
-	"github.com/opentracing/opentracing-go"
-	"github.com/opentracing/opentracing-go/ext"
-
 	"github.com/pkg/errors"
 	"golang.org/x/oauth2/clientcredentials"
 
@@ -28,6 +25,7 @@ import (
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/helper"
 	"github.com/ory/oathkeeper/pipeline"
+	"github.com/ory/oathkeeper/x"
 )
 
 type AuthenticatorOAuth2IntrospectionConfiguration struct {
@@ -171,29 +169,6 @@ func (a *AuthenticatorOAuth2Introspection) tokenToCache(config *AuthenticatorOAu
 	}
 }
 
-func (a *AuthenticatorOAuth2Introspection) traceRequest(ctx context.Context, req *http.Request) func() {
-	tracer := opentracing.GlobalTracer()
-	if tracer == nil {
-		return func() {}
-	}
-
-	parentSpan := opentracing.SpanFromContext(ctx)
-	opts := make([]opentracing.StartSpanOption, 0, 1)
-	if parentSpan != nil {
-		opts = append(opts, opentracing.ChildOf(parentSpan.Context()))
-	}
-
-	urlStr := req.URL.String()
-	clientSpan := tracer.StartSpan(req.Method+" "+urlStr, opts...)
-
-	ext.SpanKindRPCClient.Set(clientSpan)
-	ext.HTTPUrl.Set(clientSpan, urlStr)
-	ext.HTTPMethod.Set(clientSpan, req.Method)
-
-	_ = tracer.Inject(clientSpan.Context(), opentracing.HTTPHeaders, opentracing.HTTPHeadersCarrier(req.Header))
-	return clientSpan.Finish
-}
-
 func (a *AuthenticatorOAuth2Introspection) Authenticate(r *http.Request, session *AuthenticationSession, config json.RawMessage, _ pipeline.Rule) error {
 	cf, client, err := a.Config(config)
 	if err != nil {
@@ -229,7 +204,7 @@ func (a *AuthenticatorOAuth2Introspection) Authenticate(r *http.Request, session
 		introspectReq.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
 		// add tracing
-		closeSpan := a.traceRequest(r.Context(), introspectReq)
+		closeSpan := x.TraceRequest(r.Context(), introspectReq)
 
 		resp, err := client.Do(introspectReq.WithContext(r.Context()))
 
