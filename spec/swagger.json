@@ -267,7 +267,7 @@
   "definitions": {
     "UUID": {"type": "string", "format": "uuid4"},
     "Upstream": {
-      "description": "Upstream Upstream Upstream Upstream upstream",
+      "description": "Upstream Upstream Upstream Upstream Upstream upstream",
       "type": "object",
       "properties": {
         "preserve_host": {
@@ -320,7 +320,6 @@
       }
     },
     "healthNotReadyStatus": {
-      "description": "HealthNotReadyStatus HealthNotReadyStatus health not ready status",
       "type": "object",
       "properties": {
         "errors": {
@@ -333,7 +332,6 @@
       }
     },
     "healthStatus": {
-      "description": "HealthStatus health status",
       "type": "object",
       "properties": {
         "status": {
@@ -419,7 +417,6 @@
       }
     },
     "jsonWebKeySet": {
-      "description": "JSONWebKeySet JSONWebKeySet JSONWebKeySet JSONWebKeySet json web key set",
       "type": "object",
       "properties": {
         "keys": {
@@ -482,7 +479,7 @@
       }
     },
     "ruleMatch": {
-      "description": "RuleMatch rule match",
+      "description": "RuleMatch RuleMatch rule match",
       "type": "object",
       "properties": {
         "methods": {
@@ -499,7 +496,7 @@
       }
     },
     "version": {
-      "description": "Version version",
+      "description": "Version Version version",
       "type": "object",
       "properties": {
         "version": {
