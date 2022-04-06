@@ -1,103 +1,112 @@
+# Changelog
+
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
 **Table of Contents**
 
-- [0.0.0 (2022-02-14)](#000-2022-02-14)
-  - [Bug Fixes](#bug-fixes)
-  - [Features](#features)
-- [0.38.20-beta.1.pre.0 (2022-02-11)](#03820-beta1pre0-2022-02-11)
-  - [Bug Fixes](#bug-fixes-1)
+- [0.0.0 (2022-04-06)](#000-2022-04-06)
+- [0.38.24-beta.1 (2022-04-06)](#03824-beta1-2022-04-06)
   - [Code Generation](#code-generation)
+  - [Features](#features)
+- [0.38.23-beta.1 (2022-02-24)](#03823-beta1-2022-02-24)
+  - [Code Generation](#code-generation-1)
+  - [Features](#features-1)
+- [0.38.22-beta.1 (2022-02-23)](#03822-beta1-2022-02-23)
+  - [Bug Fixes](#bug-fixes)
+  - [Code Generation](#code-generation-2)
+- [0.38.20-beta.1 (2022-02-14)](#03820-beta1-2022-02-14)
+  - [Bug Fixes](#bug-fixes-1)
+  - [Code Generation](#code-generation-3)
   - [Code Refactoring](#code-refactoring)
   - [Documentation](#documentation)
-  - [Features](#features-1)
+  - [Features](#features-2)
 - [0.38.19-beta.1 (2022-02-04)](#03819-beta1-2022-02-04)
   - [Bug Fixes](#bug-fixes-2)
-  - [Code Generation](#code-generation-1)
+  - [Code Generation](#code-generation-4)
   - [Documentation](#documentation-1)
-  - [Features](#features-2)
+  - [Features](#features-3)
 - [0.38.17-beta.1 (2022-02-03)](#03817-beta1-2022-02-03)
   - [Continuous Integration](#continuous-integration)
 - [0.38.18-beta.1 (2022-02-03)](#03818-beta1-2022-02-03)
   - [Bug Fixes](#bug-fixes-3)
-  - [Code Generation](#code-generation-2)
+  - [Code Generation](#code-generation-5)
   - [Documentation](#documentation-2)
-  - [Features](#features-3)
+  - [Features](#features-4)
   - [Tests](#tests)
   - [Unclassified](#unclassified)
 - [0.38.15-beta.1 (2021-08-28)](#03815-beta1-2021-08-28)
   - [Bug Fixes](#bug-fixes-4)
-  - [Code Generation](#code-generation-3)
+  - [Code Generation](#code-generation-6)
   - [Documentation](#documentation-3)
-  - [Features](#features-4)
+  - [Features](#features-5)
 - [0.38.14-beta.1 (2021-07-14)](#03814-beta1-2021-07-14)
   - [Bug Fixes](#bug-fixes-5)
-  - [Code Generation](#code-generation-4)
+  - [Code Generation](#code-generation-7)
   - [Documentation](#documentation-4)
-  - [Features](#features-5)
+  - [Features](#features-6)
   - [Reverts](#reverts)
 - [0.38.12-beta.1 (2021-06-22)](#03812-beta1-2021-06-22)
   - [Bug Fixes](#bug-fixes-6)
-  - [Code Generation](#code-generation-5)
-  - [Features](#features-6)
+  - [Code Generation](#code-generation-8)
+  - [Features](#features-7)
   - [Tests](#tests-1)
   - [Unclassified](#unclassified-1)
 - [0.38.11-beta.1 (2021-05-13)](#03811-beta1-2021-05-13)
   - [Bug Fixes](#bug-fixes-7)
-  - [Code Generation](#code-generation-6)
+  - [Code Generation](#code-generation-9)
   - [Reverts](#reverts-1)
 - [0.38.10-beta.2 (2021-05-05)](#03810-beta2-2021-05-05)
   - [Bug Fixes](#bug-fixes-8)
-  - [Code Generation](#code-generation-7)
+  - [Code Generation](#code-generation-10)
   - [Code Refactoring](#code-refactoring-1)
   - [Documentation](#documentation-5)
-  - [Features](#features-7)
+  - [Features](#features-8)
 - [0.38.9-beta.1 (2021-03-17)](#0389-beta1-2021-03-17)
-  - [Code Generation](#code-generation-8)
+  - [Code Generation](#code-generation-11)
 - [0.38.9-beta.1.pre.3 (2021-03-16)](#0389-beta1pre3-2021-03-16)
   - [Bug Fixes](#bug-fixes-9)
-  - [Code Generation](#code-generation-9)
+  - [Code Generation](#code-generation-12)
 - [0.38.9-beta.1.pre.2 (2021-03-15)](#0389-beta1pre2-2021-03-15)
-  - [Code Generation](#code-generation-10)
+  - [Code Generation](#code-generation-13)
 - [0.38.9-beta.1.pre.1 (2021-03-15)](#0389-beta1pre1-2021-03-15)
   - [Bug Fixes](#bug-fixes-10)
-  - [Code Generation](#code-generation-11)
+  - [Code Generation](#code-generation-14)
   - [Unclassified](#unclassified-2)
 - [0.38.8-beta.1 (2021-02-25)](#0388-beta1-2021-02-25)
   - [Bug Fixes](#bug-fixes-11)
-  - [Code Generation](#code-generation-12)
+  - [Code Generation](#code-generation-15)
   - [Unclassified](#unclassified-3)
 - [0.38.7-beta.1 (2021-02-22)](#0387-beta1-2021-02-22)
   - [Bug Fixes](#bug-fixes-12)
-  - [Code Generation](#code-generation-13)
-  - [Features](#features-8)
-- [0.38.6-beta.1 (2021-01-27)](#0386-beta1-2021-01-27)
-  - [Code Generation](#code-generation-14)
-  - [Documentation](#documentation-6)
+  - [Code Generation](#code-generation-16)
   - [Features](#features-9)
+- [0.38.6-beta.1 (2021-01-27)](#0386-beta1-2021-01-27)
+  - [Code Generation](#code-generation-17)
+  - [Documentation](#documentation-6)
+  - [Features](#features-10)
 - [0.38.5-beta.1 (2020-12-10)](#0385-beta1-2020-12-10)
   - [Bug Fixes](#bug-fixes-13)
-  - [Code Generation](#code-generation-15)
+  - [Code Generation](#code-generation-18)
   - [Documentation](#documentation-7)
-  - [Features](#features-10)
+  - [Features](#features-11)
   - [Unclassified](#unclassified-4)
 - [0.38.4-beta.1 (2020-09-28)](#0384-beta1-2020-09-28)
   - [Bug Fixes](#bug-fixes-14)
-  - [Code Generation](#code-generation-16)
+  - [Code Generation](#code-generation-19)
   - [Documentation](#documentation-8)
-  - [Features](#features-11)
+  - [Features](#features-12)
   - [Unclassified](#unclassified-5)
 - [0.38.3-beta.1 (2020-07-29)](#0383-beta1-2020-07-29)
   - [Bug Fixes](#bug-fixes-15)
-  - [Code Generation](#code-generation-17)
+  - [Code Generation](#code-generation-20)
   - [Documentation](#documentation-9)
-  - [Features](#features-12)
+  - [Features](#features-13)
 - [0.38.2-beta.1 (2020-05-25)](#0382-beta1-2020-05-25)
   - [Bug Fixes](#bug-fixes-16)
   - [Chores](#chores)
   - [Documentation](#documentation-10)
-  - [Features](#features-13)
+  - [Features](#features-14)
 - [0.38.1-beta.1 (2020-05-08)](#0381-beta1-2020-05-08)
   - [Bug Fixes](#bug-fixes-17)
   - [Chores](#chores-1)
@@ -106,7 +115,7 @@
   - [Chores](#chores-2)
   - [Code Refactoring](#code-refactoring-2)
   - [Documentation](#documentation-11)
-  - [Features](#features-14)
+  - [Features](#features-15)
 - [0.37.1-beta.1 (2020-04-03)](#0371-beta1-2020-04-03)
   - [Chores](#chores-3)
   - [Documentation](#documentation-12)
@@ -114,13 +123,13 @@
   - [Breaking Changes](#breaking-changes)
     - [Bug Fixes](#bug-fixes-19)
     - [Documentation](#documentation-13)
-    - [Features](#features-15)
+    - [Features](#features-16)
 - [0.36.0-beta.4 (2020-02-14)](#0360-beta4-2020-02-14)
   - [Bug Fixes](#bug-fixes-20)
   - [Documentation](#documentation-14)
 - [0.36.0-beta.1 (2020-02-05)](#0360-beta1-2020-02-05)
   - [Documentation](#documentation-15)
-  - [Features](#features-16)
+  - [Features](#features-17)
   - [Unclassified](#unclassified-6)
 - [0.35.5-beta.2 (2020-01-31)](#0355-beta2-2020-01-31)
   - [Unclassified](#unclassified-7)
@@ -267,7 +276,69 @@
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-# [0.0.0](https://github.com/ory/oathkeeper/compare/v0.38.20-beta.1.pre.0...v0.0.0) (2022-02-14)
+# [0.0.0](https://github.com/ory/oathkeeper/compare/v0.38.24-beta.1...v0.0.0) (2022-04-06)
+
+# [0.38.24-beta.1](https://github.com/ory/oathkeeper/compare/v0.38.23-beta.1...v0.38.24-beta.1) (2022-04-06)
+
+With this release we improve tracing capabilities for Ory Oathkeeper.
+
+### Code Generation
+
+- Pin v0.38.24-beta.1 release commit
+  ([fb2c246](https://github.com/ory/oathkeeper/commit/fb2c24688f76201c46ca187e6ec7501ab1bd3389))
+
+### Features
+
+- Trace for upstream request
+  ([#931](https://github.com/ory/oathkeeper/issues/931))
+  ([21ff340](https://github.com/ory/oathkeeper/commit/21ff3405e45655dd37ae3cee9fe7d9e04da5d9d3)),
+  closes [#928](https://github.com/ory/oathkeeper/issues/928)
+
+# [0.38.23-beta.1](https://github.com/ory/oathkeeper/compare/v0.38.22-beta.1...v0.38.23-beta.1) (2022-02-24)
+
+Ory Oathkeeper has a new place for documentation at
+[github.com/ory/docs](https://github.com/ory/docs) and
+[www.ory.sh/docs/oathkeeper](https://www.ory.sh/docs/oathkeeper)! Additionally,
+the CI/CD infrastructure was moved to GitHub Actions.
+
+### Code Generation
+
+- Pin v0.38.23-beta.1 release commit
+  ([69ad28f](https://github.com/ory/oathkeeper/commit/69ad28f87fd4f49e1ca5ed0d4bd1099b61a795a5))
+
+### Features
+
+- Ddd datadog and elastic-apm tracing schema
+  ([#927](https://github.com/ory/oathkeeper/issues/927))
+  ([e78855f](https://github.com/ory/oathkeeper/commit/e78855fb0b00e584a5e0c8033bfb13cffec0e87a))
+
+# [0.38.22-beta.1](https://github.com/ory/oathkeeper/compare/v0.38.20-beta.1...v0.38.22-beta.1) (2022-02-23)
+
+Ory Oathkeeper has a new place for documentation at
+[github.com/ory/docs](https://github.com/ory/docs) and
+[www.ory.sh/docs/oathkeeper](https://www.ory.sh/docs/oathkeeper)! Additionally,
+the CI/CD infrastructure was moved to GitHub Actions.
+
+Please excuse the previous Ory Oathkeeper release notification. A faulty CI
+configuration.
+
+### Bug Fixes
+
+- Pass token to render-version-schema
+  ([#929](https://github.com/ory/oathkeeper/issues/929))
+  ([f763ced](https://github.com/ory/oathkeeper/commit/f763cedede602144b3e136ca8d58f9c1f28ccfa1)):
+
+  Fixes branch protection error.
+
+### Code Generation
+
+- Pin v0.38.22-beta.1 release commit
+  ([0dcb7c1](https://github.com/ory/oathkeeper/commit/0dcb7c13e1f47b1b86d23e65bbe1df1b98d97578))
+
+# [0.38.20-beta.1](https://github.com/ory/oathkeeper/compare/v0.38.19-beta.1...v0.38.20-beta.1) (2022-02-14)
+
+This release introduces caching capabilities for the OAuth2 Client Credentials
+authenticator as well as compatibility with Traefik!
 
 ### Bug Fixes
 
@@ -275,34 +346,15 @@
   ([#921](https://github.com/ory/oathkeeper/issues/921))
   ([d53ef01](https://github.com/ory/oathkeeper/commit/d53ef0123830060cec73d425fc9b3f7e93ada66d)),
   closes [#920](https://github.com/ory/oathkeeper/issues/920)
+- Bump goreleaser orb ([#919](https://github.com/ory/oathkeeper/issues/919))
+  ([f8dcda2](https://github.com/ory/oathkeeper/commit/f8dcda26cca0489248739cbcb4133b959d4991fe))
 - Use all pre-hooks
   ([09be55f](https://github.com/ory/oathkeeper/commit/09be55feddffc8ed483258ce3e250fc57528054f))
 
-### Features
-
-- Traefik decision api support
-  ([#904](https://github.com/ory/oathkeeper/issues/904))
-  ([bfde9df](https://github.com/ory/oathkeeper/commit/bfde9dfc6ef71762ab25289a0afbe6793899f312)),
-  closes [#521](https://github.com/ory/oathkeeper/issues/521)
-  [#441](https://github.com/ory/oathkeeper/issues/441)
-  [#487](https://github.com/ory/oathkeeper/issues/487)
-  [#263](https://github.com/ory/oathkeeper/issues/263):
-
-  Closes https://github.com/ory/oathkeeper/discussions/899
-
-# [0.38.20-beta.1.pre.0](https://github.com/ory/oathkeeper/compare/v0.38.19-beta.1...v0.38.20-beta.1.pre.0) (2022-02-11)
-
-autogen: pin v0.38.20-beta.1.pre.0 release commit
-
-### Bug Fixes
-
-- Bump goreleaser orb ([#919](https://github.com/ory/oathkeeper/issues/919))
-  ([f8dcda2](https://github.com/ory/oathkeeper/commit/f8dcda26cca0489248739cbcb4133b959d4991fe))
-
 ### Code Generation
 
-- Pin v0.38.20-beta.1.pre.0 release commit
-  ([33b0c63](https://github.com/ory/oathkeeper/commit/33b0c63e7962a66ff62a4cc58be5f577a81c3851))
+- Pin v0.38.20-beta.1 release commit
+  ([410d69e](https://github.com/ory/oathkeeper/commit/410d69edfca4cc3a83c1d819d648709ba438e74a))
 
 ### Code Refactoring
 
@@ -318,8 +370,30 @@ autogen: pin v0.38.20-beta.1.pre.0 release commit
 
 - Add post-release step
   ([e7fd550](https://github.com/ory/oathkeeper/commit/e7fd55030b9408e863f497deeb3e8f1bf66a9855))
+- Introduce token caching for client credentials authentication
+  ([#922](https://github.com/ory/oathkeeper/issues/922))
+  ([9a56154](https://github.com/ory/oathkeeper/commit/9a56154161429f9080ed6204e61aaf3a1ab731a1)),
+  closes [#870](https://github.com/ory/oathkeeper/issues/870):
+
+  Right now every request via Oathkeeper that uses client credentials
+  authentication requests a new access token. This can introduce a lot of
+  latency in the critical path of an application in case of a slow token
+  endpoint.
+
+  This change introduces a cache similar to the one that is used in the
+  introspection authentication.
+
 - Migrate to openapi 3.0 generation
   ([190d1a7](https://github.com/ory/oathkeeper/commit/190d1a7d1319f216ca3c9e9289d5282733ecc88c))
+- Traefik decision api support
+  ([#904](https://github.com/ory/oathkeeper/issues/904))
+  ([bfde9df](https://github.com/ory/oathkeeper/commit/bfde9dfc6ef71762ab25289a0afbe6793899f312)),
+  closes [#521](https://github.com/ory/oathkeeper/issues/521)
+  [#441](https://github.com/ory/oathkeeper/issues/441)
+  [#487](https://github.com/ory/oathkeeper/issues/487)
+  [#263](https://github.com/ory/oathkeeper/issues/263):
+
+  Closes https://github.com/ory/oathkeeper/discussions/899
 
 # [0.38.19-beta.1](https://github.com/ory/oathkeeper/compare/v0.38.17-beta.1...v0.38.19-beta.1) (2022-02-04)
 
