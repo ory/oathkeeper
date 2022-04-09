@@ -34,7 +34,7 @@
         "type": "string"
       },
       "Upstream": {
-        "description": "Upstream Upstream Upstream Upstream Upstream upstream",
+        "description": "Upstream Upstream Upstream Upstream Upstream Upstream upstream",
         "properties": {
           "preserve_host": {
             "description": "PreserveHost, if false (the default), tells ORY Oathkeeper to set the upstream request's Host header to the\nhostname of the API's upstream's URL. Setting this flag to true instructs ORY Oathkeeper not to do so.",
@@ -52,7 +52,7 @@
         "type": "object"
       },
       "genericError": {
-        "description": "The standard error format",
+        "description": "GenericError The standard error format",
         "properties": {
           "code": {
             "description": "code",
@@ -99,6 +99,7 @@
         "type": "object"
       },
       "healthStatus": {
+        "description": "HealthStatus health status",
         "properties": {
           "status": {
             "description": "Status always contains \"ok\".",
@@ -246,7 +247,7 @@
         "type": "object"
       },
       "ruleMatch": {
-        "description": "RuleMatch RuleMatch rule match",
+        "description": "RuleMatch RuleMatch RuleMatch rule match",
         "properties": {
           "methods": {
             "description": "An array of HTTP methods (e.g. GET, POST, PUT, DELETE, ...). When ORY Oathkeeper searches for rules\nto decide what to do with an incoming request to the proxy server, it compares the HTTP method of the incoming\nrequest with the HTTP methods of each rules. If a match is found, the rule is considered a partial match.\nIf the matchesUrl field is satisfied as well, the rule is considered a full match.",
@@ -263,7 +264,7 @@
         "type": "object"
       },
       "version": {
-        "description": "Version Version version",
+        "description": "Version Version Version version",
         "properties": {
           "version": {
             "description": "Version is the service's version.",

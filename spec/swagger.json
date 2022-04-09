@@ -267,7 +267,7 @@
   "definitions": {
     "UUID": {"type": "string", "format": "uuid4"},
     "Upstream": {
-      "description": "Upstream Upstream Upstream Upstream Upstream upstream",
+      "description": "Upstream Upstream Upstream Upstream Upstream Upstream upstream",
       "type": "object",
       "properties": {
         "preserve_host": {
@@ -285,7 +285,7 @@
       }
     },
     "genericError": {
-      "description": "The standard error format",
+      "description": "GenericError The standard error format",
       "type": "object",
       "properties": {
         "code": {
@@ -332,6 +332,7 @@
       }
     },
     "healthStatus": {
+      "description": "HealthStatus health status",
       "type": "object",
       "properties": {
         "status": {
@@ -479,7 +480,7 @@
       }
     },
     "ruleMatch": {
-      "description": "RuleMatch RuleMatch rule match",
+      "description": "RuleMatch RuleMatch RuleMatch rule match",
       "type": "object",
       "properties": {
         "methods": {
@@ -496,7 +497,7 @@
       }
     },
     "version": {
-      "description": "Version Version version",
+      "description": "Version Version Version version",
       "type": "object",
       "properties": {
         "version": {
