@@ -58,7 +58,7 @@ func TestValidateRule(t *testing.T) {
 		},
 		{
 			r:         &Rule{Match: &Match{}},
-			expectErr: `Value "" of "match.url" field is not a valid url.`,
+			expectErr: `Value "" of "match.url" field must not be empty.`,
 		},
 		{
 			r: &Rule{
@@ -140,6 +140,16 @@ func TestValidateRule(t *testing.T) {
 			r: &Rule{
 				Match:          &Match{URL: "https://www.ory.sh", Methods: []string{"MKCOL"}},
 				Upstream:       Upstream{URL: "https://www.ory.sh"},
+				Authenticators: []Handler{{Handler: "noop"}},
+				Authorizer:     Handler{Handler: "allow"},
+				Mutators:       []Handler{{Handler: "noop"}},
+			},
+		},
+		{
+			setup: prep(true, true, true),
+			r: &Rule{
+				Match:          &Match{URL: "https://www.ory.sh", Methods: []string{"MKCOL"}},
+				Upstream:       Upstream{URL: "http://tasks.foo-bar_baz"},
 				Authenticators: []Handler{{Handler: "noop"}},
 				Authorizer:     Handler{Handler: "allow"},
 				Mutators:       []Handler{{Handler: "noop"}},
