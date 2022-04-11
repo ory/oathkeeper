@@ -154,20 +154,17 @@ func (d *Proxy) Director(r *http.Request) {
 }
 
 func CopyHeaders(headers http.Header, r *http.Request) {
-	for h := range headers {
+	if r.Header == nil {
+		r.Header = make(map[string][]string)
+	}
+	for k, v := range headers {
 		var val string
-		val = headers.Get(h)
-		if val == "" {
-			if v, ok := headers[h]; ok {
-				if len(v) > 0 {
-					val = v[0]
-				}
-			}
+		if len(v) == 0 {
+			val = ""
+		} else {
+			val = v[0]
 		}
-		if r.Header == nil {
-			r.Header = make(map[string][]string)
-		}
-		r.Header.Set(h, val)
+		r.Header.Set(k, val)
 	}
 }
 
