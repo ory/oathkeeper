@@ -182,6 +182,31 @@ func TestAuthenticatorCookieSession(t *testing.T) {
 			assert.Equal(t, requestRecorder.bodies[0], []byte{})
 		})
 
+		t.Run("description=does not pass websocket-related headers through to auth server", func(t *testing.T) {
+			testServer, requestRecorder := makeServer(200, `{"subject": "123"}`)
+			req := makeRequest("GET", "/", "", map[string]string{"sessionid": "zyx"}, "")
+			req.Header.Set("Connection", "Upgrade")
+			req.Header.Set("Upgrade", "websocket")
+			req.Header.Set("Sec-Websocket-Key", "gnXM/V545apioaFAHRas/w==")
+			req.Header.Set("Sec-Websocket-Version", "13")
+			pipelineAuthenticator.Authenticate(
+				req,
+				session,
+				json.RawMessage(fmt.Sprintf(`{"check_session_url": "%s"}`, testServer.URL)),
+				nil,
+			)
+			assert.Len(t, requestRecorder.requests, 1)
+			assert.Len(t, requestRecorder.bodies, 1)
+			r := requestRecorder.requests[0]
+			assert.Equal(t, r.Method, "GET")
+			assert.Empty(t, r.Header.Get("Connection"))
+			assert.Empty(t, r.Header.Get("Upgrade"))
+			assert.Empty(t, r.Header.Get("Sec-Websocket-Key"))
+			assert.Empty(t, r.Header.Get("Sec-Websocket-Version"))
+			assert.Equal(t, r.Header.Get("Cookie"), "sessionid=zyx")
+			assert.Equal(t, &AuthenticationSession{Subject: "123"}, session)
+		})
+
 		t.Run("description=should fallthrough if only is specified and no cookie specified is set", func(t *testing.T) {
 			testServer, requestRecorder := makeServer(200, `{}`)
 			err := pipelineAuthenticator.Authenticate(

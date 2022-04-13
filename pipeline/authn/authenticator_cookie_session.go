@@ -155,6 +155,10 @@ func forwardRequestToSessionStore(r *http.Request, checkSessionURL string, prese
 
 	// We need to make a COPY of the header, not modify r.Header!
 	for k, v := range r.Header {
+		// remove websocket-related headers to not confuse reverse proxies
+		if k == "Upgrade" || k == "Connection" || k == "Sec-Websocket-Key" || k == "Sec-Websocket-Version" {
+			continue
+		}
 		req.Header[k] = v
 	}
 

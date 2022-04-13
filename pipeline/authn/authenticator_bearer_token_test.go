@@ -223,6 +223,34 @@ func TestAuthenticatorBearerToken(t *testing.T) {
 				},
 			},
 			{
+				d: "does not pass websocket-related headers through to auth server",
+				r: &http.Request{
+					Header: http.Header{
+						"Authorization":         {"bearer zyx"},
+						"Connection":            {"Upgrade"},
+						"Upgrade":               {"websocket"},
+						"Sec-Websocket-Key":     {"gnXM/V545apioaFAHRas/w=="},
+						"Sec-Websocket-Version": {"13"},
+					},
+					URL:    &url.URL{Path: "/users/123", RawQuery: "query=string"},
+					Method: "GET",
+				},
+				router: func(w http.ResponseWriter, r *http.Request) {
+					assert.Equal(t, r.Method, "GET")
+					assert.Empty(t, r.Header.Get("Connection"))
+					assert.Empty(t, r.Header.Get("Upgrade"))
+					assert.Empty(t, r.Header.Get("Sec-Websocket-Key"))
+					assert.Empty(t, r.Header.Get("Sec-Websocket-Version"))
+					assert.Equal(t, r.Header.Get("Authorization"), "bearer zyx")
+					w.WriteHeader(200)
+					w.Write([]byte(`{"sub": "123"}`))
+				},
+				expectErr: false,
+				expectSess: &AuthenticationSession{
+					Subject: "123",
+				},
+			},
+			{
 				d: "should work with nested extra keys",
 				r: &http.Request{Header: http.Header{"Authorization": {"bearer token"}}, URL: &url.URL{Path: ""}},
 				setup: func(t *testing.T, m *httprouter.Router) {
