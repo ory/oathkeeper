@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/pkg/errors"
@@ -76,6 +77,12 @@ func (a *AuthenticatorJWT) Authenticate(r *http.Request, session *Authentication
 
 	token := helper.BearerTokenFromRequest(r, cf.BearerTokenLocation)
 	if token == "" {
+		return errors.WithStack(ErrAuthenticatorNotResponsible)
+	}
+
+	// If the token is not a JWT, declare ourselves not responsible. This enables using fallback authenticators (i. e.
+	// bearer_token or oauth2_introspection) for different token types at the same location.
+	if len(strings.Split(token, ".")) != 3 {
 		return errors.WithStack(ErrAuthenticatorNotResponsible)
 	}
 
