@@ -36,6 +36,18 @@ type AuthenticatorBearerTokenConfiguration struct {
 	ForceMethod         string                      `json:"force_method"`
 }
 
+func (a *AuthenticatorBearerTokenConfiguration) ToAuthenticatorForwardConfig() *AuthenticatorForwardConfig {
+	return &AuthenticatorForwardConfig{
+		CheckSessionURL: a.CheckSessionURL,
+		PreserveQuery:   a.PreserveQuery,
+		PreservePath:    a.PreservePath,
+		PreserveHost:    a.PreserveHost,
+		ProxyHeaders:    a.ProxyHeaders,
+		SetHeaders:      a.SetHeaders,
+		ForceMethod:     a.ForceMethod,
+	}
+}
+
 type AuthenticatorBearerToken struct {
 	c configuration.Provider
 }
@@ -90,7 +102,7 @@ func (a *AuthenticatorBearerToken) Authenticate(r *http.Request, session *Authen
 		return errors.WithStack(ErrAuthenticatorNotResponsible)
 	}
 
-	body, err := forwardRequestToSessionStore(r, cf.CheckSessionURL, cf.PreserveQuery, cf.PreservePath, cf.PreserveHost, cf.ProxyHeaders, cf.SetHeaders, cf.ForceMethod)
+	body, err := forwardRequestToSessionStore(r, cf.ToAuthenticatorForwardConfig())
 	if err != nil {
 		return err
 	}

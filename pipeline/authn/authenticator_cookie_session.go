@@ -50,6 +50,17 @@ func NewAuthenticatorCookieSession(c configuration.Provider) *AuthenticatorCooki
 	}
 }
 
+func (a *AuthenticatorCookieSessionConfiguration) ToAuthenticatorForwardConfig() *AuthenticatorForwardConfig {
+	return &AuthenticatorForwardConfig{
+		CheckSessionURL: a.CheckSessionURL,
+		PreserveQuery:   a.PreserveQuery,
+		PreservePath:    a.PreservePath,
+		PreserveHost:    a.PreserveHost,
+		ProxyHeaders:    a.ProxyHeaders,
+		SetHeaders:      a.SetHeaders,
+		ForceMethod:     a.ForceMethod,
+	}
+}
 func (a *AuthenticatorCookieSession) GetID() string {
 	return "cookie_session"
 }
@@ -93,7 +104,7 @@ func (a *AuthenticatorCookieSession) Authenticate(r *http.Request, session *Auth
 		return errors.WithStack(ErrAuthenticatorNotResponsible)
 	}
 
-	body, err := forwardRequestToSessionStore(r, cf.CheckSessionURL, cf.PreserveQuery, cf.PreservePath, cf.PreserveHost, cf.ProxyHeaders, cf.SetHeaders, cf.ForceMethod)
+	body, err := forwardRequestToSessionStore(r, cf.ToAuthenticatorForwardConfig())
 	if err != nil {
 		return err
 	}
@@ -133,31 +144,31 @@ func cookieSessionResponsible(r *http.Request, only []string) bool {
 	return false
 }
 
-func forwardRequestToSessionStore(r *http.Request, checkSessionURL string, preserveQuery bool, preservePath bool, preserveHost bool, proxyHeaders []string, setHeaders map[string]string, m string) (json.RawMessage, error) {
+func forwardRequestToSessionStore(r *http.Request, cf *AuthenticatorForwardConfig) (json.RawMessage, error) {
 	proxyHeaderMap := make(map[string]string)
-	for _, h := range proxyHeaders {
+	for _, h := range cf.ProxyHeaders {
 		proxyHeaderMap[h] = h
 	}
 
-	reqUrl, err := url.Parse(checkSessionURL)
+	reqUrl, err := url.Parse(cf.CheckSessionURL)
 	if err != nil {
 		return nil, errors.WithStack(herodot.ErrInternalServerError.WithReasonf("Unable to parse session check URL: %s", err))
 	}
 
-	if !preservePath {
+	if !cf.PreservePath {
 		reqUrl.Path = r.URL.Path
 	}
 
-	if !preserveQuery {
+	if !cf.PreserveQuery {
 		reqUrl.RawQuery = r.URL.RawQuery
 	}
 
-	if m == "" {
-		m = r.Method
+	if cf.ForceMethod == "" {
+		cf.ForceMethod = r.Method
 	}
 
 	req := http.Request{
-		Method: m,
+		Method: cf.ForceMethod,
 		URL:    reqUrl,
 		Header: http.Header{},
 	}
@@ -169,11 +180,11 @@ func forwardRequestToSessionStore(r *http.Request, checkSessionURL string, prese
 		}
 	}
 
-	for k, v := range setHeaders {
+	for k, v := range cf.SetHeaders {
 		req.Header.Set(k, v)
 	}
 
-	if preserveHost {
+	if cf.PreserveHost {
 		req.Header.Set("X-Forwarded-Host", r.Host)
 	}
 
