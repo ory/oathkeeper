@@ -1,9 +1,7 @@
 package authn
 
 import (
-	"compress/gzip"
 	"encoding/json"
-	"io"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -37,6 +35,7 @@ type AuthenticatorCookieSessionConfiguration struct {
 	ExtraFrom       string            `json:"extra_from"`
 	SubjectFrom     string            `json:"subject_from"`
 	PreserveHost    bool              `json:"preserve_host"`
+	ProxyHeaders    []string          `json:"proxy_headers"`
 	SetHeaders      map[string]string `json:"additional_headers"`
 	ForceMethod     string            `json:"force_method"`
 }
@@ -77,6 +76,9 @@ func (a *AuthenticatorCookieSession) Config(config json.RawMessage) (*Authentica
 	if len(c.SubjectFrom) == 0 {
 		c.SubjectFrom = "subject"
 	}
+	if len(c.ProxyHeaders) == 0 {
+		c.ProxyHeaders = []string{"Authorization", "Cookie"}
+	}
 
 	return &c, nil
 }
@@ -91,7 +93,7 @@ func (a *AuthenticatorCookieSession) Authenticate(r *http.Request, session *Auth
 		return errors.WithStack(ErrAuthenticatorNotResponsible)
 	}
 
-	body, err := forwardRequestToSessionStore(r, cf.CheckSessionURL, cf.PreserveQuery, cf.PreservePath, cf.PreserveHost, cf.SetHeaders, cf.ForceMethod)
+	body, err := forwardRequestToSessionStore(r, cf.CheckSessionURL, cf.PreserveQuery, cf.PreservePath, cf.PreserveHost, cf.ProxyHeaders, cf.SetHeaders, cf.ForceMethod)
 	if err != nil {
 		return err
 	}
@@ -131,7 +133,12 @@ func cookieSessionResponsible(r *http.Request, only []string) bool {
 	return false
 }
 
-func forwardRequestToSessionStore(r *http.Request, checkSessionURL string, preserveQuery bool, preservePath bool, preserveHost bool, setHeaders map[string]string, m string) (json.RawMessage, error) {
+func forwardRequestToSessionStore(r *http.Request, checkSessionURL string, preserveQuery bool, preservePath bool, preserveHost bool, proxyHeaders []string, setHeaders map[string]string, m string) (json.RawMessage, error) {
+	proxyHeaderMap := make(map[string]string)
+	for _, h := range proxyHeaders {
+		proxyHeaderMap[h] = h
+	}
+
 	reqUrl, err := url.Parse(checkSessionURL)
 	if err != nil {
 		return nil, errors.WithStack(herodot.ErrInternalServerError.WithReasonf("Unable to parse session check URL: %s", err))
@@ -157,7 +164,9 @@ func forwardRequestToSessionStore(r *http.Request, checkSessionURL string, prese
 
 	// We need to make a COPY of the header, not modify r.Header!
 	for k, v := range r.Header {
-		req.Header[k] = v
+		if _, ok := proxyHeaderMap[k]; ok {
+			req.Header[k] = v
+		}
 	}
 
 	for k, v := range setHeaders {
@@ -176,17 +185,7 @@ func forwardRequestToSessionStore(r *http.Request, checkSessionURL string, prese
 	defer res.Body.Close()
 
 	if res.StatusCode == 200 {
-		var reader io.Reader
-		switch res.Header.Get("Content-Encoding") {
-		case "gzip":
-			reader, err = gzip.NewReader(res.Body)
-			if err != nil {
-				return json.RawMessage{}, err
-			}
-		default:
-			reader = res.Body
-		}
-		body, err := ioutil.ReadAll(reader)
+		body, err := ioutil.ReadAll(res.Body)
 		if err != nil {
 			return json.RawMessage{}, errors.WithStack(herodot.ErrInternalServerError.WithReasonf("Unable to fetch cookie session context from remote: %+v", err))
 		}

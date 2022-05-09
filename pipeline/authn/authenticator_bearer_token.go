@@ -31,6 +31,7 @@ type AuthenticatorBearerTokenConfiguration struct {
 	PreserveHost        bool                        `json:"preserve_host"`
 	ExtraFrom           string                      `json:"extra_from"`
 	SubjectFrom         string                      `json:"subject_from"`
+	ProxyHeaders        []string                    `json:"proxy_headers"`
 	SetHeaders          map[string]string           `json:"additional_headers"`
 	ForceMethod         string                      `json:"force_method"`
 }
@@ -71,6 +72,9 @@ func (a *AuthenticatorBearerToken) Config(config json.RawMessage) (*Authenticato
 	if len(c.SubjectFrom) == 0 {
 		c.SubjectFrom = "sub"
 	}
+	if len(c.ProxyHeaders) == 0 {
+		c.ProxyHeaders = []string{"Authorization", "Cookie"}
+	}
 
 	return &c, nil
 }
@@ -86,7 +90,7 @@ func (a *AuthenticatorBearerToken) Authenticate(r *http.Request, session *Authen
 		return errors.WithStack(ErrAuthenticatorNotResponsible)
 	}
 
-	body, err := forwardRequestToSessionStore(r, cf.CheckSessionURL, cf.PreserveQuery, cf.PreservePath, cf.PreserveHost, cf.SetHeaders, cf.ForceMethod)
+	body, err := forwardRequestToSessionStore(r, cf.CheckSessionURL, cf.PreserveQuery, cf.PreservePath, cf.PreserveHost, cf.ProxyHeaders, cf.SetHeaders, cf.ForceMethod)
 	if err != nil {
 		return err
 	}

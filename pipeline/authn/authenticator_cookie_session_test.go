@@ -2,6 +2,7 @@ package authn_test
 
 import (
 	"bytes"
+	"compress/gzip"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -234,6 +235,31 @@ func TestAuthenticatorCookieSession(t *testing.T) {
 
 		t.Run("description=should work with the root key for extra and a custom subject key", func(t *testing.T) {
 			testServer, _ := makeServer(200, `{"identity": {"id": "123"}, "session": {"foo": "bar"}}`)
+			err := pipelineAuthenticator.Authenticate(
+				makeRequest("GET", "/", "", map[string]string{"sessionid": "zyx"}, ""),
+				session,
+				json.RawMessage(fmt.Sprintf(`{"check_session_url": "%s", "subject_from": "identity.id", "extra_from": "@this"}`, testServer.URL)),
+				nil,
+			)
+			require.NoError(t, err, "%#v", errors.Cause(err))
+			assert.Equal(t, &AuthenticationSession{
+				Subject: "123",
+				Extra:   map[string]interface{}{"session": map[string]interface{}{"foo": "bar"}, "identity": map[string]interface{}{"id": "123"}},
+			}, session)
+		})
+		t.Run("description=should handle gzip requests", func(t *testing.T) {
+			responseBody := `{"identity": {"id": "123"}, "session": {"foo": "bar"}}`
+			requestRecorder := &RequestRecorder{}
+			testServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				requestRecorder.requests = append(requestRecorder.requests, r)
+				requestBody, _ := ioutil.ReadAll(r.Body)
+				requestRecorder.bodies = append(requestRecorder.bodies, requestBody)
+				w.Header().Set("Content-Encoding", "gzip")
+				w.WriteHeader(http.StatusOK)
+				gz := gzip.NewWriter(w)
+				gz.Write([]byte(responseBody))
+				gz.Close()
+			}))
 			err := pipelineAuthenticator.Authenticate(
 				makeRequest("GET", "/", "", map[string]string{"sessionid": "zyx"}, ""),
 				session,
