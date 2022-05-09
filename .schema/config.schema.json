@@ -445,6 +445,14 @@
             "POST"
           ]
         },
+        "proxy_headers": {
+          "title": "Set Proxy HTTP Headers",
+          "type": "array",
+          "description": "Set HTTP Headers allowed to proxy to upstream.",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
         "additional_headers": {
           "title": "Set Additional HTTP Headers",
           "type": "object",
@@ -551,6 +559,14 @@
             "GET",
             "POST"
           ]
+        },
+        "proxy_headers": {
+          "title": "Set Proxy HTTP Headers",
+          "type": "array",
+          "description": "Set HTTP Headers allowed to proxy to upstream.",
+          "additionalProperties": {
+            "type": "string"
+          }
         },
         "additional_headers": {
           "title": "Set Additional HTTP Headers",

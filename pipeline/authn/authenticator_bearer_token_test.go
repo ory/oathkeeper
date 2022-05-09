@@ -96,7 +96,7 @@ func TestAuthenticatorBearerToken(t *testing.T) {
 					w.WriteHeader(200)
 					w.Write([]byte(`{"sub": "123"}`))
 				},
-				config:    []byte(`{"preserve_query": true}`),
+				config:    []byte(`{"preserve_query": true, "proxy_headers": ["Authorization"]}`),
 				expectErr: false,
 				expectSess: &AuthenticationSession{
 					Subject: "123",
@@ -113,7 +113,7 @@ func TestAuthenticatorBearerToken(t *testing.T) {
 					w.WriteHeader(200)
 					w.Write([]byte(`{"sub": "123"}`))
 				},
-				config:    []byte(`{"preserve_path": true, "preserve_query": false}`),
+				config:    []byte(`{"preserve_path": true, "preserve_query": false, "proxy_headers": ["Authorization"]}`),
 				expectErr: false,
 				expectSess: &AuthenticationSession{
 					Subject: "123",
@@ -128,7 +128,7 @@ func TestAuthenticatorBearerToken(t *testing.T) {
 					w.WriteHeader(200)
 					w.Write([]byte(`{"sub": "123"}`))
 				},
-				config:    []byte(`{"preserve_path": true, "force_method": "GET"}`),
+				config:    []byte(`{"preserve_path": true, "force_method": "GET", "proxy_headers": ["Authorization"]}`),
 				expectErr: false,
 				expectSess: &AuthenticationSession{
 					Subject: "123",
@@ -145,7 +145,7 @@ func TestAuthenticatorBearerToken(t *testing.T) {
 					w.WriteHeader(200)
 					w.Write([]byte(`{"sub": "123"}`))
 				},
-				config:    []byte(`{"preserve_path": false, "preserve_query": true}`),
+				config:    []byte(`{"preserve_path": false, "preserve_query": true, "proxy_headers": ["Authorization"]}`),
 				expectErr: false,
 				expectSess: &AuthenticationSession{
 					Subject: "123",
@@ -160,7 +160,7 @@ func TestAuthenticatorBearerToken(t *testing.T) {
 					w.WriteHeader(200)
 					w.Write([]byte(`{"sub": "123"}`))
 				},
-				config:    []byte(`{"preserve_path": true, "preserve_query": true, "check_session_url": "http://origin-replaced-in-test/configured/path?q=configured-query"}`),
+				config:    []byte(`{"preserve_path": true, "preserve_query": true, "check_session_url": "http://origin-replaced-in-test/configured/path?q=configured-query", "proxy_headers": ["Authorization", "X-Forwared-Host"]}`),
 				expectErr: false,
 				expectSess: &AuthenticationSession{
 					Subject: "123",
@@ -176,7 +176,7 @@ func TestAuthenticatorBearerToken(t *testing.T) {
 					w.WriteHeader(200)
 					w.Write([]byte(`{"sub": "123"}`))
 				},
-				config:    []byte(`{"preserve_host": true}`),
+				config:    []byte(`{"preserve_host": true, "proxy_headers": ["Authorization"]}`),
 				expectErr: false,
 				expectSess: &AuthenticationSession{
 					Subject: "123",
@@ -193,7 +193,7 @@ func TestAuthenticatorBearerToken(t *testing.T) {
 					w.WriteHeader(200)
 					w.Write([]byte(`{"sub": "123"}`))
 				},
-				config:    []byte(`{"preserve_host": true, "additional_headers": {"X-Foo": "bar","X-Forwarded-For": "not-some-host"}}`),
+				config:    []byte(`{"preserve_host": true, "additional_headers": {"X-Foo": "bar","X-Forwarded-For": "not-some-host"}, "proxy_headers":["Authorization"]}`),
 				expectErr: false,
 				expectSess: &AuthenticationSession{
 					Subject: "123",
