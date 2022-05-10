@@ -57,7 +57,7 @@ type AuthenticatorForwardConfig struct {
 	PreserveQuery   bool
 	PreservePath    bool
 	PreserveHost    bool
-	ProxyHeaders    []string
+	ProxyHeadersMap map[string]string
 	SetHeaders      map[string]string
 	ForceMethod     string
 }

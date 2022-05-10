@@ -34,6 +34,7 @@ type AuthenticatorBearerTokenConfiguration struct {
 	ProxyHeaders        []string                    `json:"proxy_headers"`
 	SetHeaders          map[string]string           `json:"additional_headers"`
 	ForceMethod         string                      `json:"force_method"`
+	ProxyHeadersMap     map[string]string           `json:"-"`
 }
 
 func (a *AuthenticatorBearerTokenConfiguration) ToAuthenticatorForwardConfig() *AuthenticatorForwardConfig {
@@ -42,7 +43,7 @@ func (a *AuthenticatorBearerTokenConfiguration) ToAuthenticatorForwardConfig() *
 		PreserveQuery:   a.PreserveQuery,
 		PreservePath:    a.PreservePath,
 		PreserveHost:    a.PreserveHost,
-		ProxyHeaders:    a.ProxyHeaders,
+		ProxyHeadersMap: a.ProxyHeadersMap,
 		SetHeaders:      a.SetHeaders,
 		ForceMethod:     a.ForceMethod,
 	}
@@ -86,6 +87,10 @@ func (a *AuthenticatorBearerToken) Config(config json.RawMessage) (*Authenticato
 	}
 	if len(c.ProxyHeaders) == 0 {
 		c.ProxyHeaders = []string{"Authorization", "Cookie"}
+	}
+
+	for _, h := range c.ProxyHeaders {
+		c.ProxyHeadersMap[h] = h
 	}
 
 	return &c, nil

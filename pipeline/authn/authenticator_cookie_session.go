@@ -38,6 +38,7 @@ type AuthenticatorCookieSessionConfiguration struct {
 	ProxyHeaders    []string          `json:"proxy_headers"`
 	SetHeaders      map[string]string `json:"additional_headers"`
 	ForceMethod     string            `json:"force_method"`
+	ProxyHeadersMap map[string]string `json:"-"`
 }
 
 type AuthenticatorCookieSession struct {
@@ -56,7 +57,7 @@ func (a *AuthenticatorCookieSessionConfiguration) ToAuthenticatorForwardConfig()
 		PreserveQuery:   a.PreserveQuery,
 		PreservePath:    a.PreservePath,
 		PreserveHost:    a.PreserveHost,
-		ProxyHeaders:    a.ProxyHeaders,
+		ProxyHeadersMap: a.ProxyHeadersMap,
 		SetHeaders:      a.SetHeaders,
 		ForceMethod:     a.ForceMethod,
 	}
@@ -89,6 +90,9 @@ func (a *AuthenticatorCookieSession) Config(config json.RawMessage) (*Authentica
 	}
 	if len(c.ProxyHeaders) == 0 {
 		c.ProxyHeaders = []string{"Authorization", "Cookie"}
+	}
+	for _, h := range c.ProxyHeaders {
+		c.ProxyHeadersMap[h] = h
 	}
 
 	return &c, nil
@@ -145,11 +149,6 @@ func cookieSessionResponsible(r *http.Request, only []string) bool {
 }
 
 func forwardRequestToSessionStore(r *http.Request, cf *AuthenticatorForwardConfig) (json.RawMessage, error) {
-	proxyHeaderMap := make(map[string]string)
-	for _, h := range cf.ProxyHeaders {
-		proxyHeaderMap[h] = h
-	}
-
 	reqUrl, err := url.Parse(cf.CheckSessionURL)
 	if err != nil {
 		return nil, errors.WithStack(herodot.ErrInternalServerError.WithReasonf("Unable to parse session check URL: %s", err))
@@ -173,9 +172,9 @@ func forwardRequestToSessionStore(r *http.Request, cf *AuthenticatorForwardConfi
 		Header: http.Header{},
 	}
 
-	// We need to make a COPY of the header, not modify r.Header!
+	// We need to copy only essential and configurable headers
 	for k, v := range r.Header {
-		if _, ok := proxyHeaderMap[k]; ok {
+		if _, ok := cf.ProxyHeadersMap[k]; ok {
 			req.Header[k] = v
 		}
 	}
