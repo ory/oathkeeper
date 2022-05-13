@@ -446,9 +446,9 @@
           ]
         },
         "forward_http_headers": {
-          "title": "Set Proxy HTTP Headers",
+          "title": "Set Forward HTTP Headers",
           "type": "array",
-          "description": "Set HTTP Headers allowed to proxy to upstream.",
+          "description": "Set HTTP Headers allowed forwarding to upstream.",
           "additionalProperties": {
             "type": "string"
           }
@@ -561,9 +561,9 @@
           ]
         },
         "forward_http_headers": {
-          "title": "Set Proxy HTTP Headers",
+          "title": "Set Forward HTTP Headers",
           "type": "array",
-          "description": "Set HTTP Headers allowed to proxy to upstream.",
+          "description": "Set HTTP Headers allowed forwarding to upstream.",
           "additionalProperties": {
             "type": "string"
           }
