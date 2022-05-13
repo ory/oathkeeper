@@ -152,17 +152,41 @@ func cookieSessionResponsible(r *http.Request, only []string) bool {
 }
 
 func forwardRequestToSessionStore(r *http.Request, cf *AuthenticatorForwardConfig) (json.RawMessage, error) {
-	reqUrl, err := url.Parse(cf.CheckSessionURL)
+	req, err := PrepareRequest(r, cf)
 	if err != nil {
-		return nil, errors.WithStack(herodot.ErrInternalServerError.WithReasonf("Unable to parse session check URL: %s", err))
+		return nil, err
+	}
+
+	res, err := http.DefaultClient.Do(req.WithContext(r.Context()))
+	if err != nil {
+		return nil, helper.ErrForbidden.WithReason(err.Error()).WithTrace(err)
+	}
+
+	defer res.Body.Close()
+
+	if res.StatusCode == http.StatusOK {
+		body, err := ioutil.ReadAll(res.Body)
+		if err != nil {
+			return json.RawMessage{}, errors.WithStack(herodot.ErrInternalServerError.WithReasonf("Unable to fetch cookie session context from remote: %+v", err))
+		}
+		return body, nil
+	} else {
+		return json.RawMessage{}, errors.WithStack(helper.ErrUnauthorized)
+	}
+}
+
+func PrepareRequest(r *http.Request, cf *AuthenticatorForwardConfig) (http.Request, error) {
+	reqURL, err := url.Parse(cf.CheckSessionURL)
+	if err != nil {
+		return http.Request{}, errors.WithStack(herodot.ErrInternalServerError.WithReasonf("Unable to parse session check URL: %s", err))
 	}
 
 	if !cf.PreservePath {
-		reqUrl.Path = r.URL.Path
+		reqURL.Path = r.URL.Path
 	}
 
 	if !cf.PreserveQuery {
-		reqUrl.RawQuery = r.URL.RawQuery
+		reqURL.RawQuery = r.URL.RawQuery
 	}
 
 	if cf.ForceMethod == "" {
@@ -171,7 +195,7 @@ func forwardRequestToSessionStore(r *http.Request, cf *AuthenticatorForwardConfi
 
 	req := http.Request{
 		Method: cf.ForceMethod,
-		URL:    reqUrl,
+		URL:    reqURL,
 		Header: http.Header{},
 	}
 
@@ -187,23 +211,7 @@ func forwardRequestToSessionStore(r *http.Request, cf *AuthenticatorForwardConfi
 	}
 
 	if cf.PreserveHost {
-		req.Header.Set("X-Forwarded-Host", r.Host)
+		req.Header.Set(header.XForwardedHost, r.Host)
 	}
-
-	res, err := http.DefaultClient.Do(req.WithContext(r.Context()))
-	if err != nil {
-		return nil, helper.ErrForbidden.WithReason(err.Error()).WithTrace(err)
-	}
-
-	defer res.Body.Close()
-
-	if res.StatusCode == 200 {
-		body, err := ioutil.ReadAll(res.Body)
-		if err != nil {
-			return json.RawMessage{}, errors.WithStack(herodot.ErrInternalServerError.WithReasonf("Unable to fetch cookie session context from remote: %+v", err))
-		}
-		return body, nil
-	} else {
-		return json.RawMessage{}, errors.WithStack(helper.ErrUnauthorized)
-	}
+	return req, nil
 }

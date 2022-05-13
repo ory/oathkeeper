@@ -18,6 +18,7 @@ import (
 
 	"github.com/ory/oathkeeper/internal"
 	. "github.com/ory/oathkeeper/pipeline/authn"
+	"github.com/ory/oathkeeper/x/header"
 )
 
 func TestAuthenticatorCookieSession(t *testing.T) {
@@ -247,6 +248,46 @@ func TestAuthenticatorCookieSession(t *testing.T) {
 			}, session)
 		})
 	})
+}
+
+func TestPrepareRequest(t *testing.T) {
+	t.Run("prepare request should return only configured headers", func(t *testing.T) {
+		testCases := []struct {
+			requestHeaders  []string
+			expectedHeaders []string
+			conf            *AuthenticatorForwardConfig
+		}{
+			{
+				requestHeaders:  []string{header.Authorization, header.AcceptEncoding},
+				expectedHeaders: []string{},
+				conf:            &AuthenticatorForwardConfig{},
+			},
+			{
+				requestHeaders:  []string{header.Authorization, header.AcceptEncoding},
+				expectedHeaders: []string{header.Authorization},
+				conf: &AuthenticatorForwardConfig{
+					ForwardHTTPHeaders: map[string]string{
+						header.Authorization: header.Authorization,
+					},
+				},
+			},
+		}
+
+		for _, testCase := range testCases {
+			r := makeRequest("GET", "/", "", map[string]string{"sessionID": "zyx"}, "")
+			for _, h := range testCase.requestHeaders {
+				r.Header.Add(h, h)
+			}
+			expected := http.Header{}
+			for _, h := range testCase.expectedHeaders {
+				expected.Add(h, h)
+			}
+			req, err := PrepareRequest(r, testCase.conf)
+			assert.NoError(t, err)
+			assert.Equal(t, expected, req.Header)
+		}
+	})
+
 }
 
 type RequestRecorder struct {

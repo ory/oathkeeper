@@ -63,6 +63,7 @@ const (
 	Upgrade                       = "Upgrade"
 	Vary                          = "Vary"
 	WWWAuthenticate               = "WWW-Authenticate"
+	XForwardedHost                = "X-Forwarded-Host"
 )
 
 // Canonical returns the canonical format of the
