@@ -10,6 +10,7 @@ import (
 	"github.com/tidwall/gjson"
 
 	"github.com/ory/go-convenience/stringsx"
+	"github.com/ory/oautheeker/x/header"
 
 	"github.com/ory/herodot"
 
@@ -28,17 +29,17 @@ type AuthenticatorCookieSessionFilter struct {
 }
 
 type AuthenticatorCookieSessionConfiguration struct {
-	Only            []string          `json:"only"`
-	CheckSessionURL string            `json:"check_session_url"`
-	PreserveQuery   bool              `json:"preserve_query"`
-	PreservePath    bool              `json:"preserve_path"`
-	ExtraFrom       string            `json:"extra_from"`
-	SubjectFrom     string            `json:"subject_from"`
-	PreserveHost    bool              `json:"preserve_host"`
-	ProxyHeaders    []string          `json:"forward_http_headers"`
-	SetHeaders      map[string]string `json:"additional_headers"`
-	ForceMethod     string            `json:"force_method"`
-	ProxyHeadersMap map[string]string `json:"-"`
+	Only                  []string          `json:"only"`
+	CheckSessionURL       string            `json:"check_session_url"`
+	PreserveQuery         bool              `json:"preserve_query"`
+	PreservePath          bool              `json:"preserve_path"`
+	ExtraFrom             string            `json:"extra_from"`
+	SubjectFrom           string            `json:"subject_from"`
+	PreserveHost          bool              `json:"preserve_host"`
+	ForwardHTTPHeaders    []string          `json:"forward_http_headers"`
+	SetHeaders            map[string]string `json:"additional_headers"`
+	ForceMethod           string            `json:"force_method"`
+	ForwardHTTPHeadersMap map[string]string `json:"-"`
 }
 
 type AuthenticatorCookieSession struct {
@@ -53,13 +54,13 @@ func NewAuthenticatorCookieSession(c configuration.Provider) *AuthenticatorCooki
 
 func (a *AuthenticatorCookieSessionConfiguration) ToAuthenticatorForwardConfig() *AuthenticatorForwardConfig {
 	return &AuthenticatorForwardConfig{
-		CheckSessionURL: a.CheckSessionURL,
-		PreserveQuery:   a.PreserveQuery,
-		PreservePath:    a.PreservePath,
-		PreserveHost:    a.PreserveHost,
-		ProxyHeadersMap: a.ProxyHeadersMap,
-		SetHeaders:      a.SetHeaders,
-		ForceMethod:     a.ForceMethod,
+		CheckSessionURL:       a.CheckSessionURL,
+		PreserveQuery:         a.PreserveQuery,
+		PreservePath:          a.PreservePath,
+		PreserveHost:          a.PreserveHost,
+		ForwardHTTPHeadersMap: a.ForwardHTTPHeadersMap,
+		SetHeaders:            a.SetHeaders,
+		ForceMethod:           a.ForceMethod,
 	}
 }
 func (a *AuthenticatorCookieSession) GetID() string {
@@ -88,11 +89,11 @@ func (a *AuthenticatorCookieSession) Config(config json.RawMessage) (*Authentica
 	if len(c.SubjectFrom) == 0 {
 		c.SubjectFrom = "subject"
 	}
-	if len(c.ProxyHeaders) == 0 {
-		c.ProxyHeaders = []string{"Authorization", "Cookie"}
+	if len(c.ForwardHTTPHeaders) == 0 {
+		c.ForwardHTTPHeaders = []string{header.Authorization, header.Cookie}
 	}
-	for _, h := range c.ProxyHeaders {
-		c.ProxyHeadersMap[h] = h
+	for _, h := range c.ForwardHTTPHeaders {
+		c.ForwardHTTPHeadersMap[h] = h
 	}
 
 	return &c, nil
@@ -174,7 +175,7 @@ func forwardRequestToSessionStore(r *http.Request, cf *AuthenticatorForwardConfi
 
 	// We need to copy only essential and configurable headers
 	for k, v := range r.Header {
-		if _, ok := cf.ProxyHeadersMap[k]; ok {
+		if _, ok := cf.ForwardHTTPHeadersMap[k]; ok {
 			req.Header[k] = v
 		}
 	}

@@ -53,13 +53,13 @@ type MatchContext struct {
 	Header              http.Header `json:"header"`
 }
 type AuthenticatorForwardConfig struct {
-	CheckSessionURL string
-	PreserveQuery   bool
-	PreservePath    bool
-	PreserveHost    bool
-	ProxyHeadersMap map[string]string
-	SetHeaders      map[string]string
-	ForceMethod     string
+	CheckSessionURL    string
+	PreserveQuery      bool
+	PreservePath       bool
+	PreserveHost       bool
+	ForwardHTTPHeaders map[string]string
+	SetHeaders         map[string]string
+	ForceMethod        string
 }
 
 func (a *AuthenticationSession) SetHeader(key, val string) {
