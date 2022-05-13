@@ -12,6 +12,7 @@ import (
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/helper"
 	"github.com/ory/oathkeeper/pipeline"
+	"github.com/ory/oautheeker/x/header"
 )
 
 func init() {
@@ -24,28 +25,28 @@ type AuthenticatorBearerTokenFilter struct {
 }
 
 type AuthenticatorBearerTokenConfiguration struct {
-	CheckSessionURL     string                      `json:"check_session_url"`
-	BearerTokenLocation *helper.BearerTokenLocation `json:"token_from"`
-	PreserveQuery       bool                        `json:"preserve_query"`
-	PreservePath        bool                        `json:"preserve_path"`
-	PreserveHost        bool                        `json:"preserve_host"`
-	ExtraFrom           string                      `json:"extra_from"`
-	SubjectFrom         string                      `json:"subject_from"`
-	ProxyHeaders        []string                    `json:"forward_http_headers"`
-	SetHeaders          map[string]string           `json:"additional_headers"`
-	ForceMethod         string                      `json:"force_method"`
-	ProxyHeadersMap     map[string]string           `json:"-"`
+	CheckSessionURL       string                      `json:"check_session_url"`
+	BearerTokenLocation   *helper.BearerTokenLocation `json:"token_from"`
+	PreserveQuery         bool                        `json:"preserve_query"`
+	PreservePath          bool                        `json:"preserve_path"`
+	PreserveHost          bool                        `json:"preserve_host"`
+	ExtraFrom             string                      `json:"extra_from"`
+	SubjectFrom           string                      `json:"subject_from"`
+	ForwardHTTPHeaders    []string                    `json:"forward_http_headers"`
+	SetHeaders            map[string]string           `json:"additional_headers"`
+	ForceMethod           string                      `json:"force_method"`
+	ForwardHTTPHeadersMap map[string]string           `json:"-"`
 }
 
 func (a *AuthenticatorBearerTokenConfiguration) ToAuthenticatorForwardConfig() *AuthenticatorForwardConfig {
 	return &AuthenticatorForwardConfig{
-		CheckSessionURL: a.CheckSessionURL,
-		PreserveQuery:   a.PreserveQuery,
-		PreservePath:    a.PreservePath,
-		PreserveHost:    a.PreserveHost,
-		ProxyHeadersMap: a.ProxyHeadersMap,
-		SetHeaders:      a.SetHeaders,
-		ForceMethod:     a.ForceMethod,
+		CheckSessionURL:       a.CheckSessionURL,
+		PreserveQuery:         a.PreserveQuery,
+		PreservePath:          a.PreservePath,
+		PreserveHost:          a.PreserveHost,
+		ForwardHTTPHeadersMap: a.ForwardHTTPHeadersMap,
+		SetHeaders:            a.SetHeaders,
+		ForceMethod:           a.ForceMethod,
 	}
 }
 
@@ -85,12 +86,12 @@ func (a *AuthenticatorBearerToken) Config(config json.RawMessage) (*Authenticato
 	if len(c.SubjectFrom) == 0 {
 		c.SubjectFrom = "sub"
 	}
-	if len(c.ProxyHeaders) == 0 {
-		c.ProxyHeaders = []string{"Authorization", "Cookie"}
+	if len(c.ForwardHTTPHeaders) == 0 {
+		c.ForwardHTTPHeaders = []string{header.Authorization, header.Cookie}
 	}
 
-	for _, h := range c.ProxyHeaders {
-		c.ProxyHeadersMap[h] = h
+	for _, h := range c.ForwardHTTPHeaders {
+		c.ForwardHTTPHeadersMap[h] = h
 	}
 
 	return &c, nil
