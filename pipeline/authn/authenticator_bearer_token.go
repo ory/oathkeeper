@@ -31,7 +31,7 @@ type AuthenticatorBearerTokenConfiguration struct {
 	PreserveHost        bool                        `json:"preserve_host"`
 	ExtraFrom           string                      `json:"extra_from"`
 	SubjectFrom         string                      `json:"subject_from"`
-	ProxyHeaders        []string                    `json:"proxy_headers"`
+	ProxyHeaders        []string                    `json:"forward_http_headers"`
 	SetHeaders          map[string]string           `json:"additional_headers"`
 	ForceMethod         string                      `json:"force_method"`
 	ProxyHeadersMap     map[string]string           `json:"-"`
