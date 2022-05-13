@@ -445,7 +445,7 @@
             "POST"
           ]
         },
-        "proxy_headers": {
+        "forward_http_headers": {
           "title": "Set Proxy HTTP Headers",
           "type": "array",
           "description": "Set HTTP Headers allowed to proxy to upstream.",
@@ -560,7 +560,7 @@
             "POST"
           ]
         },
-        "proxy_headers": {
+        "forward_http_headers": {
           "title": "Set Proxy HTTP Headers",
           "type": "array",
           "description": "Set HTTP Headers allowed to proxy to upstream.",

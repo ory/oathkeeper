@@ -35,7 +35,7 @@ type AuthenticatorCookieSessionConfiguration struct {
 	ExtraFrom       string            `json:"extra_from"`
 	SubjectFrom     string            `json:"subject_from"`
 	PreserveHost    bool              `json:"preserve_host"`
-	ProxyHeaders    []string          `json:"proxy_headers"`
+	ProxyHeaders    []string          `json:"forward_http_headers"`
 	SetHeaders      map[string]string `json:"additional_headers"`
 	ForceMethod     string            `json:"force_method"`
 	ProxyHeadersMap map[string]string `json:"-"`
