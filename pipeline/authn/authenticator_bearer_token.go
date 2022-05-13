@@ -8,11 +8,11 @@ import (
 	"github.com/tidwall/gjson"
 
 	"github.com/ory/go-convenience/stringsx"
+	"github.com/ory/oathkeeper/x/header"
 
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/helper"
 	"github.com/ory/oathkeeper/pipeline"
-	"github.com/ory/oautheeker/x/header"
 )
 
 func init() {
@@ -40,13 +40,13 @@ type AuthenticatorBearerTokenConfiguration struct {
 
 func (a *AuthenticatorBearerTokenConfiguration) ToAuthenticatorForwardConfig() *AuthenticatorForwardConfig {
 	return &AuthenticatorForwardConfig{
-		CheckSessionURL:       a.CheckSessionURL,
-		PreserveQuery:         a.PreserveQuery,
-		PreservePath:          a.PreservePath,
-		PreserveHost:          a.PreserveHost,
-		ForwardHTTPHeadersMap: a.ForwardHTTPHeadersMap,
-		SetHeaders:            a.SetHeaders,
-		ForceMethod:           a.ForceMethod,
+		CheckSessionURL:    a.CheckSessionURL,
+		PreserveQuery:      a.PreserveQuery,
+		PreservePath:       a.PreservePath,
+		PreserveHost:       a.PreserveHost,
+		ForwardHTTPHeaders: a.ForwardHTTPHeadersMap,
+		SetHeaders:         a.SetHeaders,
+		ForceMethod:        a.ForceMethod,
 	}
 }
 
@@ -89,6 +89,7 @@ func (a *AuthenticatorBearerToken) Config(config json.RawMessage) (*Authenticato
 	if len(c.ForwardHTTPHeaders) == 0 {
 		c.ForwardHTTPHeaders = []string{header.Authorization, header.Cookie}
 	}
+	c.ForwardHTTPHeadersMap = make(map[string]string)
 
 	for _, h := range c.ForwardHTTPHeaders {
 		c.ForwardHTTPHeadersMap[h] = h

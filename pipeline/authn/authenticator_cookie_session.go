@@ -10,7 +10,7 @@ import (
 	"github.com/tidwall/gjson"
 
 	"github.com/ory/go-convenience/stringsx"
-	"github.com/ory/oautheeker/x/header"
+	"github.com/ory/oathkeeper/x/header"
 
 	"github.com/ory/herodot"
 
@@ -54,13 +54,13 @@ func NewAuthenticatorCookieSession(c configuration.Provider) *AuthenticatorCooki
 
 func (a *AuthenticatorCookieSessionConfiguration) ToAuthenticatorForwardConfig() *AuthenticatorForwardConfig {
 	return &AuthenticatorForwardConfig{
-		CheckSessionURL:       a.CheckSessionURL,
-		PreserveQuery:         a.PreserveQuery,
-		PreservePath:          a.PreservePath,
-		PreserveHost:          a.PreserveHost,
-		ForwardHTTPHeadersMap: a.ForwardHTTPHeadersMap,
-		SetHeaders:            a.SetHeaders,
-		ForceMethod:           a.ForceMethod,
+		CheckSessionURL:    a.CheckSessionURL,
+		PreserveQuery:      a.PreserveQuery,
+		PreservePath:       a.PreservePath,
+		PreserveHost:       a.PreserveHost,
+		ForwardHTTPHeaders: a.ForwardHTTPHeadersMap,
+		SetHeaders:         a.SetHeaders,
+		ForceMethod:        a.ForceMethod,
 	}
 }
 func (a *AuthenticatorCookieSession) GetID() string {
@@ -92,6 +92,8 @@ func (a *AuthenticatorCookieSession) Config(config json.RawMessage) (*Authentica
 	if len(c.ForwardHTTPHeaders) == 0 {
 		c.ForwardHTTPHeaders = []string{header.Authorization, header.Cookie}
 	}
+
+	c.ForwardHTTPHeadersMap = make(map[string]string)
 	for _, h := range c.ForwardHTTPHeaders {
 		c.ForwardHTTPHeadersMap[h] = h
 	}
@@ -175,7 +177,7 @@ func forwardRequestToSessionStore(r *http.Request, cf *AuthenticatorForwardConfi
 
 	// We need to copy only essential and configurable headers
 	for k, v := range r.Header {
-		if _, ok := cf.ForwardHTTPHeadersMap[k]; ok {
+		if _, ok := cf.ForwardHTTPHeaders[k]; ok {
 			req.Header[k] = v
 		}
 	}
