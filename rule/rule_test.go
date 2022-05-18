@@ -188,3 +188,99 @@ func TestRuleWithCustomMethod(t *testing.T) {
 		})
 	}
 }
+
+func TestRuleWithHeaders(t *testing.T) {
+	r := &Rule{
+		Match: &Match{
+			Methods: []string{"DELETE"},
+			URL:     "https://localhost/users/<(?!admin).*>",
+			Headers: map[string]string{
+				"Content-Type":    "application+v2.json",
+				"x-custom-header": "foo",
+			},
+		},
+	}
+
+	var tests = []struct {
+		method        string
+		url           string
+		headers       http.Header
+		expectedMatch bool
+		expectedErr   error
+	}{
+		{
+			method:        "DELETE",
+			url:           "https://localhost/users/foo",
+			headers:       map[string][]string{},
+			expectedMatch: false,
+			expectedErr:   nil,
+		},
+		{
+			method: "DELETE",
+			url:    "https://localhost/users/foo",
+			headers: map[string][]string{
+				"Content-Type": {"application+v2.json"},
+			},
+			expectedMatch: false,
+			expectedErr:   nil,
+		},
+		{
+			method: "DELETE",
+			url:    "https://localhost/users/foo",
+			headers: map[string][]string{
+				"Content-Type": {"application+v2.json"},
+			},
+			expectedMatch: false,
+			expectedErr:   nil,
+		},
+		{
+			method: "DELETE",
+			url:    "https://localhost/users/foo",
+			headers: map[string][]string{
+				"Content-Type":    {"application+v2.json"},
+				"x-custom-header": {"bar"},
+			},
+			expectedMatch: false,
+			expectedErr:   nil,
+		},
+		{
+			method: "DELETE",
+			url:    "https://localhost/users/foo",
+			headers: map[string][]string{
+				"Content-Type":    {"application+v1.json"},
+				"x-custom-header": {"foo"},
+			},
+			expectedMatch: false,
+			expectedErr:   nil,
+		},
+		{
+			method: "DELETE",
+			url:    "https://localhost/users/foo",
+			headers: map[string][]string{
+				"Content-Type":        {"application+v2.json"},
+				"x-custom-header":     {"foo"},
+				"x-irrelevant-header": {"something", "not", "important"},
+			},
+			expectedMatch: true,
+			expectedErr:   nil,
+		},
+		{
+			method: "DELETE",
+			url:    "https://localhost/users/foo",
+			headers: map[string][]string{
+				"Content-Type":        {"application+v2.json", "application+v1.json"},
+				"x-custom-header":     {"foo", "bar"},
+				"x-irrelevant-header": {"something", "not", "important"},
+			},
+			expectedMatch: true,
+			expectedErr:   nil,
+		},
+	}
+	for ind, tcase := range tests {
+		t.Run(strconv.FormatInt(int64(ind), 10), func(t *testing.T) {
+			matched, err := r.IsMatching(configuration.Regexp, tcase.method, mustParse(t, tcase.url), tcase.headers)
+			assert.Equal(t, tcase.expectedMatch, matched)
+			assert.Equal(t, tcase.expectedErr, err)
+		})
+	}
+}
