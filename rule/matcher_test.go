@@ -23,6 +23,7 @@ package rule
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"net/url"
 	"testing"
 
@@ -66,6 +67,15 @@ var testRules = []Rule{
 		Mutators:       []Handler{{Handler: "id_token"}},
 		Upstream:       Upstream{URL: "http://localhost:3333/", StripPath: "/foo", PreserveHost: false},
 	},
+	{
+		ID:             "foo4",
+		Match:          &Match{URL: "https://localhost:343/<baz|bar>", Methods: []string{"PATCH"}, Headers: map[string]string{"Content-Type": "application/some-app.v2+json"}},
+		Description:    "Patch users rule for version 2",
+		Authorizer:     Handler{Handler: "deny"},
+		Authenticators: []Handler{{Handler: "oauth2_introspection"}},
+		Mutators:       []Handler{{Handler: "id_token"}},
+		Upstream:       Upstream{URL: "http://localhost:3333/", StripPath: "/foo", PreserveHost: false},
+	},
 }
 
 var testRulesGlob = []Rule{
@@ -96,6 +106,15 @@ var testRulesGlob = []Rule{
 		Mutators:       []Handler{{Handler: "id_token"}},
 		Upstream:       Upstream{URL: "http://localhost:3333/", StripPath: "/foo", PreserveHost: false},
 	},
+	{
+		ID:             "foo4",
+		Match:          &Match{URL: "https://localhost:343/<{baz*,bar*}>", Methods: []string{"PATCH"}, Headers: map[string]string{"Content-Type": "application/some-app.v2+json"}},
+		Description:    "Patch users rule with version 2",
+		Authorizer:     Handler{Handler: "deny"},
+		Authenticators: []Handler{{Handler: "oauth2_introspection"}},
+		Mutators:       []Handler{{Handler: "id_token"}},
+		Upstream:       Upstream{URL: "http://localhost:3333/", StripPath: "/foo", PreserveHost: false},
+	},
 }
 
 func TestMatcher(t *testing.T) {
@@ -104,8 +123,8 @@ func TestMatcher(t *testing.T) {
 		Repository
 	}
 
-	var testMatcher = func(t *testing.T, matcher Matcher, method string, url string, expectErr bool, expect *Rule) {
-		r, err := matcher.Match(context.Background(), method, mustParseURL(t, url))
+	var testMatcher = func(t *testing.T, matcher Matcher, method string, url string, headers http.Header, expectErr bool, expect *Rule) {
+		r, err := matcher.Match(context.Background(), method, mustParseURL(t, url), headers)
 		if expectErr {
 			require.Error(t, err)
 		} else {
@@ -119,21 +138,21 @@ func TestMatcher(t *testing.T) {
 	} {
 		t.Run(fmt.Sprintf("regexp matcher=%s", name), func(t *testing.T) {
 			t.Run("case=empty", func(t *testing.T) {
-				testMatcher(t, matcher, "GET", "https://localhost:34/baz", true, nil)
-				testMatcher(t, matcher, "POST", "https://localhost:1234/foo", true, nil)
-				testMatcher(t, matcher, "DELETE", "https://localhost:1234/foo", true, nil)
+				testMatcher(t, matcher, "GET", "https://localhost:34/baz", http.Header{}, true, nil)
+				testMatcher(t, matcher, "POST", "https://localhost:1234/foo", http.Header{}, true, nil)
+				testMatcher(t, matcher, "DELETE", "https://localhost:1234/foo", http.Header{}, true, nil)
 			})
 
 			require.NoError(t, matcher.Set(context.Background(), testRules))
 
 			t.Run("case=created", func(t *testing.T) {
-				testMatcher(t, matcher, "GET", "https://localhost:34/baz", false, &testRules[1])
-				testMatcher(t, matcher, "POST", "https://localhost:1234/foo", false, &testRules[0])
-				testMatcher(t, matcher, "DELETE", "https://localhost:1234/foo", true, nil)
+				testMatcher(t, matcher, "GET", "https://localhost:34/baz", http.Header{}, false, &testRules[1])
+				testMatcher(t, matcher, "POST", "https://localhost:1234/foo", http.Header{}, false, &testRules[0])
+				testMatcher(t, matcher, "DELETE", "https://localhost:1234/foo", http.Header{}, true, nil)
 			})
 
 			t.Run("case=cache", func(t *testing.T) {
-				r, err := matcher.Match(context.Background(), "GET", mustParseURL(t, "https://localhost:34/baz"))
+				r, err := matcher.Match(context.Background(), "GET", mustParseURL(t, "https://localhost:34/baz"), http.Header{})
 				require.NoError(t, err)
 				got, err := matcher.Get(context.Background(), r.ID)
 				require.NoError(t, err)
@@ -141,37 +160,39 @@ func TestMatcher(t *testing.T) {
 			})
 
 			t.Run("case=nil url", func(t *testing.T) {
-				_, err := matcher.Match(context.Background(), "GET", nil)
+				_, err := matcher.Match(context.Background(), "GET", nil, http.Header{})
 				require.Error(t, err)
 			})
 
 			require.NoError(t, matcher.Set(context.Background(), testRules[1:]))
 
 			t.Run("case=updated", func(t *testing.T) {
-				testMatcher(t, matcher, "GET", "https://localhost:34/baz", false, &testRules[1])
-				testMatcher(t, matcher, "POST", "https://localhost:1234/foo", true, nil)
-				testMatcher(t, matcher, "DELETE", "https://localhost:1234/foo", true, nil)
+				testMatcher(t, matcher, "GET", "https://localhost:34/baz", http.Header{}, false, &testRules[1])
+				testMatcher(t, matcher, "POST", "https://localhost:1234/foo", http.Header{}, true, nil)
+				testMatcher(t, matcher, "DELETE", "https://localhost:1234/foo", http.Header{}, true, nil)
+				testMatcher(t, matcher, "PATCH", "https://localhost:343/bar", http.Header{"Content-Type": []string{"application/some-app.v1+json"}}, true, nil)
+				testMatcher(t, matcher, "PATCH", "https://localhost:343/bar", http.Header{"Content-Type": []string{"application/some-app.v2+json"}}, false, &testRules[3])
 			})
 		})
 		t.Run(fmt.Sprintf("glob matcher=%s", name), func(t *testing.T) {
 			require.NoError(t, matcher.SetMatchingStrategy(context.Background(), configuration.Glob))
 			require.NoError(t, matcher.Set(context.Background(), []Rule{}))
 			t.Run("case=empty", func(t *testing.T) {
-				testMatcher(t, matcher, "GET", "https://localhost:34/baz", true, nil)
-				testMatcher(t, matcher, "POST", "https://localhost:1234/foo", true, nil)
-				testMatcher(t, matcher, "DELETE", "https://localhost:1234/foo", true, nil)
+				testMatcher(t, matcher, "GET", "https://localhost:34/baz", http.Header{}, true, nil)
+				testMatcher(t, matcher, "POST", "https://localhost:1234/foo", http.Header{}, true, nil)
+				testMatcher(t, matcher, "DELETE", "https://localhost:1234/foo", http.Header{}, true, nil)
 			})
 
 			require.NoError(t, matcher.Set(context.Background(), testRulesGlob))
 
 			t.Run("case=created", func(t *testing.T) {
-				testMatcher(t, matcher, "GET", "https://localhost:34/baz", false, &testRulesGlob[1])
-				testMatcher(t, matcher, "POST", "https://localhost:1234/foo", false, &testRulesGlob[0])
-				testMatcher(t, matcher, "DELETE", "https://localhost:1234/foo", true, nil)
+				testMatcher(t, matcher, "GET", "https://localhost:34/baz", http.Header{}, false, &testRulesGlob[1])
+				testMatcher(t, matcher, "POST", "https://localhost:1234/foo", http.Header{}, false, &testRulesGlob[0])
+				testMatcher(t, matcher, "DELETE", "https://localhost:1234/foo", http.Header{}, true, nil)
 			})
 
 			t.Run("case=cache", func(t *testing.T) {
-				r, err := matcher.Match(context.Background(), "GET", mustParseURL(t, "https://localhost:34/baz"))
+				r, err := matcher.Match(context.Background(), "GET", mustParseURL(t, "https://localhost:34/baz"), http.Header{})
 				require.NoError(t, err)
 				got, err := matcher.Get(context.Background(), r.ID)
 				require.NoError(t, err)
@@ -181,9 +202,11 @@ func TestMatcher(t *testing.T) {
 			require.NoError(t, matcher.Set(context.Background(), testRulesGlob[1:]))
 
 			t.Run("case=updated", func(t *testing.T) {
-				testMatcher(t, matcher, "GET", "https://localhost:34/baz", false, &testRulesGlob[1])
-				testMatcher(t, matcher, "POST", "https://localhost:1234/foo", true, nil)
-				testMatcher(t, matcher, "DELETE", "https://localhost:1234/foo", true, nil)
+				testMatcher(t, matcher, "GET", "https://localhost:34/baz", http.Header{}, false, &testRulesGlob[1])
+				testMatcher(t, matcher, "POST", "https://localhost:1234/foo", http.Header{}, true, nil)
+				testMatcher(t, matcher, "DELETE", "https://localhost:1234/foo", http.Header{}, true, nil)
+				testMatcher(t, matcher, "PATCH", "https://localhost:343/bar", http.Header{"Content-Type": []string{"application/some-app.v1+json"}}, true, nil)
+				testMatcher(t, matcher, "PATCH", "https://localhost:343/bar", http.Header{"Content-Type": []string{"application/some-app.v2+json"}}, false, &testRulesGlob[3])
 			})
 		})
 	}

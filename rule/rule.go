@@ -23,6 +23,7 @@ package rule
 import (
 	"encoding/json"
 	"fmt"
+	"net/http"
 	"net/url"
 	"strings"
 
@@ -35,7 +36,7 @@ type Match struct {
 	// An array of HTTP methods (e.g. GET, POST, PUT, DELETE, ...). When ORY Oathkeeper searches for rules
 	// to decide what to do with an incoming request to the proxy server, it compares the HTTP method of the incoming
 	// request with the HTTP methods of each rules. If a match is found, the rule is considered a partial match.
-	// If the matchesUrl field is satisfied as well, the rule is considered a full match.
+	// If the matchesUrl and matchesHeaders fields are satisfied as well, the rule is considered a full match.
 	Methods []string `json:"methods"`
 
 	// This field represents the URL pattern this rule matches. When ORY Oathkeeper searches for rules
@@ -50,6 +51,14 @@ type Match struct {
 	// The following regexp example matches all paths of the domain `mydomain.com`: `https://mydomain.com/<.*>`.
 	// The glob equivalent of the above regexp example is `https://mydomain.com/<*>`.
 	URL string `json:"url"`
+
+	// A map of HTTP headers. When ORY Oathkeeper searches for rules
+	// to decide what to do with an incoming request to the proxy server, it compares the HTTP headers of the incoming
+	// request with the HTTP headers of each rules. If a match is found, the rule is considered a partial match.
+	// For headers with values in array format (e.g. User-Agent headers), the rule header value must match at least one
+	// of the request header values.
+	// If the matchesUrl and matchesMethods fields are satisfied as well, the rule is considered a full match.
+	Headers map[string]string `json:"headers"`
 }
 
 type Handler struct {
@@ -170,15 +179,21 @@ func (r *Rule) GetID() string {
 	return r.ID
 }
 
-// IsMatching checks whether the provided url and method match the rule.
+// IsMatching checks whether the provided url, method and headers match the rule.
 // An error will be returned if a regexp matching strategy is selected and regexp timeout occurs.
-func (r *Rule) IsMatching(strategy configuration.MatchingStrategy, method string, u *url.URL) (bool, error) {
+func (r *Rule) IsMatching(strategy configuration.MatchingStrategy, method string, u *url.URL, headers http.Header) (bool, error) {
 	if !stringInSlice(method, r.Match.Methods) {
 		return false, nil
 	}
+
+	if !matchHeaders(headers, r.Match) {
+		return false, nil
+	}
+
 	if err := ensureMatchingEngine(r, strategy); err != nil {
 		return false, err
 	}
+
 	matchAgainst := fmt.Sprintf("%s://%s%s", u.Scheme, u.Host, u.Path)
 	return r.matchingEngine.IsMatching(r.Match.URL, matchAgainst)
 }
@@ -216,6 +231,29 @@ func ensureMatchingEngine(rule *Rule, strategy configuration.MatchingStrategy) e
 	}
 
 	return errors.Wrap(ErrUnknownMatchingStrategy, string(strategy))
+}
+
+func matchHeaders(requestHeaders http.Header, ruleMatch *Match) bool {
+	for matcherHeaderKey, matcherHeaderValue := range ruleMatch.Headers {
+		foundMatch := false
+		for requestHeaderKey, requestHeaderValues := range requestHeaders {
+			// Break if we find the matching key
+			if strings.EqualFold(matcherHeaderKey, requestHeaderKey) {
+				// Match only with any of the header value
+				for _, requestHeaderValue := range requestHeaderValues {
+					if strings.EqualFold(matcherHeaderValue, requestHeaderValue) {
+						foundMatch = true
+						break
+					}
+				}
+				break
+			}
+		}
+		if !foundMatch {
+			return false
+		}
+	}
+	return true
 }
 
 // ExtractRegexGroups returns the values matching the rule pattern
