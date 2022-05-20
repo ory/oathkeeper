@@ -352,6 +352,14 @@ func (a *AuthenticatorOAuth2Introspection) Config(config json.RawMessage) (*Auth
 		if err != nil {
 			return nil, nil, err
 		}
+
+		// clear cache if previous ttl was longer (or none)
+		if a.tokenCache != nil {
+			if a.cacheTTL == nil || (a.cacheTTL != nil && a.cacheTTL.Seconds() > cacheTTL.Seconds()) {
+				a.tokenCache.Clear()
+			}
+		}
+
 		a.cacheTTL = &cacheTTL
 	}
 
