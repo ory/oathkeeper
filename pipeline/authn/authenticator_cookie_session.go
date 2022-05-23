@@ -89,9 +89,9 @@ func (a *AuthenticatorCookieSession) Config(config json.RawMessage) (*Authentica
 	if len(c.SubjectFrom) == 0 {
 		c.SubjectFrom = "subject"
 	}
-	if len(c.ForwardHTTPHeaders) == 0 {
-		c.ForwardHTTPHeaders = []string{header.Authorization, header.Cookie}
-	}
+
+	// Add Authorization and Cookie headers for backward compatibility
+	c.ForwardHTTPHeaders = append(c.ForwardHTTPHeaders, []string{header.Authorization, header.Cookie}...)
 
 	c.ForwardHTTPHeadersMap = make(map[string]string)
 	for _, h := range c.ForwardHTTPHeaders {
