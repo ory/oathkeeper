@@ -21,7 +21,8 @@
 package rule
 
 import (
-	"github.com/asaskevich/govalidator"
+	"net/url"
+
 	"github.com/pkg/errors"
 
 	"github.com/ory/herodot"
@@ -126,13 +127,13 @@ func (v *ValidatorDefault) Validate(r *Rule) error {
 	}
 
 	if r.Match.URL == "" {
-		return errors.WithStack(herodot.ErrInternalServerError.WithReasonf(`Value "%s" of "match.url" field is not a valid url.`, r.Match.URL))
+		return errors.WithStack(herodot.ErrInternalServerError.WithReasonf(`Value "%s" of "match.url" field must not be empty.`, r.Match.URL))
 	}
 
 	if r.Upstream.URL == "" {
 		// Having no upstream URL is fine here because the judge does not need an upstream!
-	} else if !govalidator.IsURL(r.Upstream.URL) {
-		return errors.WithStack(herodot.ErrInternalServerError.WithReasonf(`Value "%s" of "upstream.url" is not a valid url.`, r.Upstream.URL))
+	} else if _, err := url.ParseRequestURI(r.Upstream.URL); err != nil {
+		return errors.WithStack(herodot.ErrInternalServerError.WithReasonf(`Value "%s" of "upstream.url" is not a valid url: %s`, r.Upstream.URL, err))
 	}
 
 	if err := v.validateAuthenticators(r); err != nil {

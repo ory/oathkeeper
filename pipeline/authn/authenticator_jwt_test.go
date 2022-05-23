@@ -136,6 +136,13 @@ func TestAuthenticatorJWT(t *testing.T) {
 				expectExactErr: ErrAuthenticatorNotResponsible,
 			},
 			{
+				d:              "should return error saying that authenticator is not responsible for validating the request, as the token provided is not a JWT",
+				r:              &http.Request{Header: http.Header{"X-Custom-Header": []string{"bm90LWp3dA=="}}}, // not-jwt
+				config:         `{"token_from": {"header": "X-Custom-Header"}}`,
+				expectErr:      true,
+				expectExactErr: ErrAuthenticatorNotResponsible,
+			},
+			{
 				d: "should pass because the valid JWT token was provided in a proper location (custom header)",
 				r: &http.Request{Header: http.Header{"X-Custom-Header": []string{gen(keys[1], jwt.MapClaims{
 					"sub": "sub",

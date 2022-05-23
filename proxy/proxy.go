@@ -142,9 +142,7 @@ func (d *Proxy) Director(r *http.Request) {
 	}
 	*r = *r.WithContext(context.WithValue(r.Context(), ContextKeySession, s))
 
-	for h := range s.Header {
-		r.Header.Set(h, s.Header.Get(h))
-	}
+	CopyHeaders(s.Header, r)
 
 	if err := ConfigureBackendURL(r, rl); err != nil {
 		*r = *r.WithContext(context.WithValue(r.Context(), director, err))
@@ -153,6 +151,21 @@ func (d *Proxy) Director(r *http.Request) {
 
 	var en error // need to set it to error but with nil value
 	*r = *r.WithContext(context.WithValue(r.Context(), director, en))
+}
+
+func CopyHeaders(headers http.Header, r *http.Request) {
+	if r.Header == nil {
+		r.Header = make(map[string][]string)
+	}
+	for k, v := range headers {
+		var val string
+		if len(v) == 0 {
+			val = ""
+		} else {
+			val = v[0]
+		}
+		r.Header.Set(k, val)
+	}
 }
 
 // EnrichRequestedURL sets Scheme and Host values in a URL passed down by a http server. Per default, the URL

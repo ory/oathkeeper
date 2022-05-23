@@ -454,6 +454,28 @@ func TestEnrichRequestedURL(t *testing.T) {
 		})
 	}
 }
+func TestCopyHeaders(t *testing.T) {
+	v := "value"
+	for _, headerKey := range []string{
+		"X-Forwarded-For",
+		"X-FORWARDED-FOR",
+		"x-forwarded-for",
+		"X-CoMpAnY",
+	} {
+		r := &http.Request{Host: "test", URL: new(url.URL)}
+		canonicalHeaders := http.Header{}
+		canonicalHeaders.Add(headerKey, v)
+		proxy.CopyHeaders(canonicalHeaders, r)
+		assert.EqualValues(t, canonicalHeaders, r.Header)
+
+		notCanonicalHeaders := http.Header{}
+		notCanonicalHeaders[headerKey] = []string{v}
+		nr := &http.Request{Host: "test", URL: new(url.URL)}
+		proxy.CopyHeaders(notCanonicalHeaders, nr)
+		assert.EqualValues(t, canonicalHeaders, nr.Header)
+	}
+
+}
 
 //
 // func BenchmarkDirector(b *testing.B) {
