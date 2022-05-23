@@ -17,7 +17,7 @@
   },
   "devDependencies": {
     "doctoc": "^2.0.0",
-    "ory-prettier-styles": "1.1.2",
+    "ory-prettier-styles": "1.2.0",
     "prettier": "2.2.1"
   },
   "dependencies": {
