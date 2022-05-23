@@ -86,9 +86,9 @@ func (a *AuthenticatorBearerToken) Config(config json.RawMessage) (*Authenticato
 	if len(c.SubjectFrom) == 0 {
 		c.SubjectFrom = "sub"
 	}
-	if len(c.ForwardHTTPHeaders) == 0 {
-		c.ForwardHTTPHeaders = []string{header.Authorization, header.Cookie}
-	}
+
+	// Add Authorization and Cookie headers for backward compatibility
+	c.ForwardHTTPHeaders = append(c.ForwardHTTPHeaders, []string{header.Authorization, header.Cookie}...)
 	c.ForwardHTTPHeadersMap = make(map[string]string)
 
 	for _, h := range c.ForwardHTTPHeaders {
