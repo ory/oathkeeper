@@ -372,7 +372,7 @@ func (r *RegistryMemory) prepareAuthn() {
 			authn.NewAuthenticatorOAuth2ClientCredentials(r.c, r.Logger()),
 			authn.NewAuthenticatorOAuth2Introspection(r.c, r.Logger()),
 			authn.NewAuthenticatorUnauthorized(r.c),
-			authn.NewAuthenticatorForward(r.c),
+			authn.NewAuthenticatorRemoteJSON(r.c),
 		}
 
 		r.authenticators = map[string]authn.Authenticator{}

@@ -20,12 +20,12 @@ import (
 	. "github.com/ory/oathkeeper/pipeline/authn"
 )
 
-func TestAuthenticatorForward(t *testing.T) {
+func TestAuthenticatorRemoteJSON(t *testing.T) {
 	conf := internal.NewConfigurationWithDefaults()
 	reg := internal.NewRegistry(conf)
 	session := new(AuthenticationSession)
 
-	pipelineAuthenticator, err := reg.PipelineAuthenticator("forward")
+	pipelineAuthenticator, err := reg.PipelineAuthenticator("remote_json")
 	require.NoError(t, err)
 
 	t.Run("method=authenticate", func(t *testing.T) {
@@ -33,7 +33,7 @@ func TestAuthenticatorForward(t *testing.T) {
 			testServer, _ := makeServiceServer(400, `{}`)
 			defer testServer.Close()
 			err := pipelineAuthenticator.Authenticate(
-				makeForwardRequest("GET", "/", map[string]string{"sessionid": "zyx"}, ""),
+				makeRemoteJSONRequest("GET", "/", map[string]string{"sessionid": "zyx"}, ""),
 				session,
 				json.RawMessage(fmt.Sprintf(`{"check_session_url": "%s"}`, testServer.URL)),
 				nil,
@@ -45,7 +45,7 @@ func TestAuthenticatorForward(t *testing.T) {
 			testServer, _ := makeServiceServer(200, `{"subject": "123", "extra": {"foo": "bar"}}`)
 			defer testServer.Close()
 			err := pipelineAuthenticator.Authenticate(
-				makeForwardRequest("GET", "/", map[string]string{"sessionid": "zyx"}, ""),
+				makeRemoteJSONRequest("GET", "/", map[string]string{"sessionid": "zyx"}, ""),
 				session,
 				json.RawMessage(fmt.Sprintf(`{"service_url": "%s"}`, testServer.URL)),
 				nil,
@@ -61,7 +61,7 @@ func TestAuthenticatorForward(t *testing.T) {
 			testServer, requestRecorder := makeServiceServer(200, `{"subject": "123"}`)
 			defer testServer.Close()
 			err := pipelineAuthenticator.Authenticate(
-				makeForwardRequest("PUT", "/users/123?query=string", map[string]string{"sessionid": "zyx"}, "Test body"),
+				makeRemoteJSONRequest("PUT", "/users/123?query=string", map[string]string{"sessionid": "zyx"}, "Test body"),
 				session,
 				json.RawMessage(fmt.Sprintf(`{"service_url": "%s"}`, testServer.URL)),
 				nil,
@@ -82,7 +82,7 @@ func TestAuthenticatorForward(t *testing.T) {
 			testServer, requestRecorder := makeServiceServer(200, `{"subject": "123"}`)
 			defer testServer.Close()
 			err := pipelineAuthenticator.Authenticate(
-				makeForwardRequest("PUT", "/users/123?query=string", map[string]string{"sessionid": "zyx"}, "Test body"),
+				makeRemoteJSONRequest("PUT", "/users/123?query=string", map[string]string{"sessionid": "zyx"}, "Test body"),
 				session,
 				json.RawMessage(fmt.Sprintf(`{"service_url": "%s", "method": "POST"}`, testServer.URL)),
 				nil,
@@ -101,7 +101,7 @@ func TestAuthenticatorForward(t *testing.T) {
 			testServer, requestRecorder := makeServiceServer(200, `{"subject": "123"}`)
 			defer testServer.Close()
 			err := pipelineAuthenticator.Authenticate(
-				makeForwardRequest("PUT", "/users/123?query=string", map[string]string{"sessionid": "zyx"}, ""),
+				makeRemoteJSONRequest("PUT", "/users/123?query=string", map[string]string{"sessionid": "zyx"}, ""),
 				session,
 				json.RawMessage(fmt.Sprintf(`{"service_url": "%s", "preserve_path": true}`, testServer.URL)),
 				nil,
@@ -119,7 +119,7 @@ func TestAuthenticatorForward(t *testing.T) {
 			testServer, _ := makeServiceServer(200, `{"subject": "123", "session": {"foo": "bar"}}`)
 			defer testServer.Close()
 			err := pipelineAuthenticator.Authenticate(
-				makeForwardRequest("GET", "/", map[string]string{"sessionid": "zyx"}, ""),
+				makeRemoteJSONRequest("GET", "/", map[string]string{"sessionid": "zyx"}, ""),
 				session,
 				json.RawMessage(fmt.Sprintf(`{"service_url": "%s", "extra_from": "session"}`, testServer.URL)),
 				nil,
@@ -135,7 +135,7 @@ func TestAuthenticatorForward(t *testing.T) {
 			testServer, _ := makeServiceServer(200, `{"identity": {"id": "123"}, "session": {"foo": "bar"}}`)
 			defer testServer.Close()
 			err := pipelineAuthenticator.Authenticate(
-				makeForwardRequest("GET", "/", map[string]string{"sessionid": "zyx"}, ""),
+				makeRemoteJSONRequest("GET", "/", map[string]string{"sessionid": "zyx"}, ""),
 				session,
 				json.RawMessage(fmt.Sprintf(`{"service_url": "%s", "subject_from": "identity.id", "extra_from": "@this"}`, testServer.URL)),
 				nil,
@@ -149,13 +149,13 @@ func TestAuthenticatorForward(t *testing.T) {
 	})
 }
 
-type ForwardRequestRecorder struct {
+type RemoteJSONRequestRecorder struct {
 	requests []*http.Request
 	bodies   [][]byte
 }
 
-func makeServiceServer(statusCode int, responseBody string) (*httptest.Server, *ForwardRequestRecorder) {
-	requestRecorder := &ForwardRequestRecorder{}
+func makeServiceServer(statusCode int, responseBody string) (*httptest.Server, *RemoteJSONRequestRecorder) {
+	requestRecorder := &RemoteJSONRequestRecorder{}
 	testServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		requestRecorder.requests = append(requestRecorder.requests, r)
 		requestBody, _ := ioutil.ReadAll(r.Body)
@@ -166,7 +166,7 @@ func makeServiceServer(statusCode int, responseBody string) (*httptest.Server, *
 	return testServer, requestRecorder
 }
 
-func makeForwardRequest(method string, path string, headers map[string]string, bodyStr string) *http.Request {
+func makeRemoteJSONRequest(method string, path string, headers map[string]string, bodyStr string) *http.Request {
 	var body io.ReadCloser
 	header := http.Header{}
 	if bodyStr != "" {

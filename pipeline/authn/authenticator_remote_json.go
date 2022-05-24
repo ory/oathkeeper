@@ -26,10 +26,10 @@ func init() {
 	})
 }
 
-type AuthenticatorForwardFilter struct {
+type AuthenticatorRemoteJSONFilter struct {
 }
 
-type AuthenticatorForwardConfiguration struct {
+type AuthenticatorRemoteJSONConfiguration struct {
 	ServiceURL   string `json:"service_url"`
 	PreservePath bool   `json:"preserve_path"`
 	ExtraFrom    string `json:"extra_from"`
@@ -37,21 +37,21 @@ type AuthenticatorForwardConfiguration struct {
 	Method       string `json:"method"`
 }
 
-type AuthenticatorForward struct {
+type AuthenticatorRemoteJSON struct {
 	c configuration.Provider
 }
 
-func NewAuthenticatorForward(c configuration.Provider) *AuthenticatorForward {
-	return &AuthenticatorForward{
+func NewAuthenticatorRemoteJSON(c configuration.Provider) *AuthenticatorRemoteJSON {
+	return &AuthenticatorRemoteJSON{
 		c: c,
 	}
 }
 
-func (a *AuthenticatorForward) GetID() string {
-	return "forward"
+func (a *AuthenticatorRemoteJSON) GetID() string {
+	return "remote_json"
 }
 
-func (a *AuthenticatorForward) Validate(config json.RawMessage) error {
+func (a *AuthenticatorRemoteJSON) Validate(config json.RawMessage) error {
 	if !a.c.AuthenticatorIsEnabled(a.GetID()) {
 		return NewErrAuthenticatorNotEnabled(a)
 	}
@@ -60,8 +60,8 @@ func (a *AuthenticatorForward) Validate(config json.RawMessage) error {
 	return err
 }
 
-func (a *AuthenticatorForward) Config(config json.RawMessage) (*AuthenticatorForwardConfiguration, error) {
-	var c AuthenticatorForwardConfiguration
+func (a *AuthenticatorRemoteJSON) Config(config json.RawMessage) (*AuthenticatorRemoteJSONConfiguration, error) {
+	var c AuthenticatorRemoteJSONConfiguration
 	if err := a.c.AuthenticatorConfig(a.GetID(), config, &c); err != nil {
 		return nil, NewErrAuthenticatorMisconfigured(a, err)
 	}
@@ -77,7 +77,7 @@ func (a *AuthenticatorForward) Config(config json.RawMessage) (*AuthenticatorFor
 	return &c, nil
 }
 
-func (a *AuthenticatorForward) Authenticate(r *http.Request, session *AuthenticationSession, config json.RawMessage, _ pipeline.Rule) error {
+func (a *AuthenticatorRemoteJSON) Authenticate(r *http.Request, session *AuthenticationSession, config json.RawMessage, _ pipeline.Rule) error {
 	cf, err := a.Config(config)
 	if err != nil {
 		return err

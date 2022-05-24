@@ -429,9 +429,9 @@
       "required": ["check_session_url"],
       "additionalProperties": false
     },
-    "configAuthenticatorsForward": {
+    "configAuthenticatorsRemoteJSON": {
       "type": "object",
-      "title": "Forward Request Authenticator Configuration",
+      "title": "RemoteJSON Request Authenticator Configuration",
       "description": "This section is optional when the authenticator is disabled.",
       "properties": {
         "service_url": {
@@ -1387,8 +1387,8 @@
             }
           ]
         },
-        "forward": {
-          "title": "Forward Request",
+        "remote_json": {
+          "title": "Remote JSON Request",
           "description": "The custom forward request authenticator.",
           "type": "object",
           "properties": {
@@ -1403,7 +1403,7 @@
                   "const": true
                 },
                 "config": {
-                  "$ref": "#/definitions/configAuthenticatorsForward"
+                  "$ref": "#/definitions/configAuthenticatorsRemoteJSON"
                 }
               },
               "required": [
