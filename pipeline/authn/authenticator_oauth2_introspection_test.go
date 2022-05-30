@@ -768,6 +768,29 @@ func TestAuthenticatorOAuth2Introspection(t *testing.T) {
 				require.Error(t, a.Authenticate(r, new(AuthenticationSession), config, nil))
 				didNotUseCache.Wait()
 			})
+
+			t.Run("case=cache cleared after ttl", func(t *testing.T) {
+				//time.Sleep(time.Second)
+				config := setup(t, `{ "required_scope": ["scope-a"], "trusted_issuers": ["foo", "bar"], "target_audience": ["audience"], "cache": { "ttl": "100ms" } }`)
+
+				didNotUseCache.Add(1)
+				require.NoError(t, a.Authenticate(r, expected, config, nil))
+				didNotUseCache.Wait()
+
+				// wait cache to save value
+				time.Sleep(time.Millisecond * 10)
+
+				require.NoError(t, a.Authenticate(r, new(AuthenticationSession), config, nil))
+				time.Sleep(50 * time.Millisecond)
+
+				require.NoError(t, a.Authenticate(r, new(AuthenticationSession), config, nil))
+				time.Sleep(50 * time.Millisecond)
+
+				// cache should have been cleared
+				didNotUseCache.Add(1)
+				require.NoError(t, a.Authenticate(r, new(AuthenticationSession), config, nil))
+				didNotUseCache.Wait()
+			})
 		})
 	})
 
