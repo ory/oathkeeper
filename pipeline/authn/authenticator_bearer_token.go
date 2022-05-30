@@ -38,16 +38,26 @@ type AuthenticatorBearerTokenConfiguration struct {
 	ForwardHTTPHeadersMap map[string]string           `json:"-"`
 }
 
-func (a *AuthenticatorBearerTokenConfiguration) ToAuthenticatorForwardConfig() *AuthenticatorForwardConfig {
-	return &AuthenticatorForwardConfig{
-		CheckSessionURL:    a.CheckSessionURL,
-		PreserveQuery:      a.PreserveQuery,
-		PreservePath:       a.PreservePath,
-		PreserveHost:       a.PreserveHost,
-		ForwardHTTPHeaders: a.ForwardHTTPHeadersMap,
-		SetHeaders:         a.SetHeaders,
-		ForceMethod:        a.ForceMethod,
-	}
+func (a *AuthenticatorBearerTokenConfiguration) GetCheckSessionURL() string {
+	return a.CheckSessionURL
+}
+func (a *AuthenticatorBearerTokenConfiguration) GetPreserveQuery() bool {
+	return a.PreserveQuery
+}
+func (a *AuthenticatorBearerTokenConfiguration) GetPreservePath() bool {
+	return a.PreservePath
+}
+func (a *AuthenticatorBearerTokenConfiguration) GetPreserveHost() bool {
+	return a.PreserveHost
+}
+func (a *AuthenticatorBearerTokenConfiguration) GetForwardHTTPHeaders() []string {
+	return a.ForwardHTTPHeaders
+}
+func (a *AuthenticatorBearerTokenConfiguration) GetSetHeaders() map[string]string {
+	return a.SetHeaders
+}
+func (a *AuthenticatorBearerTokenConfiguration) GetForceMethod() string {
+	return a.ForceMethod
 }
 
 type AuthenticatorBearerToken struct {
@@ -109,7 +119,7 @@ func (a *AuthenticatorBearerToken) Authenticate(r *http.Request, session *Authen
 		return errors.WithStack(ErrAuthenticatorNotResponsible)
 	}
 
-	body, err := forwardRequestToSessionStore(r, cf.ToAuthenticatorForwardConfig())
+	body, err := forwardRequestToSessionStore(r, cf)
 	if err != nil {
 		return err
 	}

@@ -255,19 +255,19 @@ func TestPrepareRequest(t *testing.T) {
 		testCases := []struct {
 			requestHeaders  []string
 			expectedHeaders []string
-			conf            *AuthenticatorForwardConfig
+			conf            *AuthenticatorCookieSessionConfiguration
 		}{
 			{
 				requestHeaders:  []string{header.Authorization, header.AcceptEncoding},
 				expectedHeaders: []string{},
-				conf:            &AuthenticatorForwardConfig{},
+				conf:            &AuthenticatorCookieSessionConfiguration{},
 			},
 			{
 				requestHeaders:  []string{header.Authorization, header.AcceptEncoding},
 				expectedHeaders: []string{header.Authorization},
-				conf: &AuthenticatorForwardConfig{
-					ForwardHTTPHeaders: map[string]string{
-						header.Authorization: header.Authorization,
+				conf: &AuthenticatorCookieSessionConfiguration{
+					ForwardHTTPHeaders: []string{
+						header.Authorization,
 					},
 				},
 			},

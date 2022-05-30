@@ -29,17 +29,40 @@ type AuthenticatorCookieSessionFilter struct {
 }
 
 type AuthenticatorCookieSessionConfiguration struct {
-	Only                  []string          `json:"only"`
-	CheckSessionURL       string            `json:"check_session_url"`
-	PreserveQuery         bool              `json:"preserve_query"`
-	PreservePath          bool              `json:"preserve_path"`
-	ExtraFrom             string            `json:"extra_from"`
-	SubjectFrom           string            `json:"subject_from"`
-	PreserveHost          bool              `json:"preserve_host"`
-	ForwardHTTPHeaders    []string          `json:"forward_http_headers"`
-	SetHeaders            map[string]string `json:"additional_headers"`
-	ForceMethod           string            `json:"force_method"`
-	ForwardHTTPHeadersMap map[string]string `json:"-"`
+	AuthenticatorForwardConfig
+
+	Only               []string          `json:"only"`
+	CheckSessionURL    string            `json:"check_session_url"`
+	PreserveQuery      bool              `json:"preserve_query"`
+	PreservePath       bool              `json:"preserve_path"`
+	ExtraFrom          string            `json:"extra_from"`
+	SubjectFrom        string            `json:"subject_from"`
+	PreserveHost       bool              `json:"preserve_host"`
+	ForwardHTTPHeaders []string          `json:"forward_http_headers"`
+	SetHeaders         map[string]string `json:"additional_headers"`
+	ForceMethod        string            `json:"force_method"`
+}
+
+func (a *AuthenticatorCookieSessionConfiguration) GetCheckSessionURL() string {
+	return a.CheckSessionURL
+}
+func (a *AuthenticatorCookieSessionConfiguration) GetPreserveQuery() bool {
+	return a.PreserveQuery
+}
+func (a *AuthenticatorCookieSessionConfiguration) GetPreservePath() bool {
+	return a.PreservePath
+}
+func (a *AuthenticatorCookieSessionConfiguration) GetPreserveHost() bool {
+	return a.PreserveHost
+}
+func (a *AuthenticatorCookieSessionConfiguration) GetForwardHTTPHeaders() []string {
+	return a.ForwardHTTPHeaders
+}
+func (a *AuthenticatorCookieSessionConfiguration) GetSetHeaders() map[string]string {
+	return a.SetHeaders
+}
+func (a *AuthenticatorCookieSessionConfiguration) GetForceMethod() string {
+	return a.ForceMethod
 }
 
 type AuthenticatorCookieSession struct {
@@ -52,17 +75,6 @@ func NewAuthenticatorCookieSession(c configuration.Provider) *AuthenticatorCooki
 	}
 }
 
-func (a *AuthenticatorCookieSessionConfiguration) ToAuthenticatorForwardConfig() *AuthenticatorForwardConfig {
-	return &AuthenticatorForwardConfig{
-		CheckSessionURL:    a.CheckSessionURL,
-		PreserveQuery:      a.PreserveQuery,
-		PreservePath:       a.PreservePath,
-		PreserveHost:       a.PreserveHost,
-		ForwardHTTPHeaders: a.ForwardHTTPHeadersMap,
-		SetHeaders:         a.SetHeaders,
-		ForceMethod:        a.ForceMethod,
-	}
-}
 func (a *AuthenticatorCookieSession) GetID() string {
 	return "cookie_session"
 }
@@ -93,11 +105,6 @@ func (a *AuthenticatorCookieSession) Config(config json.RawMessage) (*Authentica
 	// Add Authorization and Cookie headers for backward compatibility
 	c.ForwardHTTPHeaders = append(c.ForwardHTTPHeaders, []string{header.Authorization, header.Cookie}...)
 
-	c.ForwardHTTPHeadersMap = make(map[string]string)
-	for _, h := range c.ForwardHTTPHeaders {
-		c.ForwardHTTPHeadersMap[h] = h
-	}
-
 	return &c, nil
 }
 
@@ -111,7 +118,7 @@ func (a *AuthenticatorCookieSession) Authenticate(r *http.Request, session *Auth
 		return errors.WithStack(ErrAuthenticatorNotResponsible)
 	}
 
-	body, err := forwardRequestToSessionStore(r, cf.ToAuthenticatorForwardConfig())
+	body, err := forwardRequestToSessionStore(r, cf)
 	if err != nil {
 		return err
 	}
@@ -151,7 +158,7 @@ func cookieSessionResponsible(r *http.Request, only []string) bool {
 	return false
 }
 
-func forwardRequestToSessionStore(r *http.Request, cf *AuthenticatorForwardConfig) (json.RawMessage, error) {
+func forwardRequestToSessionStore(r *http.Request, cf AuthenticatorForwardConfig) (json.RawMessage, error) {
 	req, err := PrepareRequest(r, cf)
 	if err != nil {
 		return nil, err
@@ -175,44 +182,45 @@ func forwardRequestToSessionStore(r *http.Request, cf *AuthenticatorForwardConfi
 	}
 }
 
-func PrepareRequest(r *http.Request, cf *AuthenticatorForwardConfig) (http.Request, error) {
-	reqURL, err := url.Parse(cf.CheckSessionURL)
+func PrepareRequest(r *http.Request, cf AuthenticatorForwardConfig) (http.Request, error) {
+	reqURL, err := url.Parse(cf.GetCheckSessionURL())
 	if err != nil {
 		return http.Request{}, errors.WithStack(herodot.ErrInternalServerError.WithReasonf("Unable to parse session check URL: %s", err))
 	}
 
-	if !cf.PreservePath {
+	if !cf.GetPreservePath() {
 		reqURL.Path = r.URL.Path
 	}
 
-	if !cf.PreserveQuery {
+	if !cf.GetPreserveQuery() {
 		reqURL.RawQuery = r.URL.RawQuery
 	}
 
-	if cf.ForceMethod == "" {
-		cf.ForceMethod = r.Method
+	m := cf.GetForceMethod()
+	if m == "" {
+		m = r.Method
 	}
 
 	req := http.Request{
-		Method: cf.ForceMethod,
+		Method: m,
 		URL:    reqURL,
 		Header: http.Header{},
 	}
 
 	// We need to copy only essential and configurable headers
 	for requested, v := range r.Header {
-		for _, allowed := range cf.ForwardHTTPHeaders {
+		for _, allowed := range cf.GetForwardHTTPHeaders() {
 			if requested == allowed {
 				req.Header[requested] = v
 			}
 		}
 	}
 
-	for k, v := range cf.SetHeaders {
+	for k, v := range cf.GetSetHeaders() {
 		req.Header.Set(k, v)
 	}
 
-	if cf.PreserveHost {
+	if cf.GetPreserveHost() {
 		req.Header.Set(header.XForwardedHost, r.Host)
 	}
 	return req, nil
