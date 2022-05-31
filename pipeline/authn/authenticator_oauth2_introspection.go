@@ -183,10 +183,11 @@ func (a *AuthenticatorOAuth2Introspection) Authenticate(r *http.Request, session
 	ss := a.c.ToScopeStrategy(cf.ScopeStrategy, "authenticators.oauth2_introspection.config.scope_strategy")
 
 	i := a.tokenFromCache(cf, token, ss)
+	inCache := i != nil
 
 	// If the token can not be found, and the scope strategy is nil, and the required scope list
 	// is not empty, then we can not use the cache.
-	if i == nil {
+	if !inCache {
 		body := url.Values{"token": {token}}
 		if ss == nil {
 			body.Add("scope", strings.Join(cf.Scopes, " "))
@@ -256,7 +257,9 @@ func (a *AuthenticatorOAuth2Introspection) Authenticate(r *http.Request, session
 		}
 	}
 
-	a.tokenToCache(cf, i, token, ss)
+	if !inCache {
+		a.tokenToCache(cf, i, token, ss)
+	}
 
 	if len(i.Extra) == 0 {
 		i.Extra = map[string]interface{}{}
@@ -352,6 +355,14 @@ func (a *AuthenticatorOAuth2Introspection) Config(config json.RawMessage) (*Auth
 		if err != nil {
 			return nil, nil, err
 		}
+
+		// clear cache if previous ttl was longer (or none)
+		if a.tokenCache != nil {
+			if a.cacheTTL == nil || (a.cacheTTL != nil && a.cacheTTL.Seconds() > cacheTTL.Seconds()) {
+				a.tokenCache.Clear()
+			}
+		}
+
 		a.cacheTTL = &cacheTTL
 	}
 

@@ -17,8 +17,8 @@
   },
   "devDependencies": {
     "doctoc": "^2.0.0",
-    "ory-prettier-styles": "^1.1.2",
-    "prettier": "^2.2.1"
+    "ory-prettier-styles": "1.2.0",
+    "prettier": "2.2.1"
   },
   "dependencies": {
     "@openapitools/openapi-generator-cli": "^2.4.26"
