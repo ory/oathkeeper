@@ -7,9 +7,7 @@
   "properties": {
     "api": {
       "additionalProperties": false,
-      "required": [
-        "url"
-      ],
+      "required": ["url"],
       "type": "object",
       "properties": {
         "url": {
@@ -21,10 +19,7 @@
           "additionalProperties": false,
           "properties": {
             "basic": {
-              "required": [
-                "username",
-                "password"
-              ],
+              "required": ["username", "password"],
               "type": "object",
               "additionalProperties": false,
               "properties": {
@@ -57,8 +52,6 @@
       }
     }
   },
-  "required": [
-    "api"
-  ],
+  "required": ["api"],
   "additionalProperties": false
 }

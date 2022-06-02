@@ -10,9 +10,7 @@
       "type": "string",
       "format": "uri",
       "description": "The base URL of ORY Keto.\n\n>If this authorizer is enabled, this value is required.",
-      "examples": [
-        "http://my-keto/"
-      ]
+      "examples": ["http://my-keto/"]
     },
     "required_action": {
       "type": "string"
@@ -27,10 +25,6 @@
       "type": "string"
     }
   },
-  "required": [
-    "base_url",
-    "required_action",
-    "required_resource"
-  ],
+  "required": ["base_url", "required_action", "required_resource"],
   "additionalProperties": false
 }

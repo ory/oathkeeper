@@ -6,10 +6,9 @@ services:
       context: .
       dockerfile: Dockerfile-dc
     ports:
-      - "4455:4455"
-      - "4456:4456"
-    command:
-      serve --config=/etc/config/oathkeeper/config.yaml
+      - '4455:4455'
+      - '4456:4456'
+    command: serve --config=/etc/config/oathkeeper/config.yaml
     environment:
       - TRACING_PROVIDER=jaeger
       - TRACING_PROVIDER_JAEGER_SAMPLING_SERVER_URL=http://jaeger:5778/sampling
@@ -24,7 +23,7 @@ services:
   jaeger:
     image: jaegertracing/all-in-one
     ports:
-      - "16686:16686" # The UI port
+      - '16686:16686' # The UI port
 #      These are ports for collecting, sampling, agents, ...
 #      - "5775:5775/udp"
 #      - "6831:6831/udp"
