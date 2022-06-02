@@ -5,8 +5,8 @@
   "license": "Apache-2.0",
   "scripts": {
     "doctoc": "doctoc README.md",
-    "format": "prettier --write ${npm_package_config_prettierTarget}",
-    "format:check": "prettier --check ${npm_package_config_prettierTarget}"
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
   },
   "browser": {
     "fs": false
