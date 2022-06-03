@@ -4,7 +4,6 @@
   "type": "object",
   "title": "NoOp Authenticator Configuration",
   "description": "This section is optional when the authenticator is disabled.",
-  "properties": {
-  },
+  "properties": {},
   "additionalProperties": false
 }

@@ -8,12 +8,7 @@
     "subject": {
       "type": "string",
       "title": "Anonymous Subject",
-      "examples": [
-        "guest",
-        "anon",
-        "anonymous",
-        "unknown"
-      ],
+      "examples": ["guest", "anon", "anonymous", "unknown"],
       "default": "anonymous",
       "description": "Sets the anonymous username."
     }

@@ -317,9 +317,7 @@
           }
         },
         "summary": "Lists Cryptographic Keys",
-        "tags": [
-          "api"
-        ]
+        "tags": ["api"]
       }
     },
     "/decisions": {
@@ -372,9 +370,7 @@
           }
         },
         "summary": "Access Control Decision API",
-        "tags": [
-          "api"
-        ]
+        "tags": ["api"]
       }
     },
     "/health/alive": {
@@ -392,9 +388,7 @@
                       "type": "string"
                     }
                   },
-                  "required": [
-                    "status"
-                  ],
+                  "required": ["status"],
                   "type": "object"
                 }
               }
@@ -413,9 +407,7 @@
           }
         },
         "summary": "Check HTTP Server Status",
-        "tags": [
-          "metadata"
-        ]
+        "tags": ["metadata"]
       }
     },
     "/health/ready": {
@@ -433,9 +425,7 @@
                       "type": "string"
                     }
                   },
-                  "required": [
-                    "status"
-                  ],
+                  "required": ["status"],
                   "type": "object"
                 }
               }
@@ -455,9 +445,7 @@
                       "type": "object"
                     }
                   },
-                  "required": [
-                    "errors"
-                  ],
+                  "required": ["errors"],
                   "type": "object"
                 }
               }
@@ -466,9 +454,7 @@
           }
         },
         "summary": "Check HTTP Server and Database Status",
-        "tags": [
-          "metadata"
-        ]
+        "tags": ["metadata"]
       }
     },
     "/rules": {
@@ -511,9 +497,7 @@
           }
         },
         "summary": "List All Rules",
-        "tags": [
-          "api"
-        ]
+        "tags": ["api"]
       }
     },
     "/rules/{id}": {
@@ -556,9 +540,7 @@
           }
         },
         "summary": "Retrieve a Rule",
-        "tags": [
-          "api"
-        ]
+        "tags": ["api"]
       }
     },
     "/version": {
@@ -576,9 +558,7 @@
                       "type": "string"
                     }
                   },
-                  "required": [
-                    "version"
-                  ],
+                  "required": ["version"],
                   "type": "object"
                 }
               }
@@ -587,9 +567,7 @@
           }
         },
         "summary": "Return Running Software Version.",
-        "tags": [
-          "metadata"
-        ]
+        "tags": ["metadata"]
       }
     }
   },

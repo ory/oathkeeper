@@ -1,14 +1,7 @@
 {
-  "consumes": [
-    "application/json"
-  ],
-  "produces": [
-    "application/json"
-  ],
-  "schemes": [
-    "http",
-    "https"
-  ],
+  "consumes": ["application/json"],
+  "produces": ["application/json"],
+  "schemes": ["http", "https"],
   "swagger": "2.0",
   "info": {
     "description": "ORY Oathkeeper is a reverse proxy that checks the HTTP Authorization for validity against a set of rules. This service uses Hydra to validate access tokens and policies.",
@@ -25,16 +18,9 @@
     "/.well-known/jwks.json": {
       "get": {
         "description": "This endpoint returns cryptographic keys that are required to, for example, verify signatures of ID Tokens.",
-        "produces": [
-          "application/json"
-        ],
-        "schemes": [
-          "http",
-          "https"
-        ],
-        "tags": [
-          "api"
-        ],
+        "produces": ["application/json"],
+        "schemes": ["http", "https"],
+        "tags": ["api"],
         "summary": "Lists cryptographic keys",
         "operationId": "getWellKnownJSONWebKeys",
         "responses": {
@@ -81,13 +67,8 @@
     "/decisions": {
       "get": {
         "description": "\u003e This endpoint works with all HTTP Methods (GET, POST, PUT, ...) and matches every path prefixed with /decision.\n\nThis endpoint mirrors the proxy capability of ORY Oathkeeper's proxy functionality but instead of forwarding the\nrequest to the upstream server, returns 200 (request should be allowed), 401 (unauthorized), or 403 (forbidden)\nstatus codes. This endpoint can be used to integrate with other API Proxies like Ambassador, Kong, Envoy, and many more.",
-        "schemes": [
-          "http",
-          "https"
-        ],
-        "tags": [
-          "api"
-        ],
+        "schemes": ["http", "https"],
+        "tags": ["api"],
         "summary": "Access Control Decision API",
         "operationId": "decisions",
         "responses": {
@@ -224,12 +205,8 @@
     "/health/alive": {
       "get": {
         "description": "This endpoint returns a 200 status code when the HTTP server is up running.\nThis status does currently not include checks whether the database connection is working.\n\nIf the service supports TLS Edge Termination, this endpoint does not require the\n`X-Forwarded-Proto` header to be set.\n\nBe aware that if you are running multiple nodes of this service, the health status will never\nrefer to the cluster state, only to a single instance.",
-        "produces": [
-          "application/json"
-        ],
-        "tags": [
-          "api"
-        ],
+        "produces": ["application/json"],
+        "tags": ["api"],
         "summary": "Check alive status",
         "operationId": "isInstanceAlive",
         "responses": {
@@ -276,12 +253,8 @@
     "/health/ready": {
       "get": {
         "description": "This endpoint returns a 200 status code when the HTTP server is up running and the environment dependencies (e.g.\nthe database) are responsive as well.\n\nIf the service supports TLS Edge Termination, this endpoint does not require the\n`X-Forwarded-Proto` header to be set.\n\nBe aware that if you are running multiple nodes of this service, the health status will never\nrefer to the cluster state, only to a single instance.",
-        "produces": [
-          "application/json"
-        ],
-        "tags": [
-          "api"
-        ],
+        "produces": ["application/json"],
+        "tags": ["api"],
         "summary": "Check readiness status",
         "operationId": "isInstanceReady",
         "responses": {
@@ -303,19 +276,10 @@
     "/rules": {
       "get": {
         "description": "This method returns an array of all rules that are stored in the backend. This is useful if you want to get a full\nview of what rules you have currently in place.",
-        "consumes": [
-          "application/json"
-        ],
-        "produces": [
-          "application/json"
-        ],
-        "schemes": [
-          "http",
-          "https"
-        ],
-        "tags": [
-          "api"
-        ],
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "schemes": ["http", "https"],
+        "tags": ["api"],
         "summary": "List all rules",
         "operationId": "listRules",
         "parameters": [
@@ -381,19 +345,10 @@
     "/rules/{id}": {
       "get": {
         "description": "Use this method to retrieve a rule from the storage. If it does not exist you will receive a 404 error.",
-        "consumes": [
-          "application/json"
-        ],
-        "produces": [
-          "application/json"
-        ],
-        "schemes": [
-          "http",
-          "https"
-        ],
-        "tags": [
-          "api"
-        ],
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "schemes": ["http", "https"],
+        "tags": ["api"],
         "summary": "Retrieve a rule",
         "operationId": "getRule",
         "parameters": [
@@ -479,12 +434,8 @@
     "/version": {
       "get": {
         "description": "This endpoint returns the service version typically notated using semantic versioning.\n\nIf the service supports TLS Edge Termination, this endpoint does not require the\n`X-Forwarded-Proto` header to be set.\n\nBe aware that if you are running multiple nodes of this service, the health status will never\nrefer to the cluster state, only to a single instance.",
-        "produces": [
-          "application/json"
-        ],
-        "tags": [
-          "api"
-        ],
+        "produces": ["application/json"],
+        "tags": ["api"],
         "summary": "Get service version",
         "operationId": "getVersion",
         "responses": {

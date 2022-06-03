@@ -8,10 +8,7 @@
     },
     "match": {
       "url": "myproxy.com/api",
-      "methods": [
-        "GET",
-        "POST"
-      ]
+      "methods": ["GET", "POST"]
     },
     "authenticators": [
       {
@@ -39,10 +36,7 @@
     },
     "match": {
       "url": "myproxy.com/api",
-      "methods": [
-        "GET",
-        "POST"
-      ]
+      "methods": ["GET", "POST"]
     },
     "authenticators": [
       {
@@ -78,10 +72,7 @@
     },
     "match": {
       "url": "myproxy.com/api",
-      "methods": [
-        "GET",
-        "POST"
-      ]
+      "methods": ["GET", "POST"]
     },
     "authenticators": [
       {

@@ -16,11 +16,7 @@
           "default": "5s",
           "pattern": "^[0-9]+(ns|us|ms|s|m|h)$",
           "description": "The maximum duration for reading the entire request, including the body.",
-          "examples": [
-            "5s",
-            "5m",
-            "5h"
-          ]
+          "examples": ["5s", "5m", "5h"]
         },
         "write": {
           "title": "HTTP Write Timeout",
@@ -28,11 +24,7 @@
           "default": "120s",
           "pattern": "^[0-9]+(ns|us|ms|s|m|h)$",
           "description": "The maximum duration before timing out writes of the response. Increase this parameter to prevent unexpected closing a client connection if an upstream request is responding slowly.",
-          "examples": [
-            "5s",
-            "5m",
-            "5h"
-          ]
+          "examples": ["5s", "5m", "5h"]
         },
         "idle": {
           "title": "HTTP Idle Timeout",
@@ -40,11 +32,7 @@
           "default": "120s",
           "pattern": "^[0-9]+(ns|us|ms|s|m|h)$",
           "description": " The maximum amount of time to wait for any action of a request session, reading data or writing the response.",
-          "examples": [
-            "5s",
-            "5m",
-            "5h"
-          ]
+          "examples": ["5s", "5m", "5h"]
         }
       }
     },
@@ -71,9 +59,7 @@
         "path": {
           "title": "Path to PEM-encoded Fle",
           "type": "string",
-          "examples": [
-            "path/to/file.pem"
-          ]
+          "examples": ["path/to/file.pem"]
         },
         "base64": {
           "title": "Base64 Encoded Inline",
@@ -128,9 +114,7 @@
             "type": "string",
             "minLength": 1
           },
-          "default": [
-            "*"
-          ],
+          "default": ["*"],
           "uniqueItems": true,
           "examples": [
             [
@@ -158,13 +142,7 @@
             ]
           },
           "uniqueItems": true,
-          "default": [
-            "GET",
-            "POST",
-            "PUT",
-            "PATCH",
-            "DELETE"
-          ]
+          "default": ["GET", "POST", "PUT", "PATCH", "DELETE"]
         },
         "allowed_headers": {
           "description": "A list of non simple headers the client is allowed to use with cross-domain requests.",
@@ -175,10 +153,7 @@
           },
           "minLength": 1,
           "uniqueItems": true,
-          "default": [
-            "Authorization",
-            "Content-Type"
-          ]
+          "default": ["Authorization", "Content-Type"]
         },
         "exposed_headers": {
           "description": "Indicates which headers are safe to expose to the API of a CORS API specification",
@@ -189,9 +164,7 @@
           },
           "minLength": 1,
           "uniqueItems": true,
-          "default": [
-            "Content-Type"
-          ]
+          "default": ["Content-Type"]
         },
         "allow_credentials": {
           "type": "boolean",
@@ -218,20 +191,13 @@
       "title": "Enabled",
       "type": "boolean",
       "default": false,
-      "examples": [
-        true
-      ],
+      "examples": [true],
       "description": "En-/disables this component."
     },
     "scopeStrategy": {
       "title": "Scope Strategy",
       "type": "string",
-      "enum": [
-        "hierarchic",
-        "exact",
-        "wildcard",
-        "none"
-      ],
+      "enum": ["hierarchic", "exact", "wildcard", "none"],
       "default": "none",
       "description": "Sets the strategy validation algorithm."
     },
@@ -240,9 +206,7 @@
       "title": "HTTP Redirect Error Handler",
       "description": "This section is optional when the error handler is disabled.",
       "additionalProperties": false,
-      "required": [
-        "to"
-      ],
+      "required": ["to"],
       "properties": {
         "to": {
           "title": "Redirect to",
@@ -259,10 +223,7 @@
           "title": "HTTP Redirect Status Code",
           "description": "Defines the HTTP Redirect status code which can bei 301 (Moved Permanently) or 302 (Found).",
           "type": "integer",
-          "enum": [
-            301,
-            302
-          ],
+          "enum": [301, 302],
           "default": 302
         },
         "return_to_query_param": {
@@ -386,11 +347,7 @@
         "subject": {
           "type": "string",
           "title": "Anonymous Subject",
-          "examples": [
-            "guest",
-            "anon",
-            "unknown"
-          ],
+          "examples": ["guest", "anon", "unknown"],
           "default": "anonymous",
           "description": "Sets the anonymous username."
         }
@@ -407,9 +364,7 @@
           "type": "string",
           "format": "uri",
           "description": "The origin to proxy requests to. If the response is a 200 with body `{ \"subject\": \"...\", \"extra\": {} }`. The request will pass the subject through successfully, otherwise it will be marked as unauthorized.\n\n>If this authenticator is enabled, this value is required.",
-          "examples": [
-            "https://session-store-host"
-          ]
+          "examples": ["https://session-store-host"]
         },
         "only": {
           "type": "array",
@@ -440,10 +395,7 @@
           "title": "Force HTTP Method",
           "type": "string",
           "description": "When set uses the given HTTP method instead of the request HTTP method.",
-          "examples": [
-            "GET",
-            "POST"
-          ]
+          "examples": ["GET", "POST"]
         },
         "additional_headers": {
           "title": "Set Additional HTTP Headers",
@@ -466,9 +418,7 @@
           "default": "subject"
         }
       },
-      "required": [
-        "check_session_url"
-      ],
+      "required": ["check_session_url"],
       "additionalProperties": false
     },
     "configAuthenticatorsBearerToken": {
@@ -481,9 +431,7 @@
           "type": "string",
           "format": "uri",
           "description": "The origin to proxy requests to. If the response is a 200 with body `{ \"subject\": \"...\", \"extra\": {} }`. The request will pass the subject through successfully, otherwise it will be marked as unauthorized.\n\n>If this authenticator is enabled, this value is required.",
-          "examples": [
-            "https://session-store-host"
-          ]
+          "examples": ["https://session-store-host"]
         },
         "token_from": {
           "title": "Token From",
@@ -547,10 +495,7 @@
           "title": "Force HTTP Method",
           "type": "string",
           "description": "When set uses the given HTTP method instead of the request HTTP method.",
-          "examples": [
-            "GET",
-            "POST"
-          ]
+          "examples": ["GET", "POST"]
         },
         "additional_headers": {
           "title": "Set Additional HTTP Headers",
@@ -573,18 +518,14 @@
           "default": "sub"
         }
       },
-      "required": [
-        "check_session_url"
-      ],
+      "required": ["check_session_url"],
       "additionalProperties": false
     },
     "configAuthenticatorsJwt": {
       "type": "object",
       "title": "JWT Authenticator Configuration",
       "description": "This section is optional when the authenticator is disabled.",
-      "required": [
-        "jwks_urls"
-      ],
+      "required": ["jwks_urls"],
       "properties": {
         "required_scope": {
           "type": "array",
@@ -635,20 +576,14 @@
           "type": "string",
           "description": "The configuration which sets the max wait threshold when fetching new JWKs",
           "default": "1s",
-          "examples": [
-            "100ms",
-            "1s"
-          ]
+          "examples": ["100ms", "1s"]
         },
         "jwks_ttl": {
           "title": "JWK cache TTL configuration",
           "type": "string",
           "description": "The time interval for which fetched JWKs are cached",
           "default": "30s",
-          "examples": [
-            "30m",
-            "6h"
-          ]
+          "examples": ["30m", "6h"]
         },
         "scope_strategy": {
           "$ref": "#/definitions/scopeStrategy"
@@ -707,9 +642,7 @@
           "type": "string",
           "description": "The OAuth 2.0 Token Endpoint that will be used to validate the client credentials.\n\n>If this authenticator is enabled, this value is required.",
           "format": "uri",
-          "examples": [
-            "https://my-website.com/oauth2/token"
-          ]
+          "examples": ["https://my-website.com/oauth2/token"]
         },
         "required_scope": {
           "type": "array",
@@ -734,9 +667,7 @@
               "pattern": "^[0-9]+(ns|us|ms|s|m|h)$",
               "title": "Cache Time to Live",
               "description": "Can override the default behaviour of using the token exp time, and specify a set time to live for the token in the cache. If the token exp time is lower than the set value the token exp time will be used instead.",
-              "examples": [
-                "5s"
-              ]
+              "examples": ["5s"]
             },
             "max_tokens": {
               "type": "integer",
@@ -747,9 +678,7 @@
           }
         }
       },
-      "required": [
-        "token_url"
-      ],
+      "required": ["token_url"],
       "additionalProperties": false
     },
     "configAuthenticatorsOauth2Introspection": {
@@ -760,9 +689,7 @@
         "introspection_url": {
           "type": "string",
           "format": "uri",
-          "examples": [
-            "https://my-website.com/oauth2/introspection"
-          ],
+          "examples": ["https://my-website.com/oauth2/introspection"],
           "title": "OAuth 2.0 Introspection URL",
           "description": "The OAuth 2.0 Token Introspection endpoint URL.\n\n>If this authenticator is enabled, this value is required."
         },
@@ -800,10 +727,7 @@
               "type": "string",
               "title": "OAuth 2.0 Audience",
               "description": "The OAuth 2.0 Audience to be requested during the OAuth 2.0 Client Credentials Grant.",
-              "examples": [
-                "http://www.example.com",
-                "services:my-app"
-              ]
+              "examples": ["http://www.example.com", "services:my-app"]
             },
             "scope": {
               "type": "array",
@@ -812,12 +736,7 @@
               },
               "title": "OAuth 2.0 Scope",
               "description": "The OAuth 2.0 Scope to be requested during the OAuth 2.0 Client Credentials Grant.",
-              "examples": [
-                [
-                  "foo",
-                  "bar"
-                ]
-              ]
+              "examples": [["foo", "bar"]]
             }
           },
           "oneOf": [
@@ -829,11 +748,7 @@
               }
             },
             {
-              "required": [
-                "client_id",
-                "client_secret",
-                "token_url"
-              ],
+              "required": ["client_id", "client_secret", "token_url"],
               "properties": {
                 "enabled": {
                   "const": true
@@ -861,12 +776,7 @@
                   },
                   "title": "OAuth 2.0 Scope",
                   "description": "The OAuth 2.0 Scope to be requested during the OAuth 2.0 Client Credentials Grant.",
-                  "examples": [
-                    [
-                      "foo",
-                      "bar"
-                    ]
-                  ]
+                  "examples": [["foo", "bar"]]
                 }
               }
             }
@@ -958,9 +868,7 @@
               "pattern": "^[0-9]+(ns|us|ms|s|m|h)$",
               "title": "Cache Time to Live",
               "description": "Can override the default behaviour of using the token exp time, and specify a set time to live for the token in the cache.",
-              "examples": [
-                "5s"
-              ]
+              "examples": ["5s"]
             },
             "max_cost": {
               "type": "integer",
@@ -971,9 +879,7 @@
           }
         }
       },
-      "required": [
-        "introspection_url"
-      ],
+      "required": ["introspection_url"],
       "additionalProperties": false
     },
     "configAuthorizersKetoEngineAcpOry": {
@@ -986,9 +892,7 @@
           "type": "string",
           "format": "uri",
           "description": "The base URL of ORY Keto.\n\n>If this authorizer is enabled, this value is required.",
-          "examples": [
-            "http://my-keto/"
-          ]
+          "examples": ["http://my-keto/"]
         },
         "required_action": {
           "type": "string"
@@ -1003,11 +907,7 @@
           "type": "string"
         }
       },
-      "required": [
-        "base_url",
-        "required_action",
-        "required_resource"
-      ],
+      "required": ["base_url", "required_action", "required_resource"],
       "additionalProperties": false
     },
     "configAuthorizersRemote": {
@@ -1020,9 +920,7 @@
           "type": "string",
           "format": "uri",
           "description": "The URL of the remote authorizer. The remote authorizer is expected to return either 200 OK or 403 Forbidden to allow/deny access.\n\n>If this authorizer is enabled, this value is required.",
-          "examples": [
-            "https://host/path"
-          ]
+          "examples": ["https://host/path"]
         },
         "headers": {
           "type": "object",
@@ -1045,9 +943,7 @@
           "$ref": "#/definitions/retry"
         }
       },
-      "required": [
-        "remote"
-      ],
+      "required": ["remote"],
       "additionalProperties": false
     },
     "configAuthorizersRemoteJSON": {
@@ -1060,17 +956,13 @@
           "type": "string",
           "format": "uri",
           "description": "The URL of the remote authorizer. The remote authorizer is expected to return either 200 OK or 403 Forbidden to allow/deny access.\n\n>If this authorizer is enabled, this value is required.",
-          "examples": [
-            "https://host/path"
-          ]
+          "examples": ["https://host/path"]
         },
         "payload": {
           "title": "JSON Payload",
           "type": "string",
           "description": "The JSON payload of the request sent to the remote authorizer. The string will be parsed by the Go text/template package and applied to an AuthenticationSession object.\n\n>If this authorizer is enabled, this value is required.",
-          "examples": [
-            "{\"subject\":\"{{ .Subject }}\"}"
-          ]
+          "examples": ["{\"subject\":\"{{ .Subject }}\"}"]
         },
         "forward_response_headers_to_upstream": {
           "description": "A list of non simple headers the remote is allowed to return to mutate requests.",
@@ -1087,19 +979,14 @@
           "$ref": "#/definitions/retry"
         }
       },
-      "required": [
-        "remote",
-        "payload"
-      ],
+      "required": ["remote", "payload"],
       "additionalProperties": false
     },
     "configMutatorsCookie": {
       "type": "object",
       "title": "Cookie Mutator Configuration",
       "description": "This section is optional when the mutator is disabled.",
-      "required": [
-        "cookies"
-      ],
+      "required": ["cookies"],
       "properties": {
         "cookies": {
           "type": "object",
@@ -1114,9 +1001,7 @@
       "type": "object",
       "title": "Header Mutator Configuration",
       "description": "This section is optional when the mutator is disabled.",
-      "required": [
-        "headers"
-      ],
+      "required": ["headers"],
       "properties": {
         "headers": {
           "type": "object",
@@ -1134,9 +1019,7 @@
       "properties": {
         "api": {
           "additionalProperties": false,
-          "required": [
-            "url"
-          ],
+          "required": ["url"],
           "type": "object",
           "properties": {
             "url": {
@@ -1148,10 +1031,7 @@
               "additionalProperties": false,
               "properties": {
                 "basic": {
-                  "required": [
-                    "username",
-                    "password"
-                  ],
+                  "required": ["username", "password"],
                   "type": "object",
                   "additionalProperties": false,
                   "properties": {
@@ -1187,19 +1067,14 @@
           }
         }
       },
-      "required": [
-        "api"
-      ],
+      "required": ["api"],
       "additionalProperties": false
     },
     "configMutatorsIdToken": {
       "type": "object",
       "title": "ID Token Mutator Configuration",
       "description": "This section is optional when the mutator is disabled.",
-      "required": [
-        "jwks_url",
-        "issuer_url"
-      ],
+      "required": ["jwks_url", "issuer_url"],
       "properties": {
         "claims": {
           "type": "string"
@@ -1226,11 +1101,7 @@
           "description": "Sets the time-to-live of the JSON Web Token.",
           "pattern": "^[0-9]+(ns|us|ms|s|m|h)$",
           "default": "15m",
-          "examples": [
-            "1h",
-            "1m",
-            "30s"
-          ]
+          "examples": ["1h", "1m", "30s"]
         }
       },
       "additionalProperties": false
@@ -1256,10 +1127,7 @@
             "host": {
               "type": "string",
               "default": "",
-              "examples": [
-                "localhost",
-                "127.0.0.1"
-              ],
+              "examples": ["localhost", "127.0.0.1"],
               "title": "Host",
               "description": "The network interface to listen on."
             },
@@ -1288,10 +1156,7 @@
             "host": {
               "type": "string",
               "default": "",
-              "examples": [
-                "localhost",
-                "127.0.0.1"
-              ],
+              "examples": ["localhost", "127.0.0.1"],
               "title": "Host",
               "description": "The network interface to listen on. Leave empty to listen on all interfaces."
             },
@@ -1320,10 +1185,7 @@
             "host": {
               "type": "string",
               "default": "",
-              "examples": [
-                "localhost",
-                "127.0.0.1"
-              ],
+              "examples": ["localhost", "127.0.0.1"],
               "title": "Host",
               "description": "The network interface to listen on. Leave empty to listen on all interfaces."
             },
@@ -1375,13 +1237,8 @@
           "description": "This an optional field describing matching strategy. Currently supported values are 'glob' and 'regexp'.",
           "type": "string",
           "default": "regexp",
-          "enum": [
-            "glob",
-            "regexp"
-          ],
-          "examples": [
-            "glob"
-          ]
+          "enum": ["glob", "regexp"],
+          "examples": ["glob"]
         }
       }
     },
@@ -1446,9 +1303,7 @@
                   "$ref": "#/definitions/configAuthenticatorsCookieSession"
                 }
               },
-              "required": [
-                "config"
-              ]
+              "required": ["config"]
             },
             {
               "properties": {
@@ -1478,9 +1333,7 @@
                   "$ref": "#/definitions/configAuthenticatorsBearerToken"
                 }
               },
-              "required": [
-                "config"
-              ]
+              "required": ["config"]
             },
             {
               "properties": {
@@ -1510,9 +1363,7 @@
                   "$ref": "#/definitions/configAuthenticatorsJwt"
                 }
               },
-              "required": [
-                "config"
-              ]
+              "required": ["config"]
             },
             {
               "properties": {
@@ -1542,9 +1393,7 @@
                   "$ref": "#/definitions/configAuthenticatorsOauth2ClientCredentials"
                 }
               },
-              "required": [
-                "config"
-              ]
+              "required": ["config"]
             },
             {
               "properties": {
@@ -1574,9 +1423,7 @@
                   "$ref": "#/definitions/configAuthenticatorsOauth2Introspection"
                 }
               },
-              "required": [
-                "config"
-              ]
+              "required": ["config"]
             },
             {
               "properties": {
@@ -1601,14 +1448,8 @@
           "items": {
             "type": "string"
           },
-          "default": [
-            "json"
-          ],
-          "examples": [
-            [
-              "redirect"
-            ]
-          ]
+          "default": ["json"],
+          "examples": [["redirect"]]
         },
         "handlers": {
           "additionalProperties": false,
@@ -1634,9 +1475,7 @@
                       "$ref": "#/definitions/configErrorsWWWAuthenticate"
                     }
                   },
-                  "required": [
-                    "config"
-                  ]
+                  "required": ["config"]
                 },
                 {
                   "properties": {
@@ -1666,9 +1505,7 @@
                       "$ref": "#/definitions/configErrorsRedirect"
                     }
                   },
-                  "required": [
-                    "config"
-                  ]
+                  "required": ["config"]
                 },
                 {
                   "properties": {
@@ -1699,9 +1536,7 @@
                       "$ref": "#/definitions/configErrorsJSON"
                     }
                   },
-                  "required": [
-                    "config"
-                  ]
+                  "required": ["config"]
                 },
                 {
                   "properties": {
@@ -1767,9 +1602,7 @@
                   "$ref": "#/definitions/configAuthorizersKetoEngineAcpOry"
                 }
               },
-              "required": [
-                "config"
-              ]
+              "required": ["config"]
             },
             {
               "properties": {
@@ -1799,9 +1632,7 @@
                   "$ref": "#/definitions/configAuthorizersRemote"
                 }
               },
-              "required": [
-                "config"
-              ]
+              "required": ["config"]
             },
             {
               "properties": {
@@ -1831,9 +1662,7 @@
                   "$ref": "#/definitions/configAuthorizersRemoteJSON"
                 }
               },
-              "required": [
-                "config"
-              ]
+              "required": ["config"]
             },
             {
               "properties": {
@@ -1882,9 +1711,7 @@
                   "$ref": "#/definitions/configMutatorsCookie"
                 }
               },
-              "required": [
-                "config"
-              ]
+              "required": ["config"]
             },
             {
               "properties": {
@@ -1914,9 +1741,7 @@
                   "$ref": "#/definitions/configMutatorsHeader"
                 }
               },
-              "required": [
-                "config"
-              ]
+              "required": ["config"]
             },
             {
               "properties": {
@@ -1946,9 +1771,7 @@
                   "$ref": "#/definitions/configMutatorsHydrator"
                 }
               },
-              "required": [
-                "config"
-              ]
+              "required": ["config"]
             },
             {
               "properties": {
@@ -1978,9 +1801,7 @@
                   "$ref": "#/definitions/configMutatorsIdToken"
                 }
               },
-              "required": [
-                "config"
-              ]
+              "required": ["config"]
             },
             {
               "properties": {
@@ -2003,22 +1824,13 @@
         "provider": {
           "type": "string",
           "description": "Set this to the tracing backend you wish to use. Supports Jaeger, Zipkin, DataDog and elastic-apm. If omitted or empty, tracing will be disabled. Use environment variables to configure DataDog (see https://docs.datadoghq.com/tracing/setup/go/#configuration).",
-          "enum": [
-            "zipkin",
-            "jaeger",
-            "datadog",
-            "elastic-apm"
-          ],
-          "examples": [
-            "zipkin"
-          ]
+          "enum": ["zipkin", "jaeger", "datadog", "elastic-apm"],
+          "examples": ["zipkin"]
         },
         "service_name": {
           "type": "string",
           "description": "Specifies the service name to use on the tracer.",
-          "examples": [
-            "Ory Oathkeeper"
-          ]
+          "examples": ["Ory Oathkeeper"]
         },
         "providers": {
           "type": "object",
@@ -2060,16 +1872,12 @@
                       "format": "uri"
                     }
                   ],
-                  "examples": [
-                    "127.0.0.1:6831"
-                  ]
+                  "examples": ["127.0.0.1:6831"]
                 },
                 "propagation": {
                   "type": "string",
                   "description": "The tracing header format",
-                  "examples": [
-                    "jaeger"
-                  ]
+                  "examples": ["jaeger"]
                 },
                 "max_tag_value_length": {
                   "type": "integer",
@@ -2079,11 +1887,7 @@
                 "sampling": {
                   "type": "object",
                   "propertyNames": {
-                    "enum": [
-                      "type",
-                      "value",
-                      "server_url"
-                    ]
+                    "enum": ["type", "value", "server_url"]
                   },
                   "allOf": [
                     {
@@ -2182,10 +1986,7 @@
         "format": {
           "description": "The log format can either be text or JSON.",
           "type": "string",
-          "enum": [
-            "json",
-            "text"
-          ]
+          "enum": ["json", "text"]
         }
       },
       "additionalProperties": false
@@ -2194,11 +1995,7 @@
       "title": "Profiling",
       "description": "Enables CPU or memory profiling if set. For more details on profiling Go programs read [Profiling Go Programs](https://blog.golang.org/profiling-go-programs).",
       "type": "string",
-      "enum": [
-        "cpu",
-        "mem",
-        ""
-      ]
+      "enum": ["cpu", "mem", ""]
     },
     "version": {
       "type": "string",
