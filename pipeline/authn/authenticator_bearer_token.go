@@ -25,17 +25,16 @@ type AuthenticatorBearerTokenFilter struct {
 }
 
 type AuthenticatorBearerTokenConfiguration struct {
-	CheckSessionURL       string                      `json:"check_session_url"`
-	BearerTokenLocation   *helper.BearerTokenLocation `json:"token_from"`
-	PreserveQuery         bool                        `json:"preserve_query"`
-	PreservePath          bool                        `json:"preserve_path"`
-	PreserveHost          bool                        `json:"preserve_host"`
-	ExtraFrom             string                      `json:"extra_from"`
-	SubjectFrom           string                      `json:"subject_from"`
-	ForwardHTTPHeaders    []string                    `json:"forward_http_headers"`
-	SetHeaders            map[string]string           `json:"additional_headers"`
-	ForceMethod           string                      `json:"force_method"`
-	ForwardHTTPHeadersMap map[string]string           `json:"-"`
+	CheckSessionURL     string                      `json:"check_session_url"`
+	BearerTokenLocation *helper.BearerTokenLocation `json:"token_from"`
+	PreserveQuery       bool                        `json:"preserve_query"`
+	PreservePath        bool                        `json:"preserve_path"`
+	PreserveHost        bool                        `json:"preserve_host"`
+	ExtraFrom           string                      `json:"extra_from"`
+	SubjectFrom         string                      `json:"subject_from"`
+	ForwardHTTPHeaders  []string                    `json:"forward_http_headers"`
+	SetHeaders          map[string]string           `json:"additional_headers"`
+	ForceMethod         string                      `json:"force_method"`
 }
 
 func (a *AuthenticatorBearerTokenConfiguration) GetCheckSessionURL() string {
@@ -99,11 +98,6 @@ func (a *AuthenticatorBearerToken) Config(config json.RawMessage) (*Authenticato
 
 	// Add Authorization and Cookie headers for backward compatibility
 	c.ForwardHTTPHeaders = append(c.ForwardHTTPHeaders, []string{header.Authorization, header.Cookie}...)
-	c.ForwardHTTPHeadersMap = make(map[string]string)
-
-	for _, h := range c.ForwardHTTPHeaders {
-		c.ForwardHTTPHeadersMap[h] = h
-	}
 
 	return &c, nil
 }
