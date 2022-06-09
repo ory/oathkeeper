@@ -4,7 +4,7 @@
   "type": "object",
   "title": "ID Token Mutator Configuration",
   "description": "This section is optional when the mutator is disabled.",
-  "required": ["jwks_url","issuer_url"],
+  "required": ["jwks_url", "issuer_url"],
   "properties": {
     "claims": {
       "type": "string"
@@ -31,11 +31,7 @@
       "description": "Sets the time-to-live of the JSON Web Token.",
       "pattern": "^[0-9]+(ns|us|ms|s|m|h)$",
       "default": "1m",
-      "examples": [
-        "1h",
-        "1m",
-        "30s"
-      ]
+      "examples": ["1h", "1m", "30s"]
     }
   },
   "additionalProperties": false

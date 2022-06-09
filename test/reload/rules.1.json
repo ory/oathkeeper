@@ -6,9 +6,7 @@
     },
     "match": {
       "url": "http://127.0.0.1:6060/rules",
-      "methods": [
-        "GET"
-      ]
+      "methods": ["GET"]
     },
     "authenticators": [
       {

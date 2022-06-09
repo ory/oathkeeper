@@ -34,10 +34,6 @@ format: .bin/goimports node_modules
 		bash <(curl https://raw.githubusercontent.com/ory/meta/master/install.sh) -b .bin ory v0.1.22
 		touch -a -m .bin/ory
 
-# Generates the SDKs
-.PHONY: sdk
-sdk: .bin/packr2 .bin/swagger .bin/ory
-
 # Generates the SDK
 .PHONY: sdk
 sdk: .bin/swagger .bin/ory node_modules

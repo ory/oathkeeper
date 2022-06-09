@@ -1,14 +1,7 @@
 {
-  "consumes": [
-    "application/json"
-  ],
-  "produces": [
-    "application/json"
-  ],
-  "schemes": [
-    "http",
-    "https"
-  ],
+  "consumes": ["application/json"],
+  "produces": ["application/json"],
+  "schemes": ["http", "https"],
   "swagger": "2.0",
   "info": {
     "description": "ORY Oathkeeper is a reverse proxy that checks the HTTP Authorization for validity against a set of rules. This service uses Hydra to validate access tokens and policies.",
@@ -25,16 +18,9 @@
     "/.well-known/jwks.json": {
       "get": {
         "description": "This endpoint returns cryptographic keys that are required to, for example, verify signatures of ID Tokens.",
-        "produces": [
-          "application/json"
-        ],
-        "schemes": [
-          "http",
-          "https"
-        ],
-        "tags": [
-          "api"
-        ],
+        "produces": ["application/json"],
+        "schemes": ["http", "https"],
+        "tags": ["api"],
         "summary": "Lists Cryptographic Keys",
         "operationId": "getWellKnownJSONWebKeys",
         "responses": {
@@ -56,13 +42,8 @@
     "/decisions": {
       "get": {
         "description": "\u003e This endpoint works with all HTTP Methods (GET, POST, PUT, ...) and matches every path prefixed with /decision.\n\nThis endpoint mirrors the proxy capability of ORY Oathkeeper's proxy functionality but instead of forwarding the\nrequest to the upstream server, returns 200 (request should be allowed), 401 (unauthorized), or 403 (forbidden)\nstatus codes. This endpoint can be used to integrate with other API Proxies like Ambassador, Kong, Envoy, and many more.",
-        "schemes": [
-          "http",
-          "https"
-        ],
-        "tags": [
-          "api"
-        ],
+        "schemes": ["http", "https"],
+        "tags": ["api"],
         "summary": "Access Control Decision API",
         "operationId": "decisions",
         "responses": {
@@ -99,12 +80,8 @@
     "/health/alive": {
       "get": {
         "description": "This endpoint returns a 200 status code when the HTTP server is up running.\nThis status does currently not include checks whether the database connection is working.\n\nIf the service supports TLS Edge Termination, this endpoint does not require the\n`X-Forwarded-Proto` header to be set.\n\nBe aware that if you are running multiple nodes of this service, the health status will never\nrefer to the cluster state, only to a single instance.",
-        "produces": [
-          "application/json"
-        ],
-        "tags": [
-          "api"
-        ],
+        "produces": ["application/json"],
+        "tags": ["api"],
         "summary": "Check Alive Status",
         "operationId": "isInstanceAlive",
         "responses": {
@@ -126,12 +103,8 @@
     "/health/ready": {
       "get": {
         "description": "This endpoint returns a 200 status code when the HTTP server is up running and the environment dependencies (e.g.\nthe database) are responsive as well.\n\nIf the service supports TLS Edge Termination, this endpoint does not require the\n`X-Forwarded-Proto` header to be set.\n\nBe aware that if you are running multiple nodes of this service, the health status will never\nrefer to the cluster state, only to a single instance.",
-        "produces": [
-          "application/json"
-        ],
-        "tags": [
-          "api"
-        ],
+        "produces": ["application/json"],
+        "tags": ["api"],
         "summary": "Check Readiness Status",
         "operationId": "isInstanceReady",
         "responses": {
@@ -153,19 +126,10 @@
     "/rules": {
       "get": {
         "description": "This method returns an array of all rules that are stored in the backend. This is useful if you want to get a full\nview of what rules you have currently in place.",
-        "consumes": [
-          "application/json"
-        ],
-        "produces": [
-          "application/json"
-        ],
-        "schemes": [
-          "http",
-          "https"
-        ],
-        "tags": [
-          "api"
-        ],
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "schemes": ["http", "https"],
+        "tags": ["api"],
         "summary": "List All Rules",
         "operationId": "listRules",
         "parameters": [
@@ -200,19 +164,10 @@
     "/rules/{id}": {
       "get": {
         "description": "Use this method to retrieve a rule from the storage. If it does not exist you will receive a 404 error.",
-        "consumes": [
-          "application/json"
-        ],
-        "produces": [
-          "application/json"
-        ],
-        "schemes": [
-          "http",
-          "https"
-        ],
-        "tags": [
-          "api"
-        ],
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "schemes": ["http", "https"],
+        "tags": ["api"],
         "summary": "Retrieve a Rule",
         "operationId": "getRule",
         "parameters": [
@@ -245,12 +200,8 @@
     "/version": {
       "get": {
         "description": "This endpoint returns the service version typically notated using semantic versioning.\n\nIf the service supports TLS Edge Termination, this endpoint does not require the\n`X-Forwarded-Proto` header to be set.\n\nBe aware that if you are running multiple nodes of this service, the health status will never\nrefer to the cluster state, only to a single instance.",
-        "produces": [
-          "application/json"
-        ],
-        "tags": [
-          "api"
-        ],
+        "produces": ["application/json"],
+        "tags": ["api"],
         "summary": "Get Service Version",
         "operationId": "getVersion",
         "responses": {
@@ -265,9 +216,9 @@
     }
   },
   "definitions": {
-    "UUID": {"type": "string", "format": "uuid4"},
+    "UUID": { "type": "string", "format": "uuid4" },
     "Upstream": {
-      "description": "Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream upstream",
+      "description": "Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream upstream",
       "type": "object",
       "properties": {
         "preserve_host": {
@@ -332,6 +283,7 @@
       }
     },
     "healthStatus": {
+      "description": "HealthStatus health status",
       "type": "object",
       "properties": {
         "status": {
@@ -341,7 +293,7 @@
       }
     },
     "jsonWebKey": {
-      "description": "JSONWebKey JSONWebKey JSONWebKey JSONWebKey JSONWebKey JSONWebKey JSONWebKey json web key",
+      "description": "JSONWebKey JSONWebKey JSONWebKey JSONWebKey JSONWebKey JSONWebKey JSONWebKey JSONWebKey json web key",
       "type": "object",
       "properties": {
         "alg": {
@@ -418,7 +370,7 @@
       }
     },
     "jsonWebKeySet": {
-      "description": "JSONWebKeySet json web key set",
+      "description": "JSONWebKeySet JSONWebKeySet json web key set",
       "type": "object",
       "properties": {
         "keys": {
@@ -432,7 +384,7 @@
     },
     "rule": {
       "type": "object",
-      "title": "Rule Rule Rule Rule swaggerRule is a single rule that will get checked on every HTTP request.",
+      "title": "Rule Rule Rule Rule Rule swaggerRule is a single rule that will get checked on every HTTP request.",
       "properties": {
         "authenticators": {
           "description": "Authenticators is a list of authentication handlers that will try and authenticate the provided credentials.\nAuthenticators are checked iteratively from index 0 to n and if the first authenticator to return a positive\nresult will be the one used.\n\nIf you want the rule to first check a specific authenticator  before \"falling back\" to others, have that authenticator\nas the first item in the array.",
@@ -468,7 +420,7 @@
       }
     },
     "ruleHandler": {
-      "description": "RuleHandler RuleHandler rule handler",
+      "description": "RuleHandler RuleHandler RuleHandler rule handler",
       "type": "object",
       "properties": {
         "config": {
@@ -482,7 +434,7 @@
       }
     },
     "ruleMatch": {
-      "description": "RuleMatch rule match",
+      "description": "RuleMatch RuleMatch rule match",
       "type": "object",
       "properties": {
         "methods": {
@@ -499,7 +451,7 @@
       }
     },
     "version": {
-      "description": "Version version",
+      "description": "Version Version version",
       "type": "object",
       "properties": {
         "version": {

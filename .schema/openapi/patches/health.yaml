@@ -17,16 +17,16 @@
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/healthStatus"
-          description: {{.ProjectHumanName}} is ready to accept connections.
+                '$ref': '#/components/schemas/healthStatus'
+          description: '{{.ProjectHumanName}} is ready to accept connections.'
         '500':
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/genericError"
+                '$ref': '#/components/schemas/genericError'
           description: genericError
       summary: Check HTTP Server Status
-      tags: {{ .HealthPathTags | toJson }}
+      tags: { { .HealthPathTags | toJson } }
 - op: replace
   path: /paths/~1health~1ready
   value:
@@ -51,7 +51,7 @@
                   status:
                     description: Always "ok".
                     type: string
-          description: {{.ProjectHumanName}} is ready to accept requests.
+          description: '{{.ProjectHumanName}} is ready to accept requests.'
         '503':
           content:
             application/json:
@@ -60,12 +60,14 @@
                   errors:
                     additionalProperties:
                       type: string
-                    description: Errors contains a list of errors that caused the not ready status.
+                    description:
+                      Errors contains a list of errors that caused the not ready
+                      status.
                     type: object
                 type: object
           description: Ory Kratos is not yet ready to accept requests.
       summary: Check HTTP Server and Database Status
-      tags: {{ .HealthPathTags | toJson }}
+      tags: '{{ .HealthPathTags | toJson }}'
 - op: replace
   path: /paths/~1version
   value:
@@ -91,4 +93,4 @@
                     type: string
           description: Returns the {{.ProjectHumanName}} version.
       summary: Return Running Software Version.
-      tags: {{ .HealthPathTags | toJson }}
+      tags: '{{ .HealthPathTags | toJson }}'

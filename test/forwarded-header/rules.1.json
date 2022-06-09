@@ -6,9 +6,7 @@
     },
     "match": {
       "url": "http://127.0.0.1:6060/http",
-      "methods": [
-        "GET"
-      ]
+      "methods": ["GET"]
     },
     "authenticators": [
       {
@@ -31,9 +29,7 @@
     },
     "match": {
       "url": "https://127.0.0.1:6060/https",
-      "methods": [
-        "GET"
-      ]
+      "methods": ["GET"]
     },
     "authenticators": [
       {

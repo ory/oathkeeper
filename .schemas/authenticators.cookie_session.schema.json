@@ -10,9 +10,7 @@
       "type": "string",
       "format": "uri",
       "description": "The origin to proxy requests to. If the response is a 200 with body `{ \"subject\": \"...\", \"extra\": {} }`. The request will pass the subject through successfully, otherwise it will be marked as unauthorized.\n\n>If this authenticator is enabled, this value is required.",
-      "examples": [
-        "https://session-store-host"
-      ]
+      "examples": ["https://session-store-host"]
     },
     "only": {
       "type": "array",
@@ -29,8 +27,6 @@
       "description": "When set to true, any path specified in `check_session_url` will be preserved instead of overwriting the path with the path from the original request"
     }
   },
-  "required": [
-    "check_session_url"
-  ],
+  "required": ["check_session_url"],
   "additionalProperties": false
 }

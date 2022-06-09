@@ -51,21 +51,15 @@
       "title": "Max await interval for the JWK fetch",
       "type": "string",
       "description": "The configuration which sets the max wait threshold when fetching new JWKs",
-      "default" : "1s",
-      "examples": [
-        "100ms",
-        "1s"
-      ]
+      "default": "1s",
+      "examples": ["100ms", "1s"]
     },
     "jwks_ttl": {
       "title": "JWK cache TTL configuration",
       "type": "string",
       "description": "The time interval for which fetched JWKs are cached",
-      "default" : "30s",
-      "examples": [
-        "30m",
-        "6h"
-      ]
+      "default": "30s",
+      "examples": ["30m", "6h"]
     },
     "scope_strategy": {
       "$ref": "https://raw.githubusercontent.com/ory/oathkeeper/master/.schemas/scope_strategy.schema.json#"
@@ -76,9 +70,7 @@
       "oneOf": [
         {
           "type": "object",
-          "required": [
-            "header"
-          ],
+          "required": ["header"],
           "properties": {
             "header": {
               "title": "Header",
@@ -89,9 +81,7 @@
         },
         {
           "type": "object",
-          "required": [
-            "query_parameter"
-          ],
+          "required": ["query_parameter"],
           "properties": {
             "query_parameter": {
               "title": "Query Parameter",
@@ -102,9 +92,7 @@
         },
         {
           "type": "object",
-          "required": [
-            "cookie"
-          ],
+          "required": ["cookie"],
           "properties": {
             "cookie": {
               "title": "Cookie",

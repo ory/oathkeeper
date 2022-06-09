@@ -80,7 +80,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Run tests
     strategy:
-      matrix: 
+      matrix:
         name: ['reload', 'e2e', 'forwarded-header']
     needs:
       - sdk-generate

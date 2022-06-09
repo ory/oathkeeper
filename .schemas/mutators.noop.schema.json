@@ -4,7 +4,6 @@
   "type": "object",
   "title": "NoOp Mutator Configuration",
   "description": "This section is optional when the mutator is disabled.",
-  "properties": {
-  },
+  "properties": {},
   "additionalProperties": false
 }
