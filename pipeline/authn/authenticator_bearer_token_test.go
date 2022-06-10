@@ -160,7 +160,7 @@ func TestAuthenticatorBearerToken(t *testing.T) {
 					w.WriteHeader(200)
 					w.Write([]byte(`{"sub": "123"}`))
 				},
-				config:    []byte(`{"preserve_path": true, "preserve_query": true, "check_session_url": "http://origin-replaced-in-test/configured/path?q=configured-query", "forward_http_headers": ["X-Forwared-Host"]}`),
+				config:    []byte(`{"preserve_path": true, "preserve_query": true, "check_session_url": "http://origin-replaced-in-test/configured/path?q=configured-query"}`),
 				expectErr: false,
 				expectSess: &AuthenticationSession{
 					Subject: "123",
