@@ -40,21 +40,27 @@ type AuthenticatorBearerTokenConfiguration struct {
 func (a *AuthenticatorBearerTokenConfiguration) GetCheckSessionURL() string {
 	return a.CheckSessionURL
 }
+
 func (a *AuthenticatorBearerTokenConfiguration) GetPreserveQuery() bool {
 	return a.PreserveQuery
 }
+
 func (a *AuthenticatorBearerTokenConfiguration) GetPreservePath() bool {
 	return a.PreservePath
 }
+
 func (a *AuthenticatorBearerTokenConfiguration) GetPreserveHost() bool {
 	return a.PreserveHost
 }
+
 func (a *AuthenticatorBearerTokenConfiguration) GetForwardHTTPHeaders() []string {
 	return a.ForwardHTTPHeaders
 }
+
 func (a *AuthenticatorBearerTokenConfiguration) GetSetHeaders() map[string]string {
 	return a.SetHeaders
 }
+
 func (a *AuthenticatorBearerTokenConfiguration) GetForceMethod() string {
 	return a.ForceMethod
 }
@@ -62,6 +68,8 @@ func (a *AuthenticatorBearerTokenConfiguration) GetForceMethod() string {
 type AuthenticatorBearerToken struct {
 	c configuration.Provider
 }
+
+var _ AuthenticatorForwardConfig = new(AuthenticatorBearerTokenConfiguration)
 
 func NewAuthenticatorBearerToken(c configuration.Provider) *AuthenticatorBearerToken {
 	return &AuthenticatorBearerToken{

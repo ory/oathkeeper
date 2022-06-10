@@ -29,8 +29,6 @@ type AuthenticatorCookieSessionFilter struct {
 }
 
 type AuthenticatorCookieSessionConfiguration struct {
-	AuthenticatorForwardConfig
-
 	Only               []string          `json:"only"`
 	CheckSessionURL    string            `json:"check_session_url"`
 	PreserveQuery      bool              `json:"preserve_query"`
@@ -46,21 +44,27 @@ type AuthenticatorCookieSessionConfiguration struct {
 func (a *AuthenticatorCookieSessionConfiguration) GetCheckSessionURL() string {
 	return a.CheckSessionURL
 }
+
 func (a *AuthenticatorCookieSessionConfiguration) GetPreserveQuery() bool {
 	return a.PreserveQuery
 }
+
 func (a *AuthenticatorCookieSessionConfiguration) GetPreservePath() bool {
 	return a.PreservePath
 }
+
 func (a *AuthenticatorCookieSessionConfiguration) GetPreserveHost() bool {
 	return a.PreserveHost
 }
+
 func (a *AuthenticatorCookieSessionConfiguration) GetForwardHTTPHeaders() []string {
 	return a.ForwardHTTPHeaders
 }
+
 func (a *AuthenticatorCookieSessionConfiguration) GetSetHeaders() map[string]string {
 	return a.SetHeaders
 }
+
 func (a *AuthenticatorCookieSessionConfiguration) GetForceMethod() string {
 	return a.ForceMethod
 }
@@ -68,6 +72,8 @@ func (a *AuthenticatorCookieSessionConfiguration) GetForceMethod() string {
 type AuthenticatorCookieSession struct {
 	c configuration.Provider
 }
+
+var _ AuthenticatorForwardConfig = new(AuthenticatorCookieSessionConfiguration)
 
 func NewAuthenticatorCookieSession(c configuration.Provider) *AuthenticatorCookieSession {
 	return &AuthenticatorCookieSession{
