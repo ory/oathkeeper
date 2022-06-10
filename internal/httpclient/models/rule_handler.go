@@ -10,7 +10,7 @@ import (
 	"github.com/go-openapi/swag"
 )
 
-// RuleHandler RuleHandler RuleHandler RuleHandler rule handler
+// RuleHandler RuleHandler RuleHandler RuleHandler RuleHandler rule handler
 //
 // swagger:model ruleHandler
 type RuleHandler struct {
