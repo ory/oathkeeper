@@ -439,9 +439,7 @@
           "type": "string",
           "format": "uri",
           "description": "The origin to proxy requests to. If the response is a 200 with body `{ \"subject\": \"...\", \"extra\": {} }`. The request will pass the subject through successfully, otherwise it will be marked as unauthorized.\n\n>If this authenticator is enabled, this value is required.",
-          "examples": [
-            "https://service-host"
-          ]
+          "examples": ["https://service-host"]
         },
         "preserve_path": {
           "title": "Preserve Path",
@@ -462,16 +460,18 @@
         },
         "method": {
           "title": "Method to pass to the auth server",
-          "description": "The method to pass to the auth server. Defaults to the original request method.",
+          "description": "The method to pass to the auth server. Defaults to the original request method or to POST (see `use_original_method`).",
           "type": "string",
-          "examples": [
-            "GET"
-          ]
+          "examples": ["GET"]
+        },
+        "use_original_method": {
+          "title": "Use Original Method",
+          "description": "When set to true, the original request method is sent to the authentication service. If set to false, the POST method is used as a fallback. This flag is ignored when the `method` field is set.",
+          "type": "boolean",
+          "default": false
         }
       },
-      "required": [
-        "service_url"
-      ],
+      "required": ["service_url"],
       "additionalProperties": false
     },
     "configAuthenticatorsBearerToken": {
@@ -1389,7 +1389,7 @@
         },
         "remote_json": {
           "title": "Remote JSON Request",
-          "description": "The custom forward request authenticator.",
+          "description": "The [`remote_json` authenticator](https://www.ory.sh/oathkeeper/docs/pipeline/authn#remote_json).",
           "type": "object",
           "properties": {
             "enabled": {
@@ -1406,9 +1406,7 @@
                   "$ref": "#/definitions/configAuthenticatorsRemoteJSON"
                 }
               },
-              "required": [
-                "config"
-              ]
+              "required": ["config"]
             },
             {
               "properties": {

@@ -30,11 +30,12 @@ type AuthenticatorRemoteJSONFilter struct {
 }
 
 type AuthenticatorRemoteJSONConfiguration struct {
-	ServiceURL   string `json:"service_url"`
-	PreservePath bool   `json:"preserve_path"`
-	ExtraFrom    string `json:"extra_from"`
-	SubjectFrom  string `json:"subject_from"`
-	Method       string `json:"method"`
+	ServiceURL        string `json:"service_url"`
+	PreservePath      bool   `json:"preserve_path"`
+	ExtraFrom         string `json:"extra_from"`
+	SubjectFrom       string `json:"subject_from"`
+	Method            string `json:"method"`
+	UseOriginalMethod bool   `json:"use_original_method"`
 }
 
 type AuthenticatorRemoteJSON struct {
@@ -78,14 +79,14 @@ func (a *AuthenticatorRemoteJSON) Config(config json.RawMessage) (*Authenticator
 }
 
 func (a *AuthenticatorRemoteJSON) Authenticate(r *http.Request, session *AuthenticationSession, config json.RawMessage, _ pipeline.Rule) error {
-	cf, err := a.Config(config)
+	cfg, err := a.Config(config)
 	if err != nil {
 		return err
 	}
 
-	method := forwardMethod(r, cf.Method)
+	method := forwardMethod(r, cfg)
 
-	body, err := forwardRequestToAuthenticator(r, method, cf.ServiceURL, cf.PreservePath)
+	body, err := forwardRequestToAuthenticator(r, method, cfg.ServiceURL, cfg.PreservePath)
 	if err != nil {
 		return err
 	}
@@ -94,16 +95,16 @@ func (a *AuthenticatorRemoteJSON) Authenticate(r *http.Request, session *Authent
 		subject string
 		extra   map[string]interface{}
 
-		subjectRaw = []byte(stringsx.Coalesce(gjson.GetBytes(body, cf.SubjectFrom).Raw, "null"))
-		extraRaw   = []byte(stringsx.Coalesce(gjson.GetBytes(body, cf.ExtraFrom).Raw, "null"))
+		subjectRaw = []byte(stringsx.Coalesce(gjson.GetBytes(body, cfg.SubjectFrom).Raw, "null"))
+		extraRaw   = []byte(stringsx.Coalesce(gjson.GetBytes(body, cfg.ExtraFrom).Raw, "null"))
 	)
 
 	if err = json.Unmarshal(subjectRaw, &subject); err != nil {
-		return helper.ErrForbidden.WithReasonf("The configured subject_from GJSON path returned an error on JSON output: %s", err.Error()).WithDebugf("GJSON path: %s\nBody: %s\nResult: %s", cf.SubjectFrom, body, subjectRaw).WithTrace(err)
+		return helper.ErrForbidden.WithReasonf("The configured subject_from GJSON path returned an error on JSON output: %s", err.Error()).WithDebugf("GJSON path: %s\nBody: %s\nResult: %s", cfg.SubjectFrom, body, subjectRaw).WithTrace(err)
 	}
 
 	if err = json.Unmarshal(extraRaw, &extra); err != nil {
-		return helper.ErrForbidden.WithReasonf("The configured extra_from GJSON path returned an error on JSON output: %s", err.Error()).WithDebugf("GJSON path: %s\nBody: %s\nResult: %s", cf.ExtraFrom, body, extraRaw).WithTrace(err)
+		return helper.ErrForbidden.WithReasonf("The configured extra_from GJSON path returned an error on JSON output: %s", err.Error()).WithDebugf("GJSON path: %s\nBody: %s\nResult: %s", cfg.ExtraFrom, body, extraRaw).WithTrace(err)
 	}
 
 	session.Subject = subject
@@ -111,11 +112,16 @@ func (a *AuthenticatorRemoteJSON) Authenticate(r *http.Request, session *Authent
 	return nil
 }
 
-func forwardMethod(r *http.Request, method string) string {
+func forwardMethod(r *http.Request, cfg *AuthenticatorRemoteJSONConfiguration) string {
+	method := cfg.Method
 	if len(method) == 0 {
-		return r.Method
+		if cfg.UseOriginalMethod {
+			return r.Method
+		} else {
+			return http.MethodPost
+		}
 	}
-	return method
+	return cfg.Method
 }
 
 func forwardRequestToAuthenticator(r *http.Request, method string, serviceURL string, preservePath bool) (json.RawMessage, error) {

@@ -63,7 +63,7 @@ func TestAuthenticatorRemoteJSON(t *testing.T) {
 			err := pipelineAuthenticator.Authenticate(
 				makeRemoteJSONRequest("PUT", "/users/123?query=string", map[string]string{"sessionid": "zyx"}, "Test body"),
 				session,
-				json.RawMessage(fmt.Sprintf(`{"service_url": "%s"}`, testServer.URL)),
+				json.RawMessage(fmt.Sprintf(`{"service_url": "%s", "use_original_method": true}`, testServer.URL)),
 				nil,
 			)
 			require.NoError(t, err, "%#v", errors.Cause(err))
@@ -72,6 +72,27 @@ func TestAuthenticatorRemoteJSON(t *testing.T) {
 			r := requestRecorder.requests[0]
 
 			assert.Equal(t, r.Method, "PUT")
+			assert.Equal(t, r.URL.Path, "/users/123?query=string")
+			assert.Equal(t, r.Header.Get("sessionid"), "zyx")
+			assert.Equal(t, requestRecorder.bodies[0], []byte("Test body"))
+			assert.Equal(t, &AuthenticationSession{Subject: "123"}, session)
+		})
+
+		t.Run("description=should pass through path, headers, and body to auth server, and use POST method", func(t *testing.T) {
+			testServer, requestRecorder := makeServiceServer(200, `{"subject": "123"}`)
+			defer testServer.Close()
+			err := pipelineAuthenticator.Authenticate(
+				makeRemoteJSONRequest("PUT", "/users/123?query=string", map[string]string{"sessionid": "zyx"}, "Test body"),
+				session,
+				json.RawMessage(fmt.Sprintf(`{"service_url": "%s"}`, testServer.URL)),
+				nil,
+			)
+			require.NoError(t, err, "%#v", errors.Cause(err))
+			assert.Len(t, requestRecorder.requests, 1)
+
+			r := requestRecorder.requests[0]
+
+			assert.Equal(t, r.Method, "POST")
 			assert.Equal(t, r.URL.Path, "/users/123?query=string")
 			assert.Equal(t, r.Header.Get("sessionid"), "zyx")
 			assert.Equal(t, requestRecorder.bodies[0], []byte("Test body"))
@@ -103,7 +124,7 @@ func TestAuthenticatorRemoteJSON(t *testing.T) {
 			err := pipelineAuthenticator.Authenticate(
 				makeRemoteJSONRequest("PUT", "/users/123?query=string", map[string]string{"sessionid": "zyx"}, ""),
 				session,
-				json.RawMessage(fmt.Sprintf(`{"service_url": "%s", "preserve_path": true}`, testServer.URL)),
+				json.RawMessage(fmt.Sprintf(`{"service_url": "%s", "preserve_path": true, "use_original_method": true}`, testServer.URL)),
 				nil,
 			)
 			require.NoError(t, err, "%#v", errors.Cause(err))
