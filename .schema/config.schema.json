@@ -456,6 +456,11 @@
                   "title": "Header",
                   "type": "string",
                   "description": "The header (case insensitive) that must contain a token for request authentication.\n It can't be set along with query_parameter or cookie."
+                },
+                "auth_scheme": {
+                  "title": "Auth scheme",
+                  "type": "string",
+                  "description": "The auth scheme to accept in case the header is set to Authorization, this is by default set to Bearer."
                 }
               }
             },
@@ -619,6 +624,11 @@
                   "title": "Header",
                   "type": "string",
                   "description": "The header (case insensitive) that must contain a token for request authentication.\n It can't be set along with query_parameter or cookie."
+                },
+                "auth_scheme": {
+                  "title": "Auth scheme",
+                  "type": "string",
+                  "description": "The auth scheme to accept in case the header is set to Authorization, this is by default set to Bearer."
                 }
               }
             },
@@ -842,6 +852,11 @@
                   "title": "Header",
                   "type": "string",
                   "description": "The header (case insensitive) that must contain a token for request authentication.\n It can't be set along with query_parameter or cookie."
+                },
+                "auth_scheme": {
+                  "title": "Auth scheme",
+                  "type": "string",
+                  "description": "The auth scheme to accept in case the header is set to Authorization, this is by default set to Bearer."
                 }
               }
             },

@@ -61,6 +61,17 @@ func TestAuthenticatorBearerToken(t *testing.T) {
 				expectExactErr: ErrAuthenticatorNotResponsible,
 			},
 			{
+				d: "should return error saying that authenticator is not responsible for validating the request, as the session store returns HTTP 406 Not Acceptable",
+				r: &http.Request{Header: http.Header{"Authorization": {"bearer token"}}, URL: &url.URL{Path: ""}},
+				setup: func(t *testing.T, m *httprouter.Router) {
+					m.GET("/", func(w http.ResponseWriter, _ *http.Request, _ httprouter.Params) {
+						w.WriteHeader(406)
+					})
+				},
+				expectErr:      true,
+				expectExactErr: ErrAuthenticatorNotResponsible,
+			},
+			{
 				d: "should fail because session store returned 400",
 				r: &http.Request{Header: http.Header{"Authorization": {"bearer token"}}, URL: &url.URL{Path: ""}},
 				setup: func(t *testing.T, m *httprouter.Router) {
@@ -73,6 +84,22 @@ func TestAuthenticatorBearerToken(t *testing.T) {
 			{
 				d: "should pass because session store returned 200",
 				r: &http.Request{Header: http.Header{"Authorization": {"bearer token"}}, URL: &url.URL{Path: ""}},
+				setup: func(t *testing.T, m *httprouter.Router) {
+					m.GET("/", func(w http.ResponseWriter, _ *http.Request, _ httprouter.Params) {
+						w.WriteHeader(200)
+						w.Write([]byte(`{"sub": "123", "extra": {"foo": "bar"}}`))
+					})
+				},
+				expectErr: false,
+				expectSess: &AuthenticationSession{
+					Subject: "123",
+					Extra:   map[string]interface{}{"foo": "bar"},
+				},
+			},
+			{
+				d:      "should pass because session store returned 200",
+				r:      &http.Request{Header: http.Header{"Authorization": {"AccessToken token"}}, URL: &url.URL{Path: ""}},
+				config: []byte(`{"token_from": {"header": "Authorization", "auth_scheme": "AccessToken"}}`),
 				setup: func(t *testing.T, m *httprouter.Router) {
 					m.GET("/", func(w http.ResponseWriter, _ *http.Request, _ httprouter.Params) {
 						w.WriteHeader(200)
