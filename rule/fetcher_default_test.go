@@ -28,17 +28,20 @@ import (
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/internal"
 	"github.com/ory/oathkeeper/internal/cloudstorage"
+	"github.com/ory/oathkeeper/rule"
 )
 
 const testRule = `[{"id":"test-rule-5","upstream":{"preserve_host":true,"strip_path":"/api","url":"mybackend.com/api"},"match":{"url":"myproxy.com/api","methods":["GET","POST"]},"authenticators":[{"handler":"noop"},{"handler":"anonymous"}],"authorizer":{"handler":"allow"},"mutators":[{"handler":"noop"}]}]`
 
 func TestFetcherReload(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 	viper.Reset()
 	conf := internal.NewConfigurationWithDefaults() // this resets viper and must be at the top
 	r := internal.NewRegistry(conf)
 	testConfigPath := "../test/update"
 
-	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		_, _ = w.Write([]byte(testRule))
 	}))
 	defer ts.Close()
@@ -54,20 +57,18 @@ func TestFetcherReload(t *testing.T) {
 	viperx.WatchConfig(l, nil)
 
 	go func() {
-		require.NoError(t, r.RuleFetcher().Watch(context.TODO()))
+		require.NoError(t, r.RuleFetcher().Watch(ctx))
 	}()
 
 	// initial config without a repo and without a matching strategy
 	config, err := ioutil.ReadFile(path.Join(testConfigPath, "config_no_repo.yaml"))
 	require.NoError(t, err)
 	require.NoError(t, ioutil.WriteFile(configFile, config, 0666))
-	time.Sleep(time.Millisecond * 500)
 
-	rules, err := r.RuleRepository().List(context.Background(), 500, 0)
-	require.NoError(t, err)
+	rules := eventuallyListRules(ctx, t, r, 0)
 	require.Empty(t, rules)
 
-	strategy, err := r.RuleRepository().MatchingStrategy(context.Background())
+	strategy, err := r.RuleRepository().MatchingStrategy(ctx)
 	require.NoError(t, err)
 	require.Equal(t, configuration.MatchingStrategy(""), strategy)
 
@@ -75,14 +76,11 @@ func TestFetcherReload(t *testing.T) {
 	config, err = ioutil.ReadFile(path.Join(testConfigPath, "config_default.yaml"))
 	require.NoError(t, err)
 	require.NoError(t, ioutil.WriteFile(configFile, config, 0666))
-	time.Sleep(time.Millisecond * 500)
 
-	rules, err = r.RuleRepository().List(context.Background(), 500, 0)
-	require.NoError(t, err)
-	require.Equal(t, 1, len(rules))
+	rules = eventuallyListRules(ctx, t, r, 1)
 	require.Equal(t, "test-rule-1-glob", rules[0].ID)
 
-	strategy, err = r.RuleRepository().MatchingStrategy(context.Background())
+	strategy, err = r.RuleRepository().MatchingStrategy(ctx)
 	require.NoError(t, err)
 	require.Equal(t, configuration.MatchingStrategy(""), strategy)
 
@@ -90,14 +88,11 @@ func TestFetcherReload(t *testing.T) {
 	config, err = ioutil.ReadFile(path.Join(testConfigPath, "config_glob.yaml"))
 	require.NoError(t, err)
 	require.NoError(t, ioutil.WriteFile(configFile, config, 0666))
-	time.Sleep(time.Millisecond * 500)
 
-	rules, err = r.RuleRepository().List(context.Background(), 500, 0)
-	require.NoError(t, err)
-	require.Equal(t, 1, len(rules))
+	rules = eventuallyListRules(ctx, t, r, 1)
 	require.Equal(t, "test-rule-1-glob", rules[0].ID)
 
-	strategy, err = r.RuleRepository().MatchingStrategy(context.Background())
+	strategy, err = r.RuleRepository().MatchingStrategy(ctx)
 	require.NoError(t, err)
 	require.Equal(t, configuration.Glob, strategy)
 
@@ -105,14 +100,11 @@ func TestFetcherReload(t *testing.T) {
 	config, err = ioutil.ReadFile(path.Join(testConfigPath, "config_error.yaml"))
 	require.NoError(t, err)
 	require.NoError(t, ioutil.WriteFile(configFile, config, 0666))
-	time.Sleep(time.Millisecond * 500)
 
-	rules, err = r.RuleRepository().List(context.Background(), 500, 0)
-	require.NoError(t, err)
-	require.Equal(t, 1, len(rules))
+	rules = eventuallyListRules(ctx, t, r, 1)
 	require.Equal(t, "test-rule-1-glob", rules[0].ID)
 
-	strategy, err = r.RuleRepository().MatchingStrategy(context.Background())
+	strategy, err = r.RuleRepository().MatchingStrategy(ctx)
 	require.NoError(t, err)
 	require.Equal(t, configuration.MatchingStrategy("UNKNOWN"), strategy)
 
@@ -120,14 +112,11 @@ func TestFetcherReload(t *testing.T) {
 	config, err = ioutil.ReadFile(path.Join(testConfigPath, "config_regexp.yaml"))
 	require.NoError(t, err)
 	require.NoError(t, ioutil.WriteFile(configFile, config, 0666))
-	time.Sleep(time.Millisecond * 500)
 
-	rules, err = r.RuleRepository().List(context.Background(), 500, 0)
-	require.NoError(t, err)
-	require.Equal(t, 1, len(rules))
+	rules = eventuallyListRules(ctx, t, r, 1)
 	require.Equal(t, "test-rule-1-glob", rules[0].ID)
 
-	strategy, err = r.RuleRepository().MatchingStrategy(context.Background())
+	strategy, err = r.RuleRepository().MatchingStrategy(ctx)
 	require.NoError(t, err)
 	require.Equal(t, configuration.Regexp, strategy)
 }
@@ -136,8 +125,10 @@ func TestFetcherWatchConfig(t *testing.T) {
 	viper.Reset()
 	conf := internal.NewConfigurationWithDefaults() // this resets viper and must be at the top
 	r := internal.NewRegistry(conf)
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 
-	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		_, _ = w.Write([]byte(testRule))
 	}))
 	defer ts.Close()
@@ -153,7 +144,7 @@ func TestFetcherWatchConfig(t *testing.T) {
 	viperx.WatchConfig(l, nil)
 
 	go func() {
-		require.NoError(t, r.RuleFetcher().Watch(context.TODO()))
+		require.NoError(t, r.RuleFetcher().Watch(ctx))
 	}()
 
 	for k, tc := range []struct {
@@ -206,13 +197,9 @@ access_rules:
 	} {
 		t.Run(fmt.Sprintf("case=%d", k), func(t *testing.T) {
 			require.NoError(t, ioutil.WriteFile(configFile, []byte(tc.config), 0666))
-			time.Sleep(time.Millisecond * 500)
 
-			rules, err := r.RuleRepository().List(context.Background(), 500, 0)
-			require.NoError(t, err)
-			require.Len(t, rules, len(tc.expectIDs))
-
-			strategy, err := r.RuleRepository().MatchingStrategy(context.Background())
+			rules := eventuallyListRules(ctx, t, r, len(tc.expectIDs))
+			strategy, err := r.RuleRepository().MatchingStrategy(ctx)
 			require.NoError(t, err)
 			require.Equal(t, tc.expectedStrategy, strategy)
 
@@ -229,6 +216,8 @@ access_rules:
 }
 
 func TestFetcherWatchRepositoryFromFS(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 	if runtime.GOOS == "windows" {
 		t.Skip("Skipping watcher tests on windows")
 	}
@@ -253,7 +242,7 @@ access_rules:
 	viperx.WatchConfig(nil, nil)
 
 	go func() {
-		require.NoError(t, r.RuleFetcher().Watch(context.TODO()))
+		require.NoError(t, r.RuleFetcher().Watch(ctx))
 	}()
 
 	for k, tc := range []struct {
@@ -269,15 +258,13 @@ access_rules:
 			require.NoError(t, ioutil.WriteFile(repository, []byte(tc.content), 0777))
 			time.Sleep(time.Millisecond * 500)
 
-			rules, err := r.RuleRepository().List(context.Background(), 500, 0)
-			require.NoError(t, err)
+			rules := eventuallyListRules(ctx, t, r, len(tc.expectIDs))
 
 			ids := make([]string, len(rules))
 			for k, r := range rules {
 				ids[k] = r.ID
 			}
 
-			assert.Len(t, ids, len(tc.expectIDs), "%+v", rules)
 			for _, id := range tc.expectIDs {
 				assert.True(t, stringslice.Has(ids, id), "\nexpected: %v\nactual: %v", tc.expectIDs, ids)
 			}
@@ -286,6 +273,8 @@ access_rules:
 }
 
 func TestFetcherWatchRepositoryFromKubernetesConfigMap(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 	if runtime.GOOS == "windows" {
 		t.Skip()
 	}
@@ -348,17 +337,14 @@ func TestFetcherWatchRepositoryFromKubernetesConfigMap(t *testing.T) {
 	var cleanup func()
 
 	go func() {
-		require.NoError(t, r.RuleFetcher().Watch(context.TODO()))
+		require.NoError(t, r.RuleFetcher().Watch(ctx))
 	}()
 
 	for i := 0; i < 10; i++ {
 		t.Run(fmt.Sprintf("case=%d", i), func(t *testing.T) {
 			cleanup = configMapUpdate(t, fmt.Sprintf(`[{"id":"%d"}]`, i), cleanup)
 
-			time.Sleep(time.Millisecond * 100) // give it a bit of time to reload everything
-
-			rules, err := r.RuleRepository().List(context.Background(), 500, 0)
-			require.NoError(t, err)
+			rules := eventuallyListRules(ctx, t, r, 1)
 
 			require.Len(t, rules, 1)
 			require.Equal(t, fmt.Sprintf("%d", i), rules[0].ID)
@@ -367,6 +353,8 @@ func TestFetcherWatchRepositoryFromKubernetesConfigMap(t *testing.T) {
 }
 
 func TestFetchRulesFromObjectStorage(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 	t.Cleanup(func() {
 		cloudstorage.SetCurrentTest(nil)
 	})
@@ -395,13 +383,18 @@ access_rules:
 	viperx.WatchConfig(nil, nil)
 
 	go func() {
-		require.NoError(t, r.RuleFetcher().Watch(context.TODO()))
+		require.NoError(t, r.RuleFetcher().Watch(ctx))
 	}()
 
-	time.Sleep(time.Second * 2) // give it a bit of time to reload everything
+	eventuallyListRules(ctx, t, r, 9)
+}
 
-	rules, err := r.RuleRepository().List(context.Background(), 500, 0)
-	require.NoError(t, err)
-
-	assert.Equal(t, 9, len(rules))
+func eventuallyListRules(ctx context.Context, t *testing.T, r rule.Registry, expectedLen int) (rules []rule.Rule) {
+	var err error
+	assert.Eventually(t, func() bool {
+		rules, err = r.RuleRepository().List(ctx, 500, 0)
+		require.NoError(t, err)
+		return len(rules) == expectedLen
+	}, 5*time.Second, 10*time.Millisecond)
+	return
 }
