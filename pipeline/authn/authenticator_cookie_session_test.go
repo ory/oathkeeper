@@ -247,6 +247,33 @@ func TestAuthenticatorCookieSession(t *testing.T) {
 				Extra:   map[string]interface{}{"session": map[string]interface{}{"foo": "bar"}, "identity": map[string]interface{}{"id": "123"}},
 			}, session)
 		})
+		t.Run("description=should work with custom header forwarded", func(t *testing.T) {
+			requestRecorder := &RequestRecorder{}
+			testServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				requestRecorder.requests = append(requestRecorder.requests, r)
+				requestBody, _ := ioutil.ReadAll(r.Body)
+				requestRecorder.bodies = append(requestRecorder.bodies, requestBody)
+				if r.Header.Get("X-User") == "" {
+					w.WriteHeader(http.StatusBadRequest)
+					return
+				}
+				w.WriteHeader(http.StatusOK)
+				w.Write([]byte(`{"identity": {"id": "123"}, "session": {"foo": "bar"}}`))
+			}))
+			req := makeRequest("GET", "/", "", map[string]string{"sessionid": "zyx"}, "")
+			req.Header.Add("X-User", "123")
+			err := pipelineAuthenticator.Authenticate(
+				req,
+				session,
+				json.RawMessage(fmt.Sprintf(`{"check_session_url": "%s", "subject_from": "identity.id", "extra_from": "@this", "forward_http_headers": ["X-User"]}`, testServer.URL)),
+				nil,
+			)
+			require.NoError(t, err, "%#v", errors.Cause(err))
+			assert.Equal(t, &AuthenticationSession{
+				Subject: "123",
+				Extra:   map[string]interface{}{"session": map[string]interface{}{"foo": "bar"}, "identity": map[string]interface{}{"id": "123"}},
+			}, session)
+		})
 	})
 }
 
