@@ -13,17 +13,17 @@
         refer to the cluster state, only to a single instance.
       operationId: isAlive
       responses:
-        '200':
+        "200":
           content:
             application/json:
               schema:
-                '$ref': '#/components/schemas/healthStatus'
-          description: '{{.ProjectHumanName}} is ready to accept connections.'
-        '500':
+                "$ref": "#/components/schemas/healthStatus"
+          description: "{{.ProjectHumanName}} is ready to accept connections."
+        "500":
           content:
             application/json:
               schema:
-                '$ref': '#/components/schemas/genericError'
+                "$ref": "#/components/schemas/genericError"
           description: genericError
       summary: Check HTTP Server Status
       tags: { { .HealthPathTags | toJson } }
@@ -42,7 +42,7 @@
         Be aware that if you are running multiple nodes of {{.ProjectHumanName}}, the health status will never
         refer to the cluster state, only to a single instance.
       responses:
-        '200':
+        "200":
           content:
             application/json:
               schema:
@@ -51,8 +51,8 @@
                   status:
                     description: Always "ok".
                     type: string
-          description: '{{.ProjectHumanName}} is ready to accept requests.'
-        '503':
+          description: "{{.ProjectHumanName}} is ready to accept requests."
+        "503":
           content:
             application/json:
               schema:
@@ -67,7 +67,7 @@
                 type: object
           description: Ory Kratos is not yet ready to accept requests.
       summary: Check HTTP Server and Database Status
-      tags: '{{ .HealthPathTags | toJson }}'
+      tags: "{{ .HealthPathTags | toJson }}"
 - op: replace
   path: /paths/~1version
   value:
@@ -82,7 +82,7 @@
         refer to the cluster state, only to a single instance.
       operationId: getVersion
       responses:
-        '200':
+        "200":
           content:
             application/json:
               schema:
@@ -93,4 +93,4 @@
                     type: string
           description: Returns the {{.ProjectHumanName}} version.
       summary: Return Running Software Version.
-      tags: '{{ .HealthPathTags | toJson }}'
+      tags: "{{ .HealthPathTags | toJson }}"

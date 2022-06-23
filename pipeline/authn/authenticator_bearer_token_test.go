@@ -254,6 +254,26 @@ func TestAuthenticatorBearerToken(t *testing.T) {
 					Extra:   map[string]interface{}{"session": map[string]interface{}{"foo": "bar"}, "identity": map[string]interface{}{"id": "123"}},
 				},
 			},
+			{
+				d: "should work with custom header forwarded",
+				r: &http.Request{Header: http.Header{"Authorization": {"bearer token"}, "X-User": {"123"}}, URL: &url.URL{Path: ""}},
+				setup: func(t *testing.T, m *httprouter.Router) {
+					m.GET("/", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+						if r.Header.Get("X-User") == "" {
+							w.WriteHeader(http.StatusBadRequest)
+							return
+						}
+						w.WriteHeader(200)
+						w.Write([]byte(`{"identity": {"id": "123"}, "session": {"foo": "bar"}}`))
+					})
+				},
+				config:    []byte(`{"subject_from": "identity.id", "extra_from": "@this", "forward_http_headers": ["X-UsEr"]}`),
+				expectErr: false,
+				expectSess: &AuthenticationSession{
+					Subject: "123",
+					Extra:   map[string]interface{}{"session": map[string]interface{}{"foo": "bar"}, "identity": map[string]interface{}{"id": "123"}},
+				},
+			},
 		} {
 			t.Run(fmt.Sprintf("case=%d/description=%s", k, tc.d), func(t *testing.T) {
 				var ts *httptest.Server

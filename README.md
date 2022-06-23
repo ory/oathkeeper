@@ -22,13 +22,16 @@
     <a href="https://github.com/ory/oathkeeper/blob/master/CODE_OF_CONDUCT.md" alt="Ory Code of Conduct"><img src="https://img.shields.io/badge/ory-code%20of%20conduct-green" /></a>
 </p>
 
-ORY Oathkeeper is an Identity & Access Proxy (IAP) and Access Control Decision API that authorizes HTTP requests based on sets of
-Access Rules. The BeyondCorp Model is designed by [Google](https://cloud.google.com/beyondcorp/) and secures applications in
-Zero-Trust networks.
+ORY Oathkeeper is an Identity & Access Proxy (IAP) and Access Control Decision
+API that authorizes HTTP requests based on sets of Access Rules. The BeyondCorp
+Model is designed by [Google](https://cloud.google.com/beyondcorp/) and secures
+applications in Zero-Trust networks.
 
-An Identity & Access Proxy is typically deployed in front of (think API Gateway) web-facing applications and is capable of
-authenticating and optionally authorizing access requests. The Access Control Decision API can be deployed alongside an existing
-API Gateway or reverse proxy. ORY Oathkeeper's Access Control Decision API works with:
+An Identity & Access Proxy is typically deployed in front of (think API Gateway)
+web-facing applications and is capable of authenticating and optionally
+authorizing access requests. The Access Control Decision API can be deployed
+alongside an existing API Gateway or reverse proxy. ORY Oathkeeper's Access
+Control Decision API works with:
 
 - [Ambassador](https://github.com/datawire/ambassador) via
   [auth service](https://www.getambassador.io/reference/services/auth-service).
@@ -41,17 +44,22 @@ API Gateway or reverse proxy. ORY Oathkeeper's Access Control Decision API works
 
 among others.
 
-This service is stable, but under active development and may introduce breaking changes in future releases. Any breaking change
-will have extensive documentation and upgrade instructions.
+This service is stable, but under active development and may introduce breaking
+changes in future releases. Any breaking change will have extensive
+documentation and upgrade instructions.
 
 ## Project Renaming
 
-The Ory Oathkeeper project was started in 2017 in Germany and owes its name to the Sword
-[Oathkeeper](https://gameofthrones.fandom.com/wiki/Oathkeeper) from Game of Thrones. We also understand that the name is
-politically charged in the US as it is shared with a far-right militia organization in the US called "Oath Keepers".
+The Ory Oathkeeper project was started in 2017 in Germany and owes its name to
+the Sword [Oathkeeper](https://gameofthrones.fandom.com/wiki/Oathkeeper) from
+Game of Thrones. We also understand that the name is politically charged in the
+US as it is shared with a far-right militia organization in the US called "Oath
+Keepers".
 
-To take a stand against extremism and avoid any confusion to the name's origin, we will be renaming the project in the near
-future. Please be patient with us as we work on this complicated change of various CIs, tools, scripts, and automations.
+To take a stand against extremism and avoid any confusion to the name's origin,
+we will be renaming the project in the near future. Please be patient with us as
+we work on this complicated change of various CIs, tools, scripts, and
+automations.
 
 ---
 
@@ -79,8 +87,10 @@ future. Please be patient with us as we work on this complicated change of vario
 
 ## Installation
 
-Head over to the [ORY Developer Documentation](https://www.ory.sh/oathkeeper/docs/install) to learn how to install ORY Oathkeeper
-on Linux, macOS, Windows, and Docker and how to build ORY Oathkeeper from source.
+Head over to the
+[ORY Developer Documentation](https://www.ory.sh/oathkeeper/docs/install) to
+learn how to install ORY Oathkeeper on Linux, macOS, Windows, and Docker and how
+to build ORY Oathkeeper from source.
 
 ## Who's using it?
 
@@ -332,13 +342,14 @@ to perform a certain action on a resource.
 
 ### Disclosing vulnerabilities
 
-If you think you found a security vulnerability, please refrain from posting it publicly on the forums, the chat, or GitHub and
-send us an email to [hi@ory.sh](mailto:hi@ory.sh) instead.
+If you think you found a security vulnerability, please refrain from posting it
+publicly on the forums, the chat, or GitHub and send us an email to
+[hi@ory.sh](mailto:hi@ory.sh) instead.
 
 ## Telemetry
 
-Our services collect summarized, anonymized data which can optionally be turned off. Click
-[here](https://www.ory.sh/docs/ecosystem/sqa) to learn more.
+Our services collect summarized, anonymized data which can optionally be turned
+off. Click [here](https://www.ory.sh/docs/ecosystem/sqa) to learn more.
 
 ## Documentation
 
@@ -348,11 +359,13 @@ The Guide is available [here](https://www.ory.sh/oathkeeper/docs/).
 
 ### HTTP API documentation
 
-The HTTP API is documented [here](https://www.ory.sh/oathkeeper/docs/reference/api).
+The HTTP API is documented
+[here](https://www.ory.sh/oathkeeper/docs/reference/api).
 
 ### Upgrading and Changelog
 
-New releases might introduce breaking changes. To help you identify and incorporate those changes, we document these changes in
+New releases might introduce breaking changes. To help you identify and
+incorporate those changes, we document these changes in
 [UPGRADE.md](./UPGRADE.md) and [CHANGELOG.md](./CHANGELOG.md).
 
 ### Command line documentation

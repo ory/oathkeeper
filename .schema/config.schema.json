@@ -397,6 +397,14 @@
           "description": "When set uses the given HTTP method instead of the request HTTP method.",
           "examples": ["GET", "POST"]
         },
+        "forward_http_headers": {
+          "title": "Set Forward HTTP Headers",
+          "type": "array",
+          "description": "Set HTTP Headers allowed forwarding to upstream.",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
         "additional_headers": {
           "title": "Set Additional HTTP Headers",
           "type": "object",
@@ -496,6 +504,14 @@
           "type": "string",
           "description": "When set uses the given HTTP method instead of the request HTTP method.",
           "examples": ["GET", "POST"]
+        },
+        "forward_http_headers": {
+          "title": "Set Forward HTTP Headers",
+          "type": "array",
+          "description": "Set HTTP Headers allowed forwarding to upstream.",
+          "additionalProperties": {
+            "type": "string"
+          }
         },
         "additional_headers": {
           "title": "Set Additional HTTP Headers",

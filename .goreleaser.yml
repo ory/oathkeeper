@@ -6,19 +6,19 @@ before:
   hooks:
     - go mod download
     - git checkout -- go.sum go.mod
-    - 'curl -Lo /tmp/cosign.key
-      https://raw.githubusercontent.com/ory/xgoreleaser/master/cosign.key'
-    - 'curl -Lo /tmp/cosign.pub
-      https://raw.githubusercontent.com/ory/xgoreleaser/master/cosign.pub'
+    - "curl -Lo /tmp/cosign.key
+      https://raw.githubusercontent.com/ory/xgoreleaser/master/cosign.key"
+    - "curl -Lo /tmp/cosign.pub
+      https://raw.githubusercontent.com/ory/xgoreleaser/master/cosign.pub"
     - go install github.com/gobuffalo/packr/v2/packr2
     - packr2
 
 variables:
   brew_name: oathkeeper
-  brew_description: 'The Ory Identity and Access Proxy (Ory Oathkeeper)'
-  buildinfo_hash: 'github.com/ory/oathkeeper/x.Commit'
-  buildinfo_tag: 'github.com/ory/oathkeeper/x.Version'
-  buildinfo_date: 'github.com/ory/oathkeeper/x.Date'
-  dockerfile: './Dockerfile-alpine'
+  brew_description: "The Ory Identity and Access Proxy (Ory Oathkeeper)"
+  buildinfo_hash: "github.com/ory/oathkeeper/x.Commit"
+  buildinfo_tag: "github.com/ory/oathkeeper/x.Version"
+  buildinfo_date: "github.com/ory/oathkeeper/x.Date"
+  dockerfile: "./Dockerfile-alpine"
 
 project_name: oathkeeper
