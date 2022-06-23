@@ -5,9 +5,10 @@
 
 **Table of Contents**
 
-- [0.0.0 (2022-05-23)](#000-2022-05-23)
-  - [Bug Fixes](#bug-fixes)
-  - [Features](#features)
+- [0.0.0 (2022-06-23)](#000-2022-06-23)
+  - [Breaking Changes](#breaking-changes)
+    - [Bug Fixes](#bug-fixes)
+    - [Features](#features)
 - [0.38.25-beta.1 (2022-04-13)](#03825-beta1-2022-04-13)
   - [Bug Fixes](#bug-fixes-1)
   - [Code Generation](#code-generation)
@@ -126,7 +127,7 @@
   - [Chores](#chores-3)
   - [Documentation](#documentation-13)
 - [0.37.0-beta.1 (2020-04-02)](#0370-beta1-2020-04-02)
-  - [Breaking Changes](#breaking-changes)
+  - [Breaking Changes](#breaking-changes-1)
     - [Bug Fixes](#bug-fixes-21)
     - [Documentation](#documentation-14)
     - [Features](#features-17)
@@ -282,7 +283,18 @@
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-# [0.0.0](https://github.com/ory/oathkeeper/compare/v0.38.25-beta.1...v0.0.0) (2022-05-23)
+# [0.0.0](https://github.com/ory/oathkeeper/compare/v0.38.25-beta.1...v0.0.0) (2022-06-23)
+
+## Breaking Changes
+
+From now on, the `bearer_token` and `cookie_session` handlers pass only the
+needed header (`Authorization`, `Cookie`) to the check URL. To pass additional
+headers, use the `forward_http_headers` configuration key.
+
+Closes https://github.com/ory/oathkeeper/pull/954 Closes
+https://github.com/ory/cloud/issues/76
+
+Co-authored-by: hackerman <3372410+aeneasr@users.noreply.github.com>
 
 ### Bug Fixes
 
@@ -293,6 +305,12 @@
   cached, even if it was already cached. This behavior makes it possible to keep
   a token in cache if it is authenticated in a period less than the TTL.
 
+- Less flaky rule tests ([#973](https://github.com/ory/oathkeeper/issues/973))
+  ([6ee6a73](https://github.com/ory/oathkeeper/commit/6ee6a735dfb97c577f21d0e29a5a01cf4ba52821)):
+
+  Instead of (flaky) fixed sleeps, we now use assert.Eventually to wait until
+  the rule changes were propagated.
+
 - Update format ([#970](https://github.com/ory/oathkeeper/issues/970))
   ([17c4214](https://github.com/ory/oathkeeper/commit/17c42144fe03933a3441f88320a6aefd43c22eee))
 
@@ -301,6 +319,9 @@
 - JWT should only respect JWT-formats
   ([#958](https://github.com/ory/oathkeeper/issues/958))
   ([6959524](https://github.com/ory/oathkeeper/commit/69595243bde399d91b03cf0176debc5053a6d65b))
+- Pass only essential and configured headers to authenticator
+  ([#952](https://github.com/ory/oathkeeper/issues/952))
+  ([e5e4de4](https://github.com/ory/oathkeeper/commit/e5e4de4b23534a3f80afa0f64808c25346b11f64))
 
 # [0.38.25-beta.1](https://github.com/ory/oathkeeper/compare/v0.38.24-beta.1...v0.38.25-beta.1) (2022-04-13)
 
