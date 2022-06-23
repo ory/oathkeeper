@@ -105,7 +105,7 @@ func (a *AuthenticatorBearerToken) Config(config json.RawMessage) (*Authenticato
 	}
 
 	// Add Authorization and Cookie headers for backward compatibility
-	c.ForwardHTTPHeaders = append(c.ForwardHTTPHeaders, []string{header.Authorization, header.Cookie}...)
+	c.ForwardHTTPHeaders = append(c.ForwardHTTPHeaders, []string{header.Authorization}...)
 
 	return &c, nil
 }

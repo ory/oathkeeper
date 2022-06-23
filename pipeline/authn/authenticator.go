@@ -52,6 +52,7 @@ type MatchContext struct {
 	Method              string      `json:"method"`
 	Header              http.Header `json:"header"`
 }
+
 type AuthenticatorForwardConfig interface {
 	GetCheckSessionURL() string
 	GetPreserveQuery() bool

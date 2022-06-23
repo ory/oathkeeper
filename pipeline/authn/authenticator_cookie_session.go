@@ -109,7 +109,7 @@ func (a *AuthenticatorCookieSession) Config(config json.RawMessage) (*Authentica
 	}
 
 	// Add Authorization and Cookie headers for backward compatibility
-	c.ForwardHTTPHeaders = append(c.ForwardHTTPHeaders, []string{header.Authorization, header.Cookie}...)
+	c.ForwardHTTPHeaders = append(c.ForwardHTTPHeaders, []string{header.Cookie}...)
 
 	return &c, nil
 }

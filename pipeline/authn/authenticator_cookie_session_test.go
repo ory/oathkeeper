@@ -264,6 +264,16 @@ func TestPrepareRequest(t *testing.T) {
 			},
 			{
 				requestHeaders:  []string{header.Authorization, header.AcceptEncoding},
+				expectedHeaders: []string{header.AcceptEncoding},
+				conf: &AuthenticatorCookieSessionConfiguration{
+					// This value is coming from the configuration and may use incorrect casing.
+					ForwardHTTPHeaders: []string{
+						"acCept-enCodinG",
+					},
+				},
+			},
+			{
+				requestHeaders:  []string{header.Authorization, header.AcceptEncoding},
 				expectedHeaders: []string{header.Authorization},
 				conf: &AuthenticatorCookieSessionConfiguration{
 					ForwardHTTPHeaders: []string{
