@@ -184,11 +184,13 @@ func forwardRequestToSessionStore(r *http.Request, checkSessionURL string, prese
 		logger.Tracef("Error reading response from remote: %v", err)
 		return json.RawMessage{}, errors.WithStack(herodot.ErrInternalServerError.WithReasonf("Unable to read response from remote: %s", err))
 	}
+	defer res.Body.Close()
 
 	if res.StatusCode == 200 {
 		return body, nil
 	}
 
-	logger.Tracef("Remote returned non-200 status code '%d' with body: %s", res.StatusCode, body)
+	logger.WithField("response_code", res.StatusCode).WithField("body", string(body)).Trace()
+
 	return json.RawMessage{}, errors.WithStack(helper.ErrUnauthorized.WithReasonf("Remote returned non 200 status code: %d", res.StatusCode))
 }
