@@ -216,7 +216,8 @@ func PrepareRequest(r *http.Request, cf AuthenticatorForwardConfig) (http.Reques
 	// We need to copy only essential and configurable headers
 	for requested, v := range r.Header {
 		for _, allowed := range cf.GetForwardHTTPHeaders() {
-			if requested == allowed {
+			// Check against canonical names of header
+			if requested == header.Canonical(allowed) {
 				req.Header[requested] = v
 			}
 		}
