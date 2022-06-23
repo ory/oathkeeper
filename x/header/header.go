@@ -3,7 +3,6 @@ package header
 import "net/textproto"
 
 const (
-	Accept         = "Accept"
 	AcceptEncoding = "Accept-Encoding"
 	Authorization  = "Authorization"
 	Cookie         = "Cookie"
