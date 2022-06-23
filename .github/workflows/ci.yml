@@ -4,7 +4,7 @@ on:
     branches:
       - master
     tags:
-      - '*'
+      - "*"
   pull_request:
 
 # Cancel in-progress runs in current workflow.
@@ -67,7 +67,7 @@ jobs:
       - uses: ory/ci/checkout@master
       - uses: actions/setup-go@v2
         with:
-          go-version: '^1.17'
+          go-version: "^1.17"
       - run: make install
       - uses: actions/cache@v2
         with:
@@ -81,7 +81,7 @@ jobs:
     name: Run tests
     strategy:
       matrix:
-        name: ['reload', 'e2e', 'forwarded-header']
+        name: ["reload", "e2e", "forwarded-header"]
     needs:
       - sdk-generate
       - setup-tests
@@ -89,7 +89,7 @@ jobs:
       - uses: ory/ci/checkout@master
       - uses: actions/setup-go@v2
         with:
-          go-version: '^1.17'
+          go-version: "^1.17"
       - uses: actions/cache@v2
         with:
           path: ~/go/bin/oathkeeper
@@ -173,7 +173,7 @@ jobs:
           mailchimp_list_id: f605a41b53
           mailchmip_segment_id: 6479485
           mailchimp_api_key: ${{ secrets.MAILCHIMP_API_KEY }}
-          draft: 'true'
+          draft: "true"
           ssh_key: ${{ secrets.ORY_BOT_SSH_KEY }}
 
   slack-approval-notification:
@@ -200,5 +200,5 @@ jobs:
           mailchimp_list_id: f605a41b53
           mailchmip_segment_id: 6479485
           mailchimp_api_key: ${{ secrets.MAILCHIMP_API_KEY }}
-          draft: 'false'
+          draft: "false"
           ssh_key: ${{ secrets.ORY_BOT_SSH_KEY }}

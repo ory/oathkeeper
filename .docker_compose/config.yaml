@@ -26,7 +26,7 @@ mutators:
     enabled: true
     config:
       headers:
-        X-User: '{{ print .Subject }}'
+        X-User: "{{ print .Subject }}"
   noop:
     enabled: true
   id_token:

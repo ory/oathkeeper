@@ -268,7 +268,7 @@ authorizers:
 
     config:
       remote: https://host/path
-      payload: '{}'
+      payload: "{}"
       forward_response_headers_to_upstream:
         - x-foo
 
