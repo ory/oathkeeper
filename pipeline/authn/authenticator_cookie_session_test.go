@@ -261,7 +261,7 @@ func TestAuthenticatorCookieSession(t *testing.T) {
 				w.Write([]byte(`{"identity": {"id": "123"}, "session": {"foo": "bar"}}`))
 			}))
 			req := makeRequest("GET", "/", "", map[string]string{"sessionid": "zyx"}, "")
-			req.Header.Add("X-User", "123")
+			req.Header.Add("X-UsEr", "123")
 			err := pipelineAuthenticator.Authenticate(
 				req,
 				session,
