@@ -218,7 +218,7 @@
   "definitions": {
     "UUID": { "type": "string", "format": "uuid4" },
     "Upstream": {
-      "description": "Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream upstream",
+      "description": "Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream upstream",
       "type": "object",
       "properties": {
         "preserve_host": {
@@ -271,7 +271,7 @@
       }
     },
     "healthNotReadyStatus": {
-      "description": "HealthNotReadyStatus health not ready status",
+      "description": "HealthNotReadyStatus HealthNotReadyStatus health not ready status",
       "type": "object",
       "properties": {
         "errors": {
@@ -284,7 +284,7 @@
       }
     },
     "healthStatus": {
-      "description": "HealthStatus HealthStatus health status",
+      "description": "HealthStatus HealthStatus HealthStatus health status",
       "type": "object",
       "properties": {
         "status": {
@@ -294,7 +294,7 @@
       }
     },
     "jsonWebKey": {
-      "description": "JSONWebKey JSONWebKey JSONWebKey JSONWebKey JSONWebKey JSONWebKey JSONWebKey JSONWebKey JSONWebKey json web key",
+      "description": "JSONWebKey JSONWebKey JSONWebKey JSONWebKey JSONWebKey JSONWebKey JSONWebKey JSONWebKey JSONWebKey JSONWebKey json web key",
       "type": "object",
       "properties": {
         "alg": {
@@ -371,6 +371,7 @@
       }
     },
     "jsonWebKeySet": {
+      "description": "JSONWebKeySet json web key set",
       "type": "object",
       "properties": {
         "keys": {
@@ -420,7 +421,7 @@
       }
     },
     "ruleHandler": {
-      "description": "RuleHandler RuleHandler RuleHandler RuleHandler rule handler",
+      "description": "RuleHandler RuleHandler RuleHandler RuleHandler RuleHandler rule handler",
       "type": "object",
       "properties": {
         "config": {
@@ -434,6 +435,7 @@
       }
     },
     "ruleMatch": {
+      "description": "RuleMatch rule match",
       "type": "object",
       "properties": {
         "methods": {
