@@ -21,7 +21,4 @@ jobs:
       - name: Install Dependencies
         if: steps.cache-nodemodules.outputs.cache-hit != 'true'
         run: npm ci
-      - run: make format
-      - uses: stefanzweifel/git-auto-commit-action@v4
-        with:
-          commit_message: "autogen: formatting changes"
+      - run: make format:check
