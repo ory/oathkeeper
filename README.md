@@ -27,6 +27,11 @@ API that authorizes HTTP requests based on sets of Access Rules. The BeyondCorp
 Model is designed by [Google](https://cloud.google.com/beyondcorp/) and secures
 applications in Zero-Trust networks.
 
+
+
+
+
+
 An Identity & Access Proxy is typically deployed in front of (think API Gateway)
 web-facing applications and is capable of authenticating and optionally
 authorizing access requests. The Access Control Decision API can be deployed
