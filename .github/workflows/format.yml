@@ -21,4 +21,6 @@ jobs:
       - name: Install Dependencies
         if: steps.cache-nodemodules.outputs.cache-hit != 'true'
         run: npm ci
-      - run: make format:check
+      - run: make format
+      - name: check for uncommitted formatting
+        run: git diff master --exit-code
