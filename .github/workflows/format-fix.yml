@@ -1,12 +1,9 @@
 name: Fix formatting
 
-on:
-  issue_comment:
-    types: [created]
+on: issue_comment
 
 jobs:
   fix:
-    # This job only runs for pull request comments
     name: PR comment
     # if:
     #   ${{ github.event.issue.pull_request && github.event.comment.body=="format"
@@ -15,6 +12,8 @@ jobs:
     steps:
       - run: |
           echo Formatting!
+      - name: Checkout
+        uses: actions/checkout@v3
 
   # format:
   #   runs-on: ubuntu-latest
