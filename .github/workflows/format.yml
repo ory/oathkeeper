@@ -2,8 +2,8 @@ name: Format
 
 on:
   pull_request:
-    branches:
-      - main
+    types:
+      - opened
   push:
 
 jobs:
@@ -25,5 +25,4 @@ jobs:
       - name: Format
         run: make format
       - name: Indicate formatting problems
-        if: ${{ github.event.pull_request }}
         run: git diff HEAD --exit-code
