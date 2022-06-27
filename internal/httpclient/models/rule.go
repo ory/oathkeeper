@@ -13,7 +13,7 @@ import (
 	"github.com/go-openapi/swag"
 )
 
-// Rule swaggerRule is a single rule that will get checked on every HTTP request.
+// Rule Rule swaggerRule is a single rule that will get checked on every HTTP request.
 //
 // swagger:model rule
 type Rule struct {
