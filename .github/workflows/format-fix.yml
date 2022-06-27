@@ -1,4 +1,4 @@
-name: Format
+name: Fix formatting
 
 on:
   issue_comment:
@@ -8,7 +8,9 @@ jobs:
   pr_commented:
     # This job only runs for pull request comments
     name: PR comment
-    if: ${{ github.event.issue.pull_request && github.event.comment.body=="format" }}
+    # if:
+    #   ${{ github.event.issue.pull_request && github.event.comment.body=="format"
+    #   }}
     runs-on: ubuntu-latest
     steps:
       - run: |
