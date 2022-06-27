@@ -3,7 +3,8 @@ name: Format
 on:
   pull_request:
     branches:
-      - master
+      - main
+  push:
 
 jobs:
   format:
@@ -21,6 +22,8 @@ jobs:
       - name: Install Dependencies
         if: steps.cache-nodemodules.outputs.cache-hit != 'true'
         run: npm ci
-      - run: make format
-      - name: check for uncommitted formatting
+      - name: Format
+        run: make format
+      - name: Indicate formatting problems
+        if: ${{ github.event.pull_request }}
         run: git diff HEAD --exit-code
