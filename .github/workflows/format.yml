@@ -23,4 +23,4 @@ jobs:
         run: npm ci
       - run: make format
       - name: check for uncommitted formatting
-        run: git diff master --exit-code
+        run: git diff HEAD --exit-code
