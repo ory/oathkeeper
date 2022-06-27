@@ -5,7 +5,7 @@ on:
     types: [created]
 
 jobs:
-  pr_commented:
+  fix:
     # This job only runs for pull request comments
     name: PR comment
     # if:
@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - run: |
-          Formatting!
+          echo Formatting!
 
   # format:
   #   runs-on: ubuntu-latest
