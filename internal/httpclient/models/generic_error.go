@@ -10,7 +10,7 @@ import (
 	"github.com/go-openapi/swag"
 )
 
-// GenericError The standard error format
+// GenericError GenericError The standard error format
 //
 // swagger:model genericError
 type GenericError struct {
