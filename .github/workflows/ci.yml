@@ -36,9 +36,23 @@ jobs:
           path: |
             internal/httpclient
           key: ${{ needs.sdk-generate.outputs.sdk-cache-key }}
+      - name: Cache node modules
+        id: cache-nodemodules
+        uses: actions/cache@v3
+        with:
+          path: node_modules
+          key:
+            ${{ runner.os }}-nodemodules-${{ hashFiles('package-lock.json') }}
       - uses: actions/setup-go@v2
         with:
           go-version: ^1.17
+      - name: Install Dependencies
+        if: steps.cache-nodemodules.outputs.cache-hit != 'true'
+        run: npm ci
+      - name: Format
+        run: make format
+      - name: Indicate formatting problems
+        run: git diff HEAD --exit-code
       - run: go list -json > go.list
       - name: Run nancy
         uses: sonatype-nexus-community/nancy-github-action@v1.0.2
