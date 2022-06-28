@@ -35,7 +35,7 @@ jobs:
         with:
           path: internal/httpclient
           key: ${{ needs.sdk-generate.outputs.sdk-cache-key }}
-      - id: cache-nodemodules
+      - id: cache-node
         uses: actions/cache@v3
         with:
           path: node_modules
@@ -44,7 +44,7 @@ jobs:
         with:
           go-version: ^1.17
       - run: npm ci
-        if: steps.cache-nodemodules.outputs.cache-hit != 'true'
+        if: steps.cache-node.outputs.cache-hit != 'true'
       - run: make format
       - name: Indicate formatting problems
         run: git diff HEAD --exit-code
