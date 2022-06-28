@@ -5,8 +5,7 @@
   "license": "Apache-2.0",
   "scripts": {
     "doctoc": "doctoc README.md",
-    "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format": "prettier --write ."
   },
   "browser": {
     "fs": false
