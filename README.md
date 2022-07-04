@@ -14,7 +14,7 @@
 ---
 
 <p align="left">
-    <a href="https://circleci.com/gh/ory/oathkeeper/tree/master"><img src="https://circleci.com/gh/ory/oathkeeper.svg?style=shield" alt="Build Status"></a>
+    <a href="https://github.com/ory/oathkeeper/actions/workflows/ci.yml"><img src="https://github.com/ory/oathkeeper/actions/workflows/ci.yml/badge.svg" alt="Build Status"></a>
     <a href="https://coveralls.io/github/ory/oathkeeper?branch=master"> <img src="https://coveralls.io/repos/ory/oathkeeper/badge.svg?branch=master&service=github" alt="Coverage Status"></a>
     <a href="https://goreportcard.com/report/github.com/ory/oathkeeper"><img src="https://goreportcard.com/badge/github.com/ory/oathkeeper" alt="Go Report Card"></a>
     <a href="https://pkg.go.dev/github.com/ory/oathkeeper"><img src="https://pkg.go.dev/badge/www.github.com/ory/oathkeeper" alt="PkgGoDev"></a>
