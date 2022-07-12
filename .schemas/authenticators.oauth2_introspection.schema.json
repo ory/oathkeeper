@@ -8,9 +8,7 @@
     "introspection_url": {
       "type": "string",
       "format": "uri",
-      "examples": [
-        "https://my-website.com/oauth2/introspection"
-      ],
+      "examples": ["https://my-website.com/oauth2/introspection"],
       "title": "OAuth 2.0 Introspection URL",
       "description": "The OAuth 2.0 Token Introspection endpoint URL.\n\n>If this authenticator is enabled, this value is required."
     },
@@ -34,11 +32,7 @@
         {
           "type": "object",
           "additionalProperties": false,
-          "required": [
-            "client_id",
-            "client_secret",
-            "token_url"
-          ],
+          "required": ["client_id", "client_secret", "token_url"],
           "properties": {
             "enabled": {
               "title": "Enabled",
@@ -65,10 +59,7 @@
               "type": "string",
               "title": "OAuth 2.0 Audience",
               "description": "The OAuth 2.0 Audience to be requested during the OAuth 2.0 Client Credentials Grant.",
-              "examples": [
-                "http://www.example.com",
-                "services:my-app"
-              ]
+              "examples": ["http://www.example.com", "services:my-app"]
             },
             "scope": {
               "type": "array",
@@ -77,11 +68,7 @@
               },
               "title": "OAuth 2.0 Scope",
               "description": "The OAuth 2.0 Scope to be requested during the OAuth 2.0 Client Credentials Grant.",
-              "examples": [
-                [
-                  "[\"foo\", \"bar\"]"
-                ]
-              ]
+              "examples": [["[\"foo\", \"bar\"]"]]
             }
           }
         }
@@ -117,9 +104,7 @@
       "oneOf": [
         {
           "type": "object",
-          "required": [
-            "header"
-          ],
+          "required": ["header"],
           "properties": {
             "header": {
               "title": "Header",
@@ -130,9 +115,7 @@
         },
         {
           "type": "object",
-          "required": [
-            "query_parameter"
-          ],
+          "required": ["query_parameter"],
           "properties": {
             "query_parameter": {
               "title": "Query Parameter",
@@ -143,9 +126,7 @@
         },
         {
           "type": "object",
-          "required": [
-            "cookie"
-          ],
+          "required": ["cookie"],
           "properties": {
             "cookie": {
               "title": "Cookie",
@@ -157,8 +138,6 @@
       ]
     }
   },
-  "required": [
-    "introspection_url"
-  ],
+  "required": ["introspection_url"],
   "additionalProperties": false
 }

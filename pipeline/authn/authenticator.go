@@ -53,6 +53,16 @@ type MatchContext struct {
 	Header              http.Header `json:"header"`
 }
 
+type AuthenticatorForwardConfig interface {
+	GetCheckSessionURL() string
+	GetPreserveQuery() bool
+	GetPreservePath() bool
+	GetPreserveHost() bool
+	GetForwardHTTPHeaders() []string
+	GetSetHeaders() map[string]string
+	GetForceMethod() string
+}
+
 func (a *AuthenticationSession) SetHeader(key, val string) {
 	if a.Header == nil {
 		a.Header = map[string][]string{}

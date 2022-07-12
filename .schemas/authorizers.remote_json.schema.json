@@ -10,33 +10,24 @@
       "type": "string",
       "format": "uri",
       "description": "The URL of the remote authorizer. The remote authorizer is expected to return either 200 OK or 403 Forbidden to allow/deny access.\n\n>If this authorizer is enabled, this value is required.",
-      "examples": [
-        "https://host/path"
-      ]
+      "examples": ["https://host/path"]
     },
     "payload": {
       "title": "JSON Payload",
       "type": "string",
       "description": "The JSON payload of the request sent to the remote authorizer. The string will be parsed by the Go text/template package and applied to an AuthenticationSession object.\n\n>If this authorizer is enabled, this value is required.",
-      "examples": [
-        "{\"subject\":\"{{ .Subject }}\"}"
-      ]
+      "examples": ["{\"subject\":\"{{ .Subject }}\"}"]
     },
-        "forward_response_headers_to_upstream": {
+    "forward_response_headers_to_upstream": {
       "title": "Allowed Remote HTTP Headers for his Responses",
       "type": "array",
       "items": {
         "type": "string"
       },
       "description": "A list of non simple headers the remote is allowed to return to mutate requests.",
-      "examples": [
-        "X-Foo"
-      ]
+      "examples": ["X-Foo"]
     }
   },
-  "required": [
-    "remote",
-    "payload"
-  ],
+  "required": ["remote", "payload"],
   "additionalProperties": false
 }

@@ -8,6 +8,7 @@ import (
 	"github.com/tidwall/gjson"
 
 	"github.com/ory/go-convenience/stringsx"
+	"github.com/ory/oathkeeper/x/header"
 
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/helper"
@@ -31,13 +32,44 @@ type AuthenticatorBearerTokenConfiguration struct {
 	PreserveHost        bool                        `json:"preserve_host"`
 	ExtraFrom           string                      `json:"extra_from"`
 	SubjectFrom         string                      `json:"subject_from"`
+	ForwardHTTPHeaders  []string                    `json:"forward_http_headers"`
 	SetHeaders          map[string]string           `json:"additional_headers"`
 	ForceMethod         string                      `json:"force_method"`
+}
+
+func (a *AuthenticatorBearerTokenConfiguration) GetCheckSessionURL() string {
+	return a.CheckSessionURL
+}
+
+func (a *AuthenticatorBearerTokenConfiguration) GetPreserveQuery() bool {
+	return a.PreserveQuery
+}
+
+func (a *AuthenticatorBearerTokenConfiguration) GetPreservePath() bool {
+	return a.PreservePath
+}
+
+func (a *AuthenticatorBearerTokenConfiguration) GetPreserveHost() bool {
+	return a.PreserveHost
+}
+
+func (a *AuthenticatorBearerTokenConfiguration) GetForwardHTTPHeaders() []string {
+	return a.ForwardHTTPHeaders
+}
+
+func (a *AuthenticatorBearerTokenConfiguration) GetSetHeaders() map[string]string {
+	return a.SetHeaders
+}
+
+func (a *AuthenticatorBearerTokenConfiguration) GetForceMethod() string {
+	return a.ForceMethod
 }
 
 type AuthenticatorBearerToken struct {
 	c configuration.Provider
 }
+
+var _ AuthenticatorForwardConfig = new(AuthenticatorBearerTokenConfiguration)
 
 func NewAuthenticatorBearerToken(c configuration.Provider) *AuthenticatorBearerToken {
 	return &AuthenticatorBearerToken{
@@ -72,6 +104,9 @@ func (a *AuthenticatorBearerToken) Config(config json.RawMessage) (*Authenticato
 		c.SubjectFrom = "sub"
 	}
 
+	// Add Authorization and Cookie headers for backward compatibility
+	c.ForwardHTTPHeaders = append(c.ForwardHTTPHeaders, []string{header.Authorization}...)
+
 	return &c, nil
 }
 
@@ -86,7 +121,7 @@ func (a *AuthenticatorBearerToken) Authenticate(r *http.Request, session *Authen
 		return errors.WithStack(ErrAuthenticatorNotResponsible)
 	}
 
-	body, err := forwardRequestToSessionStore(r, cf.CheckSessionURL, cf.PreserveQuery, cf.PreservePath, cf.PreserveHost, cf.SetHeaders, cf.ForceMethod)
+	body, err := forwardRequestToSessionStore(r, cf)
 	if err != nil {
 		return err
 	}

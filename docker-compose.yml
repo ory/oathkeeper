@@ -1,4 +1,4 @@
-version: '3.7'
+version: "3.7"
 
 services:
   oathkeeper:
@@ -8,8 +8,7 @@ services:
     ports:
       - "4455:4455"
       - "4456:4456"
-    command:
-      serve --config=/etc/config/oathkeeper/config.yaml
+    command: serve --config=/etc/config/oathkeeper/config.yaml
     environment:
       - TRACING_PROVIDER=jaeger
       - TRACING_PROVIDER_JAEGER_SAMPLING_SERVER_URL=http://jaeger:5778/sampling

@@ -18,6 +18,7 @@ import (
 
 	"github.com/ory/oathkeeper/internal"
 	. "github.com/ory/oathkeeper/pipeline/authn"
+	"github.com/ory/oathkeeper/x/header"
 )
 
 func TestAuthenticatorCookieSession(t *testing.T) {
@@ -246,7 +247,84 @@ func TestAuthenticatorCookieSession(t *testing.T) {
 				Extra:   map[string]interface{}{"session": map[string]interface{}{"foo": "bar"}, "identity": map[string]interface{}{"id": "123"}},
 			}, session)
 		})
+		t.Run("description=should work with custom header forwarded", func(t *testing.T) {
+			requestRecorder := &RequestRecorder{}
+			testServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				requestRecorder.requests = append(requestRecorder.requests, r)
+				requestBody, _ := ioutil.ReadAll(r.Body)
+				requestRecorder.bodies = append(requestRecorder.bodies, requestBody)
+				if r.Header.Get("X-User") == "" {
+					w.WriteHeader(http.StatusBadRequest)
+					return
+				}
+				w.WriteHeader(http.StatusOK)
+				w.Write([]byte(`{"identity": {"id": "123"}, "session": {"foo": "bar"}}`))
+			}))
+			req := makeRequest("GET", "/", "", map[string]string{"sessionid": "zyx"}, "")
+			req.Header.Add("X-UsEr", "123")
+			err := pipelineAuthenticator.Authenticate(
+				req,
+				session,
+				json.RawMessage(fmt.Sprintf(`{"check_session_url": "%s", "subject_from": "identity.id", "extra_from": "@this", "forward_http_headers": ["X-User"]}`, testServer.URL)),
+				nil,
+			)
+			require.NoError(t, err, "%#v", errors.Cause(err))
+			assert.Equal(t, &AuthenticationSession{
+				Subject: "123",
+				Extra:   map[string]interface{}{"session": map[string]interface{}{"foo": "bar"}, "identity": map[string]interface{}{"id": "123"}},
+			}, session)
+		})
 	})
+}
+
+func TestPrepareRequest(t *testing.T) {
+	t.Run("prepare request should return only configured headers", func(t *testing.T) {
+		testCases := []struct {
+			requestHeaders  []string
+			expectedHeaders []string
+			conf            *AuthenticatorCookieSessionConfiguration
+		}{
+			{
+				requestHeaders:  []string{header.Authorization, header.AcceptEncoding},
+				expectedHeaders: []string{},
+				conf:            &AuthenticatorCookieSessionConfiguration{},
+			},
+			{
+				requestHeaders:  []string{header.Authorization, header.AcceptEncoding},
+				expectedHeaders: []string{header.AcceptEncoding},
+				conf: &AuthenticatorCookieSessionConfiguration{
+					// This value is coming from the configuration and may use incorrect casing.
+					ForwardHTTPHeaders: []string{
+						"acCept-enCodinG",
+					},
+				},
+			},
+			{
+				requestHeaders:  []string{header.Authorization, header.AcceptEncoding},
+				expectedHeaders: []string{header.Authorization},
+				conf: &AuthenticatorCookieSessionConfiguration{
+					ForwardHTTPHeaders: []string{
+						header.Authorization,
+					},
+				},
+			},
+		}
+
+		for _, testCase := range testCases {
+			r := makeRequest("GET", "/", "", map[string]string{"sessionID": "zyx"}, "")
+			for _, h := range testCase.requestHeaders {
+				r.Header.Add(h, h)
+			}
+			expected := http.Header{}
+			for _, h := range testCase.expectedHeaders {
+				expected.Add(h, h)
+			}
+			req, err := PrepareRequest(r, testCase.conf)
+			assert.NoError(t, err)
+			assert.Equal(t, expected, req.Header)
+		}
+	})
+
 }
 
 type RequestRecorder struct {

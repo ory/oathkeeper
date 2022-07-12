@@ -10,7 +10,6 @@ require (
 	github.com/Azure/azure-pipeline-go v0.2.2
 	github.com/Azure/azure-storage-blob-go v0.9.0
 	github.com/Masterminds/sprig/v3 v3.2.2
-	github.com/asaskevich/govalidator v0.0.0-20200428143746-21a406dcc535
 	github.com/auth0/go-jwt-middleware v1.0.1
 	github.com/aws/aws-sdk-go v1.31.13
 	github.com/blang/semver v3.5.1+incompatible

@@ -4,7 +4,6 @@
   "type": "object",
   "title": "Allow Authorizer Configuration",
   "description": "This section is optional when the authorizer is disabled.",
-  "properties": {
-  },
+  "properties": {},
   "additionalProperties": false
 }
