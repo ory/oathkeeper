@@ -47,7 +47,7 @@ jobs:
         if: steps.cache-node.outputs.cache-hit != 'true'
       - run: make format
       - name: Indicate formatting problems
-        run: git diff HEAD --exit-code
+        run: git diff HEAD --exit-code --color
       - run: go list -json > go.list
       - name: Run nancy
         uses: sonatype-nexus-community/nancy-github-action@v1.0.2
