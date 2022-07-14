@@ -46,6 +46,7 @@ jobs:
       - run: npm ci
         if: steps.cache-node.outputs.cache-hit != 'true'
       - run: make format
+      - run: git status
       - name: Indicate formatting problems
         run: git diff HEAD --exit-code --color
       - run: go list -json > go.list
