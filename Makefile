@@ -28,6 +28,7 @@ node_modules: package.json package-lock.json
 .PHONY: format
 format: .bin/goimports node_modules
 		goimports -w --local github.com/ory .
+		gofmt -l -s -w .
 		npm run format
 
 .bin/ory: Makefile
