@@ -3,15 +3,17 @@ package metrics
 import (
 	"bytes"
 	"fmt"
-	"github.com/ory/oathkeeper/driver"
-	"github.com/ory/viper"
-	"github.com/ory/x/logrusx"
-	"github.com/stretchr/testify/require"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/require"
+
+	"github.com/ory/oathkeeper/driver"
+	"github.com/ory/viper"
+	"github.com/ory/x/logrusx"
 
 	"github.com/julienschmidt/httprouter"
 	"github.com/prometheus/client_golang/prometheus"

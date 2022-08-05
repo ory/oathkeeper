@@ -1,7 +1,7 @@
 # To compile this image manually run:
 #
 # $ make docker
-FROM alpine:3.15.4
+FROM alpine:3.16.1
 
 RUN apk --no-cache --update-cache --upgrade --latest add ca-certificates
 

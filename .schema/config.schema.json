@@ -1211,6 +1211,12 @@
               "title": "Path",
               "description": "The path to provide metrics on"
             },
+            "metric_name_prefix": {
+              "type": "string",
+              "default": "ory_oathkeeper_",
+              "title": "Metrix prefix",
+              "description": "Prefix appended to Prometheus request metrics"
+            },
             "collapse_request_paths": {
               "type": "boolean",
               "default": true,
