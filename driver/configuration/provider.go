@@ -54,6 +54,7 @@ type Provider interface {
 
 	PrometheusServeAddress() string
 	PrometheusMetricsPath() string
+	PrometheusMetricsNamePrefix() string
 	PrometheusCollapseRequestPaths() bool
 
 	ToScopeStrategy(value string, key string) fosite.ScopeStrategy

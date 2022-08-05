@@ -84,6 +84,7 @@ serve:
     host: localhost
     metrics_path: /metrics
     collapse_request_paths: true
+    metric_name_prefix: ory_oathkeeper_
 
 # Configures Access Rules
 access_rules:

@@ -1,11 +1,17 @@
 package metrics
 
 import (
+	"bytes"
 	"fmt"
+	"github.com/ory/oathkeeper/driver"
+	"github.com/ory/viper"
+	"github.com/ory/x/logrusx"
+	"github.com/stretchr/testify/require"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/julienschmidt/httprouter"
 	"github.com/prometheus/client_golang/prometheus"
@@ -28,6 +34,20 @@ var (
 	ory_oathkeeper_requests_total{method="GET",request="/hello",service="test",status_code="200"} 1
 	`
 	serverContextPaths []string = []string{"/", "/hello/world"}
+
+	configurableMetricMetadata string = `
+	# HELP http_requests_total Total number of requests
+	# TYPE http_requests_total counter
+	`
+	configurableRootMetric string = `
+	http_requests_total{method="GET",request="/",service="test",status_code="200"} 1
+	`
+	configurableMetricsNotCollapsed string = configurableMetricMetadata + configurableRootMetric + `
+	http_requests_total{method="GET",request="/hello/world",service="test",status_code="200"} 1
+	`
+	configurableMetricsCollapsed string = configurableMetricMetadata + configurableRootMetric + `
+	http_requests_total{method="GET",request="/hello",service="test",status_code="200"} 1
+	`
 )
 
 func NewTestPrometheusRepository(collector prometheus.Collector) *PrometheusRepository {
@@ -90,6 +110,57 @@ func TestPrometheusRequestTotalMetrics(t *testing.T) {
 				}
 			}
 			if err := testutil.CollectAndCompare(RequestTotal, strings.NewReader(tt.expectedMetrics), "ory_oathkeeper_requests_total"); err != nil {
+				t.Fatal(err)
+			}
+		})
+	}
+}
+
+var configurablePrometheusParams = []struct {
+	name            string
+	collapsePaths   bool
+	expectedMetrics string
+}{
+	{"Not collapsed paths", false, configurableMetricsNotCollapsed},
+	{"Collapsed paths", true, configurableMetricsCollapsed},
+}
+
+func TestConfigurablePrometheusRequestTotalMetrics(t *testing.T) {
+	for _, tt := range configurablePrometheusParams {
+		t.Run(tt.name, func(t *testing.T) {
+			// re-initialize to prevent double counts
+			RequestTotal.Reset()
+
+			viper.SetConfigType("yaml")
+
+			// We set the fallback to first run www_authenticate. But because the error is not_found, as
+			// is defined in the when clause, we should see a json error instead!
+			require.NoError(t, viper.ReadConfig(bytes.NewBufferString(`
+serve:
+  prometheus:
+    metric_name_prefix: http_
+`)))
+			logger := logrusx.New("ORY Oathkeeper", "1")
+			d := driver.NewDefaultDriver(logger, "1", "test", time.Now().String())
+			promRepo := NewConfigurablePrometheusRepository(d, logger)
+			promMiddleware := NewMiddleware(promRepo, "test")
+			promMiddleware.CollapsePaths(tt.collapsePaths)
+
+			ts := httptest.NewServer(PrometheusTestApp(promMiddleware))
+			defer ts.Close()
+
+			for _, path := range serverContextPaths {
+				req, err := http.NewRequest("GET", ts.URL+path, nil)
+				if err != nil {
+					t.Fatal(err)
+				}
+				client := &http.Client{}
+				_, err = client.Do(req)
+				if err != nil {
+					t.Fatal(err)
+				}
+			}
+			if err := testutil.CollectAndCompare(RequestTotal, strings.NewReader(tt.expectedMetrics), "http_requests_total"); err != nil {
 				t.Fatal(err)
 			}
 		})
