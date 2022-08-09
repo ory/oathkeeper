@@ -1,6 +1,13 @@
 version: 2.1
 jobs:
-  dummy:
+  test:
+    docker:
+      - image: circleci/golang:1.16.5
+    working_directory: /go/src/github.com/ory/k8s
+    steps:
+      - checkout
+      - run: echo "CircleCI post-migration workaround"
+  generate:
     docker:
       - image: circleci/golang:1.16.5
     working_directory: /go/src/github.com/ory/k8s
@@ -12,7 +19,11 @@ workflows:
   version: 2
   ci:
     jobs:
-      - dummy:
+      - test:
+          filters:
+            tags:
+              only: /.*/
+      - generate:
           filters:
             tags:
               only: /.*/
