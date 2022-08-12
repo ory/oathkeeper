@@ -68,9 +68,9 @@ type FetcherDefault struct {
 
 // NewFetcherDefault returns a new JWKS Fetcher with:
 //
-// - cancelAfter: If reached, the fetcher will stop waiting for responses and return an error.
-// - waitForResponse: While the fetcher might stop waiting for responses, we will give the server more time to respond
-//		and add the keys to the registry unless waitForResponse is reached in which case we'll terminate the request.
+//   - cancelAfter: If reached, the fetcher will stop waiting for responses and return an error.
+//   - waitForResponse: While the fetcher might stop waiting for responses, we will give the server more time to respond
+//     and add the keys to the registry unless waitForResponse is reached in which case we'll terminate the request.
 func NewFetcherDefault(l *logrusx.Logger, cancelAfter time.Duration, ttl time.Duration) *FetcherDefault {
 	return &FetcherDefault{
 		cancelAfter: cancelAfter,

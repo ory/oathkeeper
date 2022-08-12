@@ -64,8 +64,8 @@ func (m *Middleware) ExcludePaths(paths ...string) *Middleware {
 // CollapsePaths if set to true, forces the value of the "request" label
 // of the prometheus request metrics to be collapsed to the first context path segment only.
 // eg. (when set to true):
-//    - /decisions/service/my-service -> /decisions
-//    - /decisions -> /decisions
+//   - /decisions/service/my-service -> /decisions
+//   - /decisions -> /decisions
 func (m *Middleware) CollapsePaths(flag bool) *Middleware {
 	m.mutex.Lock()
 	m.collapsePaths = flag
