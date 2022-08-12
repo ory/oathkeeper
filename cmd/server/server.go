@@ -231,8 +231,7 @@ func RunServe(version, build, date string) func(cmd *cobra.Command, args []strin
 			publicmw.Use(tracer)
 		}
 
-		prometheusRepo := metrics.NewPrometheusRepository(logger)
-
+		prometheusRepo := metrics.NewConfigurablePrometheusRepository(d, logger)
 		var wg sync.WaitGroup
 		tasks := []func(){
 			runAPI(d, adminmw, logger, prometheusRepo),
