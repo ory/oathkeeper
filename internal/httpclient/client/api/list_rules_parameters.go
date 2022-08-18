@@ -56,8 +56,7 @@ func NewListRulesParamsWithHTTPClient(client *http.Client) *ListRulesParams {
 	}
 }
 
-/*
-ListRulesParams contains all the parameters to send to the API endpoint
+/*ListRulesParams contains all the parameters to send to the API endpoint
 for the list rules operation typically these are written to a http.Request
 */
 type ListRulesParams struct {

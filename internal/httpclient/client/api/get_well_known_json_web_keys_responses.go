@@ -46,8 +46,7 @@ func NewGetWellKnownJSONWebKeysOK() *GetWellKnownJSONWebKeysOK {
 	return &GetWellKnownJSONWebKeysOK{}
 }
 
-/*
-GetWellKnownJSONWebKeysOK handles this case with default header values.
+/*GetWellKnownJSONWebKeysOK handles this case with default header values.
 
 jsonWebKeySet
 */
@@ -80,8 +79,7 @@ func NewGetWellKnownJSONWebKeysInternalServerError() *GetWellKnownJSONWebKeysInt
 	return &GetWellKnownJSONWebKeysInternalServerError{}
 }
 
-/*
-GetWellKnownJSONWebKeysInternalServerError handles this case with default header values.
+/*GetWellKnownJSONWebKeysInternalServerError handles this case with default header values.
 
 genericError
 */

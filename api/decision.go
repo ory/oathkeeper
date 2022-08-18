@@ -72,7 +72,7 @@ func (h *DecisionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request, next
 
 // swagger:route GET /decisions api decisions
 //
-// # Access Control Decision API
+// Access Control Decision API
 //
 // > This endpoint works with all HTTP Methods (GET, POST, PUT, ...) and matches every path prefixed with /decision.
 //
@@ -80,14 +80,14 @@ func (h *DecisionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request, next
 // request to the upstream server, returns 200 (request should be allowed), 401 (unauthorized), or 403 (forbidden)
 // status codes. This endpoint can be used to integrate with other API Proxies like Ambassador, Kong, Envoy, and many more.
 //
-//	Schemes: http, https
+//    Schemes: http, https
 //
-//	Responses:
-//	  200: emptyResponse
-//	  401: genericError
-//	  403: genericError
-//	  404: genericError
-//	  500: genericError
+//    Responses:
+//      200: emptyResponse
+//      401: genericError
+//      403: genericError
+//      404: genericError
+//      500: genericError
 func (h *DecisionHandler) decisions(w http.ResponseWriter, r *http.Request) {
 	fields := map[string]interface{}{
 		"http_method":     r.Method,

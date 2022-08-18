@@ -218,7 +218,7 @@
   "definitions": {
     "UUID": { "type": "string", "format": "uuid4" },
     "Upstream": {
-      "description": "Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream upstream",
+      "description": "Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream upstream",
       "type": "object",
       "properties": {
         "preserve_host": {
@@ -236,7 +236,7 @@
       }
     },
     "genericError": {
-      "description": "GenericError GenericError The standard error format",
+      "description": "GenericError GenericError GenericError The standard error format",
       "type": "object",
       "properties": {
         "code": {
@@ -271,7 +271,7 @@
       }
     },
     "healthNotReadyStatus": {
-      "description": "HealthNotReadyStatus HealthNotReadyStatus health not ready status",
+      "description": "HealthNotReadyStatus HealthNotReadyStatus HealthNotReadyStatus health not ready status",
       "type": "object",
       "properties": {
         "errors": {
@@ -284,7 +284,6 @@
       }
     },
     "healthStatus": {
-      "description": "HealthStatus health status",
       "type": "object",
       "properties": {
         "status": {
@@ -294,7 +293,7 @@
       }
     },
     "jsonWebKey": {
-      "description": "JSONWebKey JSONWebKey json web key",
+      "description": "JSONWebKey JSONWebKey JSONWebKey json web key",
       "type": "object",
       "properties": {
         "alg": {
@@ -371,7 +370,7 @@
       }
     },
     "jsonWebKeySet": {
-      "description": "JSONWebKeySet JSONWebKeySet JSONWebKeySet json web key set",
+      "description": "JSONWebKeySet JSONWebKeySet JSONWebKeySet JSONWebKeySet json web key set",
       "type": "object",
       "properties": {
         "keys": {
@@ -421,6 +420,7 @@
       }
     },
     "ruleHandler": {
+      "description": "RuleHandler rule handler",
       "type": "object",
       "properties": {
         "config": {
@@ -450,7 +450,6 @@
       }
     },
     "version": {
-      "description": "Version version",
       "type": "object",
       "properties": {
         "version": {

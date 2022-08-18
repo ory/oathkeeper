@@ -40,8 +40,7 @@ func NewGetVersionOK() *GetVersionOK {
 	return &GetVersionOK{}
 }
 
-/*
-GetVersionOK handles this case with default header values.
+/*GetVersionOK handles this case with default header values.
 
 version
 */
