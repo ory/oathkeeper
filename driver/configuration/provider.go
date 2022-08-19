@@ -5,9 +5,10 @@ import (
 	"net/url"
 	"time"
 
+	"github.com/rs/cors"
+
 	"github.com/ory/fosite"
 	"github.com/ory/x/tracing"
-	"github.com/rs/cors"
 )
 
 const (

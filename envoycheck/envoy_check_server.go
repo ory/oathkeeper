@@ -8,12 +8,13 @@ import (
 
 	corev3 "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
 	authv3 "github.com/envoyproxy/go-control-plane/envoy/service/auth/v3"
-	"github.com/ory/oathkeeper/proxy"
-	"github.com/ory/oathkeeper/rule"
-	"github.com/ory/x/logrusx"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/wrapperspb"
+
+	"github.com/ory/oathkeeper/proxy"
+	"github.com/ory/oathkeeper/rule"
+	"github.com/ory/x/logrusx"
 )
 
 type (

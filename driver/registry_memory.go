@@ -5,6 +5,7 @@ import (
 	"sync"
 
 	authv3 "github.com/envoyproxy/go-control-plane/envoy/service/auth/v3"
+
 	"github.com/ory/oathkeeper/driver/health"
 	"github.com/ory/oathkeeper/envoycheck"
 	"github.com/ory/oathkeeper/pipeline"

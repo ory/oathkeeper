@@ -24,11 +24,12 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/spf13/cobra"
+
 	_ "github.com/ory/jsonschema/v3/fileloader"
 	_ "github.com/ory/jsonschema/v3/httploader"
 	"github.com/ory/x/logrusx"
 	"github.com/ory/x/viperx"
-	"github.com/spf13/cobra"
 
 	schema "github.com/ory/oathkeeper/.schema"
 )

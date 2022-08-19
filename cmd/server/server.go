@@ -13,6 +13,13 @@ import (
 	"time"
 
 	authv3 "github.com/envoyproxy/go-control-plane/envoy/service/auth/v3"
+	"github.com/pkg/errors"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"github.com/spf13/cobra"
+	"github.com/urfave/negroni"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
+
 	"github.com/ory/analytics-go/v4"
 	"github.com/ory/graceful"
 	"github.com/ory/viper"
@@ -22,12 +29,6 @@ import (
 	telemetry "github.com/ory/x/metricsx"
 	"github.com/ory/x/reqlog"
 	"github.com/ory/x/tlsx"
-	"github.com/pkg/errors"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"github.com/spf13/cobra"
-	"github.com/urfave/negroni"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials"
 
 	"github.com/ory/oathkeeper/api"
 	"github.com/ory/oathkeeper/driver"

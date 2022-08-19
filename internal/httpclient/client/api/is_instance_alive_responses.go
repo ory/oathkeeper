@@ -46,7 +46,8 @@ func NewIsInstanceAliveOK() *IsInstanceAliveOK {
 	return &IsInstanceAliveOK{}
 }
 
-/*IsInstanceAliveOK handles this case with default header values.
+/*
+IsInstanceAliveOK handles this case with default header values.
 
 healthStatus
 */
@@ -79,7 +80,8 @@ func NewIsInstanceAliveInternalServerError() *IsInstanceAliveInternalServerError
 	return &IsInstanceAliveInternalServerError{}
 }
 
-/*IsInstanceAliveInternalServerError handles this case with default header values.
+/*
+IsInstanceAliveInternalServerError handles this case with default header values.
 
 genericError
 */
