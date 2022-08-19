@@ -21,7 +21,7 @@
         "produces": ["application/json"],
         "schemes": ["http", "https"],
         "tags": ["api"],
-        "summary": "Lists Cryptographic Keys",
+        "summary": "# Lists Cryptographic Keys",
         "operationId": "getWellKnownJSONWebKeys",
         "responses": {
           "200": {
@@ -44,7 +44,7 @@
         "description": "\u003e This endpoint works with all HTTP Methods (GET, POST, PUT, ...) and matches every path prefixed with /decision.\n\nThis endpoint mirrors the proxy capability of ORY Oathkeeper's proxy functionality but instead of forwarding the\nrequest to the upstream server, returns 200 (request should be allowed), 401 (unauthorized), or 403 (forbidden)\nstatus codes. This endpoint can be used to integrate with other API Proxies like Ambassador, Kong, Envoy, and many more.",
         "schemes": ["http", "https"],
         "tags": ["api"],
-        "summary": "Access Control Decision API",
+        "summary": "# Access Control Decision API",
         "operationId": "decisions",
         "responses": {
           "200": {
@@ -82,7 +82,7 @@
         "description": "This endpoint returns a 200 status code when the HTTP server is up running.\nThis status does currently not include checks whether the database connection is working.\n\nIf the service supports TLS Edge Termination, this endpoint does not require the\n`X-Forwarded-Proto` header to be set.\n\nBe aware that if you are running multiple nodes of this service, the health status will never\nrefer to the cluster state, only to a single instance.",
         "produces": ["application/json"],
         "tags": ["api"],
-        "summary": "Check Alive Status",
+        "summary": "# Check Alive Status",
         "operationId": "isInstanceAlive",
         "responses": {
           "200": {
@@ -105,7 +105,7 @@
         "description": "This endpoint returns a 200 status code when the HTTP server is up running and the environment dependencies (e.g.\nthe database) are responsive as well.\n\nIf the service supports TLS Edge Termination, this endpoint does not require the\n`X-Forwarded-Proto` header to be set.\n\nBe aware that if you are running multiple nodes of this service, the health status will never\nrefer to the cluster state, only to a single instance.",
         "produces": ["application/json"],
         "tags": ["api"],
-        "summary": "Check Readiness Status",
+        "summary": "# Check Readiness Status",
         "operationId": "isInstanceReady",
         "responses": {
           "200": {
@@ -130,7 +130,7 @@
         "produces": ["application/json"],
         "schemes": ["http", "https"],
         "tags": ["api"],
-        "summary": "List All Rules",
+        "summary": "# List All Rules",
         "operationId": "listRules",
         "parameters": [
           {
@@ -168,7 +168,7 @@
         "produces": ["application/json"],
         "schemes": ["http", "https"],
         "tags": ["api"],
-        "summary": "Retrieve a Rule",
+        "summary": "# Retrieve a Rule",
         "operationId": "getRule",
         "parameters": [
           {
@@ -202,7 +202,7 @@
         "description": "This endpoint returns the service version typically notated using semantic versioning.\n\nIf the service supports TLS Edge Termination, this endpoint does not require the\n`X-Forwarded-Proto` header to be set.\n\nBe aware that if you are running multiple nodes of this service, the health status will never\nrefer to the cluster state, only to a single instance.",
         "produces": ["application/json"],
         "tags": ["api"],
-        "summary": "Get Service Version",
+        "summary": "# Get Service Version",
         "operationId": "getVersion",
         "responses": {
           "200": {
@@ -218,7 +218,7 @@
   "definitions": {
     "UUID": { "type": "string", "format": "uuid4" },
     "Upstream": {
-      "description": "Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream upstream",
+      "description": "Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream upstream",
       "type": "object",
       "properties": {
         "preserve_host": {
@@ -236,7 +236,7 @@
       }
     },
     "genericError": {
-      "description": "The standard error format",
+      "description": "GenericError The standard error format",
       "type": "object",
       "properties": {
         "code": {
@@ -271,6 +271,7 @@
       }
     },
     "healthNotReadyStatus": {
+      "description": "HealthNotReadyStatus health not ready status",
       "type": "object",
       "properties": {
         "errors": {
@@ -283,6 +284,7 @@
       }
     },
     "healthStatus": {
+      "description": "HealthStatus health status",
       "type": "object",
       "properties": {
         "status": {
@@ -292,6 +294,7 @@
       }
     },
     "jsonWebKey": {
+      "description": "JSONWebKey json web key",
       "type": "object",
       "properties": {
         "alg": {
@@ -368,7 +371,7 @@
       }
     },
     "jsonWebKeySet": {
-      "description": "JSONWebKeySet json web key set",
+      "description": "JSONWebKeySet JSONWebKeySet json web key set",
       "type": "object",
       "properties": {
         "keys": {
@@ -382,7 +385,7 @@
     },
     "rule": {
       "type": "object",
-      "title": "swaggerRule is a single rule that will get checked on every HTTP request.",
+      "title": "Rule swaggerRule is a single rule that will get checked on every HTTP request.",
       "properties": {
         "authenticators": {
           "description": "Authenticators is a list of authentication handlers that will try and authenticate the provided credentials.\nAuthenticators are checked iteratively from index 0 to n and if the first authenticator to return a positive\nresult will be the one used.\n\nIf you want the rule to first check a specific authenticator  before \"falling back\" to others, have that authenticator\nas the first item in the array.",
@@ -418,7 +421,6 @@
       }
     },
     "ruleHandler": {
-      "description": "RuleHandler RuleHandler rule handler",
       "type": "object",
       "properties": {
         "config": {
@@ -432,7 +434,6 @@
       }
     },
     "ruleMatch": {
-      "description": "RuleMatch RuleMatch rule match",
       "type": "object",
       "properties": {
         "methods": {
