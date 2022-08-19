@@ -8,6 +8,7 @@ services:
     ports:
       - "4455:4455"
       - "4456:4456"
+      - "4457:4457"
     command: serve --config=/etc/config/oathkeeper/config.yaml
     environment:
       - TRACING_PROVIDER=jaeger
@@ -24,6 +25,7 @@ services:
     image: jaegertracing/all-in-one
     ports:
       - "16686:16686" # The UI port
+
 #      These are ports for collecting, sampling, agents, ...
 #      - "5775:5775/udp"
 #      - "6831:6831/udp"

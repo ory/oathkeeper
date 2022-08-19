@@ -24,20 +24,16 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/gobuffalo/packr/v2"
-	"github.com/spf13/cobra"
-
-	"github.com/ory/x/logrusx"
-
 	_ "github.com/ory/jsonschema/v3/fileloader"
 	_ "github.com/ory/jsonschema/v3/httploader"
-
+	"github.com/ory/x/logrusx"
 	"github.com/ory/x/viperx"
+	"github.com/spf13/cobra"
+
+	schema "github.com/ory/oathkeeper/.schema"
 )
 
 var logger *logrusx.Logger
-
-var schemas = packr.New("schemas", "../.schema")
 
 // RootCmd represents the base command when called without any subcommands
 var RootCmd = &cobra.Command{
@@ -55,7 +51,7 @@ func Execute() {
 }
 
 func watchAndValidateViper() {
-	schema, err := schemas.Find("config.schema.json")
+	schema, err := schema.FS.ReadFile("config.schema.json")
 	if err != nil {
 		logger.WithError(err).Fatal("Unable to open configuration JSON Schema.")
 	}

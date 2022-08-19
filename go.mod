@@ -16,6 +16,7 @@ require (
 	github.com/bxcodec/faker v2.0.1+incompatible
 	github.com/dgraph-io/ristretto v0.0.2
 	github.com/dlclark/regexp2 v1.2.0
+	github.com/envoyproxy/go-control-plane v0.9.4
 	github.com/form3tech-oss/jwt-go v3.2.2+incompatible
 	github.com/fsnotify/fsnotify v1.4.9
 	github.com/ghodss/yaml v1.0.0
@@ -75,6 +76,8 @@ require (
 	golang.org/x/sys v0.0.0-20210927094055-39ccf1dd6fa6 // indirect
 	golang.org/x/tools v0.1.7
 	google.golang.org/api v0.30.0
+	google.golang.org/grpc v1.31.0
+	google.golang.org/protobuf v1.25.0
 	gopkg.in/square/go-jose.v2 v2.5.1
 )
 

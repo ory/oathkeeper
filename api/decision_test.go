@@ -102,7 +102,6 @@ func TestDecisionAPI(t *testing.T) {
 		url         string
 		code        int
 		reqBody     []byte
-		messages    []string
 		rulesRegexp []rule.Rule
 		rulesGlob   []rule.Rule
 		transform   func(r *http.Request)
@@ -343,7 +342,7 @@ func TestDecisionAPI(t *testing.T) {
 				testFunc(configuration.Regexp)
 			})
 			t.Run("glob", func(t *testing.T) {
-				reg.RuleRepository().(*rule.RepositoryMemory).WithRules(tc.rulesRegexp)
+				reg.RuleRepository().(*rule.RepositoryMemory).WithRules(tc.rulesGlob)
 				testFunc(configuration.Glob)
 			})
 		})

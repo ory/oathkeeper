@@ -2,29 +2,32 @@ package server
 
 import (
 	"bytes"
+	"context"
 	"crypto/tls"
 	"encoding/json"
 	"fmt"
+	"net"
 	"net/http"
 	"net/http/httputil"
 	"sync"
 	"time"
 
-	"github.com/pkg/errors"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"github.com/spf13/cobra"
-	"github.com/urfave/negroni"
-
+	authv3 "github.com/envoyproxy/go-control-plane/envoy/service/auth/v3"
 	"github.com/ory/analytics-go/v4"
 	"github.com/ory/graceful"
 	"github.com/ory/viper"
-
 	"github.com/ory/x/corsx"
 	"github.com/ory/x/healthx"
 	"github.com/ory/x/logrusx"
 	telemetry "github.com/ory/x/metricsx"
 	"github.com/ory/x/reqlog"
 	"github.com/ory/x/tlsx"
+	"github.com/pkg/errors"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"github.com/spf13/cobra"
+	"github.com/urfave/negroni"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 
 	"github.com/ory/oathkeeper/api"
 	"github.com/ory/oathkeeper/driver"
@@ -145,6 +148,45 @@ func runPrometheus(d driver.Driver, logger *logrusx.Logger, prom *metrics.Promet
 	}
 }
 
+func runEnvoyCheckEndpoint(d driver.Driver, logger *logrusx.Logger) func() {
+	return func() {
+		addr := d.Configuration().EnvoyCheckEndpointAddress()
+		l, err := net.Listen("tcp", addr)
+		if err != nil {
+			logger.Fatalf("Unable to start the Envoy Check() endpoint on %s: %v", addr, err)
+			return
+		}
+
+		var s *grpc.Server
+		if certs := cert("check", logger); certs != nil {
+			s = grpc.NewServer(grpc.Creds(
+				credentials.NewTLS(&tls.Config{
+					Certificates: certs,
+					ClientAuth:   tls.NoClientCert,
+				}),
+			))
+		} else {
+			s = grpc.NewServer()
+		}
+
+		authv3.RegisterAuthorizationServer(s, d.Registry().EnvoyCheckServer())
+
+		if err := graceful.Graceful(func() error {
+			logger.Infof("Listening on grpcs://%s", addr)
+			return s.Serve(l)
+		}, func(_ context.Context) error {
+			s.Stop()
+			return nil
+		}); err != nil {
+			logger.Fatalf("Unable to gracefully shutdown gRPC server because %v", err)
+			return
+		}
+		logger.Println("Envoy Check() endpoint was shutdown gracefully")
+
+		s.Serve(l)
+	}
+}
+
 func cert(daemon string, logger *logrusx.Logger) []tls.Certificate {
 	cert, err := tlsx.Certificate(
 		viper.GetString("serve."+daemon+".tls.cert.base64"),
@@ -237,6 +279,7 @@ func RunServe(version, build, date string) func(cmd *cobra.Command, args []strin
 			runAPI(d, adminmw, logger, prometheusRepo),
 			runProxy(d, publicmw, logger, prometheusRepo),
 			runPrometheus(d, logger, prometheusRepo),
+			runEnvoyCheckEndpoint(d, logger),
 		}
 		wg.Add(len(tasks))
 		for _, t := range tasks {

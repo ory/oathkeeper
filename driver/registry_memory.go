@@ -4,7 +4,9 @@ import (
 	"context"
 	"sync"
 
+	authv3 "github.com/envoyproxy/go-control-plane/envoy/service/auth/v3"
 	"github.com/ory/oathkeeper/driver/health"
+	"github.com/ory/oathkeeper/envoycheck"
 	"github.com/ory/oathkeeper/pipeline"
 	pe "github.com/ory/oathkeeper/pipeline/errors"
 	"github.com/ory/oathkeeper/proxy"
@@ -42,7 +44,8 @@ type RegistryMemory struct {
 	c            configuration.Provider
 	trc          *tracing.Tracer
 
-	ch *api.CredentialsHandler
+	ch          *api.CredentialsHandler
+	checkServer authv3.AuthorizationServer
 
 	credentialsFetcher  credentials.Fetcher
 	credentialsVerifier credentials.Verifier
@@ -140,6 +143,14 @@ func (r *RegistryMemory) CredentialHandler() *api.CredentialsHandler {
 	}
 
 	return r.ch
+}
+
+func (r *RegistryMemory) EnvoyCheckServer() authv3.AuthorizationServer {
+	if r.checkServer == nil {
+		r.checkServer = envoycheck.NewServer(r)
+	}
+
+	return r.checkServer
 }
 
 func (r *RegistryMemory) HealthEventManager() health.EventManager {

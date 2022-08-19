@@ -6,6 +6,7 @@ import (
 	"github.com/ory/x/healthx"
 	"github.com/ory/x/tracing"
 
+	authv3 "github.com/envoyproxy/go-control-plane/envoy/service/auth/v3"
 	"github.com/ory/oathkeeper/driver/health"
 	"github.com/ory/oathkeeper/pipeline/errors"
 	"github.com/ory/oathkeeper/proxy"
@@ -36,6 +37,7 @@ type Registry interface {
 	RuleHandler() *api.RuleHandler
 	DecisionHandler() *api.DecisionHandler
 	CredentialHandler() *api.CredentialsHandler
+	EnvoyCheckServer() authv3.AuthorizationServer
 
 	Proxy() *proxy.Proxy
 	Tracer() *tracing.Tracer

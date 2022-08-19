@@ -1158,6 +1158,29 @@
             }
           }
         },
+        "check": {
+          "type": "object",
+          "title": "Envoy Check gRPC API",
+          "additionalProperties": false,
+          "properties": {
+            "port": {
+              "type": "integer",
+              "default": 4457,
+              "title": "Port",
+              "description": "The port to listen on."
+            },
+            "host": {
+              "type": "string",
+              "default": "",
+              "examples": ["localhost", "127.0.0.1"],
+              "title": "Host",
+              "description": "The network interface to listen on."
+            },
+            "tls": {
+              "$ref": "#/definitions/tlsx"
+            }
+          }
+        },
         "proxy": {
           "type": "object",
           "title": "HTTP Reverse Proxy",

@@ -27,6 +27,7 @@ import (
 	"github.com/ory/x/tracing"
 	"github.com/ory/x/viperx"
 
+	schema "github.com/ory/oathkeeper/.schema"
 	"github.com/ory/oathkeeper/x"
 )
 
@@ -48,6 +49,8 @@ const (
 	ViperKeyAPIReadTimeout                      = "serve.api.timeout.read"
 	ViperKeyAPIWriteTimeout                     = "serve.api.timeout.write"
 	ViperKeyAPIIdleTimeout                      = "serve.api.timeout.idle"
+	ViperKeyEnvoyCheckEndpointHost              = "serve.envoycheck.host"
+	ViperKeyEnvoyCheckEndpointPort              = "serve.envoycheck.port"
 	ViperKeyPrometheusServeAddressHost          = "serve.prometheus.host"
 	ViperKeyPrometheusServeAddressPort          = "serve.prometheus.port"
 	ViperKeyPrometheusServeMetricsPath          = "serve.prometheus.metrics_path"
@@ -200,6 +203,14 @@ func (v *ViperProvider) APIServeAddress() string {
 	)
 }
 
+func (v *ViperProvider) EnvoyCheckEndpointAddress() string {
+	return fmt.Sprintf(
+		"%s:%d",
+		viperx.GetString(v.l, ViperKeyEnvoyCheckEndpointHost, ""),
+		viperx.GetInt(v.l, ViperKeyEnvoyCheckEndpointPort, 4457),
+	)
+}
+
 func (v *ViperProvider) PrometheusServeAddress() string {
 	return fmt.Sprintf(
 		"%s:%d",
@@ -348,12 +359,12 @@ func (v *ViperProvider) PipelineConfig(prefix, id string, override json.RawMessa
 		}
 	}
 
-	rawComponentSchema, err := schemas.Find(fmt.Sprintf("pipeline/%s.%s.schema.json", strings.Split(prefix, ".")[0], id))
+	rawComponentSchema, err := schema.FS.ReadFile(fmt.Sprintf("pipeline/%s.%s.schema.json", strings.Split(prefix, ".")[0], id))
 	if err != nil {
 		return errors.WithStack(err)
 	}
 
-	rawRootSchema, err := schemas.Find("config.schema.json")
+	rawRootSchema, err := schema.FS.ReadFile("config.schema.json")
 	if err != nil {
 		return errors.WithStack(err)
 	}
