@@ -27,6 +27,7 @@ import (
 	"github.com/ory/x/tracing"
 	"github.com/ory/x/viperx"
 
+	schema "github.com/ory/oathkeeper/.schema"
 	"github.com/ory/oathkeeper/x"
 )
 
@@ -353,12 +354,12 @@ func (v *ViperProvider) PipelineConfig(prefix, id string, override json.RawMessa
 		}
 	}
 
-	rawComponentSchema, err := schemas.Find(fmt.Sprintf("pipeline/%s.%s.schema.json", strings.Split(prefix, ".")[0], id))
+	rawComponentSchema, err := schema.FS.ReadFile(fmt.Sprintf("pipeline/%s.%s.schema.json", strings.Split(prefix, ".")[0], id))
 	if err != nil {
 		return errors.WithStack(err)
 	}
 
-	rawRootSchema, err := schemas.Find("config.schema.json")
+	rawRootSchema, err := schema.FS.ReadFile("config.schema.json")
 	if err != nil {
 		return errors.WithStack(err)
 	}

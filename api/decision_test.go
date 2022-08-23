@@ -102,7 +102,6 @@ func TestDecisionAPI(t *testing.T) {
 		url         string
 		code        int
 		reqBody     []byte
-		messages    []string
 		rulesRegexp []rule.Rule
 		rulesGlob   []rule.Rule
 		transform   func(r *http.Request)
@@ -338,12 +337,12 @@ func TestDecisionAPI(t *testing.T) {
 				assert.Equal(t, tc.code, res.StatusCode)
 				assert.Equal(t, strconv.Itoa(len(entireBody)), res.Header.Get("Content-Length"))
 			}
-			t.Run("regexp", func(t *testing.T) {
+			t.Run("regexp", func(_ *testing.T) {
 				reg.RuleRepository().(*rule.RepositoryMemory).WithRules(tc.rulesRegexp)
 				testFunc(configuration.Regexp)
 			})
-			t.Run("glob", func(t *testing.T) {
-				reg.RuleRepository().(*rule.RepositoryMemory).WithRules(tc.rulesRegexp)
+			t.Run("glob", func(_ *testing.T) {
+				reg.RuleRepository().(*rule.RepositoryMemory).WithRules(tc.rulesGlob)
 				testFunc(configuration.Glob)
 			})
 		})

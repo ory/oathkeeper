@@ -5,15 +5,10 @@ import (
 	"net/url"
 	"time"
 
-	"github.com/gobuffalo/packr/v2"
-
 	"github.com/ory/fosite"
 	"github.com/ory/x/tracing"
-
 	"github.com/rs/cors"
 )
-
-var schemas = packr.New("schemas", "../../.schema")
 
 const (
 	ForbiddenStrategyErrorType = "forbidden"
