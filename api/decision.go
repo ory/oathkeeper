@@ -100,7 +100,7 @@ func (h *DecisionHandler) decisions(w http.ResponseWriter, r *http.Request) {
 		fields["subject"] = sess.Subject
 	}
 
-	rl, err := h.r.RuleMatcher().Match(r.Context(), r.Method, r.URL)
+	rl, err := h.r.RuleMatcher().Match(r.Context(), r.Method, r.URL, rule.ProtocolHTTP)
 	if err != nil {
 		h.r.Logger().WithError(err).
 			WithFields(fields).

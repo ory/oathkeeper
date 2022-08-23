@@ -13,8 +13,9 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/ory/oathkeeper/x"
 	"github.com/ory/x/logrusx"
+
+	"github.com/ory/oathkeeper/x"
 
 	"github.com/ory/herodot"
 	"github.com/ory/x/urlx"

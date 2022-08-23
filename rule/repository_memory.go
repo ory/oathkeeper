@@ -125,7 +125,7 @@ func (m *RepositoryMemory) Set(ctx context.Context, rules []Rule) error {
 	return nil
 }
 
-func (m *RepositoryMemory) Match(_ context.Context, method string, u *url.URL) (*Rule, error) {
+func (m *RepositoryMemory) Match(ctx context.Context, method string, u *url.URL, protocol Protocol) (*Rule, error) {
 	if u == nil {
 		return nil, errors.WithStack(errors.New("nil URL provided"))
 	}
@@ -136,7 +136,7 @@ func (m *RepositoryMemory) Match(_ context.Context, method string, u *url.URL) (
 	var rules []Rule
 	for k := range m.rules {
 		r := &m.rules[k]
-		if matched, err := r.IsMatching(m.matchingStrategy, method, u); err != nil {
+		if matched, err := r.IsMatching(m.matchingStrategy, method, u, protocol); err != nil {
 			return nil, errors.WithStack(err)
 		} else if matched {
 			rules = append(rules, *r)

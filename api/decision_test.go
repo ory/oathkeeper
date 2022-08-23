@@ -25,7 +25,7 @@ import (
 	"context"
 	"crypto/tls"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -39,13 +39,14 @@ import (
 	"github.com/urfave/negroni"
 
 	"github.com/ory/herodot"
+	"github.com/ory/x/logrusx"
+
 	"github.com/ory/oathkeeper/api"
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/internal"
 	"github.com/ory/oathkeeper/pipeline/authn"
 	"github.com/ory/oathkeeper/proxy"
 	"github.com/ory/oathkeeper/rule"
-	"github.com/ory/x/logrusx"
 )
 
 func TestDecisionAPI(t *testing.T) {
@@ -101,7 +102,6 @@ func TestDecisionAPI(t *testing.T) {
 		url         string
 		code        int
 		reqBody     []byte
-		messages    []string
 		rulesRegexp []rule.Rule
 		rulesGlob   []rule.Rule
 		transform   func(r *http.Request)
@@ -329,7 +329,7 @@ func TestDecisionAPI(t *testing.T) {
 				res, err := http.DefaultClient.Do(req)
 				require.NoError(t, err)
 
-				entireBody, err := ioutil.ReadAll(res.Body)
+				entireBody, err := io.ReadAll(res.Body)
 				require.NoError(t, err)
 				defer res.Body.Close()
 
@@ -337,12 +337,12 @@ func TestDecisionAPI(t *testing.T) {
 				assert.Equal(t, tc.code, res.StatusCode)
 				assert.Equal(t, strconv.Itoa(len(entireBody)), res.Header.Get("Content-Length"))
 			}
-			t.Run("regexp", func(t *testing.T) {
+			t.Run("regexp", func(_ *testing.T) {
 				reg.RuleRepository().(*rule.RepositoryMemory).WithRules(tc.rulesRegexp)
 				testFunc(configuration.Regexp)
 			})
-			t.Run("glob", func(t *testing.T) {
-				reg.RuleRepository().(*rule.RepositoryMemory).WithRules(tc.rulesRegexp)
+			t.Run("glob", func(_ *testing.T) {
+				reg.RuleRepository().(*rule.RepositoryMemory).WithRules(tc.rulesGlob)
 				testFunc(configuration.Glob)
 			})
 		})
@@ -369,7 +369,7 @@ func (*decisionHandlerRegistryMock) Logger() *logrusx.Logger {
 	return logrusx.New("", "")
 }
 
-func (m *decisionHandlerRegistryMock) Match(ctx context.Context, method string, u *url.URL) (*rule.Rule, error) {
+func (m *decisionHandlerRegistryMock) Match(ctx context.Context, method string, u *url.URL, _ rule.Protocol) (*rule.Rule, error) {
 	args := m.Called(ctx, method, u)
 	return args.Get(0).(*rule.Rule), args.Error(1)
 }

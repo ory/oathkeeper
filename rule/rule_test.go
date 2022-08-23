@@ -87,7 +87,7 @@ func TestRule(t *testing.T) {
 	for ind, tcase := range tests {
 		t.Run(strconv.FormatInt(int64(ind), 10), func(t *testing.T) {
 			testFunc := func(rule Rule, strategy configuration.MatchingStrategy) {
-				matched, err := rule.IsMatching(strategy, tcase.method, mustParse(t, tcase.url))
+				matched, err := rule.IsMatching(strategy, tcase.method, mustParse(t, tcase.url), ProtocolHTTP)
 				assert.Equal(t, tcase.expectedMatch, matched)
 				assert.Equal(t, tcase.expectedErr, err)
 			}
@@ -139,7 +139,7 @@ func TestRule1(t *testing.T) {
 	}
 	for ind, tcase := range tests {
 		t.Run(strconv.FormatInt(int64(ind), 10), func(t *testing.T) {
-			matched, err := r.IsMatching(configuration.Regexp, tcase.method, mustParse(t, tcase.url))
+			matched, err := r.IsMatching(configuration.Regexp, tcase.method, mustParse(t, tcase.url), ProtocolHTTP)
 			assert.Equal(t, tcase.expectedMatch, matched)
 			assert.Equal(t, tcase.expectedErr, err)
 		})
@@ -181,7 +181,7 @@ func TestRuleWithCustomMethod(t *testing.T) {
 	}
 	for ind, tcase := range tests {
 		t.Run(strconv.FormatInt(int64(ind), 10), func(t *testing.T) {
-			matched, err := r.IsMatching(configuration.Regexp, tcase.method, mustParse(t, tcase.url))
+			matched, err := r.IsMatching(configuration.Regexp, tcase.method, mustParse(t, tcase.url), ProtocolHTTP)
 			assert.Equal(t, tcase.expectedMatch, matched)
 			assert.Equal(t, tcase.expectedErr, err)
 		})

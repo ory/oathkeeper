@@ -5,6 +5,15 @@ import (
 	"net/url"
 )
 
-type Matcher interface {
-	Match(ctx context.Context, method string, u *url.URL) (*Rule, error)
-}
+type (
+	Protocol int
+
+	Matcher interface {
+		Match(ctx context.Context, method string, u *url.URL, protocol Protocol) (*Rule, error)
+	}
+)
+
+const (
+	ProtocolHTTP Protocol = iota
+	ProtocolGRPC
+)

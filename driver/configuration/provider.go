@@ -6,11 +6,10 @@ import (
 	"testing"
 	"time"
 
+	"github.com/rs/cors"
 	"github.com/ory/fosite"
 	"github.com/ory/x/configx"
 	"github.com/ory/x/tracing"
-
-	"github.com/rs/cors"
 )
 
 const (

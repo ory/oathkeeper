@@ -52,10 +52,12 @@ func NewGetWellKnownJSONWebKeysParamsWithHTTPClient(client *http.Client) *GetWel
 	}
 }
 
-/* GetWellKnownJSONWebKeysParams contains all the parameters to send to the API endpoint
-   for the get well known JSON web keys operation.
+/*
+GetWellKnownJSONWebKeysParams contains all the parameters to send to the API endpoint
 
-   Typically these are written to a http.Request.
+	for the get well known JSON web keys operation.
+
+	Typically these are written to a http.Request.
 */
 type GetWellKnownJSONWebKeysParams struct {
 	timeout    time.Duration

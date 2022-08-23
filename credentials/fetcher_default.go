@@ -211,14 +211,13 @@ func (s *FetcherDefault) resolveAll(done chan struct{}, errs chan error, locatio
 
 func (s *FetcherDefault) resolve(wg *sync.WaitGroup, errs chan error, location url.URL) {
 	defer wg.Done()
-	var reader io.Reader
+	var (
+		reader io.ReadCloser
+		err    error
+	)
 
 	switch location.Scheme {
-	case "azblob":
-		fallthrough
-	case "gs":
-		fallthrough
-	case "s3":
+	case "azblob", "gs", "s3":
 		ctx := context.Background()
 		bucket, err := s.mux.OpenBucket(ctx, location.Scheme+"://"+location.Host)
 		if err != nil {
@@ -234,7 +233,7 @@ func (s *FetcherDefault) resolve(wg *sync.WaitGroup, errs chan error, location u
 		}
 		defer bucket.Close()
 
-		r, err := bucket.NewReader(ctx, location.Path[1:], nil)
+		reader, err = bucket.NewReader(ctx, location.Path[1:], nil)
 		if err != nil {
 			errs <- errors.WithStack(herodot.
 				ErrInternalServerError.
@@ -246,13 +245,10 @@ func (s *FetcherDefault) resolve(wg *sync.WaitGroup, errs chan error, location u
 			)
 			return
 		}
-		defer r.Close()
+		defer reader.Close()
 
-		reader = r
-	case "":
-		fallthrough
-	case "file":
-		f, err := os.Open(urlx.GetURLFilePath(&location))
+	case "", "file":
+		reader, err = os.Open(urlx.GetURLFilePath(&location))
 		if err != nil {
 			errs <- errors.WithStack(herodot.
 				ErrInternalServerError.
@@ -264,9 +260,8 @@ func (s *FetcherDefault) resolve(wg *sync.WaitGroup, errs chan error, location u
 			)
 			return
 		}
-		defer f.Close()
+		defer reader.Close()
 
-		reader = f
 	case "http", "https":
 		res, err := s.client.Get(location.String())
 		if err != nil {
@@ -280,7 +275,8 @@ func (s *FetcherDefault) resolve(wg *sync.WaitGroup, errs chan error, location u
 			)
 			return
 		}
-		defer res.Body.Close()
+		reader = res.Body
+		defer reader.Close()
 
 		if res.StatusCode < 200 || res.StatusCode >= 400 {
 			errs <- errors.WithStack(herodot.
@@ -294,7 +290,6 @@ func (s *FetcherDefault) resolve(wg *sync.WaitGroup, errs chan error, location u
 			return
 		}
 
-		reader = res.Body
 	default:
 		errs <- errors.WithStack(herodot.
 			ErrInternalServerError.

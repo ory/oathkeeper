@@ -1,3 +1,5 @@
+go 1.19
+
 module github.com/ory/oathkeeper
 
 replace (
@@ -14,12 +16,12 @@ require (
 	github.com/auth0/go-jwt-middleware v1.0.1
 	github.com/aws/aws-sdk-go v1.34.28
 	github.com/blang/semver v3.5.1+incompatible
-	github.com/bxcodec/faker v2.0.1+incompatible
 	github.com/dgraph-io/ristretto v0.1.0
 	github.com/dlclark/regexp2 v1.2.0
 	github.com/form3tech-oss/jwt-go v3.2.2+incompatible
 	github.com/fsnotify/fsnotify v1.5.4
 	github.com/ghodss/yaml v1.0.0
+	github.com/go-faker/faker/v4 v4.0.0-beta.2
 	github.com/go-openapi/errors v0.20.3
 	github.com/go-openapi/runtime v0.24.1
 	github.com/go-openapi/strfmt v0.21.3
@@ -31,6 +33,7 @@ require (
 	github.com/gobwas/glob v0.2.3
 	github.com/golang-jwt/jwt/v4 v4.0.0
 	github.com/golang/gddo v0.0.0-20190904175337-72a348e765d2
+	github.com/golang/mock v1.6.0
 	github.com/google/go-replayers/httpreplay v1.1.1
 	github.com/google/uuid v1.3.0
 	github.com/gorilla/websocket v1.4.2
@@ -73,6 +76,7 @@ require (
 	golang.org/x/oauth2 v0.0.0-20220822191816-0ebed06d0094
 	golang.org/x/tools v0.1.12
 	google.golang.org/api v0.84.0
+	google.golang.org/grpc v1.47.0
 	gopkg.in/square/go-jose.v2 v2.6.0
 )
 
@@ -273,7 +277,6 @@ require (
 	golang.org/x/xerrors v0.0.0-20220609144429-65e65417b02f // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/genproto v0.0.0-20220616135557-88e70c0c3a90 // indirect
-	google.golang.org/grpc v1.47.0 // indirect
 	google.golang.org/protobuf v1.28.1 // indirect
 	gopkg.in/DataDog/dd-trace-go.v1 v1.39.0 // indirect
 	gopkg.in/ini.v1 v1.66.4 // indirect
@@ -281,5 +284,3 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	howett.net/plist v0.0.0-20181124034731-591f970eefbb // indirect
 )
-
-go 1.19

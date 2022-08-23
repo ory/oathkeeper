@@ -27,6 +27,7 @@ import (
 	"strings"
 
 	"github.com/pkg/errors"
+	"github.com/tidwall/gjson"
 
 	"github.com/ory/oathkeeper/driver/configuration"
 )
@@ -51,6 +52,21 @@ type Match struct {
 	// The glob equivalent of the above regexp example is `https://mydomain.com/<*>`.
 	URL string `json:"url"`
 }
+
+func (m *Match) GetURL() string       { return m.URL }
+func (m *Match) GetMethods() []string { return m.Methods }
+func (m *Match) Protocol() Protocol   { return ProtocolHTTP }
+
+type MatchGRPC struct {
+	Authority  string `json:"authority"`
+	FullMethod string `json:"full_method"`
+}
+
+func (m *MatchGRPC) GetURL() string {
+	return fmt.Sprintf("grpc://%s/%s", m.Authority, m.FullMethod)
+}
+func (m *MatchGRPC) GetMethods() []string { return []string{"POST"} }
+func (m *MatchGRPC) Protocol() Protocol   { return ProtocolGRPC }
 
 type Handler struct {
 	// Handler identifies the implementation which will be used to handle this specific request. Please read the user
@@ -79,6 +95,12 @@ type OnErrorRequest struct {
 	Accept []string `json:"accept"`
 }
 
+type URLProvider interface {
+	GetURL() string
+	GetMethods() []string
+	Protocol() Protocol
+}
+
 // Rule is a single rule that will get checked on every HTTP request.
 type Rule struct {
 	// ID is the unique id of the rule. It can be at most 190 characters long, but the layout of the ID is up to you.
@@ -93,7 +115,7 @@ type Rule struct {
 	Description string `json:"description"`
 
 	// Match defines the URL that this rule should match.
-	Match *Match `json:"match"`
+	Match URLProvider `json:"match" faker:"urlProvider"`
 
 	// Authenticators is a list of authentication handlers that will try and authenticate the provided credentials.
 	// Authenticators are checked iteratively from index 0 to n and if the first authenticator to return a positive
@@ -143,26 +165,53 @@ func (r *Rule) UnmarshalJSON(raw []byte) error {
 		ID             string         `json:"id"`
 		Version        string         `json:"version"`
 		Description    string         `json:"description"`
-		Match          *Match         `json:"match"`
 		Authenticators []Handler      `json:"authenticators"`
 		Authorizer     Handler        `json:"authorizer"`
 		Mutators       []Handler      `json:"mutators"`
 		Errors         []ErrorHandler `json:"errors"`
 		Upstream       Upstream       `json:"upstream"`
-		matchingEngine MatchingEngine
+
+		RawMatch json.RawMessage `json:"match"`
+		Match    URLProvider
 	}
 
 	transformed, err := migrateRuleJSON(raw)
 	if err != nil {
-		return err
+		return errors.WithStack(err)
 	}
 
-	if err := errors.WithStack(json.Unmarshal(transformed, &rr)); err != nil {
-		return err
+	if err := json.Unmarshal(transformed, &rr); err != nil {
+		return errors.WithStack(err)
+	}
+	if rr.RawMatch != nil {
+		if err := unmarshalMatch(rr.RawMatch, &rr.Match); err != nil {
+			return errors.WithStack(err)
+		}
 	}
 
-	*r = rr
+	// copy all fields
+	r.ID = rr.ID
+	r.Version = rr.Version
+	r.Description = rr.Description
+	r.Match = rr.Match
+	r.Authenticators = rr.Authenticators
+	r.Authorizer = rr.Authorizer
+	r.Mutators = rr.Mutators
+	r.Errors = rr.Errors
+	r.Upstream = rr.Upstream
+
 	return nil
+}
+
+// unmarshalMatch does polymorphic decoding of the match based on keys.
+func unmarshalMatch(raw json.RawMessage, v *URLProvider) error {
+	if gjson.Get(string(raw), "full_method").Exists() {
+		// full_method --> grpc matching rule
+		*v = new(MatchGRPC)
+	} else {
+		*v = new(Match)
+	}
+	return json.Unmarshal(raw, *v)
 }
 
 // GetID returns the rule's ID.
@@ -172,15 +221,22 @@ func (r *Rule) GetID() string {
 
 // IsMatching checks whether the provided url and method match the rule.
 // An error will be returned if a regexp matching strategy is selected and regexp timeout occurs.
-func (r *Rule) IsMatching(strategy configuration.MatchingStrategy, method string, u *url.URL) (bool, error) {
-	if !stringInSlice(method, r.Match.Methods) {
+func (r *Rule) IsMatching(strategy configuration.MatchingStrategy, method string, u *url.URL, protocol Protocol) (bool, error) {
+	if r.Match == nil {
+		return false, errors.New("no Match configured (was nil)")
+	}
+	if !stringInSlice(method, r.Match.GetMethods()) {
 		return false, nil
 	}
 	if err := ensureMatchingEngine(r, strategy); err != nil {
 		return false, err
 	}
+	if r.Match.Protocol() != protocol {
+		return false, nil
+	}
+
 	matchAgainst := fmt.Sprintf("%s://%s%s", u.Scheme, u.Host, u.Path)
-	return r.matchingEngine.IsMatching(r.Match.URL, matchAgainst)
+	return r.matchingEngine.IsMatching(r.Match.GetURL(), matchAgainst)
 }
 
 // ReplaceAllString searches the input string and replaces each match (with the rule's pattern)
@@ -190,7 +246,7 @@ func (r *Rule) ReplaceAllString(strategy configuration.MatchingStrategy, input, 
 		return "", err
 	}
 
-	return r.matchingEngine.ReplaceAllString(r.Match.URL, input, replacement)
+	return r.matchingEngine.ReplaceAllString(r.Match.GetURL(), input, replacement)
 }
 
 func stringInSlice(a string, list []string) bool {
@@ -229,7 +285,7 @@ func (r *Rule) ExtractRegexGroups(strategy configuration.MatchingStrategy, u *ur
 	}
 
 	matchAgainst := fmt.Sprintf("%s://%s%s", u.Scheme, u.Host, u.Path)
-	groups, err := r.matchingEngine.FindStringSubmatch(r.Match.URL, matchAgainst)
+	groups, err := r.matchingEngine.FindStringSubmatch(r.Match.GetURL(), matchAgainst)
 	if err != nil {
 		return nil, err
 	}

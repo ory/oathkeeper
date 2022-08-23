@@ -23,9 +23,11 @@ package rule
 import (
 	"context"
 	"fmt"
+	"math/rand"
+	"reflect"
 	"testing"
 
-	"github.com/bxcodec/faker"
+	"github.com/go-faker/faker/v4"
 	_ "github.com/go-sql-driver/mysql"
 	_ "github.com/lib/pq"
 	"github.com/pkg/errors"
@@ -59,11 +61,11 @@ func (v *validatorNoop) Validate(*Rule) error {
 type mockHealthEventManager struct {
 }
 
-func (m *mockHealthEventManager) Dispatch(evt health.ReadinessProbeEvent) {
+func (m *mockHealthEventManager) Dispatch(_ health.ReadinessProbeEvent) {
 
 }
 
-func (m *mockHealthEventManager) Watch(ctx context.Context) {
+func (m *mockHealthEventManager) Watch(_ context.Context) {
 
 }
 
@@ -82,6 +84,22 @@ func (r *mockRepositoryRegistry) RuleValidator() Validator {
 func (r *mockRepositoryRegistry) Logger() *logrusx.Logger {
 	r.loggerCalled++
 	return logrusx.New("", "")
+}
+
+func init() {
+	err := faker.AddProvider("urlProvider", func(v reflect.Value) (interface{}, error) {
+		var m any
+		if rand.Intn(2) == 0 {
+			m = new(Match)
+		} else {
+			m = new(MatchGRPC)
+		}
+		err := faker.FakeData(m)
+		return m, err
+	})
+	if err != nil {
+		panic(err)
+	}
 }
 
 func TestRepository(t *testing.T) {
