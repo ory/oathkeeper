@@ -26,6 +26,7 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/ory/herodot"
+
 	"github.com/ory/oathkeeper/pipeline/authn"
 	"github.com/ory/oathkeeper/pipeline/authz"
 	pe "github.com/ory/oathkeeper/pipeline/errors"
@@ -126,8 +127,8 @@ func (v *ValidatorDefault) Validate(r *Rule) error {
 		return errors.WithStack(herodot.ErrInternalServerError.WithReasonf(`Value "match" is empty but must be set.`))
 	}
 
-	if r.Match.URL == "" {
-		return errors.WithStack(herodot.ErrInternalServerError.WithReasonf(`Value "%s" of "match.url" field must not be empty.`, r.Match.URL))
+	if r.Match.GetURL() == "" {
+		return errors.WithStack(herodot.ErrInternalServerError.WithReasonf(`Value "%s" of "match.url" field must not be empty.`, r.Match.GetURL()))
 	}
 
 	if r.Upstream.URL == "" {

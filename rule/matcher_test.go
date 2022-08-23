@@ -105,7 +105,7 @@ func TestMatcher(t *testing.T) {
 	}
 
 	var testMatcher = func(t *testing.T, matcher Matcher, method string, url string, expectErr bool, expect *Rule) {
-		r, err := matcher.Match(context.Background(), method, mustParseURL(t, url))
+		r, err := matcher.Match(context.Background(), method, mustParseURL(t, url), ProtocolHTTP)
 		if expectErr {
 			require.Error(t, err)
 		} else {
@@ -133,7 +133,7 @@ func TestMatcher(t *testing.T) {
 			})
 
 			t.Run("case=cache", func(t *testing.T) {
-				r, err := matcher.Match(context.Background(), "GET", mustParseURL(t, "https://localhost:34/baz"))
+				r, err := matcher.Match(context.Background(), "GET", mustParseURL(t, "https://localhost:34/baz"), ProtocolHTTP)
 				require.NoError(t, err)
 				got, err := matcher.Get(context.Background(), r.ID)
 				require.NoError(t, err)
@@ -141,7 +141,7 @@ func TestMatcher(t *testing.T) {
 			})
 
 			t.Run("case=nil url", func(t *testing.T) {
-				_, err := matcher.Match(context.Background(), "GET", nil)
+				_, err := matcher.Match(context.Background(), "GET", nil, ProtocolHTTP)
 				require.Error(t, err)
 			})
 
@@ -171,7 +171,7 @@ func TestMatcher(t *testing.T) {
 			})
 
 			t.Run("case=cache", func(t *testing.T) {
-				r, err := matcher.Match(context.Background(), "GET", mustParseURL(t, "https://localhost:34/baz"))
+				r, err := matcher.Match(context.Background(), "GET", mustParseURL(t, "https://localhost:34/baz"), ProtocolHTTP)
 				require.NoError(t, err)
 				got, err := matcher.Get(context.Background(), r.ID)
 				require.NoError(t, err)
