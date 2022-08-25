@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/ory/oathkeeper/x"
+
 	"github.com/pkg/errors"
 	"github.com/tidwall/gjson"
 
@@ -170,7 +172,13 @@ func forwardRequestToSessionStore(r *http.Request, cf AuthenticatorForwardConfig
 		return nil, err
 	}
 
+	// add tracing
+	closeSpan := x.TraceRequest(r.Context(), &req)
+
 	res, err := http.DefaultClient.Do(req.WithContext(r.Context()))
+
+	// close the span so it represents just the http request
+	closeSpan()
 	if err != nil {
 		return nil, helper.ErrForbidden.WithReason(err.Error()).WithTrace(err)
 	}
