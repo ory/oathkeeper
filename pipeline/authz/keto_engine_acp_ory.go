@@ -76,7 +76,7 @@ type AuthorizerKetoEngineACPORY struct {
 func NewAuthorizerKetoEngineACPORY(c configuration.Provider) *AuthorizerKetoEngineACPORY {
 	return &AuthorizerKetoEngineACPORY{
 		c:      c,
-		client: httpx.NewResilientClientLatencyToleranceSmall(nil),
+		client: httpx.NewResilientClient().HTTPClient,
 		contextCreator: func(r *http.Request) map[string]interface{} {
 			return map[string]interface{}{
 				"remoteIpAddress": realip.RealIP(r),

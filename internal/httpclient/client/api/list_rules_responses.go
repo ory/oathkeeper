@@ -46,7 +46,8 @@ func NewListRulesOK() *ListRulesOK {
 	return &ListRulesOK{}
 }
 
-/*ListRulesOK handles this case with default header values.
+/*
+ListRulesOK handles this case with default header values.
 
 A list of rules
 */
@@ -77,7 +78,8 @@ func NewListRulesInternalServerError() *ListRulesInternalServerError {
 	return &ListRulesInternalServerError{}
 }
 
-/*ListRulesInternalServerError handles this case with default header values.
+/*
+ListRulesInternalServerError handles this case with default header values.
 
 genericError
 */

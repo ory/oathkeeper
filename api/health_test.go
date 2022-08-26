@@ -19,7 +19,13 @@ type statusResult struct {
 	// Status should contains "ok" in case of success
 	Status string `json:"status"`
 	// Otherwise a map of error messages is returned
-	Errors map[string]string `json:"errors"`
+	Error *statusError `json:"error"`
+}
+
+type statusError struct {
+	Code    int    `json:"code"`
+	Status  string `json:"status"`
+	Message string `json:"message"`
 }
 
 func TestHealth(t *testing.T) {
@@ -27,7 +33,7 @@ func TestHealth(t *testing.T) {
 	r := internal.NewRegistry(conf)
 
 	router := x.NewAPIRouter()
-	r.HealthHandler().SetRoutes(router.Router, true)
+	r.HealthHandler().SetHealthRoutes(router.Router, true)
 	server := httptest.NewServer(router)
 	defer server.Close()
 
@@ -40,7 +46,7 @@ func TestHealth(t *testing.T) {
 	require.Equal(t, http.StatusOK, res.StatusCode)
 	require.NoError(t, json.NewDecoder(res.Body).Decode(&result))
 	assert.Equal(t, "ok", result.Status)
-	assert.Len(t, result.Errors, 0)
+	assert.Nil(t, result.Error)
 
 	result = statusResult{}
 	res, err = server.Client().Get(server.URL + "/health/ready")
@@ -49,8 +55,7 @@ func TestHealth(t *testing.T) {
 	require.Equal(t, http.StatusServiceUnavailable, res.StatusCode)
 	require.NoError(t, json.NewDecoder(res.Body).Decode(&result))
 	assert.Empty(t, result.Status)
-	assert.Len(t, result.Errors, 1)
-	assert.Equal(t, rulereadiness.ErrRuleNotYetLoaded.Error(), result.Errors[rulereadiness.ProbeName])
+	assert.Equal(t, rulereadiness.ErrRuleNotYetLoaded.Error(), result.Error.Message)
 
 	r.Init()
 	// Waiting for rule load and health event propagation
@@ -64,7 +69,7 @@ func TestHealth(t *testing.T) {
 	require.Equal(t, http.StatusOK, res.StatusCode)
 	require.NoError(t, json.NewDecoder(res.Body).Decode(&result))
 	assert.Equal(t, "ok", result.Status)
-	assert.Len(t, result.Errors, 0)
+	assert.Nil(t, result.Error)
 
 	result = statusResult{}
 	res, err = server.Client().Get(server.URL + "/health/ready")
@@ -73,5 +78,5 @@ func TestHealth(t *testing.T) {
 	require.Equal(t, http.StatusOK, res.StatusCode)
 	require.NoError(t, json.NewDecoder(res.Body).Decode(&result))
 	assert.Equal(t, "ok", result.Status)
-	assert.Len(t, result.Errors, 0)
+	assert.Nil(t, result.Error)
 }

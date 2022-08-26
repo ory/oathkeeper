@@ -52,7 +52,8 @@ func NewGetRuleOK() *GetRuleOK {
 	return &GetRuleOK{}
 }
 
-/*GetRuleOK handles this case with default header values.
+/*
+GetRuleOK handles this case with default header values.
 
 A rule
 */
@@ -85,7 +86,8 @@ func NewGetRuleNotFound() *GetRuleNotFound {
 	return &GetRuleNotFound{}
 }
 
-/*GetRuleNotFound handles this case with default header values.
+/*
+GetRuleNotFound handles this case with default header values.
 
 genericError
 */
@@ -118,7 +120,8 @@ func NewGetRuleInternalServerError() *GetRuleInternalServerError {
 	return &GetRuleInternalServerError{}
 }
 
-/*GetRuleInternalServerError handles this case with default header values.
+/*
+GetRuleInternalServerError handles this case with default header values.
 
 genericError
 */

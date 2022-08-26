@@ -25,8 +25,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/ory/viper"
-
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/internal"
 	. "github.com/ory/oathkeeper/rule"
@@ -39,16 +37,16 @@ import (
 )
 
 func TestValidateRule(t *testing.T) {
-	var prep = func(an, az, m bool) func() {
-		return func() {
-			viper.Set(configuration.ViperKeyAuthenticatorNoopIsEnabled, an)
-			viper.Set(configuration.ViperKeyAuthorizerAllowIsEnabled, az)
-			viper.Set(configuration.ViperKeyMutatorNoopIsEnabled, m)
+	var prep = func(an, az, m bool) func(*testing.T, configuration.Provider) {
+		return func(t *testing.T, config configuration.Provider) {
+			config.SetForTest(t, configuration.AuthenticatorNoopIsEnabled, an)
+			config.SetForTest(t, configuration.AuthorizerAllowIsEnabled, az)
+			config.SetForTest(t, configuration.MutatorNoopIsEnabled, m)
 		}
 	}
 
 	for k, tc := range []struct {
-		setup     func()
+		setup     func(*testing.T, configuration.Provider)
 		r         *Rule
 		expectErr string
 	}{
@@ -170,7 +168,7 @@ func TestValidateRule(t *testing.T) {
 		t.Run(fmt.Sprintf("case=%d", k), func(t *testing.T) {
 			conf := internal.NewConfigurationWithDefaults()
 			if tc.setup != nil {
-				tc.setup()
+				tc.setup(t, conf)
 			}
 
 			r := internal.NewRegistry(conf)

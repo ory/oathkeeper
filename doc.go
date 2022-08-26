@@ -22,23 +22,23 @@
 //
 // ORY Oathkeeper is a reverse proxy that checks the HTTP Authorization for validity against a set of rules. This service uses Hydra to validate access tokens and policies.
 //
-//    Schemes: http, https
-//    Host:
-//    BasePath: /
-//    Version: Latest
-//    Contact: ORY <hi@ory.am> https://www.ory.am
+//	Schemes: http, https
+//	Host:
+//	BasePath: /
+//	Version: Latest
+//	Contact: ORY <hi@ory.am> https://www.ory.am
 //
-//    Consumes:
-//    - application/json
+//	Consumes:
+//	- application/json
 //
-//    Produces:
-//    - application/json
+//	Produces:
+//	- application/json
 //
-//    Extensions:
-//    ---
-//    x-request-id: string
-//    x-forwarded-proto: string
-//    ---
+//	Extensions:
+//	---
+//	x-request-id: string
+//	x-forwarded-proto: string
+//	---
 //
 // swagger:meta
 package main

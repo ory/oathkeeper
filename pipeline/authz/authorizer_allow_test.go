@@ -23,8 +23,6 @@ package authz_test
 import (
 	"testing"
 
-	"github.com/ory/viper"
-
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/internal"
 
@@ -45,11 +43,10 @@ func TestAuthorizerAllow(t *testing.T) {
 	})
 
 	t.Run("method=validate", func(t *testing.T) {
-		viper.Set(configuration.ViperKeyAuthorizerAllowIsEnabled, true)
+		conf.SetForTest(t, configuration.AuthorizerAllowIsEnabled, true)
 		require.NoError(t, a.Validate(nil))
 
-		viper.Reset()
-		viper.Set(configuration.ViperKeyAuthorizerAllowIsEnabled, false)
+		conf.SetForTest(t, configuration.AuthorizerAllowIsEnabled, false)
 		require.Error(t, a.Validate(nil))
 	})
 }

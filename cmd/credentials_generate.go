@@ -35,7 +35,7 @@ var credentialsGenerateCmd = &cobra.Command{
 $ oathkeeper credentials generate --alg ES256 > jwks.json
 $ oathkeeper credentials generate --alg RS256 > jwks.json
 $ oathkeeper credentials generate --alg RS256 --bits 4096 > jwks.json`,
-	Run: func(cmd *cobra.Command, args []string) {
+	Run: func(cmd *cobra.Command, _ []string) {
 		key, err := jwksx.GenerateSigningKeys(
 			flagx.MustGetString(cmd, "kid"),
 			flagx.MustGetString(cmd, "alg"),

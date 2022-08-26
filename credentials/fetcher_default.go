@@ -78,7 +78,7 @@ func NewFetcherDefault(l *logrusx.Logger, cancelAfter time.Duration, ttl time.Du
 		ttl:         ttl,
 		keys:        make(map[string]jose.JSONWebKeySet),
 		fetchedAt:   make(map[string]time.Time),
-		client:      httpx.NewResilientClientLatencyToleranceHigh(nil),
+		client:      httpx.NewResilientClient(httpx.ResilientClientWithConnectionTimeout(15 * time.Second)).HTTPClient,
 		mux:         cloudstorage.NewURLMux(),
 	}
 }

@@ -45,19 +45,18 @@ import (
 	"github.com/ory/oathkeeper/pipeline/authn"
 	"github.com/ory/oathkeeper/proxy"
 	"github.com/ory/oathkeeper/rule"
-	"github.com/ory/viper"
 	"github.com/ory/x/logrusx"
 )
 
 func TestDecisionAPI(t *testing.T) {
 	conf := internal.NewConfigurationWithDefaults()
-	viper.Set(configuration.ViperKeyAuthenticatorNoopIsEnabled, true)
-	viper.Set(configuration.ViperKeyAuthenticatorUnauthorizedIsEnabled, true)
-	viper.Set(configuration.ViperKeyAuthenticatorAnonymousIsEnabled, true)
-	viper.Set(configuration.ViperKeyAuthorizerAllowIsEnabled, true)
-	viper.Set(configuration.ViperKeyAuthorizerDenyIsEnabled, true)
-	viper.Set(configuration.ViperKeyMutatorNoopIsEnabled, true)
-	viper.Set(configuration.ViperKeyErrorsWWWAuthenticateIsEnabled, true)
+	conf.SetForTest(t, configuration.AuthenticatorNoopIsEnabled, true)
+	conf.SetForTest(t, configuration.AuthenticatorUnauthorizedIsEnabled, true)
+	conf.SetForTest(t, configuration.AuthenticatorAnonymousIsEnabled, true)
+	conf.SetForTest(t, configuration.AuthorizerAllowIsEnabled, true)
+	conf.SetForTest(t, configuration.AuthorizerDenyIsEnabled, true)
+	conf.SetForTest(t, configuration.MutatorNoopIsEnabled, true)
+	conf.SetForTest(t, configuration.ErrorsWWWAuthenticateIsEnabled, true)
 	reg := internal.NewRegistry(conf).WithBrokenPipelineMutator()
 
 	d := reg.DecisionHandler()

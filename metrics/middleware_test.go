@@ -1,7 +1,6 @@
 package metrics
 
 import (
-	"bytes"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -9,10 +8,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/require"
-
 	"github.com/ory/oathkeeper/driver"
-	"github.com/ory/viper"
+	"github.com/ory/oathkeeper/x"
+	"github.com/ory/x/configx"
 	"github.com/ory/x/logrusx"
 
 	"github.com/julienschmidt/httprouter"
@@ -140,17 +138,14 @@ func TestConfigurablePrometheusRequestTotalMetrics(t *testing.T) {
 			// re-initialize to prevent double counts
 			RequestTotal.Reset()
 
-			viper.SetConfigType("yaml")
-
-			// We set the fallback to first run www_authenticate. But because the error is not_found, as
-			// is defined in the when clause, we should see a json error instead!
-			require.NoError(t, viper.ReadConfig(bytes.NewBufferString(`
+			logger := logrusx.New("ORY Oathkeeper", "1")
+			d := driver.NewDefaultDriver(logger, "1", "test", time.Now().String(), nil,
+				configx.WithConfigFiles(x.WriteFile(t, `
 serve:
   prometheus:
     metric_name_prefix: http_
-`)))
-			logger := logrusx.New("ORY Oathkeeper", "1")
-			d := driver.NewDefaultDriver(logger, "1", "test", time.Now().String())
+`)),
+			)
 			promRepo := NewConfigurablePrometheusRepository(d, logger)
 			promMiddleware := NewMiddleware(promRepo, "test")
 			promMiddleware.CollapsePaths(tt.collapsePaths)

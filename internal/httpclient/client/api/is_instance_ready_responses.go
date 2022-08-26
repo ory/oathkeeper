@@ -46,7 +46,8 @@ func NewIsInstanceReadyOK() *IsInstanceReadyOK {
 	return &IsInstanceReadyOK{}
 }
 
-/*IsInstanceReadyOK handles this case with default header values.
+/*
+IsInstanceReadyOK handles this case with default header values.
 
 healthStatus
 */
@@ -79,7 +80,8 @@ func NewIsInstanceReadyServiceUnavailable() *IsInstanceReadyServiceUnavailable {
 	return &IsInstanceReadyServiceUnavailable{}
 }
 
-/*IsInstanceReadyServiceUnavailable handles this case with default header values.
+/*
+IsInstanceReadyServiceUnavailable handles this case with default header values.
 
 healthNotReadyStatus
 */

@@ -49,7 +49,6 @@ func TestAuthenticatorJWT(t *testing.T) {
 		"file://../../test/stub/jwks-ecdsa.json",
 	}
 	conf := internal.NewConfigurationWithDefaults()
-	// viper.Set(configuration.ViperKeyAuthenticatorJWTJWKSURIs, keys)
 	reg := internal.NewRegistry(conf)
 
 	a, err := reg.PipelineAuthenticator("jwt")
