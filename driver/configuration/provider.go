@@ -3,6 +3,7 @@ package configuration
 import (
 	"encoding/json"
 	"net/url"
+	"testing"
 	"time"
 
 	"github.com/gobuffalo/packr/v2"
@@ -25,13 +26,22 @@ type MatchingStrategy string
 
 // Possible matching strategies.
 const (
-	Regexp MatchingStrategy = "regexp"
-	Glob   MatchingStrategy = "glob"
+	Regexp                  MatchingStrategy = "regexp"
+	Glob                    MatchingStrategy = "glob"
+	DefaultMatchingStrategy                  = Regexp
 )
 
 type Provider interface {
+	Get(k Key) interface{}
+	String(k Key) string
+	AllSettings() map[string]interface{}
+
+	AddWatcher(cb callback) SubscriptionID
+	RemoveWatcher(id SubscriptionID)
+
 	CORSEnabled(iface string) bool
 	CORSOptions(iface string) cors.Options
+	CORS(iface string) (cors.Options, bool)
 
 	ProviderAuthenticators
 	ProviderErrorHandlers
@@ -66,6 +76,10 @@ type Provider interface {
 	TracingProvider() string
 	TracingJaegerConfig() *tracing.JaegerConfig
 	TracingZipkinConfig() *tracing.ZipkinConfig
+
+	TLSConfig(daemon string) *TLSConfig
+
+	SetForTest(t testing.TB, key string, value interface{})
 }
 
 type ProviderErrorHandlers interface {

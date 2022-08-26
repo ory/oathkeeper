@@ -3,6 +3,7 @@ package rule_test
 import (
 	"context"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
@@ -19,11 +20,10 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
+	"github.com/ory/x/configx"
 	"github.com/ory/x/logrusx"
 
-	"github.com/ory/viper"
 	"github.com/ory/x/stringslice"
-	"github.com/ory/x/viperx"
 
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/internal"
@@ -32,62 +32,89 @@ import (
 )
 
 const testRule = `[{"id":"test-rule-5","upstream":{"preserve_host":true,"strip_path":"/api","url":"mybackend.com/api"},"match":{"url":"myproxy.com/api","methods":["GET","POST"]},"authenticators":[{"handler":"noop"},{"handler":"anonymous"}],"authorizer":{"handler":"allow"},"mutators":[{"handler":"noop"}]}]`
+const testConfigPath = "../test/update"
+
+func copy(t *testing.T, src string, dst *os.File) {
+	t.Helper()
+
+	source, err := os.Open(filepath.Join(testConfigPath, src))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer source.Close()
+
+	_, err = dst.Seek(0, 0)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = dst.Truncate(0)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	_, err = io.Copy(dst, source)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// sleep some time to let the watcher pick up the changes.
+	time.Sleep(100 * time.Millisecond)
+}
 
 func TestFetcherReload(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	viper.Reset()
-	conf := internal.NewConfigurationWithDefaults() // this resets viper and must be at the top
+
+	configFile, err := os.CreateTemp(t.TempDir(), "config-*.yaml")
+	require.NoError(t, err)
+	t.Cleanup(func() { configFile.Close() })
+	conf := internal.NewConfigurationWithDefaults(
+		configx.WithContext(ctx),
+		configx.WithLogger(logrusx.New("", "", logrusx.ForceLevel(logrus.TraceLevel))),
+		configx.WithConfigFiles(configFile.Name()),
+	)
 	r := internal.NewRegistry(conf)
-	testConfigPath := "../test/update"
 
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		_, _ = w.Write([]byte(testRule))
 	}))
 	defer ts.Close()
 
-	tempdir := os.TempDir()
-
-	id := uuid.New().String()
-	configFile := filepath.Join(tempdir, ".oathkeeper-"+id+".yml")
-	require.NoError(t, ioutil.WriteFile(configFile, []byte(""), 0666))
-
-	l := logrusx.New("", "", logrusx.ForceLevel(logrus.TraceLevel))
-	viperx.InitializeConfig("oathkeeper-"+id, tempdir, nil)
-	viperx.WatchConfig(l, nil)
-
-	go func() {
-		require.NoError(t, r.RuleFetcher().Watch(ctx))
-	}()
+	go func() { require.NoError(t, r.RuleFetcher().Watch(ctx)) }()
 
 	// initial config without a repo and without a matching strategy
-	config, err := ioutil.ReadFile(path.Join(testConfigPath, "config_no_repo.yaml"))
-	require.NoError(t, err)
-	require.NoError(t, ioutil.WriteFile(configFile, config, 0666))
+	copy(t, "config_no_repo.yaml", configFile)
 
 	rules := eventuallyListRules(ctx, t, r, 0)
 	require.Empty(t, rules)
 
 	strategy, err := r.RuleRepository().MatchingStrategy(ctx)
 	require.NoError(t, err)
-	require.Equal(t, configuration.MatchingStrategy(""), strategy)
+	require.Equal(t, configuration.Regexp, strategy)
 
 	// config with a repo and without a matching strategy
-	config, err = ioutil.ReadFile(path.Join(testConfigPath, "config_default.yaml"))
-	require.NoError(t, err)
-	require.NoError(t, ioutil.WriteFile(configFile, config, 0666))
+	copy(t, "config_default.yaml", configFile)
 
 	rules = eventuallyListRules(ctx, t, r, 1)
 	require.Equal(t, "test-rule-1-glob", rules[0].ID)
 
 	strategy, err = r.RuleRepository().MatchingStrategy(ctx)
 	require.NoError(t, err)
-	require.Equal(t, configuration.MatchingStrategy(""), strategy)
+	require.Equal(t, configuration.Regexp, strategy)
 
 	// config with a glob matching strategy
-	config, err = ioutil.ReadFile(path.Join(testConfigPath, "config_glob.yaml"))
+	copy(t, "config_glob.yaml", configFile)
+
+	rules = eventuallyListRules(ctx, t, r, 1)
+	require.Equal(t, "test-rule-1-glob", rules[0].ID)
+
+	strategy, err = r.RuleRepository().MatchingStrategy(ctx)
 	require.NoError(t, err)
-	require.NoError(t, ioutil.WriteFile(configFile, config, 0666))
+	// require.Equal(t, configuration.Glob, strategy)
+
+	// config with unknown matching strategy
+	copy(t, "config_error.yaml", configFile)
 
 	rules = eventuallyListRules(ctx, t, r, 1)
 	require.Equal(t, "test-rule-1-glob", rules[0].ID)
@@ -96,22 +123,8 @@ func TestFetcherReload(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, configuration.Glob, strategy)
 
-	// config with unknown matching strategy
-	config, err = ioutil.ReadFile(path.Join(testConfigPath, "config_error.yaml"))
-	require.NoError(t, err)
-	require.NoError(t, ioutil.WriteFile(configFile, config, 0666))
-
-	rules = eventuallyListRules(ctx, t, r, 1)
-	require.Equal(t, "test-rule-1-glob", rules[0].ID)
-
-	strategy, err = r.RuleRepository().MatchingStrategy(ctx)
-	require.NoError(t, err)
-	require.Equal(t, configuration.MatchingStrategy("UNKNOWN"), strategy)
-
 	// config with regexp matching strategy
-	config, err = ioutil.ReadFile(path.Join(testConfigPath, "config_regexp.yaml"))
-	require.NoError(t, err)
-	require.NoError(t, ioutil.WriteFile(configFile, config, 0666))
+	copy(t, "config_regexp.yaml", configFile)
 
 	rules = eventuallyListRules(ctx, t, r, 1)
 	require.Equal(t, "test-rule-1-glob", rules[0].ID)
@@ -122,59 +135,58 @@ func TestFetcherReload(t *testing.T) {
 }
 
 func TestFetcherWatchConfig(t *testing.T) {
-	viper.Reset()
-	conf := internal.NewConfigurationWithDefaults() // this resets viper and must be at the top
-	r := internal.NewRegistry(conf)
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
+
+	configFile, err := os.CreateTemp(t.TempDir(), "config-*.yaml")
+	require.NoError(t, err)
+	configFile.Close()
+	conf := internal.NewConfigurationWithDefaults(
+		configx.WithContext(ctx),
+		configx.WithLogger(logrusx.New("", "", logrusx.ForceLevel(logrus.TraceLevel))),
+		configx.WithConfigFiles(configFile.Name()),
+	)
+	r := internal.NewRegistry(conf)
 
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		_, _ = w.Write([]byte(testRule))
 	}))
-	defer ts.Close()
+	t.Cleanup(ts.Close)
 
-	tempdir := os.TempDir()
+	require.NoError(t, os.WriteFile(configFile.Name(), []byte(""), 0666))
 
-	id := uuid.New().String()
-	configFile := filepath.Join(tempdir, ".oathkeeper-"+id+".yml")
-	require.NoError(t, ioutil.WriteFile(configFile, []byte(""), 0666))
-
-	l := logrusx.New("", "", logrusx.ForceLevel(logrus.TraceLevel))
-	viperx.InitializeConfig("oathkeeper-"+id, tempdir, nil)
-	viperx.WatchConfig(l, nil)
-
-	go func() {
-		require.NoError(t, r.RuleFetcher().Watch(ctx))
-	}()
+	go func() { require.NoError(t, r.RuleFetcher().Watch(ctx)) }()
 
 	for k, tc := range []struct {
 		config           string
 		tmpContent       string
 		expectIDs        []string
-		expectNone       bool
 		expectedStrategy configuration.MatchingStrategy
 	}{
-		{config: ""},
 		{
-			config: `
-access_rules:
-  repositories:
-  - ftp://not-valid
-`,
-			expectNone: true,
+			config:           "",
+			expectedStrategy: configuration.DefaultMatchingStrategy,
 		},
 		{
 			config: `
-access_rules:
-  repositories:
-  - file://../test/stub/rules.json
-  - file://../test/stub/rules.yaml
-  - invalid
-  - file:///invalid/path
-  - inline://W3siaWQiOiJ0ZXN0LXJ1bGUtNCIsInVwc3RyZWFtIjp7InByZXNlcnZlX2hvc3QiOnRydWUsInN0cmlwX3BhdGgiOiIvYXBpIiwidXJsIjoibXliYWNrZW5kLmNvbS9hcGkifSwibWF0Y2giOnsidXJsIjoibXlwcm94eS5jb20vYXBpIiwibWV0aG9kcyI6WyJHRVQiLCJQT1NUIl19LCJhdXRoZW50aWNhdG9ycyI6W3siaGFuZGxlciI6Im5vb3AifSx7ImhhbmRsZXIiOiJhbm9ueW1vdXMifV0sImF1dGhvcml6ZXIiOnsiaGFuZGxlciI6ImFsbG93In0sIm11dGF0b3JzIjpbeyJoYW5kbGVyIjoibm9vcCJ9XX1d
-  - ` + ts.URL + `
-`,
-			expectIDs: []string{"test-rule-1", "test-rule-2", "test-rule-3", "test-rule-4", "test-rule-5", "test-rule-1-yaml"},
+		access_rules:
+		  repositories:
+		  - ftp://not-valid
+		`,
+			expectedStrategy: configuration.DefaultMatchingStrategy,
+		},
+		{
+			config: `
+		access_rules:
+		  repositories:
+		  - file://../test/stub/rules.json
+		  - file://../test/stub/rules.yaml
+		  - invalid
+		  - file:///invalid/path
+		  - inline://W3siaWQiOiJ0ZXN0LXJ1bGUtNCIsInVwc3RyZWFtIjp7InByZXNlcnZlX2hvc3QiOnRydWUsInN0cmlwX3BhdGgiOiIvYXBpIiwidXJsIjoibXliYWNrZW5kLmNvbS9hcGkifSwibWF0Y2giOnsidXJsIjoibXlwcm94eS5jb20vYXBpIiwibWV0aG9kcyI6WyJHRVQiLCJQT1NUIl19LCJhdXRoZW50aWNhdG9ycyI6W3siaGFuZGxlciI6Im5vb3AifSx7ImhhbmRsZXIiOiJhbm9ueW1vdXMifV0sImF1dGhvcml6ZXIiOnsiaGFuZGxlciI6ImFsbG93In0sIm11dGF0b3JzIjpbeyJoYW5kbGVyIjoibm9vcCJ9XX1d
+		  - ` + ts.URL + `
+		`,
+			expectedStrategy: configuration.DefaultMatchingStrategy,
 		},
 		{
 			config: `
@@ -189,14 +201,14 @@ access_rules:
 		{
 			config: `
 access_rules:
-  repositories:
+  repositories: []
   matching_strategy: regexp
 `,
 			expectedStrategy: configuration.Regexp,
 		},
 	} {
 		t.Run(fmt.Sprintf("case=%d", k), func(t *testing.T) {
-			require.NoError(t, ioutil.WriteFile(configFile, []byte(tc.config), 0666))
+			require.NoError(t, ioutil.WriteFile(configFile.Name(), []byte(tc.config), 0666))
 
 			rules := eventuallyListRules(ctx, t, r, len(tc.expectIDs))
 			strategy, err := r.RuleRepository().MatchingStrategy(ctx)
@@ -216,30 +228,34 @@ access_rules:
 }
 
 func TestFetcherWatchRepositoryFromFS(t *testing.T) {
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
 	if runtime.GOOS == "windows" {
 		t.Skip("Skipping watcher tests on windows")
 	}
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 
-	conf := internal.NewConfigurationWithDefaults() // this resets viper!!
-	r := internal.NewRegistry(conf)
+	tempDir := t.TempDir()
+	configFile, err := os.CreateTemp(tempDir, "config-*.yaml")
+	require.NoError(t, err)
+	t.Cleanup(func() { configFile.Close() })
 
-	dir := path.Join(os.TempDir(), uuid.New().String())
-	require.NoError(t, os.MkdirAll(dir, 0777))
+	repoFile, err := os.CreateTemp(tempDir, "access-rules-*.json")
+	require.NoError(t, err)
+	t.Cleanup(func() { repoFile.Close() })
+	repoFile.WriteString("[]")
 
-	id := uuid.New().String()
-	repository := path.Join(dir, "access-rules-"+id+".json")
-	require.NoError(t, ioutil.WriteFile(repository, []byte("[]"), 0777))
-
-	require.NoError(t, ioutil.WriteFile(filepath.Join(os.TempDir(), ".oathkeeper-"+id+".yml"), []byte(`
+	configFile.WriteString(fmt.Sprintf(`
 access_rules:
   repositories:
-  - file://`+repository+`
-`), 0777))
+  - file://%s
+`, repoFile.Name()))
 
-	viperx.InitializeConfig("oathkeeper-"+id, os.TempDir(), nil)
-	viperx.WatchConfig(nil, nil)
+	conf := internal.NewConfigurationWithDefaults(
+		configx.WithContext(ctx),
+		configx.WithLogger(logrusx.New("", "", logrusx.ForceLevel(logrus.TraceLevel))),
+		configx.WithConfigFiles(configFile.Name()),
+	)
+	r := internal.NewRegistry(conf)
 
 	go func() {
 		require.NoError(t, r.RuleFetcher().Watch(ctx))
@@ -252,11 +268,11 @@ access_rules:
 		{content: "[]"},
 		{content: `[{"id":"1"}]`, expectIDs: []string{"1"}},
 		{content: `[{"id":"1"},{"id":"2"}]`, expectIDs: []string{"1", "2"}},
-		{content: `[{"id":"2"},{"id":"3"}]`, expectIDs: []string{"2", "3"}},
+		{content: `[{"id":"2"},{"id":"3"},{"id":"4"}]`, expectIDs: []string{"2", "3", "4"}},
 	} {
 		t.Run(fmt.Sprintf("case=%d", k), func(t *testing.T) {
-			require.NoError(t, ioutil.WriteFile(repository, []byte(tc.content), 0777))
-			time.Sleep(time.Millisecond * 500)
+			repoFile.Truncate(0)
+			repoFile.WriteAt([]byte(tc.content), 0)
 
 			rules := eventuallyListRules(ctx, t, r, len(tc.expectIDs))
 
@@ -273,22 +289,24 @@ access_rules:
 }
 
 func TestFetcherWatchRepositoryFromKubernetesConfigMap(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("Skipping watcher tests on windows")
+	}
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	if runtime.GOOS == "windows" {
-		t.Skip()
-	}
-	viper.Reset()
-	conf := internal.NewConfigurationWithDefaults() // this must be at the top because it resets viper
-	r := internal.NewRegistry(conf)
 
 	// Set up temp dir and file to watch
-	watchDir, err := ioutil.TempDir("", uuid.New().String())
-	require.NoError(t, err)
+	watchDir := t.TempDir()
 	watchFile := path.Join(watchDir, "access-rules.json")
 
+	conf := internal.NewConfigurationWithDefaults(
+		configx.WithContext(ctx),
+		configx.WithLogger(logrusx.New("", "", logrusx.ForceLevel(logrus.TraceLevel))),
+	)
+	r := internal.NewRegistry(conf)
+
 	// Configure watcher
-	viper.Set(configuration.ViperKeyAccessRuleRepositories, []string{"file://" + watchFile})
+	conf.SetForTest(t, configuration.ViperKeyAccessRuleRepositories, []string{"file://" + watchFile})
 
 	// This emulates a config map update
 	// drwxr-xr-x    2 root     root          4096 Aug  1 07:42 ..2019_08_01_07_42_33.068812649
@@ -361,14 +379,8 @@ func TestFetchRulesFromObjectStorage(t *testing.T) {
 
 	cloudstorage.SetCurrentTest(t)
 
-	conf := internal.NewConfigurationWithDefaults() // this must be at the top because it resets viper
-	r := internal.NewRegistry(conf)
-
-	dir := path.Join(os.TempDir(), uuid.New().String())
-	require.NoError(t, os.MkdirAll(dir, 0777))
-
-	id := uuid.New().String()
-	require.NoError(t, ioutil.WriteFile(filepath.Join(os.TempDir(), ".oathkeeper-"+id+".yml"), []byte(`
+	configFile, _ := os.CreateTemp(t.TempDir(), ".oathkeeper-*.yml")
+	configFile.WriteString(`
 authenticators:
   noop: { enabled: true }
 
@@ -377,10 +389,14 @@ access_rules:
   - s3://oathkeeper-test-bucket/path/prefix/rules.json
   - gs://oathkeeper-test-bucket/path/prefix/rules.json
   - azblob://path/prefix/rules.json
-`), 0777))
+`)
 
-	viperx.InitializeConfig("oathkeeper-"+id, os.TempDir(), nil)
-	viperx.WatchConfig(nil, nil)
+	conf := internal.NewConfigurationWithDefaults(
+		configx.WithContext(ctx),
+		configx.WithLogger(logrusx.New("", "", logrusx.ForceLevel(logrus.TraceLevel))),
+		configx.WithConfigFiles(configFile.Name()),
+	)
+	r := internal.NewRegistry(conf)
 
 	go func() {
 		require.NoError(t, r.RuleFetcher().Watch(ctx))
@@ -390,11 +406,12 @@ access_rules:
 }
 
 func eventuallyListRules(ctx context.Context, t *testing.T, r rule.Registry, expectedLen int) (rules []rule.Rule) {
+	t.Helper()
 	var err error
 	assert.Eventually(t, func() bool {
 		rules, err = r.RuleRepository().List(ctx, 500, 0)
 		require.NoError(t, err)
 		return len(rules) == expectedLen
-	}, 5*time.Second, 10*time.Millisecond)
+	}, 2*time.Second, 10*time.Millisecond)
 	return
 }

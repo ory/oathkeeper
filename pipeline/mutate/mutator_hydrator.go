@@ -34,7 +34,7 @@ import (
 	"github.com/ory/oathkeeper/pipeline/authn"
 	"github.com/ory/oathkeeper/x"
 
-	"github.com/ory/x/httpx"
+	"github.com/ory/oldx/httpx"
 
 	"github.com/pkg/errors"
 

@@ -31,8 +31,6 @@ import (
 
 	_ "github.com/ory/jsonschema/v3/fileloader"
 	_ "github.com/ory/jsonschema/v3/httploader"
-
-	"github.com/ory/x/viperx"
 )
 
 var logger *logrusx.Logger
@@ -52,16 +50,4 @@ func Execute() {
 		fmt.Println(err)
 		os.Exit(-1)
 	}
-}
-
-func watchAndValidateViper() {
-	schema, err := schemas.Find("config.schema.json")
-	if err != nil {
-		logger.WithError(err).Fatal("Unable to open configuration JSON Schema.")
-	}
-	viperx.WatchAndValidateViper(logger, schema, "ORY Oathkeeper", []string{"serve", "profiling", "log"}, "")
-}
-
-func init() {
-	viperx.RegisterConfigFlag(RootCmd, "oathkeeper")
 }

@@ -25,8 +25,6 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/ory/viper"
-
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/internal"
 	"github.com/ory/oathkeeper/pipeline/authn"
@@ -37,7 +35,6 @@ import (
 
 func TestAuthenticatorAnonymous(t *testing.T) {
 	conf := internal.NewConfigurationWithDefaults()
-	// viper.Set(configuration.ViperKeyAuthenticatorAnonymousIdentifier, "anon")
 	reg := internal.NewRegistry(conf)
 
 	session := new(authn.AuthenticationSession)
@@ -66,11 +63,10 @@ func TestAuthenticatorAnonymous(t *testing.T) {
 	})
 
 	t.Run("method=validate", func(t *testing.T) {
-		viper.Set(configuration.ViperKeyAuthenticatorAnonymousIsEnabled, true)
+		conf.SetForTest(t, configuration.ViperKeyAuthenticatorAnonymousIsEnabled, true)
 		require.NoError(t, a.Validate(json.RawMessage(`{"subject":"foo"}`)))
 
-		viper.Reset()
-		viper.Set(configuration.ViperKeyAuthenticatorAnonymousIsEnabled, false)
+		conf.SetForTest(t, configuration.ViperKeyAuthenticatorAnonymousIsEnabled, false)
 		require.Error(t, a.Validate(json.RawMessage(`{"subject":"foo"}`)))
 	})
 }

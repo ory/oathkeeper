@@ -30,6 +30,7 @@ import (
 	"time"
 
 	"github.com/ory/x/assertx"
+	"github.com/ory/x/configx"
 
 	"github.com/julienschmidt/httprouter"
 	"github.com/stretchr/testify/assert"
@@ -39,12 +40,11 @@ import (
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/internal"
 	. "github.com/ory/oathkeeper/pipeline/authn"
-	"github.com/ory/viper"
 	"github.com/ory/x/logrusx"
 )
 
 func TestAuthenticatorOAuth2Introspection(t *testing.T) {
-	conf := internal.NewConfigurationWithDefaults()
+	conf := internal.NewConfigurationWithDefaults(configx.SkipValidation())
 	reg := internal.NewRegistry(conf)
 
 	a, err := reg.PipelineAuthenticator("oauth2_introspection")
@@ -578,10 +578,7 @@ func TestAuthenticatorOAuth2Introspection(t *testing.T) {
 	})
 
 	t.Run("method=authenticate-with-cache", func(t *testing.T) {
-		viper.Set("authenticators.oauth2_introspection.config.cache.enabled", true)
-		t.Cleanup(func() {
-			viper.Set("authenticators.oauth2_introspection.config.cache.enabled", false)
-		})
+		conf.SetForTest(t, "authenticators.oauth2_introspection.config.cache.enabled", true)
 
 		var didNotUseCache sync.WaitGroup
 
@@ -643,7 +640,7 @@ func TestAuthenticatorOAuth2Introspection(t *testing.T) {
 		}
 
 		t.Run("case=with none scope strategy", func(t *testing.T) {
-			viper.Set("authenticators.oauth2_introspection.config.scope_strategy", "none")
+			conf.SetForTest(t, "authenticators.oauth2_introspection.config.scope_strategy", "none")
 			r := &http.Request{Header: http.Header{"Authorization": {"bearer active-scope-a"}}}
 			expected := new(AuthenticationSession)
 			t.Run("case=initial request succeeds and caches", func(t *testing.T) {
@@ -692,7 +689,7 @@ func TestAuthenticatorOAuth2Introspection(t *testing.T) {
 		t.Run("case=does not use cache for refresh tokens", func(t *testing.T) {
 			for _, strategy := range []string{"wildcard", "none"} {
 				t.Run("scope_strategy="+strategy, func(t *testing.T) {
-					viper.Set("authenticators.oauth2_introspection.config.scope_strategy", strategy)
+					conf.SetForTest(t, "authenticators.oauth2_introspection.config.scope_strategy", strategy)
 					r := &http.Request{Header: http.Header{"Authorization": {"bearer refresh_token"}}}
 					expected := new(AuthenticationSession)
 
@@ -709,7 +706,7 @@ func TestAuthenticatorOAuth2Introspection(t *testing.T) {
 		})
 
 		t.Run("case=with a scope scope strategy", func(t *testing.T) {
-			viper.Set("authenticators.oauth2_introspection.config.scope_strategy", "wildcard")
+			conf.SetForTest(t, "authenticators.oauth2_introspection.config.scope_strategy", "wildcard")
 			r := &http.Request{Header: http.Header{"Authorization": {"bearer another-active-scope-a"}}}
 			expected := new(AuthenticationSession)
 
@@ -795,19 +792,16 @@ func TestAuthenticatorOAuth2Introspection(t *testing.T) {
 	})
 
 	t.Run("method=validate", func(t *testing.T) {
-		viper.Set(configuration.ViperKeyAuthenticatorOAuth2TokenIntrospectionIsEnabled, false)
+		conf.SetForTest(t, configuration.ViperKeyAuthenticatorOAuth2TokenIntrospectionIsEnabled, false)
 		require.Error(t, a.Validate(json.RawMessage(`{"introspection_url":""}`)))
 
-		viper.Reset()
-		viper.Set(configuration.ViperKeyAuthenticatorOAuth2TokenIntrospectionIsEnabled, true)
+		conf.SetForTest(t, configuration.ViperKeyAuthenticatorOAuth2TokenIntrospectionIsEnabled, true)
 		require.Error(t, a.Validate(json.RawMessage(`{"introspection_url":""}`)))
 
-		viper.Reset()
-		viper.Set(configuration.ViperKeyAuthenticatorOAuth2TokenIntrospectionIsEnabled, false)
+		conf.SetForTest(t, configuration.ViperKeyAuthenticatorOAuth2TokenIntrospectionIsEnabled, false)
 		require.Error(t, a.Validate(json.RawMessage(`{"introspection_url":"/oauth2/token"}`)))
 
-		viper.Reset()
-		viper.Set(configuration.ViperKeyAuthenticatorOAuth2TokenIntrospectionIsEnabled, true)
+		conf.SetForTest(t, configuration.ViperKeyAuthenticatorOAuth2TokenIntrospectionIsEnabled, true)
 		require.Error(t, a.Validate(json.RawMessage(`{"introspection_url":"/oauth2/token"}`)))
 	})
 
@@ -856,7 +850,7 @@ func TestAuthenticatorOAuth2Introspection(t *testing.T) {
 		t.Run("Should not be equal because we changed a system default", func(t *testing.T) {
 			// Unskip once https://github.com/ory/oathkeeper/issues/757 lands
 			t.Skip("This fails due to viper caching and it makes no sense to fix it as we need to adopt koanf first")
-			viper.Set("authenticators.oauth2_introspection.config.pre_authorization", map[string]interface{}{"scope": []string{"foo"}})
+			conf.SetForTest(t, "authenticators.oauth2_introspection.config.pre_authorization", map[string]interface{}{"scope": []string{"foo"}})
 
 			_, noPreauthClient3, err := authenticator.Config(noPreauthConfig)
 			require.NoError(t, err)

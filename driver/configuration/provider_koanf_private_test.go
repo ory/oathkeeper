@@ -21,15 +21,18 @@
 package configuration
 
 import (
+	"context"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"github.com/ory/x/logrusx"
 )
 
 func TestGetURL(t *testing.T) {
-	v := NewViperProvider(logrusx.New("", ""))
-	assert.Nil(t, v.getURL("", "key"))
-	assert.Nil(t, v.getURL("a", "key"))
+	kp, err := NewKoanfProvider(context.Background(), nil, logrusx.New("", ""))
+	require.NoError(t, err)
+	assert.Nil(t, kp.getURL("", "key"))
+	assert.Nil(t, kp.getURL("a", "key"))
 }

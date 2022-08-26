@@ -4,15 +4,13 @@ import (
 	"context"
 	"crypto/rsa"
 	"encoding/json"
-	"net/http"
-	"net/http/httptest"
-	"testing"
-
+	"github.com/ory/x/configx"
 	"github.com/square/go-jose"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-
-	"github.com/ory/viper"
+	"net/http"
+	"net/http/httptest"
+	"testing"
 
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/internal"
@@ -21,13 +19,28 @@ import (
 )
 
 func TestCredentialsHandler(t *testing.T) {
-	conf := internal.NewConfigurationWithDefaults()
-	viper.Set(configuration.ViperKeyMutatorIDTokenJWKSURL, "file://../test/stub/jwks-rsa-multiple.json")
+	conf := internal.NewConfigurationWithDefaults(configx.SkipValidation())
+	conf.SetForTest(t, configuration.ViperKeyMutatorIDTokenJWKSURL, "file://../test/stub/jwks-rsa-multiple.json")
+	conf.SetForTest(t, configuration.ViperKeyAuthenticatorAnonymousIsEnabled, true)
+	conf.SetForTest(t, configuration.ViperKeyAuthorizerAllowIsEnabled, true)
+	conf.SetForTest(t, configuration.ViperKeyMutatorIDTokenIsEnabled, true)
+
 	r := internal.NewRegistry(conf)
 
 	require.NoError(t, r.RuleRepository().Set(
 		context.Background(),
-		[]rule.Rule{{Mutators: []rule.Handler{{Handler: "id_token", Config: json.RawMessage(`{"jwks_url":"file://../test/stub/jwks-rsa-single.json"}`)}}}}),
+		[]rule.Rule{{
+			Match:          &rule.Match{URL: "http://example.com/*"},
+			Authenticators: []rule.Handler{{Handler: "anonymous"}},
+			Authorizer:     rule.Handler{Handler: "allow"},
+			Mutators: []rule.Handler{{
+				Handler: "id_token",
+				Config: json.RawMessage(`
+{
+	"jwks_url": "file://../test/stub/jwks-rsa-single.json",
+	"issuer_url": "https://example.com"
+}
+`)}}}}),
 	)
 
 	router := x.NewAPIRouter()

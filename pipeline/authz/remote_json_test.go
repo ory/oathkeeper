@@ -1,6 +1,7 @@
 package authz_test
 
 import (
+	"context"
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
@@ -11,9 +12,8 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/tidwall/sjson"
 
+	"github.com/ory/x/configx"
 	"github.com/ory/x/logrusx"
-
-	"github.com/ory/viper"
 
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/pipeline/authn"
@@ -241,9 +241,13 @@ func TestAuthorizerRemoteJSONValidate(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			p := configuration.NewViperProvider(logrusx.New("", ""))
+			p, err := configuration.NewKoanfProvider(
+				context.Background(), nil, logrusx.New("", ""),
+				configx.SkipValidation(),
+			)
+			require.NoError(t, err)
 			a := NewAuthorizerRemoteJSON(p)
-			viper.Set(configuration.ViperKeyAuthorizerRemoteJSONIsEnabled, tt.enabled)
+			p.SetForTest(t, configuration.ViperKeyAuthorizerRemoteJSONIsEnabled, tt.enabled)
 			if err := a.Validate(tt.config); (err != nil) != tt.wantErr {
 				t.Errorf("Validate() error = %v, wantErr %v", err, tt.wantErr)
 			}
@@ -265,7 +269,7 @@ func TestAuthorizerRemoteJSONConfig(t *testing.T) {
 				Payload:                          "{}",
 				ForwardResponseHeadersToUpstream: []string{"X-Foo"},
 				Retry: &AuthorizerRemoteJSONRetryConfiguration{
-					Timeout: "500ms",
+					Timeout: "100ms", // default timeout from schema
 					MaxWait: "1s",
 				},
 			},
@@ -278,15 +282,18 @@ func TestAuthorizerRemoteJSONConfig(t *testing.T) {
 				Payload:                          "{}",
 				ForwardResponseHeadersToUpstream: []string{},
 				Retry: &AuthorizerRemoteJSONRetryConfiguration{
-					Timeout: "500ms",
+					Timeout: "100ms", // default timeout from schema
 					MaxWait: "1s",
 				},
 			},
 		},
 	}
 	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			p := configuration.NewViperProvider(logrusx.New("", ""))
+		t.Run("case="+tt.name, func(t *testing.T) {
+			p, err := configuration.NewKoanfProvider(
+				context.Background(), nil, logrusx.New("", ""),
+			)
+			require.NoError(t, err)
 			a := NewAuthorizerRemoteJSON(p)
 			actual, err := a.Config(tt.raw)
 			assert.NoError(t, err)

@@ -19,7 +19,7 @@ import (
 	"golang.org/x/oauth2/clientcredentials"
 
 	"github.com/ory/go-convenience/stringslice"
-	"github.com/ory/x/httpx"
+	"github.com/ory/oldx/httpx"
 	"github.com/ory/x/logrusx"
 
 	"github.com/ory/oathkeeper/driver/configuration"

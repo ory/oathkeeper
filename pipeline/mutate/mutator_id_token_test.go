@@ -37,10 +37,9 @@ import (
 
 	"github.com/ory/oathkeeper/rule"
 	"github.com/ory/oathkeeper/x"
+	"github.com/ory/x/configx"
 
 	"github.com/golang-jwt/jwt/v4"
-
-	"github.com/ory/viper"
 
 	"github.com/ory/oathkeeper/credentials"
 	"github.com/ory/oathkeeper/driver/configuration"
@@ -200,14 +199,14 @@ func parseToken(h http.Header) string {
 }
 
 func TestMutatorIDToken(t *testing.T) {
-	conf := internal.NewConfigurationWithDefaults()
+	conf := internal.NewConfigurationWithDefaults(configx.SkipValidation())
 	reg := internal.NewRegistry(conf)
 
 	a, err := reg.PipelineMutator("id_token")
 	require.NoError(t, err)
 	assert.Equal(t, "id_token", a.GetID())
 
-	viper.Set("mutators.id_token.config.issuer_url", "/foo/bar")
+	conf.SetForTest(t, "mutators.id_token.config.issuer_url", "/foo/bar")
 
 	t.Run("method=mutate", func(t *testing.T) {
 		r := &http.Request{}
@@ -372,8 +371,7 @@ func TestMutatorIDToken(t *testing.T) {
 			{e: true, i: "http://baz/foo", j: "http://baz/foo", pass: true},
 		} {
 			t.Run(fmt.Sprintf("case=%d", k), func(t *testing.T) {
-				viper.Reset()
-				viper.Set(configuration.ViperKeyMutatorIDTokenIsEnabled, tc.e)
+				conf.SetForTest(t, configuration.ViperKeyMutatorIDTokenIsEnabled, tc.e)
 				err := a.Validate(json.RawMessage(`{"issuer_url":"` + tc.i + `", "jwks_url": "` + tc.j + `"}`))
 				if tc.pass {
 					require.NoError(t, err)
@@ -419,7 +417,7 @@ func BenchmarkMutatorIDToken(b *testing.B) {
 					for i := 0; i < b.N; i++ {
 						tc = tcs[i%len(tcs)]
 						config, _ = sjson.SetBytes(tc.Config, "jwks_url", key)
-						viper.Set("mutators.id_token.config.issuer_url", "/"+issuers[i%len(issuers)])
+						conf.SetForTest(b, "mutators.id_token.config.issuer_url", "/"+issuers[i%len(issuers)])
 
 						b.StartTimer()
 						err := a.Mutate(r, tc.Session, config, rl)

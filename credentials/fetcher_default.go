@@ -40,7 +40,7 @@ import (
 	"github.com/ory/x/urlx"
 
 	"github.com/ory/herodot"
-	"github.com/ory/x/httpx"
+	"github.com/ory/oldx/httpx"
 
 	"gocloud.dev/blob"
 	_ "gocloud.dev/blob/azureblob"

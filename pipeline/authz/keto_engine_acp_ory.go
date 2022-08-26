@@ -30,7 +30,7 @@ import (
 	"text/template"
 	"time"
 
-	"github.com/ory/x/httpx"
+	"github.com/ory/oldx/httpx"
 
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/pipeline"

@@ -11,7 +11,7 @@ import (
 
 	"github.com/pkg/errors"
 
-	"github.com/ory/x/httpx"
+	"github.com/ory/oldx/httpx"
 
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/helper"
@@ -129,10 +129,6 @@ func (a *AuthorizerRemoteJSON) Validate(config json.RawMessage) error {
 // Config merges config and the authorizer's configuration and validates the
 // resulting configuration. It reports an error if the configuration is invalid.
 func (a *AuthorizerRemoteJSON) Config(config json.RawMessage) (*AuthorizerRemoteJSONConfiguration, error) {
-	const (
-		defaultTimeout = "500ms"
-		defaultMaxWait = "1s"
-	)
 	var c AuthorizerRemoteJSONConfiguration
 	if err := a.c.AuthorizerConfig(a.GetID(), config, &c); err != nil {
 		return nil, NewErrAuthorizerMisconfigured(a, err)
@@ -142,16 +138,6 @@ func (a *AuthorizerRemoteJSON) Config(config json.RawMessage) (*AuthorizerRemote
 		c.ForwardResponseHeadersToUpstream = []string{}
 	}
 
-	if c.Retry == nil {
-		c.Retry = &AuthorizerRemoteJSONRetryConfiguration{Timeout: defaultTimeout, MaxWait: defaultMaxWait}
-	} else {
-		if c.Retry.Timeout == "" {
-			c.Retry.Timeout = defaultTimeout
-		}
-		if c.Retry.MaxWait == "" {
-			c.Retry.MaxWait = defaultMaxWait
-		}
-	}
 	duration, err := time.ParseDuration(c.Retry.Timeout)
 	if err != nil {
 		return nil, err

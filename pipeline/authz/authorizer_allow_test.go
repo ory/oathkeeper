@@ -45,11 +45,11 @@ func TestAuthorizerAllow(t *testing.T) {
 	})
 
 	t.Run("method=validate", func(t *testing.T) {
-		viper.Set(configuration.ViperKeyAuthorizerAllowIsEnabled, true)
+		conf.SetForTest(t, configuration.ViperKeyAuthorizerAllowIsEnabled, true)
 		require.NoError(t, a.Validate(nil))
 
 		viper.Reset()
-		viper.Set(configuration.ViperKeyAuthorizerAllowIsEnabled, false)
+		conf.SetForTest(t, configuration.ViperKeyAuthorizerAllowIsEnabled, false)
 		require.Error(t, a.Validate(nil))
 	})
 }
