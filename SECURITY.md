@@ -18,6 +18,8 @@ https://github.com/ory/meta/blob/master/templates/repository/SECURITY.md
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 # Security Policy
+# google policy 
+# microsoft security 
 
 ## Supported Versions
 
