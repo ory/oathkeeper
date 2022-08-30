@@ -76,7 +76,7 @@ func (m *Middleware) CollapsePaths(flag bool) *Middleware {
 }
 
 // HidePaths if set to true, forces the value of the "request" label
-// of the prometheus request metrics to be set to a constant "hidden" value.
+// of the prometheus request metrics to be set to an empty value.
 // eg. (when set to true):
 //   - /decisions/service/my-service -> /hidden
 //   - /decisions -> /hidden
