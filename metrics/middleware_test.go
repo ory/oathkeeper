@@ -35,6 +35,9 @@ var (
 	metricsCollapsed string = metricMetadata + rootMetric + `
 	ory_oathkeeper_requests_total{method="GET",request="/hello",service="test",status_code="200"} 1
 	`
+	metricsHidden string = metricMetadata + `
+	ory_oathkeeper_requests_total{method="GET",request="",service="test",status_code="200"} 2
+	`
 	serverContextPaths []string = []string{"/", "/hello/world"}
 
 	configurableMetricMetadata string = `
@@ -81,10 +84,13 @@ func PrometheusTestApp(middleware *Middleware) http.Handler {
 var prometheusParams = []struct {
 	name            string
 	collapsePaths   bool
+	hidePaths       bool
 	expectedMetrics string
 }{
-	{"Not collapsed paths", false, metricsNotCollapsed},
-	{"Collapsed paths", true, metricsCollapsed},
+	{"Not collapsed paths", false, false, metricsNotCollapsed},
+	{"Collapsed paths", true, false, metricsCollapsed},
+	{"Hidden not collapsed paths", false, true, metricsHidden},
+	{"Hidden collapsed paths", true, true, metricsHidden},
 }
 
 func TestPrometheusRequestTotalMetrics(t *testing.T) {
@@ -96,6 +102,7 @@ func TestPrometheusRequestTotalMetrics(t *testing.T) {
 			promRepo := NewTestPrometheusRepository(RequestTotal)
 			promMiddleware := NewMiddleware(promRepo, "test")
 			promMiddleware.CollapsePaths(tt.collapsePaths)
+			promMiddleware.HidePaths(tt.hidePaths)
 
 			ts := httptest.NewServer(PrometheusTestApp(promMiddleware))
 			defer ts.Close()
