@@ -83,6 +83,7 @@ serve:
     port: 9000
     host: localhost
     metrics_path: /metrics
+    hide_request_paths: false
     collapse_request_paths: true
     metric_name_prefix: ory_oathkeeper_
 
