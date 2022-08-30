@@ -47,12 +47,8 @@ func runProxy(d driver.Driver, n *negroni.Negroni, logger *logrusx.Logger, prom 
 		}
 
 		promHidePaths := d.Configuration().PrometheusHideRequestPaths()
-		if promHidePaths {
-			n.Use(metrics.NewMiddleware(prom, "oathkeeper-proxy").ExcludePaths(healthx.ReadyCheckPath, healthx.AliveCheckPath).HidePaths(promHidePaths))
-		} else {
-			promCollapsePaths := d.Configuration().PrometheusCollapseRequestPaths()
-			n.Use(metrics.NewMiddleware(prom, "oathkeeper-proxy").ExcludePaths(healthx.ReadyCheckPath, healthx.AliveCheckPath).CollapsePaths(promCollapsePaths))
-		}
+		promCollapsePaths := d.Configuration().PrometheusCollapseRequestPaths()
+		n.Use(metrics.NewMiddleware(prom, "oathkeeper-proxy").ExcludePaths(healthx.ReadyCheckPath, healthx.AliveCheckPath).HidePaths(promHidePaths).CollapsePaths(promCollapsePaths))
 		n.Use(reqlog.NewMiddlewareFromLogger(logger, "oathkeeper-proxy").ExcludePaths(healthx.ReadyCheckPath, healthx.AliveCheckPath))
 		n.UseHandler(handler)
 
@@ -91,13 +87,10 @@ func runAPI(d driver.Driver, n *negroni.Negroni, logger *logrusx.Logger, prom *m
 		d.Registry().HealthHandler().SetRoutes(router.Router, true)
 		d.Registry().CredentialHandler().SetRoutes(router)
 
+		promHidePaths := d.Configuration().PrometheusHideRequestPaths()
 		promCollapsePaths := d.Configuration().PrometheusCollapseRequestPaths()
 
-		if true {
-			n.Use(metrics.NewMiddleware(prom, "oathkeeper-api").ExcludePaths(healthx.ReadyCheckPath, healthx.AliveCheckPath).HidePaths(true))
-		} else {
-			n.Use(metrics.NewMiddleware(prom, "oathkeeper-api").ExcludePaths(healthx.ReadyCheckPath, healthx.AliveCheckPath).CollapsePaths(promCollapsePaths))
-		}
+		n.Use(metrics.NewMiddleware(prom, "oathkeeper-api").ExcludePaths(healthx.ReadyCheckPath, healthx.AliveCheckPath).HidePaths(promHidePaths).CollapsePaths(promCollapsePaths))
 		n.Use(reqlog.NewMiddlewareFromLogger(logger, "oathkeeper-api").ExcludePaths(healthx.ReadyCheckPath, healthx.AliveCheckPath))
 		n.Use(d.Registry().DecisionHandler()) // This needs to be the last entry, otherwise the judge API won't work
 
