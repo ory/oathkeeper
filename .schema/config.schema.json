@@ -1219,7 +1219,7 @@
             },
             "hide_request_paths": {
               "type": "boolean",
-              "default": true,
+              "default": false,
               "title": "HidePaths",
               "description": "When set to true the request label will be set to an empty value"
             },
