@@ -51,6 +51,14 @@ func TestDecisionAPI(t *testing.T) {
 	ts := httptest.NewServer(n)
 	defer ts.Close()
 
+	ruleNoOpAuthenticatorWithMutator := rule.Rule{
+		Match:          &rule.Match{Methods: []string{"GET"}, URL: ts.URL + "/authn-noop-mutator/<[0-9]+>"},
+		Authenticators: []rule.Handler{{Handler: "noop"}},
+		Authorizer:     rule.Handler{Handler: "allow"},
+		Mutators:       []rule.Handler{{Handler: "id_token"}},
+		Upstream:       rule.Upstream{URL: ""},
+	}
+
 	ruleNoOpAuthenticator := rule.Rule{
 		Match:          &rule.Match{Methods: []string{"GET"}, URL: ts.URL + "/authn-noop/<[0-9]+>"},
 		Authenticators: []rule.Handler{{Handler: "noop"}},
@@ -104,6 +112,17 @@ func TestDecisionAPI(t *testing.T) {
 			rulesRegexp: []rule.Rule{ruleNoOpAuthenticator, ruleNoOpAuthenticator},
 			rulesGlob:   []rule.Rule{ruleNoOpAuthenticatorGLOB, ruleNoOpAuthenticatorGLOB},
 			code:        http.StatusInternalServerError,
+		},
+		{
+			d:           "should pass and skip mutator with noop authenticator",
+			url:         ts.URL + "/decisions" + "/authn-noop-mutator/1234",
+			rulesRegexp: []rule.Rule{ruleNoOpAuthenticatorWithMutator},
+			rulesGlob:   []rule.Rule{ruleNoOpAuthenticatorWithMutator},
+			code:        http.StatusOK,
+			transform: func(r *http.Request) {
+				r.Header.Add("Authorization", "basic user:pass")
+			},
+			authz: "basic user:pass",
 		},
 		{
 			d:           "should pass",

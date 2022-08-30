@@ -180,6 +180,7 @@ func (d *requestHandler) HandleRequest(r *http.Request, rl *rule.Rule) (session 
 		return nil, err
 	}
 
+	useNoopAuthenticator := false
 	for _, a := range rl.Authenticators {
 		anh, err := d.r.PipelineAuthenticator(a.Handler)
 		if err != nil {
@@ -225,6 +226,10 @@ func (d *requestHandler) HandleRequest(r *http.Request, rl *rule.Rule) (session 
 				return nil, err
 			}
 		} else {
+			// If we hit the no-op authenticator then make a note of it
+			if anh.GetID() == "noop" {
+				useNoopAuthenticator = true
+			}
 			// The first authenticator that matches must return the session
 			found = true
 			fields["subject"] = session.Subject
@@ -240,6 +245,14 @@ func (d *requestHandler) HandleRequest(r *http.Request, rl *rule.Rule) (session 
 			WithField("reason_id", "authentication_handler_no_match").
 			Warn("No authentication handler was responsible for handling the authentication request")
 		return nil, err
+	}
+
+	if useNoopAuthenticator {
+		// This is essentially what the noop mutator does so if we choose to
+		// use noop authentication and skip other parts of the pipeline then
+		// we need to set the session from the request headers
+		session.Header = r.Header
+		return session, nil
 	}
 
 	azh, err := d.r.PipelineAuthorizer(rl.Authorizer.Handler)
