@@ -49,7 +49,7 @@ func NewMiddleware(prom *PrometheusRepository, name string) *Middleware {
 		clock:         &realClock{},
 		silencePaths:  map[string]bool{},
 		collapsePaths: true,
-		hidePaths:     true,
+		hidePaths:     false,
 	}
 }
 
