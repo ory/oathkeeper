@@ -106,7 +106,7 @@ func (m *Middleware) ServeHTTP(rw http.ResponseWriter, r *http.Request, next htt
 	if _, silent := m.silencePaths[r.URL.Path]; !silent {
 		requestURI := r.RequestURI
 		if m.hidePaths {
-			requestURI = "/hidden"
+			requestURI = ""
 		} else {
 			if m.collapsePaths {
 				requestURI = m.getFirstPathSegment(requestURI)
