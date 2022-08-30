@@ -1217,6 +1217,12 @@
               "title": "Metrix prefix",
               "description": "Prefix appended to Prometheus request metrics"
             },
+            "hide_request_paths": {
+              "type": "boolean",
+              "default": true,
+              "title": "HidePaths",
+              "description": "When set to true the request label will be set to an empty value"
+            },
             "collapse_request_paths": {
               "type": "boolean",
               "default": true,
