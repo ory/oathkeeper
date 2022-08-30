@@ -38,6 +38,7 @@ type Middleware struct {
 	mutex         sync.RWMutex
 	silencePaths  map[string]bool
 	collapsePaths bool
+	hidePaths     bool
 }
 
 // NewMiddleware returns a new *Middleware, yay!
@@ -48,6 +49,7 @@ func NewMiddleware(prom *PrometheusRepository, name string) *Middleware {
 		clock:         &realClock{},
 		silencePaths:  map[string]bool{},
 		collapsePaths: true,
+		hidePaths:     true,
 	}
 }
 
@@ -73,6 +75,18 @@ func (m *Middleware) CollapsePaths(flag bool) *Middleware {
 	return m
 }
 
+// HidePaths if set to true, forces the value of the "request" label
+// of the prometheus request metrics to be set to a constant "hidden" value.
+// eg. (when set to true):
+//   - /decisions/service/my-service -> /hidden
+//   - /decisions -> /hidden
+func (m *Middleware) HidePaths(flag bool) *Middleware {
+	m.mutex.Lock()
+	m.hidePaths = flag
+	m.mutex.Unlock()
+	return m
+}
+
 func (m *Middleware) getFirstPathSegment(requestURI string) string {
 	// Will split /my/example/uri in []string{"", "my", "example/uri"}
 	uriSegments := strings.SplitN(requestURI, "/", 3)
@@ -91,10 +105,15 @@ func (m *Middleware) ServeHTTP(rw http.ResponseWriter, r *http.Request, next htt
 
 	if _, silent := m.silencePaths[r.URL.Path]; !silent {
 		requestURI := r.RequestURI
-		if m.collapsePaths {
-			requestURI = m.getFirstPathSegment(requestURI)
+		if m.hidePaths {
+			requestURI = "/hidden"
+		} else {
+			if m.collapsePaths {
+				requestURI = m.getFirstPathSegment(requestURI)
+			}
 		}
-		m.Prometheus.RequestDurationObserve(m.Name, requestURI, r.Method, res.Status())(float64(latency.Seconds()))
+
+		m.Prometheus.RequestDurationObserve(m.Name, requestURI, r.Method, res.Status())(latency.Seconds())
 		m.Prometheus.UpdateRequest(m.Name, requestURI, r.Method, res.Status())
 	}
 }
