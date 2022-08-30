@@ -52,6 +52,7 @@ const (
 	ViperKeyPrometheusServeAddressPort          = "serve.prometheus.port"
 	ViperKeyPrometheusServeMetricsPath          = "serve.prometheus.metrics_path"
 	ViperKeyPrometheusServeMetricsNamePrefix    = "serve.prometheus.metric_name_prefix"
+	ViperKeyPrometheusServeHideRequestPaths     = "serve.prometheus.hide_request_paths"
 	ViperKeyPrometheusServeCollapseRequestPaths = "serve.prometheus.collapse_request_paths"
 	ViperKeyAccessRuleRepositories              = "access_rules.repositories"
 	ViperKeyAccessRuleMatchingStrategy          = "access_rules.matching_strategy"
@@ -214,6 +215,10 @@ func (v *ViperProvider) PrometheusMetricsPath() string {
 
 func (v *ViperProvider) PrometheusMetricsNamePrefix() string {
 	return viperx.GetString(v.l, ViperKeyPrometheusServeMetricsNamePrefix, "ory_oathkeeper_")
+}
+
+func (v *ViperProvider) PrometheusHideRequestPaths() bool {
+	return viperx.GetBool(v.l, ViperKeyPrometheusServeHideRequestPaths, false)
 }
 
 func (v *ViperProvider) PrometheusCollapseRequestPaths() bool {
