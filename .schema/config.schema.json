@@ -1073,6 +1073,11 @@
             "enabled": {
               "$ref": "#/definitions/handlerSwitch"
             },
+            "key": {
+              "type": "string",
+              "title": "Cache Key",
+              "description": "Custom cache key per rule, i.e using templating '{{ print .Subject }}'. All templated properties must be in AuthenticationSession."
+            },
             "ttl": {
               "type": "string",
               "pattern": "^[0-9]+(ns|us|ms|s|m|h)$",

@@ -9,6 +9,7 @@ import (
 	"net/http/httptest"
 	"net/url"
 	"testing"
+	"time"
 
 	"github.com/julienschmidt/httprouter"
 
@@ -80,6 +81,39 @@ func defaultRouterSetup(actions ...func(a *authn.AuthenticationSession)) routerS
 	}
 }
 
+// routerAuthSessionCache is used with AuthenticationSession cache. We can't modify AuthenticationSession,
+// thus we need to invoke an error if function is triggered twice. Given no error in tests we can assert
+// AuthenticationSession is from cache.
+func routerAuthSessionCache(actions ...func(a *authn.AuthenticationSession)) routerSetupFunction {
+	return func(t *testing.T) http.Handler {
+		router := httprouter.New()
+
+		isSeen := false
+		router.POST("/", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+			if isSeen {
+				w.WriteHeader(http.StatusInternalServerError)
+				return
+			}
+			isSeen = true
+
+			body, err := ioutil.ReadAll(r.Body)
+			require.NoError(t, err)
+			var data authn.AuthenticationSession
+			err = json.Unmarshal(body, &data)
+			require.NoError(t, err)
+			for _, f := range actions {
+				f(&data)
+			}
+			jsonData, err := json.Marshal(data)
+			require.NoError(t, err)
+			w.WriteHeader(http.StatusOK)
+			_, err = w.Write(jsonData)
+			require.NoError(t, err)
+		})
+		return router
+	}
+}
+
 func withBasicAuth(f routerSetupFunction, user, password string) routerSetupFunction {
 	return func(t *testing.T) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -127,12 +161,17 @@ func configWithRetriesForMutator(giveUpAfter, retryDelay string) func(*httptest.
 	}
 }
 
+func configWithSpecialCacheKey(key string) func(*httptest.Server) json.RawMessage {
+	return func(s *httptest.Server) json.RawMessage {
+		return []byte(fmt.Sprintf(`{"api": {"url": "%s"}, "cache": {"enabled": true, "ttl": "30s", "key": "%s"}}`, s.URL, key))
+	}
+}
+
 func TestMutatorHydrator(t *testing.T) {
 	conf := internal.NewConfigurationWithDefaults()
 	reg := internal.NewRegistry(conf)
 
-	a, err := reg.PipelineMutator("hydrator")
-	require.NoError(t, err)
+	a := mutate.NewMutatorHydrator(conf, reg)
 	assert.Equal(t, "hydrator", a.GetID())
 
 	t.Run("method=mutate", func(t *testing.T) {
@@ -148,6 +187,7 @@ func TestMutatorHydrator(t *testing.T) {
 		sampleUserId := "user"
 		sampleValidPassword := "passwd1"
 		sampleNotValidPassword := "passwd7"
+
 		var testMap = map[string]struct {
 			Setup   func(*testing.T) http.Handler
 			Session *authn.AuthenticationSession
@@ -207,7 +247,7 @@ func TestMutatorHydrator(t *testing.T) {
 					router := httprouter.New()
 					router.POST("/", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 						w.WriteHeader(http.StatusOK)
-						_, err = w.Write([]byte(`{}`))
+						_, err := w.Write([]byte(`{}`))
 						require.NoError(t, err)
 					})
 					return router
@@ -262,6 +302,17 @@ func TestMutatorHydrator(t *testing.T) {
 				Rule:    &rule.Rule{ID: "test-rule"},
 				Config: func(s *httptest.Server) json.RawMessage {
 					return []byte(`{"api": {"url": "ZGVmaW5pdGVseU5vdFZhbGlkVXJs"}}`)
+				},
+				Request: &http.Request{},
+				Match:   newAuthenticationSession(),
+				Err:     errors.New("mutator matching this route is misconfigured or disabled"),
+			},
+			"Empty API URL": {
+				Setup:   defaultRouterSetup(),
+				Session: newAuthenticationSession(),
+				Rule:    &rule.Rule{ID: "test-rule"},
+				Config: func(s *httptest.Server) json.RawMessage {
+					return []byte(`{"api": {"url": ""}}`)
 				},
 				Request: &http.Request{},
 				Match:   newAuthenticationSession(),
@@ -334,7 +385,7 @@ func TestMutatorHydrator(t *testing.T) {
 						assert.Equal(t, q["a"], []string{"b"})
 						assert.Equal(t, q["c"], []string{"&12"})
 
-						_, err = w.Write([]byte(`{}`))
+						_, err := w.Write([]byte(`{}`))
 						require.NoError(t, err)
 					})
 					return router
@@ -352,21 +403,123 @@ func TestMutatorHydrator(t *testing.T) {
 			t.Run(testName, func(t *testing.T) {
 				var router http.Handler
 				var ts *httptest.Server
+
 				if specs.Setup != nil {
 					router = specs.Setup(t)
 				}
 				ts = httptest.NewServer(router)
 				defer ts.Close()
 
-				err := a.Mutate(specs.Request, specs.Session, specs.Config(ts), specs.Rule)
-				if specs.Err == nil {
+				if err := a.Mutate(specs.Request, specs.Session, specs.Config(ts), specs.Rule); specs.Err == nil {
+					// Issuer must run without error
+					require.NoError(t, err)
+				} else {
+					assert.EqualError(t, err, specs.Err.Error())
+				}
+				assert.Equal(t, specs.Match, specs.Session)
+			})
+		}
+
+	})
+
+	t.Run("method=cache", func(t *testing.T) {
+		const (
+			sampleSubject            = "sub"
+			cacheTestTemplateSubject = "sub"
+			cacheTestKeyName         = "cache"
+			cacheTestWriteSleep      = 10 * time.Millisecond
+		)
+
+		var testMap = map[string]struct {
+			TemplateKey  bool
+			CustomKey    bool
+			SessionCache bool
+			Setup        func(*testing.T) http.Handler
+			Session      *authn.AuthenticationSession
+			Rule         *rule.Rule
+			Config       func(*httptest.Server) json.RawMessage
+			Request      *http.Request
+			Match        *authn.AuthenticationSession
+			Err          error
+		}{
+			"Custom Cache Key Cache Hit": {
+				CustomKey: true,
+				Setup:     routerAuthSessionCache(),
+				Session:   newAuthenticationSession(setSubject(sampleSubject)),
+				Rule:      &rule.Rule{ID: "test-rule"},
+				Config:    configWithSpecialCacheKey(sampleSubject),
+				Request:   &http.Request{},
+				Match:     newAuthenticationSession(setSubject(sampleSubject)),
+				Err:       nil,
+			},
+			"AuthenticationSession Key Cache Hit": {
+				SessionCache: true,
+				Setup:        routerAuthSessionCache(),
+				Session:      newAuthenticationSession(setSubject(sampleSubject)),
+				Rule:         &rule.Rule{ID: "test-rule"},
+				// An empty cache key will ensure default (AuthenticationSession) behavior is applied.
+				Config:  configWithSpecialCacheKey(""),
+				Request: &http.Request{},
+				Match:   newAuthenticationSession(setSubject(sampleSubject)),
+				Err:     nil,
+			},
+			"Custom Cache Key Template Cache Hit": {
+				TemplateKey: true,
+				CustomKey:   true,
+				Setup:       routerAuthSessionCache(),
+				Session:     newAuthenticationSession(setSubject(cacheTestTemplateSubject)),
+				Rule:        &rule.Rule{ID: "test-rule"},
+				Config:      configWithSpecialCacheKey("{{ print .Subject }}"),
+				Request:     &http.Request{},
+				Match:       newAuthenticationSession(setSubject(cacheTestTemplateSubject)),
+				Err:         nil,
+			},
+		}
+
+		for testName, specs := range testMap {
+			t.Run(testName, func(t *testing.T) {
+				var router http.Handler
+				var ts *httptest.Server
+
+				if specs.Setup != nil {
+					router = specs.Setup(t)
+				}
+				ts = httptest.NewServer(router)
+				defer ts.Close()
+
+				if specs.SessionCache {
+					require.NoError(t, a.Mutate(specs.Request, specs.Session, specs.Config(ts), specs.Rule))
+				} else {
+					specs.Session.Extra = make(map[string]interface{})
+					specs.Session.Extra[cacheTestKeyName] = struct{}{}
+					require.NoError(t, a.Mutate(specs.Request, specs.Session, specs.Config(ts), specs.Rule))
+					// Delete K/V-combination above. Must be served from the cache,
+					// K/V-combination present ensure session originates from cache.
+					delete(specs.Session.Extra, cacheTestKeyName)
+				}
+				// Cache entry is being written asynchronously. Obviously this here is not
+				// a good strategy, however, the alternative would be to replace the cache.
+				// See https://github.com/dgraph-io/ristretto/blob/9d4946d9b973c8e860ae42944e07f5bbe28a506b/cache_test.go#L17
+				time.Sleep(cacheTestWriteSleep)
+
+				if err := a.Mutate(specs.Request, specs.Session, specs.Config(ts), specs.Rule); specs.Err == nil {
 					// Issuer must run without error
 					require.NoError(t, err)
 				} else {
 					assert.EqualError(t, err, specs.Err.Error())
 				}
 
-				assert.Equal(t, specs.Match, specs.Session)
+				if specs.TemplateKey {
+					assert.Equal(t, specs.Session.Subject, cacheTestTemplateSubject)
+				}
+
+				if specs.CustomKey {
+					// As specs.Session is served from cache we can't perform
+					// full equality assertion but assert if cache key is set.
+					assert.Contains(t, specs.Session.Extra, cacheTestKeyName)
+				} else {
+					assert.Equal(t, specs.Match, specs.Session)
+				}
 			})
 		}
 
