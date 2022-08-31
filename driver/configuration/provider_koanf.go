@@ -15,6 +15,11 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/knadh/koanf"
+	"github.com/pkg/errors"
+	"github.com/rs/cors"
+	"github.com/spf13/pflag"
+	"github.com/stretchr/testify/require"
+
 	"github.com/ory/fosite"
 	"github.com/ory/go-convenience/stringsx"
 	"github.com/ory/gojsonschema"
@@ -26,10 +31,6 @@ import (
 	"github.com/ory/x/tracing"
 	"github.com/ory/x/urlx"
 	"github.com/ory/x/watcherx"
-	"github.com/pkg/errors"
-	"github.com/rs/cors"
-	"github.com/spf13/pflag"
-	"github.com/stretchr/testify/require"
 )
 
 type (
@@ -139,13 +140,13 @@ func (v *KoanfProvider) AccessRuleRepositories() []url.URL {
 	var sources []string
 
 	// The config supports both a single string and a list of strings.
-	switch val := v.source.Get(ViperKeyAccessRuleRepositories).(type) {
+	switch val := v.source.Get(AccessRuleRepositories).(type) {
 	case string:
 		sources = []string{val}
 	case []string:
 		sources = val
 	default:
-		sources = v.source.Strings(ViperKeyAccessRuleRepositories)
+		sources = v.source.Strings(AccessRuleRepositories)
 	}
 
 	repositories := make([]url.URL, len(sources))
@@ -158,7 +159,7 @@ func (v *KoanfProvider) AccessRuleRepositories() []url.URL {
 
 // AccessRuleMatchingStrategy returns current MatchingStrategy.
 func (v *KoanfProvider) AccessRuleMatchingStrategy() MatchingStrategy {
-	return MatchingStrategy(v.source.String(ViperKeyAccessRuleMatchingStrategy))
+	return MatchingStrategy(v.source.String(AccessRuleMatchingStrategy))
 }
 
 func (v *KoanfProvider) CORSEnabled(iface string) bool {
@@ -176,62 +177,62 @@ func (v *KoanfProvider) CORS(iface string) (cors.Options, bool) {
 }
 
 func (v *KoanfProvider) ProxyReadTimeout() time.Duration {
-	return v.source.DurationF(ViperKeyProxyReadTimeout, 5*time.Second)
+	return v.source.DurationF(ProxyReadTimeout, 5*time.Second)
 }
 
 func (v *KoanfProvider) ProxyWriteTimeout() time.Duration {
-	return v.source.DurationF(ViperKeyProxyWriteTimeout, 10*time.Second)
+	return v.source.DurationF(ProxyWriteTimeout, 10*time.Second)
 }
 
 func (v *KoanfProvider) ProxyIdleTimeout() time.Duration {
-	return v.source.DurationF(ViperKeyProxyIdleTimeout, 120*time.Second)
+	return v.source.DurationF(ProxyIdleTimeout, 120*time.Second)
 }
 
 func (v *KoanfProvider) ProxyServeAddress() string {
 	return fmt.Sprintf("%s:%d",
-		v.source.String(ViperKeyProxyServeAddressHost),
-		v.source.IntF(ViperKeyProxyServeAddressPort, 4455),
+		v.source.String(ProxyServeAddressHost),
+		v.source.IntF(ProxyServeAddressPort, 4455),
 	)
 }
 
 func (v *KoanfProvider) APIReadTimeout() time.Duration {
-	return v.source.DurationF(ViperKeyAPIReadTimeout, 5*time.Second)
+	return v.source.DurationF(APIReadTimeout, 5*time.Second)
 }
 
 func (v *KoanfProvider) APIWriteTimeout() time.Duration {
-	return v.source.DurationF(ViperKeyAPIWriteTimeout, 10*time.Second)
+	return v.source.DurationF(APIWriteTimeout, 10*time.Second)
 }
 
 func (v *KoanfProvider) APIIdleTimeout() time.Duration {
-	return v.source.DurationF(ViperKeyAPIIdleTimeout, 120*time.Second)
+	return v.source.DurationF(APIIdleTimeout, 120*time.Second)
 }
 
 func (v *KoanfProvider) APIServeAddress() string {
 	return fmt.Sprintf(
 		"%s:%d",
-		v.source.String(ViperKeyAPIServeAddressHost),
-		v.source.IntF(ViperKeyAPIServeAddressPort, 4456),
+		v.source.String(APIServeAddressHost),
+		v.source.IntF(APIServeAddressPort, 4456),
 	)
 }
 
 func (v *KoanfProvider) PrometheusServeAddress() string {
 	return fmt.Sprintf(
 		"%s:%d",
-		v.source.String(ViperKeyPrometheusServeAddressHost),
-		v.source.IntF(ViperKeyPrometheusServeAddressPort, 9000),
+		v.source.String(PrometheusServeAddressHost),
+		v.source.IntF(PrometheusServeAddressPort, 9000),
 	)
 }
 
 func (v *KoanfProvider) PrometheusMetricsPath() string {
-	return v.source.StringF(ViperKeyPrometheusServeMetricsPath, "/metrics")
+	return v.source.StringF(PrometheusServeMetricsPath, "/metrics")
 }
 
 func (v *KoanfProvider) PrometheusMetricsNamePrefix() string {
-	return v.source.StringF(ViperKeyPrometheusServeMetricsNamePrefix, "ory_oathkeeper_")
+	return v.source.StringF(PrometheusServeMetricsNamePrefix, "ory_oathkeeper_")
 }
 
 func (v *KoanfProvider) PrometheusCollapseRequestPaths() bool {
-	return v.source.BoolF(ViperKeyPrometheusServeCollapseRequestPaths, true)
+	return v.source.BoolF(PrometheusServeCollapseRequestPaths, true)
 }
 
 func (v *KoanfProvider) ParseURLs(sources []string) ([]url.URL, error) {
@@ -329,15 +330,15 @@ func (v *KoanfProvider) PipelineConfig(prefix, id string, override json.RawMessa
 }
 
 func (v *KoanfProvider) ErrorHandlerConfig(id string, override json.RawMessage, dest interface{}) error {
-	return v.PipelineConfig(ViperKeyErrors, id, override, dest)
+	return v.PipelineConfig(ErrorsHandlers, id, override, dest)
 }
 
 func (v *KoanfProvider) ErrorHandlerFallbackSpecificity() []string {
-	return v.source.StringsF(ViperKeyErrorsFallback, []string{"json"})
+	return v.source.StringsF(ErrorsFallback, []string{"json"})
 }
 
 func (v *KoanfProvider) ErrorHandlerIsEnabled(id string) bool {
-	return v.pipelineIsEnabled(ViperKeyErrors, id)
+	return v.pipelineIsEnabled(ErrorsHandlers, id)
 }
 
 func (v *KoanfProvider) AuthenticatorIsEnabled(id string) bool {
@@ -349,11 +350,11 @@ func (v *KoanfProvider) AuthenticatorConfig(id string, override json.RawMessage,
 }
 
 func (v *KoanfProvider) AuthenticatorJwtJwkMaxWait() time.Duration {
-	return v.source.DurationF(ViperKeyAuthenticatorJwtJwkMaxWait, 1*time.Second)
+	return v.source.DurationF(AuthenticatorJwtJwkMaxWait, 1*time.Second)
 }
 
 func (v *KoanfProvider) AuthenticatorJwtJwkTtl() time.Duration {
-	return v.source.DurationF(ViperKeyAuthenticatorJwtJwkTtl, 30*time.Second)
+	return v.source.DurationF(AuthenticatorJwtJwkTtl, 30*time.Second)
 }
 
 func (v *KoanfProvider) AuthorizerIsEnabled(id string) bool {
@@ -373,11 +374,11 @@ func (v *KoanfProvider) MutatorConfig(id string, override json.RawMessage, dest 
 }
 
 func (v *KoanfProvider) JSONWebKeyURLs() []string {
-	switch val := v.source.Get(ViperKeyMutatorIDTokenJWKSURL).(type) {
+	switch val := v.source.Get(MutatorIDTokenJWKSURL).(type) {
 	case string:
 		return []string{val}
 	default:
-		return v.source.Strings(ViperKeyMutatorIDTokenJWKSURL)
+		return v.source.Strings(MutatorIDTokenJWKSURL)
 	}
 }
 
@@ -393,7 +394,7 @@ func (v *KoanfProvider) TracingProvider() string {
 }
 
 func (v *KoanfProvider) PrometheusHideRequestPaths() bool {
-	return v.source.BoolF(ViperKeyPrometheusServeHideRequestPaths, false)
+	return v.source.BoolF(PrometheusServeHideRequestPaths, false)
 }
 
 func (v *KoanfProvider) TracingJaegerConfig() *tracing.JaegerConfig {

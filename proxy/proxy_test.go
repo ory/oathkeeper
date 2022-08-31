@@ -32,13 +32,14 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/internal"
 	"github.com/ory/oathkeeper/proxy"
 	"github.com/ory/oathkeeper/rule"
 	"github.com/ory/oathkeeper/x"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 )
 
 func TestProxy(t *testing.T) {
@@ -57,13 +58,13 @@ func TestProxy(t *testing.T) {
 	ts := httptest.NewServer(&httputil.ReverseProxy{Director: d.Director, Transport: d})
 	defer ts.Close()
 
-	conf.SetForTest(t, configuration.ViperKeyAuthenticatorNoopIsEnabled, true)
-	conf.SetForTest(t, configuration.ViperKeyAuthenticatorUnauthorizedIsEnabled, true)
-	conf.SetForTest(t, configuration.ViperKeyAuthenticatorAnonymousIsEnabled, true)
-	conf.SetForTest(t, configuration.ViperKeyAuthorizerAllowIsEnabled, true)
-	conf.SetForTest(t, configuration.ViperKeyAuthorizerDenyIsEnabled, true)
-	conf.SetForTest(t, configuration.ViperKeyMutatorNoopIsEnabled, true)
-	conf.SetForTest(t, configuration.ViperKeyErrorsWWWAuthenticateIsEnabled, true)
+	conf.SetForTest(t, configuration.AuthenticatorNoopIsEnabled, true)
+	conf.SetForTest(t, configuration.AuthenticatorUnauthorizedIsEnabled, true)
+	conf.SetForTest(t, configuration.AuthenticatorAnonymousIsEnabled, true)
+	conf.SetForTest(t, configuration.AuthorizerAllowIsEnabled, true)
+	conf.SetForTest(t, configuration.AuthorizerDenyIsEnabled, true)
+	conf.SetForTest(t, configuration.MutatorNoopIsEnabled, true)
+	conf.SetForTest(t, configuration.ErrorsWWWAuthenticateIsEnabled, true)
 
 	ruleNoOpAuthenticator := rule.Rule{
 		Match:          &rule.Match{Methods: []string{"GET"}, URL: ts.URL + "/authn-noop/<[0-9]+>"},

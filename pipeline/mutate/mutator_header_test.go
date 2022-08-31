@@ -8,7 +8,6 @@ import (
 	"testing"
 	"text/template"
 
-	"github.com/ory/viper"
 	"github.com/ory/x/configx"
 
 	"github.com/ory/oathkeeper/driver/configuration"
@@ -219,11 +218,10 @@ func TestCredentialsIssuerHeaders(t *testing.T) {
 	})
 
 	t.Run("method=validate", func(t *testing.T) {
-		conf.SetForTest(t, configuration.ViperKeyMutatorHeaderIsEnabled, true)
+		conf.SetForTest(t, configuration.MutatorHeaderIsEnabled, true)
 		require.NoError(t, a.Validate(json.RawMessage(`{"headers":{}}`)))
 
-		viper.Reset()
-		conf.SetForTest(t, configuration.ViperKeyMutatorHeaderIsEnabled, false)
+		conf.SetForTest(t, configuration.MutatorHeaderIsEnabled, false)
 		require.Error(t, a.Validate(json.RawMessage(`{"headers":{}}`)))
 	})
 }

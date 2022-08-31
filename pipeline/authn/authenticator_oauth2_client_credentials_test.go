@@ -400,19 +400,19 @@ func TestAuthenticatorOAuth2ClientCredentials(t *testing.T) {
 	ts := httptest.NewServer(h)
 
 	t.Run("method=validate", func(t *testing.T) {
-		conf.SetForTest(t, configuration.ViperKeyAuthenticatorOAuth2ClientCredentialsIsEnabled, false)
+		conf.SetForTest(t, configuration.AuthenticatorOAuth2ClientCredentialsIsEnabled, false)
 		require.Error(t, a.Validate(json.RawMessage(`{"token_url":""}`)))
 
-		conf.SetForTest(t, configuration.ViperKeyAuthenticatorOAuth2ClientCredentialsIsEnabled, false)
+		conf.SetForTest(t, configuration.AuthenticatorOAuth2ClientCredentialsIsEnabled, false)
 		require.Error(t, a.Validate(json.RawMessage(`{"token_url":"`+ts.URL+"/oauth2/token"+`"}`)))
 
-		conf.SetForTest(t, configuration.ViperKeyAuthenticatorOAuth2ClientCredentialsIsEnabled, true)
+		conf.SetForTest(t, configuration.AuthenticatorOAuth2ClientCredentialsIsEnabled, true)
 		require.Error(t, a.Validate(json.RawMessage(`{"token_url":""}`)))
 
-		conf.SetForTest(t, configuration.ViperKeyAuthenticatorOAuth2ClientCredentialsIsEnabled, true)
+		conf.SetForTest(t, configuration.AuthenticatorOAuth2ClientCredentialsIsEnabled, true)
 		require.NoError(t, a.Validate(json.RawMessage(`{"token_url":"`+ts.URL+"/oauth2/token"+`"}`)))
 
-		conf.SetForTest(t, configuration.ViperKeyAuthenticatorOAuth2ClientCredentialsIsEnabled, true)
+		conf.SetForTest(t, configuration.AuthenticatorOAuth2ClientCredentialsIsEnabled, true)
 		require.NoError(t, a.Validate(json.RawMessage(`{"token_url":"`+ts.URL+"/oauth2/token"+`","retry":{"give_up_after":"3s", "max_delay":"100ms"}}`)))
 	})
 }

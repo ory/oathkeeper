@@ -3,10 +3,11 @@ package driver
 import (
 	"context"
 
+	"github.com/spf13/pflag"
+
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/x/configx"
 	"github.com/ory/x/logrusx"
-	"github.com/spf13/pflag"
 )
 
 type DefaultDriver struct {

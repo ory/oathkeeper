@@ -19,6 +19,12 @@ import (
 
 	"github.com/fsnotify/fsnotify"
 	"github.com/ghodss/yaml"
+	"github.com/pkg/errors"
+	"gocloud.dev/blob"
+	_ "gocloud.dev/blob/azureblob"
+	_ "gocloud.dev/blob/gcsblob"
+	_ "gocloud.dev/blob/s3blob"
+
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/internal/cloudstorage"
 	"github.com/ory/oathkeeper/x"
@@ -26,11 +32,6 @@ import (
 	"github.com/ory/x/stringslice"
 	"github.com/ory/x/urlx"
 	"github.com/ory/x/watcherx"
-	"github.com/pkg/errors"
-	"gocloud.dev/blob"
-	_ "gocloud.dev/blob/azureblob"
-	_ "gocloud.dev/blob/gcsblob"
-	_ "gocloud.dev/blob/s3blob"
 )
 
 type event struct {
@@ -134,7 +135,7 @@ func (f *FetcherDefault) configUpdate(ctx context.Context, watcher *fsnotify.Wat
 	// If there are no more sources to watch we reset the rule repository as a whole
 	if len(replace) == 0 {
 		f.registry.Logger().
-			WithField("repos", f.config.Get(configuration.ViperKeyAccessRuleRepositories)).
+			WithField("repos", f.config.Get(configuration.AccessRuleRepositories)).
 			Warn("No access rule repositories have been defined in the updated config.")
 		if err := f.registry.RuleRepository().Set(ctx, []Rule{}); err != nil {
 			return err
@@ -191,7 +192,7 @@ func (f *FetcherDefault) watch(ctx context.Context, watcher *fsnotify.Watcher, e
 		if err != nil {
 			return
 		}
-		if reflect.DeepEqual(pc, f.config.Get(configuration.ViperKeyAccessRuleRepositories)) {
+		if reflect.DeepEqual(pc, f.config.Get(configuration.AccessRuleRepositories)) {
 			f.registry.Logger().
 				Debug("Not reloading access rule repositories because configuration value has not changed.")
 			return
@@ -209,7 +210,7 @@ func (f *FetcherDefault) watch(ctx context.Context, watcher *fsnotify.Watcher, e
 		if err != nil {
 			return
 		}
-		if reflect.DeepEqual(strategy, f.config.Get(configuration.ViperKeyAccessRuleMatchingStrategy)) {
+		if reflect.DeepEqual(strategy, f.config.Get(configuration.AccessRuleMatchingStrategy)) {
 			f.registry.Logger().
 				Debug("Not reloading access rule matching strategy because configuration value has not changed.")
 			return

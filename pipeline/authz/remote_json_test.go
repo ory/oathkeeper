@@ -252,7 +252,7 @@ func TestAuthorizerRemoteJSONValidate(t *testing.T) {
 			)
 			require.NoError(t, err)
 			a := NewAuthorizerRemoteJSON(p)
-			p.SetForTest(t, configuration.ViperKeyAuthorizerRemoteJSONIsEnabled, tt.enabled)
+			p.SetForTest(t, configuration.AuthorizerRemoteJSONIsEnabled, tt.enabled)
 			if err := a.Validate(tt.config); (err != nil) != tt.wantErr {
 				t.Errorf("Validate() error = %v, wantErr %v", err, tt.wantErr)
 			}

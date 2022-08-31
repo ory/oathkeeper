@@ -64,7 +64,8 @@ func NewDecisionsOK() *DecisionsOK {
 	return &DecisionsOK{}
 }
 
-/*DecisionsOK handles this case with default header values.
+/*
+DecisionsOK handles this case with default header values.
 
 An empty response
 */
@@ -85,7 +86,8 @@ func NewDecisionsUnauthorized() *DecisionsUnauthorized {
 	return &DecisionsUnauthorized{}
 }
 
-/*DecisionsUnauthorized handles this case with default header values.
+/*
+DecisionsUnauthorized handles this case with default header values.
 
 genericError
 */
@@ -118,7 +120,8 @@ func NewDecisionsForbidden() *DecisionsForbidden {
 	return &DecisionsForbidden{}
 }
 
-/*DecisionsForbidden handles this case with default header values.
+/*
+DecisionsForbidden handles this case with default header values.
 
 genericError
 */
@@ -151,7 +154,8 @@ func NewDecisionsNotFound() *DecisionsNotFound {
 	return &DecisionsNotFound{}
 }
 
-/*DecisionsNotFound handles this case with default header values.
+/*
+DecisionsNotFound handles this case with default header values.
 
 genericError
 */
@@ -184,7 +188,8 @@ func NewDecisionsInternalServerError() *DecisionsInternalServerError {
 	return &DecisionsInternalServerError{}
 }
 
-/*DecisionsInternalServerError handles this case with default header values.
+/*
+DecisionsInternalServerError handles this case with default header values.
 
 genericError
 */

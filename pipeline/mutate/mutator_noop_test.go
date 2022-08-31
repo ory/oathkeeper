@@ -26,8 +26,6 @@ import (
 
 	"github.com/ory/oathkeeper/pipeline/authn"
 
-	"github.com/ory/viper"
-
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/internal"
 
@@ -52,11 +50,10 @@ func TestMutatorNoop(t *testing.T) {
 	})
 
 	t.Run("method=validate", func(t *testing.T) {
-		conf.SetForTest(t, configuration.ViperKeyMutatorNoopIsEnabled, true)
+		conf.SetForTest(t, configuration.MutatorNoopIsEnabled, true)
 		require.NoError(t, a.Validate(nil))
 
-		viper.Reset()
-		conf.SetForTest(t, configuration.ViperKeyMutatorNoopIsEnabled, false)
+		conf.SetForTest(t, configuration.MutatorNoopIsEnabled, false)
 		require.Error(t, a.Validate(nil))
 	})
 }

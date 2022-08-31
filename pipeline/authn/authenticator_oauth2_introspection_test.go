@@ -792,16 +792,16 @@ func TestAuthenticatorOAuth2Introspection(t *testing.T) {
 	})
 
 	t.Run("method=validate", func(t *testing.T) {
-		conf.SetForTest(t, configuration.ViperKeyAuthenticatorOAuth2TokenIntrospectionIsEnabled, false)
+		conf.SetForTest(t, configuration.AuthenticatorOAuth2TokenIntrospectionIsEnabled, false)
 		require.Error(t, a.Validate(json.RawMessage(`{"introspection_url":""}`)))
 
-		conf.SetForTest(t, configuration.ViperKeyAuthenticatorOAuth2TokenIntrospectionIsEnabled, true)
+		conf.SetForTest(t, configuration.AuthenticatorOAuth2TokenIntrospectionIsEnabled, true)
 		require.Error(t, a.Validate(json.RawMessage(`{"introspection_url":""}`)))
 
-		conf.SetForTest(t, configuration.ViperKeyAuthenticatorOAuth2TokenIntrospectionIsEnabled, false)
+		conf.SetForTest(t, configuration.AuthenticatorOAuth2TokenIntrospectionIsEnabled, false)
 		require.Error(t, a.Validate(json.RawMessage(`{"introspection_url":"/oauth2/token"}`)))
 
-		conf.SetForTest(t, configuration.ViperKeyAuthenticatorOAuth2TokenIntrospectionIsEnabled, true)
+		conf.SetForTest(t, configuration.AuthenticatorOAuth2TokenIntrospectionIsEnabled, true)
 		require.Error(t, a.Validate(json.RawMessage(`{"introspection_url":"/oauth2/token"}`)))
 	})
 

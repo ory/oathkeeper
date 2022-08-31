@@ -44,10 +44,10 @@ func TestAuthenticatorNoop(t *testing.T) {
 	})
 
 	t.Run("method=validate", func(t *testing.T) {
-		conf.SetForTest(t, configuration.ViperKeyAuthenticatorNoopIsEnabled, true)
+		conf.SetForTest(t, configuration.AuthenticatorNoopIsEnabled, true)
 		require.NoError(t, a.Validate(nil))
 
-		conf.SetForTest(t, configuration.ViperKeyAuthenticatorNoopIsEnabled, false)
+		conf.SetForTest(t, configuration.AuthenticatorNoopIsEnabled, false)
 		require.Error(t, a.Validate(nil))
 	})
 }

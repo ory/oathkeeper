@@ -50,13 +50,13 @@ import (
 
 func TestDecisionAPI(t *testing.T) {
 	conf := internal.NewConfigurationWithDefaults()
-	conf.SetForTest(t, configuration.ViperKeyAuthenticatorNoopIsEnabled, true)
-	conf.SetForTest(t, configuration.ViperKeyAuthenticatorUnauthorizedIsEnabled, true)
-	conf.SetForTest(t, configuration.ViperKeyAuthenticatorAnonymousIsEnabled, true)
-	conf.SetForTest(t, configuration.ViperKeyAuthorizerAllowIsEnabled, true)
-	conf.SetForTest(t, configuration.ViperKeyAuthorizerDenyIsEnabled, true)
-	conf.SetForTest(t, configuration.ViperKeyMutatorNoopIsEnabled, true)
-	conf.SetForTest(t, configuration.ViperKeyErrorsWWWAuthenticateIsEnabled, true)
+	conf.SetForTest(t, configuration.AuthenticatorNoopIsEnabled, true)
+	conf.SetForTest(t, configuration.AuthenticatorUnauthorizedIsEnabled, true)
+	conf.SetForTest(t, configuration.AuthenticatorAnonymousIsEnabled, true)
+	conf.SetForTest(t, configuration.AuthorizerAllowIsEnabled, true)
+	conf.SetForTest(t, configuration.AuthorizerDenyIsEnabled, true)
+	conf.SetForTest(t, configuration.MutatorNoopIsEnabled, true)
+	conf.SetForTest(t, configuration.ErrorsWWWAuthenticateIsEnabled, true)
 	reg := internal.NewRegistry(conf).WithBrokenPipelineMutator()
 
 	d := reg.DecisionHandler()

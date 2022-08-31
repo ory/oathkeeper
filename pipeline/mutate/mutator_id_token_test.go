@@ -371,7 +371,7 @@ func TestMutatorIDToken(t *testing.T) {
 			{e: true, i: "http://baz/foo", j: "http://baz/foo", pass: true},
 		} {
 			t.Run(fmt.Sprintf("case=%d", k), func(t *testing.T) {
-				conf.SetForTest(t, configuration.ViperKeyMutatorIDTokenIsEnabled, tc.e)
+				conf.SetForTest(t, configuration.MutatorIDTokenIsEnabled, tc.e)
 				err := a.Validate(json.RawMessage(`{"issuer_url":"` + tc.i + `", "jwks_url": "` + tc.j + `"}`))
 				if tc.pass {
 					require.NoError(t, err)

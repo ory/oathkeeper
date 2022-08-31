@@ -3,76 +3,76 @@ package configuration
 type Key = string
 
 const (
-	ViperKeyProxyReadTimeout                    Key = "serve.proxy.timeout.read"
-	ViperKeyProxyWriteTimeout                   Key = "serve.proxy.timeout.write"
-	ViperKeyProxyIdleTimeout                    Key = "serve.proxy.timeout.idle"
-	ViperKeyProxyServeAddressHost               Key = "serve.proxy.host"
-	ViperKeyProxyServeAddressPort               Key = "serve.proxy.port"
-	ViperKeyAPIServeAddressHost                 Key = "serve.api.host"
-	ViperKeyAPIServeAddressPort                 Key = "serve.api.port"
-	ViperKeyAPIReadTimeout                      Key = "serve.api.timeout.read"
-	ViperKeyAPIWriteTimeout                     Key = "serve.api.timeout.write"
-	ViperKeyAPIIdleTimeout                      Key = "serve.api.timeout.idle"
-	ViperKeyPrometheusServeAddressHost          Key = "serve.prometheus.host"
-	ViperKeyPrometheusServeAddressPort          Key = "serve.prometheus.port"
-	ViperKeyPrometheusServeMetricsPath          Key = "serve.prometheus.metrics_path"
-	ViperKeyPrometheusServeMetricsNamePrefix    Key = "serve.prometheus.metric_name_prefix"
-	ViperKeyPrometheusServeHideRequestPaths     Key = "serve.prometheus.hide_request_paths"
-	ViperKeyPrometheusServeCollapseRequestPaths Key = "serve.prometheus.collapse_request_paths"
-	ViperKeyAccessRuleRepositories              Key = "access_rules.repositories"
-	ViperKeyAccessRuleMatchingStrategy          Key = "access_rules.matching_strategy"
+	ProxyReadTimeout                    Key = "serve.proxy.timeout.read"
+	ProxyWriteTimeout                   Key = "serve.proxy.timeout.write"
+	ProxyIdleTimeout                    Key = "serve.proxy.timeout.idle"
+	ProxyServeAddressHost               Key = "serve.proxy.host"
+	ProxyServeAddressPort               Key = "serve.proxy.port"
+	APIServeAddressHost                 Key = "serve.api.host"
+	APIServeAddressPort                 Key = "serve.api.port"
+	APIReadTimeout                      Key = "serve.api.timeout.read"
+	APIWriteTimeout                     Key = "serve.api.timeout.write"
+	APIIdleTimeout                      Key = "serve.api.timeout.idle"
+	PrometheusServeAddressHost          Key = "serve.prometheus.host"
+	PrometheusServeAddressPort          Key = "serve.prometheus.port"
+	PrometheusServeMetricsPath          Key = "serve.prometheus.metrics_path"
+	PrometheusServeMetricsNamePrefix    Key = "serve.prometheus.metric_name_prefix"
+	PrometheusServeHideRequestPaths     Key = "serve.prometheus.hide_request_paths"
+	PrometheusServeCollapseRequestPaths Key = "serve.prometheus.collapse_request_paths"
+	AccessRuleRepositories              Key = "access_rules.repositories"
+	AccessRuleMatchingStrategy          Key = "access_rules.matching_strategy"
 )
 
 // Authorizers
 const (
-	ViperKeyAuthorizerAllowIsEnabled            Key = "authorizers.allow.enabled"
-	ViperKeyAuthorizerDenyIsEnabled             Key = "authorizers.deny.enabled"
-	ViperKeyAuthorizerKetoEngineACPORYIsEnabled Key = "authorizers.keto_engine_acp_ory.enabled"
-	ViperKeyAuthorizerRemoteIsEnabled           Key = "authorizers.remote.enabled"
-	ViperKeyAuthorizerRemoteJSONIsEnabled       Key = "authorizers.remote_json.enabled"
+	AuthorizerAllowIsEnabled            Key = "authorizers.allow.enabled"
+	AuthorizerDenyIsEnabled             Key = "authorizers.deny.enabled"
+	AuthorizerKetoEngineACPORYIsEnabled Key = "authorizers.keto_engine_acp_ory.enabled"
+	AuthorizerRemoteIsEnabled           Key = "authorizers.remote.enabled"
+	AuthorizerRemoteJSONIsEnabled       Key = "authorizers.remote_json.enabled"
 )
 
 // Mutators
 const (
-	ViperKeyMutatorCookieIsEnabled   Key = "mutators.cookie.enabled"
-	ViperKeyMutatorHeaderIsEnabled   Key = "mutators.header.enabled"
-	ViperKeyMutatorNoopIsEnabled     Key = "mutators.noop.enabled"
-	ViperKeyMutatorHydratorIsEnabled Key = "mutators.hydrator.enabled"
-	ViperKeyMutatorIDTokenIsEnabled  Key = "mutators.id_token.enabled"
-	ViperKeyMutatorIDTokenJWKSURL    Key = "mutators.id_token.config.jwks_url"
+	MutatorCookieIsEnabled   Key = "mutators.cookie.enabled"
+	MutatorHeaderIsEnabled   Key = "mutators.header.enabled"
+	MutatorNoopIsEnabled     Key = "mutators.noop.enabled"
+	MutatorHydratorIsEnabled Key = "mutators.hydrator.enabled"
+	MutatorIDTokenIsEnabled  Key = "mutators.id_token.enabled"
+	MutatorIDTokenJWKSURL    Key = "mutators.id_token.config.jwks_url"
 )
 
 // Authenticators
 const (
 	// anonymous
-	ViperKeyAuthenticatorAnonymousIsEnabled Key = "authenticators.anonymous.enabled"
+	AuthenticatorAnonymousIsEnabled Key = "authenticators.anonymous.enabled"
 
 	// noop
-	ViperKeyAuthenticatorNoopIsEnabled Key = "authenticators.noop.enabled"
+	AuthenticatorNoopIsEnabled Key = "authenticators.noop.enabled"
 
 	// cookie session
-	ViperKeyAuthenticatorCookieSessionIsEnabled Key = "authenticators.cookie_session.enabled"
+	AuthenticatorCookieSessionIsEnabled Key = "authenticators.cookie_session.enabled"
 
 	// jwt
-	ViperKeyAuthenticatorJwtIsEnabled  Key = "authenticators.jwt.enabled"
-	ViperKeyAuthenticatorJwtJwkMaxWait Key = "authenticators.jwt.config.jwks_max_wait"
-	ViperKeyAuthenticatorJwtJwkTtl     Key = "authenticators.jwt.config.jwks_ttl"
+	AuthenticatorJwtIsEnabled  Key = "authenticators.jwt.enabled"
+	AuthenticatorJwtJwkMaxWait Key = "authenticators.jwt.config.jwks_max_wait"
+	AuthenticatorJwtJwkTtl     Key = "authenticators.jwt.config.jwks_ttl"
 
 	// oauth2_client_credentials
-	ViperKeyAuthenticatorOAuth2ClientCredentialsIsEnabled Key = "authenticators.oauth2_client_credentials.enabled"
+	AuthenticatorOAuth2ClientCredentialsIsEnabled Key = "authenticators.oauth2_client_credentials.enabled"
 
 	// oauth2_token_introspection
-	ViperKeyAuthenticatorOAuth2TokenIntrospectionIsEnabled Key = "authenticators.oauth2_introspection.enabled"
+	AuthenticatorOAuth2TokenIntrospectionIsEnabled Key = "authenticators.oauth2_introspection.enabled"
 
 	// unauthorized
-	ViperKeyAuthenticatorUnauthorizedIsEnabled Key = "authenticators.unauthorized.enabled"
+	AuthenticatorUnauthorizedIsEnabled Key = "authenticators.unauthorized.enabled"
 )
 
 // Errors
 const (
-	ViperKeyErrors                         Key = "errors.handlers"
-	ViperKeyErrorsFallback                 Key = "errors.fallback"
-	ViperKeyErrorsJSONIsEnabled            Key = ViperKeyErrors + ".json.enabled"
-	ViperKeyErrorsRedirectIsEnabled        Key = ViperKeyErrors + ".redirect.enabled"
-	ViperKeyErrorsWWWAuthenticateIsEnabled Key = ViperKeyErrors + ".www_authenticate.enabled"
+	ErrorsHandlers                 Key = "errors.handlers"
+	ErrorsFallback                 Key = "errors.fallback"
+	ErrorsJSONIsEnabled            Key = ErrorsHandlers + ".json.enabled"
+	ErrorsRedirectIsEnabled        Key = ErrorsHandlers + ".redirect.enabled"
+	ErrorsWWWAuthenticateIsEnabled Key = ErrorsHandlers + ".www_authenticate.enabled"
 )

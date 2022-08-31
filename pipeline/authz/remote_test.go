@@ -252,7 +252,7 @@ func TestAuthorizerRemoteValidate(t *testing.T) {
 				configx.SkipValidation())
 			require.NoError(t, err)
 			a := NewAuthorizerRemote(p)
-			p.SetForTest(t, configuration.ViperKeyAuthorizerRemoteIsEnabled, tt.enabled)
+			p.SetForTest(t, configuration.AuthorizerRemoteIsEnabled, tt.enabled)
 			if err := a.Validate(tt.config); (err != nil) != tt.wantErr {
 				t.Errorf("Validate() error = %v, wantErr %v", err, tt.wantErr)
 			}

@@ -9,10 +9,6 @@ import (
 	"github.com/ory/x/logrusx"
 )
 
-func ResetViper() {
-	// NOOP
-}
-
 func NewConfigurationWithDefaults(opts ...configx.OptionModifier) configuration.Provider {
 	l := logrusx.New("", "")
 	c, err := configuration.NewKoanfProvider(

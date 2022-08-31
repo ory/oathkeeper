@@ -30,7 +30,6 @@ import (
 
 	"github.com/tidwall/sjson"
 
-	"github.com/ory/viper"
 	"github.com/ory/x/configx"
 
 	"github.com/ory/oathkeeper/driver/configuration"
@@ -199,17 +198,16 @@ func TestAuthorizerKetoWarden(t *testing.T) {
 	}
 
 	t.Run("method=validate", func(t *testing.T) {
-		conf.SetForTest(t, configuration.ViperKeyAuthorizerKetoEngineACPORYIsEnabled, false)
+		conf.SetForTest(t, configuration.AuthorizerKetoEngineACPORYIsEnabled, false)
 		require.Error(t, a.Validate(json.RawMessage(`{"base_url":"","required_action":"foo","required_resource":"bar"}`)))
 
-		conf.SetForTest(t, configuration.ViperKeyAuthorizerKetoEngineACPORYIsEnabled, false)
+		conf.SetForTest(t, configuration.AuthorizerKetoEngineACPORYIsEnabled, false)
 		require.Error(t, a.Validate(json.RawMessage(`{"base_url":"http://foo/bar","required_action":"foo","required_resource":"bar"}`)))
 
-		viper.Reset()
-		conf.SetForTest(t, configuration.ViperKeyAuthorizerKetoEngineACPORYIsEnabled, true)
+		conf.SetForTest(t, configuration.AuthorizerKetoEngineACPORYIsEnabled, true)
 		require.Error(t, a.Validate(json.RawMessage(`{"base_url":"","required_action":"foo","required_resource":"bar"}`)))
 
-		conf.SetForTest(t, configuration.ViperKeyAuthorizerKetoEngineACPORYIsEnabled, true)
+		conf.SetForTest(t, configuration.AuthorizerKetoEngineACPORYIsEnabled, true)
 		require.NoError(t, a.Validate(json.RawMessage(`{"base_url":"http://foo/bar","required_action":"foo","required_resource":"bar"}`)))
 	})
 }

@@ -381,7 +381,7 @@ func TestMutatorHydrator(t *testing.T) {
 			{enabled: true, shouldPass: true, apiUrl: "http://api/bar"},
 		} {
 			t.Run(fmt.Sprintf("case=%d", k), func(t *testing.T) {
-				conf.SetForTest(t, configuration.ViperKeyMutatorHydratorIsEnabled, testCase.enabled)
+				conf.SetForTest(t, configuration.MutatorHydratorIsEnabled, testCase.enabled)
 
 				err := a.Validate(json.RawMessage(`{"api":{"url":"` + testCase.apiUrl + `"}}`))
 				if testCase.shouldPass {

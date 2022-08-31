@@ -39,9 +39,9 @@ import (
 func TestValidateRule(t *testing.T) {
 	var prep = func(an, az, m bool) func(*testing.T, configuration.Provider) {
 		return func(t *testing.T, config configuration.Provider) {
-			config.SetForTest(t, configuration.ViperKeyAuthenticatorNoopIsEnabled, an)
-			config.SetForTest(t, configuration.ViperKeyAuthorizerAllowIsEnabled, az)
-			config.SetForTest(t, configuration.ViperKeyMutatorNoopIsEnabled, m)
+			config.SetForTest(t, configuration.AuthenticatorNoopIsEnabled, an)
+			config.SetForTest(t, configuration.AuthorizerAllowIsEnabled, az)
+			config.SetForTest(t, configuration.MutatorNoopIsEnabled, m)
 		}
 	}
 

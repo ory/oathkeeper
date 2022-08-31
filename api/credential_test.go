@@ -4,13 +4,15 @@ import (
 	"context"
 	"crypto/rsa"
 	"encoding/json"
-	"github.com/ory/x/configx"
-	"github.com/square/go-jose"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/square/go-jose"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+
+	"github.com/ory/x/configx"
 
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/internal"
@@ -20,10 +22,10 @@ import (
 
 func TestCredentialsHandler(t *testing.T) {
 	conf := internal.NewConfigurationWithDefaults(configx.SkipValidation())
-	conf.SetForTest(t, configuration.ViperKeyMutatorIDTokenJWKSURL, "file://../test/stub/jwks-rsa-multiple.json")
-	conf.SetForTest(t, configuration.ViperKeyAuthenticatorAnonymousIsEnabled, true)
-	conf.SetForTest(t, configuration.ViperKeyAuthorizerAllowIsEnabled, true)
-	conf.SetForTest(t, configuration.ViperKeyMutatorIDTokenIsEnabled, true)
+	conf.SetForTest(t, configuration.MutatorIDTokenJWKSURL, "file://../test/stub/jwks-rsa-multiple.json")
+	conf.SetForTest(t, configuration.AuthenticatorAnonymousIsEnabled, true)
+	conf.SetForTest(t, configuration.AuthorizerAllowIsEnabled, true)
+	conf.SetForTest(t, configuration.MutatorIDTokenIsEnabled, true)
 
 	r := internal.NewRegistry(conf)
 

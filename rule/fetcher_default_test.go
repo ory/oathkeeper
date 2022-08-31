@@ -306,7 +306,7 @@ func TestFetcherWatchRepositoryFromKubernetesConfigMap(t *testing.T) {
 	r := internal.NewRegistry(conf)
 
 	// Configure watcher
-	conf.SetForTest(t, configuration.ViperKeyAccessRuleRepositories, []string{"file://" + watchFile})
+	conf.SetForTest(t, configuration.AccessRuleRepositories, []string{"file://" + watchFile})
 
 	// This emulates a config map update
 	// drwxr-xr-x    2 root     root          4096 Aug  1 07:42 ..2019_08_01_07_42_33.068812649

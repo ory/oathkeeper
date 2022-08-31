@@ -72,7 +72,7 @@ func TestHandleError(t *testing.T) {
 			d:        "should return a 500 error when no handler is enabled",
 			inputErr: &herodot.ErrNotFound,
 			setup: func(t *testing.T, config configuration.Provider) {
-				config.SetForTest(t, configuration.ViperKeyErrorsJSONIsEnabled, false)
+				config.SetForTest(t, configuration.ErrorsJSONIsEnabled, false)
 			},
 			assert: func(t *testing.T, w *httptest.ResponseRecorder) {
 				assert.Equal(t, 500, w.Code)
@@ -82,7 +82,7 @@ func TestHandleError(t *testing.T) {
 			d:        "should return the found response",
 			inputErr: &herodot.ErrUnauthorized,
 			setup: func(t *testing.T, config configuration.Provider) {
-				config.SetForTest(t, configuration.ViperKeyErrorsRedirectIsEnabled, true)
+				config.SetForTest(t, configuration.ErrorsRedirectIsEnabled, true)
 			},
 			rule: &rule.Rule{
 				Errors: []rule.ErrorHandler{{
@@ -99,8 +99,8 @@ func TestHandleError(t *testing.T) {
 			d:        "should return a JSON error because the error is not unauthorized and JSON is the default",
 			inputErr: &herodot.ErrNotFound,
 			setup: func(t *testing.T, config configuration.Provider) {
-				config.SetForTest(t, configuration.ViperKeyErrorsRedirectIsEnabled, true)
-				config.SetForTest(t, configuration.ViperKeyErrors+".redirect.config.to", "http://test/test")
+				config.SetForTest(t, configuration.ErrorsRedirectIsEnabled, true)
+				config.SetForTest(t, configuration.ErrorsHandlers+".redirect.config.to", "http://test/test")
 			},
 			rule: &rule.Rule{
 				Errors: []rule.ErrorHandler{{
@@ -117,7 +117,7 @@ func TestHandleError(t *testing.T) {
 			d:        "should pick the appropriate (json) error handler for the request when multiple are configured",
 			inputErr: &herodot.ErrNotFound,
 			setup: func(t *testing.T, config configuration.Provider) {
-				config.SetForTest(t, configuration.ViperKeyErrorsRedirectIsEnabled, true)
+				config.SetForTest(t, configuration.ErrorsRedirectIsEnabled, true)
 			},
 			header: map[string][]string{"Accept": {"application/json"}},
 			rule: &rule.Rule{
@@ -138,7 +138,7 @@ func TestHandleError(t *testing.T) {
 			d:        "should redirect to the specified endpoint by picking the appropriate error handler (redirect)",
 			inputErr: &herodot.ErrUnauthorized,
 			setup: func(t *testing.T, config configuration.Provider) {
-				config.SetForTest(t, configuration.ViperKeyErrorsRedirectIsEnabled, true)
+				config.SetForTest(t, configuration.ErrorsRedirectIsEnabled, true)
 			},
 			header: map[string][]string{"Accept": {"application/xml"}},
 			rule: &rule.Rule{
@@ -159,9 +159,9 @@ func TestHandleError(t *testing.T) {
 			d:        "should respond with the appropriate fallback handler (here www_authenticate)",
 			inputErr: &herodot.ErrUnauthorized,
 			setup: func(t *testing.T, config configuration.Provider) {
-				config.SetForTest(t, configuration.ViperKeyErrorsRedirectIsEnabled, true)
-				config.SetForTest(t, configuration.ViperKeyErrorsWWWAuthenticateIsEnabled, true)
-				config.SetForTest(t, configuration.ViperKeyErrorsFallback, []string{"www_authenticate", "json"})
+				config.SetForTest(t, configuration.ErrorsRedirectIsEnabled, true)
+				config.SetForTest(t, configuration.ErrorsWWWAuthenticateIsEnabled, true)
+				config.SetForTest(t, configuration.ErrorsFallback, []string{"www_authenticate", "json"})
 			},
 			header: map[string][]string{"Accept": {"mime/undefined"}},
 			rule: &rule.Rule{
@@ -307,9 +307,9 @@ func TestRequestHandler(t *testing.T) {
 		{
 			d: "should fail because the rule is missing authn, authz, and mutator even when some pipelines are enabled",
 			setup: func(t *testing.T, config configuration.Provider) {
-				config.SetForTest(t, configuration.ViperKeyAuthenticatorNoopIsEnabled, true)
-				config.SetForTest(t, configuration.ViperKeyAuthorizerAllowIsEnabled, true)
-				config.SetForTest(t, configuration.ViperKeyMutatorNoopIsEnabled, true)
+				config.SetForTest(t, configuration.AuthenticatorNoopIsEnabled, true)
+				config.SetForTest(t, configuration.AuthorizerAllowIsEnabled, true)
+				config.SetForTest(t, configuration.MutatorNoopIsEnabled, true)
 			},
 			expectErr: true,
 			r:         newTestRequest("http://localhost"),
@@ -322,9 +322,9 @@ func TestRequestHandler(t *testing.T) {
 		{
 			d: "should pass",
 			setup: func(t *testing.T, config configuration.Provider) {
-				config.SetForTest(t, configuration.ViperKeyAuthenticatorNoopIsEnabled, true)
-				config.SetForTest(t, configuration.ViperKeyAuthorizerAllowIsEnabled, true)
-				config.SetForTest(t, configuration.ViperKeyMutatorNoopIsEnabled, true)
+				config.SetForTest(t, configuration.AuthenticatorNoopIsEnabled, true)
+				config.SetForTest(t, configuration.AuthorizerAllowIsEnabled, true)
+				config.SetForTest(t, configuration.MutatorNoopIsEnabled, true)
 			},
 			expectErr: false,
 			r:         newTestRequest("http://localhost"),
@@ -337,9 +337,9 @@ func TestRequestHandler(t *testing.T) {
 		{
 			d: "should fail when authn is set but not authz nor mutator",
 			setup: func(t *testing.T, config configuration.Provider) {
-				config.SetForTest(t, configuration.ViperKeyAuthenticatorAnonymousIsEnabled, true)
-				config.SetForTest(t, configuration.ViperKeyAuthorizerAllowIsEnabled, true)
-				config.SetForTest(t, configuration.ViperKeyMutatorNoopIsEnabled, true)
+				config.SetForTest(t, configuration.AuthenticatorAnonymousIsEnabled, true)
+				config.SetForTest(t, configuration.AuthorizerAllowIsEnabled, true)
+				config.SetForTest(t, configuration.MutatorNoopIsEnabled, true)
 			},
 			expectErr: true,
 			r:         newTestRequest("http://localhost"),
@@ -352,9 +352,9 @@ func TestRequestHandler(t *testing.T) {
 		{
 			d: "should fail when authn, authz is set but not mutator",
 			setup: func(t *testing.T, config configuration.Provider) {
-				config.SetForTest(t, configuration.ViperKeyAuthenticatorAnonymousIsEnabled, true)
-				config.SetForTest(t, configuration.ViperKeyAuthorizerAllowIsEnabled, true)
-				config.SetForTest(t, configuration.ViperKeyMutatorNoopIsEnabled, true)
+				config.SetForTest(t, configuration.AuthenticatorAnonymousIsEnabled, true)
+				config.SetForTest(t, configuration.AuthorizerAllowIsEnabled, true)
+				config.SetForTest(t, configuration.MutatorNoopIsEnabled, true)
 			},
 			expectErr: true,
 			r:         newTestRequest("http://localhost"),
@@ -367,9 +367,9 @@ func TestRequestHandler(t *testing.T) {
 		{
 			d: "should fail when authn is invalid because not enabled",
 			setup: func(t *testing.T, config configuration.Provider) {
-				config.SetForTest(t, configuration.ViperKeyAuthenticatorAnonymousIsEnabled, false)
-				config.SetForTest(t, configuration.ViperKeyAuthorizerAllowIsEnabled, true)
-				config.SetForTest(t, configuration.ViperKeyMutatorNoopIsEnabled, true)
+				config.SetForTest(t, configuration.AuthenticatorAnonymousIsEnabled, false)
+				config.SetForTest(t, configuration.AuthorizerAllowIsEnabled, true)
+				config.SetForTest(t, configuration.MutatorNoopIsEnabled, true)
 			},
 			expectErr: true,
 			r:         newTestRequest("http://localhost"),
@@ -382,9 +382,9 @@ func TestRequestHandler(t *testing.T) {
 		{
 			d: "should fail when authz is invalid because not enabled",
 			setup: func(t *testing.T, config configuration.Provider) {
-				config.SetForTest(t, configuration.ViperKeyAuthenticatorAnonymousIsEnabled, true)
-				config.SetForTest(t, configuration.ViperKeyAuthorizerAllowIsEnabled, false)
-				config.SetForTest(t, configuration.ViperKeyMutatorNoopIsEnabled, true)
+				config.SetForTest(t, configuration.AuthenticatorAnonymousIsEnabled, true)
+				config.SetForTest(t, configuration.AuthorizerAllowIsEnabled, false)
+				config.SetForTest(t, configuration.MutatorNoopIsEnabled, true)
 			},
 			expectErr: true,
 			r:         newTestRequest("http://localhost"),
@@ -397,9 +397,9 @@ func TestRequestHandler(t *testing.T) {
 		{
 			d: "should fail when mutator is invalid because not enabled",
 			setup: func(t *testing.T, config configuration.Provider) {
-				config.SetForTest(t, configuration.ViperKeyAuthenticatorAnonymousIsEnabled, true)
-				config.SetForTest(t, configuration.ViperKeyAuthorizerAllowIsEnabled, true)
-				config.SetForTest(t, configuration.ViperKeyMutatorNoopIsEnabled, false)
+				config.SetForTest(t, configuration.AuthenticatorAnonymousIsEnabled, true)
+				config.SetForTest(t, configuration.AuthorizerAllowIsEnabled, true)
+				config.SetForTest(t, configuration.MutatorNoopIsEnabled, false)
 			},
 			expectErr: true,
 			r:         newTestRequest("http://localhost"),
@@ -412,9 +412,9 @@ func TestRequestHandler(t *testing.T) {
 		{
 			d: "should fail when authn does not exist",
 			setup: func(t *testing.T, config configuration.Provider) {
-				config.SetForTest(t, configuration.ViperKeyAuthenticatorAnonymousIsEnabled, true)
-				config.SetForTest(t, configuration.ViperKeyAuthorizerAllowIsEnabled, true)
-				config.SetForTest(t, configuration.ViperKeyMutatorNoopIsEnabled, true)
+				config.SetForTest(t, configuration.AuthenticatorAnonymousIsEnabled, true)
+				config.SetForTest(t, configuration.AuthorizerAllowIsEnabled, true)
+				config.SetForTest(t, configuration.MutatorNoopIsEnabled, true)
 			},
 			expectErr: true,
 			r:         newTestRequest("http://localhost"),
@@ -427,9 +427,9 @@ func TestRequestHandler(t *testing.T) {
 		{
 			d: "should fail when authz does not exist",
 			setup: func(t *testing.T, config configuration.Provider) {
-				config.SetForTest(t, configuration.ViperKeyAuthenticatorAnonymousIsEnabled, true)
-				config.SetForTest(t, configuration.ViperKeyAuthorizerAllowIsEnabled, true)
-				config.SetForTest(t, configuration.ViperKeyMutatorNoopIsEnabled, true)
+				config.SetForTest(t, configuration.AuthenticatorAnonymousIsEnabled, true)
+				config.SetForTest(t, configuration.AuthorizerAllowIsEnabled, true)
+				config.SetForTest(t, configuration.MutatorNoopIsEnabled, true)
 			},
 			expectErr: true,
 			r:         newTestRequest("http://localhost"),
@@ -442,9 +442,9 @@ func TestRequestHandler(t *testing.T) {
 		{
 			d: "should fail when mutator does not exist",
 			setup: func(t *testing.T, config configuration.Provider) {
-				config.SetForTest(t, configuration.ViperKeyAuthenticatorAnonymousIsEnabled, true)
-				config.SetForTest(t, configuration.ViperKeyAuthorizerAllowIsEnabled, true)
-				config.SetForTest(t, configuration.ViperKeyMutatorNoopIsEnabled, true)
+				config.SetForTest(t, configuration.AuthenticatorAnonymousIsEnabled, true)
+				config.SetForTest(t, configuration.AuthorizerAllowIsEnabled, true)
+				config.SetForTest(t, configuration.MutatorNoopIsEnabled, true)
 			},
 			expectErr: true,
 			r:         newTestRequest("http://localhost"),
@@ -561,7 +561,7 @@ func TestInitializeSession(t *testing.T) {
 
 			conf := internal.NewConfigurationWithDefaults()
 			reg := internal.NewRegistry(conf)
-			conf.SetForTest(t, configuration.ViperKeyAccessRuleMatchingStrategy, string(tc.matchingStrategy))
+			conf.SetForTest(t, configuration.AccessRuleMatchingStrategy, string(tc.matchingStrategy))
 
 			rule := rule.Rule{
 				Match:          &tc.ruleMatch,
