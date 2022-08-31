@@ -164,7 +164,12 @@ func TestAuthorizerRemoteJSONAuthorize(t *testing.T) {
 				tt.config, _ = sjson.SetBytes(tt.config, "remote", server.URL)
 			}
 
-			p := configuration.NewViperProvider(logrusx.New("", ""))
+			l := logrusx.New("", "")
+			p, err := configuration.NewKoanfProvider(
+				context.Background(), nil, l)
+			if err != nil {
+				l.WithError(err).Fatal("Failed to initialize configuration")
+			}
 			a := NewAuthorizerRemoteJSON(p)
 			r := &http.Request{
 				Header: map[string][]string{

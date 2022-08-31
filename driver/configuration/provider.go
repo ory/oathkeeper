@@ -9,6 +9,7 @@ import (
 	"github.com/gobuffalo/packr/v2"
 
 	"github.com/ory/fosite"
+	"github.com/ory/x/configx"
 	"github.com/ory/x/tracing"
 
 	"github.com/rs/cors"
@@ -35,6 +36,7 @@ type Provider interface {
 	Get(k Key) interface{}
 	String(k Key) string
 	AllSettings() map[string]interface{}
+	Source() *configx.Provider
 
 	AddWatcher(cb callback) SubscriptionID
 	RemoveWatcher(id SubscriptionID)

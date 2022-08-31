@@ -19,7 +19,7 @@ import (
 	"golang.org/x/oauth2/clientcredentials"
 
 	"github.com/ory/go-convenience/stringslice"
-	"github.com/ory/oldx/httpx"
+	"github.com/ory/x/httpx"
 	"github.com/ory/x/logrusx"
 
 	"github.com/ory/oathkeeper/driver/configuration"
@@ -344,7 +344,11 @@ func (a *AuthenticatorOAuth2Introspection) Config(config json.RawMessage) (*Auth
 			return nil, nil, errors.WithStack(err)
 		}
 
-		client = httpx.NewResilientClientLatencyToleranceConfigurable(rt, timeout, maxWait)
+		client = httpx.NewResilientClient(
+			httpx.ResilientClientWithMaxRetryWait(maxWait),
+			httpx.ResilientClientWithConnectionTimeout(timeout),
+		).HTTPClient
+		client.Transport = rt
 		a.mu.Lock()
 		a.clientMap[clientKey] = client
 		a.mu.Unlock()

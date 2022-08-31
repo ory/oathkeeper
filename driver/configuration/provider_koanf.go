@@ -122,6 +122,9 @@ func (v *KoanfProvider) String(k Key) string {
 func (v *KoanfProvider) AllSettings() map[string]interface{} {
 	return v.source.All()
 }
+func (v *KoanfProvider) Source() *configx.Provider {
+	return v.source
+}
 
 func (v *KoanfProvider) SetForTest(t testing.TB, key string, value interface{}) {
 	if original := v.source.Get(key); original != nil {

@@ -22,7 +22,7 @@ Note:
   The endpoint URL should point to a single ORY Oathkeeper deployment.
   If the endpoint URL points to a Load Balancer, these commands will effective test the Load Balancer.
 `,
-	Run: func(cmd *cobra.Command, args []string) {
+	Run: func(cmd *cobra.Command, _ []string) {
 		client := newClient(cmd)
 
 		r, err := client.API.IsInstanceAlive(api.NewIsInstanceAliveParams())

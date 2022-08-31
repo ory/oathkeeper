@@ -11,7 +11,7 @@ import (
 
 	"github.com/pkg/errors"
 
-	"github.com/ory/oldx/httpx"
+	"github.com/ory/x/httpx"
 
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/helper"
@@ -45,7 +45,7 @@ type AuthorizerRemote struct {
 func NewAuthorizerRemote(c configuration.Provider) *AuthorizerRemote {
 	return &AuthorizerRemote{
 		c:      c,
-		client: httpx.NewResilientClientLatencyToleranceSmall(nil),
+		client: httpx.NewResilientClient().HTTPClient,
 		t:      x.NewTemplate("remote"),
 	}
 }
@@ -165,7 +165,10 @@ func (a *AuthorizerRemote) Config(config json.RawMessage) (*AuthorizerRemoteConf
 		return nil, err
 	}
 	timeout := time.Millisecond * duration
-	a.client = httpx.NewResilientClientLatencyToleranceConfigurable(nil, timeout, maxWait)
+	a.client = httpx.NewResilientClient(
+		httpx.ResilientClientWithMaxRetryWait(maxWait),
+		httpx.ResilientClientWithConnectionTimeout(timeout),
+	).HTTPClient
 
 	return &c, nil
 }

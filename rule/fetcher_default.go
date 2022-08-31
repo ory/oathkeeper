@@ -15,13 +15,14 @@ import (
 	"reflect"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/fsnotify/fsnotify"
 	"github.com/ghodss/yaml"
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/internal/cloudstorage"
 	"github.com/ory/oathkeeper/x"
-	"github.com/ory/oldx/httpx"
+	"github.com/ory/x/httpx"
 	"github.com/ory/x/stringslice"
 	"github.com/ory/x/urlx"
 	"github.com/ory/x/watcherx"
@@ -76,7 +77,7 @@ func NewFetcherDefault(
 		registry: registry,
 		config:   config,
 		mux:      cloudstorage.NewURLMux(),
-		hc:       httpx.NewResilientClientLatencyToleranceHigh(nil),
+		hc:       httpx.NewResilientClient(httpx.ResilientClientWithConnectionTimeout(15 * time.Second)).HTTPClient,
 		cache:    map[string][]Rule{},
 	}
 }

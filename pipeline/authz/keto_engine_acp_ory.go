@@ -30,7 +30,7 @@ import (
 	"text/template"
 	"time"
 
-	"github.com/ory/oldx/httpx"
+	"github.com/ory/x/httpx"
 
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/pipeline"
@@ -76,7 +76,7 @@ type AuthorizerKetoEngineACPORY struct {
 func NewAuthorizerKetoEngineACPORY(c configuration.Provider) *AuthorizerKetoEngineACPORY {
 	return &AuthorizerKetoEngineACPORY{
 		c:      c,
-		client: httpx.NewResilientClientLatencyToleranceSmall(nil),
+		client: httpx.NewResilientClient().HTTPClient,
 		contextCreator: func(r *http.Request) map[string]interface{} {
 			return map[string]interface{}{
 				"remoteIpAddress": realip.RealIP(r),

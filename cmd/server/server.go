@@ -19,10 +19,10 @@ import (
 
 	"github.com/ory/analytics-go/v4"
 	"github.com/ory/graceful"
-	telemetry "github.com/ory/oldx/metricsx"
 	"github.com/ory/x/corsx"
 	"github.com/ory/x/healthx"
 	"github.com/ory/x/logrusx"
+	"github.com/ory/x/metricsx"
 	"github.com/ory/x/reqlog"
 	"github.com/ory/x/tlsx"
 
@@ -203,33 +203,31 @@ func RunServe(version, build, date string) func(cmd *cobra.Command, args []strin
 		adminmw := negroni.New()
 		publicmw := negroni.New()
 
-		telemetry := telemetry.New(cmd, logger,
-			&telemetry.Options{
-				Service:       "ory-oathkeeper",
-				ClusterID:     telemetry.Hash(clusterID(d.Configuration())),
-				IsDevelopment: isDevelopment(d.Configuration()),
-				WriteKey:      "xRVRP48SAKw6ViJEnvB0u2PY8bVlsO6O",
-				WhitelistedPaths: []string{
-					"/",
-					api.CredentialsPath,
-					api.DecisionPath,
-					api.RulesPath,
-					healthx.VersionPath,
-					healthx.AliveCheckPath,
-					healthx.ReadyCheckPath,
-				},
-				BuildVersion: version,
-				BuildTime:    build,
-				BuildHash:    date,
-				Config: &analytics.Config{
-					Endpoint:             "https://sqa.ory.sh",
-					GzipCompressionLevel: 6,
-					BatchMaxSize:         500 * 1000,
-					BatchSize:            250,
-					Interval:             time.Hour * 24,
-				},
+		telemetry := metricsx.New(cmd, logger, d.Configuration().Source(), &metricsx.Options{
+			Service:       "ory-oathkeeper",
+			ClusterID:     metricsx.Hash(clusterID(d.Configuration())),
+			IsDevelopment: isDevelopment(d.Configuration()),
+			WriteKey:      "xRVRP48SAKw6ViJEnvB0u2PY8bVlsO6O",
+			WhitelistedPaths: []string{
+				"/",
+				api.CredentialsPath,
+				api.DecisionPath,
+				api.RulesPath,
+				healthx.VersionPath,
+				healthx.AliveCheckPath,
+				healthx.ReadyCheckPath,
 			},
-		)
+			BuildVersion: version,
+			BuildTime:    build,
+			BuildHash:    date,
+			Config: &analytics.Config{
+				Endpoint:             "https://sqa.ory.sh",
+				GzipCompressionLevel: 6,
+				BatchMaxSize:         500 * 1000,
+				BatchSize:            250,
+				Interval:             time.Hour * 24,
+			},
+		})
 
 		adminmw.Use(telemetry)
 		publicmw.Use(telemetry)
