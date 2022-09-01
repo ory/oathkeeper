@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -34,7 +33,7 @@ import (
 const testRule = `[{"id":"test-rule-5","upstream":{"preserve_host":true,"strip_path":"/api","url":"mybackend.com/api"},"match":{"url":"myproxy.com/api","methods":["GET","POST"]},"authenticators":[{"handler":"noop"},{"handler":"anonymous"}],"authorizer":{"handler":"allow"},"mutators":[{"handler":"noop"}]}]`
 const testConfigPath = "../test/update"
 
-func copy(t *testing.T, src string, dst *os.File) {
+func copyToFile(t *testing.T, src string, dst *os.File) {
 	t.Helper()
 
 	source, err := os.Open(filepath.Join(testConfigPath, src))
@@ -84,7 +83,7 @@ func TestFetcherReload(t *testing.T) {
 	go func() { require.NoError(t, r.RuleFetcher().Watch(ctx)) }()
 
 	// initial config without a repo and without a matching strategy
-	copy(t, "config_no_repo.yaml", configFile)
+	copyToFile(t, "config_no_repo.yaml", configFile)
 
 	rules := eventuallyListRules(ctx, t, r, 0)
 	require.Empty(t, rules)
@@ -94,7 +93,7 @@ func TestFetcherReload(t *testing.T) {
 	require.Equal(t, configuration.Regexp, strategy)
 
 	// config with a repo and without a matching strategy
-	copy(t, "config_default.yaml", configFile)
+	copyToFile(t, "config_default.yaml", configFile)
 
 	rules = eventuallyListRules(ctx, t, r, 1)
 	require.Equal(t, "test-rule-1-glob", rules[0].ID)
@@ -104,7 +103,7 @@ func TestFetcherReload(t *testing.T) {
 	require.Equal(t, configuration.Regexp, strategy)
 
 	// config with a glob matching strategy
-	copy(t, "config_glob.yaml", configFile)
+	copyToFile(t, "config_glob.yaml", configFile)
 
 	rules = eventuallyListRules(ctx, t, r, 1)
 	require.Equal(t, "test-rule-1-glob", rules[0].ID)
@@ -114,7 +113,7 @@ func TestFetcherReload(t *testing.T) {
 	// require.Equal(t, configuration.Glob, strategy)
 
 	// config with unknown matching strategy
-	copy(t, "config_error.yaml", configFile)
+	copyToFile(t, "config_error.yaml", configFile)
 
 	rules = eventuallyListRules(ctx, t, r, 1)
 	require.Equal(t, "test-rule-1-glob", rules[0].ID)
@@ -124,7 +123,7 @@ func TestFetcherReload(t *testing.T) {
 	require.Equal(t, configuration.Glob, strategy)
 
 	// config with regexp matching strategy
-	copy(t, "config_regexp.yaml", configFile)
+	copyToFile(t, "config_regexp.yaml", configFile)
 
 	rules = eventuallyListRules(ctx, t, r, 1)
 	require.Equal(t, "test-rule-1-glob", rules[0].ID)
@@ -169,24 +168,23 @@ func TestFetcherWatchConfig(t *testing.T) {
 		},
 		{
 			config: `
-		access_rules:
-		  repositories:
-		  - ftp://not-valid
-		`,
+access_rules:
+  repositories:
+  - ftp://not-valid
+`,
 			expectedStrategy: configuration.DefaultMatchingStrategy,
 		},
 		{
 			config: `
-		access_rules:
-		  repositories:
-		  - file://../test/stub/rules.json
-		  - file://../test/stub/rules.yaml
-		  - invalid
-		  - file:///invalid/path
-		  - inline://W3siaWQiOiJ0ZXN0LXJ1bGUtNCIsInVwc3RyZWFtIjp7InByZXNlcnZlX2hvc3QiOnRydWUsInN0cmlwX3BhdGgiOiIvYXBpIiwidXJsIjoibXliYWNrZW5kLmNvbS9hcGkifSwibWF0Y2giOnsidXJsIjoibXlwcm94eS5jb20vYXBpIiwibWV0aG9kcyI6WyJHRVQiLCJQT1NUIl19LCJhdXRoZW50aWNhdG9ycyI6W3siaGFuZGxlciI6Im5vb3AifSx7ImhhbmRsZXIiOiJhbm9ueW1vdXMifV0sImF1dGhvcml6ZXIiOnsiaGFuZGxlciI6ImFsbG93In0sIm11dGF0b3JzIjpbeyJoYW5kbGVyIjoibm9vcCJ9XX1d
-		  - ` + ts.URL + `
-		`,
+access_rules:
+  repositories:
+  - file://../test/stub/rules.json
+  - file://../test/stub/rules.yaml
+  - file:///invalid/path
+  - inline://W3siaWQiOiJ0ZXN0LXJ1bGUtNCIsInVwc3RyZWFtIjp7InByZXNlcnZlX2hvc3QiOnRydWUsInN0cmlwX3BhdGgiOiIvYXBpIiwidXJsIjoibXliYWNrZW5kLmNvbS9hcGkifSwibWF0Y2giOnsidXJsIjoibXlwcm94eS5jb20vYXBpIiwibWV0aG9kcyI6WyJHRVQiLCJQT1NUIl19LCJhdXRoZW50aWNhdG9ycyI6W3siaGFuZGxlciI6Im5vb3AifSx7ImhhbmRsZXIiOiJhbm9ueW1vdXMifV0sImF1dGhvcml6ZXIiOnsiaGFuZGxlciI6ImFsbG93In0sIm11dGF0b3JzIjpbeyJoYW5kbGVyIjoibm9vcCJ9XX1d
+  - ` + ts.URL + "\n",
 			expectedStrategy: configuration.DefaultMatchingStrategy,
+			expectIDs:        []string{"test-rule-1", "test-rule-2", "test-rule-3", "test-rule-4", "test-rule-5", "test-rule-1-yaml"},
 		},
 		{
 			config: `
@@ -208,7 +206,7 @@ access_rules:
 		},
 	} {
 		t.Run(fmt.Sprintf("case=%d", k), func(t *testing.T) {
-			require.NoError(t, ioutil.WriteFile(configFile.Name(), []byte(tc.config), 0666))
+			require.NoError(t, os.WriteFile(configFile.Name(), []byte(tc.config), 0666))
 
 			rules := eventuallyListRules(ctx, t, r, len(tc.expectIDs))
 			strategy, err := r.RuleRepository().MatchingStrategy(ctx)
@@ -330,7 +328,7 @@ func TestFetcherWatchRepositoryFromKubernetesConfigMap(t *testing.T) {
 		require.NoError(t, os.Mkdir(dir, 0777))
 
 		fp := path.Join(dir, "access-rules.json")
-		require.NoError(t, ioutil.WriteFile(fp, []byte(data), 0640))
+		require.NoError(t, os.WriteFile(fp, []byte(data), 0640))
 
 		// this is the symlink: ..data -> ..2019_08_01_07_42_33.068812649
 		_ = os.Rename(path.Join(watchDir, "..data"), path.Join(watchDir, "..data_tmp"))
