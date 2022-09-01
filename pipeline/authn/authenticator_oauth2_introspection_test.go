@@ -37,10 +37,11 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/tidwall/sjson"
 
+	"github.com/ory/x/logrusx"
+
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/internal"
 	. "github.com/ory/oathkeeper/pipeline/authn"
-	"github.com/ory/x/logrusx"
 )
 
 func TestAuthenticatorOAuth2Introspection(t *testing.T) {
