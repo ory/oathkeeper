@@ -250,7 +250,9 @@ errors:
 		},
 	} {
 		t.Run(fmt.Sprintf("case=%d/description=%s", k, tc.d), func(t *testing.T) {
-			conf := internal.NewConfigurationWithDefaults(tc.configOpts...)
+			conf := internal.NewConfigurationWithDefaults(
+				append(tc.configOpts, configx.SkipValidation())...,
+			)
 			reg := internal.NewRegistry(conf)
 
 			if tc.setup != nil {

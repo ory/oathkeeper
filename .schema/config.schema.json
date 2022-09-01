@@ -206,6 +206,7 @@
       "title": "HTTP Redirect Error Handler",
       "description": "This section is optional when the error handler is disabled.",
       "additionalProperties": false,
+      "required": ["to"],
       "properties": {
         "to": {
           "title": "Redirect to",
@@ -1549,7 +1550,8 @@
                     "config": {
                       "$ref": "#/definitions/configErrorsRedirect"
                     }
-                  }
+                  },
+                  "required": ["config"]
                 },
                 {
                   "properties": {

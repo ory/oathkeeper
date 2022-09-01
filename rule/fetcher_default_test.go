@@ -71,6 +71,7 @@ func TestFetcherReload(t *testing.T) {
 	conf := internal.NewConfigurationWithDefaults(
 		configx.WithContext(ctx),
 		configx.WithLogger(logrusx.New("", "", logrusx.ForceLevel(logrus.TraceLevel))),
+		configx.SkipValidation(),
 		configx.WithConfigFiles(configFile.Name()),
 	)
 	r := internal.NewRegistry(conf)
@@ -110,7 +111,7 @@ func TestFetcherReload(t *testing.T) {
 
 	strategy, err = r.RuleRepository().MatchingStrategy(ctx)
 	require.NoError(t, err)
-	// require.Equal(t, configuration.Glob, strategy)
+	require.Equal(t, configuration.Glob, strategy)
 
 	// config with unknown matching strategy
 	copyToFile(t, "config_error.yaml", configFile)
@@ -120,7 +121,7 @@ func TestFetcherReload(t *testing.T) {
 
 	strategy, err = r.RuleRepository().MatchingStrategy(ctx)
 	require.NoError(t, err)
-	require.Equal(t, configuration.Glob, strategy)
+	require.Equal(t, "UNKNOWN", string(strategy))
 
 	// config with regexp matching strategy
 	copyToFile(t, "config_regexp.yaml", configFile)
@@ -142,6 +143,7 @@ func TestFetcherWatchConfig(t *testing.T) {
 	configFile.Close()
 	conf := internal.NewConfigurationWithDefaults(
 		configx.WithContext(ctx),
+		configx.SkipValidation(),
 		configx.WithLogger(logrusx.New("", "", logrusx.ForceLevel(logrus.TraceLevel))),
 		configx.WithConfigFiles(configFile.Name()),
 	)
@@ -250,6 +252,7 @@ access_rules:
 
 	conf := internal.NewConfigurationWithDefaults(
 		configx.WithContext(ctx),
+		configx.SkipValidation(),
 		configx.WithLogger(logrusx.New("", "", logrusx.ForceLevel(logrus.TraceLevel))),
 		configx.WithConfigFiles(configFile.Name()),
 	)
@@ -298,6 +301,7 @@ func TestFetcherWatchRepositoryFromKubernetesConfigMap(t *testing.T) {
 	watchFile := path.Join(watchDir, "access-rules.json")
 
 	conf := internal.NewConfigurationWithDefaults(
+		configx.SkipValidation(),
 		configx.WithContext(ctx),
 		configx.WithLogger(logrusx.New("", "", logrusx.ForceLevel(logrus.TraceLevel))),
 	)
@@ -390,6 +394,7 @@ access_rules:
 `)
 
 	conf := internal.NewConfigurationWithDefaults(
+		configx.SkipValidation(),
 		configx.WithContext(ctx),
 		configx.WithLogger(logrusx.New("", "", logrusx.ForceLevel(logrus.TraceLevel))),
 		configx.WithConfigFiles(configFile.Name()),
