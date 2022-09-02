@@ -76,7 +76,7 @@ func TestAuthorizerKetoWarden(t *testing.T) {
 			config: []byte(`{ "required_action": "action", "required_resource": "resource", "flavor": "regex" }`),
 			r:      &http.Request{URL: &url.URL{}},
 			setup: func(t *testing.T) *httptest.Server {
-				return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 					w.WriteHeader(http.StatusForbidden)
 				}))
 			},

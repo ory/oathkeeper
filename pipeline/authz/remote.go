@@ -45,7 +45,7 @@ type AuthorizerRemote struct {
 func NewAuthorizerRemote(c configuration.Provider) *AuthorizerRemote {
 	return &AuthorizerRemote{
 		c:      c,
-		client: httpx.NewResilientClient().HTTPClient,
+		client: httpx.NewResilientClient().StandardClient(),
 		t:      x.NewTemplate("remote"),
 	}
 }
@@ -168,7 +168,7 @@ func (a *AuthorizerRemote) Config(config json.RawMessage) (*AuthorizerRemoteConf
 	a.client = httpx.NewResilientClient(
 		httpx.ResilientClientWithMaxRetryWait(maxWait),
 		httpx.ResilientClientWithConnectionTimeout(timeout),
-	).HTTPClient
+	).StandardClient()
 
 	return &c, nil
 }

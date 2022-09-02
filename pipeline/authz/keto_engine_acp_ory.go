@@ -30,13 +30,13 @@ import (
 	"text/template"
 	"time"
 
-	"github.com/ory/x/httpx"
-
+	"github.com/hashicorp/go-retryablehttp"
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/pipeline"
 	"github.com/ory/oathkeeper/pipeline/authn"
 	"github.com/ory/oathkeeper/x"
 
+	"github.com/ory/x/httpx"
 	"github.com/ory/x/urlx"
 
 	"github.com/pkg/errors"
@@ -68,15 +68,19 @@ func (c *AuthorizerKetoEngineACPORYConfiguration) ResourceTemplateID() string {
 type AuthorizerKetoEngineACPORY struct {
 	c configuration.Provider
 
-	client         *http.Client
+	client         *retryablehttp.Client
 	contextCreator authorizerKetoWardenContext
 	t              *template.Template
 }
 
 func NewAuthorizerKetoEngineACPORY(c configuration.Provider) *AuthorizerKetoEngineACPORY {
 	return &AuthorizerKetoEngineACPORY{
-		c:      c,
-		client: httpx.NewResilientClient().HTTPClient,
+		c: c,
+		// client: http.DefaultClient,
+		client: httpx.NewResilientClient(
+			httpx.ResilientClientWithMaxRetryWait(100*time.Millisecond),
+			httpx.ResilientClientWithMaxRetry(5),
+		),
 		contextCreator: func(r *http.Request) map[string]interface{} {
 			return map[string]interface{}{
 				"remoteIpAddress": realip.RealIP(r),
@@ -160,7 +164,12 @@ func (a *AuthorizerKetoEngineACPORY) Authorize(r *http.Request, session *authn.A
 	}
 	req.Header.Add("Content-Type", "application/json")
 
-	res, err := a.client.Do(req.WithContext(r.Context()))
+	retryableReq, err := retryablehttp.FromRequest(req.WithContext(r.Context()))
+	if err != nil {
+		return errors.WithStack(err)
+	}
+
+	res, err := a.client.Do(retryableReq)
 	if err != nil {
 		return errors.WithStack(err)
 	}

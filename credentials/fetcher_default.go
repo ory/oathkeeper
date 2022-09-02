@@ -78,8 +78,10 @@ func NewFetcherDefault(l *logrusx.Logger, cancelAfter time.Duration, ttl time.Du
 		ttl:         ttl,
 		keys:        make(map[string]jose.JSONWebKeySet),
 		fetchedAt:   make(map[string]time.Time),
-		client:      httpx.NewResilientClient(httpx.ResilientClientWithConnectionTimeout(15 * time.Second)).HTTPClient,
-		mux:         cloudstorage.NewURLMux(),
+		client: httpx.NewResilientClient(
+			httpx.ResilientClientWithConnectionTimeout(15 * time.Second),
+		).StandardClient(),
+		mux: cloudstorage.NewURLMux(),
 	}
 }
 
@@ -265,9 +267,7 @@ func (s *FetcherDefault) resolve(wg *sync.WaitGroup, errs chan error, location u
 		defer f.Close()
 
 		reader = f
-	case "https":
-		fallthrough
-	case "http":
+	case "http", "https":
 		res, err := s.client.Get(location.String())
 		if err != nil {
 			errs <- errors.WithStack(herodot.

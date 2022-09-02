@@ -23,9 +23,6 @@ import (
 func TestCredentialsHandler(t *testing.T) {
 	conf := internal.NewConfigurationWithDefaults(configx.SkipValidation())
 	conf.SetForTest(t, configuration.MutatorIDTokenJWKSURL, "file://../test/stub/jwks-rsa-multiple.json")
-	conf.SetForTest(t, configuration.AuthenticatorAnonymousIsEnabled, true)
-	conf.SetForTest(t, configuration.AuthorizerAllowIsEnabled, true)
-	conf.SetForTest(t, configuration.MutatorIDTokenIsEnabled, true)
 
 	r := internal.NewRegistry(conf)
 

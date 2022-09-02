@@ -347,7 +347,7 @@ func (a *AuthenticatorOAuth2Introspection) Config(config json.RawMessage) (*Auth
 		client = httpx.NewResilientClient(
 			httpx.ResilientClientWithMaxRetryWait(maxWait),
 			httpx.ResilientClientWithConnectionTimeout(timeout),
-		).HTTPClient
+		).StandardClient()
 		client.Transport = rt
 		a.mu.Lock()
 		a.clientMap[clientKey] = client

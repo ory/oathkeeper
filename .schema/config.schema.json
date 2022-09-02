@@ -1242,40 +1242,22 @@
         "repositories": {
           "title": "Repositories",
           "description": "Locations (list of URLs) where access rules should be fetched from on boot. It is expected that the documents at those locations return a JSON or YAML Array containing ORY Oathkeeper Access Rules:\n\n- If the URL Scheme is `file://`, the access rules (an array of access rules is expected) will be fetched from the local file system.\n- If the URL Scheme is `inline://`, the access rules (an array of access rules is expected) are expected to be a base64 encoded (with padding!) JSON/YAML string (base64_encode(`[{\"id\":\"foo-rule\",\"authenticators\":[....]}]`)).\n- If the URL Scheme is `http://` or `https://`, the access rules (an array of access rules is expected) will be fetched from the provided HTTP(s) location.\n- If the URL Scheme is `s3://`, `gs://` or `azblob://`, the access rules (an array of access rules is expected) will be fetched by an object storage (AWS S3, Google Cloud Storage, Azure Blob Storage).\n\nS3 storage also supports S3-compatible endpoints served by Minio or Ceph. See aws.ConfigFromURLParams (https://godoc.org/gocloud.dev/aws#ConfigFromURLParams) for more details on supported URL options for S3.",
-          "oneOf": [
-            {
-              "type": "array",
-              "items": {
-                "type": "string",
-                "format": "uri"
-              },
-              "examples": [
-                [
-                  "file://path/to/rules.json",
-                  "inline://W3siaWQiOiJmb28tcnVsZSIsImF1dGhlbnRpY2F0b3JzIjpbXX1d",
-                  "https://path-to-my-rules/rules.json",
-                  "s3://my-bucket-name/rules.json",
-                  "s3://my-bucket-name/rules.json?endpoint=minio.my-server.net",
-                  "gs://gcp-bucket-name/rules.json",
-                  "azblob://my-blob-container/rules.json",
-                  "https://path-to-my-rules/rules.json"
-                ]
-              ]
-            },
-            {
-              "type": "string",
-              "format": "uri",
-              "examples": [
-                "file://path/to/rules.json",
-                "inline://W3siaWQiOiJmb28tcnVsZSIsImF1dGhlbnRpY2F0b3JzIjpbXX1d",
-                "https://path-to-my-rules/rules.json",
-                "s3://my-bucket-name/rules.json",
-                "s3://my-bucket-name/rules.json?endpoint=minio.my-server.net",
-                "gs://gcp-bucket-name/rules.json",
-                "azblob://my-blob-container/rules.json",
-                "https://path-to-my-rules/rules.json"
-              ]
-            }
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uri"
+          },
+          "examples": [
+            [
+              "file://path/to/rules.json",
+              "inline://W3siaWQiOiJmb28tcnVsZSIsImF1dGhlbnRpY2F0b3JzIjpbXX1d",
+              "https://path-to-my-rules/rules.json",
+              "s3://my-bucket-name/rules.json",
+              "s3://my-bucket-name/rules.json?endpoint=minio.my-server.net",
+              "gs://gcp-bucket-name/rules.json",
+              "azblob://my-blob-container/rules.json",
+              "https://path-to-my-rules/rules.json"
+            ]
           ]
         },
         "matching_strategy": {

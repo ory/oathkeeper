@@ -163,12 +163,12 @@ func (v *KoanfProvider) AccessRuleMatchingStrategy() MatchingStrategy {
 }
 
 func (v *KoanfProvider) CORSEnabled(iface string) bool {
-	_, enabled := v.source.CORS("serve."+iface, cors.Options{})
+	_, enabled := v.CORS(iface)
 	return enabled
 }
 
 func (v *KoanfProvider) CORSOptions(iface string) cors.Options {
-	opts, _ := v.source.CORS("serve."+iface, cors.Options{})
+	opts, _ := v.CORS(iface)
 	return opts
 }
 
