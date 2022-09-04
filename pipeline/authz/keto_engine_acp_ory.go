@@ -31,6 +31,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/go-retryablehttp"
+
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/pipeline"
 	"github.com/ory/oathkeeper/pipeline/authn"

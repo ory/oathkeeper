@@ -39,7 +39,6 @@ import (
 	"github.com/ory/oathkeeper/pipeline/authn"
 	. "github.com/ory/oathkeeper/pipeline/authz"
 
-	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
@@ -47,6 +46,7 @@ import (
 )
 
 func TestAuthorizerKetoWarden(t *testing.T) {
+	t.Parallel()
 	conf := internal.NewConfigurationWithDefaults(configx.SkipValidation())
 	reg := internal.NewRegistry(conf)
 
@@ -172,9 +172,10 @@ func TestAuthorizerKetoWarden(t *testing.T) {
 			expectErr: false,
 		},
 	} {
+		k := k
+		tc := tc
 		t.Run(fmt.Sprintf("case=%d", k), func(t *testing.T) {
-			c := gomock.NewController(t)
-			defer c.Finish()
+			t.Parallel()
 
 			baseURL := "http://73fa403f-7e9c-48ef-870f-d21b2c34fc80c6cb6404-bb36-4e70-8b90-45155657fda6/"
 			if tc.setup != nil {

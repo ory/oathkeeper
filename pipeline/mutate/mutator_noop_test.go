@@ -34,6 +34,7 @@ import (
 )
 
 func TestMutatorNoop(t *testing.T) {
+	t.Parallel()
 	conf := internal.NewConfigurationWithDefaults()
 	reg := internal.NewRegistry(conf)
 

@@ -22,6 +22,7 @@ import (
 )
 
 func TestAuthorizerRemoteJSONAuthorize(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name               string
 		setup              func(t *testing.T) *httptest.Server
@@ -157,7 +158,9 @@ func TestAuthorizerRemoteJSONAuthorize(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
+		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			if tt.setup != nil {
 				server := tt.setup(t)
 				defer server.Close()
@@ -188,6 +191,7 @@ func TestAuthorizerRemoteJSONAuthorize(t *testing.T) {
 }
 
 func TestAuthorizerRemoteJSONValidate(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name    string
 		enabled bool
@@ -261,6 +265,8 @@ func TestAuthorizerRemoteJSONValidate(t *testing.T) {
 }
 
 func TestAuthorizerRemoteJSONConfig(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name     string
 		raw      json.RawMessage
@@ -294,7 +300,9 @@ func TestAuthorizerRemoteJSONConfig(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
+		tt := tt
 		t.Run("case="+tt.name, func(t *testing.T) {
+			t.Parallel()
 			p, err := configuration.NewKoanfProvider(
 				context.Background(), nil, logrusx.New("", ""),
 			)

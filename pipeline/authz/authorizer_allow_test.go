@@ -31,6 +31,7 @@ import (
 )
 
 func TestAuthorizerAllow(t *testing.T) {
+	t.Parallel()
 	conf := internal.NewConfigurationWithDefaults()
 	reg := internal.NewRegistry(conf)
 

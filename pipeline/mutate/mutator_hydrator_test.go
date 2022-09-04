@@ -127,6 +127,7 @@ func configWithRetriesForMutator(giveUpAfter, retryDelay string) func(*httptest.
 }
 
 func TestMutatorHydrator(t *testing.T) {
+	t.Parallel()
 	conf := internal.NewConfigurationWithDefaults(configx.SkipValidation())
 	reg := internal.NewRegistry(conf)
 

@@ -24,6 +24,7 @@ import (
 )
 
 func TestCredentialsIssuerHeaders(t *testing.T) {
+	t.Parallel()
 	conf := internal.NewConfigurationWithDefaults(configx.SkipValidation())
 	reg := internal.NewRegistry(conf)
 

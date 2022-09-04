@@ -37,6 +37,7 @@ require (
 	github.com/google/martian/v3 v3.3.3-0.20220816151257-0f7e6797a04d // indirect
 	github.com/google/uuid v1.3.0
 	github.com/gorilla/websocket v1.4.2
+	github.com/hashicorp/go-retryablehttp v0.7.0
 	github.com/julienschmidt/httprouter v1.3.0
 	github.com/knadh/koanf v1.4.0
 	github.com/lib/pq v1.10.6

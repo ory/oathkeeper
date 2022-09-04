@@ -199,6 +199,7 @@ func parseToken(h http.Header) string {
 }
 
 func TestMutatorIDToken(t *testing.T) {
+	t.Parallel()
 	conf := internal.NewConfigurationWithDefaults(configx.SkipValidation())
 	reg := internal.NewRegistry(conf)
 
@@ -256,8 +257,8 @@ func TestMutatorIDToken(t *testing.T) {
 			session := &authn.AuthenticationSession{Subject: "foo", Extra: map[string]interface{}{"bar": "baz"}}
 			config := json.RawMessage([]byte(`{"ttl": "3s", "claims": "{\"foo\": \"{{ print .Extra.bar }}\", \"aud\": [\"foo\"]}", "jwks_url": "file://../../test/stub/jwks-ecdsa.json"}`))
 
-			t.Parallel()
 			t.Run("subcase=different tokens because expired", func(t *testing.T) {
+				t.Parallel()
 				config, _ := sjson.SetBytes(config, "ttl", "100ms")
 				prev := mutate(t, *session, config)
 				time.Sleep(time.Millisecond * 90)
@@ -265,18 +266,21 @@ func TestMutatorIDToken(t *testing.T) {
 			})
 
 			t.Run("subcase=same tokens because expired is long enough", func(t *testing.T) {
+				t.Parallel()
 				prev := mutate(t, *session, config)
 				time.Sleep(time.Second) // give the cache buffers some time
 				assert.Equal(t, prev, mutate(t, *session, config))
 			})
 
 			t.Run("subcase=different tokens because expired is long but was reached", func(t *testing.T) {
+				t.Parallel()
 				prev := mutate(t, *session, config)
 				time.Sleep(time.Second * 3) // give the cache buffers some time
 				assert.NotEqual(t, prev, mutate(t, *session, config))
 			})
 
 			t.Run("subcase=different tokens because different subjects", func(t *testing.T) {
+				t.Parallel()
 				prev := mutate(t, *session, config)
 				time.Sleep(time.Second)
 				s := *session
@@ -285,6 +289,7 @@ func TestMutatorIDToken(t *testing.T) {
 			})
 
 			t.Run("subcase=different tokens because session extra changed", func(t *testing.T) {
+				t.Parallel()
 				prev := mutate(t, *session, config)
 				time.Sleep(time.Second)
 				s := *session
@@ -293,6 +298,7 @@ func TestMutatorIDToken(t *testing.T) {
 			})
 
 			t.Run("subcase=different tokens because claim options changed", func(t *testing.T) {
+				t.Parallel()
 				prev := mutate(t, *session, config)
 				time.Sleep(time.Second)
 				config := json.RawMessage([]byte(`{"ttl": "3s", "claims": "{\"foo\": \"{{ print .Extra.bar }}\", \"aud\": [\"not-foo\"]}", "jwks_url": "file://../../test/stub/jwks-ecdsa.json"}`))
@@ -300,6 +306,7 @@ func TestMutatorIDToken(t *testing.T) {
 			})
 
 			t.Run("subcase=same tokens because session extra changed but claims ignore the extra claims", func(t *testing.T) {
+				t.Parallel()
 				t.Skip("Skipped because cache hit rate is too low, see: https://github.com/ory/oathkeeper/issues/371")
 
 				prev := mutate(t, *session, config)
@@ -310,6 +317,7 @@ func TestMutatorIDToken(t *testing.T) {
 			})
 
 			t.Run("subcase=different tokens because issuer changed", func(t *testing.T) {
+				t.Parallel()
 				prev := mutate(t, *session, config)
 				time.Sleep(time.Second)
 				config, _ := sjson.SetBytes(config, "issuer_url", "/not-baz/not-bar")
@@ -317,6 +325,7 @@ func TestMutatorIDToken(t *testing.T) {
 			})
 
 			t.Run("subcase=different tokens because JWKS source changed", func(t *testing.T) {
+				t.Parallel()
 				prev := mutate(t, *session, config)
 				time.Sleep(time.Second)
 				config, _ := sjson.SetBytes(config, "jwks_url", "file://../../test/stub/jwks-hs.json")
