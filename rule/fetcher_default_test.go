@@ -91,7 +91,7 @@ func TestFetcherReload(t *testing.T) {
 
 	strategy, err := r.RuleRepository().MatchingStrategy(ctx)
 	require.NoError(t, err)
-	require.Equal(t, configuration.Regexp, strategy)
+	require.Equal(t, configuration.DefaultMatchingStrategy, strategy)
 
 	// config with a repo and without a matching strategy
 	copyToFile(t, "config_default.yaml", configFile)
