@@ -53,7 +53,6 @@ func (o *DecisionsReader) ReadResponse(response runtime.ClientResponse, consumer
 			return nil, err
 		}
 		return nil, result
-
 	default:
 		return nil, runtime.NewAPIError("response status code does not match any response statuses defined for this endpoint in the swagger spec", response, response.Code())
 	}
@@ -65,14 +64,43 @@ func NewDecisionsOK() *DecisionsOK {
 }
 
 /*
-DecisionsOK handles this case with default header values.
+DecisionsOK describes a response with status code 200, with default header values.
 
 An empty response
 */
 type DecisionsOK struct {
 }
 
+// IsSuccess returns true when this decisions o k response has a 2xx status code
+func (o *DecisionsOK) IsSuccess() bool {
+	return true
+}
+
+// IsRedirect returns true when this decisions o k response has a 3xx status code
+func (o *DecisionsOK) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this decisions o k response has a 4xx status code
+func (o *DecisionsOK) IsClientError() bool {
+	return false
+}
+
+// IsServerError returns true when this decisions o k response has a 5xx status code
+func (o *DecisionsOK) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this decisions o k response a status code equal to that given
+func (o *DecisionsOK) IsCode(code int) bool {
+	return code == 200
+}
+
 func (o *DecisionsOK) Error() string {
+	return fmt.Sprintf("[GET /decisions][%d] decisionsOK ", 200)
+}
+
+func (o *DecisionsOK) String() string {
 	return fmt.Sprintf("[GET /decisions][%d] decisionsOK ", 200)
 }
 
@@ -87,7 +115,7 @@ func NewDecisionsUnauthorized() *DecisionsUnauthorized {
 }
 
 /*
-DecisionsUnauthorized handles this case with default header values.
+DecisionsUnauthorized describes a response with status code 401, with default header values.
 
 genericError
 */
@@ -95,7 +123,36 @@ type DecisionsUnauthorized struct {
 	Payload *models.GenericError
 }
 
+// IsSuccess returns true when this decisions unauthorized response has a 2xx status code
+func (o *DecisionsUnauthorized) IsSuccess() bool {
+	return false
+}
+
+// IsRedirect returns true when this decisions unauthorized response has a 3xx status code
+func (o *DecisionsUnauthorized) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this decisions unauthorized response has a 4xx status code
+func (o *DecisionsUnauthorized) IsClientError() bool {
+	return true
+}
+
+// IsServerError returns true when this decisions unauthorized response has a 5xx status code
+func (o *DecisionsUnauthorized) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this decisions unauthorized response a status code equal to that given
+func (o *DecisionsUnauthorized) IsCode(code int) bool {
+	return code == 401
+}
+
 func (o *DecisionsUnauthorized) Error() string {
+	return fmt.Sprintf("[GET /decisions][%d] decisionsUnauthorized  %+v", 401, o.Payload)
+}
+
+func (o *DecisionsUnauthorized) String() string {
 	return fmt.Sprintf("[GET /decisions][%d] decisionsUnauthorized  %+v", 401, o.Payload)
 }
 
@@ -121,7 +178,7 @@ func NewDecisionsForbidden() *DecisionsForbidden {
 }
 
 /*
-DecisionsForbidden handles this case with default header values.
+DecisionsForbidden describes a response with status code 403, with default header values.
 
 genericError
 */
@@ -129,7 +186,36 @@ type DecisionsForbidden struct {
 	Payload *models.GenericError
 }
 
+// IsSuccess returns true when this decisions forbidden response has a 2xx status code
+func (o *DecisionsForbidden) IsSuccess() bool {
+	return false
+}
+
+// IsRedirect returns true when this decisions forbidden response has a 3xx status code
+func (o *DecisionsForbidden) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this decisions forbidden response has a 4xx status code
+func (o *DecisionsForbidden) IsClientError() bool {
+	return true
+}
+
+// IsServerError returns true when this decisions forbidden response has a 5xx status code
+func (o *DecisionsForbidden) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this decisions forbidden response a status code equal to that given
+func (o *DecisionsForbidden) IsCode(code int) bool {
+	return code == 403
+}
+
 func (o *DecisionsForbidden) Error() string {
+	return fmt.Sprintf("[GET /decisions][%d] decisionsForbidden  %+v", 403, o.Payload)
+}
+
+func (o *DecisionsForbidden) String() string {
 	return fmt.Sprintf("[GET /decisions][%d] decisionsForbidden  %+v", 403, o.Payload)
 }
 
@@ -155,7 +241,7 @@ func NewDecisionsNotFound() *DecisionsNotFound {
 }
 
 /*
-DecisionsNotFound handles this case with default header values.
+DecisionsNotFound describes a response with status code 404, with default header values.
 
 genericError
 */
@@ -163,7 +249,36 @@ type DecisionsNotFound struct {
 	Payload *models.GenericError
 }
 
+// IsSuccess returns true when this decisions not found response has a 2xx status code
+func (o *DecisionsNotFound) IsSuccess() bool {
+	return false
+}
+
+// IsRedirect returns true when this decisions not found response has a 3xx status code
+func (o *DecisionsNotFound) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this decisions not found response has a 4xx status code
+func (o *DecisionsNotFound) IsClientError() bool {
+	return true
+}
+
+// IsServerError returns true when this decisions not found response has a 5xx status code
+func (o *DecisionsNotFound) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this decisions not found response a status code equal to that given
+func (o *DecisionsNotFound) IsCode(code int) bool {
+	return code == 404
+}
+
 func (o *DecisionsNotFound) Error() string {
+	return fmt.Sprintf("[GET /decisions][%d] decisionsNotFound  %+v", 404, o.Payload)
+}
+
+func (o *DecisionsNotFound) String() string {
 	return fmt.Sprintf("[GET /decisions][%d] decisionsNotFound  %+v", 404, o.Payload)
 }
 
@@ -189,7 +304,7 @@ func NewDecisionsInternalServerError() *DecisionsInternalServerError {
 }
 
 /*
-DecisionsInternalServerError handles this case with default header values.
+DecisionsInternalServerError describes a response with status code 500, with default header values.
 
 genericError
 */
@@ -197,7 +312,36 @@ type DecisionsInternalServerError struct {
 	Payload *models.GenericError
 }
 
+// IsSuccess returns true when this decisions internal server error response has a 2xx status code
+func (o *DecisionsInternalServerError) IsSuccess() bool {
+	return false
+}
+
+// IsRedirect returns true when this decisions internal server error response has a 3xx status code
+func (o *DecisionsInternalServerError) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this decisions internal server error response has a 4xx status code
+func (o *DecisionsInternalServerError) IsClientError() bool {
+	return false
+}
+
+// IsServerError returns true when this decisions internal server error response has a 5xx status code
+func (o *DecisionsInternalServerError) IsServerError() bool {
+	return true
+}
+
+// IsCode returns true when this decisions internal server error response a status code equal to that given
+func (o *DecisionsInternalServerError) IsCode(code int) bool {
+	return code == 500
+}
+
 func (o *DecisionsInternalServerError) Error() string {
+	return fmt.Sprintf("[GET /decisions][%d] decisionsInternalServerError  %+v", 500, o.Payload)
+}
+
+func (o *DecisionsInternalServerError) String() string {
 	return fmt.Sprintf("[GET /decisions][%d] decisionsInternalServerError  %+v", 500, o.Payload)
 }
 

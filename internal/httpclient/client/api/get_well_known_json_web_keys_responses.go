@@ -35,7 +35,6 @@ func (o *GetWellKnownJSONWebKeysReader) ReadResponse(response runtime.ClientResp
 			return nil, err
 		}
 		return nil, result
-
 	default:
 		return nil, runtime.NewAPIError("response status code does not match any response statuses defined for this endpoint in the swagger spec", response, response.Code())
 	}
@@ -47,7 +46,7 @@ func NewGetWellKnownJSONWebKeysOK() *GetWellKnownJSONWebKeysOK {
 }
 
 /*
-GetWellKnownJSONWebKeysOK handles this case with default header values.
+GetWellKnownJSONWebKeysOK describes a response with status code 200, with default header values.
 
 jsonWebKeySet
 */
@@ -55,7 +54,36 @@ type GetWellKnownJSONWebKeysOK struct {
 	Payload *models.JSONWebKeySet
 }
 
+// IsSuccess returns true when this get well known Json web keys o k response has a 2xx status code
+func (o *GetWellKnownJSONWebKeysOK) IsSuccess() bool {
+	return true
+}
+
+// IsRedirect returns true when this get well known Json web keys o k response has a 3xx status code
+func (o *GetWellKnownJSONWebKeysOK) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this get well known Json web keys o k response has a 4xx status code
+func (o *GetWellKnownJSONWebKeysOK) IsClientError() bool {
+	return false
+}
+
+// IsServerError returns true when this get well known Json web keys o k response has a 5xx status code
+func (o *GetWellKnownJSONWebKeysOK) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this get well known Json web keys o k response a status code equal to that given
+func (o *GetWellKnownJSONWebKeysOK) IsCode(code int) bool {
+	return code == 200
+}
+
 func (o *GetWellKnownJSONWebKeysOK) Error() string {
+	return fmt.Sprintf("[GET /.well-known/jwks.json][%d] getWellKnownJsonWebKeysOK  %+v", 200, o.Payload)
+}
+
+func (o *GetWellKnownJSONWebKeysOK) String() string {
 	return fmt.Sprintf("[GET /.well-known/jwks.json][%d] getWellKnownJsonWebKeysOK  %+v", 200, o.Payload)
 }
 
@@ -81,7 +109,7 @@ func NewGetWellKnownJSONWebKeysInternalServerError() *GetWellKnownJSONWebKeysInt
 }
 
 /*
-GetWellKnownJSONWebKeysInternalServerError handles this case with default header values.
+GetWellKnownJSONWebKeysInternalServerError describes a response with status code 500, with default header values.
 
 genericError
 */
@@ -89,7 +117,36 @@ type GetWellKnownJSONWebKeysInternalServerError struct {
 	Payload *models.GenericError
 }
 
+// IsSuccess returns true when this get well known Json web keys internal server error response has a 2xx status code
+func (o *GetWellKnownJSONWebKeysInternalServerError) IsSuccess() bool {
+	return false
+}
+
+// IsRedirect returns true when this get well known Json web keys internal server error response has a 3xx status code
+func (o *GetWellKnownJSONWebKeysInternalServerError) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this get well known Json web keys internal server error response has a 4xx status code
+func (o *GetWellKnownJSONWebKeysInternalServerError) IsClientError() bool {
+	return false
+}
+
+// IsServerError returns true when this get well known Json web keys internal server error response has a 5xx status code
+func (o *GetWellKnownJSONWebKeysInternalServerError) IsServerError() bool {
+	return true
+}
+
+// IsCode returns true when this get well known Json web keys internal server error response a status code equal to that given
+func (o *GetWellKnownJSONWebKeysInternalServerError) IsCode(code int) bool {
+	return code == 500
+}
+
 func (o *GetWellKnownJSONWebKeysInternalServerError) Error() string {
+	return fmt.Sprintf("[GET /.well-known/jwks.json][%d] getWellKnownJsonWebKeysInternalServerError  %+v", 500, o.Payload)
+}
+
+func (o *GetWellKnownJSONWebKeysInternalServerError) String() string {
 	return fmt.Sprintf("[GET /.well-known/jwks.json][%d] getWellKnownJsonWebKeysInternalServerError  %+v", 500, o.Payload)
 }
 

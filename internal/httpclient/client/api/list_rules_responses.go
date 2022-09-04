@@ -35,7 +35,6 @@ func (o *ListRulesReader) ReadResponse(response runtime.ClientResponse, consumer
 			return nil, err
 		}
 		return nil, result
-
 	default:
 		return nil, runtime.NewAPIError("response status code does not match any response statuses defined for this endpoint in the swagger spec", response, response.Code())
 	}
@@ -47,7 +46,7 @@ func NewListRulesOK() *ListRulesOK {
 }
 
 /*
-ListRulesOK handles this case with default header values.
+ListRulesOK describes a response with status code 200, with default header values.
 
 A list of rules
 */
@@ -55,7 +54,36 @@ type ListRulesOK struct {
 	Payload []*models.Rule
 }
 
+// IsSuccess returns true when this list rules o k response has a 2xx status code
+func (o *ListRulesOK) IsSuccess() bool {
+	return true
+}
+
+// IsRedirect returns true when this list rules o k response has a 3xx status code
+func (o *ListRulesOK) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this list rules o k response has a 4xx status code
+func (o *ListRulesOK) IsClientError() bool {
+	return false
+}
+
+// IsServerError returns true when this list rules o k response has a 5xx status code
+func (o *ListRulesOK) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this list rules o k response a status code equal to that given
+func (o *ListRulesOK) IsCode(code int) bool {
+	return code == 200
+}
+
 func (o *ListRulesOK) Error() string {
+	return fmt.Sprintf("[GET /rules][%d] listRulesOK  %+v", 200, o.Payload)
+}
+
+func (o *ListRulesOK) String() string {
 	return fmt.Sprintf("[GET /rules][%d] listRulesOK  %+v", 200, o.Payload)
 }
 
@@ -79,7 +107,7 @@ func NewListRulesInternalServerError() *ListRulesInternalServerError {
 }
 
 /*
-ListRulesInternalServerError handles this case with default header values.
+ListRulesInternalServerError describes a response with status code 500, with default header values.
 
 genericError
 */
@@ -87,7 +115,36 @@ type ListRulesInternalServerError struct {
 	Payload *models.GenericError
 }
 
+// IsSuccess returns true when this list rules internal server error response has a 2xx status code
+func (o *ListRulesInternalServerError) IsSuccess() bool {
+	return false
+}
+
+// IsRedirect returns true when this list rules internal server error response has a 3xx status code
+func (o *ListRulesInternalServerError) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this list rules internal server error response has a 4xx status code
+func (o *ListRulesInternalServerError) IsClientError() bool {
+	return false
+}
+
+// IsServerError returns true when this list rules internal server error response has a 5xx status code
+func (o *ListRulesInternalServerError) IsServerError() bool {
+	return true
+}
+
+// IsCode returns true when this list rules internal server error response a status code equal to that given
+func (o *ListRulesInternalServerError) IsCode(code int) bool {
+	return code == 500
+}
+
 func (o *ListRulesInternalServerError) Error() string {
+	return fmt.Sprintf("[GET /rules][%d] listRulesInternalServerError  %+v", 500, o.Payload)
+}
+
+func (o *ListRulesInternalServerError) String() string {
 	return fmt.Sprintf("[GET /rules][%d] listRulesInternalServerError  %+v", 500, o.Payload)
 }
 
