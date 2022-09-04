@@ -21,13 +21,13 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/ory/fosite"
-	"github.com/ory/go-convenience/stringsx"
 	"github.com/ory/gojsonschema"
 	schema "github.com/ory/oathkeeper/.schema"
 	"github.com/ory/oathkeeper/x"
 	"github.com/ory/x/configx"
 	"github.com/ory/x/logrusx"
 	"github.com/ory/x/osx"
+	"github.com/ory/x/stringsx"
 	"github.com/ory/x/tracing"
 	"github.com/ory/x/urlx"
 	"github.com/ory/x/watcherx"
@@ -259,17 +259,17 @@ func (v *KoanfProvider) getURL(value string, key string) *url.URL {
 }
 
 func (v *KoanfProvider) ToScopeStrategy(value string, key string) fosite.ScopeStrategy {
-	switch strings.ToLower(value) {
-	case "hierarchic":
+	switch s := stringsx.SwitchExact(strings.ToLower(value)); {
+	case s.AddCase("hierarchic"):
 		return fosite.HierarchicScopeStrategy
-	case "exact":
+	case s.AddCase("exact"):
 		return fosite.ExactScopeStrategy
-	case "wildcard":
+	case s.AddCase("wildcard"):
 		return fosite.WildcardScopeStrategy
-	case "none":
+	case s.AddCase("none"):
 		return nil
 	default:
-		v.l.Errorf(`Configuration key "%s" declares unknown scope strategy "%s", only "hierarchic", "exact", "wildcard", "none" are supported. Falling back to strategy "none".`, key, value)
+		v.l.Errorf(`Configuration key "%s" declares unknown scope strategy: "%s". Falling back to strategy "none".`, key, s.ToUnknownCaseErr())
 		return nil
 	}
 }
