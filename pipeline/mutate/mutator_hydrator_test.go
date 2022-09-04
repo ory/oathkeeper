@@ -205,7 +205,7 @@ func TestMutatorHydrator(t *testing.T) {
 			"Empty Response": {
 				Setup: func(t *testing.T) http.Handler {
 					router := httprouter.New()
-					router.POST("/", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+					router.POST("/", func(w http.ResponseWriter, _ *http.Request, _ httprouter.Params) {
 						w.WriteHeader(http.StatusOK)
 						_, err = w.Write([]byte(`{}`))
 						require.NoError(t, err)
@@ -242,9 +242,9 @@ func TestMutatorHydrator(t *testing.T) {
 				Err:     errors.New("mutator matching this route is misconfigured or disabled"),
 			},
 			"Not Found": {
-				Setup: func(t *testing.T) http.Handler {
+				Setup: func(_ *testing.T) http.Handler {
 					router := httprouter.New()
-					router.POST("/", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+					router.POST("/", func(w http.ResponseWriter, _ *http.Request, _ httprouter.Params) {
 						w.WriteHeader(http.StatusNotFound)
 					})
 					return router

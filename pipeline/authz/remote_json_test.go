@@ -64,7 +64,7 @@ func TestAuthorizerRemoteJSONAuthorize(t *testing.T) {
 		{
 			name: "forbidden",
 			setup: func(t *testing.T) *httptest.Server {
-				return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 					w.WriteHeader(http.StatusForbidden)
 				}))
 			},
@@ -75,7 +75,7 @@ func TestAuthorizerRemoteJSONAuthorize(t *testing.T) {
 		{
 			name: "unexpected status code",
 			setup: func(t *testing.T) *httptest.Server {
-				return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 					w.WriteHeader(http.StatusBadRequest)
 				}))
 			},
@@ -103,7 +103,7 @@ func TestAuthorizerRemoteJSONAuthorize(t *testing.T) {
 		{
 			name: "ok with allowed headers",
 			setup: func(t *testing.T) *httptest.Server {
-				return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 					w.Header().Set("X-Foo", "bar")
 					w.WriteHeader(http.StatusOK)
 				}))
@@ -115,7 +115,7 @@ func TestAuthorizerRemoteJSONAuthorize(t *testing.T) {
 		{
 			name: "ok with not allowed headers",
 			setup: func(t *testing.T) *httptest.Server {
-				return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 					w.Header().Set("X-Bar", "foo")
 					w.WriteHeader(http.StatusOK)
 				}))

@@ -32,7 +32,6 @@ require (
 	github.com/gobwas/glob v0.2.3
 	github.com/golang-jwt/jwt/v4 v4.0.0
 	github.com/golang/gddo v0.0.0-20190904175337-72a348e765d2
-	github.com/golang/mock v1.6.0
 	github.com/google/go-replayers/httpreplay v1.1.1
 	github.com/google/martian/v3 v3.3.3-0.20220816151257-0f7e6797a04d // indirect
 	github.com/google/uuid v1.3.0
