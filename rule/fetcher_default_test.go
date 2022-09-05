@@ -91,6 +91,7 @@ func TestFetcherReload(t *testing.T) {
 	// initial config without a repo and without a matching strategy
 	copyToFile(t, "config_no_repo.yaml", configFile)
 	<-configChanged
+	time.Sleep(100 * time.Millisecond)
 
 	rules := eventuallyListRules(ctx, t, r, 0)
 	require.Empty(t, rules)
@@ -102,6 +103,7 @@ func TestFetcherReload(t *testing.T) {
 	// config with a repo and without a matching strategy
 	copyToFile(t, "config_default.yaml", configFile)
 	<-configChanged
+	time.Sleep(100 * time.Millisecond)
 
 	rules = eventuallyListRules(ctx, t, r, 1)
 	require.Equal(t, "test-rule-1-glob", rules[0].ID)
@@ -125,6 +127,7 @@ func TestFetcherReload(t *testing.T) {
 	// config with unknown matching strategy
 	copyToFile(t, "config_error.yaml", configFile)
 	<-configChanged
+	time.Sleep(100 * time.Millisecond)
 
 	rules = eventuallyListRules(ctx, t, r, 1)
 	require.Equal(t, "test-rule-1-glob", rules[0].ID)
@@ -136,6 +139,7 @@ func TestFetcherReload(t *testing.T) {
 	// config with regexp matching strategy
 	copyToFile(t, "config_regexp.yaml", configFile)
 	<-configChanged
+	time.Sleep(100 * time.Millisecond)
 
 	rules = eventuallyListRules(ctx, t, r, 1)
 	require.Equal(t, "test-rule-1-glob", rules[0].ID)
