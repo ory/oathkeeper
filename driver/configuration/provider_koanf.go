@@ -22,8 +22,6 @@ import (
 
 	"github.com/ory/fosite"
 	"github.com/ory/gojsonschema"
-	schema "github.com/ory/oathkeeper/.schema"
-	"github.com/ory/oathkeeper/x"
 	"github.com/ory/x/configx"
 	"github.com/ory/x/logrusx"
 	"github.com/ory/x/osx"
@@ -31,6 +29,9 @@ import (
 	"github.com/ory/x/tracing"
 	"github.com/ory/x/urlx"
 	"github.com/ory/x/watcherx"
+
+	schema "github.com/ory/oathkeeper/.schema"
+	"github.com/ory/oathkeeper/x"
 )
 
 type (
@@ -279,6 +280,9 @@ func (v *KoanfProvider) pipelineIsEnabled(prefix, id string) bool {
 }
 
 func (v *KoanfProvider) PipelineConfig(prefix, id string, override json.RawMessage, dest interface{}) error {
+	if dest == nil {
+		return nil
+	}
 	pipelineCfg := v.source.Cut(fmt.Sprintf("%s.%s.config", prefix, id))
 
 	if len(override) != 0 {
@@ -294,13 +298,20 @@ func (v *KoanfProvider) PipelineConfig(prefix, id string, override json.RawMessa
 		return errors.WithStack(err)
 	}
 
-	if dest != nil {
-		if err := json.NewDecoder(bytes.NewBuffer(marshalled)).Decode(dest); err != nil {
-			return errors.WithStack(err)
-		}
+	if err = v.validatePipelineConfig(prefix, id, marshalled); err != nil {
+		return errors.WithStack(err)
 	}
 
-	rawComponentSchema, err := schema.FS.ReadFile(fmt.Sprintf("pipeline/%s.%s.schema.json", strings.Split(prefix, ".")[0], id))
+	if err := json.NewDecoder(bytes.NewBuffer(marshalled)).Decode(dest); err != nil {
+		return errors.WithStack(err)
+	}
+
+	return nil
+}
+
+func (v *KoanfProvider) validatePipelineConfig(prefix, id string, marshalled []byte) error {
+	rawComponentSchema, err := schema.FS.ReadFile(fmt.Sprintf(
+		"pipeline/%s.%s.schema.json", strings.Split(prefix, ".")[0], id))
 	if err != nil {
 		return errors.WithStack(err)
 	}
@@ -315,12 +326,12 @@ func (v *KoanfProvider) PipelineConfig(prefix, id string, override json.RawMessa
 		return errors.WithStack(err)
 	}
 
-	schema, err := sbl.Compile(gojsonschema.NewBytesLoader(rawComponentSchema))
+	scheme, err := sbl.Compile(gojsonschema.NewBytesLoader(rawComponentSchema))
 	if err != nil {
 		return errors.WithStack(err)
 	}
 
-	if result, err := schema.Validate(gojsonschema.NewBytesLoader(marshalled)); err != nil {
+	if result, err := scheme.Validate(gojsonschema.NewBytesLoader(marshalled)); err != nil {
 		return errors.WithStack(err)
 	} else if !result.Valid() {
 		return errors.WithStack(result.Errors())

@@ -56,13 +56,13 @@ func TestPipelineConfig(t *testing.T) {
 
 		res := json.RawMessage{}
 		require.Error(t, p.PipelineConfig("mutators", "hydrator", json.RawMessage(`{"not-api":"invalid"}`), &res))
-		assert.JSONEq(t, `{"cache":{"enabled":false,"ttl":"1m"},"api":{"url":"https://some-url/","retry":{"give_up_after":"1s","max_delay":"100ms"}},"not-api":"invalid"}`, string(res))
+		assert.Equal(t, json.RawMessage{}, res)
 
 		require.Error(t, p.PipelineConfig("mutators", "hydrator", json.RawMessage(`{"api":{"this-key-does-not-exist":true}}`), &res))
-		assert.JSONEq(t, `{"cache":{"enabled":false,"ttl":"1m"},"api":{"url":"https://some-url/","this-key-does-not-exist":true,"retry":{"give_up_after":"1s","max_delay":"100ms"}}}`, string(res))
+		assert.Equal(t, json.RawMessage{}, res)
 
 		require.Error(t, p.PipelineConfig("mutators", "hydrator", json.RawMessage(`{"api":{"url":"not-a-url"}}`), &res))
-		assert.JSONEq(t, `{"cache":{"enabled":false,"ttl":"1m"},"api":{"url":"not-a-url","retry":{"give_up_after":"1s","max_delay":"100ms"}}}`, string(res))
+		assert.Equal(t, json.RawMessage{}, res)
 	})
 
 	t.Run("case=should pass and override values", func(t *testing.T) {
