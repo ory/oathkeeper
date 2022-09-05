@@ -19,6 +19,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
+	"github.com/ory/x/watcherx"
+
 	"github.com/ory/x/configx"
 	"github.com/ory/x/logrusx"
 
@@ -56,9 +58,6 @@ func copyToFile(t *testing.T, src string, dst *os.File) {
 	if err != nil {
 		t.Fatal(err)
 	}
-
-	// sleep some time to let the watcher pick up the changes.
-	time.Sleep(100 * time.Millisecond)
 }
 
 func TestFetcherReload(t *testing.T) {
@@ -68,11 +67,17 @@ func TestFetcherReload(t *testing.T) {
 	configFile, err := os.CreateTemp(t.TempDir(), "config-*.yaml")
 	require.NoError(t, err)
 	t.Cleanup(func() { configFile.Close() })
+
+	configChanged := make(chan struct{})
+
 	conf := internal.NewConfigurationWithDefaults(
 		configx.WithContext(ctx),
 		configx.WithLogger(logrusx.New("", "", logrusx.ForceLevel(logrus.TraceLevel))),
 		configx.SkipValidation(),
 		configx.WithConfigFiles(configFile.Name()),
+		configx.AttachWatcher(func(event watcherx.Event, err error) {
+			go func() { configChanged <- struct{}{} }()
+		}),
 	)
 	r := internal.NewRegistry(conf)
 
@@ -85,6 +90,7 @@ func TestFetcherReload(t *testing.T) {
 
 	// initial config without a repo and without a matching strategy
 	copyToFile(t, "config_no_repo.yaml", configFile)
+	<-configChanged
 
 	rules := eventuallyListRules(ctx, t, r, 0)
 	require.Empty(t, rules)
@@ -95,6 +101,7 @@ func TestFetcherReload(t *testing.T) {
 
 	// config with a repo and without a matching strategy
 	copyToFile(t, "config_default.yaml", configFile)
+	<-configChanged
 
 	rules = eventuallyListRules(ctx, t, r, 1)
 	require.Equal(t, "test-rule-1-glob", rules[0].ID)
@@ -105,6 +112,8 @@ func TestFetcherReload(t *testing.T) {
 
 	// config with a glob matching strategy
 	copyToFile(t, "config_glob.yaml", configFile)
+	<-configChanged
+	time.Sleep(100 * time.Millisecond)
 
 	rules = eventuallyListRules(ctx, t, r, 1)
 	require.Equal(t, "test-rule-1-glob", rules[0].ID)
@@ -115,6 +124,7 @@ func TestFetcherReload(t *testing.T) {
 
 	// config with unknown matching strategy
 	copyToFile(t, "config_error.yaml", configFile)
+	<-configChanged
 
 	rules = eventuallyListRules(ctx, t, r, 1)
 	require.Equal(t, "test-rule-1-glob", rules[0].ID)
@@ -125,6 +135,7 @@ func TestFetcherReload(t *testing.T) {
 
 	// config with regexp matching strategy
 	copyToFile(t, "config_regexp.yaml", configFile)
+	<-configChanged
 
 	rules = eventuallyListRules(ctx, t, r, 1)
 	require.Equal(t, "test-rule-1-glob", rules[0].ID)
@@ -141,11 +152,15 @@ func TestFetcherWatchConfig(t *testing.T) {
 	configFile, err := os.CreateTemp(t.TempDir(), "config-*.yaml")
 	require.NoError(t, err)
 	configFile.Close()
+	configChanged := make(chan struct{})
 	conf := internal.NewConfigurationWithDefaults(
 		configx.WithContext(ctx),
 		configx.SkipValidation(),
 		configx.WithLogger(logrusx.New("", "", logrusx.ForceLevel(logrus.TraceLevel))),
 		configx.WithConfigFiles(configFile.Name()),
+		configx.AttachWatcher(func(event watcherx.Event, err error) {
+			go func() { configChanged <- struct{}{} }()
+		}),
 	)
 	r := internal.NewRegistry(conf)
 
@@ -209,6 +224,7 @@ access_rules:
 	} {
 		t.Run(fmt.Sprintf("case=%d", k), func(t *testing.T) {
 			require.NoError(t, os.WriteFile(configFile.Name(), []byte(tc.config), 0666))
+			<-configChanged
 
 			rules := eventuallyListRules(ctx, t, r, len(tc.expectIDs))
 			strategy, err := r.RuleRepository().MatchingStrategy(ctx)

@@ -12,7 +12,6 @@ import (
 	"os"
 	"path"
 	"path/filepath"
-	"reflect"
 	"strings"
 	"sync"
 	"time"
@@ -25,13 +24,14 @@ import (
 	_ "gocloud.dev/blob/gcsblob"
 	_ "gocloud.dev/blob/s3blob"
 
-	"github.com/ory/oathkeeper/driver/configuration"
-	"github.com/ory/oathkeeper/internal/cloudstorage"
-	"github.com/ory/oathkeeper/x"
 	"github.com/ory/x/httpx"
 	"github.com/ory/x/stringslice"
 	"github.com/ory/x/urlx"
 	"github.com/ory/x/watcherx"
+
+	"github.com/ory/oathkeeper/driver/configuration"
+	"github.com/ory/oathkeeper/internal/cloudstorage"
+	"github.com/ory/oathkeeper/x"
 )
 
 type event struct {
@@ -187,14 +187,8 @@ func (f *FetcherDefault) Watch(ctx context.Context) error {
 }
 
 func (f *FetcherDefault) watch(ctx context.Context, watcher *fsnotify.Watcher, events chan event) error {
-	var pc map[string]interface{}
 	f.config.AddWatcher(func(e watcherx.Event, err error) {
 		if err != nil {
-			return
-		}
-		if reflect.DeepEqual(pc, f.config.Get(configuration.AccessRuleRepositories)) {
-			f.registry.Logger().
-				Debug("Not reloading access rule repositories because configuration value has not changed.")
 			return
 		}
 		f.registry.Logger().
@@ -205,14 +199,8 @@ func (f *FetcherDefault) watch(ctx context.Context, watcher *fsnotify.Watcher, e
 	})
 	f.enqueueEvent(events, event{et: eventRepositoryConfigChanged, source: "entrypoint"})
 
-	var strategy map[string]interface{}
 	f.config.AddWatcher(func(e watcherx.Event, err error) {
 		if err != nil {
-			return
-		}
-		if reflect.DeepEqual(strategy, f.config.Get(configuration.AccessRuleMatchingStrategy)) {
-			f.registry.Logger().
-				Debug("Not reloading access rule matching strategy because configuration value has not changed.")
 			return
 		}
 		f.registry.Logger().
