@@ -77,7 +77,6 @@ type AuthorizerKetoEngineACPORY struct {
 func NewAuthorizerKetoEngineACPORY(c configuration.Provider) *AuthorizerKetoEngineACPORY {
 	return &AuthorizerKetoEngineACPORY{
 		c: c,
-		// client: http.DefaultClient,
 		client: httpx.NewResilientClient(
 			httpx.ResilientClientWithMaxRetryWait(100*time.Millisecond),
 			httpx.ResilientClientWithMaxRetry(5),
@@ -109,7 +108,7 @@ func (a *AuthorizerKetoEngineACPORY) WithContextCreator(f authorizerKetoWardenCo
 	a.contextCreator = f
 }
 
-func (a *AuthorizerKetoEngineACPORY) Authorize(r *http.Request, session *authn.AuthenticationSession, config json.RawMessage, rule pipeline.Rule) error {
+func (a *AuthorizerKetoEngineACPORY) Authorize(r *http.Request, session *authn.AuthenticationSession, config json.RawMessage, _ pipeline.Rule) error {
 	cf, err := a.Config(config)
 	if err != nil {
 		return err

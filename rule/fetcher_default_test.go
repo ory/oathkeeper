@@ -58,6 +58,11 @@ func copyToFile(t *testing.T, src string, dst *os.File) {
 	if err != nil {
 		t.Fatal(err)
 	}
+
+	err = dst.Sync()
+	if err != nil {
+		t.Fatal(err)
+	}
 }
 
 func TestFetcherReload(t *testing.T) {
@@ -91,7 +96,6 @@ func TestFetcherReload(t *testing.T) {
 	// initial config without a repo and without a matching strategy
 	copyToFile(t, "config_no_repo.yaml", configFile)
 	<-configChanged
-	time.Sleep(100 * time.Millisecond)
 
 	rules := eventuallyListRules(ctx, t, r, 0)
 	require.Empty(t, rules)
@@ -103,7 +107,6 @@ func TestFetcherReload(t *testing.T) {
 	// config with a repo and without a matching strategy
 	copyToFile(t, "config_default.yaml", configFile)
 	<-configChanged
-	time.Sleep(100 * time.Millisecond)
 
 	rules = eventuallyListRules(ctx, t, r, 1)
 	require.Equal(t, "test-rule-1-glob", rules[0].ID)
@@ -115,7 +118,6 @@ func TestFetcherReload(t *testing.T) {
 	// config with a glob matching strategy
 	copyToFile(t, "config_glob.yaml", configFile)
 	<-configChanged
-	time.Sleep(100 * time.Millisecond)
 
 	rules = eventuallyListRules(ctx, t, r, 1)
 	require.Equal(t, "test-rule-1-glob", rules[0].ID)
@@ -127,7 +129,6 @@ func TestFetcherReload(t *testing.T) {
 	// config with unknown matching strategy
 	copyToFile(t, "config_error.yaml", configFile)
 	<-configChanged
-	time.Sleep(100 * time.Millisecond)
 
 	rules = eventuallyListRules(ctx, t, r, 1)
 	require.Equal(t, "test-rule-1-glob", rules[0].ID)
@@ -139,7 +140,6 @@ func TestFetcherReload(t *testing.T) {
 	// config with regexp matching strategy
 	copyToFile(t, "config_regexp.yaml", configFile)
 	<-configChanged
-	time.Sleep(100 * time.Millisecond)
 
 	rules = eventuallyListRules(ctx, t, r, 1)
 	require.Equal(t, "test-rule-1-glob", rules[0].ID)
@@ -262,13 +262,16 @@ func TestFetcherWatchRepositoryFromFS(t *testing.T) {
 	repoFile, err := os.CreateTemp(tempDir, "access-rules-*.json")
 	require.NoError(t, err)
 	t.Cleanup(func() { repoFile.Close() })
+
 	repoFile.WriteString("[]")
+	require.NoError(t, repoFile.Sync())
 
 	configFile.WriteString(fmt.Sprintf(`
 access_rules:
   repositories:
   - file://%s
 `, repoFile.Name()))
+	require.NoError(t, configFile.Sync())
 
 	conf := internal.NewConfigurationWithDefaults(
 		configx.WithContext(ctx),
@@ -294,6 +297,7 @@ access_rules:
 		t.Run(fmt.Sprintf("case=%d", k), func(t *testing.T) {
 			repoFile.Truncate(0)
 			repoFile.WriteAt([]byte(tc.content), 0)
+			repoFile.Sync()
 
 			rules := eventuallyListRules(ctx, t, r, len(tc.expectIDs))
 
@@ -412,6 +416,7 @@ access_rules:
   - gs://oathkeeper-test-bucket/path/prefix/rules.json
   - azblob://path/prefix/rules.json
 `)
+	require.NoError(t, configFile.Sync())
 
 	conf := internal.NewConfigurationWithDefaults(
 		configx.SkipValidation(),

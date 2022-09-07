@@ -6,7 +6,6 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"net/url"
 	"os"
@@ -191,23 +190,10 @@ func (f *FetcherDefault) watch(ctx context.Context, watcher *fsnotify.Watcher, e
 		if err != nil {
 			return
 		}
-		f.registry.Logger().
-			WithField("event", e).
-			Debugf("Reloading access rule repositories because configuration value has changed.")
-
 		f.enqueueEvent(events, event{et: eventRepositoryConfigChanged, source: "viper_watcher"})
-	})
-	f.enqueueEvent(events, event{et: eventRepositoryConfigChanged, source: "entrypoint"})
-
-	f.config.AddWatcher(func(e watcherx.Event, err error) {
-		if err != nil {
-			return
-		}
-		f.registry.Logger().
-			WithField("event", e).
-			Debugf("Reloading strategy because configuration value has changed.")
 		f.enqueueEvent(events, event{et: eventMatchingStrategyChanged, source: "viper_watcher"})
 	})
+	f.enqueueEvent(events, event{et: eventRepositoryConfigChanged, source: "entrypoint"})
 	f.enqueueEvent(events, event{et: eventMatchingStrategyChanged, source: "entrypoint"})
 
 	for {
@@ -376,7 +362,7 @@ func (f *FetcherDefault) fetchFile(source string) ([]Rule, error) {
 }
 
 func (f *FetcherDefault) decode(r io.Reader) ([]Rule, error) {
-	b, err := ioutil.ReadAll(r)
+	b, err := io.ReadAll(r)
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
