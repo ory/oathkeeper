@@ -6,8 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/url"
-	"os"
-	"strconv"
 	"strings"
 	"sync"
 	"testing"
@@ -24,7 +22,6 @@ import (
 	"github.com/ory/gojsonschema"
 	"github.com/ory/x/configx"
 	"github.com/ory/x/logrusx"
-	"github.com/ory/x/osx"
 	"github.com/ory/x/stringsx"
 	"github.com/ory/x/tracing"
 	"github.com/ory/x/urlx"
@@ -92,7 +89,7 @@ func (v *KoanfProvider) configChangeHandler(event watcherx.Event, err error) {
 	defer v.subscriptions.RUnlock()
 	for _, cb := range v.subscriptions.data {
 		cb := cb
-		go cb(event, err) // TODO(hperl): Should we block here?
+		go cb(event, err)
 	}
 }
 
@@ -398,10 +395,7 @@ func (v *KoanfProvider) TracingServiceName() string {
 }
 
 func (v *KoanfProvider) TracingProvider() string {
-	return stringsx.Coalesce(
-		v.source.String("tracing.provider"),
-		os.Getenv("TRACING_PROVIDER"),
-	)
+	return v.source.String("tracing.provider")
 }
 
 func (v *KoanfProvider) PrometheusHideRequestPaths() bool {
@@ -409,50 +403,22 @@ func (v *KoanfProvider) PrometheusHideRequestPaths() bool {
 }
 
 func (v *KoanfProvider) TracingJaegerConfig() *tracing.JaegerConfig {
-	var samplingValue float64
-	var err error
-	if val := v.source.Get("tracing.providers.jaeger.sampling.value"); val != nil {
-		samplingValue = v.source.Float64("tracing.providers.jaeger.sampling.value")
-	} else {
-		def := osx.GetenvDefault("TRACING_PROVIDER_JAEGER_SAMPLING_VALUE", "1")
-		samplingValue, err = strconv.ParseFloat(def, 64)
-		if err != nil {
-			samplingValue = float64(1)
-		}
-	}
-
 	return &tracing.JaegerConfig{
-		LocalAgentAddress: v.source.StringF(
+		LocalAgentAddress: v.source.String(
 			"tracing.providers.jaeger.local_agent_address",
-			os.Getenv("TRACING_PROVIDER_JAEGER_LOCAL_AGENT_ADDRESS")),
+		),
 
 		Sampling: &tracing.JaegerSampling{
-			Type: stringsx.Coalesce(
-				v.source.String("tracing.providers.jaeger.sampling.type"),
-				os.Getenv("TRACING_PROVIDER_JAEGER_SAMPLING_TYPE"),
-				"const",
-			),
-
-			Value: samplingValue,
-
-			ServerURL: stringsx.Coalesce(
-				v.source.String("tracing.providers.jaeger.sampling.server_url"),
-				os.Getenv("TRACING_PROVIDER_JAEGER_SAMPLING_SERVER_URL"),
-			),
+			Type:      v.source.StringF("tracing.providers.jaeger.sampling.type", "const"),
+			Value:     v.source.Float64F("tracing.providers.jaeger.sampling.value", 1),
+			ServerURL: v.source.String("tracing.providers.jaeger.sampling.server_url"),
 		},
-		Propagation: stringsx.Coalesce(
-			v.source.String("JAEGER_PROPAGATION"), // Standard Jaeger client config
-			v.source.String("tracing.providers.jaeger.propagation"),
-			os.Getenv("TRACING_PROVIDER_JAEGER_PROPAGATION"),
-		),
+		Propagation: v.source.String("tracing.providers.jaeger.propagation"),
 	}
 }
 func (v *KoanfProvider) TracingZipkinConfig() *tracing.ZipkinConfig {
 	return &tracing.ZipkinConfig{
-		ServerURL: stringsx.Coalesce(
-			v.source.String("tracing.providers.zipkin.server_url"),
-			os.Getenv("TRACING_PROVIDER_ZIPKIN_SERVER_URL"),
-		),
+		ServerURL: v.source.String("tracing.providers.zipkin.server_url"),
 	}
 }
 
