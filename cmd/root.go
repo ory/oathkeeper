@@ -23,9 +23,13 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"path/filepath"
+	"runtime"
 
 	"github.com/gobuffalo/packr/v2"
 	"github.com/spf13/cobra"
+
+	"github.com/ory/x/configx"
 
 	"github.com/ory/x/logrusx"
 
@@ -50,4 +54,19 @@ func Execute() {
 		fmt.Println(err)
 		os.Exit(-1)
 	}
+}
+
+func init() {
+	configx.RegisterConfigFlag(RootCmd.PersistentFlags(), []string{filepath.Join(userHomeDir(), ".oathkeeper.yml")})
+}
+
+func userHomeDir() string {
+	if runtime.GOOS == "windows" {
+		home := os.Getenv("HOMEDRIVE") + os.Getenv("HOMEPATH")
+		if home == "" {
+			home = os.Getenv("USERPROFILE")
+		}
+		return home
+	}
+	return os.Getenv("HOME")
 }
