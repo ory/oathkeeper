@@ -63,6 +63,9 @@ func copyToFile(t *testing.T, src string, dst *os.File) {
 	if err != nil {
 		t.Fatal(err)
 	}
+
+	// We need to sleep here because the changes need to be picked up by FetcherDefault.watch
+	time.Sleep(100 * time.Millisecond)
 }
 
 func TestFetcherReload(t *testing.T) {

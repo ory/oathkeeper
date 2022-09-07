@@ -190,11 +190,11 @@ func (f *FetcherDefault) watch(ctx context.Context, watcher *fsnotify.Watcher, e
 		if err != nil {
 			return
 		}
-		f.enqueueEvent(events, event{et: eventRepositoryConfigChanged, source: "viper_watcher"})
 		f.enqueueEvent(events, event{et: eventMatchingStrategyChanged, source: "viper_watcher"})
+		f.enqueueEvent(events, event{et: eventRepositoryConfigChanged, source: "viper_watcher"})
 	})
-	f.enqueueEvent(events, event{et: eventRepositoryConfigChanged, source: "entrypoint"})
 	f.enqueueEvent(events, event{et: eventMatchingStrategyChanged, source: "entrypoint"})
+	f.enqueueEvent(events, event{et: eventRepositoryConfigChanged, source: "entrypoint"})
 
 	for {
 		select {
