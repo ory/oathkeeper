@@ -23,7 +23,6 @@ package cmd
 import (
 	"fmt"
 	"os"
-	"path/filepath"
 	"runtime"
 
 	"github.com/gobuffalo/packr/v2"
@@ -40,6 +39,7 @@ import (
 var logger *logrusx.Logger
 
 var schemas = packr.New("schemas", "../.schema")
+var ConfigFlag string
 
 // RootCmd represents the base command when called without any subcommands
 var RootCmd = &cobra.Command{
@@ -57,7 +57,7 @@ func Execute() {
 }
 
 func init() {
-	configx.RegisterConfigFlag(RootCmd.PersistentFlags(), []string{filepath.Join(userHomeDir(), ".oathkeeper.yml")})
+	configx.RegisterFlags(RootCmd.PersistentFlags())
 }
 
 func userHomeDir() string {
