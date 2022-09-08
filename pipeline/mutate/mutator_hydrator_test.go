@@ -15,8 +15,7 @@ import (
 	"github.com/ory/oathkeeper/pipeline/authn"
 	"github.com/ory/oathkeeper/pipeline/mutate"
 	"github.com/ory/oathkeeper/rule"
-
-	"github.com/ory/viper"
+	"github.com/ory/x/configx"
 
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/internal"
@@ -128,7 +127,8 @@ func configWithRetriesForMutator(giveUpAfter, retryDelay string) func(*httptest.
 }
 
 func TestMutatorHydrator(t *testing.T) {
-	conf := internal.NewConfigurationWithDefaults()
+	t.Parallel()
+	conf := internal.NewConfigurationWithDefaults(configx.SkipValidation())
 	reg := internal.NewRegistry(conf)
 
 	a, err := reg.PipelineMutator("hydrator")
@@ -205,7 +205,7 @@ func TestMutatorHydrator(t *testing.T) {
 			"Empty Response": {
 				Setup: func(t *testing.T) http.Handler {
 					router := httprouter.New()
-					router.POST("/", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+					router.POST("/", func(w http.ResponseWriter, _ *http.Request, _ httprouter.Params) {
 						w.WriteHeader(http.StatusOK)
 						_, err = w.Write([]byte(`{}`))
 						require.NoError(t, err)
@@ -242,9 +242,9 @@ func TestMutatorHydrator(t *testing.T) {
 				Err:     errors.New("mutator matching this route is misconfigured or disabled"),
 			},
 			"Not Found": {
-				Setup: func(t *testing.T) http.Handler {
+				Setup: func(_ *testing.T) http.Handler {
 					router := httprouter.New()
-					router.POST("/", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+					router.POST("/", func(w http.ResponseWriter, _ *http.Request, _ httprouter.Params) {
 						w.WriteHeader(http.StatusNotFound)
 					})
 					return router
@@ -382,8 +382,7 @@ func TestMutatorHydrator(t *testing.T) {
 			{enabled: true, shouldPass: true, apiUrl: "http://api/bar"},
 		} {
 			t.Run(fmt.Sprintf("case=%d", k), func(t *testing.T) {
-				viper.Reset()
-				viper.Set(configuration.ViperKeyMutatorHydratorIsEnabled, testCase.enabled)
+				conf.SetForTest(t, configuration.MutatorHydratorIsEnabled, testCase.enabled)
 
 				err := a.Validate(json.RawMessage(`{"api":{"url":"` + testCase.apiUrl + `"}}`))
 				if testCase.shouldPass {

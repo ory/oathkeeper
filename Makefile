@@ -38,6 +38,9 @@ format: .bin/goimports node_modules
 # Generates the SDK
 .PHONY: sdk
 sdk: .bin/swagger .bin/ory node_modules
+		rm -rf internal/httpclient
+		mkdir -p internal/httpclient
+
 		swagger generate spec -m -o spec/swagger.json \
 			-c github.com/ory/oathkeeper \
 			-c github.com/ory/x/healthx
@@ -50,8 +53,6 @@ sdk: .bin/swagger .bin/ory node_modules
 					-p file://.schema/openapi/patches/meta.yaml \
 					spec/swagger.json spec/api.json
 
-		rm -rf internal/httpclient
-		mkdir -p internal/httpclient
 		swagger generate client -f ./spec/swagger.json -t internal/httpclient -A Ory_Oathkeeper
 
 		make format

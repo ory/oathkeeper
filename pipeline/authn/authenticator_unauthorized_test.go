@@ -24,8 +24,6 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/ory/viper"
-
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/internal"
 
@@ -47,11 +45,10 @@ func TestAuthenticatorBroken(t *testing.T) {
 	})
 
 	t.Run("method=validate", func(t *testing.T) {
-		viper.Set(configuration.ViperKeyAuthenticatorUnauthorizedIsEnabled, true)
+		conf.SetForTest(t, configuration.AuthenticatorUnauthorizedIsEnabled, true)
 		require.NoError(t, a.Validate(nil))
 
-		viper.Reset()
-		viper.Set(configuration.ViperKeyAuthenticatorUnauthorizedIsEnabled, false)
+		conf.SetForTest(t, configuration.AuthenticatorUnauthorizedIsEnabled, false)
 		require.Error(t, a.Validate(nil))
 	})
 }

@@ -6,37 +6,31 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"net/url"
 	"os"
 	"path"
 	"path/filepath"
-	"reflect"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/fsnotify/fsnotify"
-
-	"github.com/ory/x/stringslice"
-	"github.com/ory/x/urlx"
-
-	"github.com/ory/oathkeeper/internal/cloudstorage"
-
-	"github.com/ory/viper"
-	"github.com/ory/x/httpx"
-	"github.com/ory/x/viperx"
-
-	"github.com/ory/oathkeeper/driver/configuration"
-	"github.com/ory/oathkeeper/x"
-
 	"github.com/ghodss/yaml"
 	"github.com/pkg/errors"
-
 	"gocloud.dev/blob"
 	_ "gocloud.dev/blob/azureblob"
 	_ "gocloud.dev/blob/gcsblob"
 	_ "gocloud.dev/blob/s3blob"
+
+	"github.com/ory/x/httpx"
+	"github.com/ory/x/stringslice"
+	"github.com/ory/x/urlx"
+	"github.com/ory/x/watcherx"
+
+	"github.com/ory/oathkeeper/driver/configuration"
+	"github.com/ory/oathkeeper/internal/cloudstorage"
+	"github.com/ory/oathkeeper/x"
 )
 
 type event struct {
@@ -61,10 +55,10 @@ type fetcherRegistry interface {
 }
 
 type FetcherDefault struct {
-	c   configuration.Provider
-	r   fetcherRegistry
-	hc  *http.Client
-	mux *blob.URLMux
+	config   configuration.Provider
+	registry fetcherRegistry
+	hc       *http.Client
+	mux      *blob.URLMux
 
 	cache map[string][]Rule
 
@@ -76,15 +70,15 @@ type FetcherDefault struct {
 }
 
 func NewFetcherDefault(
-	c configuration.Provider,
-	r fetcherRegistry,
+	config configuration.Provider,
+	registry fetcherRegistry,
 ) *FetcherDefault {
 	return &FetcherDefault{
-		r:     r,
-		c:     c,
-		mux:   cloudstorage.NewURLMux(),
-		hc:    httpx.NewResilientClientLatencyToleranceHigh(nil),
-		cache: map[string][]Rule{},
+		registry: registry,
+		config:   config,
+		mux:      cloudstorage.NewURLMux(),
+		hc:       httpx.NewResilientClient(httpx.ResilientClientWithConnectionTimeout(15 * time.Second)).StandardClient(),
+		cache:    map[string][]Rule{},
 	}
 }
 
@@ -95,7 +89,7 @@ func (f *FetcherDefault) configUpdate(ctx context.Context, watcher *fsnotify.Wat
 		if fileToWatch.Scheme == "file" || fileToWatch.Scheme == "" {
 			p := filepath.Clean(urlx.GetURLFilePath(&fileToWatch))
 			filesBeingWatched = append(filesBeingWatched, p)
-			directoryToWatch, _ := filepath.Split(p)
+			directoryToWatch := filepath.Dir(p)
 			directoriesToWatch = append(directoriesToWatch, directoryToWatch)
 		}
 	}
@@ -105,9 +99,9 @@ func (f *FetcherDefault) configUpdate(ctx context.Context, watcher *fsnotify.Wat
 		for _, source := range sources {
 			if err := cb(source); err != nil {
 				if os.IsNotExist(err) {
-					f.r.Logger().WithError(err).WithField("file", source).Error("Not watching config file for changes because it does not exist. Check the configuration or restart the service if the issue persists.")
+					f.registry.Logger().WithError(err).WithField("file", source).Error("Not watching config file for changes because it does not exist. Check the configuration or restart the service if the issue persists.")
 				} else if os.IsPermission(err) {
-					f.r.Logger().WithError(err).WithField("file", source).Error("Not watching config file for changes because permission is denied. Check the configuration or restart the service if the issue persists.")
+					f.registry.Logger().WithError(err).WithField("file", source).Error("Not watching config file for changes because permission is denied. Check the configuration or restart the service if the issue persists.")
 				} else if strings.Contains(err.Error(), "non-existent kevent") {
 					// ignore this error because it is fired when removing a source that does not have a watcher which can happen and is negligible
 				} else {
@@ -122,7 +116,7 @@ func (f *FetcherDefault) configUpdate(ctx context.Context, watcher *fsnotify.Wat
 
 	// First we remove all the directories being watched
 	if err := updateWatcher(f.directoriesBeingWatched, watcher.Remove); err != nil {
-		f.r.Logger().WithError(err).Error("Unable to modify (remove) file watcher. If the issue persists, restart the service.")
+		f.registry.Logger().WithError(err).Error("Unable to modify (remove) file watcher. If the issue persists, restart the service.")
 	}
 
 	f.directoriesBeingWatched = directoriesToWatch
@@ -130,7 +124,7 @@ func (f *FetcherDefault) configUpdate(ctx context.Context, watcher *fsnotify.Wat
 
 	// Next we (re-) add all the directories to watch
 	if err := updateWatcher(directoriesToWatch, watcher.Add); err != nil {
-		f.r.Logger().WithError(err).Error("Unable to modify (add) file watcher. If the issue persists, restart the service.")
+		f.registry.Logger().WithError(err).Error("Unable to modify (add) file watcher. If the issue persists, restart the service.")
 	}
 
 	// And we need to reset the rule cache
@@ -139,8 +133,10 @@ func (f *FetcherDefault) configUpdate(ctx context.Context, watcher *fsnotify.Wat
 
 	// If there are no more sources to watch we reset the rule repository as a whole
 	if len(replace) == 0 {
-		f.r.Logger().WithField("repos", viper.AllSettings()).Warn("No access rule repositories have been defined in the updated config.")
-		if err := f.r.RuleRepository().Set(ctx, []Rule{}); err != nil {
+		f.registry.Logger().
+			WithField("repos", f.config.Get(configuration.AccessRuleRepositories)).
+			Warn("No access rule repositories have been defined in the updated config.")
+		if err := f.registry.RuleRepository().Set(ctx, []Rule{}); err != nil {
 			return err
 		}
 	}
@@ -190,33 +186,15 @@ func (f *FetcherDefault) Watch(ctx context.Context) error {
 }
 
 func (f *FetcherDefault) watch(ctx context.Context, watcher *fsnotify.Watcher, events chan event) error {
-	var pc map[string]interface{}
-
-	viperx.AddWatcher(func(e fsnotify.Event) error {
-		if reflect.DeepEqual(pc, viper.Get(configuration.ViperKeyAccessRuleRepositories)) {
-			f.r.Logger().
-				Debug("Not reloading access rule repositories because configuration value has not changed.")
-			return nil
+	f.config.AddWatcher(func(e watcherx.Event, err error) {
+		if err != nil {
+			return
 		}
-
-		f.enqueueEvent(events, event{et: eventRepositoryConfigChanged, source: "viper_watcher"})
-
-		return nil
-	})
-	f.enqueueEvent(events, event{et: eventRepositoryConfigChanged, source: "entrypoint"})
-
-	var strategy map[string]interface{}
-	viperx.AddWatcher(func(e fsnotify.Event) error {
-		if reflect.DeepEqual(strategy, viper.Get(configuration.ViperKeyAccessRuleMatchingStrategy)) {
-			f.r.Logger().
-				Debug("Not reloading access rule matching strategy because configuration value has not changed.")
-			return nil
-		}
-
 		f.enqueueEvent(events, event{et: eventMatchingStrategyChanged, source: "viper_watcher"})
-		return nil
+		f.enqueueEvent(events, event{et: eventRepositoryConfigChanged, source: "viper_watcher"})
 	})
 	f.enqueueEvent(events, event{et: eventMatchingStrategyChanged, source: "entrypoint"})
+	f.enqueueEvent(events, event{et: eventRepositoryConfigChanged, source: "entrypoint"})
 
 	for {
 		select {
@@ -246,7 +224,7 @@ func (f *FetcherDefault) watch(ctx context.Context, watcher *fsnotify.Watcher, e
 				continue
 			}
 
-			f.r.Logger().
+			f.registry.Logger().
 				WithField("event", "fsnotify").
 				WithField("file", e.Name).
 				WithField("op", e.Op.String()).
@@ -256,29 +234,29 @@ func (f *FetcherDefault) watch(ctx context.Context, watcher *fsnotify.Watcher, e
 		case e, ok := <-events:
 			if !ok {
 				// channel was closed
-				f.r.Logger().Debug("The events channel was closed")
+				f.registry.Logger().Debug("The events channel was closed")
 				return nil
 			}
 
 			switch e.et {
 			case eventRepositoryConfigChanged:
-				f.r.Logger().
+				f.registry.Logger().
 					WithField("event", "config_change").
 					WithField("source", e.source).
 					Debugf("Viper detected a configuration change, reloading config.")
-				if err := f.configUpdate(ctx, watcher, f.c.AccessRuleRepositories(), events); err != nil {
+				if err := f.configUpdate(ctx, watcher, f.config.AccessRuleRepositories(), events); err != nil {
 					return err
 				}
 			case eventMatchingStrategyChanged:
-				f.r.Logger().
+				f.registry.Logger().
 					WithField("event", "matching_strategy_config_change").
 					WithField("source", e.source).
 					Debugf("Viper detected a configuration change, updating matching strategy")
-				if err := f.r.RuleRepository().SetMatchingStrategy(ctx, f.c.AccessRuleMatchingStrategy()); err != nil {
+				if err := f.registry.RuleRepository().SetMatchingStrategy(ctx, f.config.AccessRuleMatchingStrategy()); err != nil {
 					return errors.Wrapf(err, "unable to update matching strategy")
 				}
 			case eventFileChanged:
-				f.r.Logger().
+				f.registry.Logger().
 					WithField("event", "repository_change").
 					WithField("source", e.source).
 					WithField("file", e.path.String()).
@@ -286,13 +264,13 @@ func (f *FetcherDefault) watch(ctx context.Context, watcher *fsnotify.Watcher, e
 
 				rules, err := f.sourceUpdate(e)
 				if err != nil {
-					f.r.Logger().WithError(err).
+					f.registry.Logger().WithError(err).
 						WithField("file", e.path.String()).
 						Error("Unable to update access rules from given location, changes will be ignored. Check the configuration or restart the service if the issue persists.")
 					continue
 				}
 
-				if err := f.r.RuleRepository().Set(ctx, rules); err != nil {
+				if err := f.registry.RuleRepository().Set(ctx, rules); err != nil {
 					return errors.Wrapf(err, "unable to reset access rule repository")
 				}
 			}
@@ -301,6 +279,7 @@ func (f *FetcherDefault) watch(ctx context.Context, watcher *fsnotify.Watcher, e
 }
 
 func (f *FetcherDefault) enqueueEvent(events chan event, evt event) {
+	// TODO(hperl): Why is this so complicated (not just a simple send)?
 	f.wg.Add(1)
 	go func() {
 		defer f.wg.Done()
@@ -310,24 +289,16 @@ func (f *FetcherDefault) enqueueEvent(events chan event, evt event) {
 }
 
 func (f *FetcherDefault) fetch(source url.URL) ([]Rule, error) {
-	f.r.Logger().
+	f.registry.Logger().
 		WithField("location", source.String()).
 		Debugf("Fetching access rules from given location because something changed.")
 
 	switch source.Scheme {
-	case "azblob":
-		fallthrough
-	case "gs":
-		fallthrough
-	case "s3":
+	case "azblob", "gs", "s3":
 		return f.fetchFromStorage(source)
-	case "http":
-		fallthrough
-	case "https":
+	case "http", "https":
 		return f.fetchRemote(source.String())
-	case "":
-		fallthrough
-	case "file":
+	case "", "file":
 		p := urlx.GetURLFilePath(&source)
 		if path.Ext(p) == ".json" || path.Ext(p) == ".yaml" || path.Ext(p) == ".yml" {
 			return f.fetchFile(p)
@@ -391,7 +362,7 @@ func (f *FetcherDefault) fetchFile(source string) ([]Rule, error) {
 }
 
 func (f *FetcherDefault) decode(r io.Reader) ([]Rule, error) {
-	b, err := ioutil.ReadAll(r)
+	b, err := io.ReadAll(r)
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}

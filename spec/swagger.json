@@ -216,9 +216,7 @@
     }
   },
   "definitions": {
-    "UUID": { "type": "string", "format": "uuid4" },
     "Upstream": {
-      "description": "Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream upstream",
       "type": "object",
       "properties": {
         "preserve_host": {
@@ -236,36 +234,30 @@
       }
     },
     "genericError": {
-      "description": "GenericError GenericError The standard error format",
+      "description": "The standard error format",
       "type": "object",
       "properties": {
         "code": {
-          "description": "code",
           "type": "integer",
           "format": "int64"
         },
         "details": {
-          "description": "details",
           "type": "array",
           "items": {
             "type": "object",
-            "additionalProperties": true
+            "additionalProperties": {}
           }
         },
         "message": {
-          "description": "message",
           "type": "string"
         },
         "reason": {
-          "description": "reason",
           "type": "string"
         },
         "request": {
-          "description": "request",
           "type": "string"
         },
         "status": {
-          "description": "status",
           "type": "string"
         }
       }
@@ -292,7 +284,6 @@
       }
     },
     "jsonWebKey": {
-      "description": "JSONWebKey JSONWebKey json web key",
       "type": "object",
       "properties": {
         "alg": {
@@ -300,27 +291,21 @@
           "type": "string"
         },
         "crv": {
-          "description": "crv",
           "type": "string"
         },
         "d": {
-          "description": "d",
           "type": "string"
         },
         "dp": {
-          "description": "dp",
           "type": "string"
         },
         "dq": {
-          "description": "dq",
           "type": "string"
         },
         "e": {
-          "description": "e",
           "type": "string"
         },
         "k": {
-          "description": "k",
           "type": "string"
         },
         "kid": {
@@ -332,19 +317,15 @@
           "type": "string"
         },
         "n": {
-          "description": "n",
           "type": "string"
         },
         "p": {
-          "description": "p",
           "type": "string"
         },
         "q": {
-          "description": "q",
           "type": "string"
         },
         "qi": {
-          "description": "qi",
           "type": "string"
         },
         "use": {
@@ -352,7 +333,6 @@
           "type": "string"
         },
         "x": {
-          "description": "x",
           "type": "string"
         },
         "x5c": {
@@ -363,13 +343,11 @@
           }
         },
         "y": {
-          "description": "y",
           "type": "string"
         }
       }
     },
     "jsonWebKeySet": {
-      "description": "JSONWebKeySet json web key set",
       "type": "object",
       "properties": {
         "keys": {
@@ -419,12 +397,10 @@
       }
     },
     "ruleHandler": {
-      "description": "RuleHandler rule handler",
       "type": "object",
       "properties": {
         "config": {
-          "description": "Config contains the configuration for the handler. Please read the user\nguide for a complete list of each handler's available settings.",
-          "type": "object"
+          "description": "Config contains the configuration for the handler. Please read the user\nguide for a complete list of each handler's available settings."
         },
         "handler": {
           "description": "Handler identifies the implementation which will be used to handle this specific request. Please read the user\nguide for a complete list of available handlers.",
@@ -433,7 +409,6 @@
       }
     },
     "ruleMatch": {
-      "description": "RuleMatch RuleMatch RuleMatch RuleMatch rule match",
       "type": "object",
       "properties": {
         "methods": {
@@ -457,7 +432,8 @@
           "type": "string"
         }
       }
-    }
+    },
+    "UUID": { "type": "string", "format": "uuid4" }
   },
   "responses": {
     "emptyResponse": {

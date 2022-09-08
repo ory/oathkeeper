@@ -37,10 +37,9 @@ import (
 
 	"github.com/ory/oathkeeper/rule"
 	"github.com/ory/oathkeeper/x"
+	"github.com/ory/x/configx"
 
 	"github.com/golang-jwt/jwt/v4"
-
-	"github.com/ory/viper"
 
 	"github.com/ory/oathkeeper/credentials"
 	"github.com/ory/oathkeeper/driver/configuration"
@@ -200,14 +199,15 @@ func parseToken(h http.Header) string {
 }
 
 func TestMutatorIDToken(t *testing.T) {
-	conf := internal.NewConfigurationWithDefaults()
+	t.Parallel()
+	conf := internal.NewConfigurationWithDefaults(configx.SkipValidation())
 	reg := internal.NewRegistry(conf)
 
 	a, err := reg.PipelineMutator("id_token")
 	require.NoError(t, err)
 	assert.Equal(t, "id_token", a.GetID())
 
-	viper.Set("mutators.id_token.config.issuer_url", "/foo/bar")
+	conf.SetForTest(t, "mutators.id_token.config.issuer_url", "/foo/bar")
 
 	t.Run("method=mutate", func(t *testing.T) {
 		r := &http.Request{}
@@ -257,8 +257,8 @@ func TestMutatorIDToken(t *testing.T) {
 			session := &authn.AuthenticationSession{Subject: "foo", Extra: map[string]interface{}{"bar": "baz"}}
 			config := json.RawMessage([]byte(`{"ttl": "3s", "claims": "{\"foo\": \"{{ print .Extra.bar }}\", \"aud\": [\"foo\"]}", "jwks_url": "file://../../test/stub/jwks-ecdsa.json"}`))
 
-			t.Parallel()
 			t.Run("subcase=different tokens because expired", func(t *testing.T) {
+				t.Parallel()
 				config, _ := sjson.SetBytes(config, "ttl", "100ms")
 				prev := mutate(t, *session, config)
 				time.Sleep(time.Millisecond * 90)
@@ -266,18 +266,21 @@ func TestMutatorIDToken(t *testing.T) {
 			})
 
 			t.Run("subcase=same tokens because expired is long enough", func(t *testing.T) {
+				t.Parallel()
 				prev := mutate(t, *session, config)
 				time.Sleep(time.Second) // give the cache buffers some time
 				assert.Equal(t, prev, mutate(t, *session, config))
 			})
 
 			t.Run("subcase=different tokens because expired is long but was reached", func(t *testing.T) {
+				t.Parallel()
 				prev := mutate(t, *session, config)
 				time.Sleep(time.Second * 3) // give the cache buffers some time
 				assert.NotEqual(t, prev, mutate(t, *session, config))
 			})
 
 			t.Run("subcase=different tokens because different subjects", func(t *testing.T) {
+				t.Parallel()
 				prev := mutate(t, *session, config)
 				time.Sleep(time.Second)
 				s := *session
@@ -286,6 +289,7 @@ func TestMutatorIDToken(t *testing.T) {
 			})
 
 			t.Run("subcase=different tokens because session extra changed", func(t *testing.T) {
+				t.Parallel()
 				prev := mutate(t, *session, config)
 				time.Sleep(time.Second)
 				s := *session
@@ -294,6 +298,7 @@ func TestMutatorIDToken(t *testing.T) {
 			})
 
 			t.Run("subcase=different tokens because claim options changed", func(t *testing.T) {
+				t.Parallel()
 				prev := mutate(t, *session, config)
 				time.Sleep(time.Second)
 				config := json.RawMessage([]byte(`{"ttl": "3s", "claims": "{\"foo\": \"{{ print .Extra.bar }}\", \"aud\": [\"not-foo\"]}", "jwks_url": "file://../../test/stub/jwks-ecdsa.json"}`))
@@ -301,6 +306,7 @@ func TestMutatorIDToken(t *testing.T) {
 			})
 
 			t.Run("subcase=same tokens because session extra changed but claims ignore the extra claims", func(t *testing.T) {
+				t.Parallel()
 				t.Skip("Skipped because cache hit rate is too low, see: https://github.com/ory/oathkeeper/issues/371")
 
 				prev := mutate(t, *session, config)
@@ -311,6 +317,7 @@ func TestMutatorIDToken(t *testing.T) {
 			})
 
 			t.Run("subcase=different tokens because issuer changed", func(t *testing.T) {
+				t.Parallel()
 				prev := mutate(t, *session, config)
 				time.Sleep(time.Second)
 				config, _ := sjson.SetBytes(config, "issuer_url", "/not-baz/not-bar")
@@ -318,6 +325,7 @@ func TestMutatorIDToken(t *testing.T) {
 			})
 
 			t.Run("subcase=different tokens because JWKS source changed", func(t *testing.T) {
+				t.Parallel()
 				prev := mutate(t, *session, config)
 				time.Sleep(time.Second)
 				config, _ := sjson.SetBytes(config, "jwks_url", "file://../../test/stub/jwks-hs.json")
@@ -372,8 +380,7 @@ func TestMutatorIDToken(t *testing.T) {
 			{e: true, i: "http://baz/foo", j: "http://baz/foo", pass: true},
 		} {
 			t.Run(fmt.Sprintf("case=%d", k), func(t *testing.T) {
-				viper.Reset()
-				viper.Set(configuration.ViperKeyMutatorIDTokenIsEnabled, tc.e)
+				conf.SetForTest(t, configuration.MutatorIDTokenIsEnabled, tc.e)
 				err := a.Validate(json.RawMessage(`{"issuer_url":"` + tc.i + `", "jwks_url": "` + tc.j + `"}`))
 				if tc.pass {
 					require.NoError(t, err)
@@ -419,7 +426,7 @@ func BenchmarkMutatorIDToken(b *testing.B) {
 					for i := 0; i < b.N; i++ {
 						tc = tcs[i%len(tcs)]
 						config, _ = sjson.SetBytes(tc.Config, "jwks_url", key)
-						viper.Set("mutators.id_token.config.issuer_url", "/"+issuers[i%len(issuers)])
+						conf.SetForTest(b, "mutators.id_token.config.issuer_url", "/"+issuers[i%len(issuers)])
 
 						b.StartTimer()
 						err := a.Mutate(r, tc.Session, config, rl)

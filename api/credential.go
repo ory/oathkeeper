@@ -43,18 +43,18 @@ func (h *CredentialsHandler) SetRoutes(r *x.RouterAPI) {
 
 // swagger:route GET /.well-known/jwks.json api getWellKnownJSONWebKeys
 //
-// Lists Cryptographic Keys
+// # Lists Cryptographic Keys
 //
 // This endpoint returns cryptographic keys that are required to, for example, verify signatures of ID Tokens.
 //
-//    Produces:
-//    - application/json
+//	Produces:
+//	- application/json
 //
-//    Schemes: http, https
+//	Schemes: http, https
 //
-//    Responses:
-//      200: jsonWebKeySet
-//      500: genericError
+//	Responses:
+//	  200: jsonWebKeySet
+//	  500: genericError
 func (h *CredentialsHandler) wellKnown(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	urls, err := h.jwksURLs()
 	if err != nil {
