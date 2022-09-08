@@ -5,7 +5,8 @@
 
 **Table of Contents**
 
-- [0.0.0 (2022-08-31)](#000-2022-08-31)
+- [0.0.0 (2022-09-08)](#000-2022-09-08)
+  - [Code Refactoring](#code-refactoring)
 - [0.39.4 (2022-08-31)](#0394-2022-08-31)
   - [Code Generation](#code-generation)
   - [Unclassified](#unclassified)
@@ -39,7 +40,7 @@
 - [0.38.20-beta.1 (2022-02-14)](#03820-beta1-2022-02-14)
   - [Bug Fixes](#bug-fixes-4)
   - [Code Generation](#code-generation-9)
-  - [Code Refactoring](#code-refactoring)
+  - [Code Refactoring](#code-refactoring-1)
   - [Documentation](#documentation-2)
   - [Features](#features-4)
 - [0.38.19-beta.1 (2022-02-04)](#03819-beta1-2022-02-04)
@@ -80,7 +81,7 @@
 - [0.38.10-beta.2 (2021-05-05)](#03810-beta2-2021-05-05)
   - [Bug Fixes](#bug-fixes-11)
   - [Code Generation](#code-generation-16)
-  - [Code Refactoring](#code-refactoring-1)
+  - [Code Refactoring](#code-refactoring-2)
   - [Documentation](#documentation-7)
   - [Features](#features-10)
 - [0.38.9-beta.1 (2021-03-17)](#0389-beta1-2021-03-17)
@@ -134,7 +135,7 @@
 - [0.38.0-beta.2 (2020-05-07)](#0380-beta2-2020-05-07)
   - [Bug Fixes](#bug-fixes-21)
   - [Chores](#chores-2)
-  - [Code Refactoring](#code-refactoring-2)
+  - [Code Refactoring](#code-refactoring-3)
   - [Documentation](#documentation-13)
   - [Features](#features-17)
 - [0.37.1-beta.1 (2020-04-03)](#0371-beta1-2020-04-03)
@@ -297,7 +298,15 @@
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-# [0.0.0](https://github.com/ory/oathkeeper/compare/v0.39.4...v0.0.0) (2022-08-31)
+# [0.0.0](https://github.com/ory/oathkeeper/compare/v0.39.4...v0.0.0) (2022-09-08)
+
+### Code Refactoring
+
+- Use koanf configuration system
+  ([#999](https://github.com/ory/oathkeeper/issues/999))
+  ([6bac536](https://github.com/ory/oathkeeper/commit/6bac5365611039e2904a596d186d931d75d9ad59)):
+
+  Closes https://github.com/ory/oathkeeper/issues/757
 
 # [0.39.4](https://github.com/ory/oathkeeper/compare/v0.39.3...v0.39.4) (2022-08-31)
 
