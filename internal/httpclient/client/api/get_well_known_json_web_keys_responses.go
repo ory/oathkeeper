@@ -45,8 +45,7 @@ func NewGetWellKnownJSONWebKeysOK() *GetWellKnownJSONWebKeysOK {
 	return &GetWellKnownJSONWebKeysOK{}
 }
 
-/*
-GetWellKnownJSONWebKeysOK describes a response with status code 200, with default header values.
+/* GetWellKnownJSONWebKeysOK describes a response with status code 200, with default header values.
 
 jsonWebKeySet
 */
@@ -108,8 +107,7 @@ func NewGetWellKnownJSONWebKeysInternalServerError() *GetWellKnownJSONWebKeysInt
 	return &GetWellKnownJSONWebKeysInternalServerError{}
 }
 
-/*
-GetWellKnownJSONWebKeysInternalServerError describes a response with status code 500, with default header values.
+/* GetWellKnownJSONWebKeysInternalServerError describes a response with status code 500, with default header values.
 
 genericError
 */
