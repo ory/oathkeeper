@@ -100,7 +100,10 @@ func (a *AuthenticatorOAuth2ClientCredentials) Config(config json.RawMessage) (*
 		return nil, err
 	}
 	timeout := time.Millisecond * duration
-	a.client = httpx.NewResilientClientLatencyToleranceConfigurable(nil, timeout, maxWait)
+	a.client = httpx.NewResilientClient(
+		httpx.ResilientClientWithMaxRetryWait(maxWait),
+		httpx.ResilientClientWithConnectionTimeout(timeout),
+	).StandardClient()
 
 	if c.Cache.TTL != "" {
 		cacheTTL, err := time.ParseDuration(c.Cache.TTL)

@@ -35,7 +35,6 @@ func (o *IsInstanceReadyReader) ReadResponse(response runtime.ClientResponse, co
 			return nil, err
 		}
 		return nil, result
-
 	default:
 		return nil, runtime.NewAPIError("response status code does not match any response statuses defined for this endpoint in the swagger spec", response, response.Code())
 	}
@@ -46,7 +45,7 @@ func NewIsInstanceReadyOK() *IsInstanceReadyOK {
 	return &IsInstanceReadyOK{}
 }
 
-/*IsInstanceReadyOK handles this case with default header values.
+/* IsInstanceReadyOK describes a response with status code 200, with default header values.
 
 healthStatus
 */
@@ -54,7 +53,36 @@ type IsInstanceReadyOK struct {
 	Payload *models.HealthStatus
 }
 
+// IsSuccess returns true when this is instance ready o k response has a 2xx status code
+func (o *IsInstanceReadyOK) IsSuccess() bool {
+	return true
+}
+
+// IsRedirect returns true when this is instance ready o k response has a 3xx status code
+func (o *IsInstanceReadyOK) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this is instance ready o k response has a 4xx status code
+func (o *IsInstanceReadyOK) IsClientError() bool {
+	return false
+}
+
+// IsServerError returns true when this is instance ready o k response has a 5xx status code
+func (o *IsInstanceReadyOK) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this is instance ready o k response a status code equal to that given
+func (o *IsInstanceReadyOK) IsCode(code int) bool {
+	return code == 200
+}
+
 func (o *IsInstanceReadyOK) Error() string {
+	return fmt.Sprintf("[GET /health/ready][%d] isInstanceReadyOK  %+v", 200, o.Payload)
+}
+
+func (o *IsInstanceReadyOK) String() string {
 	return fmt.Sprintf("[GET /health/ready][%d] isInstanceReadyOK  %+v", 200, o.Payload)
 }
 
@@ -79,7 +107,7 @@ func NewIsInstanceReadyServiceUnavailable() *IsInstanceReadyServiceUnavailable {
 	return &IsInstanceReadyServiceUnavailable{}
 }
 
-/*IsInstanceReadyServiceUnavailable handles this case with default header values.
+/* IsInstanceReadyServiceUnavailable describes a response with status code 503, with default header values.
 
 healthNotReadyStatus
 */
@@ -87,7 +115,36 @@ type IsInstanceReadyServiceUnavailable struct {
 	Payload *models.HealthNotReadyStatus
 }
 
+// IsSuccess returns true when this is instance ready service unavailable response has a 2xx status code
+func (o *IsInstanceReadyServiceUnavailable) IsSuccess() bool {
+	return false
+}
+
+// IsRedirect returns true when this is instance ready service unavailable response has a 3xx status code
+func (o *IsInstanceReadyServiceUnavailable) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this is instance ready service unavailable response has a 4xx status code
+func (o *IsInstanceReadyServiceUnavailable) IsClientError() bool {
+	return false
+}
+
+// IsServerError returns true when this is instance ready service unavailable response has a 5xx status code
+func (o *IsInstanceReadyServiceUnavailable) IsServerError() bool {
+	return true
+}
+
+// IsCode returns true when this is instance ready service unavailable response a status code equal to that given
+func (o *IsInstanceReadyServiceUnavailable) IsCode(code int) bool {
+	return code == 503
+}
+
 func (o *IsInstanceReadyServiceUnavailable) Error() string {
+	return fmt.Sprintf("[GET /health/ready][%d] isInstanceReadyServiceUnavailable  %+v", 503, o.Payload)
+}
+
+func (o *IsInstanceReadyServiceUnavailable) String() string {
 	return fmt.Sprintf("[GET /health/ready][%d] isInstanceReadyServiceUnavailable  %+v", 503, o.Payload)
 }
 

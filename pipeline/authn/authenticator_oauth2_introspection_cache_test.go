@@ -1,6 +1,7 @@
 package authn
 
 import (
+	"context"
 	"testing"
 	"time"
 
@@ -9,18 +10,22 @@ import (
 
 	"github.com/ory/fosite"
 	"github.com/ory/oathkeeper/driver/configuration"
-	"github.com/ory/viper"
+	"github.com/ory/x/configx"
 	"github.com/ory/x/logrusx"
 )
 
 func TestCache(t *testing.T) {
-	viper.Reset()
-
-	viper.Set("authenticators.oauth2_introspection.config.cache.enabled", true)
-	viper.Set("authenticators.oauth2_introspection.config.introspection_url", "http://localhost:8080/")
-
 	logger := logrusx.New("", "")
-	c := configuration.NewViperProvider(logger)
+	c, err := configuration.NewKoanfProvider(
+		context.Background(),
+		nil,
+		logger,
+		configx.WithValues(map[string]interface{}{
+			"authenticators.oauth2_introspection.config.cache.enabled":     true,
+			"authenticators.oauth2_introspection.config.introspection_url": "http://localhost:8080/",
+		}))
+	require.NoError(t, err)
+
 	a := NewAuthenticatorOAuth2Introspection(c, logger)
 	assert.Equal(t, "oauth2_introspection", a.GetID())
 

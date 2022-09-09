@@ -41,7 +41,6 @@ func (o *GetRuleReader) ReadResponse(response runtime.ClientResponse, consumer r
 			return nil, err
 		}
 		return nil, result
-
 	default:
 		return nil, runtime.NewAPIError("response status code does not match any response statuses defined for this endpoint in the swagger spec", response, response.Code())
 	}
@@ -52,7 +51,7 @@ func NewGetRuleOK() *GetRuleOK {
 	return &GetRuleOK{}
 }
 
-/*GetRuleOK handles this case with default header values.
+/* GetRuleOK describes a response with status code 200, with default header values.
 
 A rule
 */
@@ -60,7 +59,36 @@ type GetRuleOK struct {
 	Payload *models.Rule
 }
 
+// IsSuccess returns true when this get rule o k response has a 2xx status code
+func (o *GetRuleOK) IsSuccess() bool {
+	return true
+}
+
+// IsRedirect returns true when this get rule o k response has a 3xx status code
+func (o *GetRuleOK) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this get rule o k response has a 4xx status code
+func (o *GetRuleOK) IsClientError() bool {
+	return false
+}
+
+// IsServerError returns true when this get rule o k response has a 5xx status code
+func (o *GetRuleOK) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this get rule o k response a status code equal to that given
+func (o *GetRuleOK) IsCode(code int) bool {
+	return code == 200
+}
+
 func (o *GetRuleOK) Error() string {
+	return fmt.Sprintf("[GET /rules/{id}][%d] getRuleOK  %+v", 200, o.Payload)
+}
+
+func (o *GetRuleOK) String() string {
 	return fmt.Sprintf("[GET /rules/{id}][%d] getRuleOK  %+v", 200, o.Payload)
 }
 
@@ -85,7 +113,7 @@ func NewGetRuleNotFound() *GetRuleNotFound {
 	return &GetRuleNotFound{}
 }
 
-/*GetRuleNotFound handles this case with default header values.
+/* GetRuleNotFound describes a response with status code 404, with default header values.
 
 genericError
 */
@@ -93,7 +121,36 @@ type GetRuleNotFound struct {
 	Payload *models.GenericError
 }
 
+// IsSuccess returns true when this get rule not found response has a 2xx status code
+func (o *GetRuleNotFound) IsSuccess() bool {
+	return false
+}
+
+// IsRedirect returns true when this get rule not found response has a 3xx status code
+func (o *GetRuleNotFound) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this get rule not found response has a 4xx status code
+func (o *GetRuleNotFound) IsClientError() bool {
+	return true
+}
+
+// IsServerError returns true when this get rule not found response has a 5xx status code
+func (o *GetRuleNotFound) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this get rule not found response a status code equal to that given
+func (o *GetRuleNotFound) IsCode(code int) bool {
+	return code == 404
+}
+
 func (o *GetRuleNotFound) Error() string {
+	return fmt.Sprintf("[GET /rules/{id}][%d] getRuleNotFound  %+v", 404, o.Payload)
+}
+
+func (o *GetRuleNotFound) String() string {
 	return fmt.Sprintf("[GET /rules/{id}][%d] getRuleNotFound  %+v", 404, o.Payload)
 }
 
@@ -118,7 +175,7 @@ func NewGetRuleInternalServerError() *GetRuleInternalServerError {
 	return &GetRuleInternalServerError{}
 }
 
-/*GetRuleInternalServerError handles this case with default header values.
+/* GetRuleInternalServerError describes a response with status code 500, with default header values.
 
 genericError
 */
@@ -126,7 +183,36 @@ type GetRuleInternalServerError struct {
 	Payload *models.GenericError
 }
 
+// IsSuccess returns true when this get rule internal server error response has a 2xx status code
+func (o *GetRuleInternalServerError) IsSuccess() bool {
+	return false
+}
+
+// IsRedirect returns true when this get rule internal server error response has a 3xx status code
+func (o *GetRuleInternalServerError) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this get rule internal server error response has a 4xx status code
+func (o *GetRuleInternalServerError) IsClientError() bool {
+	return false
+}
+
+// IsServerError returns true when this get rule internal server error response has a 5xx status code
+func (o *GetRuleInternalServerError) IsServerError() bool {
+	return true
+}
+
+// IsCode returns true when this get rule internal server error response a status code equal to that given
+func (o *GetRuleInternalServerError) IsCode(code int) bool {
+	return code == 500
+}
+
 func (o *GetRuleInternalServerError) Error() string {
+	return fmt.Sprintf("[GET /rules/{id}][%d] getRuleInternalServerError  %+v", 500, o.Payload)
+}
+
+func (o *GetRuleInternalServerError) String() string {
 	return fmt.Sprintf("[GET /rules/{id}][%d] getRuleInternalServerError  %+v", 500, o.Payload)
 }
 

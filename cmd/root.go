@@ -23,21 +23,23 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"runtime"
 
 	"github.com/gobuffalo/packr/v2"
 	"github.com/spf13/cobra"
+
+	"github.com/ory/x/configx"
 
 	"github.com/ory/x/logrusx"
 
 	_ "github.com/ory/jsonschema/v3/fileloader"
 	_ "github.com/ory/jsonschema/v3/httploader"
-
-	"github.com/ory/x/viperx"
 )
 
 var logger *logrusx.Logger
 
 var schemas = packr.New("schemas", "../.schema")
+var ConfigFlag string
 
 // RootCmd represents the base command when called without any subcommands
 var RootCmd = &cobra.Command{
@@ -54,14 +56,17 @@ func Execute() {
 	}
 }
 
-func watchAndValidateViper() {
-	schema, err := schemas.Find("config.schema.json")
-	if err != nil {
-		logger.WithError(err).Fatal("Unable to open configuration JSON Schema.")
-	}
-	viperx.WatchAndValidateViper(logger, schema, "ORY Oathkeeper", []string{"serve", "profiling", "log"}, "")
+func init() {
+	configx.RegisterFlags(RootCmd.PersistentFlags())
 }
 
-func init() {
-	viperx.RegisterConfigFlag(RootCmd, "oathkeeper")
+func userHomeDir() string {
+	if runtime.GOOS == "windows" {
+		home := os.Getenv("HOMEDRIVE") + os.Getenv("HOMEPATH")
+		if home == "" {
+			home = os.Getenv("USERPROFILE")
+		}
+		return home
+	}
+	return os.Getenv("HOME")
 }

@@ -35,7 +35,6 @@ func (o *IsInstanceAliveReader) ReadResponse(response runtime.ClientResponse, co
 			return nil, err
 		}
 		return nil, result
-
 	default:
 		return nil, runtime.NewAPIError("response status code does not match any response statuses defined for this endpoint in the swagger spec", response, response.Code())
 	}
@@ -46,7 +45,7 @@ func NewIsInstanceAliveOK() *IsInstanceAliveOK {
 	return &IsInstanceAliveOK{}
 }
 
-/*IsInstanceAliveOK handles this case with default header values.
+/* IsInstanceAliveOK describes a response with status code 200, with default header values.
 
 healthStatus
 */
@@ -54,7 +53,36 @@ type IsInstanceAliveOK struct {
 	Payload *models.HealthStatus
 }
 
+// IsSuccess returns true when this is instance alive o k response has a 2xx status code
+func (o *IsInstanceAliveOK) IsSuccess() bool {
+	return true
+}
+
+// IsRedirect returns true when this is instance alive o k response has a 3xx status code
+func (o *IsInstanceAliveOK) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this is instance alive o k response has a 4xx status code
+func (o *IsInstanceAliveOK) IsClientError() bool {
+	return false
+}
+
+// IsServerError returns true when this is instance alive o k response has a 5xx status code
+func (o *IsInstanceAliveOK) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this is instance alive o k response a status code equal to that given
+func (o *IsInstanceAliveOK) IsCode(code int) bool {
+	return code == 200
+}
+
 func (o *IsInstanceAliveOK) Error() string {
+	return fmt.Sprintf("[GET /health/alive][%d] isInstanceAliveOK  %+v", 200, o.Payload)
+}
+
+func (o *IsInstanceAliveOK) String() string {
 	return fmt.Sprintf("[GET /health/alive][%d] isInstanceAliveOK  %+v", 200, o.Payload)
 }
 
@@ -79,7 +107,7 @@ func NewIsInstanceAliveInternalServerError() *IsInstanceAliveInternalServerError
 	return &IsInstanceAliveInternalServerError{}
 }
 
-/*IsInstanceAliveInternalServerError handles this case with default header values.
+/* IsInstanceAliveInternalServerError describes a response with status code 500, with default header values.
 
 genericError
 */
@@ -87,7 +115,36 @@ type IsInstanceAliveInternalServerError struct {
 	Payload *models.GenericError
 }
 
+// IsSuccess returns true when this is instance alive internal server error response has a 2xx status code
+func (o *IsInstanceAliveInternalServerError) IsSuccess() bool {
+	return false
+}
+
+// IsRedirect returns true when this is instance alive internal server error response has a 3xx status code
+func (o *IsInstanceAliveInternalServerError) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this is instance alive internal server error response has a 4xx status code
+func (o *IsInstanceAliveInternalServerError) IsClientError() bool {
+	return false
+}
+
+// IsServerError returns true when this is instance alive internal server error response has a 5xx status code
+func (o *IsInstanceAliveInternalServerError) IsServerError() bool {
+	return true
+}
+
+// IsCode returns true when this is instance alive internal server error response a status code equal to that given
+func (o *IsInstanceAliveInternalServerError) IsCode(code int) bool {
+	return code == 500
+}
+
 func (o *IsInstanceAliveInternalServerError) Error() string {
+	return fmt.Sprintf("[GET /health/alive][%d] isInstanceAliveInternalServerError  %+v", 500, o.Payload)
+}
+
+func (o *IsInstanceAliveInternalServerError) String() string {
 	return fmt.Sprintf("[GET /health/alive][%d] isInstanceAliveInternalServerError  %+v", 500, o.Payload)
 }
 

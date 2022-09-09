@@ -34,7 +34,6 @@
         "type": "string"
       },
       "Upstream": {
-        "description": "Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream upstream",
         "properties": {
           "preserve_host": {
             "description": "PreserveHost, if false (the default), tells ORY Oathkeeper to set the upstream request's Host header to the\nhostname of the API's upstream's URL. Setting this flag to true instructs ORY Oathkeeper not to do so.",
@@ -52,35 +51,29 @@
         "type": "object"
       },
       "genericError": {
-        "description": "GenericError GenericError The standard error format",
+        "description": "The standard error format",
         "properties": {
           "code": {
-            "description": "code",
             "format": "int64",
             "type": "integer"
           },
           "details": {
-            "description": "details",
             "items": {
-              "additionalProperties": true,
+              "additionalProperties": {},
               "type": "object"
             },
             "type": "array"
           },
           "message": {
-            "description": "message",
             "type": "string"
           },
           "reason": {
-            "description": "reason",
             "type": "string"
           },
           "request": {
-            "description": "request",
             "type": "string"
           },
           "status": {
-            "description": "status",
             "type": "string"
           }
         },
@@ -108,34 +101,27 @@
         "type": "object"
       },
       "jsonWebKey": {
-        "description": "JSONWebKey JSONWebKey json web key",
         "properties": {
           "alg": {
             "description": "The \"alg\" (algorithm) parameter identifies the algorithm intended for\nuse with the key.  The values used should either be registered in the\nIANA \"JSON Web Signature and Encryption Algorithms\" registry\nestablished by [JWA] or be a value that contains a Collision-\nResistant Name.",
             "type": "string"
           },
           "crv": {
-            "description": "crv",
             "type": "string"
           },
           "d": {
-            "description": "d",
             "type": "string"
           },
           "dp": {
-            "description": "dp",
             "type": "string"
           },
           "dq": {
-            "description": "dq",
             "type": "string"
           },
           "e": {
-            "description": "e",
             "type": "string"
           },
           "k": {
-            "description": "k",
             "type": "string"
           },
           "kid": {
@@ -147,19 +133,15 @@
             "type": "string"
           },
           "n": {
-            "description": "n",
             "type": "string"
           },
           "p": {
-            "description": "p",
             "type": "string"
           },
           "q": {
-            "description": "q",
             "type": "string"
           },
           "qi": {
-            "description": "qi",
             "type": "string"
           },
           "use": {
@@ -167,7 +149,6 @@
             "type": "string"
           },
           "x": {
-            "description": "x",
             "type": "string"
           },
           "x5c": {
@@ -178,14 +159,12 @@
             "type": "array"
           },
           "y": {
-            "description": "y",
             "type": "string"
           }
         },
         "type": "object"
       },
       "jsonWebKeySet": {
-        "description": "JSONWebKeySet json web key set",
         "properties": {
           "keys": {
             "description": "The value of the \"keys\" parameter is an array of JWK values.  By\ndefault, the order of the JWK values within the array does not imply\nan order of preference among them, although applications of JWK Sets\ncan choose to assign a meaning to the order for their purposes, if\ndesired.",
@@ -235,11 +214,9 @@
         "type": "object"
       },
       "ruleHandler": {
-        "description": "RuleHandler rule handler",
         "properties": {
           "config": {
-            "description": "Config contains the configuration for the handler. Please read the user\nguide for a complete list of each handler's available settings.",
-            "type": "object"
+            "description": "Config contains the configuration for the handler. Please read the user\nguide for a complete list of each handler's available settings."
           },
           "handler": {
             "description": "Handler identifies the implementation which will be used to handle this specific request. Please read the user\nguide for a complete list of available handlers.",
@@ -249,7 +226,6 @@
         "type": "object"
       },
       "ruleMatch": {
-        "description": "RuleMatch RuleMatch RuleMatch RuleMatch rule match",
         "properties": {
           "methods": {
             "description": "An array of HTTP methods (e.g. GET, POST, PUT, DELETE, ...). When ORY Oathkeeper searches for rules\nto decide what to do with an incoming request to the proxy server, it compares the HTTP method of the incoming\nrequest with the HTTP methods of each rules. If a match is found, the rule is considered a partial match.\nIf the matchesUrl field is satisfied as well, the rule is considered a full match.",
@@ -315,7 +291,7 @@
             "description": "genericError"
           }
         },
-        "summary": "Lists Cryptographic Keys",
+        "summary": "# Lists Cryptographic Keys",
         "tags": ["api"]
       }
     },
@@ -368,7 +344,7 @@
             "description": "genericError"
           }
         },
-        "summary": "Access Control Decision API",
+        "summary": "# Access Control Decision API",
         "tags": ["api"]
       }
     },
@@ -495,7 +471,7 @@
             "description": "genericError"
           }
         },
-        "summary": "List All Rules",
+        "summary": "# List All Rules",
         "tags": ["api"]
       }
     },
@@ -538,7 +514,7 @@
             "description": "genericError"
           }
         },
-        "summary": "Retrieve a Rule",
+        "summary": "# Retrieve a Rule",
         "tags": ["api"]
       }
     },

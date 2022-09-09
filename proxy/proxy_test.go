@@ -32,17 +32,14 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/ory/viper"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/internal"
 	"github.com/ory/oathkeeper/proxy"
-	"github.com/ory/oathkeeper/x"
-
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
-
 	"github.com/ory/oathkeeper/rule"
+	"github.com/ory/oathkeeper/x"
 )
 
 func TestProxy(t *testing.T) {
@@ -61,13 +58,13 @@ func TestProxy(t *testing.T) {
 	ts := httptest.NewServer(&httputil.ReverseProxy{Director: d.Director, Transport: d})
 	defer ts.Close()
 
-	viper.Set(configuration.ViperKeyAuthenticatorNoopIsEnabled, true)
-	viper.Set(configuration.ViperKeyAuthenticatorUnauthorizedIsEnabled, true)
-	viper.Set(configuration.ViperKeyAuthenticatorAnonymousIsEnabled, true)
-	viper.Set(configuration.ViperKeyAuthorizerAllowIsEnabled, true)
-	viper.Set(configuration.ViperKeyAuthorizerDenyIsEnabled, true)
-	viper.Set(configuration.ViperKeyMutatorNoopIsEnabled, true)
-	viper.Set(configuration.ViperKeyErrorsWWWAuthenticateIsEnabled, true)
+	conf.SetForTest(t, configuration.AuthenticatorNoopIsEnabled, true)
+	conf.SetForTest(t, configuration.AuthenticatorUnauthorizedIsEnabled, true)
+	conf.SetForTest(t, configuration.AuthenticatorAnonymousIsEnabled, true)
+	conf.SetForTest(t, configuration.AuthorizerAllowIsEnabled, true)
+	conf.SetForTest(t, configuration.AuthorizerDenyIsEnabled, true)
+	conf.SetForTest(t, configuration.MutatorNoopIsEnabled, true)
+	conf.SetForTest(t, configuration.ErrorsWWWAuthenticateIsEnabled, true)
 
 	ruleNoOpAuthenticator := rule.Rule{
 		Match:          &rule.Match{Methods: []string{"GET"}, URL: ts.URL + "/authn-noop/<[0-9]+>"},
@@ -355,10 +352,10 @@ backend_url=%s
 
 			}
 
-			t.Run("regexp", func(t *testing.T) {
+			t.Run("regexp", func(*testing.T) {
 				testFunc(configuration.Regexp, tc.rulesRegexp)
 			})
-			t.Run("glob", func(t *testing.T) {
+			t.Run("glob", func(*testing.T) {
 				testFunc(configuration.Glob, tc.rulesGlob)
 			})
 

@@ -24,6 +24,7 @@ import (
 )
 
 func TestCredentialsIssuerCookies(t *testing.T) {
+	t.Parallel()
 	conf := internal.NewConfigurationWithDefaults()
 	reg := internal.NewRegistry(conf)
 
@@ -206,11 +207,10 @@ func TestCredentialsIssuerCookies(t *testing.T) {
 		})
 
 		t.Run("method=validate", func(t *testing.T) {
-			viper.Set(configuration.ViperKeyMutatorCookieIsEnabled, true)
+			viper.Set(configuration.MutatorCookieIsEnabled, true)
 			require.Error(t, a.Validate(json.RawMessage(`{}`)))
 
-			viper.Reset()
-			viper.Set(configuration.ViperKeyMutatorCookieIsEnabled, false)
+			viper.Set(configuration.MutatorCookieIsEnabled, false)
 			require.Error(t, a.Validate(json.RawMessage(`{"cookies":{}}`)))
 		})
 	})

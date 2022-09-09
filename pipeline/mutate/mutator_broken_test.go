@@ -30,6 +30,7 @@ import (
 )
 
 func TestCredentialsIssuerBroken(t *testing.T) {
+	t.Parallel()
 	a := mutate.NewMutatorBroken(false)
 	assert.Equal(t, "broken", a.GetID())
 

@@ -107,7 +107,12 @@ func NewMutatorHydrator(c configuration.Provider, d mutatorHydratorDependencies)
 		// This is a best-practice value.
 		BufferItems: 64,
 	})
-	return &MutatorHydrator{c: c, d: d, client: httpx.NewResilientClientLatencyToleranceSmall(nil), hydrateCache: cache}
+	return &MutatorHydrator{
+		c:            c,
+		d:            d,
+		client:       httpx.NewResilientClient().StandardClient(),
+		hydrateCache: cache,
+	}
 }
 
 func (a *MutatorHydrator) GetID() string {
@@ -184,7 +189,8 @@ func (a *MutatorHydrator) Mutate(r *http.Request, session *authn.AuthenticationS
 	}
 	req.Header.Set(contentTypeHeaderKey, contentTypeJSONHeaderValue)
 
-	var client http.Client
+	var client *http.Client
+
 	if cfg.Api.Retry != nil {
 		maxRetryDelay := time.Second
 		giveUpAfter := time.Millisecond * 50
@@ -203,7 +209,12 @@ func (a *MutatorHydrator) Mutate(r *http.Request, session *authn.AuthenticationS
 			}
 		}
 
-		client.Transport = httpx.NewResilientRoundTripper(a.client.Transport, maxRetryDelay, giveUpAfter)
+		client = httpx.NewResilientClient(
+			httpx.ResilientClientWithMaxRetryWait(maxRetryDelay),
+			httpx.ResilientClientWithConnectionTimeout(giveUpAfter),
+		).StandardClient()
+	} else {
+		client = http.DefaultClient
 	}
 
 	res, err := client.Do(req.WithContext(r.Context()))
