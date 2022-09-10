@@ -5,7 +5,7 @@
 
 **Table of Contents**
 
-- [0.0.0 (2022-09-08)](#000-2022-09-08)
+- [0.0.0 (2022-09-10)](#000-2022-09-10)
   - [Code Refactoring](#code-refactoring)
 - [0.39.4 (2022-08-31)](#0394-2022-08-31)
   - [Code Generation](#code-generation)
@@ -298,7 +298,7 @@
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-# [0.0.0](https://github.com/ory/oathkeeper/compare/v0.39.4...v0.0.0) (2022-09-08)
+# [0.0.0](https://github.com/ory/oathkeeper/compare/v0.39.4...v0.0.0) (2022-09-10)
 
 ### Code Refactoring
 
