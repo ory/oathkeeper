@@ -22,12 +22,14 @@ package cmd
 
 import (
 	"fmt"
+	"os"
+	"runtime"
+
+	"github.com/spf13/cobra"
+
 	_ "github.com/ory/jsonschema/v3/fileloader"
 	_ "github.com/ory/jsonschema/v3/httploader"
 	"github.com/ory/x/configx"
-	"github.com/spf13/cobra"
-	"os"
-	"runtime"
 )
 
 // RootCmd represents the base command when called without any subcommands
