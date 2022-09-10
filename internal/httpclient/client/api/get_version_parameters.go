@@ -52,12 +52,10 @@ func NewGetVersionParamsWithHTTPClient(client *http.Client) *GetVersionParams {
 	}
 }
 
-/*
-GetVersionParams contains all the parameters to send to the API endpoint
+/* GetVersionParams contains all the parameters to send to the API endpoint
+   for the get version operation.
 
-	for the get version operation.
-
-	Typically these are written to a http.Request.
+   Typically these are written to a http.Request.
 */
 type GetVersionParams struct {
 	timeout    time.Duration

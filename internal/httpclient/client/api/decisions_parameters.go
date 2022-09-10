@@ -52,12 +52,10 @@ func NewDecisionsParamsWithHTTPClient(client *http.Client) *DecisionsParams {
 	}
 }
 
-/*
-DecisionsParams contains all the parameters to send to the API endpoint
+/* DecisionsParams contains all the parameters to send to the API endpoint
+   for the decisions operation.
 
-	for the decisions operation.
-
-	Typically these are written to a http.Request.
+   Typically these are written to a http.Request.
 */
 type DecisionsParams struct {
 	timeout    time.Duration
