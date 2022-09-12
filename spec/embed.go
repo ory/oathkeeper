@@ -1,4 +1,4 @@
-package schema
+package spec
 
 import "embed"
 

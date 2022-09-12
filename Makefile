@@ -8,7 +8,6 @@ GO_DEPENDENCIES = github.com/ory/go-acc \
 				  golang.org/x/tools/cmd/goimports \
 				  github.com/go-swagger/go-swagger/cmd/swagger \
 				  github.com/ory/cli \
-				  github.com/gobuffalo/packr/v2/packr2 \
 				  github.com/go-bindata/go-bindata/go-bindata
 
 define make-go-dependency
@@ -58,27 +57,21 @@ sdk: .bin/swagger .bin/ory node_modules
 		make format
 
 .PHONY: install-stable
-install-stable: .bin/packr2
+install-stable:
 		OATHKEEPER_LATEST=$$(git describe --abbrev=0 --tags)
 		git checkout $$OATHKEEPER_LATEST
-		packr2
 		GO111MODULE=on go install \
 				-ldflags "-X github.com/ory/oathkeeper/x.Version=$$OATHKEEPER_LATEST -X github.com/ory/oathkeeper/x.Date=`TZ=UTC date -u '+%Y-%m-%dT%H:%M:%SZ'` -X github.com/ory/oathkeeper/x.Commit=`git rev-parse HEAD`" \
 				.
-		packr2 clean
 		git checkout master
 
 .PHONY: install
-install: .bin/packr2
-		packr2 || (GO111MODULE=on go install github.com/gobuffalo/packr/v2/packr2 && packr2)
+install:
 		GO111MODULE=on go install .
-		packr2 clean
 
 .PHONY: docker
-docker: .bin/packr2
-		packr2 || (GO111MODULE=on go install github.com/gobuffalo/packr/v2/packr2 && packr2)
+docker:
 		CGO_ENABLED=0 GO111MODULE=on GOOS=linux GOARCH=amd64 go build
-		packr2 clean
 		docker build -t oryd/oathkeeper:dev .
 		docker build -t oryd/oathkeeper:dev-alpine -f Dockerfile-alpine .
 		rm oathkeeper

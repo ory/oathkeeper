@@ -25,21 +25,12 @@ import (
 	"os"
 	"runtime"
 
-	"github.com/gobuffalo/packr/v2"
 	"github.com/spf13/cobra"
-
-	"github.com/ory/x/configx"
-
-	"github.com/ory/x/logrusx"
 
 	_ "github.com/ory/jsonschema/v3/fileloader"
 	_ "github.com/ory/jsonschema/v3/httploader"
+	"github.com/ory/x/configx"
 )
-
-var logger *logrusx.Logger
-
-var schemas = packr.New("schemas", "../.schema")
-var ConfigFlag string
 
 // RootCmd represents the base command when called without any subcommands
 var RootCmd = &cobra.Command{
