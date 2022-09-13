@@ -24,7 +24,7 @@ var (
 	// HistogramRequestDuration provides the duration of requests
 	HistogramRequestDuration = prometheus.NewHistogramVec(
 		prometheus.HistogramOpts{
-			Name:    "ory_oathkeeper_request_duration_seconds",
+			Name:    "ory_oathkeeper_requests_duration_seconds",
 			Help:    "Time spent serving requests.",
 			Buckets: prometheus.DefBuckets,
 		},
@@ -58,7 +58,7 @@ func NewConfigurablePrometheusRepository(d driver.Driver, logger *logrusx.Logger
 	)
 	HistogramRequestDuration = prometheus.NewHistogramVec(
 		prometheus.HistogramOpts{
-			Name:    d.Configuration().PrometheusMetricsNamePrefix() + "request_duration_seconds",
+			Name:    d.Configuration().PrometheusMetricsNamePrefix() + "requests_duration_seconds",
 			Help:    "Time spent serving requests.",
 			Buckets: prometheus.DefBuckets,
 		},
