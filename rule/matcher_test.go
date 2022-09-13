@@ -66,6 +66,15 @@ var testRules = []Rule{
 		Mutators:       []Handler{{Handler: "id_token"}},
 		Upstream:       Upstream{URL: "http://localhost:3333/", StripPath: "/foo", PreserveHost: false},
 	},
+	{
+		ID:             "grpc1",
+		Match:          &MatchGRPC{Authority: "<baz|bar>.example.com", FullMethod: "grpc.api/Call"},
+		Description:    "gRPC Rule",
+		Authorizer:     Handler{Handler: "allow", Config: []byte(`{"type":"any"}`)},
+		Authenticators: []Handler{{Handler: "anonymous", Config: []byte(`{"name":"anonymous1"}`)}},
+		Mutators:       []Handler{{Handler: "id_token", Config: []byte(`{"issuer":"anything"}`)}},
+		Upstream:       Upstream{URL: "http://bar.example.com/", PreserveHost: false},
+	},
 }
 
 var testRulesGlob = []Rule{
@@ -96,6 +105,15 @@ var testRulesGlob = []Rule{
 		Mutators:       []Handler{{Handler: "id_token"}},
 		Upstream:       Upstream{URL: "http://localhost:3333/", StripPath: "/foo", PreserveHost: false},
 	},
+	{
+		ID:             "grpc1",
+		Match:          &MatchGRPC{Authority: "<{baz*,bar*}>.example.com", FullMethod: "grpc.api/Call"},
+		Description:    "gRPC Rule",
+		Authorizer:     Handler{Handler: "allow", Config: []byte(`{"type":"any"}`)},
+		Authenticators: []Handler{{Handler: "anonymous", Config: []byte(`{"name":"anonymous1"}`)}},
+		Mutators:       []Handler{{Handler: "id_token", Config: []byte(`{"issuer":"anything"}`)}},
+		Upstream:       Upstream{URL: "http://bar.example.com/", PreserveHost: false},
+	},
 }
 
 func TestMatcher(t *testing.T) {
@@ -104,8 +122,8 @@ func TestMatcher(t *testing.T) {
 		Repository
 	}
 
-	var testMatcher = func(t *testing.T, matcher Matcher, method string, url string, expectErr bool, expect *Rule) {
-		r, err := matcher.Match(context.Background(), method, mustParseURL(t, url), ProtocolHTTP)
+	var testMatcher = func(t *testing.T, matcher Matcher, method string, url string, protocol Protocol, expectErr bool, expect *Rule) {
+		r, err := matcher.Match(context.Background(), method, mustParseURL(t, url), protocol)
 		if expectErr {
 			require.Error(t, err)
 		} else {
@@ -119,17 +137,20 @@ func TestMatcher(t *testing.T) {
 	} {
 		t.Run(fmt.Sprintf("regexp matcher=%s", name), func(t *testing.T) {
 			t.Run("case=empty", func(t *testing.T) {
-				testMatcher(t, matcher, "GET", "https://localhost:34/baz", true, nil)
-				testMatcher(t, matcher, "POST", "https://localhost:1234/foo", true, nil)
-				testMatcher(t, matcher, "DELETE", "https://localhost:1234/foo", true, nil)
+				testMatcher(t, matcher, "GET", "https://localhost:34/baz", ProtocolHTTP, true, nil)
+				testMatcher(t, matcher, "POST", "https://localhost:1234/foo", ProtocolHTTP, true, nil)
+				testMatcher(t, matcher, "DELETE", "https://localhost:1234/foo", ProtocolHTTP, true, nil)
 			})
 
 			require.NoError(t, matcher.Set(context.Background(), testRules))
 
 			t.Run("case=created", func(t *testing.T) {
-				testMatcher(t, matcher, "GET", "https://localhost:34/baz", false, &testRules[1])
-				testMatcher(t, matcher, "POST", "https://localhost:1234/foo", false, &testRules[0])
-				testMatcher(t, matcher, "DELETE", "https://localhost:1234/foo", true, nil)
+				testMatcher(t, matcher, "GET", "https://localhost:34/baz", ProtocolHTTP, false, &testRules[1])
+				testMatcher(t, matcher, "GET", "https://localhost:34/baz", ProtocolGRPC, true, nil)
+				testMatcher(t, matcher, "POST", "https://localhost:1234/foo", ProtocolHTTP, false, &testRules[0])
+				testMatcher(t, matcher, "POST", "https://localhost:1234/foo", ProtocolGRPC, true, nil)
+				testMatcher(t, matcher, "DELETE", "https://localhost:1234/foo", ProtocolHTTP, true, nil)
+				testMatcher(t, matcher, "POST", "grpc://bar.example.com/grpc.api/Call", ProtocolGRPC, false, &testRules[3])
 			})
 
 			t.Run("case=cache", func(t *testing.T) {
@@ -148,26 +169,27 @@ func TestMatcher(t *testing.T) {
 			require.NoError(t, matcher.Set(context.Background(), testRules[1:]))
 
 			t.Run("case=updated", func(t *testing.T) {
-				testMatcher(t, matcher, "GET", "https://localhost:34/baz", false, &testRules[1])
-				testMatcher(t, matcher, "POST", "https://localhost:1234/foo", true, nil)
-				testMatcher(t, matcher, "DELETE", "https://localhost:1234/foo", true, nil)
+				testMatcher(t, matcher, "GET", "https://localhost:34/baz", ProtocolHTTP, false, &testRules[1])
+				testMatcher(t, matcher, "POST", "https://localhost:1234/foo", ProtocolHTTP, true, nil)
+				testMatcher(t, matcher, "DELETE", "https://localhost:1234/foo", ProtocolHTTP, true, nil)
 			})
 		})
 		t.Run(fmt.Sprintf("glob matcher=%s", name), func(t *testing.T) {
 			require.NoError(t, matcher.SetMatchingStrategy(context.Background(), configuration.Glob))
 			require.NoError(t, matcher.Set(context.Background(), []Rule{}))
 			t.Run("case=empty", func(t *testing.T) {
-				testMatcher(t, matcher, "GET", "https://localhost:34/baz", true, nil)
-				testMatcher(t, matcher, "POST", "https://localhost:1234/foo", true, nil)
-				testMatcher(t, matcher, "DELETE", "https://localhost:1234/foo", true, nil)
+				testMatcher(t, matcher, "GET", "https://localhost:34/baz", ProtocolHTTP, true, nil)
+				testMatcher(t, matcher, "POST", "https://localhost:1234/foo", ProtocolHTTP, true, nil)
+				testMatcher(t, matcher, "DELETE", "https://localhost:1234/foo", ProtocolHTTP, true, nil)
 			})
 
 			require.NoError(t, matcher.Set(context.Background(), testRulesGlob))
 
 			t.Run("case=created", func(t *testing.T) {
-				testMatcher(t, matcher, "GET", "https://localhost:34/baz", false, &testRulesGlob[1])
-				testMatcher(t, matcher, "POST", "https://localhost:1234/foo", false, &testRulesGlob[0])
-				testMatcher(t, matcher, "DELETE", "https://localhost:1234/foo", true, nil)
+				testMatcher(t, matcher, "GET", "https://localhost:34/baz", ProtocolHTTP, false, &testRulesGlob[1])
+				testMatcher(t, matcher, "POST", "https://localhost:1234/foo", ProtocolHTTP, false, &testRulesGlob[0])
+				testMatcher(t, matcher, "DELETE", "https://localhost:1234/foo", ProtocolHTTP, true, nil)
+				testMatcher(t, matcher, "POST", "grpc://bar.example.com/grpc.api/Call", ProtocolGRPC, false, &testRulesGlob[3])
 			})
 
 			t.Run("case=cache", func(t *testing.T) {
@@ -181,9 +203,9 @@ func TestMatcher(t *testing.T) {
 			require.NoError(t, matcher.Set(context.Background(), testRulesGlob[1:]))
 
 			t.Run("case=updated", func(t *testing.T) {
-				testMatcher(t, matcher, "GET", "https://localhost:34/baz", false, &testRulesGlob[1])
-				testMatcher(t, matcher, "POST", "https://localhost:1234/foo", true, nil)
-				testMatcher(t, matcher, "DELETE", "https://localhost:1234/foo", true, nil)
+				testMatcher(t, matcher, "GET", "https://localhost:34/baz", ProtocolHTTP, false, &testRulesGlob[1])
+				testMatcher(t, matcher, "POST", "https://localhost:1234/foo", ProtocolHTTP, true, nil)
+				testMatcher(t, matcher, "DELETE", "https://localhost:1234/foo", ProtocolHTTP, true, nil)
 			})
 		})
 	}

@@ -21,6 +21,7 @@
 package rule
 
 import (
+	"encoding/json"
 	"net/url"
 	"strconv"
 	"testing"
@@ -184,6 +185,84 @@ func TestRuleWithCustomMethod(t *testing.T) {
 			matched, err := r.IsMatching(configuration.Regexp, tcase.method, mustParse(t, tcase.url), ProtocolHTTP)
 			assert.Equal(t, tcase.expectedMatch, matched)
 			assert.Equal(t, tcase.expectedErr, err)
+		})
+	}
+}
+
+func TestRule_UnmarshalJSON(t *testing.T) {
+	var tests = []struct {
+		name     string
+		json     string
+		expected Rule
+		err      assert.ErrorAssertionFunc
+	}{
+
+		{name: "unmarshal gRPC match",
+			json: `
+{
+	"id": "123",
+	"description": "description",
+	"authorizers": "nil",
+	"match": { "authority": "example.com", "full_method": "/full/method" }
+}	
+`,
+			expected: Rule{
+				ID:          "123",
+				Description: "description",
+				Match:       &MatchGRPC{Authority: "example.com", FullMethod: "/full/method"},
+			},
+			err: assert.NoError,
+		},
+
+		{name: "unmarshal HTTP match",
+			json: `
+{
+	"id": "123",
+	"description": "description",
+	"authorizers": "nil",
+	"match": { "url": "example.com/some/method", "methods": ["GET", "PUT"] }
+}	
+`,
+			expected: Rule{
+				ID:          "123",
+				Description: "description",
+				Match:       &Match{Methods: []string{"GET", "PUT"}, URL: "example.com/some/method"},
+			},
+			err: assert.NoError,
+		},
+
+		{name: "err on invalid version",
+			json: `
+{
+	"id": "123",
+	"version": "42"
+}
+`,
+			err: assert.Error,
+		},
+
+		{name: "err on invalid match",
+			json: `
+{
+	"id": "123",
+	"description": "description",
+	"authorizers": "nil",
+	"match": { foo }
+}
+`,
+			err: assert.Error,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run("case="+tc.name, func(t *testing.T) {
+			var (
+				actual Rule
+				err    error
+			)
+			err = json.Unmarshal([]byte(tc.json), &actual)
+			assert.Equal(t, tc.expected, actual)
+			tc.err(t, err)
 		})
 	}
 }
