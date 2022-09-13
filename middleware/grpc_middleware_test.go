@@ -356,3 +356,25 @@ func assertErrDenied(t assert.TestingT, err error, _ ...interface{}) bool {
 	assert.Equal(t, codes.Unauthenticated, s.Code())
 	return true
 }
+
+// Test that the middleware config does not read values from the environment.
+func TestMiddleware_EnvironmentIsolation(t *testing.T) {
+	ctx := context.Background()
+	envVals := []string{"true", "false"}
+	for _, envVal := range envVals {
+		t.Run("AUTHENTICATORS_NOOP_ENABLED="+envVal, func(t *testing.T) {
+			t.Setenv("AUTHENTICATORS_NOOP_ENABLED", envVal)
+
+			configFile := writeTestConfig(t, "")
+			configPtr := new(configuration.Provider)
+			_, err := middleware.New(ctx,
+				middleware.WithConfigFile(configFile),
+				middleware.WithConfigProvider(configPtr),
+			)
+			require.NoError(t, err)
+			config := *configPtr
+
+			assert.Falsef(t, config.Get("authenticators.noop.enabled").(bool), "was: %v", config.Get("authenticators.noop.enabled"))
+		})
+	}
+}

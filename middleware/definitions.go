@@ -27,18 +27,14 @@ type (
 	middleware struct{ dependencies }
 
 	options struct {
-		logger       *logrusx.Logger
-		configFile   string
-		registryAddr *driver.Registry
+		logger             *logrusx.Logger
+		configFile         string
+		registryAddr       *driver.Registry
+		configProviderAddr *configuration.Provider
 	}
 
 	Option func(*options)
 )
-
-// WithLogger uses the specified logger in the middleware.
-func WithLogger(l *logrusx.Logger) Option {
-	return func(o *options) { o.logger = l }
-}
 
 // WithConfigFile sets the path to the config file to use for the middleware.
 func WithConfigFile(configFile string) Option {
@@ -61,6 +57,7 @@ func New(ctx context.Context, opts ...Option) (*middleware, error) {
 		configx.WithContext(ctx),
 		configx.WithLogger(o.logger),
 		configx.WithConfigFiles(o.configFile),
+		configx.DisableEnvLoading(),
 	)
 	if err != nil {
 		return nil, errors.WithStack(err)
@@ -69,6 +66,9 @@ func New(ctx context.Context, opts ...Option) (*middleware, error) {
 	r := driver.NewRegistry(c).WithLogger(o.logger).WithBuildInfo(x.Version, x.Commit, x.Date)
 	if o.registryAddr != nil {
 		*o.registryAddr = r
+	}
+	if o.configProviderAddr != nil {
+		*o.configProviderAddr = c
 	}
 
 	m := &middleware{r}
