@@ -48,9 +48,9 @@ type ClientService interface {
 }
 
 /*
-	Decisions accesses control decision API
+  Decisions accesses control decision API
 
-	> This endpoint works with all HTTP Methods (GET, POST, PUT, ...) and matches every path prefixed with /decision.
+  > This endpoint works with all HTTP Methods (GET, POST, PUT, ...) and matches every path prefixed with /decision.
 
 This endpoint mirrors the proxy capability of ORY Oathkeeper's proxy functionality but instead of forwarding the
 request to the upstream server, returns 200 (request should be allowed), 401 (unauthorized), or 403 (forbidden)
@@ -92,9 +92,9 @@ func (a *Client) Decisions(params *DecisionsParams, opts ...ClientOption) (*Deci
 }
 
 /*
-GetRule retrieves a rule
+  GetRule retrieves a rule
 
-Use this method to retrieve a rule from the storage. If it does not exist you will receive a 404 error.
+  Use this method to retrieve a rule from the storage. If it does not exist you will receive a 404 error.
 */
 func (a *Client) GetRule(params *GetRuleParams, opts ...ClientOption) (*GetRuleOK, error) {
 	// TODO: Validate the params before sending
@@ -132,9 +132,9 @@ func (a *Client) GetRule(params *GetRuleParams, opts ...ClientOption) (*GetRuleO
 }
 
 /*
-	GetVersion gets service version
+  GetVersion gets service version
 
-	This endpoint returns the service version typically notated using semantic versioning.
+  This endpoint returns the service version typically notated using semantic versioning.
 
 If the service supports TLS Edge Termination, this endpoint does not require the
 `X-Forwarded-Proto` header to be set.
@@ -178,9 +178,9 @@ func (a *Client) GetVersion(params *GetVersionParams, opts ...ClientOption) (*Ge
 }
 
 /*
-GetWellKnownJSONWebKeys lists cryptographic keys
+  GetWellKnownJSONWebKeys lists cryptographic keys
 
-This endpoint returns cryptographic keys that are required to, for example, verify signatures of ID Tokens.
+  This endpoint returns cryptographic keys that are required to, for example, verify signatures of ID Tokens.
 */
 func (a *Client) GetWellKnownJSONWebKeys(params *GetWellKnownJSONWebKeysParams, opts ...ClientOption) (*GetWellKnownJSONWebKeysOK, error) {
 	// TODO: Validate the params before sending
@@ -218,10 +218,9 @@ func (a *Client) GetWellKnownJSONWebKeys(params *GetWellKnownJSONWebKeysParams, 
 }
 
 /*
-	IsInstanceAlive checks alive status
+  IsInstanceAlive checks alive status
 
-	This endpoint returns a 200 status code when the HTTP server is up running.
-
+  This endpoint returns a 200 status code when the HTTP server is up running.
 This status does currently not include checks whether the database connection is working.
 
 If the service supports TLS Edge Termination, this endpoint does not require the
@@ -266,10 +265,9 @@ func (a *Client) IsInstanceAlive(params *IsInstanceAliveParams, opts ...ClientOp
 }
 
 /*
-	IsInstanceReady checks readiness status
+  IsInstanceReady checks readiness status
 
-	This endpoint returns a 200 status code when the HTTP server is up running and the environment dependencies (e.g.
-
+  This endpoint returns a 200 status code when the HTTP server is up running and the environment dependencies (e.g.
 the database) are responsive as well.
 
 If the service supports TLS Edge Termination, this endpoint does not require the
@@ -314,10 +312,9 @@ func (a *Client) IsInstanceReady(params *IsInstanceReadyParams, opts ...ClientOp
 }
 
 /*
-	ListRules lists all rules
+  ListRules lists all rules
 
-	This method returns an array of all rules that are stored in the backend. This is useful if you want to get a full
-
+  This method returns an array of all rules that are stored in the backend. This is useful if you want to get a full
 view of what rules you have currently in place.
 */
 func (a *Client) ListRules(params *ListRulesParams, opts ...ClientOption) (*ListRulesOK, error) {
