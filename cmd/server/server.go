@@ -62,7 +62,7 @@ func runProxy(d driver.Driver, n *negroni.Negroni, logger *logrusx.Logger, prom 
 		server := graceful.WithDefaults(&http.Server{
 			Addr:         addr,
 			Handler:      n,
-			TLSConfig:    &tls.Config{Certificates: certs, MinVersion: SSL.VersionTLS13},
+			TLSConfig:    &tls.Config{Certificates: certs, MinVersion: tls.VersionTLS13},
 			ReadTimeout:  d.Configuration().ProxyReadTimeout(),
 			WriteTimeout: d.Configuration().ProxyWriteTimeout(),
 			IdleTimeout:  d.Configuration().ProxyIdleTimeout(),
@@ -107,7 +107,7 @@ func runAPI(d driver.Driver, n *negroni.Negroni, logger *logrusx.Logger, prom *m
 		server := graceful.WithDefaults(&http.Server{
 			Addr:         addr,
 			Handler:      n,
-			TLSConfig:    &tls.Config{Certificates: certs, MinVersion: SSL.VersionTLS13},
+			TLSConfig:    &tls.Config{Certificates: certs, MinVersion: tls.VersionTLS13},
 			ReadTimeout:  d.Configuration().APIReadTimeout(),
 			WriteTimeout: d.Configuration().APIWriteTimeout(),
 			IdleTimeout:  d.Configuration().APIIdleTimeout(),
