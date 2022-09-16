@@ -7,8 +7,7 @@
     "fs": false
   },
   "scripts": {
-    "doctoc": "doctoc README.md",
-    "format": "prettier --write ."
+    "doctoc": "doctoc README.md"
   },
   "prettier": "ory-prettier-styles",
   "dependencies": {

@@ -2,7 +2,6 @@ name: Format
 
 on:
   pull_request:
-    types: [opened, reopened]
   push:
 
 jobs:
@@ -10,16 +9,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/setup-go@v2
+      - uses: actions/setup-go@v3
         with:
           go-version: 1.18
-      - id: cache-node
-        uses: actions/cache@v3
-        with:
-          path: node_modules
-          key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
-      - run: npm ci --legacy-peer-deps
-        if: steps.cache-node.outputs.cache-hit != 'true'
       - run: make format
       - name: Indicate formatting issues
         run: git diff HEAD --exit-code --color

@@ -17,8 +17,9 @@ define make-go-dependency
 endef
 $(foreach dep, $(GO_DEPENDENCIES), $(eval $(call make-go-dependency, $(dep))))
 
-node_modules: package.json package-lock.json
-		npm i
+node_modules: package-lock.json
+		npm ci
+		touch node_modules
 
 .bin/clidoc: go.mod
 		go build -o .bin/clidoc ./cmd/clidoc/.
@@ -28,7 +29,7 @@ node_modules: package.json package-lock.json
 format: .bin/goimports node_modules
 		goimports -w --local github.com/ory .
 		gofmt -l -s -w .
-		npm run format
+		npm exec -- prettier --write .
 
 .bin/ory: Makefile
 		bash <(curl https://raw.githubusercontent.com/ory/meta/master/install.sh) -b .bin ory v0.1.22
