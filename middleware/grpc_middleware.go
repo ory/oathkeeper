@@ -108,7 +108,7 @@ func (m *middleware) StreamInterceptor() grpc.StreamServerInterceptor {
 		}
 		log.Debugf("http request: %v", httpReq)
 
-		r, err := m.RuleMatcher().Match(ctx, httpReq.Method, httpReq.URL, rule.ProtocolHTTP)
+		r, err := m.RuleMatcher().Match(ctx, httpReq.Method, httpReq.URL, rule.ProtocolGRPC)
 		if err != nil {
 			log.WithError(err).Warn("could not find a matching rule")
 			return ErrDenied
