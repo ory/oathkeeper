@@ -87,7 +87,7 @@ func (a *AuthorizerRemoteJSON) Authorize(r *http.Request, session *authn.Authent
 		return errors.Wrap(err, "payload is not a JSON text")
 	}
 
-	req, err := http.NewRequest("POST", c.Remote, &body)
+	req, err := http.NewRequestWithContext(r.Context(), "POST", c.Remote, &body)
 	if err != nil {
 		return errors.WithStack(err)
 	}

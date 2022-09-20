@@ -15,6 +15,7 @@ import (
 )
 
 func TestCache(t *testing.T) {
+	t.Parallel()
 	logger := logrusx.New("", "")
 	c, err := configuration.NewKoanfProvider(
 		context.Background(),

@@ -42,6 +42,7 @@ import (
 )
 
 func TestAuthenticatorJWT(t *testing.T) {
+	t.Parallel()
 	keys := []string{
 		"file://../../test/stub/jwks-hs.json",
 		"file://../../test/stub/jwks-rsa-multiple.json",

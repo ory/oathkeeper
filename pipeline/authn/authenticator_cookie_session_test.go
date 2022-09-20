@@ -22,6 +22,7 @@ import (
 )
 
 func TestAuthenticatorCookieSession(t *testing.T) {
+	t.Parallel()
 	conf := internal.NewConfigurationWithDefaults()
 	reg := internal.NewRegistry(conf)
 	session := new(AuthenticationSession)

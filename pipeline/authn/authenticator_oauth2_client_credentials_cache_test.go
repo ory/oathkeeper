@@ -18,6 +18,7 @@ import (
 )
 
 func TestClientCredentialsCache(t *testing.T) {
+	t.Parallel()
 	ts := httptest.NewServer(httprouter.New())
 	t.Cleanup(ts.Close)
 

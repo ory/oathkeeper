@@ -17,6 +17,7 @@ const (
 )
 
 func TestSetHeader(t *testing.T) {
+	t.Parallel()
 	assert := assert.New(t)
 	for k, tc := range []struct {
 		a    *authn.AuthenticationSession
@@ -42,6 +43,7 @@ func TestSetHeader(t *testing.T) {
 }
 
 func TestCopy(t *testing.T) {
+	t.Parallel()
 	assert := assert.New(t)
 	original := &authn.AuthenticationSession{
 		Subject: "ab",
