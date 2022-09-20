@@ -82,6 +82,10 @@ func NewFetcherDefault(
 	}
 }
 
+func (f *FetcherDefault) SetURLMux(mux *blob.URLMux) {
+	f.mux = mux
+}
+
 func (f *FetcherDefault) configUpdate(ctx context.Context, watcher *fsnotify.Watcher, replace []url.URL, events chan event) error {
 	var directoriesToWatch []string
 	var filesBeingWatched []string

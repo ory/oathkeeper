@@ -20,8 +20,16 @@
 
 package rule
 
-import "context"
+import (
+	"context"
+
+	"gocloud.dev/blob"
+)
 
 type Fetcher interface {
 	Watch(ctx context.Context) error
+}
+
+type URLMuxSetter interface {
+	SetURLMux(mux *blob.URLMux)
 }

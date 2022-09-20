@@ -66,23 +66,31 @@ type FetcherDefault struct {
 	mux         *blob.URLMux
 }
 
+type FetcherOption func(f *FetcherDefault)
+
+func WithURLMux(mux *blob.URLMux) FetcherOption {
+	return func(f *FetcherDefault) { f.mux = mux }
+}
+
 // NewFetcherDefault returns a new JWKS Fetcher with:
 //
 //   - cancelAfter: If reached, the fetcher will stop waiting for responses and return an error.
 //   - waitForResponse: While the fetcher might stop waiting for responses, we will give the server more time to respond
 //     and add the keys to the registry unless waitForResponse is reached in which case we'll terminate the request.
-func NewFetcherDefault(l *logrusx.Logger, cancelAfter time.Duration, ttl time.Duration) *FetcherDefault {
-	return &FetcherDefault{
+func NewFetcherDefault(l *logrusx.Logger, cancelAfter time.Duration, ttl time.Duration, opts ...FetcherOption) *FetcherDefault {
+	f := &FetcherDefault{
 		cancelAfter: cancelAfter,
 		l:           l,
 		ttl:         ttl,
 		keys:        make(map[string]jose.JSONWebKeySet),
 		fetchedAt:   make(map[string]time.Time),
-		client: httpx.NewResilientClient(
-			httpx.ResilientClientWithConnectionTimeout(15 * time.Second),
-		).StandardClient(),
-		mux: cloudstorage.NewURLMux(),
+		client:      httpx.NewResilientClient(httpx.ResilientClientWithConnectionTimeout(15 * time.Second)).StandardClient(),
+		mux:         cloudstorage.NewURLMux(),
 	}
+	for _, o := range opts {
+		o(f)
+	}
+	return f
 }
 
 func (s *FetcherDefault) ResolveSets(ctx context.Context, locations []url.URL) ([]jose.JSONWebKeySet, error) {
@@ -200,6 +208,7 @@ func (s *FetcherDefault) resolveAll(done chan struct{}, errs chan error, locatio
 	var wg sync.WaitGroup
 
 	for _, l := range locations {
+		l := l
 		wg.Add(1)
 		go s.resolve(&wg, errs, l)
 	}
