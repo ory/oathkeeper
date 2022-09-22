@@ -36,8 +36,8 @@ const (
 	ErrNoCredentialsProvided            = "No credentials were provided in mutator configuration"
 	contentTypeHeaderKey                = "Content-Type"
 	contentTypeJSONHeaderValue          = "application/json"
-	acceptEncodingHeaderKey							= "Accept-Encoding"
-	acceptEncodingHeaderValue						= "gzip, deflate"
+	acceptEncodingHeaderKey             = "Accept-Encoding"
+	acceptEncodingHeaderValue           = "gzip, deflate"
 )
 
 type MutatorHydrator struct {
@@ -220,7 +220,7 @@ func (a *MutatorHydrator) Mutate(r *http.Request, session *authn.AuthenticationS
 	default:
 		return errors.New(ErrNon200ResponseFromAPI)
 	}
-	
+
 	// Handle compressed data
 	var reader io.ReadCloser
 	switch res.Header.Get("Content-Encoding") {
