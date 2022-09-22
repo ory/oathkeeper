@@ -5,7 +5,6 @@ export PATH := .bin:${PATH}
 export PWD := $(shell pwd)
 
 GO_DEPENDENCIES = github.com/ory/go-acc \
-				  golang.org/x/tools/cmd/goimports \
 				  github.com/go-swagger/go-swagger/cmd/swagger \
 				  github.com/ory/cli \
 				  github.com/go-bindata/go-bindata/go-bindata
@@ -17,18 +16,22 @@ define make-go-dependency
 endef
 $(foreach dep, $(GO_DEPENDENCIES), $(eval $(call make-go-dependency, $(dep))))
 
-node_modules: package.json package-lock.json
-		npm i
+node_modules: package-lock.json
+		npm ci
+		touch node_modules
 
 .bin/clidoc: go.mod
 		go build -o .bin/clidoc ./cmd/clidoc/.
+
+.bin/goimports: Makefile
+	GOBIN=$(shell pwd)/.bin go install golang.org/x/tools/cmd/goimports@latest
 
 # Formats the code
 .PHONY: format
 format: .bin/goimports node_modules
 		goimports -w --local github.com/ory .
 		gofmt -l -s -w .
-		npm run format
+		npm exec -- prettier --write .
 
 .bin/ory: Makefile
 		bash <(curl https://raw.githubusercontent.com/ory/meta/master/install.sh) -b .bin ory v0.1.22
@@ -54,7 +57,7 @@ sdk: .bin/swagger .bin/ory node_modules
 
 		swagger generate client -f ./spec/swagger.json -t internal/httpclient -A Ory_Oathkeeper
 
-		make format
+		make --no-print-dir format
 
 .PHONY: install-stable
 install-stable:
