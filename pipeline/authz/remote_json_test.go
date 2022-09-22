@@ -3,10 +3,11 @@ package authz_test
 import (
 	"context"
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -91,7 +92,7 @@ func TestAuthorizerRemoteJSONAuthorize(t *testing.T) {
 					assert.Contains(t, r.Header["Content-Type"], "application/json")
 					assert.Contains(t, r.Header, "Authorization")
 					assert.Contains(t, r.Header["Authorization"], "Bearer token")
-					body, err := ioutil.ReadAll(r.Body)
+					body, err := io.ReadAll(r.Body)
 					require.NoError(t, err)
 					assert.Equal(t, string(body), "{}")
 					w.WriteHeader(http.StatusOK)
@@ -128,7 +129,7 @@ func TestAuthorizerRemoteJSONAuthorize(t *testing.T) {
 			name: "authentication session",
 			setup: func(t *testing.T) *httptest.Server {
 				return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-					body, err := ioutil.ReadAll(r.Body)
+					body, err := io.ReadAll(r.Body)
 					require.NoError(t, err)
 					assert.Equal(t, string(body), `{"subject":"alice","extra":"bar","match":"baz"}`)
 					w.WriteHeader(http.StatusOK)
@@ -147,7 +148,7 @@ func TestAuthorizerRemoteJSONAuthorize(t *testing.T) {
 			name: "json array",
 			setup: func(t *testing.T) *httptest.Server {
 				return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-					body, err := ioutil.ReadAll(r.Body)
+					body, err := io.ReadAll(r.Body)
 					require.NoError(t, err)
 					assert.Equal(t, string(body), `["foo","bar"]`)
 					w.WriteHeader(http.StatusOK)
@@ -168,17 +169,16 @@ func TestAuthorizerRemoteJSONAuthorize(t *testing.T) {
 			}
 
 			l := logrusx.New("", "")
-			p, err := configuration.NewKoanfProvider(
-				context.Background(), nil, l)
+			p, err := configuration.NewKoanfProvider(context.Background(), nil, l)
 			if err != nil {
 				l.WithError(err).Fatal("Failed to initialize configuration")
 			}
 			a := NewAuthorizerRemoteJSON(p)
-			r := &http.Request{
-				Header: map[string][]string{
-					"Authorization": {"Bearer token"},
-				},
-			}
+			ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
+			defer cancel()
+			r, err := http.NewRequestWithContext(ctx, "", "", nil)
+			require.NoError(t, err)
+			r.Header = map[string][]string{"Authorization": {"Bearer token"}}
 			if err := a.Authorize(r, tt.session, tt.config, &rule.Rule{}); (err != nil) != tt.wantErr {
 				t.Errorf("Authorize() error = %v, wantErr %v", err, tt.wantErr)
 			}
@@ -249,7 +249,9 @@ func TestAuthorizerRemoteJSONValidate(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
+		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			p, err := configuration.NewKoanfProvider(
 				context.Background(), nil, logrusx.New("", ""),
 				configx.SkipValidation(),

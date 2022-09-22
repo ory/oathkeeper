@@ -51,6 +51,7 @@ func authOkDynamic(u string) *http.Request {
 }
 
 func TestAuthenticatorOAuth2ClientCredentials(t *testing.T) {
+	t.Parallel()
 	conf := internal.NewConfigurationWithDefaults(configx.SkipValidation())
 	reg := internal.NewRegistry(conf)
 

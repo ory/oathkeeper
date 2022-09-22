@@ -23,6 +23,7 @@ import (
 )
 
 func TestAuthorizerRemoteAuthorize(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name               string
 		setup              func(t *testing.T) *httptest.Server

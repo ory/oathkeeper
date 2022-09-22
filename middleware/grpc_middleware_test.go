@@ -4,6 +4,7 @@ package middleware_test
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"io"
 	"net"
@@ -11,6 +12,7 @@ import (
 	"net/http/httptest"
 	"os"
 	"testing"
+	"time"
 
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
@@ -58,8 +60,8 @@ func testTokenCheckServer(t *testing.T) *httptest.Server {
 	return s
 }
 
-func writeTestConfig(t *testing.T, content string) string {
-	f, err := os.CreateTemp(t.TempDir(), "config-*.yaml")
+func writeTestConfig(t *testing.T, pattern string, content string) string {
+	f, err := os.CreateTemp(t.TempDir(), pattern)
 	if err != nil {
 		t.Error(err)
 		return ""
@@ -90,7 +92,7 @@ func TestMiddleware(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	upstream := upstream{MockTestServiceServer: NewMockTestServiceServer(ctrl)}
 
-	config := writeTestConfig(t, fmt.Sprintf(`
+	config := writeTestConfig(t, "config-*.yaml", fmt.Sprintf(`
 authenticators:
   noop:
     enabled: true
@@ -177,8 +179,8 @@ mutators:
 			rules: map[configuration.MatchingStrategy][]rule.Rule{
 				configuration.Regexp: {{
 					Match: &rule.MatchGRPC{
-						Authority:  "<[0-9a-zA-Z]+>.apis.ory.sh",
-						FullMethod: "grpc.testing.TestService/Empty<[a-zA-Z]+>",
+						Authority:  "<.*>",
+						FullMethod: "<.*>Empty<.*>",
 					},
 					Authenticators: []rule.Handler{{Handler: "anonymous"}},
 					Authorizer:     rule.Handler{Handler: "allow"},
@@ -329,11 +331,8 @@ mutators:
 			client := testClient(t, l, tc.dialOpts...)
 			for _, s := range strategies {
 				t.Run("strategy="+string(s), func(t *testing.T) {
-
-					require.NoError(t, reg.RuleRepository().
-						SetMatchingStrategy(ctx, s))
-					reg.RuleRepository().(*rule.RepositoryMemory).
-						WithRules(tc.rules[s])
+					require.NoError(t, reg.RuleRepository().SetMatchingStrategy(ctx, s))
+					require.NoError(t, reg.RuleRepository().Set(ctx, tc.rules[s]))
 
 					_, err := client.EmptyCall(ctx, &grpcTesting.Empty{})
 					tc.assert(t, err)
@@ -365,7 +364,7 @@ func TestMiddleware_EnvironmentIsolation(t *testing.T) {
 		t.Run("AUTHENTICATORS_NOOP_ENABLED="+envVal, func(t *testing.T) {
 			t.Setenv("AUTHENTICATORS_NOOP_ENABLED", envVal)
 
-			configFile := writeTestConfig(t, "")
+			configFile := writeTestConfig(t, "config-*.yaml", "")
 			configPtr := new(configuration.Provider)
 			_, err := middleware.New(ctx,
 				middleware.WithConfigFile(configFile),
@@ -377,4 +376,61 @@ func TestMiddleware_EnvironmentIsolation(t *testing.T) {
 			assert.Falsef(t, config.Get("authenticators.noop.enabled").(bool), "was: %v", config.Get("authenticators.noop.enabled"))
 		})
 	}
+}
+
+func TestMiddleware_LoadRulesFromJSON(t *testing.T) {
+	ctx := context.Background()
+
+	jsonRule := `
+	{
+  "authenticators": [
+   {
+    "handler": "noop"
+   }
+  ],
+  "authorizer": {
+   "handler": "allow"
+  },
+  "id": "some-rule-id",
+  "match": {
+   "methods": [
+    "POST"
+   ],
+   "url": "<(https|http)>://example.com:8080/service/webhooks<(|/.*)>"
+  },
+  "mutators": [
+   {
+    "handler": "noop"
+   }
+  ],
+  "upstream": {
+   "preserve_host": true,
+   "strip_path": "/service",
+   "url": "http://example.svc.cluster.local"
+  }
+}`
+	var expected rule.Rule
+	require.NoError(t, json.Unmarshal([]byte(jsonRule), &expected))
+	rulesFile := writeTestConfig(t, "access-rules-*.json", "["+jsonRule+"]")
+
+	configFile := writeTestConfig(t, "config-*.yaml", fmt.Sprintf(`
+access_rules:
+  matching_strategy: regexp
+  repositories:
+  - file://%s
+`, rulesFile))
+
+	regPtr := new(driver.Registry)
+	_, err := middleware.New(ctx,
+		middleware.WithConfigFile(configFile),
+		middleware.WithRegistry(regPtr),
+	)
+	require.NoError(t, err)
+	reg := *regPtr
+
+	time.Sleep(100 * time.Millisecond)
+
+	actual, err := reg.RuleRepository().Get(ctx, "some-rule-id")
+	require.NoError(t, err)
+	assert.Equal(t, &expected, actual)
 }

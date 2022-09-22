@@ -400,13 +400,9 @@ func TestFetcherWatchRepositoryFromKubernetesConfigMap(t *testing.T) {
 }
 
 func TestFetchRulesFromObjectStorage(t *testing.T) {
+	t.Parallel()
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	t.Cleanup(func() {
-		cloudstorage.SetCurrentTest(nil)
-	})
-
-	cloudstorage.SetCurrentTest(t)
 
 	configFile, _ := os.CreateTemp(t.TempDir(), ".oathkeeper-*.yml")
 	configFile.WriteString(`
@@ -428,6 +424,7 @@ access_rules:
 		configx.WithConfigFiles(configFile.Name()),
 	)
 	r := internal.NewRegistry(conf)
+	r.RuleFetcher().(rule.URLMuxSetter).SetURLMux(cloudstorage.NewTestURLMux(t))
 
 	go func() {
 		require.NoError(t, r.RuleFetcher().Watch(ctx))

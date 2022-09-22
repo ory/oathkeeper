@@ -25,7 +25,6 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
-	"sync"
 	"testing"
 	"time"
 
@@ -581,12 +580,20 @@ func TestAuthenticatorOAuth2Introspection(t *testing.T) {
 	t.Run("method=authenticate-with-cache", func(t *testing.T) {
 		conf.SetForTest(t, "authenticators.oauth2_introspection.config.cache.enabled", true)
 
-		var didNotUseCache sync.WaitGroup
+		var handlerWasCalled bool
+		assertHandlerWasCalled := func(t *testing.T) {
+			assert.True(t, handlerWasCalled, "expected the handler to have been called")
+			handlerWasCalled = false
+		}
+		assertCacheWasUsed := func(t *testing.T) {
+			assert.False(t, handlerWasCalled, "expected the cache to have been used")
+			handlerWasCalled = false
+		}
 
 		setup := func(t *testing.T, config string) []byte {
 			router := httprouter.New()
 			router.POST("/oauth2/introspect", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-				defer didNotUseCache.Done()
+				handlerWasCalled = true
 				require.NoError(t, r.ParseForm())
 				switch r.Form.Get("token") {
 				case "inactive-scope-b":
@@ -609,7 +616,7 @@ func TestAuthenticatorOAuth2Introspection(t *testing.T) {
 						Audience: []string{"audience"},
 						Issuer:   "foo",
 						Username: "username",
-						Expires:  time.Now().Add(time.Second).Unix(),
+						Expires:  time.Now().Add(2 * time.Second).Unix(),
 						Extra:    map[string]interface{}{"extra": "foo"},
 					}))
 				case "refresh-token":
@@ -647,10 +654,9 @@ func TestAuthenticatorOAuth2Introspection(t *testing.T) {
 			t.Run("case=initial request succeeds and caches", func(t *testing.T) {
 				config := setup(t, `{ "required_scope": [], "trusted_issuers": ["foo", "bar"], "target_audience": ["audience"] }`)
 
-				didNotUseCache.Add(1)
 				err = a.Authenticate(r, expected, config, nil)
-				didNotUseCache.Wait()
 				require.NoError(t, err)
+				assertHandlerWasCalled(t)
 			})
 
 			// We expect to use the cache here because we are not interested to validate the scope. Usually we would
@@ -660,8 +666,8 @@ func TestAuthenticatorOAuth2Introspection(t *testing.T) {
 				sess := new(AuthenticationSession)
 
 				err = a.Authenticate(r, sess, config, nil)
-				didNotUseCache.Wait() // Would result in a panic if wg.done was called!
 				require.NoError(t, err)
+				assertCacheWasUsed(t)
 				assertx.EqualAsJSON(t, expected, sess)
 			})
 
@@ -669,10 +675,9 @@ func TestAuthenticatorOAuth2Introspection(t *testing.T) {
 				config := setup(t, `{ "required_scope": ["scope-a"], "trusted_issuers": ["foo", "bar"], "target_audience": ["audience"] }`)
 				sess := new(AuthenticationSession)
 
-				didNotUseCache.Add(1)
 				err = a.Authenticate(r, sess, config, nil)
-				didNotUseCache.Wait()
 				require.NoError(t, err)
+				assertHandlerWasCalled(t)
 				assertx.EqualAsJSON(t, expected, sess)
 			})
 
@@ -680,10 +685,9 @@ func TestAuthenticatorOAuth2Introspection(t *testing.T) {
 				config := setup(t, `{ "required_scope": ["scope-b"], "trusted_issuers": ["foo", "bar"], "target_audience": ["audience"] }`)
 				sess := new(AuthenticationSession)
 
-				didNotUseCache.Add(1)
 				err = a.Authenticate(r, sess, config, nil)
-				didNotUseCache.Wait()
 				require.Error(t, err)
+				assertHandlerWasCalled(t)
 			})
 		})
 
@@ -698,10 +702,10 @@ func TestAuthenticatorOAuth2Introspection(t *testing.T) {
 					config := setup(t, `{ "required_scope": ["scope-a"], "trusted_issuers": ["foo", "bar"], "target_audience": ["audience"] }`)
 
 					// Also doesn't use the cache the second time
-					didNotUseCache.Add(2)
 					require.Error(t, a.Authenticate(r, expected, config, nil))
+					assertHandlerWasCalled(t)
 					require.Error(t, a.Authenticate(r, expected, config, nil))
-					didNotUseCache.Wait()
+					assertHandlerWasCalled(t)
 				})
 			}
 		})
@@ -714,27 +718,26 @@ func TestAuthenticatorOAuth2Introspection(t *testing.T) {
 			// The initial request
 			config := setup(t, `{ "required_scope": ["scope-a"], "trusted_issuers": ["foo", "bar"], "target_audience": ["audience"] }`)
 
-			didNotUseCache.Add(1)
 			require.NoError(t, a.Authenticate(r, expected, config, nil))
-			didNotUseCache.Wait()
+			assertHandlerWasCalled(t)
 
 			t.Run("case=request succeeds and uses the cache", func(t *testing.T) {
 				config := setup(t, `{ "trusted_issuers": ["foo", "bar"], "target_audience": ["audience"] }`)
 				sess := new(AuthenticationSession)
 
 				err = a.Authenticate(r, sess, config, nil)
-				didNotUseCache.Wait()
 				require.NoError(t, err)
+				assertCacheWasUsed(t)
 				assertx.EqualAsJSON(t, expected, sess)
 			})
 
-			t.Run("case=request the initial request which also passes", func(t *testing.T) {
+			t.Run("case=cache the initial request which also passes", func(t *testing.T) {
 				config := setup(t, `{ "required_scope": ["scope-a"], "trusted_issuers": ["foo", "bar"], "target_audience": ["audience"] }`)
 				sess := new(AuthenticationSession)
 
 				err = a.Authenticate(r, sess, config, nil)
-				didNotUseCache.Wait()
 				require.NoError(t, err)
+				assertCacheWasUsed(t)
 				assertx.EqualAsJSON(t, expected, sess)
 			})
 
@@ -742,52 +745,48 @@ func TestAuthenticatorOAuth2Introspection(t *testing.T) {
 				require.Error(t, a.Authenticate(r, new(AuthenticationSession),
 					setup(t, `{ "required_scope": ["scope-b"], "trusted_issuers": ["foo", "bar"], "target_audience": ["audience"] }`),
 					nil))
-				didNotUseCache.Wait()
 			})
 
 			t.Run("case=requests an audience which the token does not have", func(t *testing.T) {
 				require.Error(t, a.Authenticate(r, new(AuthenticationSession),
 					setup(t, `{ "required_scope": ["scope-a"], "trusted_issuers": ["foo", "bar"], "target_audience": ["not-audience"] }`),
 					nil))
-				didNotUseCache.Wait()
 			})
 
 			t.Run("case=does not trust the issuer", func(t *testing.T) {
 				require.Error(t, a.Authenticate(r, new(AuthenticationSession),
 					setup(t, `{ "required_scope": ["scope-a"], "trusted_issuers": ["not-foo", "bar"], "target_audience": ["audience"] }`),
 					nil))
-				didNotUseCache.Wait()
 			})
 
 			t.Run("case=respects the expiry time", func(t *testing.T) {
 				setup(t, `{ "required_scope": ["scope-a"], "trusted_issuers": ["foo", "bar"], "target_audience": ["audience"] }`)
 				require.NoError(t, a.Authenticate(r, new(AuthenticationSession), config, nil))
-				time.Sleep(time.Second)
+				time.Sleep(2 * time.Second)
 				require.Error(t, a.Authenticate(r, new(AuthenticationSession), config, nil))
-				didNotUseCache.Wait()
 			})
 
 			t.Run("case=cache cleared after ttl", func(t *testing.T) {
 				//time.Sleep(time.Second)
 				config := setup(t, `{ "required_scope": ["scope-a"], "trusted_issuers": ["foo", "bar"], "target_audience": ["audience"], "cache": { "ttl": "100ms" } }`)
 
-				didNotUseCache.Add(1)
 				require.NoError(t, a.Authenticate(r, expected, config, nil))
-				didNotUseCache.Wait()
+				assertHandlerWasCalled(t)
 
 				// wait cache to save value
 				time.Sleep(time.Millisecond * 10)
 
 				require.NoError(t, a.Authenticate(r, new(AuthenticationSession), config, nil))
+				assertCacheWasUsed(t)
 				time.Sleep(50 * time.Millisecond)
 
 				require.NoError(t, a.Authenticate(r, new(AuthenticationSession), config, nil))
+				assertCacheWasUsed(t)
 				time.Sleep(50 * time.Millisecond)
 
 				// cache should have been cleared
-				didNotUseCache.Add(1)
 				require.NoError(t, a.Authenticate(r, new(AuthenticationSession), config, nil))
-				didNotUseCache.Wait()
+				assertHandlerWasCalled(t)
 			})
 		})
 	})
