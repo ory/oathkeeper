@@ -291,7 +291,7 @@
             "description": "genericError"
           }
         },
-        "summary": "# Lists Cryptographic Keys",
+        "summary": "Lists Cryptographic Keys",
         "tags": ["api"]
       }
     },
@@ -344,7 +344,7 @@
             "description": "genericError"
           }
         },
-        "summary": "# Access Control Decision API",
+        "summary": "Access Control Decision API",
         "tags": ["api"]
       }
     },
@@ -471,7 +471,7 @@
             "description": "genericError"
           }
         },
-        "summary": "# List All Rules",
+        "summary": "List All Rules",
         "tags": ["api"]
       }
     },
@@ -514,7 +514,7 @@
             "description": "genericError"
           }
         },
-        "summary": "# Retrieve a Rule",
+        "summary": "Retrieve a Rule",
         "tags": ["api"]
       }
     },

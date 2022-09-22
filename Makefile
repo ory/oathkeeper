@@ -57,7 +57,7 @@ sdk: .bin/swagger .bin/ory node_modules
 
 		swagger generate client -f ./spec/swagger.json -t internal/httpclient -A Ory_Oathkeeper
 
-		make format
+		make --no-print-dir format
 
 .PHONY: install-stable
 install-stable:
