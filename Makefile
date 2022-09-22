@@ -5,7 +5,6 @@ export PATH := .bin:${PATH}
 export PWD := $(shell pwd)
 
 GO_DEPENDENCIES = github.com/ory/go-acc \
-				  golang.org/x/tools/cmd/goimports \
 				  github.com/go-swagger/go-swagger/cmd/swagger \
 				  github.com/ory/cli \
 				  github.com/go-bindata/go-bindata/go-bindata
@@ -23,6 +22,9 @@ node_modules: package-lock.json
 
 .bin/clidoc: go.mod
 		go build -o .bin/clidoc ./cmd/clidoc/.
+
+.bin/goimports: Makefile
+	GOBIN=$(shell pwd)/.bin go install golang.org/x/tools/cmd/goimports@latest
 
 # Formats the code
 .PHONY: format
