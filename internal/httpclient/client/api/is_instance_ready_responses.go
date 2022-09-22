@@ -45,8 +45,7 @@ func NewIsInstanceReadyOK() *IsInstanceReadyOK {
 	return &IsInstanceReadyOK{}
 }
 
-/*
-IsInstanceReadyOK describes a response with status code 200, with default header values.
+/* IsInstanceReadyOK describes a response with status code 200, with default header values.
 
 healthStatus
 */
@@ -108,8 +107,7 @@ func NewIsInstanceReadyServiceUnavailable() *IsInstanceReadyServiceUnavailable {
 	return &IsInstanceReadyServiceUnavailable{}
 }
 
-/*
-IsInstanceReadyServiceUnavailable describes a response with status code 503, with default header values.
+/* IsInstanceReadyServiceUnavailable describes a response with status code 503, with default header values.
 
 healthNotReadyStatus
 */
