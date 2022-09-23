@@ -51,7 +51,8 @@ func NewGetRuleOK() *GetRuleOK {
 	return &GetRuleOK{}
 }
 
-/* GetRuleOK describes a response with status code 200, with default header values.
+/*
+GetRuleOK describes a response with status code 200, with default header values.
 
 A rule
 */
@@ -113,7 +114,8 @@ func NewGetRuleNotFound() *GetRuleNotFound {
 	return &GetRuleNotFound{}
 }
 
-/* GetRuleNotFound describes a response with status code 404, with default header values.
+/*
+GetRuleNotFound describes a response with status code 404, with default header values.
 
 genericError
 */
@@ -175,7 +177,8 @@ func NewGetRuleInternalServerError() *GetRuleInternalServerError {
 	return &GetRuleInternalServerError{}
 }
 
-/* GetRuleInternalServerError describes a response with status code 500, with default header values.
+/*
+GetRuleInternalServerError describes a response with status code 500, with default header values.
 
 genericError
 */
