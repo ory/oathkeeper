@@ -46,7 +46,7 @@ func NewListRulesOK() *ListRulesOK {
 }
 
 /*
-	ListRulesOK describes a response with status code 200, with default header values.
+ListRulesOK describes a response with status code 200, with default header values.
 
 A list of rules
 */
@@ -107,7 +107,7 @@ func NewListRulesInternalServerError() *ListRulesInternalServerError {
 }
 
 /*
-	ListRulesInternalServerError describes a response with status code 500, with default header values.
+ListRulesInternalServerError describes a response with status code 500, with default header values.
 
 genericError
 */

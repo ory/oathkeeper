@@ -64,7 +64,7 @@ func NewDecisionsOK() *DecisionsOK {
 }
 
 /*
-	DecisionsOK describes a response with status code 200, with default header values.
+DecisionsOK describes a response with status code 200, with default header values.
 
 An empty response
 */
@@ -115,7 +115,7 @@ func NewDecisionsUnauthorized() *DecisionsUnauthorized {
 }
 
 /*
-	DecisionsUnauthorized describes a response with status code 401, with default header values.
+DecisionsUnauthorized describes a response with status code 401, with default header values.
 
 genericError
 */
@@ -178,7 +178,7 @@ func NewDecisionsForbidden() *DecisionsForbidden {
 }
 
 /*
-	DecisionsForbidden describes a response with status code 403, with default header values.
+DecisionsForbidden describes a response with status code 403, with default header values.
 
 genericError
 */
@@ -241,7 +241,7 @@ func NewDecisionsNotFound() *DecisionsNotFound {
 }
 
 /*
-	DecisionsNotFound describes a response with status code 404, with default header values.
+DecisionsNotFound describes a response with status code 404, with default header values.
 
 genericError
 */
@@ -304,7 +304,7 @@ func NewDecisionsInternalServerError() *DecisionsInternalServerError {
 }
 
 /*
-	DecisionsInternalServerError describes a response with status code 500, with default header values.
+DecisionsInternalServerError describes a response with status code 500, with default header values.
 
 genericError
 */

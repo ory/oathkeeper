@@ -46,7 +46,7 @@ func NewIsInstanceAliveOK() *IsInstanceAliveOK {
 }
 
 /*
-	IsInstanceAliveOK describes a response with status code 200, with default header values.
+IsInstanceAliveOK describes a response with status code 200, with default header values.
 
 healthStatus
 */
@@ -109,7 +109,7 @@ func NewIsInstanceAliveInternalServerError() *IsInstanceAliveInternalServerError
 }
 
 /*
-	IsInstanceAliveInternalServerError describes a response with status code 500, with default header values.
+IsInstanceAliveInternalServerError describes a response with status code 500, with default header values.
 
 genericError
 */
