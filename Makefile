@@ -31,7 +31,6 @@ node_modules: package-lock.json
 format: .bin/goimports node_modules
 		# workaround because goimports doesn't allow ignoring folders yet, see https://github.com/golang/go/issues/42965
 		find . -type f -name '*.go' -not -path './internal/httpclient/*' | xargs .bin/goimports -w --local github.com/ory
-		gofmt -l -s -w .
 		npm exec -- prettier --write .
 
 .bin/ory: Makefile
