@@ -29,7 +29,7 @@ node_modules: package-lock.json
 # Formats the code
 .PHONY: format
 format: .bin/goimports node_modules
-		goimports -w --local github.com/ory .
+		find . -type f -name '*.go' -not -path './internal/httpclient/*' | xargs -L 1 .bin/goimports -w --local github.com/ory
 		gofmt -l -s -w .
 		npm exec -- prettier --write .
 
