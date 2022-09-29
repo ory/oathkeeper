@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"net/url"
 
@@ -67,14 +66,6 @@ func (a *AuthenticatorRemoteJSON) Config(config json.RawMessage) (*Authenticator
 		return nil, NewErrAuthenticatorMisconfigured(a, err)
 	}
 
-	if len(c.ExtraFrom) == 0 {
-		c.ExtraFrom = "extra"
-	}
-
-	if len(c.SubjectFrom) == 0 {
-		c.SubjectFrom = "subject"
-	}
-
 	return &c, nil
 }
 
@@ -100,11 +91,19 @@ func (a *AuthenticatorRemoteJSON) Authenticate(r *http.Request, session *Authent
 	)
 
 	if err = json.Unmarshal(subjectRaw, &subject); err != nil {
-		return helper.ErrForbidden.WithReasonf("The configured subject_from GJSON path returned an error on JSON output: %s", err.Error()).WithDebugf("GJSON path: %s\nBody: %s\nResult: %s", cfg.SubjectFrom, body, subjectRaw).WithTrace(err)
+		return helper.
+			ErrForbidden.
+			WithReasonf("The configured subject_from GJSON path returned an error on JSON output: %s", err.Error()).
+			WithDebugf("GJSON path: %s\nBody: %s\nResult: %s", cfg.SubjectFrom, body, subjectRaw).
+			WithTrace(err)
 	}
 
 	if err = json.Unmarshal(extraRaw, &extra); err != nil {
-		return helper.ErrForbidden.WithReasonf("The configured extra_from GJSON path returned an error on JSON output: %s", err.Error()).WithDebugf("GJSON path: %s\nBody: %s\nResult: %s", cfg.ExtraFrom, body, extraRaw).WithTrace(err)
+		return helper.
+			ErrForbidden.
+			WithReasonf("The configured extra_from GJSON path returned an error on JSON output: %s", err.Error()).
+			WithDebugf("GJSON path: %s\nBody: %s\nResult: %s", cfg.ExtraFrom, body, extraRaw).
+			WithTrace(err)
 	}
 
 	session.Subject = subject
@@ -127,7 +126,10 @@ func forwardMethod(r *http.Request, cfg *AuthenticatorRemoteJSONConfiguration) s
 func forwardRequestToAuthenticator(r *http.Request, method string, serviceURL string, preservePath bool) (json.RawMessage, error) {
 	reqUrl, err := url.Parse(serviceURL)
 	if err != nil {
-		return nil, errors.WithStack(herodot.ErrInternalServerError.WithReasonf("Unable to parse remote URL: %s", err))
+		return nil, errors.WithStack(
+			herodot.
+				ErrInternalServerError.WithReasonf("Unable to parse remote URL: %s", err),
+		)
 	}
 
 	if !preservePath {
@@ -136,15 +138,24 @@ func forwardRequestToAuthenticator(r *http.Request, method string, serviceURL st
 
 	var forwardRequestBody io.ReadCloser = nil
 	if r.Body != nil {
-		body, err := ioutil.ReadAll(r.Body)
+		body, err := io.ReadAll(r.Body)
 		if err != nil {
 			return nil, helper.ErrBadRequest.WithReason(err.Error()).WithTrace(err)
 		}
 
+		err = r.Body.Close()
+		if err != nil {
+			return nil, errors.WithStack(
+				herodot.
+					ErrInternalServerError.
+					WithReasonf("Could not close body reader: %s\n", err),
+			)
+		}
+
 		// Unfortunately the body reader needs to be read once to forward the request,
 		// thus the upstream request will fail miserably without recreating a fresh ReaderCloser
-		forwardRequestBody = ioutil.NopCloser(bytes.NewReader(body))
-		r.Body = ioutil.NopCloser(bytes.NewReader(body))
+		forwardRequestBody = io.NopCloser(bytes.NewReader(body))
+		r.Body = io.NopCloser(bytes.NewReader(body))
 	}
 
 	req := http.Request{
@@ -163,7 +174,7 @@ func forwardRequestToAuthenticator(r *http.Request, method string, serviceURL st
 
 func handleResponse(r *http.Response) (json.RawMessage, error) {
 	if r.StatusCode == http.StatusOK {
-		body, err := ioutil.ReadAll(r.Body)
+		body, err := io.ReadAll(r.Body)
 		if err != nil {
 			return json.RawMessage{}, errors.WithStack(herodot.ErrInternalServerError.WithReasonf("Remote server returned error: %+v", err))
 		}

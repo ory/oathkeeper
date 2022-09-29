@@ -35,7 +35,7 @@ func TestAuthenticatorRemoteJSON(t *testing.T) {
 			err := pipelineAuthenticator.Authenticate(
 				makeRemoteJSONRequest("GET", "/", map[string]string{"sessionid": "zyx"}, ""),
 				session,
-				json.RawMessage(fmt.Sprintf(`{"check_session_url": "%s"}`, testServer.URL)),
+				json.RawMessage(fmt.Sprintf(`{"service_url": "%s"}`, testServer.URL)),
 				nil,
 			)
 			require.Error(t, err, "%#v", errors.Cause(err))
