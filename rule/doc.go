@@ -1,3 +1,5 @@
+// Copyright © 2022 Ory Corp
+
 // Package rule implements management capabilities for rules
 //
 // A rule is used to decide what to do with requests that are hitting the ORY Oathkeeper proxy server. A rule must

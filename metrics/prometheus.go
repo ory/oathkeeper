@@ -1,3 +1,5 @@
+// Copyright © 2022 Ory Corp
+
 // Package contains the collection of prometheus meters/counters
 // and related update methods
 package metrics

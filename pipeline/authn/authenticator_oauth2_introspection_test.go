@@ -1,3 +1,5 @@
+// Copyright © 2022 Ory Corp
+
 /*
  * Copyright © 2017-2018 Aeneas Rekkas <aeneas+oss@aeneas.io>
  *

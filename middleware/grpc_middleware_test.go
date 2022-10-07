@@ -1,3 +1,5 @@
+// Copyright © 2022 Ory Corp
+
 package middleware_test
 
 //go:generate mockgen -destination=grpc_mock_server_test.go -package=middleware_test google.golang.org/grpc/test/grpc_testing TestServiceServer
