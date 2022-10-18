@@ -407,6 +407,17 @@ func TestDecisionAPIHeaderUsage(t *testing.T) {
 			},
 		},
 		{
+			name:           "argument from the headers doesn't get url encoded",
+			expectedUrl:    &url.URL{Scheme: "https", Host: "test.dev", Path: "/bar"},
+			expectedMethod: "POST",
+			transform: func(req *http.Request) {
+				req.Header.Add("X-Forwarded-Method", "POST")
+				req.Header.Add("X-Forwarded-Proto", "https")
+				req.Header.Add("X-Forwarded-Host", "test.dev")
+				req.Header.Add("X-Forwarded-Uri", "/bar?this=is&a=test")
+			},
+		},
+		{
 			name:           "only scheme is taken from the headers",
 			expectedUrl:    &url.URL{Scheme: "https", Host: defaultUrl.Host, Path: defaultUrl.Path},
 			expectedMethod: defaultMethod,

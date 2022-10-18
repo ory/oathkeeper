@@ -45,7 +45,7 @@ func (h *DecisionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request, next
 		r.URL.Scheme = x.OrDefaultString(r.Header.Get(xForwardedProto),
 			x.IfThenElseString(r.TLS != nil, "https", "http"))
 		r.URL.Host = x.OrDefaultString(r.Header.Get(xForwardedHost), r.Host)
-		r.URL.Path = x.OrDefaultString(r.Header.Get(xForwardedUri), r.URL.Path[len(DecisionPath):])
+		r.URL.Path = x.OrDefaultString(strings.SplitN(r.Header.Get(xForwardedUri), "?", 2)[0], r.URL.Path[len(DecisionPath):])
 
 		h.decisions(w, r)
 	} else {
