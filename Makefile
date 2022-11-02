@@ -33,6 +33,12 @@ format: .bin/goimports node_modules
 	gofmt -l -s -w .
 	npm exec -- prettier --write .
 
+licenses: .bin/licenses node_modules  # checks open-source licenses
+	.bin/licenses
+
+.bin/licenses: Makefile
+	curl https://raw.githubusercontent.com/ory/ci/master/licenses/install | sh
+
 .bin/ory: Makefile
 	bash <(curl https://raw.githubusercontent.com/ory/meta/master/install.sh) -b .bin ory v0.1.22
 	touch -a -m .bin/ory
