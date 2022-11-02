@@ -25,6 +25,9 @@ node_modules: package-lock.json
 .bin/goimports: Makefile
 	GOBIN=$(shell pwd)/.bin go install golang.org/x/tools/cmd/goimports@latest
 
+.bin/licenses: Makefile
+	curl https://raw.githubusercontent.com/ory/ci/master/licenses/install | sh
+
 .bin/ory: Makefile
 	curl https://raw.githubusercontent.com/ory/meta/master/install.sh | bash -s -- -b .bin ory v0.1.44
 	touch .bin/ory
@@ -34,6 +37,9 @@ format: .bin/goimports .bin/ory node_modules
 	goimports -w --local github.com/ory .
 	gofmt -l -s -w .
 	npm exec -- prettier --write .
+
+licenses: .bin/licenses node_modules  # checks open-source licenses
+	.bin/licenses
 
 # Generates the SDK
 .PHONY: sdk
