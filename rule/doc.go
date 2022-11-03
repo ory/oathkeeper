@@ -1,3 +1,6 @@
+// Copyright © 2022 Ory Corp
+// SPDX-License-Identifier: Apache-2.0
+
 // Package rule implements management capabilities for rules
 //
 // A rule is used to decide what to do with requests that are hitting the ORY Oathkeeper proxy server. A rule must

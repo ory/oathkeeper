@@ -1,3 +1,6 @@
+// Copyright © 2022 Ory Corp
+// SPDX-License-Identifier: Apache-2.0
+
 package middleware_test
 
 //go:generate mockgen -destination=grpc_mock_server_test.go -package=middleware_test google.golang.org/grpc/test/grpc_testing TestServiceServer

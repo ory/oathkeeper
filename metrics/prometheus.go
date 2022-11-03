@@ -1,3 +1,6 @@
+// Copyright © 2022 Ory Corp
+// SPDX-License-Identifier: Apache-2.0
+
 // Package contains the collection of prometheus meters/counters
 // and related update methods
 package metrics
