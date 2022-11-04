@@ -5,7 +5,7 @@
 
 **Table of Contents**
 
-- [0.0.0 (2022-11-03)](#000-2022-11-03)
+- [0.0.0 (2022-11-04)](#000-2022-11-04)
   - [Bug Fixes](#bug-fixes)
   - [Documentation](#documentation)
   - [Tests](#tests)
@@ -306,10 +306,13 @@
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-# [0.0.0](https://github.com/ory/oathkeeper/compare/v0.40.0...v0.0.0) (2022-11-03)
+# [0.0.0](https://github.com/ory/oathkeeper/compare/v0.40.0...v0.0.0) (2022-11-04)
 
 ### Bug Fixes
 
+- Align proxy mode log level with decision mode log level for access request
+  granted log ([#1029](https://github.com/ory/oathkeeper/issues/1029))
+  ([b9365a6](https://github.com/ory/oathkeeper/commit/b9365a6c3aef03b7fd37e58dde2f33887afc6ea1))
 - Decouple cloud storage tests
   ([c1ed811](https://github.com/ory/oathkeeper/commit/c1ed8110c37bdfea3789977464c2493b731065a6))
 - Init registry in middleware
