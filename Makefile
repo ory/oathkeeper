@@ -33,7 +33,7 @@ node_modules: package-lock.json
 	touch .bin/ory
 
 format: .bin/goimports .bin/ory node_modules
-	.bin/ory dev headers copyright --exclude=internal/httpclient
+	.bin/ory dev headers copyright --type=open-source --exclude=internal/httpclient
 	goimports -w --local github.com/ory .
 	gofmt -l -s -w .
 	npm exec -- prettier --write .
