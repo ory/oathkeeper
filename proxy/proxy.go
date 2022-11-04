@@ -83,7 +83,7 @@ func (d *Proxy) RoundTrip(r *http.Request) (*http.Response, error) {
 			d.r.Logger().
 				WithField("granted", true).
 				WithFields(fields).
-				Warn("Access request granted")
+				Info("Access request granted")
 		}
 
 		return res, err
