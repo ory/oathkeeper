@@ -32,11 +32,13 @@ node_modules: package-lock.json
 	curl https://raw.githubusercontent.com/ory/meta/master/install.sh | bash -s -- -b .bin ory v0.1.48
 	touch .bin/ory
 
+authors:  # updates the AUTHORS file
+	curl https://raw.githubusercontent.com/ory/ci/master/authors/authors.sh | env PRODUCT="Ory Oathkeeper" bash
+
 format: .bin/goimports .bin/ory node_modules
 	.bin/ory dev headers copyright --type=open-source --exclude=internal/httpclient
 	goimports -w --local github.com/ory .
 	gofmt -l -s -w .
-	curl https://raw.githubusercontent.com/ory/ci/master/authors/authors.sh | env PRODUCT="Ory Oathkeeper" bash
 	npm exec -- prettier --write .
 
 licenses: .bin/licenses node_modules  # checks open-source licenses
