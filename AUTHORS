@@ -1,12 +1,9 @@
-# This is the official list of Ory Oathkeeper authors.
+# This is the official list of Oathkeeper authors.
 # If you don't want to be on this list, please contact Ory.
 
 adamwalach <adam.walach@gmail.com>
-Aeneas <arekkas@users.noreply.github.com>
-aeneasr <3372410+aeneasr@users.noreply.github.com>
-aeneasr <aeneas@ory.sh>
 aeneasr <aeneas.rekkas@serlo.org>
-aeneasr <aeneasr@users.noreply.github.com>
+Aeneas Rekkas <aeneas@ory.sh>
 Alessandro Chitolina <alekitto@gmail.com>
 Alex David <alexdavid@users.noreply.github.com>
 Alexey Piyanin <162457+7phs@users.noreply.github.com>
@@ -16,7 +13,6 @@ Andrew Minkin <minkin.andrew@gmail.com>
 Andrew Talalai <talalai.andrew@gmail.com>
 Aniketh Varma <aaniketh_varma@yahoo.com>
 Anirudh Oppiliappan <x@icyphox.sh>
-arekkas <aeneas@ory.am>
 Arthur Knoepflin <arthur.knoepflin@epitech.eu>
 Arthur Knoepflin <arthur@knoepflin.eu>
 Augustin Prolongeau <augustin.pro@gmail.com>
@@ -42,8 +38,6 @@ fredbi <fredbi@yahoo.com>
 Grant Zvolský <GrantZvolsky@gmail.com>
 Grant Zvolský <grant@zvolsky.org>
 Guillaume SMAHA <GuillaumeSmaha@users.noreply.github.com>
-hackerman <3372410+aeneasr@users.noreply.github.com>
-hackerman <arekkas@users.noreply.github.com>
 Henning Perl <henning.perl@gmail.com>
 Henrik Feldt <henrik@haf.se>
 hperl <34397+hperl@users.noreply.github.com>
@@ -90,7 +84,7 @@ Nikolai Grigoriev <ngrigoriev@gmail.com>
 Patrick Tescher <pat2man@gmail.com>
 Patrick Tescher <patrick@tescher.me>
 Patrik Lindahl <patrik@ramnet.se>
-Patrik <zepatrik@users.noreply.github.com>
+Patrik Neu <patrik@ory.sh>
 Paul Davis <paul@dangersalad.com>
 pike1212 <clp207@psu.edu>
 pike1212 <pike1212@gmail.com>
@@ -114,5 +108,3 @@ Vincent <vincent@ory.sh>
 Vladyslav Burzakovskyy <burzakovskij@gmail.com>
 Wesley Fantinel <wesley.fantinel@gmail.com>
 wezzle <wesley@black-sky.nl>
-zepatrik <patrik@ory.sh>
-zepatrik <zepatrik@users.noreply.github.com>
