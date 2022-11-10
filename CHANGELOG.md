@@ -5,7 +5,7 @@
 
 **Table of Contents**
 
-- [0.0.0 (2022-11-08)](#000-2022-11-08)
+- [0.0.0 (2022-11-10)](#000-2022-11-10)
   - [Bug Fixes](#bug-fixes)
   - [Documentation](#documentation)
   - [Tests](#tests)
@@ -306,7 +306,7 @@
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-# [0.0.0](https://github.com/ory/oathkeeper/compare/v0.40.0...v0.0.0) (2022-11-08)
+# [0.0.0](https://github.com/ory/oathkeeper/compare/v0.40.0...v0.0.0) (2022-11-10)
 
 ### Bug Fixes
 
@@ -315,6 +315,9 @@
   ([b9365a6](https://github.com/ory/oathkeeper/commit/b9365a6c3aef03b7fd37e58dde2f33887afc6ea1))
 - Decouple cloud storage tests
   ([c1ed811](https://github.com/ory/oathkeeper/commit/c1ed8110c37bdfea3789977464c2493b731065a6))
+- Ignore query string when using X-Forwarded-Uri
+  ([#1025](https://github.com/ory/oathkeeper/issues/1025))
+  ([6fa3978](https://github.com/ory/oathkeeper/commit/6fa3978bcb58c19f3b0ef4e1840f42156a5751f0))
 - Init registry in middleware
   ([1daecb6](https://github.com/ory/oathkeeper/commit/1daecb68a54f50c8894dc00441afec8a4cd1ac3d))
 
