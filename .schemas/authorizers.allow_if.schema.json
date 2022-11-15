@@ -1,0 +1,30 @@
+{
+  "$id": "https://raw.githubusercontent.com/ory/oathkeeper/master/.schemas/authorizers.allow_if.schema.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "title": "Allow If Authorizer Configuration",
+  "description": "This section is optional when the authorizer is disabled.",
+  "properties": {
+    "key": {
+      "title": "Key to use from the AuthenticationSession struct",
+      "type": "string",
+      "description": "The string will be parsed by the Go text/template package and applied to an AuthenticationSession struct",
+      "examples": ["\"{{ .Subject }}\"}"]
+    },
+    "op": {
+      "title": "The operator to use",
+      "type": "string",
+      "description": "The operator to be used by the authorizer",
+      "enum": ["equals"],
+      "examples": ["equals"]
+    },
+    "value": {
+      "title": "The value for the key",
+      "type": "string",
+      "description": "The operand to be used by the authorizer",
+      "examples": ["peter"]
+    }
+  },
+  "required": ["key", "value", "op"],
+  "additionalProperties": false
+}

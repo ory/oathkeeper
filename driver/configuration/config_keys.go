@@ -29,6 +29,7 @@ const (
 // Authorizers
 const (
 	AuthorizerAllowIsEnabled            Key = "authorizers.allow.enabled"
+	AuthorizerAllowIfIsEnabled          Key = "authorizers.allow_if.enabled"
 	AuthorizerDenyIsEnabled             Key = "authorizers.deny.enabled"
 	AuthorizerKetoEngineACPORYIsEnabled Key = "authorizers.keto_engine_acp_ory.enabled"
 	AuthorizerRemoteIsEnabled           Key = "authorizers.remote.enabled"

@@ -998,6 +998,34 @@
       "required": ["remote", "payload"],
       "additionalProperties": false
     },
+    "configAuthorizersAllowIf": {
+      "type": "object",
+      "title": "Allow If Configuration",
+      "description": "This section is optional when the authorizer is disabled.",
+      "properties": {
+        "key": {
+          "title": "Key to use from the AuthenticationSession struct",
+          "type": "string",
+          "description": "The string will be parsed by the Go text/template package and applied to an AuthenticationSession struct",
+          "examples": ["\"{{ .Subject }}\"}"]
+        },
+        "op": {
+          "title": "The operator to use",
+          "type": "string",
+          "description": "The operator to be used by the authorizer",
+          "enum": ["equals"],
+          "examples": ["equals"]
+        },
+        "value": {
+          "title": "The value for the key",
+          "type": "string",
+          "description": "The operand to be used by the authorizer",
+          "examples": ["peter"]
+        }
+      },
+      "required": ["key", "value", "op"],
+      "additionalProperties": false
+    },
     "configMutatorsCookie": {
       "type": "object",
       "title": "Cookie Mutator Configuration",
@@ -1599,6 +1627,36 @@
               "$ref": "#/definitions/handlerSwitch"
             }
           }
+        },
+        "allow_if": {
+          "title": "Allow If",
+          "description": "The [`allow_if` authorizer](https://www.ory.sh/docs/oathkeeper/pipeline/authz#allow_if).",
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "$ref": "#/definitions/handlerSwitch"
+            }
+          },
+          "oneOf": [
+            {
+              "properties": {
+                "enabled": {
+                  "const": true
+                },
+                "config": {
+                  "$ref": "#/definitions/configAuthorizersAllowIf"
+                }
+              },
+              "required": ["config"]
+            },
+            {
+              "properties": {
+                "enabled": {
+                  "const": false
+                }
+              }
+            }
+          ]
         },
         "deny": {
           "title": "Deny",
