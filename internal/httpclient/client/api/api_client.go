@@ -50,7 +50,7 @@ type ClientService interface {
 /*
 	Decisions accesses control decision API
 
-	> This endpoint works with all HTTP Methods (GET, POST, PUT, ...) and matches every path prefixed with /decision.
+	> This endpoint works with all HTTP Methods (GET, POST, PUT, ...) and matches every path prefixed with /decisions.
 
 This endpoint mirrors the proxy capability of ORY Oathkeeper's proxy functionality but instead of forwarding the
 request to the upstream server, returns 200 (request should be allowed), 401 (unauthorized), or 403 (forbidden)
