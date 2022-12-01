@@ -5,7 +5,7 @@
 
 **Table of Contents**
 
-- [0.0.0 (2022-11-10)](#000-2022-11-10)
+- [0.0.0 (2022-12-01)](#000-2022-12-01)
   - [Bug Fixes](#bug-fixes)
   - [Documentation](#documentation)
   - [Tests](#tests)
@@ -306,13 +306,16 @@
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-# [0.0.0](https://github.com/ory/oathkeeper/compare/v0.40.0...v0.0.0) (2022-11-10)
+# [0.0.0](https://github.com/ory/oathkeeper/compare/v0.40.0...v0.0.0) (2022-12-01)
 
 ### Bug Fixes
 
 - Align proxy mode log level with decision mode log level for access request
   granted log ([#1029](https://github.com/ory/oathkeeper/issues/1029))
   ([b9365a6](https://github.com/ory/oathkeeper/commit/b9365a6c3aef03b7fd37e58dde2f33887afc6ea1))
+- Allow otel tracing provider in config
+  ([#1039](https://github.com/ory/oathkeeper/issues/1039))
+  ([2661190](https://github.com/ory/oathkeeper/commit/26611904a796b3511a417917a2d0c56473bdc174))
 - Decouple cloud storage tests
   ([c1ed811](https://github.com/ory/oathkeeper/commit/c1ed8110c37bdfea3789977464c2493b731065a6))
 - Ignore query string when using X-Forwarded-Uri
@@ -323,6 +326,9 @@
 
 ### Documentation
 
+- Fix typo from /decision to /decisions
+  ([#1036](https://github.com/ory/oathkeeper/issues/1036))
+  ([5d23dcb](https://github.com/ory/oathkeeper/commit/5d23dcba96ea9e040ce63b177609df7715faf43b))
 - Standardize license headers
   ([#1024](https://github.com/ory/oathkeeper/issues/1024))
   ([851cd0f](https://github.com/ory/oathkeeper/commit/851cd0f86563eb67e0cbc3620b8d3c4c7e44ec16))
