@@ -39,7 +39,7 @@ func (a *MutatorHeader) WithCache(t *template.Template) {
 	a.t = t
 }
 
-func (a *MutatorHeader) Mutate(r *http.Request, session *authn.AuthenticationSession, config json.RawMessage, rl pipeline.Rule) error {
+func (a *MutatorHeader) Mutate(_ *http.Request, session *authn.AuthenticationSession, config json.RawMessage, rl pipeline.Rule) error {
 	cfg, err := a.config(config)
 	if err != nil {
 		return err
