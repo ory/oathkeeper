@@ -5,7 +5,7 @@
 
 **Table of Contents**
 
-- [0.0.0 (2022-12-01)](#000-2022-12-01)
+- [0.0.0 (2022-12-13)](#000-2022-12-13)
   - [Bug Fixes](#bug-fixes)
   - [Documentation](#documentation)
   - [Tests](#tests)
@@ -306,7 +306,7 @@
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-# [0.0.0](https://github.com/ory/oathkeeper/compare/v0.40.0...v0.0.0) (2022-12-01)
+# [0.0.0](https://github.com/ory/oathkeeper/compare/v0.40.0...v0.0.0) (2022-12-13)
 
 ### Bug Fixes
 
@@ -318,6 +318,8 @@
   ([2661190](https://github.com/ory/oathkeeper/commit/26611904a796b3511a417917a2d0c56473bdc174))
 - Decouple cloud storage tests
   ([c1ed811](https://github.com/ory/oathkeeper/commit/c1ed8110c37bdfea3789977464c2493b731065a6))
+- Do not leak sensitive data from gRPC middleware
+  ([32aa172](https://github.com/ory/oathkeeper/commit/32aa17252e3f55dfa5de7d8b6382c024fe11626b))
 - Ignore query string when using X-Forwarded-Uri
   ([#1025](https://github.com/ory/oathkeeper/issues/1025))
   ([6fa3978](https://github.com/ory/oathkeeper/commit/6fa3978bcb58c19f3b0ef4e1840f42156a5751f0))
@@ -337,6 +339,8 @@
 
 - Fix flaky tests
   ([099bcf0](https://github.com/ory/oathkeeper/commit/099bcf0bdf65f9404f35a4210cd52e8918fe4d6a))
+- Remove `t.Parallel()` from tests that use the same cache and key
+  ([7017fdf](https://github.com/ory/oathkeeper/commit/7017fdf1a8b5820d1f2796dead3be17e2907c0a5))
 
 # [0.40.0](https://github.com/ory/oathkeeper/compare/v0.39.4...v0.40.0) (2022-09-14)
 
