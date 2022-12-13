@@ -26,7 +26,7 @@ func (m *middleware) httpRequest(ctx context.Context, fullMethod string) (*http.
 	if !ok {
 		return nil, fmt.Errorf("no metadata found in context")
 	}
-	m.Logger().WithField("middleware", "oathkeeper").Debugf("request metadata: %+v", md)
+	m.Logger().WithField("middleware", "oathkeeper").WithField("metadata", m.Logger().HTTPHeadersRedacted(http.Header(md))).Debug("using request metadata to build http header")
 
 	authorities := md.Get(":authority")
 	if len(authorities) != 1 {
@@ -74,7 +74,9 @@ func (m *middleware) UnaryInterceptor() grpc.UnaryServerInterceptor {
 			log.WithError(err).Warn("could not build HTTP request")
 			return nil, ErrDenied
 		}
-		log.Debugf("http request: %v", httpReq)
+		log = log.WithRequest(httpReq)
+
+		log.Debug("matching HTTP request build from gRPC")
 
 		r, err := m.RuleMatcher().Match(ctx, httpReq.Method, httpReq.URL, rule.ProtocolGRPC)
 		if err != nil {
@@ -109,7 +111,9 @@ func (m *middleware) StreamInterceptor() grpc.StreamServerInterceptor {
 			log.WithError(err).Warn("could not build HTTP request")
 			return ErrDenied
 		}
-		log.Debugf("http request: %v", httpReq)
+		log = log.WithRequest(httpReq)
+
+		log.Debug("matching HTTP request build from gRPC")
 
 		r, err := m.RuleMatcher().Match(ctx, httpReq.Method, httpReq.URL, rule.ProtocolGRPC)
 		if err != nil {
