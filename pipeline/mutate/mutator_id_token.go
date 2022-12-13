@@ -151,7 +151,7 @@ func (a *MutatorIDToken) Mutate(r *http.Request, session *authn.AuthenticationSe
 		}
 
 		templateClaims = b.Bytes()
-		if err := json.NewDecoder(&b).Decode(&claims); err != nil {
+		if err := json.Unmarshal(templateClaims, &claims); err != nil {
 			return errors.WithStack(err)
 		}
 	}
