@@ -33,36 +33,36 @@ func TestAuthenticatorBasic(t *testing.T) {
 			session,
 			json.RawMessage(`{"credentials":"bc842c31a9e54efe320d30d948be61291f3ceee4766e36ab25fa65243cd76e0e"}`),
 			nil)
-			require.Error(t, err)
-			assert.EqualError(t, err, helper.ErrUnauthorized.Error())
+		require.Error(t, err)
+		assert.EqualError(t, err, helper.ErrUnauthorized.Error())
 	})
 
 	t.Run("method=authenticate/case=incorrect base64 token", func(t *testing.T) {
 		err := a.Authenticate(
-			&http.Request{Header: http.Header{ "Authorization": {"Basic " + "123"} }},
+			&http.Request{Header: http.Header{"Authorization": {"Basic " + "123"}}},
 			session,
 			json.RawMessage(`{"credentials":"bc842c31a9e54efe320d30d948be61291f3ceee4766e36ab25fa65243cd76e0e"}`),
 			nil)
-			require.Error(t, err)
-			assert.EqualError(t, err, helper.ErrUnauthorized.Error())
+		require.Error(t, err)
+		assert.EqualError(t, err, helper.ErrUnauthorized.Error())
 	})
 
 	t.Run("method=authenticate/case=incorrect auth", func(t *testing.T) {
 		err := a.Authenticate(
-			&http.Request{Header: http.Header{ "Authorization": {"Basic " + "dXNlcjpwYXNz"} }},
+			&http.Request{Header: http.Header{"Authorization": {"Basic " + "dXNlcjpwYXNz"}}},
 			session,
 			json.RawMessage(`{"credentials":"bc842c31a9e54efe320d30d948be61291f3ceee4766e36ab25fa65243cd76e0e"}`),
 			nil)
-			require.Error(t, err)
-			assert.EqualError(t, err, helper.ErrUnauthorized.Error())
+		require.Error(t, err)
+		assert.EqualError(t, err, helper.ErrUnauthorized.Error())
 	})
 
 	t.Run("method=authenticate/case=correct auth", func(t *testing.T) {
 		err := a.Authenticate(
-			&http.Request{Header: http.Header{ "Authorization": {"Basic " + "dXNlcm5hbWU6cGFzc3dvcmQ="} }},
+			&http.Request{Header: http.Header{"Authorization": {"Basic " + "dXNlcm5hbWU6cGFzc3dvcmQ="}}},
 			session,
 			json.RawMessage(`{"credentials":"bc842c31a9e54efe320d30d948be61291f3ceee4766e36ab25fa65243cd76e0e"}`),
 			nil)
-			require.NoError(t, err)
+		require.NoError(t, err)
 	})
 }
