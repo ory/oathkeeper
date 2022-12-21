@@ -354,6 +354,20 @@
       },
       "additionalProperties": false
     },
+    "configAuthenticatorsBasic": {
+      "type": "object",
+      "title": "Basic Authenticator Configuration",
+      "description": "This section is optional when the authenticator is disabled.",
+      "properties": {
+        "credentials": {
+          "title": "Credentials",
+          "type": "string",
+          "description": "The Basic credentials in form of 'username:password' hashed with SHA256"
+        }
+      },
+      "required": ["credentials"],
+      "additionalProperties": false
+    },
     "configAuthenticatorsCookieSession": {
       "type": "object",
       "title": "Cookie Session Authenticator Configuration",
@@ -1287,6 +1301,17 @@
             },
             "config": {
               "$ref": "#/definitions/configAuthenticatorsAnonymous"
+            }
+          }
+        },
+        "basic": {
+          "title": "Basic",
+          "description": "The [`basic` authenticator](https://www.ory.sh/docs/oathkeeper/pipeline/authn#basic).",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "enabled": {
+              "$ref": "#/definitions/configAuthenticatorsBasic"
             }
           }
         },
