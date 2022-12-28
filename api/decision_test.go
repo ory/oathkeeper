@@ -14,6 +14,7 @@ import (
 	"net/url"
 	"strconv"
 	"testing"
+	"time"
 
 	"github.com/julienschmidt/httprouter"
 	"github.com/stretchr/testify/assert"
@@ -299,6 +300,29 @@ func TestDecisionAPI(t *testing.T) {
 			code:  http.StatusOK,
 			authz: "",
 		},
+		{
+			d:   "HEAD request should not result in an read timeout",
+			url: ts.URL + "/decisions" + "/authn-anon/authz-allow/cred-noop/1234",
+			rulesRegexp: []rule.Rule{{
+				Match:          &rule.Match{Methods: []string{"HEAD"}, URL: ts.URL + "/authn-anon/authz-allow/cred-noop/<[0-9]+>"},
+				Authenticators: []rule.Handler{{Handler: "anonymous"}},
+				Authorizer:     rule.Handler{Handler: "allow"},
+				Mutators:       []rule.Handler{{Handler: "noop"}},
+				Upstream:       rule.Upstream{URL: ""},
+			}},
+			rulesGlob: []rule.Rule{{
+				Match:          &rule.Match{Methods: []string{"HEAD"}, URL: ts.URL + "/authn-anon/authz-allow/cred-noop/<[0-9]*>"},
+				Authenticators: []rule.Handler{{Handler: "anonymous"}},
+				Authorizer:     rule.Handler{Handler: "allow"},
+				Mutators:       []rule.Handler{{Handler: "noop"}},
+				Upstream:       rule.Upstream{URL: ""},
+			}},
+			transform: func(r *http.Request) {
+				r.Header.Add("X-Forwarded-Method", "HEAD")
+			},
+			code:  http.StatusOK,
+			authz: "",
+		},
 	} {
 		t.Run(fmt.Sprintf("case=%d/description=%s", k, tc.d), func(t *testing.T) {
 			testFunc := func(strategy configuration.MatchingStrategy) {
@@ -309,7 +333,10 @@ func TestDecisionAPI(t *testing.T) {
 					tc.transform(req)
 				}
 
-				res, err := http.DefaultClient.Do(req)
+				httpClient := http.Client{
+					Timeout: 2 * time.Second,
+				}
+				res, err := httpClient.Do(req)
 				require.NoError(t, err)
 
 				entireBody, err := io.ReadAll(res.Body)

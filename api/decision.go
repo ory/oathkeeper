@@ -5,6 +5,7 @@ package api
 
 import (
 	"net/http"
+	"net/url"
 	"strings"
 
 	"github.com/ory/oathkeeper/pipeline/authn"
@@ -41,13 +42,21 @@ func NewJudgeHandler(r decisionHandlerRegistry) *DecisionHandler {
 
 func (h *DecisionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
 	if len(r.URL.Path) >= len(DecisionPath) && r.URL.Path[:len(DecisionPath)] == DecisionPath {
-		r.Method = x.OrDefaultString(r.Header.Get(xForwardedMethod), r.Method)
-		r.URL.Scheme = x.OrDefaultString(r.Header.Get(xForwardedProto),
-			x.IfThenElseString(r.TLS != nil, "https", "http"))
-		r.URL.Host = x.OrDefaultString(r.Header.Get(xForwardedHost), r.Host)
-		r.URL.Path = x.OrDefaultString(strings.SplitN(r.Header.Get(xForwardedUri), "?", 2)[0], r.URL.Path[len(DecisionPath):])
-
-		h.decisions(w, r)
+		// Copy the request information, instead of modifing the incoming request directly.
+		// This is nevessary because the middleware would otherwise use e.g. the method from "X-Forwarded-Method" for the response
+		// although the original request had another method, which leads to problem with the HEAD method.
+		// For more information see: https://github.com/thomseddon/traefik-forward-auth/issues/156
+		forwardedReq := &http.Request{
+			Method: x.OrDefaultString(r.Header.Get(xForwardedMethod), r.Method),
+			URL: &url.URL{
+				Scheme: x.OrDefaultString(r.Header.Get(xForwardedProto),
+					x.IfThenElseString(r.TLS != nil, "https", "http")),
+				Host: x.OrDefaultString(r.Header.Get(xForwardedHost), r.Host),
+				Path: x.OrDefaultString(strings.SplitN(r.Header.Get(xForwardedUri), "?", 2)[0], r.URL.Path[len(DecisionPath):]),
+			},
+			Header: r.Header,
+		}
+		h.decisions(w, forwardedReq)
 	} else {
 		next(w, r)
 	}
