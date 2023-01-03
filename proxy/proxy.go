@@ -96,10 +96,6 @@ func (d *Proxy) RoundTrip(r *http.Request) (*http.Response, error) {
 		WithFields(fields).
 		Warn("Unable to type assert context")
 
-	// add tracing
-	closeSpan := x.TraceRequest(r.Context(), r)
-	defer closeSpan()
-
 	d.r.ProxyRequestHandler().HandleError(rw, r, rl, err)
 
 	return &http.Response{
