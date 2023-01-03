@@ -12,9 +12,10 @@ import (
 	pe "github.com/ory/oathkeeper/pipeline/errors"
 	"github.com/ory/oathkeeper/proxy"
 	"github.com/ory/oathkeeper/x"
+	"go.opentelemetry.io/otel/trace"
 
 	"github.com/ory/x/logrusx"
-	"github.com/ory/x/tracing"
+	"github.com/ory/x/otelx"
 
 	"github.com/pkg/errors"
 
@@ -26,7 +27,6 @@ import (
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/pipeline/authn"
 	"github.com/ory/oathkeeper/pipeline/authz"
-	ep "github.com/ory/oathkeeper/pipeline/errors"
 	"github.com/ory/oathkeeper/pipeline/mutate"
 	"github.com/ory/oathkeeper/rule"
 	rulereadiness "github.com/ory/oathkeeper/rule/readiness"
@@ -43,7 +43,7 @@ type RegistryMemory struct {
 	logger       *logrusx.Logger
 	writer       herodot.Writer
 	c            configuration.Provider
-	trc          *tracing.Tracer
+	trc          *otelx.Tracer
 
 	ch *api.CredentialsHandler
 
@@ -63,7 +63,7 @@ type RegistryMemory struct {
 	authenticators map[string]authn.Authenticator
 	authorizers    map[string]authz.Authorizer
 	mutators       map[string]mutate.Mutator
-	errors         map[string]ep.Handler
+	errors         map[string]pe.Handler
 
 	healthEventManager *health.DefaultHealthEventManager
 
@@ -78,6 +78,7 @@ func (r *RegistryMemory) Init() {
 	}()
 	r.HealthEventManager().Watch(context.Background())
 	_ = r.RuleRepository()
+	_ = r.Tracer() // make sure tracer is initialized
 }
 
 func (r *RegistryMemory) RuleFetcher() rule.Fetcher {
@@ -262,13 +263,13 @@ func (r *RegistryMemory) prepareErrors() {
 	defer r.Unlock()
 
 	if r.errors == nil {
-		interim := []ep.Handler{
-			ep.NewErrorJSON(r.c, r),
-			ep.NewErrorRedirect(r.c, r),
-			ep.NewErrorWWWAuthenticate(r.c, r),
+		interim := []pe.Handler{
+			pe.NewErrorJSON(r.c, r),
+			pe.NewErrorRedirect(r.c, r),
+			pe.NewErrorWWWAuthenticate(r.c, r),
 		}
 
-		r.errors = map[string]ep.Handler{}
+		r.errors = map[string]pe.Handler{}
 		for _, a := range interim {
 			r.errors[a.GetID()] = a
 		}
@@ -422,22 +423,13 @@ func (r *RegistryMemory) prepareMutators() {
 	}
 }
 
-func (r *RegistryMemory) Tracer() *tracing.Tracer {
+func (r *RegistryMemory) Tracer() trace.Tracer {
 	if r.trc == nil {
 		var err error
-		r.trc, err = tracing.New(r.Logger(),
-			&tracing.Config{
-				ServiceName: r.c.TracingServiceName(),
-				Provider:    r.c.TracingProvider(),
-				Providers: &tracing.ProvidersConfig{
-					Jaeger: r.c.TracingJaegerConfig(),
-					Zipkin: r.c.TracingZipkinConfig(),
-				},
-			})
+		r.trc, err = otelx.New(r.c.TracingServiceName(), r.Logger(), r.c.TracingConfig())
 		if err != nil {
 			r.Logger().WithError(err).Fatalf("Unable to initialize Tracer.")
 		}
 	}
-
-	return r.trc
+	return r.trc.Tracer()
 }

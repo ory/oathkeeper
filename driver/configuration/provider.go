@@ -13,7 +13,7 @@ import (
 
 	"github.com/ory/fosite"
 	"github.com/ory/x/configx"
-	"github.com/ory/x/tracing"
+	"github.com/ory/x/otelx"
 )
 
 const (
@@ -74,9 +74,7 @@ type Provider interface {
 	JSONWebKeyURLs() []string
 
 	TracingServiceName() string
-	TracingProvider() string
-	TracingJaegerConfig() *tracing.JaegerConfig
-	TracingZipkinConfig() *tracing.ZipkinConfig
+	TracingConfig() *otelx.Config
 
 	TLSConfig(daemon string) *TLSConfig
 
