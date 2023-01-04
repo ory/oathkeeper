@@ -19,6 +19,7 @@ import (
 	"github.com/rs/cors"
 	"github.com/spf13/cobra"
 	"github.com/urfave/negroni"
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 
 	"github.com/ory/analytics-go/v4"
 	"github.com/ory/graceful"
@@ -26,6 +27,7 @@ import (
 	"github.com/ory/x/healthx"
 	"github.com/ory/x/logrusx"
 	"github.com/ory/x/metricsx"
+	"github.com/ory/x/otelx"
 	"github.com/ory/x/reqlog"
 	"github.com/ory/x/tlsx"
 
@@ -39,10 +41,10 @@ import (
 func runProxy(d driver.Driver, n *negroni.Negroni, logger *logrusx.Logger, prom *metrics.PrometheusRepository) func() {
 	return func() {
 		proxy := d.Registry().Proxy()
-
-		handler := &httputil.ReverseProxy{
+		transport := otelhttp.NewTransport(proxy, otelhttp.WithSpanNameFormatter(func(operation string, r *http.Request) string { return "upstream" }))
+		proxyHandler := &httputil.ReverseProxy{
 			Director:  proxy.Director,
-			Transport: proxy,
+			Transport: transport,
 			ErrorHandler: func(w http.ResponseWriter, _ *http.Request, err error) {
 				logger.WithError(err).Errorf("http: proxy error: %v", err)
 				w.WriteHeader(http.StatusBadGateway)
@@ -57,14 +59,14 @@ func runProxy(d driver.Driver, n *negroni.Negroni, logger *logrusx.Logger, prom 
 			return d.Configuration().CORS("proxy")
 		}))
 
-		n.UseHandler(handler)
+		n.UseHandler(proxyHandler)
 
 		certs := cert(d.Configuration(), "proxy", logger)
 
 		addr := d.Configuration().ProxyServeAddress()
 		server := graceful.WithDefaults(&http.Server{
 			Addr:         addr,
-			Handler:      n,
+			Handler:      otelx.NewHandler(n, "proxy"),
 			TLSConfig:    &tls.Config{Certificates: certs},
 			ReadTimeout:  d.Configuration().ProxyReadTimeout(),
 			WriteTimeout: d.Configuration().ProxyWriteTimeout(),
@@ -109,7 +111,7 @@ func runAPI(d driver.Driver, n *negroni.Negroni, logger *logrusx.Logger, prom *m
 		addr := d.Configuration().APIServeAddress()
 		server := graceful.WithDefaults(&http.Server{
 			Addr:         addr,
-			Handler:      n,
+			Handler:      otelx.TraceHandler(n),
 			TLSConfig:    &tls.Config{Certificates: certs},
 			ReadTimeout:  d.Configuration().APIReadTimeout(),
 			WriteTimeout: d.Configuration().APIWriteTimeout(),
@@ -234,11 +236,6 @@ func RunServe(version, build, date string) func(cmd *cobra.Command, args []strin
 
 		adminmw.Use(telemetry)
 		publicmw.Use(telemetry)
-
-		if tracer := d.Registry().Tracer(); tracer.IsLoaded() {
-			adminmw.Use(tracer)
-			publicmw.Use(tracer)
-		}
 
 		prometheusRepo := metrics.NewConfigurablePrometheusRepository(d, logger)
 		var wg sync.WaitGroup

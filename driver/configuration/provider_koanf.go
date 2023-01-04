@@ -25,8 +25,8 @@ import (
 	"github.com/ory/gojsonschema"
 	"github.com/ory/x/configx"
 	"github.com/ory/x/logrusx"
+	"github.com/ory/x/otelx"
 	"github.com/ory/x/stringsx"
-	"github.com/ory/x/tracing"
 	"github.com/ory/x/urlx"
 	"github.com/ory/x/watcherx"
 
@@ -401,32 +401,12 @@ func (v *KoanfProvider) TracingServiceName() string {
 	return v.source.StringF("tracing.service_name", "ORY Oathkeeper")
 }
 
-func (v *KoanfProvider) TracingProvider() string {
-	return v.source.String("tracing.provider")
+func (v *KoanfProvider) TracingConfig() *otelx.Config {
+	return v.source.TracingConfig(v.TracingServiceName())
 }
 
 func (v *KoanfProvider) PrometheusHideRequestPaths() bool {
 	return v.source.BoolF(PrometheusServeHideRequestPaths, false)
-}
-
-func (v *KoanfProvider) TracingJaegerConfig() *tracing.JaegerConfig {
-	return &tracing.JaegerConfig{
-		LocalAgentAddress: v.source.String(
-			"tracing.providers.jaeger.local_agent_address",
-		),
-
-		Sampling: &tracing.JaegerSampling{
-			Type:      v.source.StringF("tracing.providers.jaeger.sampling.type", "const"),
-			Value:     v.source.Float64F("tracing.providers.jaeger.sampling.value", 1),
-			ServerURL: v.source.String("tracing.providers.jaeger.sampling.server_url"),
-		},
-		Propagation: v.source.String("tracing.providers.jaeger.propagation"),
-	}
-}
-func (v *KoanfProvider) TracingZipkinConfig() *tracing.ZipkinConfig {
-	return &tracing.ZipkinConfig{
-		ServerURL: v.source.String("tracing.providers.zipkin.server_url"),
-	}
 }
 
 type TLSConfig struct {
