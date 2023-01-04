@@ -366,6 +366,7 @@ func (r *RegistryMemory) WithBrokenPipelineMutator() *RegistryMemory {
 func (r *RegistryMemory) prepareAuthn() {
 	r.Lock()
 	defer r.Unlock()
+	_ = r.Tracer() // make sure tracer is initialized
 	if r.authenticators == nil {
 		interim := []authn.Authenticator{
 			authn.NewAuthenticatorAnonymous(r.c),
