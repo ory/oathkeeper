@@ -4,8 +4,9 @@
 package driver
 
 import (
-	"github.com/ory/x/logrusx"
 	"go.opentelemetry.io/otel/trace"
+
+	"github.com/ory/x/logrusx"
 
 	"github.com/ory/x/healthx"
 

@@ -7,12 +7,13 @@ import (
 	"context"
 	"sync"
 
+	"go.opentelemetry.io/otel/trace"
+
 	"github.com/ory/oathkeeper/driver/health"
 	"github.com/ory/oathkeeper/pipeline"
 	pe "github.com/ory/oathkeeper/pipeline/errors"
 	"github.com/ory/oathkeeper/proxy"
 	"github.com/ory/oathkeeper/x"
-	"go.opentelemetry.io/otel/trace"
 
 	"github.com/ory/x/logrusx"
 	"github.com/ory/x/otelx"
