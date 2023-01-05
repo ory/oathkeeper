@@ -365,7 +365,7 @@ func TestKoanfProvider(t *testing.T) {
 		})
 
 		t.Run("mutator=hydrator", func(t *testing.T) {
-			a := mutate.NewMutatorHydrator(p, new(x.TestLoggerProvider))
+			a := mutate.NewMutatorHydrator(p, new(x.TestLoggerProvider), nil)
 			assert.True(t, p.MutatorIsEnabled(a.GetID()))
 			require.NoError(t, a.Validate(nil))
 		})

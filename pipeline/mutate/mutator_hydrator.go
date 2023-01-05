@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/dgraph-io/ristretto"
+	"go.opentelemetry.io/otel/trace"
 
 	"github.com/ory/oathkeeper/pipeline/authn"
 	"github.com/ory/oathkeeper/x"
@@ -37,12 +38,12 @@ const (
 )
 
 type MutatorHydrator struct {
-	c      configuration.Provider
-	client *http.Client
-	d      mutatorHydratorDependencies
+	c configuration.Provider
+	d mutatorHydratorDependencies
 
-	hydrateCache *ristretto.Cache
-	cacheTTL     *time.Duration
+	hydrateCache   *ristretto.Cache
+	cacheTTL       *time.Duration
+	tracerProvider trace.Tracer
 }
 
 type BasicAuth struct {
@@ -81,7 +82,7 @@ type mutatorHydratorDependencies interface {
 	x.RegistryLogger
 }
 
-func NewMutatorHydrator(c configuration.Provider, d mutatorHydratorDependencies) *MutatorHydrator {
+func NewMutatorHydrator(c configuration.Provider, d mutatorHydratorDependencies, provider trace.Tracer) *MutatorHydrator {
 	cache, _ := ristretto.NewCache(&ristretto.Config{
 		// This will hold about 1000 unique mutation responses.
 		NumCounters: 10000,
@@ -90,11 +91,14 @@ func NewMutatorHydrator(c configuration.Provider, d mutatorHydratorDependencies)
 		// This is a best-practice value.
 		BufferItems: 64,
 	})
+
+	fmt.Println("XUXU")
+
 	return &MutatorHydrator{
-		c:            c,
-		d:            d,
-		client:       httpx.NewResilientClient().StandardClient(),
-		hydrateCache: cache,
+		c:              c,
+		d:              d,
+		hydrateCache:   cache,
+		tracerProvider: provider,
 	}
 }
 
@@ -173,10 +177,10 @@ func (a *MutatorHydrator) Mutate(r *http.Request, session *authn.AuthenticationS
 	req.Header.Set(contentTypeHeaderKey, contentTypeJSONHeaderValue)
 
 	var client *http.Client
+	maxRetryDelay := time.Second
+	giveUpAfter := time.Millisecond * 50
 
 	if cfg.Api.Retry != nil {
-		maxRetryDelay := time.Second
-		giveUpAfter := time.Millisecond * 50
 		if len(cfg.Api.Retry.MaxDelay) > 0 {
 			if d, err := time.ParseDuration(cfg.Api.Retry.MaxDelay); err != nil {
 				a.d.Logger().WithError(err).Warn("Unable to parse max_delay in the Hydrator Mutator, falling pack to default.")
@@ -191,14 +195,14 @@ func (a *MutatorHydrator) Mutate(r *http.Request, session *authn.AuthenticationS
 				giveUpAfter = d
 			}
 		}
-
-		client = httpx.NewResilientClient(
-			httpx.ResilientClientWithMaxRetryWait(maxRetryDelay),
-			httpx.ResilientClientWithConnectionTimeout(giveUpAfter),
-		).StandardClient()
-	} else {
-		client = http.DefaultClient
 	}
+
+	client = httpx.NewResilientClient(
+		httpx.ResilientClientWithMaxRetryWait(maxRetryDelay),
+		httpx.ResilientClientWithConnectionTimeout(giveUpAfter),
+		// httpx.ResilientClientWithTracer(a.tracerProvider.Tracer("otel")),
+		httpx.ResilientClientWithTracer(a.tracerProvider),
+	).StandardClient()
 
 	res, err := client.Do(req.WithContext(r.Context()))
 	if err != nil {
