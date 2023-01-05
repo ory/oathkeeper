@@ -200,7 +200,6 @@ func (a *MutatorHydrator) Mutate(r *http.Request, session *authn.AuthenticationS
 	client = httpx.NewResilientClient(
 		httpx.ResilientClientWithMaxRetryWait(maxRetryDelay),
 		httpx.ResilientClientWithConnectionTimeout(giveUpAfter),
-		// httpx.ResilientClientWithTracer(a.tracerProvider.Tracer("otel")),
 		httpx.ResilientClientWithTracer(a.tracerProvider),
 	).StandardClient()
 
