@@ -704,15 +704,15 @@ func TestAuthenticatorOAuth2Introspection(t *testing.T) {
 			require.NoError(t, a.Authenticate(r, expected, config, nil))
 			assertHandlerWasCalled(t)
 
-			// t.Run("case=request succeeds and uses the cache", func(t *testing.T) {
-			// 	config := setup(t, `{ "trusted_issuers": ["foo", "bar"], "target_audience": ["audience"] }`)
-			// 	sess := new(AuthenticationSession)
+			t.Run("case=request succeeds and uses the cache", func(t *testing.T) {
+				config := setup(t, `{ "required_scope": ["scope-a"], "trusted_issuers": ["foo", "bar"], "target_audience": ["audience"] }`)
+				sess := new(AuthenticationSession)
 
-			// 	err = a.Authenticate(r, sess, config, nil)
-			// 	require.NoError(t, err)
-			// 	assertCacheWasUsed(t)
-			// 	assertx.EqualAsJSON(t, expected, sess)
-			// })
+				err = a.Authenticate(r, sess, config, nil)
+				require.NoError(t, err)
+				assertCacheWasUsed(t)
+				assertx.EqualAsJSON(t, expected, sess)
+			})
 
 			t.Run("case=cache the initial request which also passes", func(t *testing.T) {
 				config := setup(t, `{ "required_scope": ["scope-a"], "trusted_issuers": ["foo", "bar"], "target_audience": ["audience"] }`)
