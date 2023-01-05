@@ -41,9 +41,9 @@ type MutatorHydrator struct {
 	c configuration.Provider
 	d mutatorHydratorDependencies
 
-	hydrateCache   *ristretto.Cache
-	cacheTTL       *time.Duration
-	tracerProvider trace.Tracer
+	hydrateCache *ristretto.Cache
+	cacheTTL     *time.Duration
+	tracer       trace.Tracer
 }
 
 type BasicAuth struct {
@@ -82,7 +82,7 @@ type mutatorHydratorDependencies interface {
 	x.RegistryLogger
 }
 
-func NewMutatorHydrator(c configuration.Provider, d mutatorHydratorDependencies, provider trace.Tracer) *MutatorHydrator {
+func NewMutatorHydrator(c configuration.Provider, d mutatorHydratorDependencies, tracer trace.Tracer) *MutatorHydrator {
 	cache, _ := ristretto.NewCache(&ristretto.Config{
 		// This will hold about 1000 unique mutation responses.
 		NumCounters: 10000,
@@ -91,14 +91,11 @@ func NewMutatorHydrator(c configuration.Provider, d mutatorHydratorDependencies,
 		// This is a best-practice value.
 		BufferItems: 64,
 	})
-
-	fmt.Println("XUXU")
-
 	return &MutatorHydrator{
-		c:              c,
-		d:              d,
-		hydrateCache:   cache,
-		tracerProvider: provider,
+		c:            c,
+		d:            d,
+		hydrateCache: cache,
+		tracer:       tracer,
 	}
 }
 
@@ -200,7 +197,7 @@ func (a *MutatorHydrator) Mutate(r *http.Request, session *authn.AuthenticationS
 	client = httpx.NewResilientClient(
 		httpx.ResilientClientWithMaxRetryWait(maxRetryDelay),
 		httpx.ResilientClientWithConnectionTimeout(giveUpAfter),
-		httpx.ResilientClientWithTracer(a.tracerProvider),
+		httpx.ResilientClientWithTracer(a.tracer),
 	).StandardClient()
 
 	res, err := client.Do(req.WithContext(r.Context()))
