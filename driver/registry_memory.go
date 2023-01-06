@@ -67,8 +67,6 @@ type RegistryMemory struct {
 	errors         map[string]pe.Handler
 
 	healthEventManager *health.DefaultHealthEventManager
-
-	ruleRepositoryLock sync.Mutex
 }
 
 func (r *RegistryMemory) Init() {
@@ -415,7 +413,7 @@ func (r *RegistryMemory) prepareMutators() {
 			mutate.NewMutatorHeader(r.c),
 			mutate.NewMutatorIDToken(r.c, r),
 			mutate.NewMutatorNoop(r.c),
-			mutate.NewMutatorHydrator(r.c, r, r.Tracer()),
+			mutate.NewMutatorHydrator(r.c, r),
 		}
 
 		r.mutators = map[string]mutate.Mutator{}
