@@ -705,7 +705,7 @@ func TestAuthenticatorOAuth2Introspection(t *testing.T) {
 			assertHandlerWasCalled(t)
 
 			t.Run("case=request succeeds and uses the cache", func(t *testing.T) {
-				config := setup(t, `{ "required_scope": ["scope-a"], "trusted_issuers": ["foo", "bar"], "target_audience": ["audience"] }`)
+				config := setup(t, `{ "trusted_issuers": ["foo", "bar"], "target_audience": ["audience"] }`)
 				sess := new(AuthenticationSession)
 
 				err = a.Authenticate(r, sess, config, nil)
