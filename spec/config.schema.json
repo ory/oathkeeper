@@ -1914,24 +1914,21 @@
                 },
                 "sampling": {
                   "type": "object",
-                  "propertyNames": {
-                    "enum": ["server_url", "trace_id_ratio"]
-                  },
-                  "allOf": [
-                    {
-                      "properties": {
-                        "server_url": {
-                          "type": "string",
-                          "description": "The address of jaeger-agent's HTTP sampling server",
-                          "format": "uri"
-                        },
-                        "trace_id_ratio": {
-                          "type": "number",
-                          "description": "The address of jaeger-agent's HTTP sampling server"
-                        }
-                      }
+                  "additionalProperties": false,
+                  "properties": {
+                    "server_url": {
+                      "type": "string",
+                      "description": "The address of jaeger-agent's HTTP sampling server.",
+                      "format": "uri"
+                    },
+                    "trace_id_ratio": {
+                      "type": "number",
+                      "description": "The initial sample ratio.",
+                      "minimum": 0,
+                      "maximum": 1,
+                      "default": 1
                     }
-                  ],
+                  },
                   "examples": [
                     {
                       "server_url": "http://localhost:5778/sampling",
