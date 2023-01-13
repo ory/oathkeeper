@@ -55,7 +55,7 @@ require (
 	github.com/ory/jsonschema/v3 v3.0.7
 	github.com/ory/ladon v1.1.0
 	github.com/ory/viper v1.7.5
-	github.com/ory/x v0.0.529
+	github.com/ory/x v0.0.532
 	github.com/pborman/uuid v1.2.1
 	github.com/phayes/freeport v0.0.0-20180830031419-95f893ade6f2
 	github.com/pkg/errors v0.9.1
@@ -222,7 +222,7 @@ require (
 	github.com/spf13/viper v1.12.0 // indirect
 	github.com/square/go-jose/v3 v3.0.0-20200630053402-0a67ce9b0693 // indirect
 	github.com/stretchr/objx v0.5.0 // indirect
-	github.com/subosito/gotenv v1.4.1 // indirect
+	github.com/subosito/gotenv v1.4.2 // indirect
 	github.com/tidwall/match v1.1.1 // indirect
 	github.com/tidwall/pretty v1.2.1 // indirect
 	github.com/toqueteos/webbrowser v1.2.0 // indirect
