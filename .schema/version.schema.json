@@ -1,9 +1,22 @@
 {
   "$id": "https://github.com/ory/oathkeeper/.schema/versions.config.schema.json",
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "All Versions of the ORY Oathkeeper Configuration",
-  "type": "object",
   "oneOf": [
+    {
+      "allOf": [
+        {
+          "properties": {
+            "version": {
+              "const": "v0.40.1"
+            }
+          },
+          "required": ["version"]
+        },
+        {
+          "$ref": "https://raw.githubusercontent.com/ory/oathkeeper/v0.40.1/spec/config.schema.json"
+        }
+      ]
+    },
     {
       "allOf": [
         {
@@ -167,5 +180,7 @@
         }
       ]
     }
-  ]
+  ],
+  "title": "All Versions of the ORY Oathkeeper Configuration",
+  "type": "object"
 }
