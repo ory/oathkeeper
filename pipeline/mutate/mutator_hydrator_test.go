@@ -7,7 +7,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -64,7 +64,7 @@ func defaultRouterSetup(actions ...func(a *authn.AuthenticationSession)) routerS
 	return func(t *testing.T) http.Handler {
 		router := httprouter.New()
 		router.POST("/", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-			body, err := ioutil.ReadAll(r.Body)
+			body, err := io.ReadAll(r.Body)
 			require.NoError(t, err)
 			var data authn.AuthenticationSession
 			err = json.Unmarshal(body, &data)

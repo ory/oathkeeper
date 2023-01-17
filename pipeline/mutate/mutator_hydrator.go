@@ -13,16 +13,15 @@ import (
 	"time"
 
 	"github.com/dgraph-io/ristretto"
-
-	"github.com/ory/oathkeeper/pipeline/authn"
-	"github.com/ory/oathkeeper/x"
-
-	"github.com/ory/x/httpx"
-
 	"github.com/pkg/errors"
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
+	"go.opentelemetry.io/otel/trace"
 
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/pipeline"
+	"github.com/ory/oathkeeper/pipeline/authn"
+	"github.com/ory/oathkeeper/x"
+	"github.com/ory/x/httpx"
 )
 
 const (
@@ -37,12 +36,10 @@ const (
 )
 
 type MutatorHydrator struct {
-	c      configuration.Provider
-	client *http.Client
-	d      mutatorHydratorDependencies
+	c configuration.Provider
+	d mutatorHydratorDependencies
 
 	hydrateCache *ristretto.Cache
-	cacheTTL     *time.Duration
 }
 
 type BasicAuth struct {
@@ -79,6 +76,7 @@ type MutatorHydratorConfig struct {
 
 type mutatorHydratorDependencies interface {
 	x.RegistryLogger
+	Tracer() trace.Tracer
 }
 
 func NewMutatorHydrator(c configuration.Provider, d mutatorHydratorDependencies) *MutatorHydrator {
@@ -93,7 +91,6 @@ func NewMutatorHydrator(c configuration.Provider, d mutatorHydratorDependencies)
 	return &MutatorHydrator{
 		c:            c,
 		d:            d,
-		client:       httpx.NewResilientClient().StandardClient(),
 		hydrateCache: cache,
 	}
 }
@@ -172,32 +169,32 @@ func (a *MutatorHydrator) Mutate(r *http.Request, session *authn.AuthenticationS
 	}
 	req.Header.Set(contentTypeHeaderKey, contentTypeJSONHeaderValue)
 
-	var client *http.Client
-
+	client := http.DefaultClient
+	if a.d.Tracer() != nil {
+		client = otelhttp.DefaultClient
+	}
 	if cfg.Api.Retry != nil {
-		maxRetryDelay := time.Second
-		giveUpAfter := time.Millisecond * 50
+		giveUpAfter := time.Second
+		maxRetryDelay := 100 * time.Millisecond
 		if len(cfg.Api.Retry.MaxDelay) > 0 {
 			if d, err := time.ParseDuration(cfg.Api.Retry.MaxDelay); err != nil {
-				a.d.Logger().WithError(err).Warn("Unable to parse max_delay in the Hydrator Mutator, falling pack to default.")
+				a.d.Logger().WithError(err).Warnf("Unable to parse max_delay in the Hydrator Mutator, falling back to default (%v).", maxRetryDelay)
 			} else {
 				maxRetryDelay = d
 			}
 		}
 		if len(cfg.Api.Retry.GiveUpAfter) > 0 {
 			if d, err := time.ParseDuration(cfg.Api.Retry.GiveUpAfter); err != nil {
-				a.d.Logger().WithError(err).Warn("Unable to parse max_delay in the Hydrator Mutator, falling pack to default.")
+				a.d.Logger().WithError(err).Warnf("Unable to parse give_up_after in the Hydrator Mutator, falling back to default (%v).", giveUpAfter)
 			} else {
 				giveUpAfter = d
 			}
 		}
-
-		client = httpx.NewResilientClient(
-			httpx.ResilientClientWithMaxRetryWait(maxRetryDelay),
+		clientOpts := []httpx.ResilientOptions{
+			httpx.ResilientClientWithTracer(a.d.Tracer()),
 			httpx.ResilientClientWithConnectionTimeout(giveUpAfter),
-		).StandardClient()
-	} else {
-		client = http.DefaultClient
+			httpx.ResilientClientWithMaxRetryWait(maxRetryDelay)}
+		client = httpx.NewResilientClient(clientOpts...).StandardClient()
 	}
 
 	res, err := client.Do(req.WithContext(r.Context()))

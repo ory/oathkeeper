@@ -67,8 +67,6 @@ type RegistryMemory struct {
 	errors         map[string]pe.Handler
 
 	healthEventManager *health.DefaultHealthEventManager
-
-	ruleRepositoryLock sync.Mutex
 }
 
 func (r *RegistryMemory) Init() {
