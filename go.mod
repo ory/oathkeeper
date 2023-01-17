@@ -3,7 +3,6 @@ go 1.19
 module github.com/ory/oathkeeper
 
 replace (
-	github.com/dgrijalva/jwt-go => github.com/form3tech-oss/jwt-go v1.0.3-0.20210625141045-a211650c6ae1
 	github.com/mattn/go-sqlite3 => github.com/mattn/go-sqlite3 v1.14.10
 	github.com/oleiade/reflections => github.com/oleiade/reflections v1.0.1
 	gopkg.in/DataDog/dd-trace-go.v1 => gopkg.in/DataDog/dd-trace-go.v1 v1.27.1
@@ -13,12 +12,11 @@ require (
 	github.com/Azure/azure-pipeline-go v0.2.2
 	github.com/Azure/azure-storage-blob-go v0.9.0
 	github.com/Masterminds/sprig/v3 v3.2.2
-	github.com/auth0/go-jwt-middleware v1.0.1
+	github.com/auth0/go-jwt-middleware/v2 v2.1.0
 	github.com/aws/aws-sdk-go v1.34.28
 	github.com/blang/semver v3.5.1+incompatible
 	github.com/dgraph-io/ristretto v0.1.1
 	github.com/dlclark/regexp2 v1.2.0
-	github.com/form3tech-oss/jwt-go v3.2.2+incompatible
 	github.com/fsnotify/fsnotify v1.6.0
 	github.com/ghodss/yaml v1.0.0
 	github.com/go-faker/faker/v4 v4.0.0-beta.2
@@ -31,7 +29,7 @@ require (
 	github.com/go-swagger/go-swagger v0.30.0
 	github.com/gobuffalo/httptest v1.5.2
 	github.com/gobwas/glob v0.2.3
-	github.com/golang-jwt/jwt/v4 v4.0.0
+	github.com/golang-jwt/jwt/v4 v4.4.3
 	github.com/golang/gddo v0.0.0-20190904175337-72a348e765d2
 	github.com/golang/mock v1.6.0
 	github.com/google/go-replayers/httpreplay v1.1.1
@@ -46,7 +44,7 @@ require (
 	github.com/opentracing/opentracing-go v1.2.0
 	github.com/ory/analytics-go/v4 v4.0.3
 	github.com/ory/cli v0.0.10
-	github.com/ory/fosite v0.36.1
+	github.com/ory/fosite v0.44.0
 	github.com/ory/go-acc v0.2.8
 	github.com/ory/go-convenience v0.1.0
 	github.com/ory/gojsonschema v1.2.0
@@ -103,14 +101,15 @@ require (
 	github.com/cockroachdb/cockroach-go/v2 v2.2.16 // indirect
 	github.com/containerd/continuity v0.3.0 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.2 // indirect
+	github.com/dave/jennifer v1.4.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
-	github.com/dgrijalva/jwt-go v3.2.0+incompatible // indirect
 	github.com/docker/cli v20.10.21+incompatible // indirect
 	github.com/docker/distribution v2.8.1+incompatible // indirect
 	github.com/docker/docker v20.10.21+incompatible // indirect
 	github.com/docker/go-connections v0.4.0 // indirect
 	github.com/docker/go-units v0.5.0 // indirect
 	github.com/dustin/go-humanize v1.0.0 // indirect
+	github.com/ecordell/optgen v0.0.6 // indirect
 	github.com/evanphx/json-patch v5.6.0+incompatible // indirect
 	github.com/fatih/color v1.13.0 // indirect
 	github.com/fatih/structs v1.1.0 // indirect
