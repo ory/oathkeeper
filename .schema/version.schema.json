@@ -9,6 +9,21 @@
         {
           "properties": {
             "version": {
+              "const": "v0.40.0"
+            }
+          },
+          "required": ["version"]
+        },
+        {
+          "$ref": "https://raw.githubusercontent.com/ory/oathkeeper/v0.40.0/spec/config.schema.json"
+        }
+      ]
+    },
+    {
+      "allOf": [
+        {
+          "properties": {
+            "version": {
               "const": "v0.38.4-beta.1"
             }
           },
@@ -125,7 +140,6 @@
       ]
     },
     {
-      "description": "This is the fallback to the latest version (the first one in this schema) in case no version is specified.",
       "allOf": [
         {
           "oneOf": [
