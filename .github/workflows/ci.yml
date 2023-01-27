@@ -37,7 +37,7 @@ jobs:
           key: ${{ needs.sdk-generate.outputs.sdk-cache-key }}
       - uses: actions/setup-go@v2
         with:
-          go-version: 1.18
+          go-version: 1.19
       - run: go list -json > go.list
       - name: Run nancy
         uses: sonatype-nexus-community/nancy-github-action@v1.0.2
@@ -70,7 +70,7 @@ jobs:
       - uses: ory/ci/checkout@master
       - uses: actions/setup-go@v2
         with:
-          go-version: "1.18"
+          go-version: "1.19"
       - uses: actions/cache@v2
         with:
           path: ~/go/bin/oathkeeper
@@ -115,6 +115,7 @@ jobs:
       - uses: ory/ci/sdk/release@master
         with:
           token: ${{ secrets.ORY_BOT_PAT }}
+          swag-spec-location: spec/swagger.json
 
   release:
     name: Generate release

@@ -1,4 +1,4 @@
-// Copyright © 2022 Ory Corp
+// Copyright © 2023 Ory Corp
 // SPDX-License-Identifier: Apache-2.0
 
 package authn_test
@@ -8,7 +8,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -256,7 +255,7 @@ func TestAuthenticatorCookieSession(t *testing.T) {
 			requestRecorder := &RequestRecorder{}
 			testServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				requestRecorder.requests = append(requestRecorder.requests, r)
-				requestBody, _ := ioutil.ReadAll(r.Body)
+				requestBody, _ := io.ReadAll(r.Body)
 				requestRecorder.bodies = append(requestRecorder.bodies, requestBody)
 				if r.Header.Get("X-User") == "" {
 					w.WriteHeader(http.StatusBadRequest)
@@ -341,7 +340,7 @@ func makeServer(t *testing.T, statusCode int, responseBody string) (*httptest.Se
 	requestRecorder := &RequestRecorder{}
 	testServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		requestRecorder.requests = append(requestRecorder.requests, r)
-		requestBody, _ := ioutil.ReadAll(r.Body)
+		requestBody, _ := io.ReadAll(r.Body)
 		requestRecorder.bodies = append(requestRecorder.bodies, requestBody)
 		w.WriteHeader(statusCode)
 		w.Write([]byte(responseBody))
@@ -354,7 +353,7 @@ func makeRequest(method string, path string, rawQuery string, cookies map[string
 	var body io.ReadCloser
 	header := http.Header{}
 	if bodyStr != "" {
-		body = ioutil.NopCloser(bytes.NewBufferString(bodyStr))
+		body = io.NopCloser(bytes.NewBufferString(bodyStr))
 		header.Add("Content-Length", strconv.Itoa(len(bodyStr)))
 	}
 	req := &http.Request{

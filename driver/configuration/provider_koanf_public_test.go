@@ -1,4 +1,4 @@
-// Copyright © 2022 Ory Corp
+// Copyright © 2023 Ory Corp
 // SPDX-License-Identifier: Apache-2.0
 
 package configuration_test
@@ -21,14 +21,13 @@ import (
 	_ "github.com/ory/jsonschema/v3/httploader"
 
 	"github.com/ory/oathkeeper/driver/configuration"
-	. "github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/pipeline/authn"
 	"github.com/ory/oathkeeper/pipeline/authz"
 	"github.com/ory/oathkeeper/pipeline/mutate"
 	"github.com/ory/oathkeeper/x"
 )
 
-func setup(t *testing.T) *KoanfProvider {
+func setup(t *testing.T) *configuration.KoanfProvider {
 	p, err := configuration.NewKoanfProvider(
 		context.Background(),
 		nil,
@@ -247,7 +246,7 @@ func TestKoanfProvider(t *testing.T) {
 		})
 
 		t.Run("authenticator=cookie_session", func(t *testing.T) {
-			a := authn.NewAuthenticatorCookieSession(p)
+			a := authn.NewAuthenticatorCookieSession(p, nil)
 			assert.True(t, p.AuthenticatorIsEnabled(a.GetID()))
 			require.NoError(t, a.Validate(nil))
 

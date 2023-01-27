@@ -1,4 +1,4 @@
-// Copyright © 2022 Ory Corp
+// Copyright © 2023 Ory Corp
 // SPDX-License-Identifier: Apache-2.0
 
 package mutate_test
@@ -7,7 +7,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -64,7 +64,7 @@ func defaultRouterSetup(actions ...func(a *authn.AuthenticationSession)) routerS
 	return func(t *testing.T) http.Handler {
 		router := httprouter.New()
 		router.POST("/", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-			body, err := ioutil.ReadAll(r.Body)
+			body, err := io.ReadAll(r.Body)
 			require.NoError(t, err)
 			var data authn.AuthenticationSession
 			err = json.Unmarshal(body, &data)

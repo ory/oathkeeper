@@ -1,4 +1,4 @@
-// Copyright © 2022 Ory Corp
+// Copyright © 2023 Ory Corp
 // SPDX-License-Identifier: Apache-2.0
 
 package authn_test
@@ -7,7 +7,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/url"
 	"reflect"
@@ -212,10 +212,10 @@ func TestAuthenticatorBearerToken(t *testing.T) {
 					},
 					URL:    &url.URL{Path: "/users/123", RawQuery: "query=string"},
 					Method: "PUT",
-					Body:   ioutil.NopCloser(bytes.NewBufferString("body")),
+					Body:   io.NopCloser(bytes.NewBufferString("body")),
 				},
 				router: func(w http.ResponseWriter, r *http.Request) {
-					requestBody, _ := ioutil.ReadAll(r.Body)
+					requestBody, _ := io.ReadAll(r.Body)
 					assert.Equal(t, r.ContentLength, int64(0))
 					assert.Equal(t, requestBody, []byte{})
 					w.WriteHeader(200)

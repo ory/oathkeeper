@@ -1,4 +1,4 @@
-// Copyright © 2022 Ory Corp
+// Copyright © 2023 Ory Corp
 // SPDX-License-Identifier: Apache-2.0
 
 package driver
@@ -7,6 +7,8 @@ import (
 	"context"
 	"sync"
 
+	"go.opentelemetry.io/otel/trace"
+
 	"github.com/ory/oathkeeper/driver/health"
 	"github.com/ory/oathkeeper/pipeline"
 	pe "github.com/ory/oathkeeper/pipeline/errors"
@@ -14,7 +16,7 @@ import (
 	"github.com/ory/oathkeeper/x"
 
 	"github.com/ory/x/logrusx"
-	"github.com/ory/x/tracing"
+	"github.com/ory/x/otelx"
 
 	"github.com/pkg/errors"
 
@@ -26,7 +28,6 @@ import (
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/pipeline/authn"
 	"github.com/ory/oathkeeper/pipeline/authz"
-	ep "github.com/ory/oathkeeper/pipeline/errors"
 	"github.com/ory/oathkeeper/pipeline/mutate"
 	"github.com/ory/oathkeeper/rule"
 	rulereadiness "github.com/ory/oathkeeper/rule/readiness"
@@ -43,7 +44,7 @@ type RegistryMemory struct {
 	logger       *logrusx.Logger
 	writer       herodot.Writer
 	c            configuration.Provider
-	trc          *tracing.Tracer
+	trc          *otelx.Tracer
 
 	ch *api.CredentialsHandler
 
@@ -63,11 +64,9 @@ type RegistryMemory struct {
 	authenticators map[string]authn.Authenticator
 	authorizers    map[string]authz.Authorizer
 	mutators       map[string]mutate.Mutator
-	errors         map[string]ep.Handler
+	errors         map[string]pe.Handler
 
 	healthEventManager *health.DefaultHealthEventManager
-
-	ruleRepositoryLock sync.Mutex
 }
 
 func (r *RegistryMemory) Init() {
@@ -78,6 +77,7 @@ func (r *RegistryMemory) Init() {
 	}()
 	r.HealthEventManager().Watch(context.Background())
 	_ = r.RuleRepository()
+	_ = r.Tracer() // make sure tracer is initialized
 }
 
 func (r *RegistryMemory) RuleFetcher() rule.Fetcher {
@@ -262,13 +262,13 @@ func (r *RegistryMemory) prepareErrors() {
 	defer r.Unlock()
 
 	if r.errors == nil {
-		interim := []ep.Handler{
-			ep.NewErrorJSON(r.c, r),
-			ep.NewErrorRedirect(r.c, r),
-			ep.NewErrorWWWAuthenticate(r.c, r),
+		interim := []pe.Handler{
+			pe.NewErrorJSON(r.c, r),
+			pe.NewErrorRedirect(r.c, r),
+			pe.NewErrorWWWAuthenticate(r.c, r),
 		}
 
-		r.errors = map[string]ep.Handler{}
+		r.errors = map[string]pe.Handler{}
 		for _, a := range interim {
 			r.errors[a.GetID()] = a
 		}
@@ -365,11 +365,12 @@ func (r *RegistryMemory) WithBrokenPipelineMutator() *RegistryMemory {
 func (r *RegistryMemory) prepareAuthn() {
 	r.Lock()
 	defer r.Unlock()
+	_ = r.Tracer() // make sure tracer is initialized
 	if r.authenticators == nil {
 		interim := []authn.Authenticator{
 			authn.NewAuthenticatorAnonymous(r.c),
-			authn.NewAuthenticatorCookieSession(r.c),
-			authn.NewAuthenticatorBearerToken(r.c),
+			authn.NewAuthenticatorCookieSession(r.c, r.trc.Provider()),
+			authn.NewAuthenticatorBearerToken(r.c, r.trc.Provider()),
 			authn.NewAuthenticatorJWT(r.c, r),
 			authn.NewAuthenticatorNoOp(r.c),
 			authn.NewAuthenticatorOAuth2ClientCredentials(r.c, r.Logger()),
@@ -422,22 +423,13 @@ func (r *RegistryMemory) prepareMutators() {
 	}
 }
 
-func (r *RegistryMemory) Tracer() *tracing.Tracer {
+func (r *RegistryMemory) Tracer() trace.Tracer {
 	if r.trc == nil {
 		var err error
-		r.trc, err = tracing.New(r.Logger(),
-			&tracing.Config{
-				ServiceName: r.c.TracingServiceName(),
-				Provider:    r.c.TracingProvider(),
-				Providers: &tracing.ProvidersConfig{
-					Jaeger: r.c.TracingJaegerConfig(),
-					Zipkin: r.c.TracingZipkinConfig(),
-				},
-			})
+		r.trc, err = otelx.New(r.c.TracingServiceName(), r.Logger(), r.c.TracingConfig())
 		if err != nil {
 			r.Logger().WithError(err).Fatalf("Unable to initialize Tracer.")
 		}
 	}
-
-	return r.trc
+	return r.trc.Tracer()
 }

@@ -1,4 +1,4 @@
-// Copyright © 2022 Ory Corp
+// Copyright © 2023 Ory Corp
 // SPDX-License-Identifier: Apache-2.0
 
 package driver
@@ -26,7 +26,6 @@ func NewDefaultDriver(l *logrusx.Logger, version, build, date string, flags *pfl
 		l.WithError(err).Fatal("Failed to initialize configuration")
 	}
 	r := NewRegistry(c).WithLogger(l).WithBuildInfo(version, build, date)
-
 	return &DefaultDriver{r: r, c: c}
 }
 

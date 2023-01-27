@@ -1,4 +1,4 @@
-// Copyright © 2022 Ory Corp
+// Copyright © 2023 Ory Corp
 // SPDX-License-Identifier: Apache-2.0
 
 package proxy
@@ -95,10 +95,6 @@ func (d *Proxy) RoundTrip(r *http.Request) (*http.Response, error) {
 		WithField("granted", false).
 		WithFields(fields).
 		Warn("Unable to type assert context")
-
-	// add tracing
-	closeSpan := x.TraceRequest(r.Context(), r)
-	defer closeSpan()
 
 	d.r.ProxyRequestHandler().HandleError(rw, r, rl, err)
 
