@@ -16,6 +16,8 @@ import (
 
 	"github.com/ory/x/httpx"
 
+	"go.opentelemetry.io/otel/trace"
+
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/helper"
 	"github.com/ory/oathkeeper/pipeline"
@@ -45,7 +47,7 @@ type AuthorizerRemote struct {
 }
 
 // NewAuthorizerRemote creates a new AuthorizerRemote.
-func NewAuthorizerRemote(c configuration.Provider) *AuthorizerRemote {
+func NewAuthorizerRemote(c configuration.Provider, d interface{ Tracer() trace.Tracer }) *AuthorizerRemote {
 	return &AuthorizerRemote{
 		c:      c,
 		client: httpx.NewResilientClient().StandardClient(),
@@ -108,6 +110,7 @@ func (a *AuthorizerRemote) Authorize(r *http.Request, session *authn.Authenticat
 	}
 
 	res, err := a.client.Do(req.WithContext(r.Context()))
+
 	if err != nil {
 		return errors.WithStack(err)
 	}

@@ -23,6 +23,7 @@ import (
 	"github.com/ory/oathkeeper/pipeline/authn"
 	. "github.com/ory/oathkeeper/pipeline/authz"
 	"github.com/ory/oathkeeper/rule"
+	"github.com/ory/x/otelx"
 )
 
 func TestAuthorizerRemoteAuthorize(t *testing.T) {
@@ -177,7 +178,7 @@ func TestAuthorizerRemoteAuthorize(t *testing.T) {
 			if err != nil {
 				l.WithError(err).Fatal("Failed to initialize configuration")
 			}
-			a := NewAuthorizerRemote(p)
+			a := NewAuthorizerRemote(p, otelx.NewNoop(l, p.TracingConfig()))
 			r := &http.Request{
 				Header: map[string][]string{
 					"Content-Type": {"text/plain"},
@@ -255,7 +256,8 @@ func TestAuthorizerRemoteValidate(t *testing.T) {
 				context.Background(), nil, logrusx.New("", ""),
 				configx.SkipValidation())
 			require.NoError(t, err)
-			a := NewAuthorizerRemote(p)
+			l := logrusx.New("", "")
+			a := NewAuthorizerRemote(p, otelx.NewNoop(l, p.TracingConfig()))
 			p.SetForTest(t, configuration.AuthorizerRemoteIsEnabled, tt.enabled)
 			if err := a.Validate(tt.config); (err != nil) != tt.wantErr {
 				t.Errorf("Validate() error = %v, wantErr %v", err, tt.wantErr)

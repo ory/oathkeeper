@@ -25,6 +25,7 @@ import (
 	"github.com/ory/oathkeeper/pipeline/authz"
 	"github.com/ory/oathkeeper/pipeline/mutate"
 	"github.com/ory/oathkeeper/x"
+	"github.com/ory/x/otelx"
 )
 
 func setup(t *testing.T) *configuration.KoanfProvider {
@@ -333,7 +334,8 @@ func TestKoanfProvider(t *testing.T) {
 		})
 
 		t.Run("authorizer=remote_json", func(t *testing.T) {
-			a := authz.NewAuthorizerRemoteJSON(p)
+			l := logrusx.New("", "")
+			a := authz.NewAuthorizerRemoteJSON(p, otelx.NewNoop(l, p.TracingConfig()))
 			assert.True(t, p.AuthorizerIsEnabled(a.GetID()))
 			require.NoError(t, a.Validate(nil))
 
