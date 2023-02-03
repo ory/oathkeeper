@@ -5,7 +5,7 @@
 
 **Table of Contents**
 
-- [0.0.0 (2023-01-30)](#000-2023-01-30)
+- [0.0.0 (2023-02-03)](#000-2023-02-03)
   - [Bug Fixes](#bug-fixes)
   - [Features](#features)
 - [0.40.1 (2023-01-17)](#0401-2023-01-17)
@@ -311,7 +311,7 @@
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-# [0.0.0](https://github.com/ory/oathkeeper/compare/v0.40.1...v0.0.0) (2023-01-30)
+# [0.0.0](https://github.com/ory/oathkeeper/compare/v0.40.1...v0.0.0) (2023-02-03)
 
 ### Bug Fixes
 
@@ -323,6 +323,9 @@
 - Add cache to Koanf.validatePipelineConfig
   ([#1042](https://github.com/ory/oathkeeper/issues/1042))
   ([e7fb605](https://github.com/ory/oathkeeper/commit/e7fb6055e56aec581b39abaa8439abf1ce6c17a8))
+- Expose health checks in middleware
+  ([#1058](https://github.com/ory/oathkeeper/issues/1058))
+  ([e1357f8](https://github.com/ory/oathkeeper/commit/e1357f8d9aee105b7169c124a0141aafef5ba613))
 
 # [0.40.1](https://github.com/ory/oathkeeper/compare/v0.40.0...v0.40.1) (2023-01-17)
 
