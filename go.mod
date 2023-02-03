@@ -16,7 +16,6 @@ require (
 	github.com/blang/semver v3.5.1+incompatible
 	github.com/dgraph-io/ristretto v0.1.1
 	github.com/dlclark/regexp2 v1.2.0
-	github.com/fsnotify/fsnotify v1.6.0
 	github.com/ghodss/yaml v1.0.0
 	github.com/go-faker/faker/v4 v4.0.0-beta.2
 	github.com/go-openapi/errors v0.20.3
@@ -48,7 +47,7 @@ require (
 	github.com/ory/jsonschema/v3 v3.0.7
 	github.com/ory/ladon v1.1.0
 	github.com/ory/viper v1.7.5
-	github.com/ory/x v0.0.534
+	github.com/ory/x v0.0.535
 	github.com/pborman/uuid v1.2.1
 	github.com/phayes/freeport v0.0.0-20180830031419-95f893ade6f2
 	github.com/pkg/errors v0.9.1
@@ -109,6 +108,7 @@ require (
 	github.com/fatih/structs v1.1.0 // indirect
 	github.com/felixge/fgprof v0.9.3 // indirect
 	github.com/felixge/httpsnoop v1.0.3 // indirect
+	github.com/fsnotify/fsnotify v1.6.0 // indirect
 	github.com/go-logr/logr v1.2.3 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/go-openapi/analysis v0.21.4 // indirect
