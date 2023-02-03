@@ -12,10 +12,12 @@ import (
 	_ "github.com/ory/jsonschema/v3/fileloader"
 	_ "github.com/ory/jsonschema/v3/httploader"
 	"github.com/ory/x/configx"
+	"github.com/ory/x/healthx"
 	"github.com/ory/x/logrusx"
 
 	"github.com/ory/oathkeeper/driver"
 	"github.com/ory/oathkeeper/driver/configuration"
+	"github.com/ory/oathkeeper/driver/health"
 	"github.com/ory/oathkeeper/proxy"
 	"github.com/ory/oathkeeper/rule"
 	"github.com/ory/oathkeeper/x"
@@ -26,6 +28,7 @@ type (
 		Logger() *logrusx.Logger
 		RuleMatcher() rule.Matcher
 		ProxyRequestHandler() proxy.RequestHandler
+		HealthEventManager() health.EventManager
 	}
 
 	middleware struct{ dependencies }
@@ -33,6 +36,7 @@ type (
 	Middleware interface {
 		UnaryInterceptor() grpc.UnaryServerInterceptor
 		StreamInterceptor() grpc.StreamServerInterceptor
+		HealthxReadyCheckers() healthx.ReadyCheckers
 	}
 
 	options struct {
@@ -89,4 +93,8 @@ func New(ctx context.Context, opts ...Option) (Middleware, error) {
 	m := &middleware{r}
 
 	return m, nil
+}
+
+func (m *middleware) HealthxReadyCheckers() healthx.ReadyCheckers {
+	return m.HealthEventManager().HealthxReadyCheckers()
 }
