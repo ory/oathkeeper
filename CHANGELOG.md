@@ -5,7 +5,7 @@
 
 **Table of Contents**
 
-- [0.0.0 (2023-02-03)](#000-2023-02-03)
+- [0.0.0 (2023-02-07)](#000-2023-02-07)
   - [Bug Fixes](#bug-fixes)
   - [Features](#features)
 - [0.40.1 (2023-01-17)](#0401-2023-01-17)
@@ -311,7 +311,7 @@
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-# [0.0.0](https://github.com/ory/oathkeeper/compare/v0.40.1...v0.0.0) (2023-02-03)
+# [0.0.0](https://github.com/ory/oathkeeper/compare/v0.40.1...v0.0.0) (2023-02-07)
 
 ### Bug Fixes
 
@@ -326,6 +326,9 @@
 - Expose health checks in middleware
   ([#1058](https://github.com/ory/oathkeeper/issues/1058))
   ([e1357f8](https://github.com/ory/oathkeeper/commit/e1357f8d9aee105b7169c124a0141aafef5ba613))
+- Forward config options in middleware
+  ([#1062](https://github.com/ory/oathkeeper/issues/1062))
+  ([f3c4386](https://github.com/ory/oathkeeper/commit/f3c43861e8ed9ba3bdf46380c97feb7ff53f18b5))
 
 # [0.40.1](https://github.com/ory/oathkeeper/compare/v0.40.0...v0.40.1) (2023-01-17)
 
