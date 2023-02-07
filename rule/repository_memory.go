@@ -90,16 +90,20 @@ func (m *RepositoryMemory) Get(ctx context.Context, id string) (*Rule, error) {
 }
 
 func (m *RepositoryMemory) Set(ctx context.Context, rules []Rule) error {
+	m.Lock()
+	defer m.Unlock()
+
+	m.rules = make([]Rule, 0, len(rules))
+
 	for _, check := range rules {
 		if err := m.r.RuleValidator().Validate(&check); err != nil {
 			m.r.Logger().WithError(err).WithField("rule_id", check.ID).
 				Errorf("A Rule uses a malformed configuration and all URLs matching this rule will not work. You should resolve this issue now.")
+		} else {
+			m.rules = append(m.rules, check)
 		}
 	}
 
-	m.Lock()
-	m.rules = rules
-	m.Unlock()
 	return nil
 }
 

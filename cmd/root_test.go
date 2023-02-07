@@ -4,15 +4,18 @@
 package cmd
 
 import (
+	"encoding/base64"
 	"fmt"
 	"net/http"
 	"os"
 	"testing"
 	"time"
 
-	"github.com/phayes/freeport"
+	"github.com/spf13/cobra"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/ory/x/cmdx"
+
+	"github.com/phayes/freeport"
 )
 
 var apiPort, proxyPort int
@@ -48,7 +51,39 @@ func init() {
 	os.Setenv("AUTHENTICATORS_ANONYMOUS_ENABLED", "true")
 	os.Setenv("AUTHORIZERS_ALLOW_ENABLED", "true")
 	os.Setenv("MUTATORS_NOOP_ENABLED", "true")
-	os.Setenv("ACCESS_RULES_REPOSITORIES", "inline://W3siaWQiOiJ0ZXN0LXJ1bGUtNCIsInVwc3RyZWFtIjp7InByZXNlcnZlX2hvc3QiOnRydWUsInN0cmlwX3BhdGgiOiIvYXBpIiwidXJsIjoibXliYWNrZW5kLmNvbS9hcGkifSwibWF0Y2giOnsidXJsIjoibXlwcm94eS5jb20vYXBpIiwibWV0aG9kcyI6WyJHRVQiLCJQT1NUIl19LCJhdXRoZW50aWNhdG9ycyI6W3siaGFuZGxlciI6Im5vb3AifSx7ImhhbmRsZXIiOiJhbm9ueW1vdXMifV0sImF1dGhvcml6ZXIiOnsiaGFuZGxlciI6ImFsbG93In0sIm11dGF0b3JzIjpbeyJoYW5kbGVyIjoibm9vcCJ9XX1d")
+	os.Setenv("ACCESS_RULES_REPOSITORIES", "inline://"+base64.StdEncoding.EncodeToString([]byte(`[
+  {
+    "id": "test-rule-4",
+    "upstream": {
+      "preserve_host": true,
+      "strip_path": "/api",
+      "url": "https://mybackend.com/api"
+    },
+    "match": {
+      "url": "myproxy.com/api",
+      "methods": [
+        "GET",
+        "POST"
+      ]
+    },
+    "authenticators": [
+      {
+        "handler": "noop"
+      },
+      {
+        "handler": "anonymous"
+      }
+    ],
+    "authorizer": {
+      "handler": "allow"
+    },
+    "mutators": [
+      {
+        "handler": "noop"
+      }
+    ]
+  }
+]`)))
 }
 
 func ensureOpen(t *testing.T, port int) bool {
@@ -64,18 +99,28 @@ func ensureOpen(t *testing.T, port int) bool {
 func TestCommandLineInterface(t *testing.T) {
 	var osArgs = make([]string, len(os.Args))
 	copy(osArgs, os.Args)
+	cmd := cmdx.CommandExecuter{
+		New: func() *cobra.Command {
+			cp := *RootCmd
+			return &cp
+		},
+	}
+
+	// start server, and wait for the ports to be open
+	cmd.ExecBackground(nil, os.Stdout, os.Stderr, "serve", "--disable-telemetry")
+	var count = 0
+	for ensureOpen(t, apiPort) && ensureOpen(t, proxyPort) {
+		t.Logf("Port is not yet open, retrying attempt #%d..", count)
+		count++
+		if count > 50 {
+			t.FailNow()
+		}
+		time.Sleep(100 * time.Millisecond)
+	}
 
 	for _, c := range []struct {
-		args      []string
-		wait      func() bool
-		expectErr bool
+		args []string
 	}{
-		{
-			args: []string{"serve", "--disable-telemetry"},
-			wait: func() bool {
-				return ensureOpen(t, apiPort) && ensureOpen(t, proxyPort)
-			},
-		},
 		{args: []string{"rules", fmt.Sprintf("--endpoint=http://127.0.0.1:%d/", apiPort), "list"}},
 		{args: []string{"rules", fmt.Sprintf("--endpoint=http://127.0.0.1:%d/", apiPort), "get", "test-rule-4"}},
 		{args: []string{"health", fmt.Sprintf("--endpoint=http://127.0.0.1:%d/", apiPort), "alive"}},
@@ -85,33 +130,8 @@ func TestCommandLineInterface(t *testing.T) {
 		{args: []string{"credentials", "generate", "--alg", "HS256"}},
 		{args: []string{"credentials", "generate", "--alg", "RS512"}},
 	} {
-		RootCmd.SetArgs(c.args)
-
 		t.Run(fmt.Sprintf("command=%v", c.args), func(t *testing.T) {
-			if c.wait != nil {
-				go func() {
-					assert.Nil(t, RootCmd.Execute())
-				}()
-			}
-
-			if c.wait != nil {
-				var count = 0
-				for c.wait() {
-					t.Logf("Port is not yet open, retrying attempt #%d..", count)
-					count++
-					if count > 5 {
-						t.FailNow()
-					}
-					time.Sleep(time.Second)
-				}
-			} else {
-				err := RootCmd.Execute()
-				if c.expectErr {
-					assert.Error(t, err)
-				} else {
-					assert.NoError(t, err)
-				}
-			}
+			cmd.ExecNoErr(t, c.args...)
 		})
 	}
 }

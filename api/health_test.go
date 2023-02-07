@@ -35,7 +35,17 @@ type statusError struct {
 
 func TestHealth(t *testing.T) {
 	conf := internal.NewConfigurationWithDefaults()
-	require.NoError(t, conf.Source().Set(configuration.AccessRuleRepositories, []string{"file://../test/stub/rules.json"}))
+	conf.SetForTest(t, configuration.AccessRuleRepositories, []string{"file://../test/stub/rules.json"})
+	conf.SetForTest(t, configuration.AuthorizerAllowIsEnabled, true)
+	conf.SetForTest(t, configuration.AuthorizerDenyIsEnabled, true)
+	conf.SetForTest(t, configuration.AuthenticatorNoopIsEnabled, true)
+	conf.SetForTest(t, configuration.AuthenticatorAnonymousIsEnabled, true)
+	conf.SetForTest(t, configuration.MutatorNoopIsEnabled, true)
+	conf.SetForTest(t, "mutators.header.config", map[string]interface{}{"headers": map[string]interface{}{}})
+	conf.SetForTest(t, configuration.MutatorHeaderIsEnabled, true)
+	conf.SetForTest(t, configuration.MutatorIDTokenJWKSURL, "https://stub/.well-known/jwks.json")
+	conf.SetForTest(t, configuration.MutatorIDTokenIssuerURL, "https://stub")
+	conf.SetForTest(t, configuration.MutatorIDTokenIsEnabled, true)
 	r := internal.NewRegistry(conf)
 
 	router := x.NewAPIRouter()

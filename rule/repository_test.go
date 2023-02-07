@@ -7,6 +7,7 @@ import (
 	"context"
 	"fmt"
 	"math/rand"
+	"net/http"
 	"reflect"
 	"testing"
 
@@ -72,6 +73,8 @@ func TestRepository(t *testing.T) {
 		"memory": NewRepositoryMemory(new(mockRepositoryRegistry)),
 	} {
 		t.Run(fmt.Sprintf("repository=%s/case=valid rule", name), func(t *testing.T) {
+			assert.Error(t, repo.ReadyChecker(new(http.Request)))
+
 			var rules []Rule
 			for i := 0; i < 4; i++ {
 				var rule Rule
@@ -88,6 +91,7 @@ func TestRepository(t *testing.T) {
 			copy(inserted, rules)
 			inserted = inserted[:len(inserted)-1] // insert all elements but the last
 			repo.Set(context.Background(), inserted)
+			assert.NoError(t, repo.ReadyChecker(new(http.Request)))
 
 			for _, expect := range inserted {
 				got, err := repo.Get(context.Background(), expect.ID)
@@ -135,8 +139,8 @@ func TestRepository(t *testing.T) {
 		})
 	}
 
-	var index int
-	mr := &mockRepositoryRegistry{v: validatorNoop{ret: errors.New("this is a forced test error and can be ignored")}}
+	expectedErr := errors.New("this is a forced test error and can be ignored")
+	mr := &mockRepositoryRegistry{v: validatorNoop{ret: expectedErr}}
 	for name, repo := range map[string]Repository{
 		"memory": NewRepositoryMemory(mr),
 	} {
@@ -144,7 +148,8 @@ func TestRepository(t *testing.T) {
 			var rule Rule
 			require.NoError(t, faker.FakeData(&rule))
 			require.NoError(t, repo.Set(context.Background(), []Rule{rule}))
-			assert.Equal(t, index+1, mr.loggerCalled)
+			assert.Equal(t, 1, mr.loggerCalled)
+			assert.Error(t, repo.ReadyChecker(new(http.Request)))
 		})
 	}
 }

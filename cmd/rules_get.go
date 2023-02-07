@@ -20,13 +20,17 @@ var getCmd = &cobra.Command{
 
 	oathkeeper rules --endpoint=http://localhost:4456/ get rule-1
 `,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		cmdx.ExactArgs(cmd, args, 1)
 		client := newClient(cmd)
 
 		r, err := client.API.GetRule(api.NewGetRuleParams().WithID(args[0]))
-		cmdx.Must(err, "%s", err)
+		if err != nil {
+			fmt.Fprintf(cmd.ErrOrStderr(), "Could not get rule: %s", err)
+			return cmdx.FailSilently(cmd)
+		}
 		fmt.Println(cmdx.FormatResponse(r.Payload))
+		return nil
 	},
 }
 

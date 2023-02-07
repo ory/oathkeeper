@@ -111,6 +111,7 @@ func TestMatcher(t *testing.T) {
 			require.Error(t, err)
 		} else {
 			require.NoError(t, err)
+			r.matchingEngine = nil
 			assert.EqualValues(t, *expect, *r)
 		}
 	}
