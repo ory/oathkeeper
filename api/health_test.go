@@ -10,11 +10,13 @@ import (
 	"testing"
 	"time"
 
+	"github.com/ory/herodot"
+	"github.com/ory/oathkeeper/driver/configuration"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
 	"github.com/ory/oathkeeper/internal"
-	rulereadiness "github.com/ory/oathkeeper/rule/readiness"
 	"github.com/ory/oathkeeper/x"
 )
 
@@ -33,6 +35,7 @@ type statusError struct {
 
 func TestHealth(t *testing.T) {
 	conf := internal.NewConfigurationWithDefaults()
+	require.NoError(t, conf.Source().Set(configuration.AccessRuleRepositories, []string{"file://../test/stub/rules.json"}))
 	r := internal.NewRegistry(conf)
 
 	router := x.NewAPIRouter()
@@ -58,7 +61,7 @@ func TestHealth(t *testing.T) {
 	require.Equal(t, http.StatusServiceUnavailable, res.StatusCode)
 	require.NoError(t, json.NewDecoder(res.Body).Decode(&result))
 	assert.Empty(t, result.Status)
-	assert.Equal(t, rulereadiness.ErrRuleNotYetLoaded.Error(), result.Error.Message)
+	assert.Equal(t, herodot.ErrNotFound.ErrorField, result.Error.Message)
 
 	r.Init()
 	// Waiting for rule load and health event propagation

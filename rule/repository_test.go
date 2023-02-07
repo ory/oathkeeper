@@ -17,14 +17,11 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/ory/x/healthx"
-
 	"github.com/ory/x/logrusx"
 
 	"github.com/ory/x/sqlcon/dockertest"
 
 	"github.com/ory/oathkeeper/driver/configuration"
-	"github.com/ory/oathkeeper/driver/health"
 )
 
 func TestMain(m *testing.M) {
@@ -39,21 +36,6 @@ type validatorNoop struct {
 
 func (v *validatorNoop) Validate(*Rule) error {
 	return v.ret
-}
-
-type mockHealthEventManager struct {
-}
-
-func (m *mockHealthEventManager) Dispatch(_ health.ReadinessProbeEvent) {
-
-}
-
-func (m *mockHealthEventManager) Watch(_ context.Context) {
-
-}
-
-func (m *mockHealthEventManager) HealthxReadyCheckers() healthx.ReadyCheckers {
-	return nil
 }
 
 type mockRepositoryRegistry struct {
@@ -87,7 +69,7 @@ func init() {
 
 func TestRepository(t *testing.T) {
 	for name, repo := range map[string]Repository{
-		"memory": NewRepositoryMemory(new(mockRepositoryRegistry), new(mockHealthEventManager)),
+		"memory": NewRepositoryMemory(new(mockRepositoryRegistry)),
 	} {
 		t.Run(fmt.Sprintf("repository=%s/case=valid rule", name), func(t *testing.T) {
 			var rules []Rule
@@ -156,7 +138,7 @@ func TestRepository(t *testing.T) {
 	var index int
 	mr := &mockRepositoryRegistry{v: validatorNoop{ret: errors.New("this is a forced test error and can be ignored")}}
 	for name, repo := range map[string]Repository{
-		"memory": NewRepositoryMemory(mr, new(mockHealthEventManager)),
+		"memory": NewRepositoryMemory(mr),
 	} {
 		t.Run(fmt.Sprintf("repository=%s/case=invalid rule", name), func(t *testing.T) {
 			var rule Rule
