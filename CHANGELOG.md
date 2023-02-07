@@ -317,6 +317,12 @@
 
 - Release pipeline ([#1053](https://github.com/ory/oathkeeper/issues/1053))
   ([878089d](https://github.com/ory/oathkeeper/commit/878089dbbda8c2db0bc38bf3ff7158e996eae1b6))
+- Rule readiness check should require at least one rule to be loaded
+  ([#1061](https://github.com/ory/oathkeeper/issues/1061))
+  ([daa2994](https://github.com/ory/oathkeeper/commit/daa299498953a7c53c4f82224e9e9b3e9472a82d)):
+
+  With this change, Oathkeeper now reports as "not ready" on the health check if
+  not at least one valid rule is loaded.
 
 ### Features
 
