@@ -28,6 +28,7 @@ type repositoryMemoryRegistry interface {
 type RepositoryMemory struct {
 	sync.RWMutex
 	rules            []Rule
+	invalidRules     []Rule
 	matchingStrategy configuration.MatchingStrategy
 	r                repositoryMemoryRegistry
 }
@@ -94,11 +95,13 @@ func (m *RepositoryMemory) Set(ctx context.Context, rules []Rule) error {
 	defer m.Unlock()
 
 	m.rules = make([]Rule, 0, len(rules))
+	m.invalidRules = make([]Rule, 0)
 
 	for _, check := range rules {
 		if err := m.r.RuleValidator().Validate(&check); err != nil {
 			m.r.Logger().WithError(err).WithField("rule_id", check.ID).
 				Errorf("A Rule uses a malformed configuration and all URLs matching this rule will not work. You should resolve this issue now.")
+			m.invalidRules = append(m.invalidRules, check)
 		} else {
 			m.rules = append(m.rules, check)
 		}
@@ -115,15 +118,22 @@ func (m *RepositoryMemory) Match(ctx context.Context, method string, u *url.URL,
 	m.Lock()
 	defer m.Unlock()
 
-	var rules []Rule
+	var rules []*Rule
 	for k := range m.rules {
 		r := &m.rules[k]
 		if matched, err := r.IsMatching(m.matchingStrategy, method, u, protocol); err != nil {
 			return nil, errors.WithStack(err)
 		} else if matched {
-			rules = append(rules, *r)
+			rules = append(rules, r)
 		}
-		m.rules[k] = *r
+	}
+	for k := range m.invalidRules {
+		r := &m.invalidRules[k]
+		if matched, err := r.IsMatching(m.matchingStrategy, method, u, protocol); err != nil {
+			return nil, errors.WithStack(err)
+		} else if matched {
+			rules = append(rules, r)
+		}
 	}
 
 	if len(rules) == 0 {
@@ -132,7 +142,7 @@ func (m *RepositoryMemory) Match(ctx context.Context, method string, u *url.URL,
 		return nil, errors.WithStack(helper.ErrMatchesMoreThanOneRule)
 	}
 
-	return &rules[0], nil
+	return rules[0], nil
 }
 
 func (m *RepositoryMemory) ReadyChecker(r *http.Request) error {

@@ -6,9 +6,11 @@ package cmd
 import (
 	"fmt"
 	"os"
-	"runtime"
 
+	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
+
+	"github.com/ory/x/cmdx"
 
 	_ "github.com/ory/jsonschema/v3/fileloader"
 	_ "github.com/ory/jsonschema/v3/httploader"
@@ -25,22 +27,13 @@ var RootCmd = &cobra.Command{
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
 	if err := RootCmd.Execute(); err != nil {
-		fmt.Println(err)
+		if !errors.Is(err, cmdx.ErrNoPrintButFail) {
+			fmt.Println(err)
+		}
 		os.Exit(-1)
 	}
 }
 
 func init() {
 	configx.RegisterFlags(RootCmd.PersistentFlags())
-}
-
-func userHomeDir() string {
-	if runtime.GOOS == "windows" {
-		home := os.Getenv("HOMEDRIVE") + os.Getenv("HOMEPATH")
-		if home == "" {
-			home = os.Getenv("USERPROFILE")
-		}
-		return home
-	}
-	return os.Getenv("HOME")
 }
