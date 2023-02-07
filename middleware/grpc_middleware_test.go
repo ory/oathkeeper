@@ -32,6 +32,7 @@ import (
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/middleware"
 	"github.com/ory/oathkeeper/rule"
+	"github.com/ory/x/configx"
 )
 
 func testClient(t *testing.T, l *bufconn.Listener, dialOpts ...grpc.DialOption) grpcTesting.TestServiceClient {
@@ -116,6 +117,7 @@ mutators:
 	regPtr := new(driver.Registry)
 	mw, err := middleware.New(ctx,
 		middleware.WithConfigFile(config),
+		middleware.WithConfigOption(configx.WithValue("tracing.providers.jaeger.local_agent_address", "localhost:12345")),
 		middleware.WithRegistry(regPtr),
 	)
 	require.NoError(t, err)

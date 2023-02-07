@@ -44,6 +44,7 @@ type (
 		configFile         string
 		registryAddr       *driver.Registry
 		configProviderAddr *configuration.Provider
+		configProviderOpts []configx.OptionModifier
 	}
 
 	Option func(*options)
@@ -59,6 +60,18 @@ func WithLogger(logger *logrusx.Logger) Option {
 	return func(o *options) { o.logger = logger }
 }
 
+// WithConfigOption sets a config option for the middleware. The following
+// options will be set regardless:
+// - configx.WithContext
+// - configx.WithLogger
+// - configx.WithConfigFiles
+// - configx.DisableEnvLoading
+func WithConfigOption(option configx.OptionModifier) Option {
+	return func(o *options) {
+		o.configProviderOpts = append(o.configProviderOpts, option)
+	}
+}
+
 // New creates an Oathkeeper middleware from the options. By default, it tries
 // to read the configuration from the file "oathkeeper.yaml".
 func New(ctx context.Context, opts ...Option) (Middleware, error) {
@@ -72,10 +85,12 @@ func New(ctx context.Context, opts ...Option) (Middleware, error) {
 
 	c, err := configuration.NewKoanfProvider(
 		ctx, nil, o.logger,
-		configx.WithContext(ctx),
-		configx.WithLogger(o.logger),
-		configx.WithConfigFiles(o.configFile),
-		configx.DisableEnvLoading(),
+		append(o.configProviderOpts,
+			configx.WithContext(ctx),
+			configx.WithLogger(o.logger),
+			configx.WithConfigFiles(o.configFile),
+			configx.DisableEnvLoading(),
+		)...,
 	)
 	if err != nil {
 		return nil, errors.WithStack(err)

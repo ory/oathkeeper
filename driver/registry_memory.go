@@ -428,7 +428,7 @@ func (r *RegistryMemory) Tracer() trace.Tracer {
 		var err error
 		r.trc, err = otelx.New(r.c.TracingServiceName(), r.Logger(), r.c.TracingConfig())
 		if err != nil {
-			r.Logger().WithError(err).Fatalf("Unable to initialize Tracer.")
+			r.Logger().WithError(err).Fatalf("Unable to initialize Tracer for Oathkeeper.")
 		}
 	}
 	return r.trc.Tracer()
