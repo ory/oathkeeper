@@ -10,7 +10,6 @@ import (
 
 	"github.com/ory/x/healthx"
 
-	"github.com/ory/oathkeeper/driver/health"
 	"github.com/ory/oathkeeper/pipeline/errors"
 	"github.com/ory/oathkeeper/proxy"
 
@@ -35,7 +34,7 @@ type Registry interface {
 	BuildHash() string
 
 	ProxyRequestHandler() proxy.RequestHandler
-	HealthEventManager() health.EventManager
+	HealthxReadyCheckers() healthx.ReadyCheckers
 	HealthHandler() *healthx.Handler
 	RuleHandler() *api.RuleHandler
 	DecisionHandler() *api.DecisionHandler

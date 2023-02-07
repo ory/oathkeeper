@@ -17,7 +17,6 @@ import (
 
 	"github.com/ory/oathkeeper/driver"
 	"github.com/ory/oathkeeper/driver/configuration"
-	"github.com/ory/oathkeeper/driver/health"
 	"github.com/ory/oathkeeper/proxy"
 	"github.com/ory/oathkeeper/rule"
 	"github.com/ory/oathkeeper/x"
@@ -28,7 +27,7 @@ type (
 		Logger() *logrusx.Logger
 		RuleMatcher() rule.Matcher
 		ProxyRequestHandler() proxy.RequestHandler
-		HealthEventManager() health.EventManager
+		HealthxReadyCheckers() healthx.ReadyCheckers
 	}
 
 	middleware struct{ dependencies }
@@ -111,5 +110,5 @@ func New(ctx context.Context, opts ...Option) (Middleware, error) {
 }
 
 func (m *middleware) HealthxReadyCheckers() healthx.ReadyCheckers {
-	return m.HealthEventManager().HealthxReadyCheckers()
+	return m.dependencies.HealthxReadyCheckers()
 }

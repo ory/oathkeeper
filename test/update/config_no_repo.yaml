@@ -1,2 +1,11 @@
 access_rules:
   repositories: []
+authenticators:
+  anonymous:
+    enabled: true
+authorizers:
+  allow:
+    enabled: true
+mutators:
+  noop:
+    enabled: true

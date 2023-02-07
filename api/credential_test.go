@@ -25,7 +25,11 @@ import (
 
 func TestCredentialsHandler(t *testing.T) {
 	conf := internal.NewConfigurationWithDefaults(configx.SkipValidation())
+	conf.SetForTest(t, configuration.MutatorIDTokenIsEnabled, true)
 	conf.SetForTest(t, configuration.MutatorIDTokenJWKSURL, "file://../test/stub/jwks-rsa-multiple.json")
+	conf.SetForTest(t, configuration.MutatorIDTokenIssuerURL, "https://example.com")
+	conf.SetForTest(t, configuration.AuthenticatorAnonymousIsEnabled, true)
+	conf.SetForTest(t, configuration.AuthorizerAllowIsEnabled, true)
 
 	r := internal.NewRegistry(conf)
 
@@ -57,9 +61,9 @@ func TestCredentialsHandler(t *testing.T) {
 
 	var j jose.JSONWebKeySet
 	require.NoError(t, json.NewDecoder(res.Body).Decode(&j))
-	assert.Len(t, j.Key("3e0edde4-12ad-425d-a783-135f46eac57e"), 1, "The public key should be broadcasted")
-	assert.Len(t, j.Key("81be3441-5303-4c52-b00d-bbdfadc75633"), 1, "The public key should be broadcasted")
-	assert.Len(t, j.Key("f4190122-ae96-4c29-8b79-56024e459d80"), 1, "The public key generated from the private key should be broadcasted")
+	require.Len(t, j.Key("3e0edde4-12ad-425d-a783-135f46eac57e"), 1, "The public key should be broadcasted")
+	require.Len(t, j.Key("81be3441-5303-4c52-b00d-bbdfadc75633"), 1, "The public key should be broadcasted")
+	require.Len(t, j.Key("f4190122-ae96-4c29-8b79-56024e459d80"), 1, "The public key generated from the private key should be broadcasted")
 	assert.IsType(t, new(rsa.PublicKey), j.Key("3e0edde4-12ad-425d-a783-135f46eac57e")[0].Key, "Ensure a public key")
 	assert.IsType(t, new(rsa.PublicKey), j.Key("f4190122-ae96-4c29-8b79-56024e459d80")[0].Key, "Ensure a public key")
 	assert.IsType(t, new(rsa.PublicKey), j.Key("81be3441-5303-4c52-b00d-bbdfadc75633")[0].Key, "Ensure a public key")

@@ -43,6 +43,7 @@ const (
 	MutatorHydratorIsEnabled Key = "mutators.hydrator.enabled"
 	MutatorIDTokenIsEnabled  Key = "mutators.id_token.enabled"
 	MutatorIDTokenJWKSURL    Key = "mutators.id_token.config.jwks_url"
+	MutatorIDTokenIssuerURL  Key = "mutators.id_token.config.issuer_url"
 )
 
 // Authenticators
