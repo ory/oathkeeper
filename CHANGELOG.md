@@ -5,7 +5,7 @@
 
 **Table of Contents**
 
-- [0.0.0 (2023-02-07)](#000-2023-02-07)
+- [0.0.0 (2023-02-08)](#000-2023-02-08)
   - [Bug Fixes](#bug-fixes)
   - [Features](#features)
 - [0.40.1 (2023-01-17)](#0401-2023-01-17)
@@ -311,7 +311,7 @@
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-# [0.0.0](https://github.com/ory/oathkeeper/compare/v0.40.1...v0.0.0) (2023-02-07)
+# [0.0.0](https://github.com/ory/oathkeeper/compare/v0.40.1...v0.0.0) (2023-02-08)
 
 ### Bug Fixes
 
@@ -335,6 +335,9 @@
 - Forward config options in middleware
   ([#1062](https://github.com/ory/oathkeeper/issues/1062))
   ([f3c4386](https://github.com/ory/oathkeeper/commit/f3c43861e8ed9ba3bdf46380c97feb7ff53f18b5))
+- Tracing for authz remote
+  ([#1056](https://github.com/ory/oathkeeper/issues/1056))
+  ([7e7d45e](https://github.com/ory/oathkeeper/commit/7e7d45e4ec7af91157ea9b6526f8607bb9b8ef06))
 
 # [0.40.1](https://github.com/ory/oathkeeper/compare/v0.40.0...v0.40.1) (2023-01-17)
 
