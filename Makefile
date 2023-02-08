@@ -82,8 +82,7 @@ install:
 .PHONY: docker
 docker:
 	CGO_ENABLED=0 GO111MODULE=on GOOS=linux GOARCH=amd64 go build
-	docker build -t oryd/oathkeeper:dev .
-	docker build -t oryd/oathkeeper:dev-alpine -f Dockerfile-alpine .
+	docker build -t oryd/oathkeeper:dev -f Dockerfile .
 	rm oathkeeper
 
 docs/cli: .bin/clidoc

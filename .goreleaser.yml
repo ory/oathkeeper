@@ -17,6 +17,6 @@ variables:
   buildinfo_hash: "github.com/ory/oathkeeper/x.Commit"
   buildinfo_tag: "github.com/ory/oathkeeper/x.Version"
   buildinfo_date: "github.com/ory/oathkeeper/x.Date"
-  dockerfile: "./Dockerfile-alpine"
+  dockerfile: "./Dockerfile"
 
 project_name: oathkeeper
