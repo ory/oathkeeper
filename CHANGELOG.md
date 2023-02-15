@@ -5,7 +5,7 @@
 
 **Table of Contents**
 
-- [0.0.0 (2023-02-08)](#000-2023-02-08)
+- [0.0.0 (2023-02-15)](#000-2023-02-15)
   - [Bug Fixes](#bug-fixes)
   - [Features](#features)
 - [0.40.1 (2023-01-17)](#0401-2023-01-17)
@@ -311,12 +311,15 @@
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-# [0.0.0](https://github.com/ory/oathkeeper/compare/v0.40.1...v0.0.0) (2023-02-08)
+# [0.0.0](https://github.com/ory/oathkeeper/compare/v0.40.1...v0.0.0) (2023-02-15)
 
 ### Bug Fixes
 
 - Release pipeline ([#1053](https://github.com/ory/oathkeeper/issues/1053))
   ([878089d](https://github.com/ory/oathkeeper/commit/878089dbbda8c2db0bc38bf3ff7158e996eae1b6))
+- Render complete config schema in CI and update tracing config
+  ([#1063](https://github.com/ory/oathkeeper/issues/1063))
+  ([e5e9d17](https://github.com/ory/oathkeeper/commit/e5e9d1788af669c3818d9e1f91b24222c2b9aafc))
 - Rule readiness check should require at least one rule to be loaded
   ([#1061](https://github.com/ory/oathkeeper/issues/1061))
   ([daa2994](https://github.com/ory/oathkeeper/commit/daa299498953a7c53c4f82224e9e9b3e9472a82d)):
