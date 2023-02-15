@@ -122,18 +122,11 @@ func (v *KoanfProvider) AddWatcher(cb callback) SubscriptionID {
 	return sID
 }
 
-// RemoveWatcher removes the watcher with the given subscription ID.
-func (v *KoanfProvider) RemoveWatcher(id SubscriptionID) {
-	v.subscriptions.Lock()
-	delete(v.subscriptions.data, id)
-	v.subscriptions.Unlock()
-}
-
 func (v *KoanfProvider) Get(k Key) interface{} {
-	return v.source.Get(string(k))
+	return v.source.Get(k)
 }
 func (v *KoanfProvider) String(k Key) string {
-	return v.source.String(string(k))
+	return v.source.String(k)
 }
 func (v *KoanfProvider) AllSettings() map[string]interface{} {
 	return v.source.All()

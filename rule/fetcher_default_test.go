@@ -193,7 +193,7 @@ func TestFetcherWatchConfig(t *testing.T) {
 
 	require.NoError(t, os.WriteFile(configFile.Name(), []byte(""), 0666))
 
-	go func() { require.NoError(t, r.RuleFetcher().Watch(ctx)) }()
+	require.NoError(t, r.RuleFetcher().Watch(ctx))
 
 	for k, tc := range []struct {
 		config           string
@@ -276,7 +276,7 @@ access_rules:
 				ids[k] = r.ID
 			}
 
-			assert.ElementsMatch(t, tc.expectIDs, ids)
+			assert.ElementsMatch(t, ids, tc.expectIDs)
 		})
 	}
 }

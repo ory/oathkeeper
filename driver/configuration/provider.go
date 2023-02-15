@@ -38,7 +38,6 @@ type Provider interface {
 	Source() *configx.Provider
 
 	AddWatcher(cb callback) SubscriptionID
-	RemoveWatcher(id SubscriptionID)
 
 	CORSEnabled(iface string) bool
 	CORSOptions(iface string) cors.Options
