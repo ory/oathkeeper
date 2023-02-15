@@ -247,7 +247,7 @@ func (f *FetcherDefault) processLocalUpdates(ctx context.Context) {
 			f.registry.Logger().
 				WithField("event", "fsnotify").
 				WithField("file", e.Source()).
-				Debugf("Detected file change for access rules. Triggering a reload.")
+				Info("Detected file change for access rules. Triggering a reload.")
 
 			if e.Reader() == nil {
 				f.registry.Logger().WithField("file", e.Source()).Error("Unable to read access rules probably because they were deleted, skipping those.")
