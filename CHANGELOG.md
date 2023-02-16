@@ -5,7 +5,7 @@
 
 **Table of Contents**
 
-- [0.0.0 (2023-02-15)](#000-2023-02-15)
+- [0.0.0 (2023-02-16)](#000-2023-02-16)
   - [Bug Fixes](#bug-fixes)
   - [Features](#features)
 - [0.40.1 (2023-01-17)](#0401-2023-01-17)
@@ -311,10 +311,14 @@
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-# [0.0.0](https://github.com/ory/oathkeeper/compare/v0.40.1...v0.0.0) (2023-02-15)
+# [0.0.0](https://github.com/ory/oathkeeper/compare/v0.40.1...v0.0.0) (2023-02-16)
 
 ### Bug Fixes
 
+- Add handlers in correct order to handle CORS requests properly
+  ([#1055](https://github.com/ory/oathkeeper/issues/1055))
+  ([0b5f6e6](https://github.com/ory/oathkeeper/commit/0b5f6e6cc98126e778f5ccb1c5f7728cb342ec62)),
+  closes [ory/oathkeeper#1054](https://github.com/ory/oathkeeper/issues/1054)
 - Release pipeline ([#1053](https://github.com/ory/oathkeeper/issues/1053))
   ([878089d](https://github.com/ory/oathkeeper/commit/878089dbbda8c2db0bc38bf3ff7158e996eae1b6))
 - Render complete config schema in CI and update tracing config
