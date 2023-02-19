@@ -1,3 +1,6 @@
+// Copyright © 2023 Ory Corp
+// SPDX-License-Identifier: Apache-2.0
+
 package metrics
 
 import (
@@ -6,6 +9,12 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+	"time"
+
+	"github.com/ory/oathkeeper/driver"
+	"github.com/ory/oathkeeper/x"
+	"github.com/ory/x/configx"
+	"github.com/ory/x/logrusx"
 
 	"github.com/julienschmidt/httprouter"
 	"github.com/prometheus/client_golang/prometheus"
@@ -27,7 +36,24 @@ var (
 	metricsCollapsed string = metricMetadata + rootMetric + `
 	ory_oathkeeper_requests_total{method="GET",request="/hello",service="test",status_code="200"} 1
 	`
+	metricsHidden string = metricMetadata + `
+	ory_oathkeeper_requests_total{method="GET",request="",service="test",status_code="200"} 2
+	`
 	serverContextPaths []string = []string{"/", "/hello/world"}
+
+	configurableMetricMetadata string = `
+	# HELP http_requests_total Total number of requests
+	# TYPE http_requests_total counter
+	`
+	configurableRootMetric string = `
+	http_requests_total{method="GET",request="/",service="test",status_code="200"} 1
+	`
+	configurableMetricsNotCollapsed string = configurableMetricMetadata + configurableRootMetric + `
+	http_requests_total{method="GET",request="/hello/world",service="test",status_code="200"} 1
+	`
+	configurableMetricsCollapsed string = configurableMetricMetadata + configurableRootMetric + `
+	http_requests_total{method="GET",request="/hello",service="test",status_code="200"} 1
+	`
 )
 
 func NewTestPrometheusRepository(collector prometheus.Collector) *PrometheusRepository {
@@ -59,10 +85,13 @@ func PrometheusTestApp(middleware *Middleware) http.Handler {
 var prometheusParams = []struct {
 	name            string
 	collapsePaths   bool
+	hidePaths       bool
 	expectedMetrics string
 }{
-	{"Not collapsed paths", false, metricsNotCollapsed},
-	{"Collapsed paths", true, metricsCollapsed},
+	{"Not collapsed paths", false, false, metricsNotCollapsed},
+	{"Collapsed paths", true, false, metricsCollapsed},
+	{"Hidden not collapsed paths", false, true, metricsHidden},
+	{"Hidden collapsed paths", true, true, metricsHidden},
 }
 
 func TestPrometheusRequestTotalMetrics(t *testing.T) {
@@ -72,6 +101,55 @@ func TestPrometheusRequestTotalMetrics(t *testing.T) {
 			RequestTotal.Reset()
 
 			promRepo := NewTestPrometheusRepository(RequestTotal)
+			promMiddleware := NewMiddleware(promRepo, "test")
+			promMiddleware.CollapsePaths(tt.collapsePaths)
+			promMiddleware.HidePaths(tt.hidePaths)
+
+			ts := httptest.NewServer(PrometheusTestApp(promMiddleware))
+			defer ts.Close()
+
+			for _, path := range serverContextPaths {
+				req, err := http.NewRequest("GET", ts.URL+path, nil)
+				if err != nil {
+					t.Fatal(err)
+				}
+				client := &http.Client{}
+				_, err = client.Do(req)
+				if err != nil {
+					t.Fatal(err)
+				}
+			}
+			if err := testutil.CollectAndCompare(RequestTotal, strings.NewReader(tt.expectedMetrics), "ory_oathkeeper_requests_total"); err != nil {
+				t.Fatal(err)
+			}
+		})
+	}
+}
+
+var configurablePrometheusParams = []struct {
+	name            string
+	collapsePaths   bool
+	expectedMetrics string
+}{
+	{"Not collapsed paths", false, configurableMetricsNotCollapsed},
+	{"Collapsed paths", true, configurableMetricsCollapsed},
+}
+
+func TestConfigurablePrometheusRequestTotalMetrics(t *testing.T) {
+	for _, tt := range configurablePrometheusParams {
+		t.Run(tt.name, func(t *testing.T) {
+			// re-initialize to prevent double counts
+			RequestTotal.Reset()
+
+			logger := logrusx.New("ORY Oathkeeper", "1")
+			d := driver.NewDefaultDriver(logger, "1", "test", time.Now().String(), nil,
+				configx.WithConfigFiles(x.WriteFile(t, `
+serve:
+  prometheus:
+    metric_name_prefix: http_
+`)),
+			)
+			promRepo := NewConfigurablePrometheusRepository(d, logger)
 			promMiddleware := NewMiddleware(promRepo, "test")
 			promMiddleware.CollapsePaths(tt.collapsePaths)
 
@@ -89,7 +167,7 @@ func TestPrometheusRequestTotalMetrics(t *testing.T) {
 					t.Fatal(err)
 				}
 			}
-			if err := testutil.CollectAndCompare(RequestTotal, strings.NewReader(tt.expectedMetrics), "ory_oathkeeper_requests_total"); err != nil {
+			if err := testutil.CollectAndCompare(RequestTotal, strings.NewReader(tt.expectedMetrics), "http_requests_total"); err != nil {
 				t.Fatal(err)
 			}
 		})

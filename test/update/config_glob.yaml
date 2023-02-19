@@ -1,3 +1,12 @@
 access_rules:
   repositories: file://../test/update/rules_glob.yaml
   matching_strategy: glob
+authenticators:
+  anonymous:
+    enabled: true
+authorizers:
+  allow:
+    enabled: true
+mutators:
+  noop:
+    enabled: true

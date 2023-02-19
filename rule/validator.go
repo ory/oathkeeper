@@ -1,22 +1,5 @@
-/*
- * Copyright © 2017-2018 Aeneas Rekkas <aeneas+oss@aeneas.io>
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *
- * @author       Aeneas Rekkas <aeneas+oss@aeneas.io>
- * @copyright  2017-2018 Aeneas Rekkas <aeneas+oss@aeneas.io>
- * @license  	   Apache-2.0
- */
+// Copyright © 2023 Ory Corp
+// SPDX-License-Identifier: Apache-2.0
 
 package rule
 
@@ -26,6 +9,7 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/ory/herodot"
+
 	"github.com/ory/oathkeeper/pipeline/authn"
 	"github.com/ory/oathkeeper/pipeline/authz"
 	pe "github.com/ory/oathkeeper/pipeline/errors"
@@ -126,8 +110,8 @@ func (v *ValidatorDefault) Validate(r *Rule) error {
 		return errors.WithStack(herodot.ErrInternalServerError.WithReasonf(`Value "match" is empty but must be set.`))
 	}
 
-	if r.Match.URL == "" {
-		return errors.WithStack(herodot.ErrInternalServerError.WithReasonf(`Value "%s" of "match.url" field must not be empty.`, r.Match.URL))
+	if r.Match.GetURL() == "" {
+		return errors.WithStack(herodot.ErrInternalServerError.WithReasonf(`Value "%s" of "match.url" field must not be empty.`, r.Match.GetURL()))
 	}
 
 	if r.Upstream.URL == "" {

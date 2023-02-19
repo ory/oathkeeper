@@ -1,3 +1,6 @@
+// Copyright © 2023 Ory Corp
+// SPDX-License-Identifier: Apache-2.0
+
 package authz
 
 import (
@@ -12,6 +15,8 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/ory/x/httpx"
+
+	"go.opentelemetry.io/otel/trace"
 
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/helper"
@@ -42,10 +47,10 @@ type AuthorizerRemote struct {
 }
 
 // NewAuthorizerRemote creates a new AuthorizerRemote.
-func NewAuthorizerRemote(c configuration.Provider) *AuthorizerRemote {
+func NewAuthorizerRemote(c configuration.Provider, d interface{ Tracer() trace.Tracer }) *AuthorizerRemote {
 	return &AuthorizerRemote{
 		c:      c,
-		client: httpx.NewResilientClientLatencyToleranceSmall(nil),
+		client: httpx.NewResilientClient().StandardClient(),
 		t:      x.NewTemplate("remote"),
 	}
 }
@@ -105,6 +110,7 @@ func (a *AuthorizerRemote) Authorize(r *http.Request, session *authn.Authenticat
 	}
 
 	res, err := a.client.Do(req.WithContext(r.Context()))
+
 	if err != nil {
 		return errors.WithStack(err)
 	}
@@ -165,7 +171,10 @@ func (a *AuthorizerRemote) Config(config json.RawMessage) (*AuthorizerRemoteConf
 		return nil, err
 	}
 	timeout := time.Millisecond * duration
-	a.client = httpx.NewResilientClientLatencyToleranceConfigurable(nil, timeout, maxWait)
+	a.client = httpx.NewResilientClient(
+		httpx.ResilientClientWithMaxRetryWait(maxWait),
+		httpx.ResilientClientWithConnectionTimeout(timeout),
+	).StandardClient()
 
 	return &c, nil
 }

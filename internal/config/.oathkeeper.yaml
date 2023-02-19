@@ -83,7 +83,9 @@ serve:
     port: 9000
     host: localhost
     metrics_path: /metrics
+    hide_request_paths: false
     collapse_request_paths: true
+    metric_name_prefix: ory_oathkeeper_
 
 # Configures Access Rules
 access_rules:
@@ -268,7 +270,7 @@ authorizers:
 
     config:
       remote: https://host/path
-      payload: '{}'
+      payload: "{}"
       forward_response_headers_to_upstream:
         - x-foo
 

@@ -1,3 +1,6 @@
+// Copyright © 2023 Ory Corp
+// SPDX-License-Identifier: Apache-2.0
+
 package authn
 
 import (
@@ -51,6 +54,16 @@ type MatchContext struct {
 	URL                 *url.URL    `json:"url"`
 	Method              string      `json:"method"`
 	Header              http.Header `json:"header"`
+}
+
+type AuthenticatorForwardConfig interface {
+	GetCheckSessionURL() string
+	GetPreserveQuery() bool
+	GetPreservePath() bool
+	GetPreserveHost() bool
+	GetForwardHTTPHeaders() []string
+	GetSetHeaders() map[string]string
+	GetForceMethod() string
 }
 
 func (a *AuthenticationSession) SetHeader(key, val string) {

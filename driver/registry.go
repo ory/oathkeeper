@@ -1,12 +1,15 @@
+// Copyright © 2023 Ory Corp
+// SPDX-License-Identifier: Apache-2.0
+
 package driver
 
 import (
+	"go.opentelemetry.io/otel/trace"
+
 	"github.com/ory/x/logrusx"
 
 	"github.com/ory/x/healthx"
-	"github.com/ory/x/tracing"
 
-	"github.com/ory/oathkeeper/driver/health"
 	"github.com/ory/oathkeeper/pipeline/errors"
 	"github.com/ory/oathkeeper/proxy"
 
@@ -31,14 +34,14 @@ type Registry interface {
 	BuildHash() string
 
 	ProxyRequestHandler() proxy.RequestHandler
-	HealthEventManager() health.EventManager
+	HealthxReadyCheckers() healthx.ReadyCheckers
 	HealthHandler() *healthx.Handler
 	RuleHandler() *api.RuleHandler
 	DecisionHandler() *api.DecisionHandler
 	CredentialHandler() *api.CredentialsHandler
 
 	Proxy() *proxy.Proxy
-	Tracer() *tracing.Tracer
+	Tracer() trace.Tracer
 
 	authn.Registry
 	authz.Registry

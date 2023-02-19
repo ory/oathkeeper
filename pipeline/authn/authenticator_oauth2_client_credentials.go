@@ -1,3 +1,6 @@
+// Copyright © 2023 Ory Corp
+// SPDX-License-Identifier: Apache-2.0
+
 package authn
 
 import (
@@ -100,7 +103,10 @@ func (a *AuthenticatorOAuth2ClientCredentials) Config(config json.RawMessage) (*
 		return nil, err
 	}
 	timeout := time.Millisecond * duration
-	a.client = httpx.NewResilientClientLatencyToleranceConfigurable(nil, timeout, maxWait)
+	a.client = httpx.NewResilientClient(
+		httpx.ResilientClientWithMaxRetryWait(maxWait),
+		httpx.ResilientClientWithConnectionTimeout(timeout),
+	).StandardClient()
 
 	if c.Cache.TTL != "" {
 		cacheTTL, err := time.ParseDuration(c.Cache.TTL)

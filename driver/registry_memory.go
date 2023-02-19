@@ -1,17 +1,21 @@
+// Copyright © 2023 Ory Corp
+// SPDX-License-Identifier: Apache-2.0
+
 package driver
 
 import (
 	"context"
 	"sync"
 
-	"github.com/ory/oathkeeper/driver/health"
+	"go.opentelemetry.io/otel/trace"
+
 	"github.com/ory/oathkeeper/pipeline"
 	pe "github.com/ory/oathkeeper/pipeline/errors"
 	"github.com/ory/oathkeeper/proxy"
 	"github.com/ory/oathkeeper/x"
 
 	"github.com/ory/x/logrusx"
-	"github.com/ory/x/tracing"
+	"github.com/ory/x/otelx"
 
 	"github.com/pkg/errors"
 
@@ -23,10 +27,8 @@ import (
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/pipeline/authn"
 	"github.com/ory/oathkeeper/pipeline/authz"
-	ep "github.com/ory/oathkeeper/pipeline/errors"
 	"github.com/ory/oathkeeper/pipeline/mutate"
 	"github.com/ory/oathkeeper/rule"
-	rulereadiness "github.com/ory/oathkeeper/rule/readiness"
 )
 
 var _ Registry = new(RegistryMemory)
@@ -40,7 +42,7 @@ type RegistryMemory struct {
 	logger       *logrusx.Logger
 	writer       herodot.Writer
 	c            configuration.Provider
-	trc          *tracing.Tracer
+	trc          *otelx.Tracer
 
 	ch *api.CredentialsHandler
 
@@ -60,21 +62,15 @@ type RegistryMemory struct {
 	authenticators map[string]authn.Authenticator
 	authorizers    map[string]authz.Authorizer
 	mutators       map[string]mutate.Mutator
-	errors         map[string]ep.Handler
-
-	healthEventManager *health.DefaultHealthEventManager
-
-	ruleRepositoryLock sync.Mutex
+	errors         map[string]pe.Handler
 }
 
 func (r *RegistryMemory) Init() {
-	go func() {
-		if err := r.RuleFetcher().Watch(context.Background()); err != nil {
-			r.Logger().WithError(err).Fatal("Access rule watcher terminated with an error.")
-		}
-	}()
-	r.HealthEventManager().Watch(context.Background())
+	if err := r.RuleFetcher().Watch(context.Background()); err != nil {
+		r.Logger().WithError(err).Fatal("Access rule watcher could not be initialized.")
+	}
 	_ = r.RuleRepository()
+	_ = r.Tracer() // make sure tracer is initialized
 }
 
 func (r *RegistryMemory) RuleFetcher() rule.Fetcher {
@@ -142,15 +138,10 @@ func (r *RegistryMemory) CredentialHandler() *api.CredentialsHandler {
 	return r.ch
 }
 
-func (r *RegistryMemory) HealthEventManager() health.EventManager {
-	if r.healthEventManager == nil {
-		var err error
-		rulesReadinessChecker := rulereadiness.NewReadinessHealthChecker()
-		if r.healthEventManager, err = health.NewDefaultHealthEventManager(rulesReadinessChecker); err != nil {
-			r.logger.WithError(err).Fatal("unable to instantiate new health event manager")
-		}
+func (r *RegistryMemory) HealthxReadyCheckers() healthx.ReadyCheckers {
+	return healthx.ReadyCheckers{
+		"rules_loaded": r.RuleRepository().ReadyChecker,
 	}
-	return r.healthEventManager
 }
 
 func (r *RegistryMemory) HealthHandler() *healthx.Handler {
@@ -158,7 +149,7 @@ func (r *RegistryMemory) HealthHandler() *healthx.Handler {
 	defer r.RUnlock()
 
 	if r.healthxHandler == nil {
-		r.healthxHandler = healthx.NewHandler(r.Writer(), r.BuildVersion(), r.HealthEventManager().HealthxReadyCheckers())
+		r.healthxHandler = healthx.NewHandler(r.Writer(), r.BuildVersion(), r.HealthxReadyCheckers())
 	}
 	return r.healthxHandler
 }
@@ -172,14 +163,14 @@ func (r *RegistryMemory) RuleValidator() rule.Validator {
 
 func (r *RegistryMemory) RuleRepository() rule.Repository {
 	if r.ruleRepository == nil {
-		r.ruleRepository = rule.NewRepositoryMemory(r, r.HealthEventManager())
+		r.ruleRepository = rule.NewRepositoryMemory(r)
 	}
 	return r.ruleRepository
 }
 
 func (r *RegistryMemory) Writer() herodot.Writer {
 	if r.writer == nil {
-		r.writer = herodot.NewJSONWriter(r.Logger().Logger)
+		r.writer = herodot.NewJSONWriter(r.Logger())
 	}
 	return r.writer
 }
@@ -259,13 +250,13 @@ func (r *RegistryMemory) prepareErrors() {
 	defer r.Unlock()
 
 	if r.errors == nil {
-		interim := []ep.Handler{
-			ep.NewErrorJSON(r.c, r),
-			ep.NewErrorRedirect(r.c, r),
-			ep.NewErrorWWWAuthenticate(r.c, r),
+		interim := []pe.Handler{
+			pe.NewErrorJSON(r.c, r),
+			pe.NewErrorRedirect(r.c, r),
+			pe.NewErrorWWWAuthenticate(r.c, r),
 		}
 
-		r.errors = map[string]ep.Handler{}
+		r.errors = map[string]pe.Handler{}
 		for _, a := range interim {
 			r.errors[a.GetID()] = a
 		}
@@ -362,11 +353,12 @@ func (r *RegistryMemory) WithBrokenPipelineMutator() *RegistryMemory {
 func (r *RegistryMemory) prepareAuthn() {
 	r.Lock()
 	defer r.Unlock()
+	_ = r.Tracer() // make sure tracer is initialized
 	if r.authenticators == nil {
 		interim := []authn.Authenticator{
 			authn.NewAuthenticatorAnonymous(r.c),
-			authn.NewAuthenticatorCookieSession(r.c, r.Logger()),
-			authn.NewAuthenticatorBearerToken(r.c, r.Logger()),
+			authn.NewAuthenticatorCookieSession(r.c, r.trc.Provider()),
+			authn.NewAuthenticatorBearerToken(r.c, r.trc.Provider()),
 			authn.NewAuthenticatorJWT(r.c, r),
 			authn.NewAuthenticatorNoOp(r.c),
 			authn.NewAuthenticatorOAuth2ClientCredentials(r.c, r.Logger()),
@@ -389,8 +381,8 @@ func (r *RegistryMemory) prepareAuthz() {
 			authz.NewAuthorizerAllow(r.c),
 			authz.NewAuthorizerDeny(r.c),
 			authz.NewAuthorizerKetoEngineACPORY(r.c),
-			authz.NewAuthorizerRemote(r.c),
-			authz.NewAuthorizerRemoteJSON(r.c),
+			authz.NewAuthorizerRemote(r.c, r),
+			authz.NewAuthorizerRemoteJSON(r.c, r),
 		}
 
 		r.authorizers = map[string]authz.Authorizer{}
@@ -419,20 +411,13 @@ func (r *RegistryMemory) prepareMutators() {
 	}
 }
 
-func (r *RegistryMemory) Tracer() *tracing.Tracer {
+func (r *RegistryMemory) Tracer() trace.Tracer {
 	if r.trc == nil {
-		r.trc = &tracing.Tracer{
-			ServiceName:  r.c.TracingServiceName(),
-			JaegerConfig: r.c.TracingJaegerConfig(),
-			ZipkinConfig: r.c.TracingZipkinConfig(),
-			Provider:     r.c.TracingProvider(),
-			Logger:       r.Logger(),
-		}
-
-		if err := r.trc.Setup(); err != nil {
-			r.Logger().WithError(err).Fatalf("Unable to initialize Tracer.")
+		var err error
+		r.trc, err = otelx.New(r.c.TracingServiceName(), r.Logger(), r.c.TracingConfig())
+		if err != nil {
+			r.Logger().WithError(err).Fatalf("Unable to initialize Tracer for Oathkeeper.")
 		}
 	}
-
-	return r.trc
+	return r.trc.Tracer()
 }

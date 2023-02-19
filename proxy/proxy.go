@@ -1,22 +1,5 @@
-/*
- * Copyright © 2017-2018 Aeneas Rekkas <aeneas+oss@aeneas.io>
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *
- * @author       Aeneas Rekkas <aeneas+oss@aeneas.io>
- * @copyright  2017-2018 Aeneas Rekkas <aeneas+oss@aeneas.io>
- * @license  	   Apache-2.0
- */
+// Copyright © 2023 Ory Corp
+// SPDX-License-Identifier: Apache-2.0
 
 package proxy
 
@@ -100,7 +83,7 @@ func (d *Proxy) RoundTrip(r *http.Request) (*http.Response, error) {
 			d.r.Logger().
 				WithField("granted", true).
 				WithFields(fields).
-				Warn("Access request granted")
+				Info("Access request granted")
 		}
 
 		return res, err
@@ -113,10 +96,6 @@ func (d *Proxy) RoundTrip(r *http.Request) (*http.Response, error) {
 		WithFields(fields).
 		Warn("Unable to type assert context")
 
-	// add tracing
-	closeSpan := x.TraceRequest(r.Context(), r)
-	defer closeSpan()
-
 	d.r.ProxyRequestHandler().HandleError(rw, r, rl, err)
 
 	return &http.Response{
@@ -128,7 +107,7 @@ func (d *Proxy) RoundTrip(r *http.Request) (*http.Response, error) {
 
 func (d *Proxy) Director(r *http.Request) {
 	EnrichRequestedURL(r)
-	rl, err := d.r.RuleMatcher().Match(r.Context(), r.Method, r.URL)
+	rl, err := d.r.RuleMatcher().Match(r.Context(), r.Method, r.URL, rule.ProtocolHTTP)
 	if err != nil {
 		*r = *r.WithContext(context.WithValue(r.Context(), director, err))
 		return

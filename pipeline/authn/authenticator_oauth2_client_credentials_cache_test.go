@@ -1,6 +1,10 @@
+// Copyright © 2023 Ory Corp
+// SPDX-License-Identifier: Apache-2.0
+
 package authn
 
 import (
+	"context"
 	"net/http/httptest"
 	"testing"
 	"time"
@@ -12,20 +16,26 @@ import (
 	"golang.org/x/oauth2/clientcredentials"
 
 	"github.com/ory/oathkeeper/driver/configuration"
-	"github.com/ory/viper"
+	"github.com/ory/x/configx"
 	"github.com/ory/x/logrusx"
 )
 
 func TestClientCredentialsCache(t *testing.T) {
-	viper.Reset()
-
+	t.Parallel()
 	ts := httptest.NewServer(httprouter.New())
-
-	viper.Set("authenticators.oauth2_client_credentials.config.token_url", ts.URL+"/oauth2/token")
-	viper.Set("authenticators.oauth2_client_credentials.config.cache.enabled", true)
+	t.Cleanup(ts.Close)
 
 	logger := logrusx.New("", "")
-	c := configuration.NewViperProvider(logger)
+	c, err := configuration.NewKoanfProvider(
+		context.Background(),
+		nil,
+		logger,
+		configx.WithValues(map[string]interface{}{
+			"authenticators.oauth2_client_credentials.config.token_url":     ts.URL + "/oauth2/token",
+			"authenticators.oauth2_client_credentials.config.cache.enabled": true,
+		}))
+	require.NoError(t, err)
+
 	a := NewAuthenticatorOAuth2ClientCredentials(c, logger)
 	assert.Equal(t, "oauth2_client_credentials", a.GetID())
 

@@ -1,3 +1,6 @@
+// Copyright © 2023 Ory Corp
+// SPDX-License-Identifier: Apache-2.0
+
 package authn
 
 import (
@@ -6,14 +9,15 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/tidwall/gjson"
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
+	"go.opentelemetry.io/otel/trace"
 
 	"github.com/ory/go-convenience/stringsx"
+	"github.com/ory/oathkeeper/x/header"
 
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/helper"
 	"github.com/ory/oathkeeper/pipeline"
-
-	"github.com/ory/x/logrusx"
 )
 
 func init() {
@@ -33,19 +37,55 @@ type AuthenticatorBearerTokenConfiguration struct {
 	PreserveHost        bool                        `json:"preserve_host"`
 	ExtraFrom           string                      `json:"extra_from"`
 	SubjectFrom         string                      `json:"subject_from"`
+	ForwardHTTPHeaders  []string                    `json:"forward_http_headers"`
 	SetHeaders          map[string]string           `json:"additional_headers"`
 	ForceMethod         string                      `json:"force_method"`
 }
 
-type AuthenticatorBearerToken struct {
-	c      configuration.Provider
-	logger *logrusx.Logger
+func (a *AuthenticatorBearerTokenConfiguration) GetCheckSessionURL() string {
+	return a.CheckSessionURL
 }
 
-func NewAuthenticatorBearerToken(c configuration.Provider, logger *logrusx.Logger) *AuthenticatorBearerToken {
+func (a *AuthenticatorBearerTokenConfiguration) GetPreserveQuery() bool {
+	return a.PreserveQuery
+}
+
+func (a *AuthenticatorBearerTokenConfiguration) GetPreservePath() bool {
+	return a.PreservePath
+}
+
+func (a *AuthenticatorBearerTokenConfiguration) GetPreserveHost() bool {
+	return a.PreserveHost
+}
+
+func (a *AuthenticatorBearerTokenConfiguration) GetForwardHTTPHeaders() []string {
+	return a.ForwardHTTPHeaders
+}
+
+func (a *AuthenticatorBearerTokenConfiguration) GetSetHeaders() map[string]string {
+	return a.SetHeaders
+}
+
+func (a *AuthenticatorBearerTokenConfiguration) GetForceMethod() string {
+	return a.ForceMethod
+}
+
+type AuthenticatorBearerToken struct {
+	c      configuration.Provider
+	client *http.Client
+}
+
+var _ AuthenticatorForwardConfig = new(AuthenticatorBearerTokenConfiguration)
+
+func NewAuthenticatorBearerToken(c configuration.Provider, provider trace.TracerProvider) *AuthenticatorBearerToken {
 	return &AuthenticatorBearerToken{
-		c:      c,
-		logger: logger,
+		c: c,
+		client: &http.Client{
+			Transport: otelhttp.NewTransport(
+				http.DefaultTransport,
+				otelhttp.WithTracerProvider(provider),
+				otelhttp.WithSpanNameFormatter(func(operation string, r *http.Request) string { return "authn.bearer_token" })),
+		},
 	}
 }
 
@@ -76,6 +116,9 @@ func (a *AuthenticatorBearerToken) Config(config json.RawMessage) (*Authenticato
 		c.SubjectFrom = "sub"
 	}
 
+	// Add Authorization and Cookie headers for backward compatibility
+	c.ForwardHTTPHeaders = append(c.ForwardHTTPHeaders, []string{header.Authorization}...)
+
 	return &c, nil
 }
 
@@ -90,7 +133,7 @@ func (a *AuthenticatorBearerToken) Authenticate(r *http.Request, session *Authen
 		return errors.WithStack(ErrAuthenticatorNotResponsible)
 	}
 
-	body, err := forwardRequestToSessionStore(r, cf.CheckSessionURL, cf.PreserveQuery, cf.PreservePath, cf.PreserveHost, cf.SetHeaders, cf.ForceMethod, a.logger)
+	body, err := forwardRequestToSessionStore(a.client, r, cf)
 	if err != nil {
 		return err
 	}

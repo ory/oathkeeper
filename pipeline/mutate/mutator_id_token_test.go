@@ -1,22 +1,5 @@
-/*
- * Copyright © 2017-2018 Aeneas Rekkas <aeneas+oss@aeneas.io>
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *
- * @author       Aeneas Rekkas <aeneas+oss@aeneas.io>
- * @copyright  2017-2018 Aeneas Rekkas <aeneas+oss@aeneas.io>
- * @license  	   Apache-2.0
- */
+// Copyright © 2023 Ory Corp
+// SPDX-License-Identifier: Apache-2.0
 
 package mutate_test
 
@@ -37,10 +20,9 @@ import (
 
 	"github.com/ory/oathkeeper/rule"
 	"github.com/ory/oathkeeper/x"
+	"github.com/ory/x/configx"
 
 	"github.com/golang-jwt/jwt/v4"
-
-	"github.com/ory/viper"
 
 	"github.com/ory/oathkeeper/credentials"
 	"github.com/ory/oathkeeper/driver/configuration"
@@ -200,14 +182,15 @@ func parseToken(h http.Header) string {
 }
 
 func TestMutatorIDToken(t *testing.T) {
-	conf := internal.NewConfigurationWithDefaults()
+	t.Parallel()
+	conf := internal.NewConfigurationWithDefaults(configx.SkipValidation())
 	reg := internal.NewRegistry(conf)
 
 	a, err := reg.PipelineMutator("id_token")
 	require.NoError(t, err)
 	assert.Equal(t, "id_token", a.GetID())
 
-	viper.Set("mutators.id_token.config.issuer_url", "/foo/bar")
+	conf.SetForTest(t, "mutators.id_token.config.issuer_url", "/foo/bar")
 
 	t.Run("method=mutate", func(t *testing.T) {
 		r := &http.Request{}
@@ -255,31 +238,29 @@ func TestMutatorIDToken(t *testing.T) {
 			}
 
 			session := &authn.AuthenticationSession{Subject: "foo", Extra: map[string]interface{}{"bar": "baz"}}
-			config := json.RawMessage([]byte(`{"ttl": "3s", "claims": "{\"foo\": \"{{ print .Extra.bar }}\", \"aud\": [\"foo\"]}", "jwks_url": "file://../../test/stub/jwks-ecdsa.json"}`))
+			config := json.RawMessage(`{"ttl": "100ms", "claims": "{\"foo\": \"{{ print .Extra.bar }}\", \"aud\": [\"foo\"]}", "jwks_url": "file://../../test/stub/jwks-ecdsa.json"}`)
 
-			t.Parallel()
 			t.Run("subcase=different tokens because expired", func(t *testing.T) {
-				config, _ := sjson.SetBytes(config, "ttl", "100ms")
+				config, _ := sjson.SetBytes(config, "ttl", "1ms")
 				prev := mutate(t, *session, config)
-				time.Sleep(time.Millisecond * 90)
+				time.Sleep(time.Millisecond)
 				assert.NotEqual(t, prev, mutate(t, *session, config))
 			})
 
 			t.Run("subcase=same tokens because expired is long enough", func(t *testing.T) {
 				prev := mutate(t, *session, config)
-				time.Sleep(time.Second) // give the cache buffers some time
+				time.Sleep(10 * time.Millisecond) // give the cache buffers some time
 				assert.Equal(t, prev, mutate(t, *session, config))
 			})
 
 			t.Run("subcase=different tokens because expired is long but was reached", func(t *testing.T) {
 				prev := mutate(t, *session, config)
-				time.Sleep(time.Second * 3) // give the cache buffers some time
+				time.Sleep(150 * time.Millisecond) // give the cache buffers some time
 				assert.NotEqual(t, prev, mutate(t, *session, config))
 			})
 
 			t.Run("subcase=different tokens because different subjects", func(t *testing.T) {
 				prev := mutate(t, *session, config)
-				time.Sleep(time.Second)
 				s := *session
 				s.Subject = "not-foo"
 				assert.NotEqual(t, prev, mutate(t, s, config))
@@ -287,7 +268,6 @@ func TestMutatorIDToken(t *testing.T) {
 
 			t.Run("subcase=different tokens because session extra changed", func(t *testing.T) {
 				prev := mutate(t, *session, config)
-				time.Sleep(time.Second)
 				s := *session
 				s.Extra = map[string]interface{}{"bar": "not-baz"}
 				assert.NotEqual(t, prev, mutate(t, s, config))
@@ -295,8 +275,7 @@ func TestMutatorIDToken(t *testing.T) {
 
 			t.Run("subcase=different tokens because claim options changed", func(t *testing.T) {
 				prev := mutate(t, *session, config)
-				time.Sleep(time.Second)
-				config := json.RawMessage([]byte(`{"ttl": "3s", "claims": "{\"foo\": \"{{ print .Extra.bar }}\", \"aud\": [\"not-foo\"]}", "jwks_url": "file://../../test/stub/jwks-ecdsa.json"}`))
+				config := json.RawMessage(`{"ttl": "3s", "claims": "{\"foo\": \"{{ print .Extra.bar }}\", \"aud\": [\"not-foo\"]}", "jwks_url": "file://../../test/stub/jwks-ecdsa.json"}`)
 				assert.NotEqual(t, prev, mutate(t, *session, config))
 			})
 
@@ -312,14 +291,12 @@ func TestMutatorIDToken(t *testing.T) {
 
 			t.Run("subcase=different tokens because issuer changed", func(t *testing.T) {
 				prev := mutate(t, *session, config)
-				time.Sleep(time.Second)
 				config, _ := sjson.SetBytes(config, "issuer_url", "/not-baz/not-bar")
 				assert.NotEqual(t, prev, mutate(t, *session, config))
 			})
 
 			t.Run("subcase=different tokens because JWKS source changed", func(t *testing.T) {
 				prev := mutate(t, *session, config)
-				time.Sleep(time.Second)
 				config, _ := sjson.SetBytes(config, "jwks_url", "file://../../test/stub/jwks-hs.json")
 				assert.NotEqual(t, prev, mutate(t, *session, config))
 			})
@@ -372,8 +349,7 @@ func TestMutatorIDToken(t *testing.T) {
 			{e: true, i: "http://baz/foo", j: "http://baz/foo", pass: true},
 		} {
 			t.Run(fmt.Sprintf("case=%d", k), func(t *testing.T) {
-				viper.Reset()
-				viper.Set(configuration.ViperKeyMutatorIDTokenIsEnabled, tc.e)
+				conf.SetForTest(t, configuration.MutatorIDTokenIsEnabled, tc.e)
 				err := a.Validate(json.RawMessage(`{"issuer_url":"` + tc.i + `", "jwks_url": "` + tc.j + `"}`))
 				if tc.pass {
 					require.NoError(t, err)
@@ -419,7 +395,7 @@ func BenchmarkMutatorIDToken(b *testing.B) {
 					for i := 0; i < b.N; i++ {
 						tc = tcs[i%len(tcs)]
 						config, _ = sjson.SetBytes(tc.Config, "jwks_url", key)
-						viper.Set("mutators.id_token.config.issuer_url", "/"+issuers[i%len(issuers)])
+						conf.SetForTest(b, "mutators.id_token.config.issuer_url", "/"+issuers[i%len(issuers)])
 
 						b.StartTimer()
 						err := a.Mutate(r, tc.Session, config, rl)

@@ -1,3 +1,6 @@
+// Copyright © 2023 Ory Corp
+// SPDX-License-Identifier: Apache-2.0
+
 package cmd
 
 import (
@@ -14,7 +17,7 @@ var healthCmd = &cobra.Command{
   The endpoint URL should point to a single ORY Oathkeeper deployment.
   If the endpoint URL points to a Load Balancer, these commands will effective test the Load Balancer.
 `,
-	Run: func(cmd *cobra.Command, args []string) {
+	Run: func(cmd *cobra.Command, _ []string) {
 		fmt.Println(cmd.UsageString())
 	},
 }

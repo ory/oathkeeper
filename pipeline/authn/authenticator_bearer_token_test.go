@@ -1,10 +1,13 @@
+// Copyright © 2023 Ory Corp
+// SPDX-License-Identifier: Apache-2.0
+
 package authn_test
 
 import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/url"
 	"reflect"
@@ -25,6 +28,7 @@ import (
 )
 
 func TestAuthenticatorBearerToken(t *testing.T) {
+	t.Parallel()
 	conf := internal.NewConfigurationWithDefaults()
 	reg := internal.NewRegistry(conf)
 
@@ -226,10 +230,10 @@ func TestAuthenticatorBearerToken(t *testing.T) {
 					},
 					URL:    &url.URL{Path: "/users/123", RawQuery: "query=string"},
 					Method: "PUT",
-					Body:   ioutil.NopCloser(bytes.NewBufferString("body")),
+					Body:   io.NopCloser(bytes.NewBufferString("body")),
 				},
 				router: func(w http.ResponseWriter, r *http.Request) {
-					requestBody, _ := ioutil.ReadAll(r.Body)
+					requestBody, _ := io.ReadAll(r.Body)
 					assert.Equal(t, r.ContentLength, int64(0))
 					assert.Equal(t, requestBody, []byte{})
 					w.WriteHeader(200)
@@ -284,6 +288,26 @@ func TestAuthenticatorBearerToken(t *testing.T) {
 				config:     []byte(`{"subject_from": "identity.id", "extra_from": "@this"}`),
 				expectErr:  true,
 				expectSess: &AuthenticationSession{},
+			},
+			{
+				d: "should work with custom header forwarded",
+				r: &http.Request{Header: http.Header{"Authorization": {"bearer token"}, "X-User": {"123"}}, URL: &url.URL{Path: ""}},
+				setup: func(t *testing.T, m *httprouter.Router) {
+					m.GET("/", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+						if r.Header.Get("X-User") == "" {
+							w.WriteHeader(http.StatusBadRequest)
+							return
+						}
+						w.WriteHeader(200)
+						w.Write([]byte(`{"identity": {"id": "123"}, "session": {"foo": "bar"}}`))
+					})
+				},
+				config:    []byte(`{"subject_from": "identity.id", "extra_from": "@this", "forward_http_headers": ["X-UsEr"]}`),
+				expectErr: false,
+				expectSess: &AuthenticationSession{
+					Subject: "123",
+					Extra:   map[string]interface{}{"session": map[string]interface{}{"foo": "bar"}, "identity": map[string]interface{}{"id": "123"}},
+				},
 			},
 		} {
 			t.Run(fmt.Sprintf("case=%d/description=%s", k, tc.d), func(t *testing.T) {

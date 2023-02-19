@@ -1,22 +1,5 @@
-/*
- * Copyright © 2017-2018 Aeneas Rekkas <aeneas+oss@aeneas.io>
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *
- * @author       Aeneas Rekkas <aeneas+oss@aeneas.io>
- * @copyright  2017-2018 Aeneas Rekkas <aeneas+oss@aeneas.io>
- * @license  	   Apache-2.0
- */
+// Copyright © 2023 Ory Corp
+// SPDX-License-Identifier: Apache-2.0
 
 package authn_test
 
@@ -25,26 +8,26 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
-	"sync"
 	"testing"
 	"time"
 
 	"github.com/ory/x/assertx"
+	"github.com/ory/x/configx"
 
 	"github.com/julienschmidt/httprouter"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/tidwall/sjson"
 
+	"github.com/ory/x/logrusx"
+
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/internal"
 	. "github.com/ory/oathkeeper/pipeline/authn"
-	"github.com/ory/viper"
-	"github.com/ory/x/logrusx"
 )
 
 func TestAuthenticatorOAuth2Introspection(t *testing.T) {
-	conf := internal.NewConfigurationWithDefaults()
+	conf := internal.NewConfigurationWithDefaults(configx.SkipValidation())
 	reg := internal.NewRegistry(conf)
 
 	a, err := reg.PipelineAuthenticator("oauth2_introspection")
@@ -578,17 +561,22 @@ func TestAuthenticatorOAuth2Introspection(t *testing.T) {
 	})
 
 	t.Run("method=authenticate-with-cache", func(t *testing.T) {
-		viper.Set("authenticators.oauth2_introspection.config.cache.enabled", true)
-		t.Cleanup(func() {
-			viper.Set("authenticators.oauth2_introspection.config.cache.enabled", false)
-		})
+		conf.SetForTest(t, "authenticators.oauth2_introspection.config.cache.enabled", true)
 
-		var didNotUseCache sync.WaitGroup
+		var handlerWasCalled bool
+		assertHandlerWasCalled := func(t *testing.T) {
+			assert.True(t, handlerWasCalled, "expected the handler to have been called")
+			handlerWasCalled = false
+		}
+		assertCacheWasUsed := func(t *testing.T) {
+			assert.False(t, handlerWasCalled, "expected the cache to have been used")
+			handlerWasCalled = false
+		}
 
 		setup := func(t *testing.T, config string) []byte {
 			router := httprouter.New()
 			router.POST("/oauth2/introspect", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-				defer didNotUseCache.Done()
+				handlerWasCalled = true
 				require.NoError(t, r.ParseForm())
 				switch r.Form.Get("token") {
 				case "inactive-scope-b":
@@ -611,7 +599,7 @@ func TestAuthenticatorOAuth2Introspection(t *testing.T) {
 						Audience: []string{"audience"},
 						Issuer:   "foo",
 						Username: "username",
-						Expires:  time.Now().Add(time.Second).Unix(),
+						Expires:  time.Now().Add(2 * time.Second).Unix(),
 						Extra:    map[string]interface{}{"extra": "foo"},
 					}))
 				case "refresh-token":
@@ -643,16 +631,15 @@ func TestAuthenticatorOAuth2Introspection(t *testing.T) {
 		}
 
 		t.Run("case=with none scope strategy", func(t *testing.T) {
-			viper.Set("authenticators.oauth2_introspection.config.scope_strategy", "none")
+			conf.SetForTest(t, "authenticators.oauth2_introspection.config.scope_strategy", "none")
 			r := &http.Request{Header: http.Header{"Authorization": {"bearer active-scope-a"}}}
 			expected := new(AuthenticationSession)
 			t.Run("case=initial request succeeds and caches", func(t *testing.T) {
 				config := setup(t, `{ "required_scope": [], "trusted_issuers": ["foo", "bar"], "target_audience": ["audience"] }`)
 
-				didNotUseCache.Add(1)
 				err = a.Authenticate(r, expected, config, nil)
-				didNotUseCache.Wait()
 				require.NoError(t, err)
+				assertHandlerWasCalled(t)
 			})
 
 			// We expect to use the cache here because we are not interested to validate the scope. Usually we would
@@ -662,8 +649,8 @@ func TestAuthenticatorOAuth2Introspection(t *testing.T) {
 				sess := new(AuthenticationSession)
 
 				err = a.Authenticate(r, sess, config, nil)
-				didNotUseCache.Wait() // Would result in a panic if wg.done was called!
 				require.NoError(t, err)
+				assertCacheWasUsed(t)
 				assertx.EqualAsJSON(t, expected, sess)
 			})
 
@@ -671,10 +658,9 @@ func TestAuthenticatorOAuth2Introspection(t *testing.T) {
 				config := setup(t, `{ "required_scope": ["scope-a"], "trusted_issuers": ["foo", "bar"], "target_audience": ["audience"] }`)
 				sess := new(AuthenticationSession)
 
-				didNotUseCache.Add(1)
 				err = a.Authenticate(r, sess, config, nil)
-				didNotUseCache.Wait()
 				require.NoError(t, err)
+				assertHandlerWasCalled(t)
 				assertx.EqualAsJSON(t, expected, sess)
 			})
 
@@ -682,17 +668,16 @@ func TestAuthenticatorOAuth2Introspection(t *testing.T) {
 				config := setup(t, `{ "required_scope": ["scope-b"], "trusted_issuers": ["foo", "bar"], "target_audience": ["audience"] }`)
 				sess := new(AuthenticationSession)
 
-				didNotUseCache.Add(1)
 				err = a.Authenticate(r, sess, config, nil)
-				didNotUseCache.Wait()
 				require.Error(t, err)
+				assertHandlerWasCalled(t)
 			})
 		})
 
 		t.Run("case=does not use cache for refresh tokens", func(t *testing.T) {
 			for _, strategy := range []string{"wildcard", "none"} {
 				t.Run("scope_strategy="+strategy, func(t *testing.T) {
-					viper.Set("authenticators.oauth2_introspection.config.scope_strategy", strategy)
+					conf.SetForTest(t, "authenticators.oauth2_introspection.config.scope_strategy", strategy)
 					r := &http.Request{Header: http.Header{"Authorization": {"bearer refresh_token"}}}
 					expected := new(AuthenticationSession)
 
@@ -700,43 +685,42 @@ func TestAuthenticatorOAuth2Introspection(t *testing.T) {
 					config := setup(t, `{ "required_scope": ["scope-a"], "trusted_issuers": ["foo", "bar"], "target_audience": ["audience"] }`)
 
 					// Also doesn't use the cache the second time
-					didNotUseCache.Add(2)
 					require.Error(t, a.Authenticate(r, expected, config, nil))
+					assertHandlerWasCalled(t)
 					require.Error(t, a.Authenticate(r, expected, config, nil))
-					didNotUseCache.Wait()
+					assertHandlerWasCalled(t)
 				})
 			}
 		})
 
 		t.Run("case=with a scope scope strategy", func(t *testing.T) {
-			viper.Set("authenticators.oauth2_introspection.config.scope_strategy", "wildcard")
+			conf.SetForTest(t, "authenticators.oauth2_introspection.config.scope_strategy", "wildcard")
 			r := &http.Request{Header: http.Header{"Authorization": {"bearer another-active-scope-a"}}}
 			expected := new(AuthenticationSession)
 
 			// The initial request
 			config := setup(t, `{ "required_scope": ["scope-a"], "trusted_issuers": ["foo", "bar"], "target_audience": ["audience"] }`)
 
-			didNotUseCache.Add(1)
 			require.NoError(t, a.Authenticate(r, expected, config, nil))
-			didNotUseCache.Wait()
+			assertHandlerWasCalled(t)
 
 			t.Run("case=request succeeds and uses the cache", func(t *testing.T) {
 				config := setup(t, `{ "trusted_issuers": ["foo", "bar"], "target_audience": ["audience"] }`)
 				sess := new(AuthenticationSession)
 
 				err = a.Authenticate(r, sess, config, nil)
-				didNotUseCache.Wait()
 				require.NoError(t, err)
+				assertCacheWasUsed(t)
 				assertx.EqualAsJSON(t, expected, sess)
 			})
 
-			t.Run("case=request the initial request which also passes", func(t *testing.T) {
+			t.Run("case=cache the initial request which also passes", func(t *testing.T) {
 				config := setup(t, `{ "required_scope": ["scope-a"], "trusted_issuers": ["foo", "bar"], "target_audience": ["audience"] }`)
 				sess := new(AuthenticationSession)
 
 				err = a.Authenticate(r, sess, config, nil)
-				didNotUseCache.Wait()
 				require.NoError(t, err)
+				assertCacheWasUsed(t)
 				assertx.EqualAsJSON(t, expected, sess)
 			})
 
@@ -744,70 +728,63 @@ func TestAuthenticatorOAuth2Introspection(t *testing.T) {
 				require.Error(t, a.Authenticate(r, new(AuthenticationSession),
 					setup(t, `{ "required_scope": ["scope-b"], "trusted_issuers": ["foo", "bar"], "target_audience": ["audience"] }`),
 					nil))
-				didNotUseCache.Wait()
 			})
 
 			t.Run("case=requests an audience which the token does not have", func(t *testing.T) {
 				require.Error(t, a.Authenticate(r, new(AuthenticationSession),
 					setup(t, `{ "required_scope": ["scope-a"], "trusted_issuers": ["foo", "bar"], "target_audience": ["not-audience"] }`),
 					nil))
-				didNotUseCache.Wait()
 			})
 
 			t.Run("case=does not trust the issuer", func(t *testing.T) {
 				require.Error(t, a.Authenticate(r, new(AuthenticationSession),
 					setup(t, `{ "required_scope": ["scope-a"], "trusted_issuers": ["not-foo", "bar"], "target_audience": ["audience"] }`),
 					nil))
-				didNotUseCache.Wait()
 			})
 
 			t.Run("case=respects the expiry time", func(t *testing.T) {
 				setup(t, `{ "required_scope": ["scope-a"], "trusted_issuers": ["foo", "bar"], "target_audience": ["audience"] }`)
 				require.NoError(t, a.Authenticate(r, new(AuthenticationSession), config, nil))
-				time.Sleep(time.Second)
+				time.Sleep(2 * time.Second)
 				require.Error(t, a.Authenticate(r, new(AuthenticationSession), config, nil))
-				didNotUseCache.Wait()
 			})
 
 			t.Run("case=cache cleared after ttl", func(t *testing.T) {
 				//time.Sleep(time.Second)
 				config := setup(t, `{ "required_scope": ["scope-a"], "trusted_issuers": ["foo", "bar"], "target_audience": ["audience"], "cache": { "ttl": "100ms" } }`)
 
-				didNotUseCache.Add(1)
 				require.NoError(t, a.Authenticate(r, expected, config, nil))
-				didNotUseCache.Wait()
+				assertHandlerWasCalled(t)
 
 				// wait cache to save value
 				time.Sleep(time.Millisecond * 10)
 
 				require.NoError(t, a.Authenticate(r, new(AuthenticationSession), config, nil))
+				assertCacheWasUsed(t)
 				time.Sleep(50 * time.Millisecond)
 
 				require.NoError(t, a.Authenticate(r, new(AuthenticationSession), config, nil))
+				assertCacheWasUsed(t)
 				time.Sleep(50 * time.Millisecond)
 
 				// cache should have been cleared
-				didNotUseCache.Add(1)
 				require.NoError(t, a.Authenticate(r, new(AuthenticationSession), config, nil))
-				didNotUseCache.Wait()
+				assertHandlerWasCalled(t)
 			})
 		})
 	})
 
 	t.Run("method=validate", func(t *testing.T) {
-		viper.Set(configuration.ViperKeyAuthenticatorOAuth2TokenIntrospectionIsEnabled, false)
+		conf.SetForTest(t, configuration.AuthenticatorOAuth2TokenIntrospectionIsEnabled, false)
 		require.Error(t, a.Validate(json.RawMessage(`{"introspection_url":""}`)))
 
-		viper.Reset()
-		viper.Set(configuration.ViperKeyAuthenticatorOAuth2TokenIntrospectionIsEnabled, true)
+		conf.SetForTest(t, configuration.AuthenticatorOAuth2TokenIntrospectionIsEnabled, true)
 		require.Error(t, a.Validate(json.RawMessage(`{"introspection_url":""}`)))
 
-		viper.Reset()
-		viper.Set(configuration.ViperKeyAuthenticatorOAuth2TokenIntrospectionIsEnabled, false)
+		conf.SetForTest(t, configuration.AuthenticatorOAuth2TokenIntrospectionIsEnabled, false)
 		require.Error(t, a.Validate(json.RawMessage(`{"introspection_url":"/oauth2/token"}`)))
 
-		viper.Reset()
-		viper.Set(configuration.ViperKeyAuthenticatorOAuth2TokenIntrospectionIsEnabled, true)
+		conf.SetForTest(t, configuration.AuthenticatorOAuth2TokenIntrospectionIsEnabled, true)
 		require.Error(t, a.Validate(json.RawMessage(`{"introspection_url":"/oauth2/token"}`)))
 	})
 
@@ -856,7 +833,7 @@ func TestAuthenticatorOAuth2Introspection(t *testing.T) {
 		t.Run("Should not be equal because we changed a system default", func(t *testing.T) {
 			// Unskip once https://github.com/ory/oathkeeper/issues/757 lands
 			t.Skip("This fails due to viper caching and it makes no sense to fix it as we need to adopt koanf first")
-			viper.Set("authenticators.oauth2_introspection.config.pre_authorization", map[string]interface{}{"scope": []string{"foo"}})
+			conf.SetForTest(t, "authenticators.oauth2_introspection.config.pre_authorization", map[string]interface{}{"scope": []string{"foo"}})
 
 			_, noPreauthClient3, err := authenticator.Config(noPreauthConfig)
 			require.NoError(t, err)

@@ -41,7 +41,7 @@
     },
     "/decisions": {
       "get": {
-        "description": "\u003e This endpoint works with all HTTP Methods (GET, POST, PUT, ...) and matches every path prefixed with /decision.\n\nThis endpoint mirrors the proxy capability of ORY Oathkeeper's proxy functionality but instead of forwarding the\nrequest to the upstream server, returns 200 (request should be allowed), 401 (unauthorized), or 403 (forbidden)\nstatus codes. This endpoint can be used to integrate with other API Proxies like Ambassador, Kong, Envoy, and many more.",
+        "description": "\u003e This endpoint works with all HTTP Methods (GET, POST, PUT, ...) and matches every path prefixed with /decisions.\n\nThis endpoint mirrors the proxy capability of ORY Oathkeeper's proxy functionality but instead of forwarding the\nrequest to the upstream server, returns 200 (request should be allowed), 401 (unauthorized), or 403 (forbidden)\nstatus codes. This endpoint can be used to integrate with other API Proxies like Ambassador, Kong, Envoy, and many more.",
         "schemes": ["http", "https"],
         "tags": ["api"],
         "summary": "Access Control Decision API",
@@ -81,8 +81,8 @@
       "get": {
         "description": "This endpoint returns a 200 status code when the HTTP server is up running.\nThis status does currently not include checks whether the database connection is working.\n\nIf the service supports TLS Edge Termination, this endpoint does not require the\n`X-Forwarded-Proto` header to be set.\n\nBe aware that if you are running multiple nodes of this service, the health status will never\nrefer to the cluster state, only to a single instance.",
         "produces": ["application/json"],
-        "tags": ["api"],
-        "summary": "Check Alive Status",
+        "tags": ["health"],
+        "summary": "Check alive status",
         "operationId": "isInstanceAlive",
         "responses": {
           "200": {
@@ -104,8 +104,8 @@
       "get": {
         "description": "This endpoint returns a 200 status code when the HTTP server is up running and the environment dependencies (e.g.\nthe database) are responsive as well.\n\nIf the service supports TLS Edge Termination, this endpoint does not require the\n`X-Forwarded-Proto` header to be set.\n\nBe aware that if you are running multiple nodes of this service, the health status will never\nrefer to the cluster state, only to a single instance.",
         "produces": ["application/json"],
-        "tags": ["api"],
-        "summary": "Check Readiness Status",
+        "tags": ["health"],
+        "summary": "Check readiness status",
         "operationId": "isInstanceReady",
         "responses": {
           "200": {
@@ -201,8 +201,8 @@
       "get": {
         "description": "This endpoint returns the service version typically notated using semantic versioning.\n\nIf the service supports TLS Edge Termination, this endpoint does not require the\n`X-Forwarded-Proto` header to be set.\n\nBe aware that if you are running multiple nodes of this service, the health status will never\nrefer to the cluster state, only to a single instance.",
         "produces": ["application/json"],
-        "tags": ["api"],
-        "summary": "Get Service Version",
+        "tags": ["version"],
+        "summary": "Get service version",
         "operationId": "getVersion",
         "responses": {
           "200": {
@@ -216,9 +216,7 @@
     }
   },
   "definitions": {
-    "UUID": { "type": "string", "format": "uuid4" },
     "Upstream": {
-      "description": "Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream upstream",
       "type": "object",
       "properties": {
         "preserve_host": {
@@ -240,38 +238,31 @@
       "type": "object",
       "properties": {
         "code": {
-          "description": "code",
           "type": "integer",
           "format": "int64"
         },
         "details": {
-          "description": "details",
           "type": "array",
           "items": {
             "type": "object",
-            "additionalProperties": true
+            "additionalProperties": {}
           }
         },
         "message": {
-          "description": "message",
           "type": "string"
         },
         "reason": {
-          "description": "reason",
           "type": "string"
         },
         "request": {
-          "description": "request",
           "type": "string"
         },
         "status": {
-          "description": "status",
           "type": "string"
         }
       }
     },
     "healthNotReadyStatus": {
-      "description": "HealthNotReadyStatus health not ready status",
       "type": "object",
       "properties": {
         "errors": {
@@ -284,7 +275,6 @@
       }
     },
     "healthStatus": {
-      "description": "HealthStatus HealthStatus health status",
       "type": "object",
       "properties": {
         "status": {
@@ -294,7 +284,6 @@
       }
     },
     "jsonWebKey": {
-      "description": "JSONWebKey JSONWebKey JSONWebKey JSONWebKey JSONWebKey JSONWebKey JSONWebKey JSONWebKey JSONWebKey json web key",
       "type": "object",
       "properties": {
         "alg": {
@@ -302,27 +291,21 @@
           "type": "string"
         },
         "crv": {
-          "description": "crv",
           "type": "string"
         },
         "d": {
-          "description": "d",
           "type": "string"
         },
         "dp": {
-          "description": "dp",
           "type": "string"
         },
         "dq": {
-          "description": "dq",
           "type": "string"
         },
         "e": {
-          "description": "e",
           "type": "string"
         },
         "k": {
-          "description": "k",
           "type": "string"
         },
         "kid": {
@@ -334,19 +317,15 @@
           "type": "string"
         },
         "n": {
-          "description": "n",
           "type": "string"
         },
         "p": {
-          "description": "p",
           "type": "string"
         },
         "q": {
-          "description": "q",
           "type": "string"
         },
         "qi": {
-          "description": "qi",
           "type": "string"
         },
         "use": {
@@ -354,7 +333,6 @@
           "type": "string"
         },
         "x": {
-          "description": "x",
           "type": "string"
         },
         "x5c": {
@@ -365,7 +343,6 @@
           }
         },
         "y": {
-          "description": "y",
           "type": "string"
         }
       }
@@ -420,12 +397,10 @@
       }
     },
     "ruleHandler": {
-      "description": "RuleHandler RuleHandler RuleHandler RuleHandler rule handler",
       "type": "object",
       "properties": {
         "config": {
-          "description": "Config contains the configuration for the handler. Please read the user\nguide for a complete list of each handler's available settings.",
-          "type": "object"
+          "description": "Config contains the configuration for the handler. Please read the user\nguide for a complete list of each handler's available settings."
         },
         "handler": {
           "description": "Handler identifies the implementation which will be used to handle this specific request. Please read the user\nguide for a complete list of available handlers.",
@@ -457,7 +432,8 @@
           "type": "string"
         }
       }
-    }
+    },
+    "UUID": { "type": "string", "format": "uuid4" }
   },
   "responses": {
     "emptyResponse": {

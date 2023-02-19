@@ -1,22 +1,5 @@
-/*
- * Copyright © 2017-2018 Aeneas Rekkas <aeneas+oss@aeneas.io>
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *
- * @author       Aeneas Rekkas <aeneas+oss@aeneas.io>
- * @copyright  2017-2018 Aeneas Rekkas <aeneas+oss@aeneas.io>
- * @license  	   Apache-2.0
- */
+// Copyright © 2023 Ory Corp
+// SPDX-License-Identifier: Apache-2.0
 
 package api
 
@@ -62,7 +45,7 @@ func (h *DecisionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request, next
 		r.URL.Scheme = x.OrDefaultString(r.Header.Get(xForwardedProto),
 			x.IfThenElseString(r.TLS != nil, "https", "http"))
 		r.URL.Host = x.OrDefaultString(r.Header.Get(xForwardedHost), r.Host)
-		r.URL.Path = x.OrDefaultString(r.Header.Get(xForwardedUri), r.URL.Path[len(DecisionPath):])
+		r.URL.Path = x.OrDefaultString(strings.SplitN(r.Header.Get(xForwardedUri), "?", 2)[0], r.URL.Path[len(DecisionPath):])
 
 		h.decisions(w, r)
 	} else {
@@ -72,22 +55,22 @@ func (h *DecisionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request, next
 
 // swagger:route GET /decisions api decisions
 //
-// Access Control Decision API
+// # Access Control Decision API
 //
-// > This endpoint works with all HTTP Methods (GET, POST, PUT, ...) and matches every path prefixed with /decision.
+// > This endpoint works with all HTTP Methods (GET, POST, PUT, ...) and matches every path prefixed with /decisions.
 //
 // This endpoint mirrors the proxy capability of ORY Oathkeeper's proxy functionality but instead of forwarding the
 // request to the upstream server, returns 200 (request should be allowed), 401 (unauthorized), or 403 (forbidden)
 // status codes. This endpoint can be used to integrate with other API Proxies like Ambassador, Kong, Envoy, and many more.
 //
-//     Schemes: http, https
+//	Schemes: http, https
 //
-//     Responses:
-//       200: emptyResponse
-//       401: genericError
-//       403: genericError
-//       404: genericError
-//       500: genericError
+//	Responses:
+//	  200: emptyResponse
+//	  401: genericError
+//	  403: genericError
+//	  404: genericError
+//	  500: genericError
 func (h *DecisionHandler) decisions(w http.ResponseWriter, r *http.Request) {
 	fields := map[string]interface{}{
 		"http_method":     r.Method,
@@ -100,7 +83,7 @@ func (h *DecisionHandler) decisions(w http.ResponseWriter, r *http.Request) {
 		fields["subject"] = sess.Subject
 	}
 
-	rl, err := h.r.RuleMatcher().Match(r.Context(), r.Method, r.URL)
+	rl, err := h.r.RuleMatcher().Match(r.Context(), r.Method, r.URL, rule.ProtocolHTTP)
 	if err != nil {
 		h.r.Logger().WithError(err).
 			WithFields(fields).

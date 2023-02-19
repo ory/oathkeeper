@@ -1,23 +1,6 @@
-/*
- * Copyright © 2017-2018 Aeneas Rekkas <aeneas+oss@aeneas.io>
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *
- * @author		Aeneas Rekkas <aeneas+oss@aeneas.io>
- * @Copyright 	2017-2018 Aeneas Rekkas <aeneas+oss@aeneas.io>
- * @license 	Apache-2.0
- *
- */
+// Copyright © 2023 Ory Corp
+// SPDX-License-Identifier: Apache-2.0
+
 package credentials
 
 import (
@@ -66,21 +49,31 @@ type FetcherDefault struct {
 	mux         *blob.URLMux
 }
 
+type FetcherOption func(f *FetcherDefault)
+
+func WithURLMux(mux *blob.URLMux) FetcherOption {
+	return func(f *FetcherDefault) { f.mux = mux }
+}
+
 // NewFetcherDefault returns a new JWKS Fetcher with:
 //
-// - cancelAfter: If reached, the fetcher will stop waiting for responses and return an error.
-// - waitForResponse: While the fetcher might stop waiting for responses, we will give the server more time to respond
-//		and add the keys to the registry unless waitForResponse is reached in which case we'll terminate the request.
-func NewFetcherDefault(l *logrusx.Logger, cancelAfter time.Duration, ttl time.Duration) *FetcherDefault {
-	return &FetcherDefault{
+//   - cancelAfter: If reached, the fetcher will stop waiting for responses and return an error.
+//   - waitForResponse: While the fetcher might stop waiting for responses, we will give the server more time to respond
+//     and add the keys to the registry unless waitForResponse is reached in which case we'll terminate the request.
+func NewFetcherDefault(l *logrusx.Logger, cancelAfter time.Duration, ttl time.Duration, opts ...FetcherOption) *FetcherDefault {
+	f := &FetcherDefault{
 		cancelAfter: cancelAfter,
 		l:           l,
 		ttl:         ttl,
 		keys:        make(map[string]jose.JSONWebKeySet),
 		fetchedAt:   make(map[string]time.Time),
-		client:      httpx.NewResilientClientLatencyToleranceHigh(nil),
+		client:      httpx.NewResilientClient(httpx.ResilientClientWithConnectionTimeout(15 * time.Second)).StandardClient(),
 		mux:         cloudstorage.NewURLMux(),
 	}
+	for _, o := range opts {
+		o(f)
+	}
+	return f
 }
 
 func (s *FetcherDefault) ResolveSets(ctx context.Context, locations []url.URL) ([]jose.JSONWebKeySet, error) {
@@ -198,6 +191,7 @@ func (s *FetcherDefault) resolveAll(done chan struct{}, errs chan error, locatio
 	var wg sync.WaitGroup
 
 	for _, l := range locations {
+		l := l
 		wg.Add(1)
 		go s.resolve(&wg, errs, l)
 	}
@@ -209,14 +203,13 @@ func (s *FetcherDefault) resolveAll(done chan struct{}, errs chan error, locatio
 
 func (s *FetcherDefault) resolve(wg *sync.WaitGroup, errs chan error, location url.URL) {
 	defer wg.Done()
-	var reader io.Reader
+	var (
+		reader io.ReadCloser
+		err    error
+	)
 
 	switch location.Scheme {
-	case "azblob":
-		fallthrough
-	case "gs":
-		fallthrough
-	case "s3":
+	case "azblob", "gs", "s3":
 		ctx := context.Background()
 		bucket, err := s.mux.OpenBucket(ctx, location.Scheme+"://"+location.Host)
 		if err != nil {
@@ -232,7 +225,7 @@ func (s *FetcherDefault) resolve(wg *sync.WaitGroup, errs chan error, location u
 		}
 		defer bucket.Close()
 
-		r, err := bucket.NewReader(ctx, location.Path[1:], nil)
+		reader, err = bucket.NewReader(ctx, location.Path[1:], nil)
 		if err != nil {
 			errs <- errors.WithStack(herodot.
 				ErrInternalServerError.
@@ -244,13 +237,10 @@ func (s *FetcherDefault) resolve(wg *sync.WaitGroup, errs chan error, location u
 			)
 			return
 		}
-		defer r.Close()
+		defer reader.Close()
 
-		reader = r
-	case "":
-		fallthrough
-	case "file":
-		f, err := os.Open(urlx.GetURLFilePath(&location))
+	case "", "file":
+		reader, err = os.Open(urlx.GetURLFilePath(&location))
 		if err != nil {
 			errs <- errors.WithStack(herodot.
 				ErrInternalServerError.
@@ -262,12 +252,9 @@ func (s *FetcherDefault) resolve(wg *sync.WaitGroup, errs chan error, location u
 			)
 			return
 		}
-		defer f.Close()
+		defer reader.Close()
 
-		reader = f
-	case "https":
-		fallthrough
-	case "http":
+	case "http", "https":
 		res, err := s.client.Get(location.String())
 		if err != nil {
 			errs <- errors.WithStack(herodot.
@@ -280,7 +267,8 @@ func (s *FetcherDefault) resolve(wg *sync.WaitGroup, errs chan error, location u
 			)
 			return
 		}
-		defer res.Body.Close()
+		reader = res.Body
+		defer reader.Close()
 
 		if res.StatusCode < 200 || res.StatusCode >= 400 {
 			errs <- errors.WithStack(herodot.
@@ -294,7 +282,6 @@ func (s *FetcherDefault) resolve(wg *sync.WaitGroup, errs chan error, location u
 			return
 		}
 
-		reader = res.Body
 	default:
 		errs <- errors.WithStack(herodot.
 			ErrInternalServerError.

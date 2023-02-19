@@ -1,23 +1,28 @@
+// Copyright © 2023 Ory Corp
+// SPDX-License-Identifier: Apache-2.0
+
 package authn
 
 import (
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/url"
+
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
+	"go.opentelemetry.io/otel/trace"
 
 	"github.com/pkg/errors"
 	"github.com/tidwall/gjson"
 
 	"github.com/ory/go-convenience/stringsx"
+	"github.com/ory/oathkeeper/x/header"
 
 	"github.com/ory/herodot"
 
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/helper"
 	"github.com/ory/oathkeeper/pipeline"
-
-	"github.com/ory/x/logrusx"
 )
 
 func init() {
@@ -30,26 +35,62 @@ type AuthenticatorCookieSessionFilter struct {
 }
 
 type AuthenticatorCookieSessionConfiguration struct {
-	Only            []string          `json:"only"`
-	CheckSessionURL string            `json:"check_session_url"`
-	PreserveQuery   bool              `json:"preserve_query"`
-	PreservePath    bool              `json:"preserve_path"`
-	ExtraFrom       string            `json:"extra_from"`
-	SubjectFrom     string            `json:"subject_from"`
-	PreserveHost    bool              `json:"preserve_host"`
-	SetHeaders      map[string]string `json:"additional_headers"`
-	ForceMethod     string            `json:"force_method"`
+	Only               []string          `json:"only"`
+	CheckSessionURL    string            `json:"check_session_url"`
+	PreserveQuery      bool              `json:"preserve_query"`
+	PreservePath       bool              `json:"preserve_path"`
+	ExtraFrom          string            `json:"extra_from"`
+	SubjectFrom        string            `json:"subject_from"`
+	PreserveHost       bool              `json:"preserve_host"`
+	ForwardHTTPHeaders []string          `json:"forward_http_headers"`
+	SetHeaders         map[string]string `json:"additional_headers"`
+	ForceMethod        string            `json:"force_method"`
+}
+
+func (a *AuthenticatorCookieSessionConfiguration) GetCheckSessionURL() string {
+	return a.CheckSessionURL
+}
+
+func (a *AuthenticatorCookieSessionConfiguration) GetPreserveQuery() bool {
+	return a.PreserveQuery
+}
+
+func (a *AuthenticatorCookieSessionConfiguration) GetPreservePath() bool {
+	return a.PreservePath
+}
+
+func (a *AuthenticatorCookieSessionConfiguration) GetPreserveHost() bool {
+	return a.PreserveHost
+}
+
+func (a *AuthenticatorCookieSessionConfiguration) GetForwardHTTPHeaders() []string {
+	return a.ForwardHTTPHeaders
+}
+
+func (a *AuthenticatorCookieSessionConfiguration) GetSetHeaders() map[string]string {
+	return a.SetHeaders
+}
+
+func (a *AuthenticatorCookieSessionConfiguration) GetForceMethod() string {
+	return a.ForceMethod
 }
 
 type AuthenticatorCookieSession struct {
 	c      configuration.Provider
-	logger *logrusx.Logger
+	client *http.Client
 }
 
-func NewAuthenticatorCookieSession(c configuration.Provider, logger *logrusx.Logger) *AuthenticatorCookieSession {
+var _ AuthenticatorForwardConfig = new(AuthenticatorCookieSessionConfiguration)
+
+func NewAuthenticatorCookieSession(c configuration.Provider, provider trace.TracerProvider) *AuthenticatorCookieSession {
 	return &AuthenticatorCookieSession{
-		c:      c,
-		logger: logger,
+		c: c,
+		client: &http.Client{
+			Transport: otelhttp.NewTransport(
+				http.DefaultTransport,
+				otelhttp.WithTracerProvider(provider),
+				otelhttp.WithSpanNameFormatter(func(operation string, r *http.Request) string { return "authn.cookie_session" })),
+		},
 	}
 }
 
@@ -80,6 +121,9 @@ func (a *AuthenticatorCookieSession) Config(config json.RawMessage) (*Authentica
 		c.SubjectFrom = "subject"
 	}
 
+	// Add Authorization and Cookie headers for backward compatibility
+	c.ForwardHTTPHeaders = append(c.ForwardHTTPHeaders, []string{header.Cookie}...)
+
 	return &c, nil
 }
 
@@ -93,7 +137,7 @@ func (a *AuthenticatorCookieSession) Authenticate(r *http.Request, session *Auth
 		return errors.WithStack(ErrAuthenticatorNotResponsible)
 	}
 
-	body, err := forwardRequestToSessionStore(r, cf.CheckSessionURL, cf.PreserveQuery, cf.PreservePath, cf.PreserveHost, cf.SetHeaders, cf.ForceMethod, a.logger)
+	body, err := forwardRequestToSessionStore(a.client, r, cf)
 	if err != nil {
 		return err
 	}
@@ -133,64 +177,72 @@ func cookieSessionResponsible(r *http.Request, only []string) bool {
 	return false
 }
 
-func forwardRequestToSessionStore(r *http.Request, checkSessionURL string, preserveQuery bool, preservePath bool, preserveHost bool, setHeaders map[string]string, m string, logger *logrusx.Logger) (json.RawMessage, error) {
-	reqUrl, err := url.Parse(checkSessionURL)
+func forwardRequestToSessionStore(client *http.Client, r *http.Request, cf AuthenticatorForwardConfig) (json.RawMessage, error) {
+	req, err := PrepareRequest(r, cf)
 	if err != nil {
-		return nil, errors.WithStack(herodot.ErrInternalServerError.WithReasonf("Unable to parse session check URL: %s", err))
+		return nil, err
 	}
 
-	if !preservePath {
-		reqUrl.Path = r.URL.Path
+	res, err := client.Do(req.WithContext(r.Context()))
+
+	if err != nil {
+		return nil, helper.ErrForbidden.WithReason(err.Error()).WithTrace(err)
 	}
 
-	if !preserveQuery {
-		reqUrl.RawQuery = r.URL.RawQuery
+	defer res.Body.Close()
+
+	if res.StatusCode == http.StatusOK {
+		body, err := io.ReadAll(res.Body)
+		if err != nil {
+			return json.RawMessage{}, errors.WithStack(herodot.ErrInternalServerError.WithReasonf("Unable to fetch cookie session context from remote: %+v", err))
+		}
+		return body, nil
 	}
 
+	return json.RawMessage{}, errors.WithStack(helper.ErrUnauthorized)
+}
+
+func PrepareRequest(r *http.Request, cf AuthenticatorForwardConfig) (http.Request, error) {
+	reqURL, err := url.Parse(cf.GetCheckSessionURL())
+	if err != nil {
+		return http.Request{}, errors.WithStack(herodot.ErrInternalServerError.WithReasonf("Unable to parse session check URL: %s", err))
+	}
+
+	if !cf.GetPreservePath() {
+		reqURL.Path = r.URL.Path
+	}
+
+	if !cf.GetPreserveQuery() {
+		reqURL.RawQuery = r.URL.RawQuery
+	}
+
+	m := cf.GetForceMethod()
 	if m == "" {
 		m = r.Method
 	}
 
 	req := http.Request{
 		Method: m,
-		URL:    reqUrl,
+		URL:    reqURL,
 		Header: http.Header{},
 	}
 
-	// We need to make a COPY of the header, not modify r.Header!
-	for k, v := range r.Header {
-		// remove Accept-Encoding to let the transport handle gzip
-		if k == "Accept-Encoding" {
-			continue
+	// We need to copy only essential and configurable headers
+	for requested, v := range r.Header {
+		for _, allowed := range cf.GetForwardHTTPHeaders() {
+			// Check against canonical names of header
+			if requested == header.Canonical(allowed) {
+				req.Header[requested] = v
+			}
 		}
-		req.Header[k] = v
 	}
 
-	for k, v := range setHeaders {
+	for k, v := range cf.GetSetHeaders() {
 		req.Header.Set(k, v)
 	}
 
-	if preserveHost {
-		req.Header.Set("X-Forwarded-Host", r.Host)
+	if cf.GetPreserveHost() {
+		req.Header.Set(header.XForwardedHost, r.Host)
 	}
-
-	res, err := http.DefaultClient.Do(req.WithContext(r.Context()))
-	if err != nil {
-		return nil, helper.ErrForbidden.WithReason(err.Error()).WithTrace(err)
-	}
-
-	body, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		logger.Tracef("Error reading response from remote: %v", err)
-		return json.RawMessage{}, errors.WithStack(herodot.ErrInternalServerError.WithReasonf("Unable to read response from remote: %s", err))
-	}
-	defer res.Body.Close()
-
-	if res.StatusCode == 200 {
-		return body, nil
-	}
-
-	logger.WithField("response_code", res.StatusCode).WithField("body", string(body)).Trace()
-
-	return json.RawMessage{}, errors.WithStack(helper.ErrUnauthorized.WithReasonf("Remote returned non 200 status code: %d", res.StatusCode))
+	return req, nil
 }

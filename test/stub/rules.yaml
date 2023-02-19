@@ -2,7 +2,7 @@
   upstream:
     preserve_host: true
     strip_path: /api
-    url: mybackend.com/api
+    url: https://mybackend.com/api
   match:
     url: myproxy.com/api
     methods:

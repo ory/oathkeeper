@@ -1,12 +1,15 @@
+// Copyright © 2023 Ory Corp
+// SPDX-License-Identifier: Apache-2.0
+
 package cmd
 
 import (
 	"fmt"
 	"os"
 
-	"github.com/spf13/cobra"
+	"github.com/ory/oathkeeper/internal/httpclient/client/health"
 
-	"github.com/ory/oathkeeper/internal/httpclient/client/api"
+	"github.com/spf13/cobra"
 
 	"github.com/ory/x/cmdx"
 )
@@ -22,10 +25,10 @@ Note:
   The endpoint URL should point to a single ORY Oathkeeper deployment.
   If the endpoint URL points to a Load Balancer, these commands will effective test the Load Balancer.
 `,
-	Run: func(cmd *cobra.Command, args []string) {
+	Run: func(cmd *cobra.Command, _ []string) {
 		client := newClient(cmd)
 
-		r, err := client.API.IsInstanceAlive(api.NewIsInstanceAliveParams())
+		r, err := client.Health.IsInstanceAlive(health.NewIsInstanceAliveParams())
 		// If err, print err and exit 1
 		cmdx.Must(err, "%s", err)
 		// Print payload

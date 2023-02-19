@@ -1,22 +1,5 @@
-/*
- * Copyright © 2017-2018 Aeneas Rekkas <aeneas+oss@aeneas.io>
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *
- * @author       Aeneas Rekkas <aeneas+oss@aeneas.io>
- * @copyright  2017-2018 Aeneas Rekkas <aeneas+oss@aeneas.io>
- * @license  	   Apache-2.0
- */
+// Copyright © 2023 Ory Corp
+// SPDX-License-Identifier: Apache-2.0
 
 package api_test
 
@@ -25,7 +8,7 @@ import (
 	"context"
 	"crypto/tls"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -39,25 +22,25 @@ import (
 	"github.com/urfave/negroni"
 
 	"github.com/ory/herodot"
+	"github.com/ory/x/logrusx"
+
 	"github.com/ory/oathkeeper/api"
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/internal"
 	"github.com/ory/oathkeeper/pipeline/authn"
 	"github.com/ory/oathkeeper/proxy"
 	"github.com/ory/oathkeeper/rule"
-	"github.com/ory/viper"
-	"github.com/ory/x/logrusx"
 )
 
 func TestDecisionAPI(t *testing.T) {
 	conf := internal.NewConfigurationWithDefaults()
-	viper.Set(configuration.ViperKeyAuthenticatorNoopIsEnabled, true)
-	viper.Set(configuration.ViperKeyAuthenticatorUnauthorizedIsEnabled, true)
-	viper.Set(configuration.ViperKeyAuthenticatorAnonymousIsEnabled, true)
-	viper.Set(configuration.ViperKeyAuthorizerAllowIsEnabled, true)
-	viper.Set(configuration.ViperKeyAuthorizerDenyIsEnabled, true)
-	viper.Set(configuration.ViperKeyMutatorNoopIsEnabled, true)
-	viper.Set(configuration.ViperKeyErrorsWWWAuthenticateIsEnabled, true)
+	conf.SetForTest(t, configuration.AuthenticatorNoopIsEnabled, true)
+	conf.SetForTest(t, configuration.AuthenticatorUnauthorizedIsEnabled, true)
+	conf.SetForTest(t, configuration.AuthenticatorAnonymousIsEnabled, true)
+	conf.SetForTest(t, configuration.AuthorizerAllowIsEnabled, true)
+	conf.SetForTest(t, configuration.AuthorizerDenyIsEnabled, true)
+	conf.SetForTest(t, configuration.MutatorNoopIsEnabled, true)
+	conf.SetForTest(t, configuration.ErrorsWWWAuthenticateIsEnabled, true)
 	reg := internal.NewRegistry(conf).WithBrokenPipelineMutator()
 
 	d := reg.DecisionHandler()
@@ -102,7 +85,6 @@ func TestDecisionAPI(t *testing.T) {
 		url         string
 		code        int
 		reqBody     []byte
-		messages    []string
 		rulesRegexp []rule.Rule
 		rulesGlob   []rule.Rule
 		transform   func(r *http.Request)
@@ -330,7 +312,7 @@ func TestDecisionAPI(t *testing.T) {
 				res, err := http.DefaultClient.Do(req)
 				require.NoError(t, err)
 
-				entireBody, err := ioutil.ReadAll(res.Body)
+				entireBody, err := io.ReadAll(res.Body)
 				require.NoError(t, err)
 				defer res.Body.Close()
 
@@ -338,12 +320,12 @@ func TestDecisionAPI(t *testing.T) {
 				assert.Equal(t, tc.code, res.StatusCode)
 				assert.Equal(t, strconv.Itoa(len(entireBody)), res.Header.Get("Content-Length"))
 			}
-			t.Run("regexp", func(t *testing.T) {
+			t.Run("regexp", func(_ *testing.T) {
 				reg.RuleRepository().(*rule.RepositoryMemory).WithRules(tc.rulesRegexp)
 				testFunc(configuration.Regexp)
 			})
-			t.Run("glob", func(t *testing.T) {
-				reg.RuleRepository().(*rule.RepositoryMemory).WithRules(tc.rulesRegexp)
+			t.Run("glob", func(_ *testing.T) {
+				reg.RuleRepository().(*rule.RepositoryMemory).WithRules(tc.rulesGlob)
 				testFunc(configuration.Glob)
 			})
 		})
@@ -370,7 +352,7 @@ func (*decisionHandlerRegistryMock) Logger() *logrusx.Logger {
 	return logrusx.New("", "")
 }
 
-func (m *decisionHandlerRegistryMock) Match(ctx context.Context, method string, u *url.URL) (*rule.Rule, error) {
+func (m *decisionHandlerRegistryMock) Match(ctx context.Context, method string, u *url.URL, _ rule.Protocol) (*rule.Rule, error) {
 	args := m.Called(ctx, method, u)
 	return args.Get(0).(*rule.Rule), args.Error(1)
 }
@@ -422,6 +404,17 @@ func TestDecisionAPIHeaderUsage(t *testing.T) {
 				req.Header.Add("X-Forwarded-Proto", "https")
 				req.Header.Add("X-Forwarded-Host", "test.dev")
 				req.Header.Add("X-Forwarded-Uri", "/bar")
+			},
+		},
+		{
+			name:           "argument from the headers doesn't get url encoded",
+			expectedUrl:    &url.URL{Scheme: "https", Host: "test.dev", Path: "/bar"},
+			expectedMethod: "POST",
+			transform: func(req *http.Request) {
+				req.Header.Add("X-Forwarded-Method", "POST")
+				req.Header.Add("X-Forwarded-Proto", "https")
+				req.Header.Add("X-Forwarded-Host", "test.dev")
+				req.Header.Add("X-Forwarded-Uri", "/bar?this=is&a=test")
 			},
 		},
 		{

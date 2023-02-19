@@ -1,3 +1,6 @@
+// Copyright © 2023 Ory Corp
+// SPDX-License-Identifier: Apache-2.0
+
 package authz
 
 import (
@@ -12,6 +15,8 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/ory/x/httpx"
+
+	"go.opentelemetry.io/otel/trace"
 
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/helper"
@@ -47,10 +52,10 @@ type AuthorizerRemoteJSON struct {
 }
 
 // NewAuthorizerRemoteJSON creates a new AuthorizerRemoteJSON.
-func NewAuthorizerRemoteJSON(c configuration.Provider) *AuthorizerRemoteJSON {
+func NewAuthorizerRemoteJSON(c configuration.Provider, d interface{ Tracer() trace.Tracer }) *AuthorizerRemoteJSON {
 	return &AuthorizerRemoteJSON{
 		c:      c,
-		client: httpx.NewResilientClientLatencyToleranceSmall(nil),
+		client: httpx.NewResilientClient(httpx.ResilientClientWithTracer(d.Tracer())).StandardClient(),
 		t:      x.NewTemplate("remote_json"),
 	}
 }
@@ -87,7 +92,7 @@ func (a *AuthorizerRemoteJSON) Authorize(r *http.Request, session *authn.Authent
 		return errors.Wrap(err, "payload is not a JSON text")
 	}
 
-	req, err := http.NewRequest("POST", c.Remote, &body)
+	req, err := http.NewRequestWithContext(r.Context(), "POST", c.Remote, &body)
 	if err != nil {
 		return errors.WithStack(err)
 	}
@@ -98,6 +103,7 @@ func (a *AuthorizerRemoteJSON) Authorize(r *http.Request, session *authn.Authent
 	}
 
 	res, err := a.client.Do(req.WithContext(r.Context()))
+
 	if err != nil {
 		return errors.WithStack(err)
 	}
@@ -129,10 +135,6 @@ func (a *AuthorizerRemoteJSON) Validate(config json.RawMessage) error {
 // Config merges config and the authorizer's configuration and validates the
 // resulting configuration. It reports an error if the configuration is invalid.
 func (a *AuthorizerRemoteJSON) Config(config json.RawMessage) (*AuthorizerRemoteJSONConfiguration, error) {
-	const (
-		defaultTimeout = "500ms"
-		defaultMaxWait = "1s"
-	)
 	var c AuthorizerRemoteJSONConfiguration
 	if err := a.c.AuthorizerConfig(a.GetID(), config, &c); err != nil {
 		return nil, NewErrAuthorizerMisconfigured(a, err)
@@ -142,16 +144,6 @@ func (a *AuthorizerRemoteJSON) Config(config json.RawMessage) (*AuthorizerRemote
 		c.ForwardResponseHeadersToUpstream = []string{}
 	}
 
-	if c.Retry == nil {
-		c.Retry = &AuthorizerRemoteJSONRetryConfiguration{Timeout: defaultTimeout, MaxWait: defaultMaxWait}
-	} else {
-		if c.Retry.Timeout == "" {
-			c.Retry.Timeout = defaultTimeout
-		}
-		if c.Retry.MaxWait == "" {
-			c.Retry.MaxWait = defaultMaxWait
-		}
-	}
 	duration, err := time.ParseDuration(c.Retry.Timeout)
 	if err != nil {
 		return nil, err
@@ -162,7 +154,10 @@ func (a *AuthorizerRemoteJSON) Config(config json.RawMessage) (*AuthorizerRemote
 		return nil, err
 	}
 	timeout := time.Millisecond * duration
-	a.client = httpx.NewResilientClientLatencyToleranceConfigurable(nil, timeout, maxWait)
+	a.client = httpx.NewResilientClient(
+		httpx.ResilientClientWithMaxRetryWait(maxWait),
+		httpx.ResilientClientWithConnectionTimeout(timeout),
+	).StandardClient()
 
 	return &c, nil
 }
