@@ -9,11 +9,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io"
-	"net"
-	"net/http"
-	"net/http/httptest"
-	"os"
 	"testing"
 	"time"
 
@@ -22,10 +17,8 @@ import (
 	"github.com/stretchr/testify/require"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/status"
 	"google.golang.org/grpc/test/bufconn"
-	"google.golang.org/grpc/test/grpc_testing"
 	grpcTesting "google.golang.org/grpc/test/grpc_testing"
 
 	"github.com/ory/oathkeeper/driver"
@@ -33,59 +26,6 @@ import (
 	"github.com/ory/oathkeeper/middleware"
 	"github.com/ory/oathkeeper/rule"
 )
-
-func testClient(t *testing.T, l *bufconn.Listener, dialOpts ...grpc.DialOption) grpcTesting.TestServiceClient {
-	conn, err := grpc.Dial("bufnet",
-		append(dialOpts,
-			grpc.WithTransportCredentials(insecure.NewCredentials()),
-			grpc.WithAuthority("myproject.apis.ory.sh"),
-			grpc.WithContextDialer(func(context.Context, string) (net.Conn, error) { return l.Dial() }),
-		)...,
-	)
-	require.NoError(t, err)
-	t.Cleanup(func() { conn.Close() })
-
-	return grpcTesting.NewTestServiceClient(conn)
-}
-
-func testTokenCheckServer(t *testing.T) *httptest.Server {
-	s := httptest.NewServer(http.HandlerFunc(
-		func(w http.ResponseWriter, r *http.Request) {
-			if r.Header.Get("authorization") != "Bearer correct token" {
-				t.Logf("denied request %+v", r)
-				w.WriteHeader(http.StatusForbidden)
-				return
-			}
-			t.Logf("allowed request %+v", r)
-			io.WriteString(w, "{}")
-		}))
-	t.Cleanup(s.Close)
-	return s
-}
-
-func writeTestConfig(t *testing.T, pattern string, content string) string {
-	f, err := os.CreateTemp(t.TempDir(), pattern)
-	if err != nil {
-		t.Error(err)
-		return ""
-	}
-	defer f.Close()
-	io.WriteString(f, content)
-
-	return f.Name()
-}
-
-type testToken string
-
-func (t testToken) GetRequestMetadata(context.Context, ...string) (map[string]string, error) {
-	return map[string]string{"authorization": "Bearer " + string(t)}, nil
-}
-func (t testToken) RequireTransportSecurity() bool { return false }
-
-type upstream struct {
-	*MockTestServiceServer
-	grpc_testing.UnsafeTestServiceServer
-}
 
 func TestMiddleware(t *testing.T) {
 	ctx := context.Background()
@@ -104,6 +44,7 @@ authenticators:
   bearer_token:
     enabled: true
     config:
+      subject_from: identity.id
       check_session_url: %s
 authorizers:
   allow:
