@@ -1238,10 +1238,10 @@
           }
         }
       },
-      "authorizers": {
-        "title": "Authorizers",
+      "authorizer": {
+        "title": "Authorizer",
         "type": "object",
-        "description": "For more information on authorizers head over to: https://www.ory.sh/oathkeeper/docs/pipeline/authz",
+        "description": "For more information on authorizer head over to: https://www.ory.sh/oathkeeper/docs/pipeline/authz",
         "additionalProperties": false,
         "properties": {
           "allow": {
