@@ -767,9 +767,6 @@
           "additionalProperties": false,
           "type": "object",
           "properties": {
-            "enabled": {
-              "$ref": "#/definitions/handlerSwitch"
-            },
             "ttl": {
               "type": "string",
               "pattern": "^[0-9]+(ns|us|ms|s|m|h)$",
@@ -787,7 +784,6 @@
       "type": "object",
       "title": "ID Token Mutator Configuration",
       "description": "This section is optional when the mutator is disabled.",
-      "required": ["jwks_url", "issuer_url"],
       "properties": {
         "claims": {
           "type": "string"
@@ -815,9 +811,40 @@
           "pattern": "^[0-9]+(ns|us|ms|s|m|h)$",
           "default": "15m",
           "examples": ["1h", "1m", "30s"]
+        },
+        "iss": {
+          "type": "string",
+          "format": "uri",
+          "description": "Issuer Identifier for the Issuer of the response. The iss value is a case sensitive URL using the https scheme that contains scheme, host, and optionally, port number and path components and no query or fragment components. Typically, this is the URL of Ory Oathkeeper, for example: https://oathkeeper.myapi.com."
+        },
+        "sub": {
+          "type": "string",
+          "maxLength": 255,
+          "description": "Subject Identifier. A locally unique and never reassigned identifier within the Issuer for the End-User, which is intended to be consumed by the Client, for example, 24400320 or AItOawmwtWwcT0k51BayewNvutrJUqsvl6qs7A4. It must not exceed 255 ASCII characters in length. The sub value is a case sensitive string. The End-User might also be an OAuth 2.0 Client, given that the access token was granted using the OAuth 2.0 Client Credentials flow."
+        },
+        "aud": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Audience(s) that this ID Token is intended for. It MUST contain the OAuth 2.0 client_id of the Relying Party as an audience value. It MAY also contain identifiers for other audiences. In the general case, the aud value is an array of case sensitive strings."
+        },
+        "exp": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Expiration time on or after which the ID Token MUST NOT be accepted for processing. The processing of this parameter requires that the current date/time MUST be before the expiration date/time listed in the value. Its value is a JSON number representing the number of seconds from 1970-01-01T0:0:0Z as measured in UTC until the date/time. See RFC 3339 [RFC3339] for details regarding date/times and UTC in particular."
+        },
+        "iat": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Time at which the JWT was issued. Its value is a JSON number representing the number of seconds from 1970-01-01T0:0:0Z as measured in UTC until the date/time."
+        },
+        "jti": {
+          "type": "string",
+          "description": "A cryptographically strong random identifier to ensure the ID Token's uniqueness."
         }
       },
-      "additionalProperties": false
+      "additionalProperties": true
     },
     "configErrorsJSON": {
       "type": "object",
@@ -1049,193 +1076,124 @@
         "items": {
           "type": "object",
           "properties": {
-            "anonymous": {
+            "handler": {
+              "title": "Handler",
+              "description": "Defines the handler (for example noop, anonymous and bearer_token) to be used.",
+              "type": "string",
+              "enum": [
+                "noop",
+                "unauthorized",
+                "anonymous",
+                "cookie_session",
+                "bearer_token",
+                "oauth2_client_credentials",
+                "oauth2_introspection",
+                "jwt"
+              ]
+            }
+          },
+          "required": ["handler"],
+          "oneOf": [
+            {
+              "title": "No Operation (noop)",
+              "description": "The [`noop` authenticator](https://www.ory.sh/oathkeeper/docs/pipeline/authn#noop).",
+              "additionalProperties": false,
+              "properties": {
+                "handler": {
+                  "const": "noop"
+                }
+              }
+            },
+            {
               "title": "Anonymous",
               "description": "The [`anonymous` authenticator](https://www.ory.sh/oathkeeper/docs/pipeline/authn#anonymous).",
               "type": "object",
               "additionalProperties": false,
               "properties": {
-                "enabled": {
-                  "$ref": "#/definitions/handlerSwitch"
+                "handler": {
+                  "const": "anonymous"
                 },
                 "config": {
                   "$ref": "#/definitions/configAuthenticatorsAnonymous"
                 }
               }
             },
-            "noop": {
-              "title": "No Operation (noop)",
-              "description": "The [`noop` authenticator](https://www.ory.sh/oathkeeper/docs/pipeline/authn#noop).",
-              "type": "object",
-              "additionalProperties": false,
-              "properties": {
-                "enabled": {
-                  "$ref": "#/definitions/handlerSwitch"
-                }
-              }
-            },
-            "unauthorized": {
+            {
               "title": "Unauthorized",
               "description": "The [`unauthorized` authenticator](https://www.ory.sh/oathkeeper/docs/pipeline/authn#unauthorized).",
               "type": "object",
               "additionalProperties": false,
               "properties": {
-                "enabled": {
-                  "$ref": "#/definitions/handlerSwitch"
+                "handler": {
+                  "const": "unauthorized"
                 }
               }
             },
-            "cookie_session": {
+            {
               "title": "Cookie Session",
               "description": "The [`cookie_session` authenticator](https://www.ory.sh/oathkeeper/docs/pipeline/authn#cookie_session).",
               "type": "object",
               "properties": {
-                "enabled": {
-                  "$ref": "#/definitions/handlerSwitch"
-                }
-              },
-              "oneOf": [
-                {
-                  "properties": {
-                    "enabled": {
-                      "const": true
-                    },
-                    "config": {
-                      "$ref": "#/definitions/configAuthenticatorsCookieSession"
-                    }
-                  },
-                  "required": ["config"]
+                "handler": {
+                  "const": "cookie_session"
                 },
-                {
-                  "properties": {
-                    "enabled": {
-                      "const": false
-                    }
-                  }
+                "config": {
+                  "$ref": "#/definitions/configAuthenticatorsCookieSession"
                 }
-              ]
+              }
             },
-            "bearer_token": {
+            {
               "title": "Bearer Token",
               "description": "The [`bearer_token` authenticator](https://www.ory.sh/oathkeeper/docs/pipeline/authn#bearer_token).",
               "type": "object",
               "properties": {
-                "enabled": {
-                  "$ref": "#/definitions/handlerSwitch"
-                }
-              },
-              "oneOf": [
-                {
-                  "properties": {
-                    "enabled": {
-                      "const": true
-                    },
-                    "config": {
-                      "$ref": "#/definitions/configAuthenticatorsBearerToken"
-                    }
-                  },
-                  "required": ["config"]
+                "handler": {
+                  "const": "bearer_token"
                 },
-                {
-                  "properties": {
-                    "enabled": {
-                      "const": false
-                    }
-                  }
+                "config": {
+                  "$ref": "#/definitions/configAuthenticatorsBearerToken"
                 }
-              ]
+              }
             },
-            "jwt": {
-              "title": "JSON Web Token (jwt)",
-              "description": "The [`jwt` authenticator](https://www.ory.sh/oathkeeper/docs/pipeline/authn#jwt).",
-              "type": "object",
-              "properties": {
-                "enabled": {
-                  "$ref": "#/definitions/handlerSwitch"
-                }
-              },
-              "oneOf": [
-                {
-                  "properties": {
-                    "enabled": {
-                      "const": true
-                    },
-                    "config": {
-                      "$ref": "#/definitions/configAuthenticatorsJwt"
-                    }
-                  },
-                  "required": ["config"]
-                },
-                {
-                  "properties": {
-                    "enabled": {
-                      "const": false
-                    }
-                  }
-                }
-              ]
-            },
-            "oauth2_client_credentials": {
+            {
               "title": "OAuth 2.0 Client Credentials",
               "description": "The [`oauth2_client_credentials` authenticator](https://www.ory.sh/oathkeeper/docs/pipeline/authn#oauth2_client_credentials).",
               "type": "object",
               "properties": {
-                "enabled": {
-                  "$ref": "#/definitions/handlerSwitch"
-                }
-              },
-              "oneOf": [
-                {
-                  "properties": {
-                    "enabled": {
-                      "const": true
-                    },
-                    "config": {
-                      "$ref": "#/definitions/configAuthenticatorsOauth2ClientCredentials"
-                    }
-                  },
-                  "required": ["config"]
+                "handler": {
+                  "const": "oauth2_client_credentials"
                 },
-                {
-                  "properties": {
-                    "enabled": {
-                      "const": false
-                    }
-                  }
+                "config": {
+                  "$ref": "#/definitions/configAuthenticatorsOauth2ClientCredentials"
                 }
-              ]
+              }
             },
-            "oauth2_introspection": {
+            {
               "title": "OAuth 2.0 Token Introspection",
               "description": "The [`oauth2_introspection` authenticator](https://www.ory.sh/oathkeeper/docs/pipeline/authn#oauth2_introspection).",
               "type": "object",
               "properties": {
-                "enabled": {
-                  "$ref": "#/definitions/handlerSwitch"
-                }
-              },
-              "oneOf": [
-                {
-                  "properties": {
-                    "enabled": {
-                      "const": true
-                    },
-                    "config": {
-                      "$ref": "#/definitions/configAuthenticatorsOauth2Introspection"
-                    }
-                  },
-                  "required": ["config"]
+                "handler": {
+                  "const": "oauth2_introspection"
                 },
-                {
-                  "properties": {
-                    "enabled": {
-                      "const": false
-                    }
-                  }
+                "config": {
+                  "$ref": "#/definitions/configAuthenticatorsOauth2Introspection"
                 }
-              ]
+              }
+            },
+            {
+              "title": "JSON Web Token (jwt)",
+              "description": "The [`jwt` authenticator](https://www.ory.sh/oathkeeper/docs/pipeline/authn#jwt).",
+              "properties": {
+                "handler": {
+                  "const": "jwt"
+                },
+                "config": {
+                  "$ref": "#/definitions/configAuthenticatorsJwt"
+                }
+              }
             }
-          }
+          ]
         }
       },
       "authorizer": {
@@ -1244,119 +1202,100 @@
         "description": "For more information on authorizer head over to: https://www.ory.sh/oathkeeper/docs/pipeline/authz",
         "additionalProperties": false,
         "properties": {
-          "allow": {
+          "handler": {
+            "title": "Handler",
+            "description": "Defines the handler (for example noop, allow and keto_engine_acp_ory) to be used.",
+            "type": "string",
+            "enum": [
+              "noop",
+              "allow",
+              "deny",
+              "keto_engine_acp_ory",
+              "remote",
+              "remote_json"
+            ]
+          },
+          "config": {
+            "title": "Config",
+            "description": "Configuration specific to the chosen authorizer.",
+            "type": "object"
+          }
+        },
+        "required": ["handler"],
+        "oneOf": [
+          {
+            "title": "No Operation (noop)",
+            "additionalProperties": false,
+            "properties": {
+              "handler": {
+                "const": "noop"
+              }
+            }
+          },
+          {
             "title": "Allow",
             "description": "The [`allow` authorizer](https://www.ory.sh/oathkeeper/docs/pipeline/authz#allow).",
             "type": "object",
             "additionalProperties": false,
             "properties": {
-              "enabled": {
-                "$ref": "#/definitions/handlerSwitch"
+              "handler": {
+                "const": "allow"
               }
             }
           },
-          "deny": {
+          {
             "title": "Deny",
             "description": "The [`deny` authorizer](https://www.ory.sh/oathkeeper/docs/pipeline/authz#deny).",
             "type": "object",
             "additionalProperties": false,
             "properties": {
-              "enabled": {
-                "$ref": "#/definitions/handlerSwitch"
+              "handler": {
+                "const": "deny"
               }
             }
           },
-          "keto_engine_acp_ory": {
+          {
             "title": "ORY Keto Access Control Policies Engine",
             "description": "The [`keto_engine_acp_ory` authorizer](https://www.ory.sh/oathkeeper/docs/pipeline/authz#keto_engine_acp_ory).",
             "type": "object",
             "properties": {
-              "enabled": {
-                "$ref": "#/definitions/handlerSwitch"
+              "handler": {
+                "const": "keto_engine_acp_ory"
+              },
+              "config": {
+                "$ref": "#/definitions/configAuthorizersKetoEngineAcpOry"
               }
             },
-            "oneOf": [
-              {
-                "properties": {
-                  "enabled": {
-                    "const": true
-                  },
-                  "config": {
-                    "$ref": "#/definitions/configAuthorizersKetoEngineAcpOry"
-                  }
-                },
-                "required": ["config"]
-              },
-              {
-                "properties": {
-                  "enabled": {
-                    "const": false
-                  }
-                }
-              }
-            ]
+            "required": ["config"]
           },
-          "remote": {
+          {
             "title": "Remote",
             "description": "The [`remote` authorizer](https://www.ory.sh/oathkeeper/docs/pipeline/authz#remote).",
             "type": "object",
             "properties": {
-              "enabled": {
-                "$ref": "#/definitions/handlerSwitch"
+              "handler": {
+                "const": "remote"
+              },
+              "config": {
+                "$ref": "#/definitions/configAuthorizersRemote"
               }
             },
-            "oneOf": [
-              {
-                "properties": {
-                  "enabled": {
-                    "const": true
-                  },
-                  "config": {
-                    "$ref": "#/definitions/configAuthorizersRemote"
-                  }
-                },
-                "required": ["config"]
-              },
-              {
-                "properties": {
-                  "enabled": {
-                    "const": false
-                  }
-                }
-              }
-            ]
+            "required": ["config"]
           },
-          "remote_json": {
+          {
             "title": "Remote JSON",
             "description": "The [`remote_json` authorizer](https://www.ory.sh/oathkeeper/docs/pipeline/authz#remote_json).",
             "type": "object",
             "properties": {
-              "enabled": {
-                "$ref": "#/definitions/handlerSwitch"
-              }
-            },
-            "oneOf": [
-              {
-                "properties": {
-                  "enabled": {
-                    "const": true
-                  },
-                  "config": {
-                    "$ref": "#/definitions/configAuthorizersRemoteJSON"
-                  }
-                },
-                "required": ["config"]
+              "handler": {
+                "const": "remote_json"
               },
-              {
-                "properties": {
-                  "enabled": {
-                    "const": false
-                  }
-                }
+              "config": {
+                "$ref": "#/definitions/configAuthorizersRemoteJSON"
               }
-            ]
+            }
           }
-        }
+        ]
       },
       "mutators": {
         "title": "Mutators",
@@ -1366,138 +1305,82 @@
         "items": {
           "type": "object",
           "properties": {
-            "noop": {
+            "handler": {
+              "title": "Handler",
+              "description": "Defines the handler (for example noop, id_token and cookie) to be used.",
+              "type": "string",
+              "enum": ["noop", "id_token", "header", "cookie", "hydrator"]
+            }
+          },
+          "required": ["handler"],
+          "oneOf": [
+            {
               "title": "No Operation (noop)",
               "description": "The [`noop` mutator](https://www.ory.sh/oathkeeper/docs/pipeline/mutator#noop).",
               "type": "object",
               "additionalProperties": false,
               "properties": {
-                "enabled": {
-                  "$ref": "#/definitions/handlerSwitch"
+                "handler": {
+                  "const": "noop"
                 }
               }
             },
-            "cookie": {
+            {
               "title": "HTTP Cookie",
               "description": "The [`cookie` mutator](https://www.ory.sh/oathkeeper/docs/pipeline/mutator#cookie).",
               "type": "object",
               "properties": {
-                "enabled": {
-                  "$ref": "#/definitions/handlerSwitch"
+                "handler": {
+                  "const": "cookie"
+                },
+                "config": {
+                  "$ref": "#/definitions/configMutatorsCookie"
                 }
               },
-              "oneOf": [
-                {
-                  "properties": {
-                    "enabled": {
-                      "const": true
-                    },
-                    "config": {
-                      "$ref": "#/definitions/configMutatorsCookie"
-                    }
-                  },
-                  "required": ["config"]
-                },
-                {
-                  "properties": {
-                    "enabled": {
-                      "const": false
-                    }
-                  }
-                }
-              ]
+              "required": ["config"]
             },
-            "header": {
+            {
               "title": "HTTP Header",
               "description": "The [`header` mutator](https://www.ory.sh/oathkeeper/docs/pipeline/mutator#header).",
               "type": "object",
               "properties": {
-                "enabled": {
-                  "$ref": "#/definitions/handlerSwitch"
+                "handler": {
+                  "const": "header"
+                },
+                "config": {
+                  "$ref": "#/definitions/configMutatorsHeader"
                 }
               },
-              "oneOf": [
-                {
-                  "properties": {
-                    "enabled": {
-                      "const": true
-                    },
-                    "config": {
-                      "$ref": "#/definitions/configMutatorsHeader"
-                    }
-                  },
-                  "required": ["config"]
-                },
-                {
-                  "properties": {
-                    "enabled": {
-                      "const": false
-                    }
-                  }
-                }
-              ]
+              "required": ["config"]
             },
-            "hydrator": {
+            {
               "title": "Hydrator",
               "description": "The [`hydrator` mutator](https://www.ory.sh/oathkeeper/docs/pipeline/mutator#hydrator).",
               "type": "object",
               "properties": {
-                "enabled": {
-                  "$ref": "#/definitions/handlerSwitch"
-                }
-              },
-              "oneOf": [
-                {
-                  "properties": {
-                    "enabled": {
-                      "const": true
-                    },
-                    "config": {
-                      "$ref": "#/definitions/configMutatorsHydrator"
-                    }
-                  },
-                  "required": ["config"]
+                "handler": {
+                  "const": "hydrator"
                 },
-                {
-                  "properties": {
-                    "enabled": {
-                      "const": false
-                    }
-                  }
+                "config": {
+                  "$ref": "#/definitions/configMutatorsHydrator"
                 }
-              ]
+              }
             },
-            "id_token": {
+            {
               "title": "ID Token (JSON Web Token)",
               "description": "The [`id_token` mutator](https://www.ory.sh/oathkeeper/docs/pipeline/mutator#id_token).",
               "type": "object",
               "properties": {
-                "enabled": {
-                  "$ref": "#/definitions/handlerSwitch"
+                "handler": {
+                  "const": "id_token"
+                },
+                "config": {
+                  "$ref": "#/definitions/configMutatorsIdToken"
                 }
               },
-              "oneOf": [
-                {
-                  "properties": {
-                    "enabled": {
-                      "const": true
-                    },
-                    "config": {
-                      "$ref": "#/definitions/configMutatorsIdToken"
-                    }
-                  },
-                  "required": ["config"]
-                },
-                {
-                  "properties": {
-                    "enabled": {
-                      "const": false
-                    }
-                  }
-                }
-              ]
+              "required": ["config"]
             }
-          }
+          ]
         }
       },
       "errors": {
@@ -1507,119 +1390,65 @@
         "items": {
           "type": "object",
           "properties": {
-            "fallback": {
-              "title": "Error Handling Fallback",
-              "description": "This array defines how to handle errors when no \"when\" clause matches. If you have, for example, enabled redirect and json in your access rule, you could tell ORY Oathkeeper to try sending JSON if the request does not match the access rule definition",
-              "type": "array",
-              "items": {
-                "type": "string"
-              },
-              "default": ["json"],
-              "examples": [["redirect"]]
-            },
-            "handlers": {
+            "handler": {
               "additionalProperties": false,
               "title": "Individual Error Handler Configuration",
+              "description": "Defines the handler (for example json, redirect and www_authenticate) to be used.",
+              "type": "string",
+              "enum": ["json", "redirect", "www_authenticate", "noop"]
+            }
+          },
+          "required": ["handler"],
+          "oneOf": [
+            {
+              "title": "No Operation (noop)",
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "handler": {
+                  "const": "noop"
+                }
+              }
+            },
+            {
+              "title": "JSON Error Handler",
+              "description": "Responds with a JSON error response",
+              "properties": {
+                "handler": {
+                  "const": "json"
+                },
+                "config": {
+                  "$ref": "#/definitions/configErrorsJSON"
+                }
+              }
+            },
+            {
+              "title": "HTTP Redirect Error Handler",
+              "description": "Responds with a 301/302 HTTP redirect.",
               "type": "object",
               "properties": {
-                "www_authenticate": {
-                  "title": "HTTP WWW-Authenticate Handler",
-                  "description": "Responds with the WWW-Authenticate HTTP Response",
-                  "type": "object",
-                  "properties": {
-                    "enabled": {
-                      "$ref": "#/definitions/handlerSwitch"
-                    }
-                  },
-                  "oneOf": [
-                    {
-                      "properties": {
-                        "enabled": {
-                          "const": true
-                        },
-                        "config": {
-                          "$ref": "#/definitions/configErrorsWWWAuthenticate"
-                        }
-                      },
-                      "required": ["config"]
-                    },
-                    {
-                      "properties": {
-                        "enabled": {
-                          "const": false
-                        }
-                      }
-                    }
-                  ]
+                "handler": {
+                  "const": "redirect"
                 },
-                "redirect": {
-                  "title": "HTTP Redirect Error Handler",
-                  "description": "Responds with a 301/302 HTTP redirect.",
-                  "type": "object",
-                  "properties": {
-                    "enabled": {
-                      "$ref": "#/definitions/handlerSwitch"
-                    }
-                  },
-                  "oneOf": [
-                    {
-                      "properties": {
-                        "enabled": {
-                          "const": true
-                        },
-                        "config": {
-                          "$ref": "#/definitions/configErrorsRedirect"
-                        }
-                      },
-                      "required": ["config"]
-                    },
-                    {
-                      "properties": {
-                        "enabled": {
-                          "const": false
-                        }
-                      }
-                    }
-                  ]
+                "config": {
+                  "$ref": "#/definitions/configErrorsRedirect"
+                }
+              }
+            },
+            {
+              "title": "HTTP WWW-Authenticate Handler",
+              "description": "Responds with the WWW-Authenticate HTTP Response",
+              "type": "object",
+              "properties": {
+                "handler": {
+                  "const": "www_authenticate"
                 },
-                "json": {
-                  "title": "JSON Error Handler",
-                  "description": "Responds with a JSON error response",
-                  "properties": {
-                    "enabled": {
-                      "title": "Enabled",
-                      "type": "boolean",
-                      "description": "En-/disables this component."
-                    }
-                  },
-                  "oneOf": [
-                    {
-                      "properties": {
-                        "enabled": {
-                          "const": true
-                        },
-                        "config": {
-                          "$ref": "#/definitions/configErrorsJSON"
-                        }
-                      },
-                      "required": ["config"]
-                    },
-                    {
-                      "properties": {
-                        "enabled": {
-                          "const": false
-                        }
-                      }
-                    }
-                  ],
-                  "default": {
-                    "enabled": true,
-                    "config": {}
-                  }
+                "config": {
+                  "$ref": "#/definitions/configErrorsWWWAuthenticate"
                 }
               }
             }
-          }
+          ]
         }
       }
     }
