@@ -566,7 +566,7 @@ to perform a certain action on a resource.
 
 If you think you found a security vulnerability, please refrain from posting it
 publicly on the forums, the chat, or GitHub and send us an email to
-[hi@ory.sh](mailto:hi@ory.sh) instead.
+[security@ory.sh](mailto:security@ory.sh) instead.
 
 ## Telemetry
 
