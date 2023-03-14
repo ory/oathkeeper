@@ -380,7 +380,7 @@ func (r *RegistryMemory) prepareAuthz() {
 		interim := []authz.Authorizer{
 			authz.NewAuthorizerAllow(r.c),
 			authz.NewAuthorizerDeny(r.c),
-			authz.NewAuthorizerKetoEngineACPORY(r.c),
+			authz.NewAuthorizerKetoEngineACPORY(r.c, r),
 			authz.NewAuthorizerRemote(r.c, r),
 			authz.NewAuthorizerRemoteJSON(r.c, r),
 		}

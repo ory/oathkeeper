@@ -47,6 +47,7 @@ func TestAuthorizerKetoWarden(t *testing.T) {
 		expectErr bool
 	}{
 		{
+			r:         &http.Request{},
 			expectErr: true,
 		},
 		{

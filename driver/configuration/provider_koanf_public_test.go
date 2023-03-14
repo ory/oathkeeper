@@ -323,7 +323,8 @@ func TestKoanfProvider(t *testing.T) {
 		})
 
 		t.Run("authorizer=keto_engine_acp_ory", func(t *testing.T) {
-			a := authz.NewAuthorizerKetoEngineACPORY(p)
+			l := logrusx.New("", "")
+			a := authz.NewAuthorizerKetoEngineACPORY(p, otelx.NewNoop(l, p.TracingConfig()))
 			assert.True(t, p.AuthorizerIsEnabled(a.GetID()))
 			require.NoError(t, a.Validate(nil))
 

@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/go-retryablehttp"
+	"go.opentelemetry.io/otel/trace"
 
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/pipeline"
@@ -21,6 +22,7 @@ import (
 	"github.com/ory/oathkeeper/x"
 
 	"github.com/ory/x/httpx"
+	"github.com/ory/x/otelx"
 	"github.com/ory/x/urlx"
 
 	"github.com/pkg/errors"
@@ -55,14 +57,16 @@ type AuthorizerKetoEngineACPORY struct {
 	client         *retryablehttp.Client
 	contextCreator authorizerKetoWardenContext
 	t              *template.Template
+	tracer         trace.Tracer
 }
 
-func NewAuthorizerKetoEngineACPORY(c configuration.Provider) *AuthorizerKetoEngineACPORY {
+func NewAuthorizerKetoEngineACPORY(c configuration.Provider, d interface{ Tracer() trace.Tracer }) *AuthorizerKetoEngineACPORY {
 	return &AuthorizerKetoEngineACPORY{
 		c: c,
 		client: httpx.NewResilientClient(
 			httpx.ResilientClientWithMaxRetryWait(100*time.Millisecond),
 			httpx.ResilientClientWithMaxRetry(5),
+			httpx.ResilientClientWithTracer(d.Tracer()),
 		),
 		contextCreator: func(r *http.Request) map[string]interface{} {
 			return map[string]interface{}{
@@ -70,7 +74,8 @@ func NewAuthorizerKetoEngineACPORY(c configuration.Provider) *AuthorizerKetoEngi
 				"requestedAt":     time.Now().UTC(),
 			}
 		},
-		t: x.NewTemplate("keto_engine_acp_ory"),
+		t:      x.NewTemplate("keto_engine_acp_ory"),
+		tracer: d.Tracer(),
 	}
 }
 
@@ -91,7 +96,11 @@ func (a *AuthorizerKetoEngineACPORY) WithContextCreator(f authorizerKetoWardenCo
 	a.contextCreator = f
 }
 
-func (a *AuthorizerKetoEngineACPORY) Authorize(r *http.Request, session *authn.AuthenticationSession, config json.RawMessage, _ pipeline.Rule) error {
+func (a *AuthorizerKetoEngineACPORY) Authorize(r *http.Request, session *authn.AuthenticationSession, config json.RawMessage, _ pipeline.Rule) (err error) {
+	ctx, span := a.tracer.Start(r.Context(), "authz.keto_engine_acp_ory")
+	defer otelx.End(span, &err)
+	r = r.WithContext(ctx)
+
 	cf, err := a.Config(config)
 	if err != nil {
 		return err
