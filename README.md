@@ -565,8 +565,9 @@ to perform a certain action on a resource.
 ### Disclosing vulnerabilities
 
 If you think you found a security vulnerability, please refrain from posting it
-publicly on the forums, the chat, or GitHub and send us an email to
-[hi@ory.sh](mailto:hi@ory.sh) instead.
+publicly on the forums, the chat, or GitHub. You can find all info for
+responsible disclosure in our
+[security.txt](https://www.ory.sh/.well-known/security.txt).
 
 ## Telemetry
 
