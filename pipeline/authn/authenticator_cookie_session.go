@@ -197,9 +197,9 @@ func forwardRequestToSessionStore(client *http.Client, r *http.Request, cf Authe
 			return json.RawMessage{}, errors.WithStack(herodot.ErrInternalServerError.WithReasonf("Unable to fetch cookie session context from remote: %+v", err))
 		}
 		return body, nil
-	} else {
-		return json.RawMessage{}, errors.WithStack(helper.ErrUnauthorized)
 	}
+
+	return json.RawMessage{}, errors.WithStack(helper.ErrUnauthorized)
 }
 
 func PrepareRequest(r *http.Request, cf AuthenticatorForwardConfig) (http.Request, error) {
