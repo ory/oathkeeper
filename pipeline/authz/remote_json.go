@@ -15,6 +15,9 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/ory/x/httpx"
+	"github.com/ory/x/otelx"
+
+	"go.opentelemetry.io/otel/trace"
 
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/helper"
@@ -47,14 +50,16 @@ type AuthorizerRemoteJSON struct {
 
 	client *http.Client
 	t      *template.Template
+	tracer trace.Tracer
 }
 
 // NewAuthorizerRemoteJSON creates a new AuthorizerRemoteJSON.
-func NewAuthorizerRemoteJSON(c configuration.Provider) *AuthorizerRemoteJSON {
+func NewAuthorizerRemoteJSON(c configuration.Provider, d interface{ Tracer() trace.Tracer }) *AuthorizerRemoteJSON {
 	return &AuthorizerRemoteJSON{
 		c:      c,
-		client: httpx.NewResilientClient().StandardClient(),
+		client: httpx.NewResilientClient(httpx.ResilientClientWithTracer(d.Tracer())).StandardClient(),
 		t:      x.NewTemplate("remote_json"),
+		tracer: d.Tracer(),
 	}
 }
 
@@ -64,7 +69,11 @@ func (a *AuthorizerRemoteJSON) GetID() string {
 }
 
 // Authorize implements the Authorizer interface.
-func (a *AuthorizerRemoteJSON) Authorize(r *http.Request, session *authn.AuthenticationSession, config json.RawMessage, _ pipeline.Rule) error {
+func (a *AuthorizerRemoteJSON) Authorize(r *http.Request, session *authn.AuthenticationSession, config json.RawMessage, _ pipeline.Rule) (err error) {
+	ctx, span := a.tracer.Start(r.Context(), "authz.remote_json")
+	defer otelx.End(span, &err)
+	r = r.WithContext(ctx)
+
 	c, err := a.Config(config)
 	if err != nil {
 		return err
@@ -101,6 +110,7 @@ func (a *AuthorizerRemoteJSON) Authorize(r *http.Request, session *authn.Authent
 	}
 
 	res, err := a.client.Do(req.WithContext(r.Context()))
+
 	if err != nil {
 		return errors.WithStack(err)
 	}
@@ -154,6 +164,7 @@ func (a *AuthorizerRemoteJSON) Config(config json.RawMessage) (*AuthorizerRemote
 	a.client = httpx.NewResilientClient(
 		httpx.ResilientClientWithMaxRetryWait(maxWait),
 		httpx.ResilientClientWithConnectionTimeout(timeout),
+		httpx.ResilientClientWithTracer(a.tracer),
 	).StandardClient()
 
 	return &c, nil

@@ -12,6 +12,7 @@ import (
 	_ "github.com/ory/jsonschema/v3/fileloader"
 	_ "github.com/ory/jsonschema/v3/httploader"
 	"github.com/ory/x/configx"
+	"github.com/ory/x/healthx"
 	"github.com/ory/x/logrusx"
 
 	"github.com/ory/oathkeeper/driver"
@@ -26,6 +27,7 @@ type (
 		Logger() *logrusx.Logger
 		RuleMatcher() rule.Matcher
 		ProxyRequestHandler() proxy.RequestHandler
+		HealthxReadyCheckers() healthx.ReadyCheckers
 	}
 
 	middleware struct{ dependencies }
@@ -33,6 +35,7 @@ type (
 	Middleware interface {
 		UnaryInterceptor() grpc.UnaryServerInterceptor
 		StreamInterceptor() grpc.StreamServerInterceptor
+		HealthxReadyCheckers() healthx.ReadyCheckers
 	}
 
 	options struct {
@@ -40,6 +43,7 @@ type (
 		configFile         string
 		registryAddr       *driver.Registry
 		configProviderAddr *configuration.Provider
+		configProviderOpts []configx.OptionModifier
 	}
 
 	Option func(*options)
@@ -55,6 +59,18 @@ func WithLogger(logger *logrusx.Logger) Option {
 	return func(o *options) { o.logger = logger }
 }
 
+// WithConfigOption sets a config option for the middleware. The following
+// options will be set regardless:
+// - configx.WithContext
+// - configx.WithLogger
+// - configx.WithConfigFiles
+// - configx.DisableEnvLoading
+func WithConfigOption(option configx.OptionModifier) Option {
+	return func(o *options) {
+		o.configProviderOpts = append(o.configProviderOpts, option)
+	}
+}
+
 // New creates an Oathkeeper middleware from the options. By default, it tries
 // to read the configuration from the file "oathkeeper.yaml".
 func New(ctx context.Context, opts ...Option) (Middleware, error) {
@@ -68,10 +84,12 @@ func New(ctx context.Context, opts ...Option) (Middleware, error) {
 
 	c, err := configuration.NewKoanfProvider(
 		ctx, nil, o.logger,
-		configx.WithContext(ctx),
-		configx.WithLogger(o.logger),
-		configx.WithConfigFiles(o.configFile),
-		configx.DisableEnvLoading(),
+		append(o.configProviderOpts,
+			configx.WithContext(ctx),
+			configx.WithLogger(o.logger),
+			configx.WithConfigFiles(o.configFile),
+			configx.DisableEnvLoading(),
+		)...,
 	)
 	if err != nil {
 		return nil, errors.WithStack(err)
@@ -89,4 +107,8 @@ func New(ctx context.Context, opts ...Option) (Middleware, error) {
 	m := &middleware{r}
 
 	return m, nil
+}
+
+func (m *middleware) HealthxReadyCheckers() healthx.ReadyCheckers {
+	return m.dependencies.HealthxReadyCheckers()
 }

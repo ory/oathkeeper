@@ -1,4 +1,4 @@
-FROM golang:1.19-alpine3.14
+FROM golang:1.19-alpine3.17
 
 RUN addgroup -S ory; \
     adduser -S ory -G ory -D -H -s /bin/nologin

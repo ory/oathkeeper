@@ -5,15 +5,16 @@ package rule_test
 
 import (
 	"context"
+	"encoding/base64"
 	"fmt"
 	"io"
 	"net/http"
 	"net/http/httptest"
 	"os"
 	"os/exec"
-	"path"
 	"path/filepath"
 	"runtime"
+	"strings"
 	"testing"
 	"time"
 
@@ -35,7 +36,7 @@ import (
 	"github.com/ory/oathkeeper/rule"
 )
 
-const testRule = `[{"id":"test-rule-5","upstream":{"preserve_host":true,"strip_path":"/api","url":"mybackend.com/api"},"match":{"url":"myproxy.com/api","methods":["GET","POST"]},"authenticators":[{"handler":"noop"},{"handler":"anonymous"}],"authorizer":{"handler":"allow"},"mutators":[{"handler":"noop"}]}]`
+const testRule = `[{"id":"test-rule-5","upstream":{"preserve_host":true,"strip_path":"/api","url":"https://mybackend.com/api"},"match":{"url":"myproxy.com/api","methods":["GET","POST"]},"authenticators":[{"handler":"noop"},{"handler":"anonymous"}],"authorizer":{"handler":"allow"},"mutators":[{"handler":"noop"}]}]`
 const testConfigPath = "../test/update"
 
 func copyToFile(t *testing.T, src string, dst *os.File) {
@@ -172,6 +173,17 @@ func TestFetcherWatchConfig(t *testing.T) {
 			go func() { configChanged <- struct{}{} }()
 		}),
 	)
+	// set default values for all test cases
+	conf.SetForTest(t, configuration.AuthorizerAllowIsEnabled, true)
+	conf.SetForTest(t, configuration.AuthorizerDenyIsEnabled, true)
+	conf.SetForTest(t, configuration.AuthenticatorNoopIsEnabled, true)
+	conf.SetForTest(t, configuration.AuthenticatorAnonymousIsEnabled, true)
+	conf.SetForTest(t, configuration.MutatorNoopIsEnabled, true)
+	conf.SetForTest(t, configuration.MutatorHeaderIsEnabled, true)
+	conf.SetForTest(t, configuration.MutatorIDTokenIsEnabled, true)
+	conf.SetForTest(t, configuration.MutatorIDTokenJWKSURL, "https://stub/.well-known/jwks.json")
+	conf.SetForTest(t, configuration.MutatorIDTokenIssuerURL, "https://stub")
+
 	r := internal.NewRegistry(conf)
 
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
@@ -181,7 +193,7 @@ func TestFetcherWatchConfig(t *testing.T) {
 
 	require.NoError(t, os.WriteFile(configFile.Name(), []byte(""), 0666))
 
-	go func() { require.NoError(t, r.RuleFetcher().Watch(ctx)) }()
+	require.NoError(t, r.RuleFetcher().Watch(ctx))
 
 	for k, tc := range []struct {
 		config           string
@@ -202,14 +214,32 @@ access_rules:
 			expectedStrategy: configuration.DefaultMatchingStrategy,
 		},
 		{
-			config: `
+			config: fmt.Sprintf(`
 access_rules:
   repositories:
   - file://../test/stub/rules.json
   - file://../test/stub/rules.yaml
   - file:///invalid/path
-  - inline://W3siaWQiOiJ0ZXN0LXJ1bGUtNCIsInVwc3RyZWFtIjp7InByZXNlcnZlX2hvc3QiOnRydWUsInN0cmlwX3BhdGgiOiIvYXBpIiwidXJsIjoibXliYWNrZW5kLmNvbS9hcGkifSwibWF0Y2giOnsidXJsIjoibXlwcm94eS5jb20vYXBpIiwibWV0aG9kcyI6WyJHRVQiLCJQT1NUIl19LCJhdXRoZW50aWNhdG9ycyI6W3siaGFuZGxlciI6Im5vb3AifSx7ImhhbmRsZXIiOiJhbm9ueW1vdXMifV0sImF1dGhvcml6ZXIiOnsiaGFuZGxlciI6ImFsbG93In0sIm11dGF0b3JzIjpbeyJoYW5kbGVyIjoibm9vcCJ9XX1d
-  - ` + ts.URL + "\n",
+  - inline://%s
+  - %s
+`, base64.StdEncoding.EncodeToString([]byte(`- id: test-rule-4
+  upstream:
+    preserve_host: true
+    strip_path: "/api"
+    url: https://mybackend.com/api
+  match:
+    url: myproxy.com/api
+    methods:
+    - GET
+    - POST
+  authenticators:
+  - handler: noop
+  - handler: anonymous
+  authorizer:
+    handler: allow
+  mutators:
+  - handler: noop
+`)), ts.URL),
 			expectedStrategy: configuration.DefaultMatchingStrategy,
 			expectIDs:        []string{"test-rule-1", "test-rule-2", "test-rule-3", "test-rule-4", "test-rule-5", "test-rule-1-yaml"},
 		},
@@ -246,9 +276,7 @@ access_rules:
 				ids[k] = r.ID
 			}
 
-			for _, id := range tc.expectIDs {
-				assert.True(t, stringslice.Has(ids, id), "\nexpected: %v\nactual: %v", tc.expectIDs, ids)
-			}
+			assert.ElementsMatch(t, ids, tc.expectIDs)
 		})
 	}
 }
@@ -285,35 +313,59 @@ access_rules:
 		configx.WithLogger(logrusx.New("", "", logrusx.ForceLevel(logrus.TraceLevel))),
 		configx.WithConfigFiles(configFile.Name()),
 	)
+	conf.SetForTest(t, configuration.AuthenticatorNoopIsEnabled, true)
+	conf.SetForTest(t, configuration.AuthorizerAllowIsEnabled, true)
+	conf.SetForTest(t, configuration.MutatorNoopIsEnabled, true)
+
 	r := internal.NewRegistry(conf)
 
 	go func() {
 		require.NoError(t, r.RuleFetcher().Watch(ctx))
 	}()
 
+	const rulePattern = `{
+  "id": "%s",
+  "upstream": {
+    "preserve_host": true,
+    "strip_path": "/api",
+    "url": "https://a"
+  },
+  "match": {
+    "url": "a",
+    "methods": ["GET"]
+  },
+  "authenticators": [{"handler": "noop"}],
+  "authorizer": {"handler": "allow"},
+  "mutators": [{"handler": "noop"}]
+}`
 	for k, tc := range []struct {
-		content   string
-		expectIDs []string
+		ids []string
 	}{
-		{content: "[]"},
-		{content: `[{"id":"1"}]`, expectIDs: []string{"1"}},
-		{content: `[{"id":"1"},{"id":"2"}]`, expectIDs: []string{"1", "2"}},
-		{content: `[{"id":"2"},{"id":"3"},{"id":"4"}]`, expectIDs: []string{"2", "3", "4"}},
+		{},
+		{ids: []string{"1"}},
+		{ids: []string{"1", "2"}},
+		{ids: []string{"2", "3", "4"}},
 	} {
 		t.Run(fmt.Sprintf("case=%d", k), func(t *testing.T) {
+			rawRules := make([]string, len(tc.ids))
+			for k, id := range tc.ids {
+				rawRules[k] = fmt.Sprintf(rulePattern, id)
+			}
+			content := fmt.Sprintf("[%s]", strings.Join(rawRules, ","))
+
 			repoFile.Truncate(0)
-			repoFile.WriteAt([]byte(tc.content), 0)
+			repoFile.WriteAt([]byte(content), 0)
 			repoFile.Sync()
 
-			rules := eventuallyListRules(ctx, t, r, len(tc.expectIDs))
+			actualRules := eventuallyListRules(ctx, t, r, len(tc.ids))
 
-			ids := make([]string, len(rules))
-			for k, r := range rules {
+			ids := make([]string, len(rawRules))
+			for k, r := range actualRules {
 				ids[k] = r.ID
 			}
 
-			for _, id := range tc.expectIDs {
-				assert.True(t, stringslice.Has(ids, id), "\nexpected: %v\nactual: %v", tc.expectIDs, ids)
+			for _, id := range tc.ids {
+				assert.True(t, stringslice.Has(ids, id), "\nexpected: %v\nactual: %v", tc.ids, ids)
 			}
 		})
 	}
@@ -328,7 +380,7 @@ func TestFetcherWatchRepositoryFromKubernetesConfigMap(t *testing.T) {
 
 	// Set up temp dir and file to watch
 	watchDir := t.TempDir()
-	watchFile := path.Join(watchDir, "access-rules.json")
+	watchFile := filepath.Join(watchDir, "access-rules.json")
 
 	conf := internal.NewConfigurationWithDefaults(
 		configx.SkipValidation(),
@@ -339,6 +391,9 @@ func TestFetcherWatchRepositoryFromKubernetesConfigMap(t *testing.T) {
 
 	// Configure watcher
 	conf.SetForTest(t, configuration.AccessRuleRepositories, []string{"file://" + watchFile})
+	conf.SetForTest(t, configuration.AuthenticatorNoopIsEnabled, true)
+	conf.SetForTest(t, configuration.AuthorizerAllowIsEnabled, true)
+	conf.SetForTest(t, configuration.MutatorNoopIsEnabled, true)
 
 	// This emulates a config map update
 	// drwxr-xr-x    2 root     root          4096 Aug  1 07:42 ..2019_08_01_07_42_33.068812649
@@ -358,24 +413,24 @@ func TestFetcherWatchRepositoryFromKubernetesConfigMap(t *testing.T) {
 	var configMapUpdate = func(t *testing.T, data string, cleanup func()) func() {
 
 		// this is the equivalent of /etc/rules/..2019_08_01_07_42_33.068812649
-		dir := path.Join(watchDir, ".."+uuid.New().String())
+		dir := filepath.Join(watchDir, ".."+uuid.New().String())
 		require.NoError(t, os.Mkdir(dir, 0777))
 
-		fp := path.Join(dir, "access-rules.json")
+		fp := filepath.Join(dir, "access-rules.json")
 		require.NoError(t, os.WriteFile(fp, []byte(data), 0640))
 
 		// this is the symlink: ..data -> ..2019_08_01_07_42_33.068812649
-		_ = os.Rename(path.Join(watchDir, "..data"), path.Join(watchDir, "..data_tmp"))
-		require.NoError(t, exec.Command("ln", "-sfn", dir, path.Join(watchDir, "..data")).Run())
+		_ = os.Rename(filepath.Join(watchDir, "..data"), filepath.Join(watchDir, "..data_tmp"))
+		require.NoError(t, exec.Command("ln", "-sfn", dir, filepath.Join(watchDir, "..data")).Run())
 		if cleanup != nil {
 			cleanup()
 		}
 
 		// symlink equivalent: access-rules.json -> ..data/access-rules.json
-		require.NoError(t, exec.Command("ln", "-sfn", path.Join(watchDir, "..data", "access-rules.json"), watchFile).Run())
+		require.NoError(t, exec.Command("ln", "-sfn", filepath.Join(watchDir, "..data", "access-rules.json"), watchFile).Run())
 
 		t.Logf("Created access rule file at: file://%s", fp)
-		t.Logf("Created symbolink link at: file://%s", path.Join(watchDir, "..data"))
+		t.Logf("Created symbolink link at: file://%s", filepath.Join(watchDir, "..data"))
 
 		return func() {
 			if err := os.RemoveAll(dir); err != nil {
@@ -392,7 +447,21 @@ func TestFetcherWatchRepositoryFromKubernetesConfigMap(t *testing.T) {
 
 	for i := 0; i < 10; i++ {
 		t.Run(fmt.Sprintf("case=%d", i), func(t *testing.T) {
-			cleanup = configMapUpdate(t, fmt.Sprintf(`[{"id":"%d"}]`, i), cleanup)
+			cleanup = configMapUpdate(t, fmt.Sprintf(`[{
+  "id": "%d",
+  "upstream": {
+    "preserve_host": true,
+    "strip_path": "/api",
+    "url": "https://a"
+  },
+  "match": {
+    "url": "a",
+    "methods": ["GET"]
+  },
+  "authenticators": [{"handler": "noop"}],
+  "authorizer": {"handler": "allow"},
+  "mutators": [{"handler": "noop"}]
+}]`, i), cleanup)
 
 			rules := eventuallyListRules(ctx, t, r, 1)
 
@@ -411,6 +480,18 @@ func TestFetchRulesFromObjectStorage(t *testing.T) {
 	configFile.WriteString(`
 authenticators:
   noop: { enabled: true }
+  anonymous: { enabled: true }
+authorizers:
+  allow: { enabled: true }
+  deny: { enabled: true }
+mutators:
+  noop: { enabled: true }
+  header: { enabled: true }
+  id_token: 
+    enabled: true
+    config:
+      jwks_url: https://stub/.well-known/jwks.json
+      issuer_url: https://stub
 
 access_rules:
   repositories:
@@ -441,8 +522,12 @@ func eventuallyListRules(ctx context.Context, t *testing.T, r rule.Registry, exp
 	var err error
 	assert.Eventually(t, func() bool {
 		rules, err = r.RuleRepository().List(ctx, 500, 0)
-		require.NoError(t, err)
+		if err != nil {
+			t.Logf("Error listing rules: %+v", err)
+			return false
+		}
 		return len(rules) == expectedLen
 	}, 2*time.Second, 10*time.Millisecond)
+	require.Len(t, rules, expectedLen)
 	return
 }

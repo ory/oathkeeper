@@ -9,7 +9,6 @@ import (
 
 	"go.opentelemetry.io/otel/trace"
 
-	"github.com/ory/oathkeeper/driver/health"
 	"github.com/ory/oathkeeper/pipeline"
 	pe "github.com/ory/oathkeeper/pipeline/errors"
 	"github.com/ory/oathkeeper/proxy"
@@ -30,7 +29,6 @@ import (
 	"github.com/ory/oathkeeper/pipeline/authz"
 	"github.com/ory/oathkeeper/pipeline/mutate"
 	"github.com/ory/oathkeeper/rule"
-	rulereadiness "github.com/ory/oathkeeper/rule/readiness"
 )
 
 var _ Registry = new(RegistryMemory)
@@ -65,17 +63,12 @@ type RegistryMemory struct {
 	authorizers    map[string]authz.Authorizer
 	mutators       map[string]mutate.Mutator
 	errors         map[string]pe.Handler
-
-	healthEventManager *health.DefaultHealthEventManager
 }
 
 func (r *RegistryMemory) Init() {
-	go func() {
-		if err := r.RuleFetcher().Watch(context.Background()); err != nil {
-			r.Logger().WithError(err).Fatal("Access rule watcher terminated with an error.")
-		}
-	}()
-	r.HealthEventManager().Watch(context.Background())
+	if err := r.RuleFetcher().Watch(context.Background()); err != nil {
+		r.Logger().WithError(err).Fatal("Access rule watcher could not be initialized.")
+	}
 	_ = r.RuleRepository()
 	_ = r.Tracer() // make sure tracer is initialized
 }
@@ -145,15 +138,10 @@ func (r *RegistryMemory) CredentialHandler() *api.CredentialsHandler {
 	return r.ch
 }
 
-func (r *RegistryMemory) HealthEventManager() health.EventManager {
-	if r.healthEventManager == nil {
-		var err error
-		rulesReadinessChecker := rulereadiness.NewReadinessHealthChecker()
-		if r.healthEventManager, err = health.NewDefaultHealthEventManager(rulesReadinessChecker); err != nil {
-			r.logger.WithError(err).Fatal("unable to instantiate new health event manager")
-		}
+func (r *RegistryMemory) HealthxReadyCheckers() healthx.ReadyCheckers {
+	return healthx.ReadyCheckers{
+		"rules_loaded": r.RuleRepository().ReadyChecker,
 	}
-	return r.healthEventManager
 }
 
 func (r *RegistryMemory) HealthHandler() *healthx.Handler {
@@ -161,7 +149,7 @@ func (r *RegistryMemory) HealthHandler() *healthx.Handler {
 	defer r.RUnlock()
 
 	if r.healthxHandler == nil {
-		r.healthxHandler = healthx.NewHandler(r.Writer(), r.BuildVersion(), r.HealthEventManager().HealthxReadyCheckers())
+		r.healthxHandler = healthx.NewHandler(r.Writer(), r.BuildVersion(), r.HealthxReadyCheckers())
 	}
 	return r.healthxHandler
 }
@@ -175,7 +163,7 @@ func (r *RegistryMemory) RuleValidator() rule.Validator {
 
 func (r *RegistryMemory) RuleRepository() rule.Repository {
 	if r.ruleRepository == nil {
-		r.ruleRepository = rule.NewRepositoryMemory(r, r.HealthEventManager())
+		r.ruleRepository = rule.NewRepositoryMemory(r)
 	}
 	return r.ruleRepository
 }
@@ -392,9 +380,9 @@ func (r *RegistryMemory) prepareAuthz() {
 		interim := []authz.Authorizer{
 			authz.NewAuthorizerAllow(r.c),
 			authz.NewAuthorizerDeny(r.c),
-			authz.NewAuthorizerKetoEngineACPORY(r.c),
-			authz.NewAuthorizerRemote(r.c),
-			authz.NewAuthorizerRemoteJSON(r.c),
+			authz.NewAuthorizerKetoEngineACPORY(r.c, r),
+			authz.NewAuthorizerRemote(r.c, r),
+			authz.NewAuthorizerRemoteJSON(r.c, r),
 		}
 
 		r.authorizers = map[string]authz.Authorizer{}
@@ -428,7 +416,7 @@ func (r *RegistryMemory) Tracer() trace.Tracer {
 		var err error
 		r.trc, err = otelx.New(r.c.TracingServiceName(), r.Logger(), r.c.TracingConfig())
 		if err != nil {
-			r.Logger().WithError(err).Fatalf("Unable to initialize Tracer.")
+			r.Logger().WithError(err).Fatalf("Unable to initialize Tracer for Oathkeeper.")
 		}
 	}
 	return r.trc.Tracer()

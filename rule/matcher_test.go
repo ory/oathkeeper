@@ -111,12 +111,13 @@ func TestMatcher(t *testing.T) {
 			require.Error(t, err)
 		} else {
 			require.NoError(t, err)
+			r.matchingEngine = nil
 			assert.EqualValues(t, *expect, *r)
 		}
 	}
 
 	for name, matcher := range map[string]m{
-		"memory": NewRepositoryMemory(new(mockRepositoryRegistry), new(mockHealthEventManager)),
+		"memory": NewRepositoryMemory(new(mockRepositoryRegistry)),
 	} {
 		t.Run(fmt.Sprintf("regexp matcher=%s", name), func(t *testing.T) {
 			t.Run("case=empty", func(t *testing.T) {

@@ -7,9 +7,9 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/spf13/cobra"
+	"github.com/ory/oathkeeper/internal/httpclient/client/health"
 
-	"github.com/ory/oathkeeper/internal/httpclient/client/api"
+	"github.com/spf13/cobra"
 
 	"github.com/ory/x/cmdx"
 )
@@ -28,7 +28,7 @@ Note:
 	Run: func(cmd *cobra.Command, _ []string) {
 		client := newClient(cmd)
 
-		r, err := client.API.IsInstanceAlive(api.NewIsInstanceAliveParams())
+		r, err := client.Health.IsInstanceAlive(health.NewIsInstanceAliveParams())
 		// If err, print err and exit 1
 		cmdx.Must(err, "%s", err)
 		// Print payload

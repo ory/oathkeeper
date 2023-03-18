@@ -421,6 +421,15 @@ access_rules:
   matching_strategy: regexp
   repositories:
   - file://%s
+authenticators:
+  noop:
+    enabled: true
+authorizers:
+  allow:
+    enabled: true
+mutators:
+  noop:
+    enabled: true
 `, rulesFile))
 
 	regPtr := new(driver.Registry)

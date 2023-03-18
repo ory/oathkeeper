@@ -34,6 +34,7 @@ waitport 6060
 waitport 6061
 
 function finish {
+  killall oathkeeper || true
   cat ./config.yaml
   cat ./rules.3.json || true
   cat ./oathkeeper.log

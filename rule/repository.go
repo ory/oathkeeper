@@ -5,6 +5,7 @@ package rule
 
 import (
 	"context"
+	"net/http"
 
 	"github.com/ory/oathkeeper/driver/configuration"
 )
@@ -16,4 +17,5 @@ type Repository interface {
 	Count(context.Context) (int, error)
 	MatchingStrategy(context.Context) (configuration.MatchingStrategy, error)
 	SetMatchingStrategy(context.Context, configuration.MatchingStrategy) error
+	ReadyChecker(*http.Request) error
 }
