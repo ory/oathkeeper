@@ -74,6 +74,13 @@ func TestDecisionAPI(t *testing.T) {
 		Upstream:       rule.Upstream{URL: "", StripPath: "/strip-path/", PreserveHost: true},
 	}
 
+	ruleNoOpAuthenticatorWithMutatorGLOB := rule.Rule{
+        Match:          &rule.Match{Methods: []string{"GET"}, URL: ts.URL + "/authn-noop-mutator/<[0-9]*>"},    
+        Authenticators: []rule.Handler{{Handler: "noop"}},    
+        Authorizer:     rule.Handler{Handler: "allow"},    
+        Mutators:       []rule.Handler{{Handler: "id_token"}},    
+        Upstream:       rule.Upstream{URL: ""},  
+	}
 	ruleNoOpAuthenticatorGLOB := rule.Rule{
 		Match:          &rule.Match{Methods: []string{"GET"}, URL: ts.URL + "/authn-noop/<[0-9]*>"},
 		Authenticators: []rule.Handler{{Handler: "noop"}},
@@ -117,7 +124,7 @@ func TestDecisionAPI(t *testing.T) {
 			d:           "should pass and skip mutator with noop authenticator",
 			url:         ts.URL + "/decisions" + "/authn-noop-mutator/1234",
 			rulesRegexp: []rule.Rule{ruleNoOpAuthenticatorWithMutator},
-			rulesGlob:   []rule.Rule{ruleNoOpAuthenticatorWithMutator},
+			rulesGlob:   []rule.Rule{ruleNoOpAuthenticatorWithMutatorGLOB},
 			code:        http.StatusOK,
 			transform: func(r *http.Request) {
 				r.Header.Add("Authorization", "basic user:pass")
