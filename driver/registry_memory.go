@@ -66,11 +66,11 @@ type RegistryMemory struct {
 }
 
 func (r *RegistryMemory) Init() {
+	_ = r.Tracer() // make sure tracer is initialized
 	if err := r.RuleFetcher().Watch(context.Background()); err != nil {
 		r.Logger().WithError(err).Fatal("Access rule watcher could not be initialized.")
 	}
 	_ = r.RuleRepository()
-	_ = r.Tracer() // make sure tracer is initialized
 }
 
 func (r *RegistryMemory) RuleFetcher() rule.Fetcher {
