@@ -38,6 +38,11 @@ import (
 	"github.com/ory/oathkeeper/x"
 )
 
+func isTimeoutError(err error) bool {
+	var te interface{ Timeout() bool } = nil
+	return errors.As(err, &te) && te.Timeout() || errors.Is(err, context.DeadlineExceeded)
+}
+
 func runProxy(d driver.Driver, n *negroni.Negroni, logger *logrusx.Logger, prom *metrics.PrometheusRepository) func() {
 	return func() {
 		proxy := d.Registry().Proxy()
@@ -45,9 +50,18 @@ func runProxy(d driver.Driver, n *negroni.Negroni, logger *logrusx.Logger, prom 
 		proxyHandler := &httputil.ReverseProxy{
 			Director:  proxy.Director,
 			Transport: transport,
-			ErrorHandler: func(w http.ResponseWriter, _ *http.Request, err error) {
-				logger.WithError(err).Errorf("http: proxy error: %v", err)
-				w.WriteHeader(http.StatusBadGateway)
+			ErrorHandler: func(w http.ResponseWriter, r *http.Request, err error) {
+				switch {
+				case errors.Is(r.Context().Err(), context.Canceled):
+					logger.WithError(err).Warn("http: client canceled request")
+					w.WriteHeader(499) // http://nginx.org/en/docs/dev/development_guide.html
+				case isTimeoutError(err):
+					logger.WithError(err).Errorf("http: gateway timeout")
+					w.WriteHeader(http.StatusGatewayTimeout)
+				default:
+					logger.WithError(err).Errorf("http: gateway error")
+					w.WriteHeader(http.StatusBadGateway)
+				}
 			},
 		}
 
