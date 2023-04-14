@@ -243,8 +243,8 @@ func RunServe(version, build, date string) func(cmd *cobra.Command, args []strin
 				Endpoint:             "https://sqa.ory.sh",
 				GzipCompressionLevel: 6,
 				BatchMaxSize:         500 * 1000,
-				BatchSize:            250,
-				Interval:             time.Hour * 24,
+				BatchSize:            1000,
+				Interval:             time.Hour * 6,
 			},
 		})
 
