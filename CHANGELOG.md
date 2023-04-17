@@ -5,7 +5,7 @@
 
 **Table of Contents**
 
-- [0.0.0 (2023-04-14)](#000-2023-04-14)
+- [0.0.0 (2023-04-17)](#000-2023-04-17)
   - [Bug Fixes](#bug-fixes)
   - [Features](#features)
 - [0.40.2 (2023-03-15)](#0402-2023-03-15)
@@ -316,13 +316,16 @@
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-# [0.0.0](https://github.com/ory/oathkeeper/compare/v0.40.2...v0.0.0) (2023-04-14)
+# [0.0.0](https://github.com/ory/oathkeeper/compare/v0.40.2...v0.0.0) (2023-04-17)
 
 ### Bug Fixes
 
 - Report 499, 502, or 504
   ([#1090](https://github.com/ory/oathkeeper/issues/1090))
   ([360a03e](https://github.com/ory/oathkeeper/commit/360a03e4bac11dc982d5ec9384d0748e4d445614))
+- Sqa config values unified across projects
+  ([#1094](https://github.com/ory/oathkeeper/issues/1094))
+  ([9374d2f](https://github.com/ory/oathkeeper/commit/9374d2f8646e673eaf8fd228cda8a156fe0c3cd4))
 
 ### Features
 
