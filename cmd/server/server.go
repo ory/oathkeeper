@@ -48,7 +48,7 @@ func runProxy(d driver.Driver, n *negroni.Negroni, logger *logrusx.Logger, prom 
 		proxy := d.Registry().Proxy()
 		transport := otelhttp.NewTransport(proxy, otelhttp.WithSpanNameFormatter(func(operation string, r *http.Request) string { return "upstream" }))
 		proxyHandler := &httputil.ReverseProxy{
-			Director:  proxy.Director,
+			Rewrite:   proxy.Rewrite,
 			Transport: transport,
 			ErrorHandler: func(w http.ResponseWriter, r *http.Request, err error) {
 				switch {

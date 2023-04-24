@@ -5,8 +5,9 @@ package proxy
 
 import (
 	"context"
-	"io/ioutil"
+	"io"
 	"net/http"
+	"net/http/httputil"
 	"net/url"
 	"strings"
 
@@ -67,7 +68,7 @@ func (d *Proxy) RoundTrip(r *http.Request) (*http.Response, error) {
 
 		return &http.Response{
 			StatusCode: rw.code,
-			Body:       ioutil.NopCloser(rw.buffer),
+			Body:       io.NopCloser(rw.buffer),
 			Header:     rw.header,
 		}, nil
 	} else if err == nil {
@@ -100,36 +101,36 @@ func (d *Proxy) RoundTrip(r *http.Request) (*http.Response, error) {
 
 	return &http.Response{
 		StatusCode: rw.code,
-		Body:       ioutil.NopCloser(rw.buffer),
+		Body:       io.NopCloser(rw.buffer),
 		Header:     rw.header,
 	}, nil
 }
 
-func (d *Proxy) Director(r *http.Request) {
-	EnrichRequestedURL(r)
-	rl, err := d.r.RuleMatcher().Match(r.Context(), r.Method, r.URL, rule.ProtocolHTTP)
+func (d *Proxy) Rewrite(r *httputil.ProxyRequest) {
+	EnrichRequestedURL(r.Out)
+	rl, err := d.r.RuleMatcher().Match(r.Out.Context(), r.Out.Method, r.Out.URL, rule.ProtocolHTTP)
 	if err != nil {
-		*r = *r.WithContext(context.WithValue(r.Context(), director, err))
+		*r.Out = *r.Out.WithContext(context.WithValue(r.Out.Context(), director, err))
 		return
 	}
 
-	*r = *r.WithContext(context.WithValue(r.Context(), ContextKeyMatchedRule, rl))
-	s, err := d.r.ProxyRequestHandler().HandleRequest(r, rl)
+	*r.Out = *r.Out.WithContext(context.WithValue(r.Out.Context(), ContextKeyMatchedRule, rl))
+	s, err := d.r.ProxyRequestHandler().HandleRequest(r.Out, rl)
 	if err != nil {
-		*r = *r.WithContext(context.WithValue(r.Context(), director, err))
+		*r.Out = *r.Out.WithContext(context.WithValue(r.Out.Context(), director, err))
 		return
 	}
-	*r = *r.WithContext(context.WithValue(r.Context(), ContextKeySession, s))
+	*r.Out = *r.Out.WithContext(context.WithValue(r.Out.Context(), ContextKeySession, s))
 
-	CopyHeaders(s.Header, r)
+	CopyHeaders(s.Header, r.Out)
 
-	if err := ConfigureBackendURL(r, rl); err != nil {
-		*r = *r.WithContext(context.WithValue(r.Context(), director, err))
+	if err := ConfigureBackendURL(r.Out, rl); err != nil {
+		*r.Out = *r.Out.WithContext(context.WithValue(r.Out.Context(), director, err))
 		return
 	}
 
 	var en error // need to set it to error but with nil value
-	*r = *r.WithContext(context.WithValue(r.Context(), director, en))
+	*r.Out = *r.Out.WithContext(context.WithValue(r.Out.Context(), director, en))
 }
 
 func CopyHeaders(headers http.Header, r *http.Request) {
