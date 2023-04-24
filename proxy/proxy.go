@@ -107,7 +107,7 @@ func (d *Proxy) RoundTrip(r *http.Request) (*http.Response, error) {
 }
 
 func (d *Proxy) Rewrite(r *httputil.ProxyRequest) {
-	EnrichRequestedURL(r.Out)
+	EnrichRequestedURL(r)
 	rl, err := d.r.RuleMatcher().Match(r.Out.Context(), r.Out.Method, r.Out.URL, rule.ProtocolHTTP)
 	if err != nil {
 		*r.Out = *r.Out.WithContext(context.WithValue(r.Out.Context(), director, err))
@@ -150,11 +150,11 @@ func CopyHeaders(headers http.Header, r *http.Request) {
 
 // EnrichRequestedURL sets Scheme and Host values in a URL passed down by a http server. Per default, the URL
 // does not contain host nor scheme values.
-func EnrichRequestedURL(r *http.Request) {
-	r.URL.Scheme = "http"
-	r.URL.Host = r.Host
-	if r.TLS != nil || strings.EqualFold(r.Header.Get("X-Forwarded-Proto"), "https") {
-		r.URL.Scheme = "https"
+func EnrichRequestedURL(r *httputil.ProxyRequest) {
+	r.Out.URL.Scheme = "http"
+	r.Out.URL.Host = r.In.Host
+	if r.In.TLS != nil || strings.EqualFold(r.In.Header.Get("X-Forwarded-Proto"), "https") {
+		r.Out.URL.Scheme = "https"
 	}
 }
 

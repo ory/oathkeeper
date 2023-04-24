@@ -443,25 +443,34 @@ func TestConfigureBackendURL(t *testing.T) {
 
 func TestEnrichRequestedURL(t *testing.T) {
 	for k, tc := range []struct {
-		in     *http.Request
+		req    *httputil.ProxyRequest
 		expect url.URL
 	}{
 		{
-			in:     &http.Request{Host: "test", TLS: &tls.ConnectionState{}, URL: new(url.URL)},
+			req: &httputil.ProxyRequest{
+				In:  &http.Request{Host: "test", TLS: &tls.ConnectionState{}, URL: new(url.URL)},
+				Out: &http.Request{Host: "test", TLS: &tls.ConnectionState{}, URL: new(url.URL)},
+			},
 			expect: url.URL{Scheme: "https", Host: "test"},
 		},
 		{
-			in:     &http.Request{Host: "test", URL: new(url.URL)},
+			req: &httputil.ProxyRequest{
+				In:  &http.Request{Host: "test", URL: new(url.URL)},
+				Out: &http.Request{Host: "test", URL: new(url.URL)},
+			},
 			expect: url.URL{Scheme: "http", Host: "test"},
 		},
 		{
-			in:     &http.Request{Host: "test", Header: http.Header{"X-Forwarded-Proto": {"https"}}, URL: new(url.URL)},
+			req: &httputil.ProxyRequest{
+				In:  &http.Request{Host: "test", Header: http.Header{"X-Forwarded-Proto": {"https"}}, URL: new(url.URL)},
+				Out: &http.Request{Host: "test", URL: new(url.URL)},
+			},
 			expect: url.URL{Scheme: "https", Host: "test"},
 		},
 	} {
 		t.Run(fmt.Sprintf("case=%d", k), func(t *testing.T) {
-			proxy.EnrichRequestedURL(tc.in)
-			assert.EqualValues(t, tc.expect, *tc.in.URL)
+			proxy.EnrichRequestedURL(tc.req)
+			assert.EqualValues(t, tc.expect, *tc.req.Out.URL)
 		})
 	}
 }
