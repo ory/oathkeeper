@@ -25,7 +25,8 @@ export GO111MODULE=on
 
 cp config.1.yaml config.yaml
 
-LOG_LEVEL=debug go run ../.. --config ./config.yaml serve > ./oathkeeper.log 2>&1 &
+go build -o . ../..
+LOG_LEVEL=debug ./oathkeeper --config ./config.yaml serve > ./oathkeeper.log 2>&1 &
 
 waitport 6060
 waitport 6061
