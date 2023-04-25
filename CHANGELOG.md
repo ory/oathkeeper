@@ -5,7 +5,7 @@
 
 **Table of Contents**
 
-- [0.0.0 (2023-04-17)](#000-2023-04-17)
+- [0.0.0 (2023-04-25)](#000-2023-04-25)
   - [Bug Fixes](#bug-fixes)
   - [Features](#features)
 - [0.40.2 (2023-03-15)](#0402-2023-03-15)
@@ -316,7 +316,7 @@
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-# [0.0.0](https://github.com/ory/oathkeeper/compare/v0.40.2...v0.0.0) (2023-04-17)
+# [0.0.0](https://github.com/ory/oathkeeper/compare/v0.40.2...v0.0.0) (2023-04-25)
 
 ### Bug Fixes
 
@@ -326,6 +326,9 @@
 - Sqa config values unified across projects
   ([#1094](https://github.com/ory/oathkeeper/issues/1094))
   ([9374d2f](https://github.com/ory/oathkeeper/commit/9374d2f8646e673eaf8fd228cda8a156fe0c3cd4))
+- Switch to `httputil.ReverseProxy.Rewrite`
+  ([#1098](https://github.com/ory/oathkeeper/issues/1098))
+  ([c5cc7f7](https://github.com/ory/oathkeeper/commit/c5cc7f736dc84185034be4356057d1c7a656d797))
 
 ### Features
 
