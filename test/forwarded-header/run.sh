@@ -24,7 +24,8 @@ run_oathkekeper() {
   export OATHKEEPER_PROXY=http://127.0.0.1:6060
   export OATHKEEPER_API=http://127.0.0.1:6061
 
-  LOG_LEVEL=debug go run ../.. --config ./config.yaml serve > ./oathkeeper.log 2>&1 &
+  go build -o . ../..
+  LOG_LEVEL=debug ./oathkeeper --config ./config.yaml serve > ./oathkeeper.log 2>&1 &
 
   waitport 6060
   waitport 6061

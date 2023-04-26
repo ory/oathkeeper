@@ -71,13 +71,7 @@ jobs:
       - uses: actions/setup-go@v2
         with:
           go-version: "1.20"
-      - uses: actions/cache@v2
-        with:
-          path: ~/go/bin/oathkeeper
-          key: oathkeeper-${{ hashFiles('~/go/bin/oathkeeper') }}
       - run: |
-          make install
-          go version -m $(which oathkeeper) | grep "\w*build"
           ./test/${{ matrix.name }}/run.sh
 
   docs-cli:

@@ -23,21 +23,23 @@ export OATHKEEPER_PROXY=http://127.0.0.1:6060
 export OATHKEEPER_API=http://127.0.0.1:6061
 export GO111MODULE=on
 
-[[ "$(command -v oathkeeper)" == "" ]] &&
-    (cd ../../; make install)
-
 cp config.1.yaml config.yaml
 
-LOG_LEVEL=debug oathkeeper --config ./config.yaml serve >> ./oathkeeper.log 2>&1 &
+go build -o . ../..
+LOG_LEVEL=debug ./oathkeeper --config ./config.yaml serve > ./oathkeeper.log 2>&1 &
 
 waitport 6060
 waitport 6061
 
 function finish {
   killall oathkeeper || true
+  echo ::group::Config
   cat ./config.yaml
   cat ./rules.3.json || true
+  echo ::endgroup::
+  echo ::group::Log
   cat ./oathkeeper.log
+  echo ::endgroup::
 }
 trap finish EXIT
 
