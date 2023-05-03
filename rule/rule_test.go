@@ -178,9 +178,9 @@ func TestRuleWithHeaders(t *testing.T) {
 		Match: &Match{
 			Methods: []string{"DELETE"},
 			URL:     "https://localhost/users/<(?!admin).*>",
-			Headers: map[string]string{
-				"Content-Type":    "application+v2.json",
-				"x-custom-header": "foo",
+			Headers: http.Header{
+				"Content-Type":    {"application+v2.json"},
+				"x-custom-header": {"foo"},
 			},
 		},
 	}
@@ -195,14 +195,14 @@ func TestRuleWithHeaders(t *testing.T) {
 		{
 			method:        "DELETE",
 			url:           "https://localhost/users/foo",
-			headers:       map[string][]string{},
+			headers:       http.Header{},
 			expectedMatch: false,
 			expectedErr:   nil,
 		},
 		{
 			method: "DELETE",
 			url:    "https://localhost/users/foo",
-			headers: map[string][]string{
+			headers: http.Header{
 				"Content-Type": {"application+v2.json"},
 			},
 			expectedMatch: false,
@@ -211,7 +211,7 @@ func TestRuleWithHeaders(t *testing.T) {
 		{
 			method: "DELETE",
 			url:    "https://localhost/users/foo",
-			headers: map[string][]string{
+			headers: http.Header{
 				"Content-Type": {"application+v2.json"},
 			},
 			expectedMatch: false,
@@ -220,7 +220,7 @@ func TestRuleWithHeaders(t *testing.T) {
 		{
 			method: "DELETE",
 			url:    "https://localhost/users/foo",
-			headers: map[string][]string{
+			headers: http.Header{
 				"Content-Type":    {"application+v2.json"},
 				"x-custom-header": {"bar"},
 			},
@@ -230,7 +230,7 @@ func TestRuleWithHeaders(t *testing.T) {
 		{
 			method: "DELETE",
 			url:    "https://localhost/users/foo",
-			headers: map[string][]string{
+			headers: http.Header{
 				"Content-Type":    {"application+v1.json"},
 				"x-custom-header": {"foo"},
 			},
@@ -240,7 +240,7 @@ func TestRuleWithHeaders(t *testing.T) {
 		{
 			method: "DELETE",
 			url:    "https://localhost/users/foo",
-			headers: map[string][]string{
+			headers: http.Header{
 				"Content-Type":        {"application+v2.json"},
 				"x-custom-header":     {"foo"},
 				"x-irrelevant-header": {"something", "not", "important"},
@@ -251,12 +251,12 @@ func TestRuleWithHeaders(t *testing.T) {
 		{
 			method: "DELETE",
 			url:    "https://localhost/users/foo",
-			headers: map[string][]string{
+			headers: http.Header{
 				"Content-Type":        {"application+v2.json", "application+v1.json"},
 				"x-custom-header":     {"foo", "bar"},
 				"x-irrelevant-header": {"something", "not", "important"},
 			},
-			expectedMatch: true,
+			expectedMatch: false,
 			expectedErr:   nil,
 		},
 	}

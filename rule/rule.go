@@ -42,23 +42,26 @@ type Match struct {
 	// For headers with values in array format (e.g. User-Agent headers), the rule header value must match at least one
 	// of the request header values.
 	// If the matchesUrl and matchesMethods fields are satisfied as well, the rule is considered a full match.
-	Headers map[string]string `json:"headers"`
+	Headers http.Header `json:"headers"`
 }
 
-func (m *Match) GetURL() string       { return m.URL }
-func (m *Match) GetMethods() []string { return m.Methods }
-func (m *Match) Protocol() Protocol   { return ProtocolHTTP }
+func (m *Match) GetURL() string          { return m.URL }
+func (m *Match) GetMethods() []string    { return m.Methods }
+func (m *Match) Protocol() Protocol      { return ProtocolHTTP }
+func (m *Match) GetHeaders() http.Header { return m.Headers }
 
 type MatchGRPC struct {
-	Authority  string `json:"authority"`
-	FullMethod string `json:"full_method"`
+	Authority  string      `json:"authority"`
+	FullMethod string      `json:"full_method"`
+	Headers    http.Header `json:"headers"`
 }
 
 func (m *MatchGRPC) GetURL() string {
 	return fmt.Sprintf("grpc://%s/%s", m.Authority, m.FullMethod)
 }
-func (m *MatchGRPC) GetMethods() []string { return []string{"POST"} }
-func (m *MatchGRPC) Protocol() Protocol   { return ProtocolGRPC }
+func (m *MatchGRPC) GetMethods() []string    { return []string{"POST"} }
+func (m *MatchGRPC) Protocol() Protocol      { return ProtocolGRPC }
+func (m *MatchGRPC) GetHeaders() http.Header { return m.Headers }
 
 type Handler struct {
 	// Handler identifies the implementation which will be used to handle this specific request. Please read the user
@@ -91,6 +94,7 @@ type URLProvider interface {
 	GetURL() string
 	GetMethods() []string
 	Protocol() Protocol
+	GetHeaders() http.Header
 }
 
 // Rule is a single rule that will get checked on every HTTP request.
@@ -224,7 +228,7 @@ func (r *Rule) IsMatching(strategy configuration.MatchingStrategy, method string
 		return false, nil
 	}
 
-	if !matchHeaders(headers, r.Match) {
+	if !matchHeaders(headers, r.Match.GetHeaders()) {
 		return false, nil
 	}
 
@@ -271,23 +275,33 @@ func ensureMatchingEngine(rule *Rule, strategy configuration.MatchingStrategy) e
 	return errors.Wrap(ErrUnknownMatchingStrategy, string(strategy))
 }
 
-func matchHeaders(requestHeaders http.Header, ruleMatch *Match) bool {
-	for matcherHeaderKey, matcherHeaderValue := range ruleMatch.Headers {
+func matchHeaders(requestHeaders http.Header, matchHeaders http.Header) bool {
+	for matcherHeaderKey, matcherHeaderValues := range matchHeaders {
 		foundMatch := false
 		for requestHeaderKey, requestHeaderValues := range requestHeaders {
-			// Break if we find the matching key
 			if strings.EqualFold(matcherHeaderKey, requestHeaderKey) {
-				// Match only with any of the header value
-				for _, requestHeaderValue := range requestHeaderValues {
-					if strings.EqualFold(matcherHeaderValue, requestHeaderValue) {
-						foundMatch = true
-						break
-					}
+				if slicesEqualFold(requestHeaderValues, matcherHeaderValues) {
+					foundMatch = true
+					// Break if we find the matching values. Report match found
+					break
 				}
+				// Break if we find the matching key but value do not match
 				break
 			}
 		}
 		if !foundMatch {
+			return false
+		}
+	}
+	return true
+}
+
+func slicesEqualFold(a, b []string) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for i, v := range a {
+		if !strings.EqualFold(v, b[i]) {
 			return false
 		}
 	}

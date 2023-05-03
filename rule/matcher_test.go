@@ -52,7 +52,7 @@ var testRules = []Rule{
 	},
 	{
 		ID:             "foo4",
-		Match:          &Match{URL: "https://localhost:343/<baz|bar>", Methods: []string{"PATCH"}, Headers: map[string]string{"Content-Type": "application/some-app.v2+json"}},
+		Match:          &Match{URL: "https://localhost:343/<baz|bar>", Methods: []string{"PATCH"}, Headers: http.Header{"Content-Type": {"application/some-app.v2+json"}}},
 		Description:    "Patch users rule for version 2",
 		Authorizer:     Handler{Handler: "deny"},
 		Authenticators: []Handler{{Handler: "oauth2_introspection"}},
@@ -100,7 +100,7 @@ var testRulesGlob = []Rule{
 	},
 	{
 		ID:             "foo4",
-		Match:          &Match{URL: "https://localhost:343/<{baz*,bar*}>", Methods: []string{"PATCH"}, Headers: map[string]string{"Content-Type": "application/some-app.v2+json"}},
+		Match:          &Match{URL: "https://localhost:343/<{baz*,bar*}>", Methods: []string{"PATCH"}, Headers: http.Header{"Content-Type": {"application/some-app.v2+json"}}},
 		Description:    "Patch users rule with version 2",
 		Authorizer:     Handler{Handler: "deny"},
 		Authenticators: []Handler{{Handler: "oauth2_introspection"}},
@@ -111,6 +111,15 @@ var testRulesGlob = []Rule{
 		ID:             "grpc1",
 		Match:          &MatchGRPC{Authority: "<{baz*,bar*}>.example.com", FullMethod: "grpc.api/Call"},
 		Description:    "gRPC Rule",
+		Authorizer:     Handler{Handler: "allow", Config: []byte(`{"type":"any"}`)},
+		Authenticators: []Handler{{Handler: "anonymous", Config: []byte(`{"name":"anonymous1"}`)}},
+		Mutators:       []Handler{{Handler: "id_token", Config: []byte(`{"issuer":"anything"}`)}},
+		Upstream:       Upstream{URL: "http://bar.example.com/", PreserveHost: false},
+	},
+	{
+		ID:             "grpc2",
+		Match:          &MatchGRPC{Authority: "<{baz*,bar*}>.example.com", FullMethod: "grpc.api/CallWithHeader", Headers: http.Header{"Content-Type": {"application/some-app.v2+json"}}},
+		Description:    "gRPC Rule with version 2",
 		Authorizer:     Handler{Handler: "allow", Config: []byte(`{"type":"any"}`)},
 		Authenticators: []Handler{{Handler: "anonymous", Config: []byte(`{"name":"anonymous1"}`)}},
 		Mutators:       []Handler{{Handler: "id_token", Config: []byte(`{"issuer":"anything"}`)}},
@@ -153,7 +162,7 @@ func TestMatcher(t *testing.T) {
 				testMatcher(t, matcher, "POST", "https://localhost:1234/foo", http.Header{}, ProtocolHTTP, false, &testRules[0])
 				testMatcher(t, matcher, "POST", "https://localhost:1234/foo", http.Header{}, ProtocolGRPC, true, nil)
 				testMatcher(t, matcher, "DELETE", "https://localhost:1234/foo", http.Header{}, ProtocolHTTP, true, nil)
-				testMatcher(t, matcher, "POST", "grpc://bar.example.com/grpc.api/Call", http.Header{}, ProtocolGRPC, false, &testRules[3])
+				testMatcher(t, matcher, "POST", "grpc://bar.example.com/grpc.api/Call", http.Header{}, ProtocolGRPC, false, &testRules[4])
 			})
 
 			t.Run("case=cache", func(t *testing.T) {
@@ -175,8 +184,8 @@ func TestMatcher(t *testing.T) {
 				testMatcher(t, matcher, "GET", "https://localhost:34/baz", http.Header{}, ProtocolHTTP, false, &testRules[1])
 				testMatcher(t, matcher, "POST", "https://localhost:1234/foo", http.Header{}, ProtocolHTTP, true, nil)
 				testMatcher(t, matcher, "DELETE", "https://localhost:1234/foo", http.Header{}, ProtocolHTTP, true, nil)
-				testMatcher(t, matcher, "PATCH", "https://localhost:343/bar", http.Header{"Content-Type": []string{"application/some-app.v1+json"}}, ProtocolHTTP, true, nil)
-				testMatcher(t, matcher, "PATCH", "https://localhost:343/bar", http.Header{"Content-Type": []string{"application/some-app.v2+json"}}, ProtocolHTTP, false, &testRules[3])
+				testMatcher(t, matcher, "PATCH", "https://localhost:343/bar", http.Header{"Content-Type": {"application/some-app.v1+json"}}, ProtocolHTTP, true, nil)
+				testMatcher(t, matcher, "PATCH", "https://localhost:343/bar", http.Header{"Content-Type": {"application/some-app.v2+json"}}, ProtocolHTTP, false, &testRules[3])
 			})
 		})
 		t.Run(fmt.Sprintf("glob matcher=%s", name), func(t *testing.T) {
@@ -194,7 +203,9 @@ func TestMatcher(t *testing.T) {
 				testMatcher(t, matcher, "GET", "https://localhost:34/baz", http.Header{}, ProtocolHTTP, false, &testRulesGlob[1])
 				testMatcher(t, matcher, "POST", "https://localhost:1234/foo", http.Header{}, ProtocolHTTP, false, &testRulesGlob[0])
 				testMatcher(t, matcher, "DELETE", "https://localhost:1234/foo", http.Header{}, ProtocolHTTP, true, nil)
-				testMatcher(t, matcher, "POST", "grpc://bar.example.com/grpc.api/Call", http.Header{}, ProtocolGRPC, false, &testRulesGlob[3])
+				testMatcher(t, matcher, "POST", "grpc://bar.example.com/grpc.api/Call", http.Header{}, ProtocolGRPC, false, &testRulesGlob[4])
+				testMatcher(t, matcher, "POST", "grpc://bar.example.com/grpc.api/CallWithHeader", http.Header{"Content-Type": []string{"application/some-app.v1+json"}}, ProtocolGRPC, true, nil)
+				testMatcher(t, matcher, "POST", "grpc://bar.example.com/grpc.api/CallWithHeader", http.Header{"Content-Type": []string{"application/some-app.v2+json"}}, ProtocolGRPC, false, &testRulesGlob[5])
 			})
 
 			t.Run("case=cache", func(t *testing.T) {
