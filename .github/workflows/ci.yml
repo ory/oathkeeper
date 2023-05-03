@@ -25,31 +25,29 @@ jobs:
         id: sdk-generate
 
   validate:
-    runs-on: ubuntu-latest
     name: Run tests and lints
+    runs-on: ubuntu-latest
     needs:
       - sdk-generate
     steps:
       - uses: ory/ci/checkout@master
-      - uses: actions/cache@v2
+      - uses: actions/cache@v3
         with:
-          path: |
-            internal/httpclient
+          path: internal/httpclient
           key: ${{ needs.sdk-generate.outputs.sdk-cache-key }}
       - uses: actions/setup-go@v2
         with:
-          go-version: ^1.17
+          go-version: "1.20"
       - run: go list -json > go.list
       - name: Run nancy
         uses: sonatype-nexus-community/nancy-github-action@v1.0.2
-      - name: Run prettier
-        uses: ory/ci/prettier@master
       - name: Run golangci-lint
         uses: golangci/golangci-lint-action@v2
         env:
           GOGC: 100
         with:
           args: --timeout 10m0s
+          version: v1.52.2
           skip-go-installation: true
           skip-pkg-cache: true
       - name: Run go-acc (tests)
@@ -60,22 +58,6 @@ jobs:
         run: |
           bash <(curl -s https://codecov.io/bash)
 
-  setup-tests:
-    runs-on: ubuntu-latest
-    name: Setup tests
-    steps:
-      - uses: ory/ci/checkout@master
-      - uses: actions/setup-go@v2
-        with:
-          go-version: "^1.17"
-      - run: make install
-      - uses: actions/cache@v2
-        with:
-          path: ~/go/bin/oathkeeper
-          key: oathkeeper-${{ hashFiles('~/go/bin/oathkeeper') }}
-          restore-keys: |
-            oathkeeper-
-
   test:
     runs-on: ubuntu-latest
     name: Run tests
@@ -84,17 +66,13 @@ jobs:
         name: ["reload", "e2e", "forwarded-header"]
     needs:
       - sdk-generate
-      - setup-tests
     steps:
       - uses: ory/ci/checkout@master
       - uses: actions/setup-go@v2
         with:
-          go-version: "^1.17"
-      - uses: actions/cache@v2
-        with:
-          path: ~/go/bin/oathkeeper
-          key: oathkeeper-${{ hashFiles('~/go/bin/oathkeeper') }}
-      - run: ./test/${{ matrix.name }}/run.sh
+          go-version: "1.20"
+      - run: |
+          ./test/${{ matrix.name }}/run.sh
 
   docs-cli:
     runs-on: ubuntu-latest
@@ -131,6 +109,7 @@ jobs:
       - uses: ory/ci/sdk/release@master
         with:
           token: ${{ secrets.ORY_BOT_PAT }}
+          swag-spec-location: spec/swagger.json
 
   release:
     name: Generate release
@@ -158,7 +137,7 @@ jobs:
     steps:
       - uses: ory/ci/releaser/render-version-schema@master
         with:
-          schema-path: spec/config.json
+          schema-path: .schema/config.schema.json
           token: ${{ secrets.ORY_BOT_PAT }}
 
   newsletter-draft:

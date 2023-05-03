@@ -1,22 +1,5 @@
-/*
- * Copyright © 2017-2018 Aeneas Rekkas <aeneas+oss@aeneas.io>
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *
- * @author       Aeneas Rekkas <aeneas+oss@aeneas.io>
- * @copyright  2017-2018 Aeneas Rekkas <aeneas+oss@aeneas.io>
- * @license  	   Apache-2.0
- */
+// Copyright © 2023 Ory Corp
+// SPDX-License-Identifier: Apache-2.0
 
 package api
 
@@ -57,22 +40,22 @@ func (h *RuleHandler) SetRoutes(r *x.RouterAPI) {
 
 // swagger:route GET /rules api listRules
 //
-// List All Rules
+// # List All Rules
 //
 // This method returns an array of all rules that are stored in the backend. This is useful if you want to get a full
 // view of what rules you have currently in place.
 //
-//     Consumes:
-//     - application/json
+//	Consumes:
+//	- application/json
 //
-//     Produces:
-//     - application/json
+//	Produces:
+//	- application/json
 //
-//     Schemes: http, https
+//	Schemes: http, https
 //
-//     Responses:
-//       200: rules
-//       500: genericError
+//	Responses:
+//	  200: rules
+//	  500: genericError
 func (h *RuleHandler) listRules(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	limit, offset := pagination.Parse(r, 50, 0, 500)
 	rules, err := h.r.RuleRepository().List(r.Context(), limit, offset)
@@ -90,22 +73,22 @@ func (h *RuleHandler) listRules(w http.ResponseWriter, r *http.Request, _ httpro
 
 // swagger:route GET /rules/{id} api getRule
 //
-// Retrieve a Rule
+// # Retrieve a Rule
 //
 // Use this method to retrieve a rule from the storage. If it does not exist you will receive a 404 error.
 //
-//     Consumes:
-//     - application/json
+//	Consumes:
+//	- application/json
 //
-//     Produces:
-//     - application/json
+//	Produces:
+//	- application/json
 //
-//     Schemes: http, https
+//	Schemes: http, https
 //
-//     Responses:
-//       200: rule
-//       404: genericError
-//       500: genericError
+//	Responses:
+//	  200: rule
+//	  404: genericError
+//	  500: genericError
 func (h *RuleHandler) getRules(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	rl, err := h.r.RuleRepository().Get(r.Context(), ps.ByName("id"))
 	if errors.Cause(err) == helper.ErrResourceNotFound {

@@ -1,22 +1,5 @@
-/*
- * Copyright © 2017-2018 Aeneas Rekkas <aeneas+oss@aeneas.io>
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *
- * @author       Aeneas Rekkas <aeneas+oss@aeneas.io>
- * @copyright  2017-2018 Aeneas Rekkas <aeneas+oss@aeneas.io>
- * @license  	   Apache-2.0
- */
+// Copyright © 2023 Ory Corp
+// SPDX-License-Identifier: Apache-2.0
 
 package mutate
 
@@ -30,16 +13,15 @@ import (
 	"time"
 
 	"github.com/dgraph-io/ristretto"
-
-	"github.com/ory/oathkeeper/pipeline/authn"
-	"github.com/ory/oathkeeper/x"
-
-	"github.com/ory/x/httpx"
-
 	"github.com/pkg/errors"
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
+	"go.opentelemetry.io/otel/trace"
 
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/pipeline"
+	"github.com/ory/oathkeeper/pipeline/authn"
+	"github.com/ory/oathkeeper/x"
+	"github.com/ory/x/httpx"
 )
 
 const (
@@ -54,12 +36,10 @@ const (
 )
 
 type MutatorHydrator struct {
-	c      configuration.Provider
-	client *http.Client
-	d      mutatorHydratorDependencies
+	c configuration.Provider
+	d mutatorHydratorDependencies
 
 	hydrateCache *ristretto.Cache
-	cacheTTL     *time.Duration
 }
 
 type BasicAuth struct {
@@ -96,6 +76,7 @@ type MutatorHydratorConfig struct {
 
 type mutatorHydratorDependencies interface {
 	x.RegistryLogger
+	Tracer() trace.Tracer
 }
 
 func NewMutatorHydrator(c configuration.Provider, d mutatorHydratorDependencies) *MutatorHydrator {
@@ -107,7 +88,11 @@ func NewMutatorHydrator(c configuration.Provider, d mutatorHydratorDependencies)
 		// This is a best-practice value.
 		BufferItems: 64,
 	})
-	return &MutatorHydrator{c: c, d: d, client: httpx.NewResilientClientLatencyToleranceSmall(nil), hydrateCache: cache}
+	return &MutatorHydrator{
+		c:            c,
+		d:            d,
+		hydrateCache: cache,
+	}
 }
 
 func (a *MutatorHydrator) GetID() string {
@@ -184,26 +169,32 @@ func (a *MutatorHydrator) Mutate(r *http.Request, session *authn.AuthenticationS
 	}
 	req.Header.Set(contentTypeHeaderKey, contentTypeJSONHeaderValue)
 
-	var client http.Client
+	client := http.DefaultClient
+	if a.d.Tracer() != nil {
+		client = otelhttp.DefaultClient
+	}
 	if cfg.Api.Retry != nil {
-		maxRetryDelay := time.Second
-		giveUpAfter := time.Millisecond * 50
+		giveUpAfter := time.Second
+		maxRetryDelay := 100 * time.Millisecond
 		if len(cfg.Api.Retry.MaxDelay) > 0 {
 			if d, err := time.ParseDuration(cfg.Api.Retry.MaxDelay); err != nil {
-				a.d.Logger().WithError(err).Warn("Unable to parse max_delay in the Hydrator Mutator, falling pack to default.")
+				a.d.Logger().WithError(err).Warnf("Unable to parse max_delay in the Hydrator Mutator, falling back to default (%v).", maxRetryDelay)
 			} else {
 				maxRetryDelay = d
 			}
 		}
 		if len(cfg.Api.Retry.GiveUpAfter) > 0 {
 			if d, err := time.ParseDuration(cfg.Api.Retry.GiveUpAfter); err != nil {
-				a.d.Logger().WithError(err).Warn("Unable to parse max_delay in the Hydrator Mutator, falling pack to default.")
+				a.d.Logger().WithError(err).Warnf("Unable to parse give_up_after in the Hydrator Mutator, falling back to default (%v).", giveUpAfter)
 			} else {
 				giveUpAfter = d
 			}
 		}
-
-		client.Transport = httpx.NewResilientRoundTripper(a.client.Transport, maxRetryDelay, giveUpAfter)
+		clientOpts := []httpx.ResilientOptions{
+			httpx.ResilientClientWithTracer(a.d.Tracer()),
+			httpx.ResilientClientWithConnectionTimeout(giveUpAfter),
+			httpx.ResilientClientWithMaxRetryWait(maxRetryDelay)}
+		client = httpx.NewResilientClient(clientOpts...).StandardClient()
 	}
 
 	res, err := client.Do(req.WithContext(r.Context()))

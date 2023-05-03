@@ -1,10 +1,16 @@
+// Copyright © 2023 Ory Corp
+// SPDX-License-Identifier: Apache-2.0
+
 package authn
 
 import (
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/url"
+
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
+	"go.opentelemetry.io/otel/trace"
 
 	"github.com/pkg/errors"
 	"github.com/tidwall/gjson"
@@ -70,14 +76,21 @@ func (a *AuthenticatorCookieSessionConfiguration) GetForceMethod() string {
 }
 
 type AuthenticatorCookieSession struct {
-	c configuration.Provider
+	c      configuration.Provider
+	client *http.Client
 }
 
 var _ AuthenticatorForwardConfig = new(AuthenticatorCookieSessionConfiguration)
 
-func NewAuthenticatorCookieSession(c configuration.Provider) *AuthenticatorCookieSession {
+func NewAuthenticatorCookieSession(c configuration.Provider, provider trace.TracerProvider) *AuthenticatorCookieSession {
 	return &AuthenticatorCookieSession{
 		c: c,
+		client: &http.Client{
+			Transport: otelhttp.NewTransport(
+				http.DefaultTransport,
+				otelhttp.WithTracerProvider(provider),
+				otelhttp.WithSpanNameFormatter(func(operation string, r *http.Request) string { return "authn.cookie_session" })),
+		},
 	}
 }
 
@@ -124,7 +137,7 @@ func (a *AuthenticatorCookieSession) Authenticate(r *http.Request, session *Auth
 		return errors.WithStack(ErrAuthenticatorNotResponsible)
 	}
 
-	body, err := forwardRequestToSessionStore(r, cf)
+	body, err := forwardRequestToSessionStore(a.client, r, cf)
 	if err != nil {
 		return err
 	}
@@ -164,13 +177,14 @@ func cookieSessionResponsible(r *http.Request, only []string) bool {
 	return false
 }
 
-func forwardRequestToSessionStore(r *http.Request, cf AuthenticatorForwardConfig) (json.RawMessage, error) {
+func forwardRequestToSessionStore(client *http.Client, r *http.Request, cf AuthenticatorForwardConfig) (json.RawMessage, error) {
 	req, err := PrepareRequest(r, cf)
 	if err != nil {
 		return nil, err
 	}
 
-	res, err := http.DefaultClient.Do(req.WithContext(r.Context()))
+	res, err := client.Do(req.WithContext(r.Context()))
+
 	if err != nil {
 		return nil, helper.ErrForbidden.WithReason(err.Error()).WithTrace(err)
 	}
@@ -178,7 +192,7 @@ func forwardRequestToSessionStore(r *http.Request, cf AuthenticatorForwardConfig
 	defer res.Body.Close()
 
 	if res.StatusCode == http.StatusOK {
-		body, err := ioutil.ReadAll(res.Body)
+		body, err := io.ReadAll(res.Body)
 		if err != nil {
 			return json.RawMessage{}, errors.WithStack(herodot.ErrInternalServerError.WithReasonf("Unable to fetch cookie session context from remote: %+v", err))
 		}

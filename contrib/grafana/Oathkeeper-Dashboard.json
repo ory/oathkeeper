@@ -345,25 +345,25 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "histogram_quantile(0.90, avg(rate(ory_oathkeeper_request_duration_seconds_bucket[5m])) by (le, instance))",
+          "expr": "histogram_quantile(0.90, avg(rate(ory_oathkeeper_requests_duration_seconds_bucket[5m])) by (le, instance))",
           "interval": "",
           "legendFormat": "{{ instance }} - p90",
           "refId": "A"
         },
         {
-          "expr": "histogram_quantile(0.95, avg(rate(ory_oathkeeper_request_duration_seconds_bucket[5m])) by (le, instance))",
+          "expr": "histogram_quantile(0.95, avg(rate(ory_oathkeeper_requests_duration_seconds_bucket[5m])) by (le, instance))",
           "interval": "",
           "legendFormat": "{{ instance }} - p95",
           "refId": "B"
         },
         {
-          "expr": "histogram_quantile(0.99, avg(rate(ory_oathkeeper_request_duration_seconds_bucket[5m])) by (le, instance))",
+          "expr": "histogram_quantile(0.99, avg(rate(ory_oathkeeper_requests_duration_seconds_bucket[5m])) by (le, instance))",
           "interval": "",
           "legendFormat": "{{ instance }} - p99",
           "refId": "C"
         },
         {
-          "expr": "histogram_quantile(1, avg(rate(ory_oathkeeper_request_duration_seconds_bucket[5m])) by (le, instance))",
+          "expr": "histogram_quantile(1, avg(rate(ory_oathkeeper_requests_duration_seconds_bucket[5m])) by (le, instance))",
           "interval": "",
           "legendFormat": "{{ instance }} - p100",
           "refId": "D"

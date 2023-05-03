@@ -1,7 +1,11 @@
+// Copyright © 2023 Ory Corp
+// SPDX-License-Identifier: Apache-2.0
+
 package server
 
 import (
 	"bytes"
+	"context"
 	"crypto/tls"
 	"encoding/json"
 	"fmt"
@@ -12,17 +16,18 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"github.com/rs/cors"
 	"github.com/spf13/cobra"
 	"github.com/urfave/negroni"
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 
 	"github.com/ory/analytics-go/v4"
 	"github.com/ory/graceful"
-	"github.com/ory/viper"
-
 	"github.com/ory/x/corsx"
 	"github.com/ory/x/healthx"
 	"github.com/ory/x/logrusx"
-	telemetry "github.com/ory/x/metricsx"
+	"github.com/ory/x/metricsx"
+	"github.com/ory/x/otelx"
 	"github.com/ory/x/reqlog"
 	"github.com/ory/x/tlsx"
 
@@ -33,32 +38,49 @@ import (
 	"github.com/ory/oathkeeper/x"
 )
 
+func isTimeoutError(err error) bool {
+	var te interface{ Timeout() bool } = nil
+	return errors.As(err, &te) && te.Timeout() || errors.Is(err, context.DeadlineExceeded)
+}
+
 func runProxy(d driver.Driver, n *negroni.Negroni, logger *logrusx.Logger, prom *metrics.PrometheusRepository) func() {
 	return func() {
 		proxy := d.Registry().Proxy()
-
-		handler := &httputil.ReverseProxy{
-			Director:  proxy.Director,
-			Transport: proxy,
+		transport := otelhttp.NewTransport(proxy, otelhttp.WithSpanNameFormatter(func(operation string, r *http.Request) string { return "upstream" }))
+		proxyHandler := &httputil.ReverseProxy{
+			Rewrite:   proxy.Rewrite,
+			Transport: transport,
 			ErrorHandler: func(w http.ResponseWriter, r *http.Request, err error) {
-				logger.WithError(err).Errorf("http: proxy error: %v", err)
-				w.WriteHeader(http.StatusBadGateway)
+				switch {
+				case errors.Is(r.Context().Err(), context.Canceled):
+					logger.WithError(err).Warn("http: client canceled request")
+					w.WriteHeader(499) // http://nginx.org/en/docs/dev/development_guide.html
+				case isTimeoutError(err):
+					logger.WithError(err).Errorf("http: gateway timeout")
+					w.WriteHeader(http.StatusGatewayTimeout)
+				default:
+					logger.WithError(err).Errorf("http: gateway error")
+					w.WriteHeader(http.StatusBadGateway)
+				}
 			},
 		}
 
+		promHidePaths := d.Configuration().PrometheusHideRequestPaths()
 		promCollapsePaths := d.Configuration().PrometheusCollapseRequestPaths()
-
-		n.Use(metrics.NewMiddleware(prom, "oathkeeper-proxy").ExcludePaths(healthx.ReadyCheckPath, healthx.AliveCheckPath).CollapsePaths(promCollapsePaths))
+		n.Use(metrics.NewMiddleware(prom, "oathkeeper-proxy").ExcludePaths(healthx.ReadyCheckPath, healthx.AliveCheckPath).HidePaths(promHidePaths).CollapsePaths(promCollapsePaths))
 		n.Use(reqlog.NewMiddlewareFromLogger(logger, "oathkeeper-proxy").ExcludePaths(healthx.ReadyCheckPath, healthx.AliveCheckPath))
-		n.UseHandler(handler)
+		n.Use(corsx.ContextualizedMiddleware(func(ctx context.Context) (opts cors.Options, enabled bool) {
+			return d.Configuration().CORS("proxy")
+		}))
 
-		h := corsx.Initialize(n, logger, "serve.proxy")
-		certs := cert("proxy", logger)
+		n.UseHandler(proxyHandler)
+
+		certs := cert(d.Configuration(), "proxy", logger)
 
 		addr := d.Configuration().ProxyServeAddress()
 		server := graceful.WithDefaults(&http.Server{
 			Addr:         addr,
-			Handler:      h,
+			Handler:      otelx.NewHandler(n, "proxy"),
 			TLSConfig:    &tls.Config{Certificates: certs},
 			ReadTimeout:  d.Configuration().ProxyReadTimeout(),
 			WriteTimeout: d.Configuration().ProxyWriteTimeout(),
@@ -84,23 +106,26 @@ func runAPI(d driver.Driver, n *negroni.Negroni, logger *logrusx.Logger, prom *m
 	return func() {
 		router := x.NewAPIRouter()
 		d.Registry().RuleHandler().SetRoutes(router)
-		d.Registry().HealthHandler().SetRoutes(router.Router, true)
+		d.Registry().HealthHandler().SetHealthRoutes(router.Router, true)
 		d.Registry().CredentialHandler().SetRoutes(router)
 
+		promHidePaths := d.Configuration().PrometheusHideRequestPaths()
 		promCollapsePaths := d.Configuration().PrometheusCollapseRequestPaths()
 
-		n.Use(metrics.NewMiddleware(prom, "oathkeeper-api").ExcludePaths(healthx.ReadyCheckPath, healthx.AliveCheckPath).CollapsePaths(promCollapsePaths))
+		n.Use(metrics.NewMiddleware(prom, "oathkeeper-api").ExcludePaths(healthx.ReadyCheckPath, healthx.AliveCheckPath).HidePaths(promHidePaths).CollapsePaths(promCollapsePaths))
 		n.Use(reqlog.NewMiddlewareFromLogger(logger, "oathkeeper-api").ExcludePaths(healthx.ReadyCheckPath, healthx.AliveCheckPath))
+		n.Use(corsx.ContextualizedMiddleware(func(ctx context.Context) (opts cors.Options, enabled bool) {
+			return d.Configuration().CORS("api")
+		}))
 		n.Use(d.Registry().DecisionHandler()) // This needs to be the last entry, otherwise the judge API won't work
 
 		n.UseHandler(router)
 
-		h := corsx.Initialize(n, logger, "serve.api")
-		certs := cert("api", logger)
+		certs := cert(d.Configuration(), "api", logger)
 		addr := d.Configuration().APIServeAddress()
 		server := graceful.WithDefaults(&http.Server{
 			Addr:         addr,
-			Handler:      h,
+			Handler:      otelx.TraceHandler(n),
 			TLSConfig:    &tls.Config{Certificates: certs},
 			ReadTimeout:  d.Configuration().APIReadTimeout(),
 			WriteTimeout: d.Configuration().APIWriteTimeout(),
@@ -145,12 +170,14 @@ func runPrometheus(d driver.Driver, logger *logrusx.Logger, prom *metrics.Promet
 	}
 }
 
-func cert(daemon string, logger *logrusx.Logger) []tls.Certificate {
+func cert(config configuration.Provider, daemon string, logger *logrusx.Logger) []tls.Certificate {
+	tlsCfg := config.TLSConfig(daemon)
+
 	cert, err := tlsx.Certificate(
-		viper.GetString("serve."+daemon+".tls.cert.base64"),
-		viper.GetString("serve."+daemon+".tls.key.base64"),
-		viper.GetString("serve."+daemon+".tls.cert.path"),
-		viper.GetString("serve."+daemon+".tls.key.path"),
+		tlsCfg.Cert.Base64,
+		tlsCfg.Key.Base64,
+		tlsCfg.Cert.Path,
+		tlsCfg.Key.Path,
 	)
 
 	if err == nil {
@@ -166,15 +193,15 @@ func cert(daemon string, logger *logrusx.Logger) []tls.Certificate {
 
 func clusterID(c configuration.Provider) string {
 	var id bytes.Buffer
-	if err := json.NewEncoder(&id).Encode(viper.AllSettings()); err != nil {
+	if err := json.NewEncoder(&id).Encode(c.AllSettings()); err != nil {
 		for _, repo := range c.AccessRuleRepositories() {
 			_, _ = id.WriteString(repo.String())
 		}
 		_, _ = id.WriteString(c.ProxyServeAddress())
 		_, _ = id.WriteString(c.APIServeAddress())
-		_, _ = id.WriteString(viper.GetString("mutators.id_token.config.jwks_url"))
-		_, _ = id.WriteString(viper.GetString("mutators.id_token.config.issuer_url"))
-		_, _ = id.WriteString(viper.GetString("authenticators.jwt.config.jwks_urls"))
+		_, _ = id.WriteString(c.String("mutators.id_token.config.jwks_url"))
+		_, _ = id.WriteString(c.String("mutators.id_token.config.issuer_url"))
+		_, _ = id.WriteString(c.String("authenticators.jwt.config.jwks_urls"))
 	}
 
 	return id.String()
@@ -185,54 +212,46 @@ func isDevelopment(c configuration.Provider) bool {
 }
 
 func RunServe(version, build, date string) func(cmd *cobra.Command, args []string) {
-	return func(cmd *cobra.Command, args []string) {
+	return func(cmd *cobra.Command, _ []string) {
 		fmt.Println(banner(version))
 
 		logger := logrusx.New("ORY Oathkeeper", version)
-		d := driver.NewDefaultDriver(logger, version, build, date)
+		d := driver.NewDefaultDriver(logger, version, build, date, cmd.Flags())
 		d.Registry().Init()
 
 		adminmw := negroni.New()
 		publicmw := negroni.New()
 
-		telemetry := telemetry.New(cmd, logger,
-			&telemetry.Options{
-				Service:       "ory-oathkeeper",
-				ClusterID:     telemetry.Hash(clusterID(d.Configuration())),
-				IsDevelopment: isDevelopment(d.Configuration()),
-				WriteKey:      "xRVRP48SAKw6ViJEnvB0u2PY8bVlsO6O",
-				WhitelistedPaths: []string{
-					"/",
-					api.CredentialsPath,
-					api.DecisionPath,
-					api.RulesPath,
-					healthx.VersionPath,
-					healthx.AliveCheckPath,
-					healthx.ReadyCheckPath,
-				},
-				BuildVersion: version,
-				BuildTime:    build,
-				BuildHash:    date,
-				Config: &analytics.Config{
-					Endpoint:             "https://sqa.ory.sh",
-					GzipCompressionLevel: 6,
-					BatchMaxSize:         500 * 1000,
-					BatchSize:            250,
-					Interval:             time.Hour * 24,
-				},
+		telemetry := metricsx.New(cmd, logger, d.Configuration().Source(), &metricsx.Options{
+			Service:       "ory-oathkeeper",
+			ClusterID:     metricsx.Hash(clusterID(d.Configuration())),
+			IsDevelopment: isDevelopment(d.Configuration()),
+			WriteKey:      "xRVRP48SAKw6ViJEnvB0u2PY8bVlsO6O",
+			WhitelistedPaths: []string{
+				"/",
+				api.CredentialsPath,
+				api.DecisionPath,
+				api.RulesPath,
+				healthx.VersionPath,
+				healthx.AliveCheckPath,
+				healthx.ReadyCheckPath,
 			},
-		)
+			BuildVersion: version,
+			BuildTime:    build,
+			BuildHash:    date,
+			Config: &analytics.Config{
+				Endpoint:             "https://sqa.ory.sh",
+				GzipCompressionLevel: 6,
+				BatchMaxSize:         500 * 1000,
+				BatchSize:            1000,
+				Interval:             time.Hour * 6,
+			},
+		})
 
 		adminmw.Use(telemetry)
 		publicmw.Use(telemetry)
 
-		if tracer := d.Registry().Tracer(); tracer.IsLoaded() {
-			adminmw.Use(tracer)
-			publicmw.Use(tracer)
-		}
-
-		prometheusRepo := metrics.NewPrometheusRepository(logger)
-
+		prometheusRepo := metrics.NewConfigurablePrometheusRepository(d, logger)
 		var wg sync.WaitGroup
 		tasks := []func(){
 			runAPI(d, adminmw, logger, prometheusRepo),

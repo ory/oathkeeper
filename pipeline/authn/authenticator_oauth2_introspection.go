@@ -1,3 +1,6 @@
+// Copyright © 2023 Ory Corp
+// SPDX-License-Identifier: Apache-2.0
+
 package authn
 
 import (
@@ -10,6 +13,8 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 
 	"github.com/ory/fosite"
 
@@ -25,7 +30,6 @@ import (
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/helper"
 	"github.com/ory/oathkeeper/pipeline"
-	"github.com/ory/oathkeeper/x"
 )
 
 type AuthenticatorOAuth2IntrospectionConfiguration struct {
@@ -204,13 +208,7 @@ func (a *AuthenticatorOAuth2Introspection) Authenticate(r *http.Request, session
 		// set/override the content-type header
 		introspectReq.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
-		// add tracing
-		closeSpan := x.TraceRequest(r.Context(), introspectReq)
-
 		resp, err := client.Do(introspectReq.WithContext(r.Context()))
-
-		// close the span so it represents just the http request
-		closeSpan()
 		if err != nil {
 			return errors.WithStack(err)
 		}
@@ -344,7 +342,11 @@ func (a *AuthenticatorOAuth2Introspection) Config(config json.RawMessage) (*Auth
 			return nil, nil, errors.WithStack(err)
 		}
 
-		client = httpx.NewResilientClientLatencyToleranceConfigurable(rt, timeout, maxWait)
+		client = httpx.NewResilientClient(
+			httpx.ResilientClientWithMaxRetryWait(maxWait),
+			httpx.ResilientClientWithConnectionTimeout(timeout),
+		).StandardClient()
+		client.Transport = otelhttp.NewTransport(rt)
 		a.mu.Lock()
 		a.clientMap[clientKey] = client
 		a.mu.Unlock()

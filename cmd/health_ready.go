@@ -1,12 +1,16 @@
+// Copyright © 2023 Ory Corp
+// SPDX-License-Identifier: Apache-2.0
+
 package cmd
 
 import (
 	"fmt"
 	"os"
 
+	"github.com/ory/oathkeeper/internal/httpclient/client/health"
+
 	"github.com/spf13/cobra"
 
-	"github.com/ory/oathkeeper/internal/httpclient/client/api"
 	"github.com/ory/x/cmdx"
 )
 
@@ -24,7 +28,7 @@ Note:
 	Run: func(cmd *cobra.Command, args []string) {
 		client := newClient(cmd)
 
-		r, err := client.API.IsInstanceReady(api.NewIsInstanceReadyParams())
+		r, err := client.Health.IsInstanceReady(health.NewIsInstanceReadyParams())
 		// If err, print err and exit 1
 		cmdx.Must(err, "%s", err)
 		// Print payload

@@ -34,7 +34,6 @@
         "type": "string"
       },
       "Upstream": {
-        "description": "Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream Upstream upstream",
         "properties": {
           "preserve_host": {
             "description": "PreserveHost, if false (the default), tells ORY Oathkeeper to set the upstream request's Host header to the\nhostname of the API's upstream's URL. Setting this flag to true instructs ORY Oathkeeper not to do so.",
@@ -55,32 +54,26 @@
         "description": "The standard error format",
         "properties": {
           "code": {
-            "description": "code",
             "format": "int64",
             "type": "integer"
           },
           "details": {
-            "description": "details",
             "items": {
-              "additionalProperties": true,
+              "additionalProperties": {},
               "type": "object"
             },
             "type": "array"
           },
           "message": {
-            "description": "message",
             "type": "string"
           },
           "reason": {
-            "description": "reason",
             "type": "string"
           },
           "request": {
-            "description": "request",
             "type": "string"
           },
           "status": {
-            "description": "status",
             "type": "string"
           }
         },
@@ -99,7 +92,6 @@
         "type": "object"
       },
       "healthStatus": {
-        "description": "HealthStatus health status",
         "properties": {
           "status": {
             "description": "Status always contains \"ok\".",
@@ -115,27 +107,21 @@
             "type": "string"
           },
           "crv": {
-            "description": "crv",
             "type": "string"
           },
           "d": {
-            "description": "d",
             "type": "string"
           },
           "dp": {
-            "description": "dp",
             "type": "string"
           },
           "dq": {
-            "description": "dq",
             "type": "string"
           },
           "e": {
-            "description": "e",
             "type": "string"
           },
           "k": {
-            "description": "k",
             "type": "string"
           },
           "kid": {
@@ -147,19 +133,15 @@
             "type": "string"
           },
           "n": {
-            "description": "n",
             "type": "string"
           },
           "p": {
-            "description": "p",
             "type": "string"
           },
           "q": {
-            "description": "q",
             "type": "string"
           },
           "qi": {
-            "description": "qi",
             "type": "string"
           },
           "use": {
@@ -167,7 +149,6 @@
             "type": "string"
           },
           "x": {
-            "description": "x",
             "type": "string"
           },
           "x5c": {
@@ -178,14 +159,12 @@
             "type": "array"
           },
           "y": {
-            "description": "y",
             "type": "string"
           }
         },
         "type": "object"
       },
       "jsonWebKeySet": {
-        "description": "JSONWebKeySet json web key set",
         "properties": {
           "keys": {
             "description": "The value of the \"keys\" parameter is an array of JWK values.  By\ndefault, the order of the JWK values within the array does not imply\nan order of preference among them, although applications of JWK Sets\ncan choose to assign a meaning to the order for their purposes, if\ndesired.",
@@ -231,15 +210,13 @@
             "$ref": "#/components/schemas/Upstream"
           }
         },
-        "title": "Rule Rule Rule swaggerRule is a single rule that will get checked on every HTTP request.",
+        "title": "swaggerRule is a single rule that will get checked on every HTTP request.",
         "type": "object"
       },
       "ruleHandler": {
-        "description": "RuleHandler rule handler",
         "properties": {
           "config": {
-            "description": "Config contains the configuration for the handler. Please read the user\nguide for a complete list of each handler's available settings.",
-            "type": "object"
+            "description": "Config contains the configuration for the handler. Please read the user\nguide for a complete list of each handler's available settings."
           },
           "handler": {
             "description": "Handler identifies the implementation which will be used to handle this specific request. Please read the user\nguide for a complete list of available handlers.",
@@ -265,7 +242,6 @@
         "type": "object"
       },
       "version": {
-        "description": "Version Version Version version",
         "properties": {
           "version": {
             "description": "Version is the service's version.",
@@ -321,7 +297,7 @@
     },
     "/decisions": {
       "get": {
-        "description": "\u003e This endpoint works with all HTTP Methods (GET, POST, PUT, ...) and matches every path prefixed with /decision.\n\nThis endpoint mirrors the proxy capability of ORY Oathkeeper's proxy functionality but instead of forwarding the\nrequest to the upstream server, returns 200 (request should be allowed), 401 (unauthorized), or 403 (forbidden)\nstatus codes. This endpoint can be used to integrate with other API Proxies like Ambassador, Kong, Envoy, and many more.",
+        "description": "\u003e This endpoint works with all HTTP Methods (GET, POST, PUT, ...) and matches every path prefixed with /decisions.\n\nThis endpoint mirrors the proxy capability of ORY Oathkeeper's proxy functionality but instead of forwarding the\nrequest to the upstream server, returns 200 (request should be allowed), 401 (unauthorized), or 403 (forbidden)\nstatus codes. This endpoint can be used to integrate with other API Proxies like Ambassador, Kong, Envoy, and many more.",
         "operationId": "decisions",
         "responses": {
           "200": {
@@ -394,15 +370,15 @@
             },
             "description": "Ory Oathkeeper is ready to accept connections."
           },
-          "500": {
+          "default": {
             "content": {
-              "application/json": {
+              "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/genericError"
+                  "type": "string"
                 }
               }
             },
-            "description": "genericError"
+            "description": "Unexpected error"
           }
         },
         "summary": "Check HTTP Server Status",
@@ -450,6 +426,16 @@
               }
             },
             "description": "Ory Kratos is not yet ready to accept requests."
+          },
+          "default": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Unexpected error"
           }
         },
         "summary": "Check HTTP Server and Database Status",

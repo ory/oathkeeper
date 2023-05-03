@@ -1,8 +1,10 @@
+.bin
 vendor
+.bin/
 .idea
 _book
 node_modules/
 LICENSE.txt
-*-packr.go
 dev
 dist/
+oathkeeper

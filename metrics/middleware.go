@@ -1,3 +1,6 @@
+// Copyright © 2023 Ory Corp
+// SPDX-License-Identifier: Apache-2.0
+
 package metrics
 
 import (
@@ -38,6 +41,7 @@ type Middleware struct {
 	mutex         sync.RWMutex
 	silencePaths  map[string]bool
 	collapsePaths bool
+	hidePaths     bool
 }
 
 // NewMiddleware returns a new *Middleware, yay!
@@ -48,6 +52,7 @@ func NewMiddleware(prom *PrometheusRepository, name string) *Middleware {
 		clock:         &realClock{},
 		silencePaths:  map[string]bool{},
 		collapsePaths: true,
+		hidePaths:     false,
 	}
 }
 
@@ -64,11 +69,21 @@ func (m *Middleware) ExcludePaths(paths ...string) *Middleware {
 // CollapsePaths if set to true, forces the value of the "request" label
 // of the prometheus request metrics to be collapsed to the first context path segment only.
 // eg. (when set to true):
-//    - /decisions/service/my-service -> /decisions
-//    - /decisions -> /decisions
+//   - /decisions/service/my-service -> /decisions
+//   - /decisions -> /decisions
 func (m *Middleware) CollapsePaths(flag bool) *Middleware {
 	m.mutex.Lock()
 	m.collapsePaths = flag
+	m.mutex.Unlock()
+	return m
+}
+
+// HidePaths if set to true, forces the value of the "request" label
+// of the prometheus request metrics to be set to an empty value.
+
+func (m *Middleware) HidePaths(flag bool) *Middleware {
+	m.mutex.Lock()
+	m.hidePaths = flag
 	m.mutex.Unlock()
 	return m
 }
@@ -91,10 +106,15 @@ func (m *Middleware) ServeHTTP(rw http.ResponseWriter, r *http.Request, next htt
 
 	if _, silent := m.silencePaths[r.URL.Path]; !silent {
 		requestURI := r.RequestURI
-		if m.collapsePaths {
-			requestURI = m.getFirstPathSegment(requestURI)
+		if m.hidePaths {
+			requestURI = ""
+		} else {
+			if m.collapsePaths {
+				requestURI = m.getFirstPathSegment(requestURI)
+			}
 		}
-		m.Prometheus.RequestDurationObserve(m.Name, requestURI, r.Method, res.Status())(float64(latency.Seconds()))
+
+		m.Prometheus.RequestDurationObserve(m.Name, requestURI, r.Method, res.Status())(latency.Seconds())
 		m.Prometheus.UpdateRequest(m.Name, requestURI, r.Method, res.Status())
 	}
 }

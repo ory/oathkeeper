@@ -1,3 +1,6 @@
+// Copyright © 2023 Ory Corp
+// SPDX-License-Identifier: Apache-2.0
+
 package authn_test
 
 import (
@@ -17,6 +20,7 @@ const (
 )
 
 func TestSetHeader(t *testing.T) {
+	t.Parallel()
 	assert := assert.New(t)
 	for k, tc := range []struct {
 		a    *authn.AuthenticationSession
@@ -42,6 +46,7 @@ func TestSetHeader(t *testing.T) {
 }
 
 func TestCopy(t *testing.T) {
+	t.Parallel()
 	assert := assert.New(t)
 	original := &authn.AuthenticationSession{
 		Subject: "ab",

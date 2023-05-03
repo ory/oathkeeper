@@ -1,3 +1,6 @@
+// Copyright © 2023 Ory Corp
+// SPDX-License-Identifier: Apache-2.0
+
 package authn_test
 
 import (
@@ -5,7 +8,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -22,6 +24,7 @@ import (
 )
 
 func TestAuthenticatorCookieSession(t *testing.T) {
+	t.Parallel()
 	conf := internal.NewConfigurationWithDefaults()
 	reg := internal.NewRegistry(conf)
 	session := new(AuthenticationSession)
@@ -31,7 +34,7 @@ func TestAuthenticatorCookieSession(t *testing.T) {
 
 	t.Run("method=authenticate", func(t *testing.T) {
 		t.Run("description=should fail because session store returned 400", func(t *testing.T) {
-			testServer, _ := makeServer(400, `{}`)
+			testServer, _ := makeServer(t, 400, `{}`)
 			err := pipelineAuthenticator.Authenticate(
 				makeRequest("GET", "/", "", map[string]string{"sessionid": "zyx"}, ""),
 				session,
@@ -42,7 +45,7 @@ func TestAuthenticatorCookieSession(t *testing.T) {
 		})
 
 		t.Run("description=should pass because session store returned 200", func(t *testing.T) {
-			testServer, _ := makeServer(200, `{"subject": "123", "extra": {"foo": "bar"}}`)
+			testServer, _ := makeServer(t, 200, `{"subject": "123", "extra": {"foo": "bar"}}`)
 			err := pipelineAuthenticator.Authenticate(
 				makeRequest("GET", "/", "", map[string]string{"sessionid": "zyx"}, ""),
 				session,
@@ -57,25 +60,26 @@ func TestAuthenticatorCookieSession(t *testing.T) {
 		})
 
 		t.Run("description=should pass through method, path, and headers to auth server", func(t *testing.T) {
-			testServer, requestRecorder := makeServer(200, `{"subject": "123"}`)
+
+			testServer, requestRecorder := makeServer(t, 200, `{"subject": "123"}`)
 			err := pipelineAuthenticator.Authenticate(
 				makeRequest("PUT", "/users/123", "query=string", map[string]string{"sessionid": "zyx"}, ""),
 				session,
-				json.RawMessage(fmt.Sprintf(`{"check_session_url": "%s"}`, testServer.URL)),
+				json.RawMessage(fmt.Sprintf(`{"check_session_url": "%s", "preserve_query": false}`, testServer.URL)),
 				nil,
 			)
 			require.NoError(t, err, "%#v", errors.Cause(err))
 			assert.Len(t, requestRecorder.requests, 1)
 			r := requestRecorder.requests[0]
-			assert.Equal(t, r.Method, "PUT")
-			assert.Equal(t, r.URL.Path, "/users/123")
-			assert.Equal(t, r.URL.RawQuery, "query=string")
-			assert.Equal(t, r.Header.Get("Cookie"), "sessionid=zyx")
+			assert.Equal(t, "PUT", r.Method)
+			assert.Equal(t, "/users/123", r.URL.Path)
+			assert.Equal(t, "query=string", r.URL.RawQuery)
+			assert.Equal(t, "sessionid=zyx", r.Header.Get("Cookie"))
 			assert.Equal(t, &AuthenticationSession{Subject: "123"}, session)
 		})
 
 		t.Run("description=should pass through method and headers ONLY to auth server when PreservePath and PreserveQuery are true", func(t *testing.T) {
-			testServer, requestRecorder := makeServer(200, `{"subject": "123"}`)
+			testServer, requestRecorder := makeServer(t, 200, `{"subject": "123"}`)
 			err := pipelineAuthenticator.Authenticate(
 				makeRequest("PUT", "/users/123", "query=string", map[string]string{"sessionid": "zyx"}, ""),
 				session,
@@ -93,7 +97,7 @@ func TestAuthenticatorCookieSession(t *testing.T) {
 		})
 
 		t.Run("should preserve path, query in check_session_url when preserve_path, preserve_query are true", func(t *testing.T) {
-			testServer, requestRecorder := makeServer(200, `{"subject": "123"}`)
+			testServer, requestRecorder := makeServer(t, 200, `{"subject": "123"}`)
 			err := pipelineAuthenticator.Authenticate(
 				makeRequest("PUT", "/client/request/path", "q=client-request-query", map[string]string{"sessionid": "zyx"}, ""),
 				session,
@@ -111,7 +115,7 @@ func TestAuthenticatorCookieSession(t *testing.T) {
 		})
 
 		t.Run("should override method", func(t *testing.T) {
-			testServer, requestRecorder := makeServer(200, `{"subject": "123"}`)
+			testServer, requestRecorder := makeServer(t, 200, `{"subject": "123"}`)
 			err := pipelineAuthenticator.Authenticate(
 				makeRequest("PUT", "/client/request/path", "q=client-request-query", map[string]string{"sessionid": "zyx"}, ""),
 				session,
@@ -125,7 +129,7 @@ func TestAuthenticatorCookieSession(t *testing.T) {
 		})
 
 		t.Run("description=should pass through x-forwarded-host if preserve_host is set to true", func(t *testing.T) {
-			testServer, requestRecorder := makeServer(200, `{"subject": "123"}`)
+			testServer, requestRecorder := makeServer(t, 200, `{"subject": "123"}`)
 			req := makeRequest("PUT", "/users/123", "query=string", map[string]string{"sessionid": "zyx"}, "")
 			expectedHost := "some-host"
 			req.Host = expectedHost
@@ -146,7 +150,7 @@ func TestAuthenticatorCookieSession(t *testing.T) {
 		})
 
 		t.Run("description=should pass not override x-forwarded-host in set_headers", func(t *testing.T) {
-			testServer, requestRecorder := makeServer(200, `{"subject": "123"}`)
+			testServer, requestRecorder := makeServer(t, 200, `{"subject": "123"}`)
 			req := makeRequest("PUT", "/users/123", "query=string", map[string]string{"sessionid": "zyx"}, "")
 			expectedHost := "some-host"
 			req.Host = expectedHost
@@ -169,7 +173,7 @@ func TestAuthenticatorCookieSession(t *testing.T) {
 		})
 
 		t.Run("description=does not pass request body through to auth server", func(t *testing.T) {
-			testServer, requestRecorder := makeServer(200, `{}`)
+			testServer, requestRecorder := makeServer(t, 200, `{}`)
 			pipelineAuthenticator.Authenticate(
 				makeRequest("POST", "/", "", map[string]string{"sessionid": "zyx"}, "Some body..."),
 				session,
@@ -184,7 +188,7 @@ func TestAuthenticatorCookieSession(t *testing.T) {
 		})
 
 		t.Run("description=should fallthrough if only is specified and no cookie specified is set", func(t *testing.T) {
-			testServer, requestRecorder := makeServer(200, `{}`)
+			testServer, requestRecorder := makeServer(t, 200, `{}`)
 			err := pipelineAuthenticator.Authenticate(
 				makeRequest("GET", "/", "", map[string]string{"sessionid": "zyx"}, ""),
 				session,
@@ -196,7 +200,7 @@ func TestAuthenticatorCookieSession(t *testing.T) {
 		})
 
 		t.Run("description=should fallthrough if is missing and it has no cookies", func(t *testing.T) {
-			testServer, requestRecorder := makeServer(200, `{}`)
+			testServer, requestRecorder := makeServer(t, 200, `{}`)
 			err := pipelineAuthenticator.Authenticate(
 				makeRequest("GET", "/", "", map[string]string{}, ""),
 				session,
@@ -208,7 +212,7 @@ func TestAuthenticatorCookieSession(t *testing.T) {
 		})
 
 		t.Run("description=should not fallthrough if only is specified and cookie specified is set", func(t *testing.T) {
-			testServer, _ := makeServer(200, `{}`)
+			testServer, _ := makeServer(t, 200, `{}`)
 			err := pipelineAuthenticator.Authenticate(
 				makeRequest("GET", "/", "", map[string]string{"sid": "zyx"}, ""),
 				session,
@@ -219,7 +223,7 @@ func TestAuthenticatorCookieSession(t *testing.T) {
 		})
 
 		t.Run("description=should work with nested extra keys", func(t *testing.T) {
-			testServer, _ := makeServer(200, `{"subject": "123", "session": {"foo": "bar"}}`)
+			testServer, _ := makeServer(t, 200, `{"subject": "123", "session": {"foo": "bar"}}`)
 			err := pipelineAuthenticator.Authenticate(
 				makeRequest("GET", "/", "", map[string]string{"sessionid": "zyx"}, ""),
 				session,
@@ -234,7 +238,7 @@ func TestAuthenticatorCookieSession(t *testing.T) {
 		})
 
 		t.Run("description=should work with the root key for extra and a custom subject key", func(t *testing.T) {
-			testServer, _ := makeServer(200, `{"identity": {"id": "123"}, "session": {"foo": "bar"}}`)
+			testServer, _ := makeServer(t, 200, `{"identity": {"id": "123"}, "session": {"foo": "bar"}}`)
 			err := pipelineAuthenticator.Authenticate(
 				makeRequest("GET", "/", "", map[string]string{"sessionid": "zyx"}, ""),
 				session,
@@ -251,7 +255,7 @@ func TestAuthenticatorCookieSession(t *testing.T) {
 			requestRecorder := &RequestRecorder{}
 			testServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				requestRecorder.requests = append(requestRecorder.requests, r)
-				requestBody, _ := ioutil.ReadAll(r.Body)
+				requestBody, _ := io.ReadAll(r.Body)
 				requestRecorder.bodies = append(requestRecorder.bodies, requestBody)
 				if r.Header.Get("X-User") == "" {
 					w.WriteHeader(http.StatusBadRequest)
@@ -332,15 +336,16 @@ type RequestRecorder struct {
 	bodies   [][]byte
 }
 
-func makeServer(statusCode int, responseBody string) (*httptest.Server, *RequestRecorder) {
+func makeServer(t *testing.T, statusCode int, responseBody string) (*httptest.Server, *RequestRecorder) {
 	requestRecorder := &RequestRecorder{}
 	testServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		requestRecorder.requests = append(requestRecorder.requests, r)
-		requestBody, _ := ioutil.ReadAll(r.Body)
+		requestBody, _ := io.ReadAll(r.Body)
 		requestRecorder.bodies = append(requestRecorder.bodies, requestBody)
 		w.WriteHeader(statusCode)
 		w.Write([]byte(responseBody))
 	}))
+	t.Cleanup(testServer.Close)
 	return testServer, requestRecorder
 }
 
@@ -348,7 +353,7 @@ func makeRequest(method string, path string, rawQuery string, cookies map[string
 	var body io.ReadCloser
 	header := http.Header{}
 	if bodyStr != "" {
-		body = ioutil.NopCloser(bytes.NewBufferString(bodyStr))
+		body = io.NopCloser(bytes.NewBufferString(bodyStr))
 		header.Add("Content-Length", strconv.Itoa(len(bodyStr)))
 	}
 	req := &http.Request{

@@ -1,22 +1,5 @@
-/*
- * Copyright © 2017-2018 Aeneas Rekkas <aeneas+oss@aeneas.io>
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *
- * @author       Aeneas Rekkas <aeneas+oss@aeneas.io>
- * @copyright  2017-2018 Aeneas Rekkas <aeneas+oss@aeneas.io>
- * @license  	   Apache-2.0
- */
+// Copyright © 2023 Ory Corp
+// SPDX-License-Identifier: Apache-2.0
 
 package rule_test
 
@@ -24,8 +7,6 @@ import (
 	"fmt"
 	"strings"
 	"testing"
-
-	"github.com/ory/viper"
 
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/internal"
@@ -39,16 +20,16 @@ import (
 )
 
 func TestValidateRule(t *testing.T) {
-	var prep = func(an, az, m bool) func() {
-		return func() {
-			viper.Set(configuration.ViperKeyAuthenticatorNoopIsEnabled, an)
-			viper.Set(configuration.ViperKeyAuthorizerAllowIsEnabled, az)
-			viper.Set(configuration.ViperKeyMutatorNoopIsEnabled, m)
+	var prep = func(an, az, m bool) func(*testing.T, configuration.Provider) {
+		return func(t *testing.T, config configuration.Provider) {
+			config.SetForTest(t, configuration.AuthenticatorNoopIsEnabled, an)
+			config.SetForTest(t, configuration.AuthorizerAllowIsEnabled, az)
+			config.SetForTest(t, configuration.MutatorNoopIsEnabled, m)
 		}
 	}
 
 	for k, tc := range []struct {
-		setup     func()
+		setup     func(*testing.T, configuration.Provider)
 		r         *Rule
 		expectErr string
 	}{
@@ -170,7 +151,7 @@ func TestValidateRule(t *testing.T) {
 		t.Run(fmt.Sprintf("case=%d", k), func(t *testing.T) {
 			conf := internal.NewConfigurationWithDefaults()
 			if tc.setup != nil {
-				tc.setup()
+				tc.setup(t, conf)
 			}
 
 			r := internal.NewRegistry(conf)

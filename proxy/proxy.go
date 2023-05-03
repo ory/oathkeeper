@@ -1,29 +1,13 @@
-/*
- * Copyright © 2017-2018 Aeneas Rekkas <aeneas+oss@aeneas.io>
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *
- * @author       Aeneas Rekkas <aeneas+oss@aeneas.io>
- * @copyright  2017-2018 Aeneas Rekkas <aeneas+oss@aeneas.io>
- * @license  	   Apache-2.0
- */
+// Copyright © 2023 Ory Corp
+// SPDX-License-Identifier: Apache-2.0
 
 package proxy
 
 import (
 	"context"
-	"io/ioutil"
+	"io"
 	"net/http"
+	"net/http/httputil"
 	"net/url"
 	"strings"
 
@@ -84,7 +68,7 @@ func (d *Proxy) RoundTrip(r *http.Request) (*http.Response, error) {
 
 		return &http.Response{
 			StatusCode: rw.code,
-			Body:       ioutil.NopCloser(rw.buffer),
+			Body:       io.NopCloser(rw.buffer),
 			Header:     rw.header,
 		}, nil
 	} else if err == nil {
@@ -100,7 +84,7 @@ func (d *Proxy) RoundTrip(r *http.Request) (*http.Response, error) {
 			d.r.Logger().
 				WithField("granted", true).
 				WithFields(fields).
-				Warn("Access request granted")
+				Info("Access request granted")
 		}
 
 		return res, err
@@ -113,44 +97,40 @@ func (d *Proxy) RoundTrip(r *http.Request) (*http.Response, error) {
 		WithFields(fields).
 		Warn("Unable to type assert context")
 
-	// add tracing
-	closeSpan := x.TraceRequest(r.Context(), r)
-	defer closeSpan()
-
 	d.r.ProxyRequestHandler().HandleError(rw, r, rl, err)
 
 	return &http.Response{
 		StatusCode: rw.code,
-		Body:       ioutil.NopCloser(rw.buffer),
+		Body:       io.NopCloser(rw.buffer),
 		Header:     rw.header,
 	}, nil
 }
 
-func (d *Proxy) Director(r *http.Request) {
+func (d *Proxy) Rewrite(r *httputil.ProxyRequest) {
 	EnrichRequestedURL(r)
-	rl, err := d.r.RuleMatcher().Match(r.Context(), r.Method, r.URL, r.Header)
+	rl, err := d.r.RuleMatcher().Match(r.Out.Context(), r.Out.Method, r.Out.URL, r.Header, rule.ProtocolHTTP)
 	if err != nil {
-		*r = *r.WithContext(context.WithValue(r.Context(), director, err))
+		*r.Out = *r.Out.WithContext(context.WithValue(r.Out.Context(), director, err))
 		return
 	}
 
-	*r = *r.WithContext(context.WithValue(r.Context(), ContextKeyMatchedRule, rl))
-	s, err := d.r.ProxyRequestHandler().HandleRequest(r, rl)
+	*r.Out = *r.Out.WithContext(context.WithValue(r.Out.Context(), ContextKeyMatchedRule, rl))
+	s, err := d.r.ProxyRequestHandler().HandleRequest(r.Out, rl)
 	if err != nil {
-		*r = *r.WithContext(context.WithValue(r.Context(), director, err))
+		*r.Out = *r.Out.WithContext(context.WithValue(r.Out.Context(), director, err))
 		return
 	}
-	*r = *r.WithContext(context.WithValue(r.Context(), ContextKeySession, s))
+	*r.Out = *r.Out.WithContext(context.WithValue(r.Out.Context(), ContextKeySession, s))
 
-	CopyHeaders(s.Header, r)
+	CopyHeaders(s.Header, r.Out)
 
-	if err := ConfigureBackendURL(r, rl); err != nil {
-		*r = *r.WithContext(context.WithValue(r.Context(), director, err))
+	if err := ConfigureBackendURL(r.Out, rl); err != nil {
+		*r.Out = *r.Out.WithContext(context.WithValue(r.Out.Context(), director, err))
 		return
 	}
 
 	var en error // need to set it to error but with nil value
-	*r = *r.WithContext(context.WithValue(r.Context(), director, en))
+	*r.Out = *r.Out.WithContext(context.WithValue(r.Out.Context(), director, en))
 }
 
 func CopyHeaders(headers http.Header, r *http.Request) {
@@ -170,11 +150,11 @@ func CopyHeaders(headers http.Header, r *http.Request) {
 
 // EnrichRequestedURL sets Scheme and Host values in a URL passed down by a http server. Per default, the URL
 // does not contain host nor scheme values.
-func EnrichRequestedURL(r *http.Request) {
-	r.URL.Scheme = "http"
-	r.URL.Host = r.Host
-	if r.TLS != nil || strings.EqualFold(r.Header.Get("X-Forwarded-Proto"), "https") {
-		r.URL.Scheme = "https"
+func EnrichRequestedURL(r *httputil.ProxyRequest) {
+	r.Out.URL.Scheme = "http"
+	r.Out.URL.Host = r.In.Host
+	if r.In.TLS != nil || strings.EqualFold(r.In.Header.Get("X-Forwarded-Proto"), "https") {
+		r.Out.URL.Scheme = "https"
 	}
 }
 

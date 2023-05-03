@@ -1,3 +1,6 @@
+// Copyright © 2023 Ory Corp
+// SPDX-License-Identifier: Apache-2.0
+
 package authz
 
 import (
@@ -12,6 +15,9 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/ory/x/httpx"
+	"github.com/ory/x/otelx"
+
+	"go.opentelemetry.io/otel/trace"
 
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/helper"
@@ -39,14 +45,16 @@ type AuthorizerRemote struct {
 
 	client *http.Client
 	t      *template.Template
+	tracer trace.Tracer
 }
 
 // NewAuthorizerRemote creates a new AuthorizerRemote.
-func NewAuthorizerRemote(c configuration.Provider) *AuthorizerRemote {
+func NewAuthorizerRemote(c configuration.Provider, d interface{ Tracer() trace.Tracer }) *AuthorizerRemote {
 	return &AuthorizerRemote{
 		c:      c,
-		client: httpx.NewResilientClientLatencyToleranceSmall(nil),
+		client: httpx.NewResilientClient(httpx.ResilientClientWithTracer(d.Tracer())).StandardClient(),
 		t:      x.NewTemplate("remote"),
+		tracer: d.Tracer(),
 	}
 }
 
@@ -56,7 +64,11 @@ func (a *AuthorizerRemote) GetID() string {
 }
 
 // Authorize implements the Authorizer interface.
-func (a *AuthorizerRemote) Authorize(r *http.Request, session *authn.AuthenticationSession, config json.RawMessage, rl pipeline.Rule) error {
+func (a *AuthorizerRemote) Authorize(r *http.Request, session *authn.AuthenticationSession, config json.RawMessage, rl pipeline.Rule) (err error) {
+	ctx, span := a.tracer.Start(r.Context(), "authz.remote")
+	defer otelx.End(span, &err)
+	r = r.WithContext(ctx)
+
 	c, err := a.Config(config)
 	if err != nil {
 		return err
@@ -105,6 +117,7 @@ func (a *AuthorizerRemote) Authorize(r *http.Request, session *authn.Authenticat
 	}
 
 	res, err := a.client.Do(req.WithContext(r.Context()))
+
 	if err != nil {
 		return errors.WithStack(err)
 	}
@@ -165,7 +178,11 @@ func (a *AuthorizerRemote) Config(config json.RawMessage) (*AuthorizerRemoteConf
 		return nil, err
 	}
 	timeout := time.Millisecond * duration
-	a.client = httpx.NewResilientClientLatencyToleranceConfigurable(nil, timeout, maxWait)
+	a.client = httpx.NewResilientClient(
+		httpx.ResilientClientWithMaxRetryWait(maxWait),
+		httpx.ResilientClientWithConnectionTimeout(timeout),
+		httpx.ResilientClientWithTracer(a.tracer),
+	).StandardClient()
 
 	return &c, nil
 }

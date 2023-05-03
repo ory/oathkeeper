@@ -1,30 +1,14 @@
-/*
- * Copyright © 2017-2018 Aeneas Rekkas <aeneas+oss@aeneas.io>
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *
- * @author       Aeneas Rekkas <aeneas+oss@aeneas.io>
- * @copyright  2017-2018 Aeneas Rekkas <aeneas+oss@aeneas.io>
- * @license  	   Apache-2.0
- */
+// Copyright © 2023 Ory Corp
+// SPDX-License-Identifier: Apache-2.0
 
 package proxy_test
 
 import (
 	"context"
 	"crypto/tls"
+	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"net/http/httputil"
@@ -32,17 +16,14 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/ory/viper"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/internal"
 	"github.com/ory/oathkeeper/proxy"
-	"github.com/ory/oathkeeper/x"
-
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
-
 	"github.com/ory/oathkeeper/rule"
+	"github.com/ory/oathkeeper/x"
 )
 
 func TestProxy(t *testing.T) {
@@ -50,7 +31,10 @@ func TestProxy(t *testing.T) {
 		// assert.NotEmpty(t, helper.BearerTokenFromRequest(r))
 		fmt.Fprint(w, "authorization="+r.Header.Get("Authorization")+"\n")
 		fmt.Fprint(w, "host="+r.Host+"\n")
-		fmt.Fprint(w, "url="+r.URL.String())
+		fmt.Fprint(w, "url="+r.URL.String()+"\n")
+		for k, v := range r.Header {
+			fmt.Fprint(w, "header "+k+"="+strings.Join(v, ",")+"\n")
+		}
 	}))
 	defer backend.Close()
 
@@ -58,16 +42,18 @@ func TestProxy(t *testing.T) {
 	reg := internal.NewRegistry(conf).WithBrokenPipelineMutator()
 
 	d := reg.Proxy()
-	ts := httptest.NewServer(&httputil.ReverseProxy{Director: d.Director, Transport: d})
+	ts := httptest.NewServer(&httputil.ReverseProxy{Rewrite: d.Rewrite, Transport: d})
 	defer ts.Close()
 
-	viper.Set(configuration.ViperKeyAuthenticatorNoopIsEnabled, true)
-	viper.Set(configuration.ViperKeyAuthenticatorUnauthorizedIsEnabled, true)
-	viper.Set(configuration.ViperKeyAuthenticatorAnonymousIsEnabled, true)
-	viper.Set(configuration.ViperKeyAuthorizerAllowIsEnabled, true)
-	viper.Set(configuration.ViperKeyAuthorizerDenyIsEnabled, true)
-	viper.Set(configuration.ViperKeyMutatorNoopIsEnabled, true)
-	viper.Set(configuration.ViperKeyErrorsWWWAuthenticateIsEnabled, true)
+	conf.SetForTest(t, configuration.AuthenticatorNoopIsEnabled, true)
+	conf.SetForTest(t, configuration.AuthenticatorUnauthorizedIsEnabled, true)
+	conf.SetForTest(t, configuration.AuthenticatorAnonymousIsEnabled, true)
+	conf.SetForTest(t, configuration.AuthorizerAllowIsEnabled, true)
+	conf.SetForTest(t, configuration.AuthorizerDenyIsEnabled, true)
+	conf.SetForTest(t, configuration.MutatorNoopIsEnabled, true)
+	conf.SetForTest(t, "mutators.header.config", map[string]interface{}{"headers": map[string]string{}})
+	conf.SetForTest(t, configuration.MutatorHeaderIsEnabled, true)
+	conf.SetForTest(t, configuration.ErrorsWWWAuthenticateIsEnabled, true)
 
 	ruleNoOpAuthenticator := rule.Rule{
 		Match:          &rule.Match{Methods: []string{"GET"}, URL: ts.URL + "/authn-noop/<[0-9]+>"},
@@ -103,7 +89,7 @@ func TestProxy(t *testing.T) {
 	// acceptRuleStripHostWithoutTrailing2 := rule.Rule{MatchesMethods: []string{"GET"}, MatchesURLCompiled: mustCompileRegex(t, proxy.URL+"/users/<[0-9]+>"), Mode: "pass_through_accept", Upstream: rule.Upstream{URLParsed: u, StripPath: "users", PreserveHost: true}}
 	// denyRule := rule.Rule{MatchesMethods: []string{"GET"}, MatchesURLCompiled: mustCompileRegex(t, proxy.URL+"/users/<[0-9]+>"), Mode: "pass_through_deny", Upstream: rule.Upstream{URLParsed: u}}
 
-	for k, tc := range []struct {
+	for _, tc := range []struct {
 		url         string
 		code        int
 		messages    []string
@@ -325,9 +311,34 @@ func TestProxy(t *testing.T) {
 			}},
 			code: http.StatusInternalServerError,
 		},
+		{
+			d:   "should not remove headers set by the mutator that are defined in the connection header",
+			url: ts.URL + "/",
+			rulesRegexp: []rule.Rule{{
+				Match:          &rule.Match{Methods: []string{"GET"}, URL: ts.URL + "/"},
+				Authenticators: []rule.Handler{{Handler: "noop"}},
+				Authorizer:     rule.Handler{Handler: "allow"},
+				Mutators:       []rule.Handler{{Handler: "header", Config: json.RawMessage(`{"headers":{"X-Arbitrary":"foo"}}`)}},
+				Upstream:       rule.Upstream{URL: backend.URL},
+			}},
+			rulesGlob: []rule.Rule{{
+				Match:          &rule.Match{Methods: []string{"GET"}, URL: ts.URL + "/"},
+				Authenticators: []rule.Handler{{Handler: "noop"}},
+				Authorizer:     rule.Handler{Handler: "allow"},
+				Mutators:       []rule.Handler{{Handler: "header", Config: json.RawMessage(`{"headers":{"X-Arbitrary":"foo"}}`)}},
+				Upstream:       rule.Upstream{URL: backend.URL},
+			}},
+			code: http.StatusOK,
+			messages: []string{
+				"header X-Arbitrary=foo",
+			},
+			transform: func(r *http.Request) {
+				r.Header.Set("Connection", "x-arbitrary")
+			},
+		},
 	} {
-		t.Run(fmt.Sprintf("case=%d/description=%s", k, tc.d), func(t *testing.T) {
-			testFunc := func(strategy configuration.MatchingStrategy, rules []rule.Rule) {
+		t.Run(fmt.Sprintf("description=%s", tc.d), func(t *testing.T) {
+			testFunc := func(t *testing.T, strategy configuration.MatchingStrategy, rules []rule.Rule) {
 				reg.RuleRepository().(*rule.RepositoryMemory).WithRules(rules)
 				require.NoError(t, reg.RuleRepository().SetMatchingStrategy(context.Background(), strategy))
 
@@ -340,7 +351,7 @@ func TestProxy(t *testing.T) {
 				res, err := http.DefaultClient.Do(req)
 				require.NoError(t, err)
 
-				greeting, err := ioutil.ReadAll(res.Body)
+				greeting, err := io.ReadAll(res.Body)
 				require.NoError(t, res.Body.Close())
 				require.NoError(t, err)
 
@@ -356,10 +367,10 @@ backend_url=%s
 			}
 
 			t.Run("regexp", func(t *testing.T) {
-				testFunc(configuration.Regexp, tc.rulesRegexp)
+				testFunc(t, configuration.Regexp, tc.rulesRegexp)
 			})
 			t.Run("glob", func(t *testing.T) {
-				testFunc(configuration.Glob, tc.rulesGlob)
+				testFunc(t, configuration.Glob, tc.rulesGlob)
 			})
 
 		})
@@ -432,25 +443,34 @@ func TestConfigureBackendURL(t *testing.T) {
 
 func TestEnrichRequestedURL(t *testing.T) {
 	for k, tc := range []struct {
-		in     *http.Request
+		req    *httputil.ProxyRequest
 		expect url.URL
 	}{
 		{
-			in:     &http.Request{Host: "test", TLS: &tls.ConnectionState{}, URL: new(url.URL)},
+			req: &httputil.ProxyRequest{
+				In:  &http.Request{Host: "test", TLS: &tls.ConnectionState{}, URL: new(url.URL)},
+				Out: &http.Request{Host: "test", TLS: &tls.ConnectionState{}, URL: new(url.URL)},
+			},
 			expect: url.URL{Scheme: "https", Host: "test"},
 		},
 		{
-			in:     &http.Request{Host: "test", URL: new(url.URL)},
+			req: &httputil.ProxyRequest{
+				In:  &http.Request{Host: "test", URL: new(url.URL)},
+				Out: &http.Request{Host: "test", URL: new(url.URL)},
+			},
 			expect: url.URL{Scheme: "http", Host: "test"},
 		},
 		{
-			in:     &http.Request{Host: "test", Header: http.Header{"X-Forwarded-Proto": {"https"}}, URL: new(url.URL)},
+			req: &httputil.ProxyRequest{
+				In:  &http.Request{Host: "test", Header: http.Header{"X-Forwarded-Proto": {"https"}}, URL: new(url.URL)},
+				Out: &http.Request{Host: "test", URL: new(url.URL)},
+			},
 			expect: url.URL{Scheme: "https", Host: "test"},
 		},
 	} {
 		t.Run(fmt.Sprintf("case=%d", k), func(t *testing.T) {
-			proxy.EnrichRequestedURL(tc.in)
-			assert.EqualValues(t, tc.expect, *tc.in.URL)
+			proxy.EnrichRequestedURL(tc.req)
+			assert.EqualValues(t, tc.expect, *tc.req.Out.URL)
 		})
 	}
 }

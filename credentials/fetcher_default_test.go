@@ -1,3 +1,6 @@
+// Copyright © 2023 Ory Corp
+// SPDX-License-Identifier: Apache-2.0
+
 package credentials
 
 import (
@@ -13,8 +16,9 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/ory/oathkeeper/x"
 	"github.com/ory/x/logrusx"
+
+	"github.com/ory/oathkeeper/x"
 
 	"github.com/ory/herodot"
 	"github.com/ory/x/urlx"
@@ -30,16 +34,14 @@ var sets = [...]json.RawMessage{
 }
 
 func TestFetcherDefault(t *testing.T) {
+	t.Parallel()
+
 	const maxWait = time.Millisecond * 100
 	const JWKsTTL = maxWait * 7
 	const timeoutServerDelay = maxWait * 2
 
-	t.Cleanup(func() {
-		cloudstorage.SetCurrentTest(nil)
-	})
-
 	l := logrusx.New("", "", logrusx.ForceLevel(logrus.DebugLevel))
-	w := herodot.NewJSONWriter(l.Logger)
+	w := herodot.NewJSONWriter(l)
 	s := NewFetcherDefault(l, maxWait, JWKsTTL)
 
 	timeOutServer := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
@@ -59,7 +61,7 @@ func TestFetcherDefault(t *testing.T) {
 	}))
 	defer fastServer.Close()
 
-	invalidServer := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
+	invalidServer := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, _ *http.Request) {
 		rw.Header().Set("Content-Type", "application/json")
 		rw.Write(sets[3])
 	}))
@@ -108,21 +110,23 @@ func TestFetcherDefault(t *testing.T) {
 	})
 
 	t.Run("name=should find the key even if the upstream server is no longer active", func(t *testing.T) {
+		t.Parallel()
 		fastServer.Close()
 		key, err := s.ResolveKey(context.Background(), uris, "392e1a6b-6ae1-48b8-bea3-2fe09447805c", "sig")
 		require.NoError(t, err)
 		assert.Equal(t, "392e1a6b-6ae1-48b8-bea3-2fe09447805c", key.KeyID)
-	})
 
-	time.Sleep(maxWait)
+		t.Run("name=should no longer find the key if the remote does not find it", func(t *testing.T) {
+			time.Sleep(maxWait)
 
-	t.Run("name=should no longer find the key if the remote does not find it", func(t *testing.T) {
-		key, err := s.ResolveKey(context.Background(), uris, "392e1a6b-6ae1-48b8-bea3-2fe09447805c", "sig")
-		require.NoError(t, err)
-		assert.Equal(t, "392e1a6b-6ae1-48b8-bea3-2fe09447805c", key.KeyID)
+			key, err := s.ResolveKey(context.Background(), uris, "392e1a6b-6ae1-48b8-bea3-2fe09447805c", "sig")
+			require.NoError(t, err)
+			assert.Equal(t, "392e1a6b-6ae1-48b8-bea3-2fe09447805c", key.KeyID)
+		})
 	})
 
 	t.Run("name=should fetch keys from the file system", func(t *testing.T) {
+		t.Parallel()
 		key, err := s.ResolveKey(context.Background(), uris, "81be3441-5303-4c52-b00d-bbdfadc75633", "sig")
 		require.NoError(t, err)
 		assert.Equal(t, "81be3441-5303-4c52-b00d-bbdfadc75633", key.KeyID)
@@ -171,10 +175,9 @@ func TestFetcherDefault(t *testing.T) {
 	})
 
 	t.Run("name=should fetch from s3 object storage", func(t *testing.T) {
+		t.Parallel()
 		ctx := context.Background()
-		cloudstorage.SetCurrentTest(t)
-
-		s := NewFetcherDefault(l, maxWait, JWKsTTL)
+		s := NewFetcherDefault(l, maxWait, JWKsTTL, WithURLMux(cloudstorage.NewTestURLMux(t)))
 
 		key, err := s.ResolveKey(ctx, []url.URL{
 			*urlx.ParseOrPanic("s3://oathkeeper-test-bucket/path/prefix/jwks.json"),
@@ -184,10 +187,9 @@ func TestFetcherDefault(t *testing.T) {
 	})
 
 	t.Run("name=should fetch from gs object storage", func(t *testing.T) {
+		t.Parallel()
 		ctx := context.Background()
-		cloudstorage.SetCurrentTest(t)
-
-		s := NewFetcherDefault(l, maxWait, JWKsTTL)
+		s := NewFetcherDefault(l, maxWait, JWKsTTL, WithURLMux(cloudstorage.NewTestURLMux(t)))
 
 		key, err := s.ResolveKey(ctx, []url.URL{
 			*urlx.ParseOrPanic("gs://oathkeeper-test-bucket/path/prefix/jwks.json"),
@@ -197,10 +199,9 @@ func TestFetcherDefault(t *testing.T) {
 	})
 
 	t.Run("name=should fetch from azure object storage", func(t *testing.T) {
+		t.Parallel()
 		ctx := context.Background()
-		cloudstorage.SetCurrentTest(t)
-
-		s := NewFetcherDefault(l, maxWait, JWKsTTL)
+		s := NewFetcherDefault(l, maxWait, JWKsTTL, WithURLMux(cloudstorage.NewTestURLMux(t)))
 
 		jwkKey, err := s.ResolveKey(ctx, []url.URL{
 			*urlx.ParseOrPanic("azblob://path/prefix/jwks.json"),

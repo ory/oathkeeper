@@ -1,3 +1,6 @@
+// Copyright © 2023 Ory Corp
+// SPDX-License-Identifier: Apache-2.0
+
 package cloudstorage
 
 import (
@@ -29,88 +32,82 @@ import (
 	"github.com/Azure/azure-storage-blob-go/azblob"
 )
 
-var currentTest *testing.T = nil
+func NewTestURLMux(t *testing.T) *blob.URLMux {
+	ctx := context.Background()
+	mux := new(blob.URLMux)
 
-func SetCurrentTest(t *testing.T) {
-	currentTest = t
+	// Prepare S3 client
+	awsErr, awsSession, awsDone := NewAWSSession(t, "us-west-1")
+
+	if nil == awsErr {
+		s3UrlOpener := new(s3blob.URLOpener)
+		s3UrlOpener.ConfigProvider = awsSession
+
+		mux.RegisterBucket(s3blob.Scheme, s3UrlOpener)
+	}
+
+	// Prepare GCS client
+	gcpError, gcpClient, gcpDone := NewGCPClient(ctx, t)
+
+	if nil == gcpError {
+		gcsUrlOpener := new(gcsblob.URLOpener)
+		gcsUrlOpener.Client = gcpClient
+
+		mux.RegisterBucket(gcsblob.Scheme, gcsUrlOpener)
+	}
+
+	// Prepare Azure client
+	accountName := azureblob.AccountName("oathkeepertestbucket")
+
+	var key azureblob.AccountKey
+	if *Record {
+		name, err := azureblob.DefaultAccountName()
+		if err != nil {
+			t.Fatal(err)
+		}
+		if name != accountName {
+			t.Fatalf("Please update the accountName constant to match your settings file so future records work (%q vs %q)", name, accountName)
+		}
+		key, err = azureblob.DefaultAccountKey()
+		if err != nil {
+			t.Fatal(err)
+		}
+	} else {
+		// In replay mode, we use fake credentials.
+		key = azureblob.AccountKey(base64.StdEncoding.EncodeToString([]byte("FAKECREDS")))
+	}
+
+	credential, err := azureblob.NewCredential(accountName, key)
+	if err != nil {
+		require.NoError(t, err)
+	}
+
+	azureError, azureClient, azureDone := NewAzureTestPipeline(t, "blob", credential)
+	if nil == azureError {
+		azureUrlOpener := new(azureblob.URLOpener)
+		azureUrlOpener.Pipeline = azureClient
+		azureUrlOpener.AccountName = accountName
+
+		mux.RegisterBucket(azureblob.Scheme, azureUrlOpener)
+	}
+
+	t.Cleanup(func() {
+		if nil != awsDone {
+			awsDone()
+		}
+		if nil != gcpDone {
+			gcpDone()
+		}
+		if nil != azureDone {
+			azureDone()
+		}
+	})
+
+	return mux
 }
 
 func NewURLMux() *blob.URLMux {
-	if nil == currentTest {
-		return blob.DefaultURLMux()
-	} else {
-		ctx := context.Background()
-		mux := new(blob.URLMux)
-
-		// Prepare S3 client
-		awsErr, awsSession, awsDone := NewAWSSession(currentTest, "us-west-1")
-
-		if nil == awsErr {
-			s3UrlOpener := new(s3blob.URLOpener)
-			s3UrlOpener.ConfigProvider = awsSession
-
-			mux.RegisterBucket(s3blob.Scheme, s3UrlOpener)
-		}
-
-		// Prepare GCS client
-		gcpError, gcpClient, gcpDone := NewGCPClient(ctx, currentTest)
-
-		if nil == gcpError {
-			gcsUrlOpener := new(gcsblob.URLOpener)
-			gcsUrlOpener.Client = gcpClient
-
-			mux.RegisterBucket(gcsblob.Scheme, gcsUrlOpener)
-		}
-
-		// Prepare Azure client
-		accountName := azureblob.AccountName("oathkeepertestbucket")
-
-		var key azureblob.AccountKey
-		if *Record {
-			name, err := azureblob.DefaultAccountName()
-			if err != nil {
-				currentTest.Fatal(err)
-			}
-			if name != accountName {
-				currentTest.Fatalf("Please update the accountName constant to match your settings file so future records work (%q vs %q)", name, accountName)
-			}
-			key, err = azureblob.DefaultAccountKey()
-			if err != nil {
-				currentTest.Fatal(err)
-			}
-		} else {
-			// In replay mode, we use fake credentials.
-			key = azureblob.AccountKey(base64.StdEncoding.EncodeToString([]byte("FAKECREDS")))
-		}
-
-		credential, err := azureblob.NewCredential(accountName, key)
-		if err != nil {
-			require.NoError(currentTest, err)
-		}
-
-		azureError, azureClient, azureDone := NewAzureTestPipeline(currentTest, "blob", credential)
-		if nil == azureError {
-			azureUrlOpener := new(azureblob.URLOpener)
-			azureUrlOpener.Pipeline = azureClient
-			azureUrlOpener.AccountName = accountName
-
-			mux.RegisterBucket(azureblob.Scheme, azureUrlOpener)
-		}
-
-		currentTest.Cleanup(func() {
-			if nil != awsDone {
-				awsDone()
-			}
-			if nil != gcpDone {
-				gcpDone()
-			}
-			if nil != azureDone {
-				azureDone()
-			}
-		})
-
-		return mux
-	}
+	return blob.DefaultURLMux()
 }
 
 // Record is true iff the tests are being run in "record" mode.

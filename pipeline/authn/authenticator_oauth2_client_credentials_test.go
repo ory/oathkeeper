@@ -1,22 +1,5 @@
-/*
- * Copyright © 2017-2018 Aeneas Rekkas <aeneas+oss@aeneas.io>
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *
- * @author       Aeneas Rekkas <aeneas+oss@aeneas.io>
- * @copyright  2017-2018 Aeneas Rekkas <aeneas+oss@aeneas.io>
- * @license  	   Apache-2.0
- */
+// Copyright © 2023 Ory Corp
+// SPDX-License-Identifier: Apache-2.0
 
 package authn_test
 
@@ -28,15 +11,13 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ory/viper"
-
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/internal"
 	"github.com/ory/oathkeeper/pipeline/authn"
+	"github.com/ory/x/configx"
 
 	"github.com/julienschmidt/httprouter"
 	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/tidwall/sjson"
@@ -53,7 +34,8 @@ func authOkDynamic(u string) *http.Request {
 }
 
 func TestAuthenticatorOAuth2ClientCredentials(t *testing.T) {
-	conf := internal.NewConfigurationWithDefaults()
+	t.Parallel()
+	conf := internal.NewConfigurationWithDefaults(configx.SkipValidation())
 	reg := internal.NewRegistry(conf)
 
 	a, err := reg.PipelineAuthenticator("oauth2_client_credentials")
@@ -70,6 +52,7 @@ func TestAuthenticatorOAuth2ClientCredentials(t *testing.T) {
 	upstreamFailure.SetBasicAuth("client", "secret")
 
 	calls := 0
+	var logger herodot.ErrorReporter = nil
 	for k, tc := range []struct {
 		d             string
 		r             *http.Request
@@ -95,7 +78,7 @@ func TestAuthenticatorOAuth2ClientCredentials(t *testing.T) {
 			token_url: "",
 			setup: func(t *testing.T, h *httprouter.Router, _ json.RawMessage) {
 				h.POST("/oauth2/token", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-					h := herodot.NewJSONWriter(logrus.New())
+					h := herodot.NewJSONWriter(logger)
 					h.WriteError(w, r, helper.ErrUnauthorized)
 				})
 			},
@@ -109,7 +92,7 @@ func TestAuthenticatorOAuth2ClientCredentials(t *testing.T) {
 			token_url:     "",
 			setup: func(t *testing.T, h *httprouter.Router, _ json.RawMessage) {
 				h.POST("/oauth2/token", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-					h := herodot.NewJSONWriter(logrus.New())
+					h := herodot.NewJSONWriter(logger)
 					h.Write(w, r, map[string]interface{}{"access_token": "foo-token", "expires_in": 3600})
 				})
 			},
@@ -126,12 +109,12 @@ func TestAuthenticatorOAuth2ClientCredentials(t *testing.T) {
 				h.POST("/oauth2/token", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 					calls++
 					if calls == 2 {
-						h := herodot.NewJSONWriter(logrus.New())
+						h := herodot.NewJSONWriter(logger)
 						h.WriteError(w, r, helper.ErrUpstreamServiceNotAvailable)
 						return
 					}
 
-					h := herodot.NewJSONWriter(logrus.New())
+					h := herodot.NewJSONWriter(logger)
 					h.Write(w, r, map[string]interface{}{"access_token": "foo-token", "expires_in": 3600})
 				})
 
@@ -153,7 +136,7 @@ func TestAuthenticatorOAuth2ClientCredentials(t *testing.T) {
 			token_url:     "",
 			setup: func(t *testing.T, h *httprouter.Router, c json.RawMessage) {
 				h.POST("/oauth2/token", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-					h := herodot.NewJSONWriter(logrus.New())
+					h := herodot.NewJSONWriter(logger)
 					h.Write(w, r, map[string]interface{}{"access_token": "foo-token", "expires_in": 1})
 				})
 
@@ -178,12 +161,12 @@ func TestAuthenticatorOAuth2ClientCredentials(t *testing.T) {
 				h.POST("/oauth2/token", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 					calls++
 					if calls == 2 {
-						h := herodot.NewJSONWriter(logrus.New())
+						h := herodot.NewJSONWriter(logger)
 						h.WriteError(w, r, helper.ErrUpstreamServiceNotAvailable)
 						return
 					}
 
-					h := herodot.NewJSONWriter(logrus.New())
+					h := herodot.NewJSONWriter(logger)
 					h.Write(w, r, map[string]interface{}{"access_token": "foo-token", "expires_in": 3600})
 				})
 
@@ -208,13 +191,13 @@ func TestAuthenticatorOAuth2ClientCredentials(t *testing.T) {
 				h.POST("/oauth2/token", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 					calls++
 					if calls == 3 {
-						h := herodot.NewJSONWriter(logrus.New())
+						h := herodot.NewJSONWriter(logger)
 						t.Errorf("expected only 2 calls to token endpoint this is number %d", calls)
 						h.WriteError(w, r, helper.ErrUpstreamServiceNotAvailable)
 						return
 					}
 
-					h := herodot.NewJSONWriter(logrus.New())
+					h := herodot.NewJSONWriter(logger)
 					h.Write(w, r, map[string]interface{}{"access_token": "foo-token", "expires_in": 3600})
 				})
 
@@ -251,13 +234,13 @@ func TestAuthenticatorOAuth2ClientCredentials(t *testing.T) {
 				h.POST("/oauth2/token", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 					calls++
 					if calls == 3 {
-						h := herodot.NewJSONWriter(logrus.New())
+						h := herodot.NewJSONWriter(logger)
 						t.Errorf("expected only 2 calls to token endpoint this is number %d", calls)
 						h.WriteError(w, r, helper.ErrUpstreamServiceNotAvailable)
 						return
 					}
 
-					h := herodot.NewJSONWriter(logrus.New())
+					h := herodot.NewJSONWriter(logger)
 					h.Write(w, r, map[string]interface{}{"access_token": "foo-token", "expires_in": 3600})
 				})
 
@@ -295,7 +278,7 @@ func TestAuthenticatorOAuth2ClientCredentials(t *testing.T) {
 			token_url: "",
 			setup: func(t *testing.T, h *httprouter.Router, _ json.RawMessage) {
 				h.POST("/oauth2/token", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-					h := herodot.NewJSONWriter(logrus.New())
+					h := herodot.NewJSONWriter(logger)
 					h.WriteError(w, r, helper.ErrUpstreamServiceNotAvailable)
 				})
 			},
@@ -308,7 +291,7 @@ func TestAuthenticatorOAuth2ClientCredentials(t *testing.T) {
 			token_url: "",
 			setup: func(t *testing.T, h *httprouter.Router, _ json.RawMessage) {
 				h.POST("/oauth2/token", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-					h := herodot.NewJSONWriter(logrus.New())
+					h := herodot.NewJSONWriter(logger)
 					h.WriteError(w, r, helper.ErrUpstreamServiceTimeout)
 				})
 			},
@@ -321,7 +304,7 @@ func TestAuthenticatorOAuth2ClientCredentials(t *testing.T) {
 			token_url: "",
 			setup: func(t *testing.T, h *httprouter.Router, _ json.RawMessage) {
 				h.POST("/oauth2/token", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-					h := herodot.NewJSONWriter(logrus.New())
+					h := herodot.NewJSONWriter(logger)
 					h.WriteError(w, r, helper.ErrUpstreamServiceInternalServerError)
 				})
 			},
@@ -334,7 +317,7 @@ func TestAuthenticatorOAuth2ClientCredentials(t *testing.T) {
 			token_url: "",
 			setup: func(t *testing.T, h *httprouter.Router, _ json.RawMessage) {
 				h.POST("/oauth2/v1/token", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-					h := herodot.NewJSONWriter(logrus.New())
+					h := herodot.NewJSONWriter(logger)
 					h.Write(w, r, map[string]interface{}{"access_token": "foo-token"})
 				})
 			},
@@ -347,7 +330,7 @@ func TestAuthenticatorOAuth2ClientCredentials(t *testing.T) {
 			token_url: "",
 			setup: func(t *testing.T, h *httprouter.Router, _ json.RawMessage) {
 				h.POST("/oauth2/token", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-					h := herodot.NewJSONWriter(logrus.New())
+					h := herodot.NewJSONWriter(logger)
 					h.WriteError(w, r, helper.ErrForbidden)
 				})
 			},
@@ -389,7 +372,7 @@ func TestAuthenticatorOAuth2ClientCredentials(t *testing.T) {
 
 	h := httprouter.New()
 	h.POST("/oauth2/token", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-		h := herodot.NewJSONWriter(logrus.New())
+		h := herodot.NewJSONWriter(logger)
 		u, p, ok := r.BasicAuth()
 		if !ok || u != "client" || p != "secret" {
 			h.WriteError(w, r, helper.ErrUnauthorized)
@@ -401,23 +384,19 @@ func TestAuthenticatorOAuth2ClientCredentials(t *testing.T) {
 	ts := httptest.NewServer(h)
 
 	t.Run("method=validate", func(t *testing.T) {
-		viper.Set(configuration.ViperKeyAuthenticatorOAuth2ClientCredentialsIsEnabled, false)
+		conf.SetForTest(t, configuration.AuthenticatorOAuth2ClientCredentialsIsEnabled, false)
 		require.Error(t, a.Validate(json.RawMessage(`{"token_url":""}`)))
 
-		viper.Reset()
-		viper.Set(configuration.ViperKeyAuthenticatorOAuth2ClientCredentialsIsEnabled, false)
+		conf.SetForTest(t, configuration.AuthenticatorOAuth2ClientCredentialsIsEnabled, false)
 		require.Error(t, a.Validate(json.RawMessage(`{"token_url":"`+ts.URL+"/oauth2/token"+`"}`)))
 
-		viper.Reset()
-		viper.Set(configuration.ViperKeyAuthenticatorOAuth2ClientCredentialsIsEnabled, true)
+		conf.SetForTest(t, configuration.AuthenticatorOAuth2ClientCredentialsIsEnabled, true)
 		require.Error(t, a.Validate(json.RawMessage(`{"token_url":""}`)))
 
-		viper.Reset()
-		viper.Set(configuration.ViperKeyAuthenticatorOAuth2ClientCredentialsIsEnabled, true)
+		conf.SetForTest(t, configuration.AuthenticatorOAuth2ClientCredentialsIsEnabled, true)
 		require.NoError(t, a.Validate(json.RawMessage(`{"token_url":"`+ts.URL+"/oauth2/token"+`"}`)))
 
-		viper.Reset()
-		viper.Set(configuration.ViperKeyAuthenticatorOAuth2ClientCredentialsIsEnabled, true)
+		conf.SetForTest(t, configuration.AuthenticatorOAuth2ClientCredentialsIsEnabled, true)
 		require.NoError(t, a.Validate(json.RawMessage(`{"token_url":"`+ts.URL+"/oauth2/token"+`","retry":{"give_up_after":"3s", "max_delay":"100ms"}}`)))
 	})
 }

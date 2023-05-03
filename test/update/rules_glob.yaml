@@ -4,3 +4,9 @@
     methods:
       - GET
       - POST
+  authenticators:
+    - handler: anonymous
+  authorizer:
+    handler: allow
+  mutators:
+    - handler: noop

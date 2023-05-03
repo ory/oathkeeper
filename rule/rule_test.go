@@ -1,26 +1,10 @@
-/*
- * Copyright © 2017-2018 Aeneas Rekkas <aeneas+oss@aeneas.io>
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *
- * @author       Aeneas Rekkas <aeneas+oss@aeneas.io>
- * @copyright  2017-2018 Aeneas Rekkas <aeneas+oss@aeneas.io>
- * @license  	   Apache-2.0
- */
+// Copyright © 2023 Ory Corp
+// SPDX-License-Identifier: Apache-2.0
 
 package rule
 
 import (
+	"encoding/json"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -88,7 +72,7 @@ func TestRule(t *testing.T) {
 	for ind, tcase := range tests {
 		t.Run(strconv.FormatInt(int64(ind), 10), func(t *testing.T) {
 			testFunc := func(rule Rule, strategy configuration.MatchingStrategy) {
-				matched, err := rule.IsMatching(strategy, tcase.method, mustParse(t, tcase.url), http.Header{})
+				matched, err := rule.IsMatching(strategy, tcase.method, mustParse(t, tcase.url), http.Header{}, ProtocolHTTP)
 				assert.Equal(t, tcase.expectedMatch, matched)
 				assert.Equal(t, tcase.expectedErr, err)
 			}
@@ -140,7 +124,7 @@ func TestRule1(t *testing.T) {
 	}
 	for ind, tcase := range tests {
 		t.Run(strconv.FormatInt(int64(ind), 10), func(t *testing.T) {
-			matched, err := r.IsMatching(configuration.Regexp, tcase.method, mustParse(t, tcase.url), http.Header{})
+			matched, err := r.IsMatching(configuration.Regexp, tcase.method, mustParse(t, tcase.url), http.Header{}, ProtocolHTTP)
 			assert.Equal(t, tcase.expectedMatch, matched)
 			assert.Equal(t, tcase.expectedErr, err)
 		})
@@ -182,7 +166,7 @@ func TestRuleWithCustomMethod(t *testing.T) {
 	}
 	for ind, tcase := range tests {
 		t.Run(strconv.FormatInt(int64(ind), 10), func(t *testing.T) {
-			matched, err := r.IsMatching(configuration.Regexp, tcase.method, mustParse(t, tcase.url), http.Header{})
+			matched, err := r.IsMatching(configuration.Regexp, tcase.method, mustParse(t, tcase.url), http.Header{}, ProtocolHTTP)
 			assert.Equal(t, tcase.expectedMatch, matched)
 			assert.Equal(t, tcase.expectedErr, err)
 		})
@@ -278,9 +262,87 @@ func TestRuleWithHeaders(t *testing.T) {
 	}
 	for ind, tcase := range tests {
 		t.Run(strconv.FormatInt(int64(ind), 10), func(t *testing.T) {
-			matched, err := r.IsMatching(configuration.Regexp, tcase.method, mustParse(t, tcase.url), tcase.headers)
+			matched, err := r.IsMatching(configuration.Regexp, tcase.method, mustParse(t, tcase.url), tcase.headers, ProtocolHTTP)
 			assert.Equal(t, tcase.expectedMatch, matched)
 			assert.Equal(t, tcase.expectedErr, err)
+		})
+	}
+}
+
+func TestRule_UnmarshalJSON(t *testing.T) {
+	var tests = []struct {
+		name     string
+		json     string
+		expected Rule
+		err      assert.ErrorAssertionFunc
+	}{
+
+		{name: "unmarshal gRPC match",
+			json: `
+{
+	"id": "123",
+	"description": "description",
+	"authorizers": "nil",
+	"match": { "authority": "example.com", "full_method": "/full/method" }
+}
+`,
+			expected: Rule{
+				ID:          "123",
+				Description: "description",
+				Match:       &MatchGRPC{Authority: "example.com", FullMethod: "/full/method"},
+			},
+			err: assert.NoError,
+		},
+
+		{name: "unmarshal HTTP match",
+			json: `
+{
+	"id": "123",
+	"description": "description",
+	"authorizers": "nil",
+	"match": { "url": "example.com/some/method", "methods": ["GET", "PUT"] }
+}
+`,
+			expected: Rule{
+				ID:          "123",
+				Description: "description",
+				Match:       &Match{Methods: []string{"GET", "PUT"}, URL: "example.com/some/method"},
+			},
+			err: assert.NoError,
+		},
+
+		{name: "err on invalid version",
+			json: `
+{
+	"id": "123",
+	"version": "42"
+}
+`,
+			err: assert.Error,
+		},
+
+		{name: "err on invalid match",
+			json: `
+{
+	"id": "123",
+	"description": "description",
+	"authorizers": "nil",
+	"match": { foo }
+}
+`,
+			err: assert.Error,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run("case="+tc.name, func(t *testing.T) {
+			var (
+				actual Rule
+				err    error
+			)
+			err = json.Unmarshal([]byte(tc.json), &actual)
+			assert.Equal(t, tc.expected, actual)
+			tc.err(t, err)
 		})
 	}
 }

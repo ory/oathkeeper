@@ -1,3 +1,6 @@
+// Copyright © 2023 Ory Corp
+// SPDX-License-Identifier: Apache-2.0
+
 package rule
 
 import (
@@ -6,51 +9,27 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"net/url"
-	"os"
-	"path"
 	"path/filepath"
-	"reflect"
 	"strings"
 	"sync"
-
-	"github.com/fsnotify/fsnotify"
-
-	"github.com/ory/x/stringslice"
-	"github.com/ory/x/urlx"
-
-	"github.com/ory/oathkeeper/internal/cloudstorage"
-
-	"github.com/ory/viper"
-	"github.com/ory/x/httpx"
-	"github.com/ory/x/viperx"
-
-	"github.com/ory/oathkeeper/driver/configuration"
-	"github.com/ory/oathkeeper/x"
+	"time"
 
 	"github.com/ghodss/yaml"
 	"github.com/pkg/errors"
-
 	"gocloud.dev/blob"
 	_ "gocloud.dev/blob/azureblob"
 	_ "gocloud.dev/blob/gcsblob"
 	_ "gocloud.dev/blob/s3blob"
-)
 
-type event struct {
-	et     eventType
-	path   url.URL
-	source string
-}
+	"github.com/ory/x/httpx"
+	"github.com/ory/x/urlx"
+	"github.com/ory/x/watcherx"
 
-type eventType int
-
-const (
-	eventRepositoryConfigChanged eventType = iota
-	eventFileChanged
-	eventMatchingStrategyChanged
+	"github.com/ory/oathkeeper/driver/configuration"
+	"github.com/ory/oathkeeper/internal/cloudstorage"
+	"github.com/ory/oathkeeper/x"
 )
 
 var _ Fetcher = new(FetcherDefault)
@@ -61,278 +40,262 @@ type fetcherRegistry interface {
 }
 
 type FetcherDefault struct {
-	c   configuration.Provider
-	r   fetcherRegistry
-	hc  *http.Client
-	mux *blob.URLMux
+	config   configuration.Provider
+	registry fetcherRegistry
+	hc       *http.Client
+	mux      *blob.URLMux
 
-	cache map[string][]Rule
-
-	directoriesBeingWatched []string
-	filesBeingWatched       []string
+	cache          map[string][]Rule
+	cancelWatchers map[string]context.CancelFunc
+	events         chan watcherx.Event
 
 	lock sync.Mutex
-	wg   sync.WaitGroup
 }
 
 func NewFetcherDefault(
-	c configuration.Provider,
-	r fetcherRegistry,
+	config configuration.Provider,
+	registry fetcherRegistry,
 ) *FetcherDefault {
 	return &FetcherDefault{
-		r:     r,
-		c:     c,
-		mux:   cloudstorage.NewURLMux(),
-		hc:    httpx.NewResilientClientLatencyToleranceHigh(nil),
-		cache: map[string][]Rule{},
+		registry:       registry,
+		config:         config,
+		mux:            cloudstorage.NewURLMux(),
+		hc:             httpx.NewResilientClient(httpx.ResilientClientWithConnectionTimeout(15 * time.Second)).StandardClient(),
+		cache:          make(map[string][]Rule),
+		cancelWatchers: make(map[string]context.CancelFunc),
+		events:         make(chan watcherx.Event),
 	}
 }
 
-func (f *FetcherDefault) configUpdate(ctx context.Context, watcher *fsnotify.Watcher, replace []url.URL, events chan event) error {
-	var directoriesToWatch []string
-	var filesBeingWatched []string
-	for _, fileToWatch := range replace {
-		if fileToWatch.Scheme == "file" || fileToWatch.Scheme == "" {
-			p := filepath.Clean(urlx.GetURLFilePath(&fileToWatch))
-			filesBeingWatched = append(filesBeingWatched, p)
-			directoryToWatch, _ := filepath.Split(p)
-			directoriesToWatch = append(directoriesToWatch, directoryToWatch)
+func (f *FetcherDefault) SetURLMux(mux *blob.URLMux) {
+	f.mux = mux
+}
+
+func splitLocalRemoteRepos(ruleRepos []url.URL) (files []string, nonFiles []url.URL) {
+	files = make([]string, 0, len(ruleRepos))
+	nonFiles = make([]url.URL, 0, len(ruleRepos))
+	for _, repo := range ruleRepos {
+		if repo.Scheme == "file" || repo.Scheme == "" {
+			files = append(files,
+				filepath.Clean(
+					urlx.GetURLFilePath(&repo)))
+		} else {
+			nonFiles = append(nonFiles, repo)
 		}
 	}
-	directoriesToWatch = stringslice.Unique(directoriesToWatch)
+	return files, nonFiles
+}
 
-	var updateWatcher = func(sources []string, cb func(source string) error) error {
-		for _, source := range sources {
-			if err := cb(source); err != nil {
-				if os.IsNotExist(err) {
-					f.r.Logger().WithError(err).WithField("file", source).Error("Not watching config file for changes because it does not exist. Check the configuration or restart the service if the issue persists.")
-				} else if os.IsPermission(err) {
-					f.r.Logger().WithError(err).WithField("file", source).Error("Not watching config file for changes because permission is denied. Check the configuration or restart the service if the issue persists.")
-				} else if strings.Contains(err.Error(), "non-existent kevent") {
-					// ignore this error because it is fired when removing a source that does not have a watcher which can happen and is negligible
-				} else {
-					return errors.Wrapf(err, "unable to modify file watcher for file: %s", source)
-				}
+// watchLocalFiles watches all files that are configured in the config and are not watched already.
+// It also cancels watchers for files that are no longer configured. This function is idempotent.
+func (f *FetcherDefault) watchLocalFiles(ctx context.Context) {
+	f.lock.Lock()
+
+	repoChanged := false
+	cancelWatchers := make(map[string]context.CancelFunc, len(f.cancelWatchers))
+
+	localFiles, _ := splitLocalRemoteRepos(f.config.AccessRuleRepositories())
+	for _, fp := range localFiles {
+		if cancel, ok := f.cancelWatchers[fp]; !ok {
+			// watch all files we are not yet watching
+			repoChanged = true
+			ctx, cancelWatchers[fp] = context.WithCancel(ctx)
+			w, err := watcherx.WatchFile(ctx, fp, f.events)
+			if err != nil {
+				f.registry.Logger().WithError(err).WithField("file", fp).Error("Unable to watch file, ignoring it.")
+				continue
 			}
-		}
-		return nil
-	}
-
-	f.lock.Lock()
-
-	// First we remove all the directories being watched
-	if err := updateWatcher(f.directoriesBeingWatched, watcher.Remove); err != nil {
-		f.r.Logger().WithError(err).Error("Unable to modify (remove) file watcher. If the issue persists, restart the service.")
-	}
-
-	f.directoriesBeingWatched = directoriesToWatch
-	f.filesBeingWatched = filesBeingWatched
-
-	// Next we (re-) add all the directories to watch
-	if err := updateWatcher(directoriesToWatch, watcher.Add); err != nil {
-		f.r.Logger().WithError(err).Error("Unable to modify (add) file watcher. If the issue persists, restart the service.")
-	}
-
-	// And we need to reset the rule cache
-	f.cache = make(map[string][]Rule)
-	f.lock.Unlock()
-
-	// If there are no more sources to watch we reset the rule repository as a whole
-	if len(replace) == 0 {
-		f.r.Logger().WithField("repos", viper.AllSettings()).Warn("No access rule repositories have been defined in the updated config.")
-		if err := f.r.RuleRepository().Set(ctx, []Rule{}); err != nil {
-			return err
+			// we force reading the files
+			done, err := w.DispatchNow()
+			if err != nil {
+				f.registry.Logger().WithError(err).WithField("file", fp).Error("Unable to read file, ignoring it.")
+				continue
+			}
+			go func() { <-done }() // we do not need to wait here, but we need to clear the channel
+		} else {
+			// keep watching files we are already watching
+			cancelWatchers[fp] = cancel
 		}
 	}
 
-	// Let's fetch all of the repos
-	for _, source := range replace {
-		f.enqueueEvent(events, event{et: eventFileChanged, path: source, source: "config_update"})
+	// cancel watchers for files we are no longer watching
+	for fp, cancel := range f.cancelWatchers {
+		if _, ok := cancelWatchers[fp]; !ok {
+			f.registry.Logger().WithField("file", fp).Info("Stopped watching access rule file.")
+			repoChanged = true
+			cancel()
+
+			delete(f.cache, fp)
+		}
 	}
+	f.cancelWatchers = cancelWatchers
 
-	return nil
-}
+	f.lock.Unlock() // release lock before processing events
 
-func (f *FetcherDefault) sourceUpdate(e event) ([]Rule, error) {
-	rules, err := f.fetch(e.path)
-	if err != nil {
-		return nil, err
+	if repoChanged {
+		f.registry.Logger().WithField("repos", f.config.Get(configuration.AccessRuleRepositories)).Info("Detected access rule repository change, processing updates.")
+		if err := f.updateRulesFromCache(ctx); err != nil {
+			f.registry.Logger().WithError(err).WithField("event_source", "local repo change").Error("Unable to update access rules.")
+		}
 	}
-
-	f.lock.Lock()
-	defer f.lock.Unlock()
-
-	f.cache[e.path.String()] = rules
-
-	var total []Rule
-	for _, items := range f.cache {
-		total = append(total, items...)
-	}
-
-	return total, nil
 }
 
 func (f *FetcherDefault) Watch(ctx context.Context) error {
-	watcher, err := fsnotify.NewWatcher()
-	if err != nil {
+	f.watchLocalFiles(ctx)
+
+	getRemoteRepos := func() map[url.URL]struct{} {
+		_, remoteRepos := splitLocalRemoteRepos(f.config.AccessRuleRepositories())
+		repos := make(map[url.URL]struct{}, len(remoteRepos))
+		for _, repo := range remoteRepos {
+			repos[repo] = struct{}{}
+		}
+		return repos
+	}
+
+	// capture the previous config values to detect changes, and trigger initial processing
+	strategy := f.config.AccessRuleMatchingStrategy()
+	if err := f.processStrategyUpdate(ctx, strategy); err != nil {
 		return err
 	}
-	defer watcher.Close()
 
-	events := make(chan event)
-	err = f.watch(ctx, watcher, events)
+	remoteRepos := getRemoteRepos()
+	if err := f.processRemoteRepoUpdate(ctx, nil, remoteRepos); err != nil {
+		return err
+	}
 
-	// Close the channel only when all child goroutines exit
-	f.wg.Wait()
-	close(events)
+	f.config.AddWatcher(func(_ watcherx.Event, err error) {
+		if err != nil {
+			return
+		}
+		// watch files that need to be watched
+		f.watchLocalFiles(ctx)
 
-	return err
+		// update the matching strategy if it changed
+		if newStrategy := f.config.AccessRuleMatchingStrategy(); newStrategy != strategy {
+			f.registry.Logger().WithField("strategy", newStrategy).Info("Detected access rule matching strategy change, processing updates.")
+			if err := f.processStrategyUpdate(ctx, newStrategy); err != nil {
+				f.registry.Logger().WithError(err).Error("Unable to update access rule matching strategy.")
+			} else {
+				strategy = newStrategy
+			}
+		}
+
+		// update & fetch the remote repos if they changed
+		newRemoteRepos := getRemoteRepos()
+		if err := f.processRemoteRepoUpdate(ctx, remoteRepos, newRemoteRepos); err != nil {
+			f.registry.Logger().WithError(err).Error("Unable to update remote access rule repository config.")
+		}
+		remoteRepos = newRemoteRepos
+	})
+
+	go f.processLocalUpdates(ctx)
+	return nil
 }
 
-func (f *FetcherDefault) watch(ctx context.Context, watcher *fsnotify.Watcher, events chan event) error {
-	var pc map[string]interface{}
+func (f *FetcherDefault) processStrategyUpdate(ctx context.Context, newValue configuration.MatchingStrategy) error {
+	if err := f.registry.RuleRepository().SetMatchingStrategy(ctx, newValue); err != nil {
+		return err
+	}
+	return nil
+}
 
-	viperx.AddWatcher(func(e fsnotify.Event) error {
-		if reflect.DeepEqual(pc, viper.Get(configuration.ViperKeyAccessRuleRepositories)) {
-			f.r.Logger().
-				Debug("Not reloading access rule repositories because configuration value has not changed.")
-			return nil
-		}
+func (f *FetcherDefault) processRemoteRepoUpdate(ctx context.Context, oldRepos, newRepos map[url.URL]struct{}) error {
+	repoChanged := false
+	for repo := range newRepos {
+		if _, ok := f.cache[repo.String()]; !ok {
+			repoChanged = true
+			f.registry.Logger().WithField("repo", repo.String()).Info("New repo detected, fetching access rules.")
 
-		f.enqueueEvent(events, event{et: eventRepositoryConfigChanged, source: "viper_watcher"})
-
-		return nil
-	})
-	f.enqueueEvent(events, event{et: eventRepositoryConfigChanged, source: "entrypoint"})
-
-	var strategy map[string]interface{}
-	viperx.AddWatcher(func(e fsnotify.Event) error {
-		if reflect.DeepEqual(strategy, viper.Get(configuration.ViperKeyAccessRuleMatchingStrategy)) {
-			f.r.Logger().
-				Debug("Not reloading access rule matching strategy because configuration value has not changed.")
-			return nil
-		}
-
-		f.enqueueEvent(events, event{et: eventMatchingStrategyChanged, source: "viper_watcher"})
-		return nil
-	})
-	f.enqueueEvent(events, event{et: eventMatchingStrategyChanged, source: "entrypoint"})
-
-	for {
-		select {
-		case e, ok := <-watcher.Events:
-			if !ok {
-				// channel was closed
-				return nil
+			rules, err := f.fetch(repo)
+			if err != nil {
+				f.registry.Logger().WithError(err).WithField("repo", repo.String()).Error("Unable to fetch access rules.")
+				return err
 			}
-
-			clean := filepath.Clean(e.Name)
+			f.cacheRules(repo.String(), rules)
+		}
+	}
+	for repo := range oldRepos {
+		if _, ok := newRepos[repo]; !ok {
+			repoChanged = true
+			f.registry.Logger().WithField("repo", repo.String()).Info("Repo was removed, removing access rules.")
 
 			f.lock.Lock()
-			var changed bool
-			for _, watching := range f.filesBeingWatched {
-				if filepath.Clean(watching) == clean {
-					changed = true
-				}
-			}
+			delete(f.cache, repo.String())
 			f.lock.Unlock()
+		}
+	}
+	if repoChanged {
+		if err := f.updateRulesFromCache(ctx); err != nil {
+			f.registry.Logger().WithError(err).WithField("event_source", "remote change").Error("Unable to update access rules.")
+			return err
+		}
+	}
+	return nil
+}
 
-			if strings.Contains(clean, "..") && (e.Op&fsnotify.Remove == fsnotify.Remove || e.Op&fsnotify.Rename == fsnotify.Rename) {
-				// This covers the k8s AtomicWriter
-				changed = true
+func (f *FetcherDefault) processLocalUpdates(ctx context.Context) {
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		case e, ok := <-f.events:
+			if !ok {
+				// channel was closed
+				return
 			}
 
-			if !changed {
+			f.registry.Logger().
+				WithField("event", "fsnotify").
+				WithField("file", e.Source()).
+				Info("Detected file change for access rules. Triggering a reload.")
+
+			if e.Reader() == nil {
+				f.registry.Logger().WithField("file", e.Source()).Error("Unable to read access rules probably because they were deleted, skipping those.")
+				continue
+			}
+			rules, err := f.decode(e.Reader())
+			if err != nil {
+				f.registry.Logger().WithField("file", e.Source()).WithError(err).Error("Unable to decode access rules, skipping those.")
 				continue
 			}
 
-			f.r.Logger().
-				WithField("event", "fsnotify").
-				WithField("file", e.Name).
-				WithField("op", e.Op.String()).
-				Debugf("Detected file change in directory containing access rules. Triggering a reload.")
+			f.cacheRules(e.Source(), rules)
 
-			f.enqueueEvent(events, event{et: eventRepositoryConfigChanged, source: "fsnotify"})
-		case e, ok := <-events:
-			if !ok {
-				// channel was closed
-				f.r.Logger().Debug("The events channel was closed")
-				return nil
-			}
-
-			switch e.et {
-			case eventRepositoryConfigChanged:
-				f.r.Logger().
-					WithField("event", "config_change").
-					WithField("source", e.source).
-					Debugf("Viper detected a configuration change, reloading config.")
-				if err := f.configUpdate(ctx, watcher, f.c.AccessRuleRepositories(), events); err != nil {
-					return err
-				}
-			case eventMatchingStrategyChanged:
-				f.r.Logger().
-					WithField("event", "matching_strategy_config_change").
-					WithField("source", e.source).
-					Debugf("Viper detected a configuration change, updating matching strategy")
-				if err := f.r.RuleRepository().SetMatchingStrategy(ctx, f.c.AccessRuleMatchingStrategy()); err != nil {
-					return errors.Wrapf(err, "unable to update matching strategy")
-				}
-			case eventFileChanged:
-				f.r.Logger().
-					WithField("event", "repository_change").
-					WithField("source", e.source).
-					WithField("file", e.path.String()).
-					Debugf("One or more access rule repositories changed, reloading access rules.")
-
-				rules, err := f.sourceUpdate(e)
-				if err != nil {
-					f.r.Logger().WithError(err).
-						WithField("file", e.path.String()).
-						Error("Unable to update access rules from given location, changes will be ignored. Check the configuration or restart the service if the issue persists.")
-					continue
-				}
-
-				if err := f.r.RuleRepository().Set(ctx, rules); err != nil {
-					return errors.Wrapf(err, "unable to reset access rule repository")
-				}
+			if err := f.updateRulesFromCache(ctx); err != nil {
+				f.registry.Logger().WithError(err).WithField("event_source", "local change").Error("Unable to update access rules.")
 			}
 		}
 	}
 }
 
-func (f *FetcherDefault) enqueueEvent(events chan event, evt event) {
-	f.wg.Add(1)
-	go func() {
-		defer f.wg.Done()
+func (f *FetcherDefault) cacheRules(source string, rules []Rule) {
+	f.lock.Lock()
+	defer f.lock.Unlock()
 
-		events <- evt
-	}()
+	f.cache[source] = rules
+}
+
+func (f *FetcherDefault) updateRulesFromCache(ctx context.Context) error {
+	f.lock.Lock()
+	defer f.lock.Unlock()
+
+	allRules := make([]Rule, 0)
+	for _, rules := range f.cache {
+		allRules = append(allRules, rules...)
+	}
+	return f.registry.RuleRepository().Set(ctx, allRules)
 }
 
 func (f *FetcherDefault) fetch(source url.URL) ([]Rule, error) {
-	f.r.Logger().
+	f.registry.Logger().
 		WithField("location", source.String()).
 		Debugf("Fetching access rules from given location because something changed.")
 
 	switch source.Scheme {
-	case "azblob":
-		fallthrough
-	case "gs":
-		fallthrough
-	case "s3":
+	case "azblob", "gs", "s3":
 		return f.fetchFromStorage(source)
-	case "http":
-		fallthrough
-	case "https":
+	case "http", "https":
 		return f.fetchRemote(source.String())
-	case "":
-		fallthrough
-	case "file":
-		p := urlx.GetURLFilePath(&source)
-		if path.Ext(p) == ".json" || path.Ext(p) == ".yaml" || path.Ext(p) == ".yml" {
-			return f.fetchFile(p)
-		}
-		return f.fetchDir(p)
 	case "inline":
 		src, err := base64.StdEncoding.DecodeString(strings.Replace(source.String(), "inline://", "", 1))
 		if err != nil {
@@ -356,42 +319,8 @@ func (f *FetcherDefault) fetchRemote(source string) ([]Rule, error) {
 	return f.decode(res.Body)
 }
 
-func (f *FetcherDefault) fetchDir(source string) ([]Rule, error) {
-	var rules []Rule
-	if err := filepath.Walk(source, func(path string, info os.FileInfo, err error) error {
-		if err != nil {
-			return errors.Wrapf(err, "rule: %s", source)
-		}
-		if info.IsDir() {
-			return nil
-		}
-
-		interim, err := f.fetchFile(path)
-		if err != nil {
-			return err
-		}
-
-		rules = append(rules, interim...)
-
-		return nil
-	}); err != nil {
-		return nil, err
-	}
-	return rules, nil
-}
-
-func (f *FetcherDefault) fetchFile(source string) ([]Rule, error) {
-	fp, err := os.Open(source)
-	if err != nil {
-		return nil, errors.Wrapf(err, "rule: %s", source)
-	}
-	defer fp.Close()
-
-	return f.decode(fp)
-}
-
 func (f *FetcherDefault) decode(r io.Reader) ([]Rule, error) {
-	b, err := ioutil.ReadAll(r)
+	b, err := io.ReadAll(r)
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}

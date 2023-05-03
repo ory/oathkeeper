@@ -4,7 +4,7 @@
     "upstream": {
       "preserve_host": true,
       "strip_path": "/api",
-      "url": "mybackend.com/api"
+      "url": "https://mybackend.com/api"
     },
     "match": {
       "url": "myproxy.com/api",
@@ -32,7 +32,7 @@
     "upstream": {
       "preserve_host": true,
       "strip_path": "/api",
-      "url": "mybackend.com/api"
+      "url": "https://mybackend.com/api"
     },
     "match": {
       "url": "myproxy.com/api",
@@ -54,7 +54,7 @@
         "handler": "id_token"
       },
       {
-        "handler": "headers",
+        "handler": "header",
         "config": {
           "headers": {
             "X-User": "{{ print .Subject }}"
@@ -68,7 +68,7 @@
     "upstream": {
       "preserve_host": true,
       "strip_path": "/api",
-      "url": "mybackend.com/api"
+      "url": "https://mybackend.com/api"
     },
     "match": {
       "url": "myproxy.com/api",

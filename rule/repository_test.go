@@ -1,45 +1,28 @@
-/*
- * Copyright © 2017-2018 Aeneas Rekkas <aeneas+oss@aeneas.io>
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *
- * @author       Aeneas Rekkas <aeneas+oss@aeneas.io>
- * @copyright  2017-2018 Aeneas Rekkas <aeneas+oss@aeneas.io>
- * @license  	   Apache-2.0
- */
+// Copyright © 2023 Ory Corp
+// SPDX-License-Identifier: Apache-2.0
 
 package rule
 
 import (
 	"context"
 	"fmt"
+	"math/rand"
+	"net/http"
+	"reflect"
 	"testing"
 
-	"github.com/bxcodec/faker"
+	"github.com/go-faker/faker/v4"
 	_ "github.com/go-sql-driver/mysql"
 	_ "github.com/lib/pq"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/ory/x/healthx"
-
 	"github.com/ory/x/logrusx"
 
 	"github.com/ory/x/sqlcon/dockertest"
 
 	"github.com/ory/oathkeeper/driver/configuration"
-	"github.com/ory/oathkeeper/driver/health"
 )
 
 func TestMain(m *testing.M) {
@@ -56,21 +39,6 @@ func (v *validatorNoop) Validate(*Rule) error {
 	return v.ret
 }
 
-type mockHealthEventManager struct {
-}
-
-func (m *mockHealthEventManager) Dispatch(evt health.ReadinessProbeEvent) {
-
-}
-
-func (m *mockHealthEventManager) Watch(ctx context.Context) {
-
-}
-
-func (m *mockHealthEventManager) HealthxReadyCheckers() healthx.ReadyCheckers {
-	return nil
-}
-
 type mockRepositoryRegistry struct {
 	v            validatorNoop
 	loggerCalled int
@@ -84,11 +52,29 @@ func (r *mockRepositoryRegistry) Logger() *logrusx.Logger {
 	return logrusx.New("", "")
 }
 
+func init() {
+	err := faker.AddProvider("urlProvider", func(v reflect.Value) (interface{}, error) {
+		var m any
+		if rand.Intn(2) == 0 {
+			m = new(Match)
+		} else {
+			m = new(MatchGRPC)
+		}
+		err := faker.FakeData(m)
+		return m, err
+	})
+	if err != nil {
+		panic(err)
+	}
+}
+
 func TestRepository(t *testing.T) {
 	for name, repo := range map[string]Repository{
-		"memory": NewRepositoryMemory(new(mockRepositoryRegistry), new(mockHealthEventManager)),
+		"memory": NewRepositoryMemory(new(mockRepositoryRegistry)),
 	} {
 		t.Run(fmt.Sprintf("repository=%s/case=valid rule", name), func(t *testing.T) {
+			assert.Error(t, repo.ReadyChecker(new(http.Request)))
+
 			var rules []Rule
 			for i := 0; i < 4; i++ {
 				var rule Rule
@@ -105,6 +91,7 @@ func TestRepository(t *testing.T) {
 			copy(inserted, rules)
 			inserted = inserted[:len(inserted)-1] // insert all elements but the last
 			repo.Set(context.Background(), inserted)
+			assert.NoError(t, repo.ReadyChecker(new(http.Request)))
 
 			for _, expect := range inserted {
 				got, err := repo.Get(context.Background(), expect.ID)
@@ -152,16 +139,17 @@ func TestRepository(t *testing.T) {
 		})
 	}
 
-	var index int
-	mr := &mockRepositoryRegistry{v: validatorNoop{ret: errors.New("this is a forced test error and can be ignored")}}
+	expectedErr := errors.New("this is a forced test error and can be ignored")
+	mr := &mockRepositoryRegistry{v: validatorNoop{ret: expectedErr}}
 	for name, repo := range map[string]Repository{
-		"memory": NewRepositoryMemory(mr, new(mockHealthEventManager)),
+		"memory": NewRepositoryMemory(mr),
 	} {
 		t.Run(fmt.Sprintf("repository=%s/case=invalid rule", name), func(t *testing.T) {
 			var rule Rule
 			require.NoError(t, faker.FakeData(&rule))
 			require.NoError(t, repo.Set(context.Background(), []Rule{rule}))
-			assert.Equal(t, index+1, mr.loggerCalled)
+			assert.Equal(t, 1, mr.loggerCalled)
+			assert.Error(t, repo.ReadyChecker(new(http.Request)))
 		})
 	}
 }

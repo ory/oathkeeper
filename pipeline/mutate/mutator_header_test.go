@@ -1,3 +1,6 @@
+// Copyright © 2023 Ory Corp
+// SPDX-License-Identifier: Apache-2.0
+
 package mutate_test
 
 import (
@@ -8,7 +11,7 @@ import (
 	"testing"
 	"text/template"
 
-	"github.com/ory/viper"
+	"github.com/ory/x/configx"
 
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/internal"
@@ -24,7 +27,8 @@ import (
 )
 
 func TestCredentialsIssuerHeaders(t *testing.T) {
-	conf := internal.NewConfigurationWithDefaults()
+	t.Parallel()
+	conf := internal.NewConfigurationWithDefaults(configx.SkipValidation())
 	reg := internal.NewRegistry(conf)
 
 	a, err := reg.PipelineMutator("header")
@@ -218,11 +222,10 @@ func TestCredentialsIssuerHeaders(t *testing.T) {
 	})
 
 	t.Run("method=validate", func(t *testing.T) {
-		viper.Set(configuration.ViperKeyMutatorHeaderIsEnabled, true)
+		conf.SetForTest(t, configuration.MutatorHeaderIsEnabled, true)
 		require.NoError(t, a.Validate(json.RawMessage(`{"headers":{}}`)))
 
-		viper.Reset()
-		viper.Set(configuration.ViperKeyMutatorHeaderIsEnabled, false)
+		conf.SetForTest(t, configuration.MutatorHeaderIsEnabled, false)
 		require.Error(t, a.Validate(json.RawMessage(`{"headers":{}}`)))
 	})
 }
