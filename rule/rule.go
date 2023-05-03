@@ -39,7 +39,7 @@ type Match struct {
 	// A map of HTTP headers. When ORY Oathkeeper searches for rules
 	// to decide what to do with an incoming request to the proxy server, it compares the HTTP headers of the incoming
 	// request with the HTTP headers of each rules. If a match is found, the rule is considered a partial match.
-	// For headers with values in array format (e.g. User-Agent headers), the rule header value must match at least one
+	// For headers with values in array format (e.g. User-Agent headers), the rule header value must match at all
 	// of the request header values.
 	// If the matchesUrl and matchesMethods fields are satisfied as well, the rule is considered a full match.
 	Headers http.Header `json:"headers"`
