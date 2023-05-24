@@ -1,0 +1,34 @@
+[
+  {
+    "id": "test",
+    "upstream": {
+      "url": "http://127.0.0.1:6662"
+    },
+    "match": {
+      "url": "http://127.0.0.1:6060/test",
+      "methods": ["POST"]
+    },
+    "authenticators": [
+      {
+        "handler": "bearer_token",
+        "config": {
+          "check_session_url": "http://127.0.0.1:6662/session",
+          "preserve_path": true,
+          "preserve_query": false,
+          "force_method": "GET",
+          "token_from": {
+            "query_parameter": "token"
+          }
+        }
+      }
+    ],
+    "authorizer": {
+      "handler": "allow"
+    },
+    "mutators": [
+      {
+        "handler": "noop"
+      }
+    ]
+  }
+]

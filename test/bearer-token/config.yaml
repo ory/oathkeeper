@@ -1,0 +1,27 @@
+serve:
+  api:
+    port: 6061
+  proxy:
+    port: 6060
+
+access_rules:
+  repositories:
+    - file://./rules.1.json
+
+authenticators:
+  noop:
+    enabled: true
+  bearer_token:
+    enabled: true
+    config:
+      check_session_url: http://localhost:6662/session
+
+authorizers:
+  allow:
+    enabled: true
+  deny:
+    enabled: true
+
+mutators:
+  noop:
+    enabled: true
