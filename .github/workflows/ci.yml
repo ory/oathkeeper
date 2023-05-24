@@ -63,7 +63,7 @@ jobs:
     name: Run tests
     strategy:
       matrix:
-        name: ["reload", "e2e", "forwarded-header"]
+        name: ["reload", "e2e", "forwarded-header", "bearer-token"]
     needs:
       - sdk-generate
     steps:
