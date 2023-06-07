@@ -21,7 +21,7 @@ import (
 	"github.com/urfave/negroni"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 
-	"github.com/ory/analytics-go/v4"
+	"github.com/ory/analytics-go/v5"
 	"github.com/ory/graceful"
 	"github.com/ory/x/corsx"
 	"github.com/ory/x/healthx"
@@ -223,8 +223,8 @@ func RunServe(version, build, date string) func(cmd *cobra.Command, args []strin
 		publicmw := negroni.New()
 
 		telemetry := metricsx.New(cmd, logger, d.Configuration().Source(), &metricsx.Options{
-			Service:       "ory-oathkeeper",
-			ClusterID:     metricsx.Hash(clusterID(d.Configuration())),
+			Service:       "oathkeeper",
+			DeploymentId:  metricsx.Hash(clusterID(d.Configuration())),
 			IsDevelopment: isDevelopment(d.Configuration()),
 			WriteKey:      "xRVRP48SAKw6ViJEnvB0u2PY8bVlsO6O",
 			WhitelistedPaths: []string{
