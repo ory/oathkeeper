@@ -241,6 +241,9 @@
         },
         "type": "object"
       },
+      "unexpectedError": {
+        "type": "string"
+      },
       "version": {
         "properties": {
           "version": {
