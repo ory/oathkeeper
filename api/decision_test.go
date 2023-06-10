@@ -24,6 +24,7 @@ import (
 
 	"github.com/ory/herodot"
 	"github.com/ory/x/logrusx"
+	"github.com/ory/x/configx"
 
 	"github.com/ory/oathkeeper/api"
 	"github.com/ory/oathkeeper/driver/configuration"
@@ -34,7 +35,7 @@ import (
 )
 
 func TestDecisionAPI(t *testing.T) {
-	conf := internal.NewConfigurationWithDefaults()
+	conf := internal.NewConfigurationWithDefaults(configx.SkipValidation())
 	conf.SetForTest(t, configuration.AuthenticatorNoopIsEnabled, true)
 	conf.SetForTest(t, configuration.AuthenticatorUnauthorizedIsEnabled, true)
 	conf.SetForTest(t, configuration.AuthenticatorAnonymousIsEnabled, true)
