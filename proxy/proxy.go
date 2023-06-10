@@ -5,8 +5,9 @@ package proxy
 
 import (
 	"context"
-	"io/ioutil"
+	"io"
 	"net/http"
+	"net/http/httputil"
 	"net/url"
 	"strings"
 
@@ -67,7 +68,7 @@ func (d *Proxy) RoundTrip(r *http.Request) (*http.Response, error) {
 
 		return &http.Response{
 			StatusCode: rw.code,
-			Body:       ioutil.NopCloser(rw.buffer),
+			Body:       io.NopCloser(rw.buffer),
 			Header:     rw.header,
 		}, nil
 	} else if err == nil {
@@ -100,36 +101,36 @@ func (d *Proxy) RoundTrip(r *http.Request) (*http.Response, error) {
 
 	return &http.Response{
 		StatusCode: rw.code,
-		Body:       ioutil.NopCloser(rw.buffer),
+		Body:       io.NopCloser(rw.buffer),
 		Header:     rw.header,
 	}, nil
 }
 
-func (d *Proxy) Director(r *http.Request) {
+func (d *Proxy) Rewrite(r *httputil.ProxyRequest) {
 	EnrichRequestedURL(r)
-	rl, err := d.r.RuleMatcher().Match(r.Context(), r.Method, r.URL, rule.ProtocolHTTP)
+	rl, err := d.r.RuleMatcher().Match(r.Out.Context(), r.Out.Method, r.Out.URL, rule.ProtocolHTTP)
 	if err != nil {
-		*r = *r.WithContext(context.WithValue(r.Context(), director, err))
+		*r.Out = *r.Out.WithContext(context.WithValue(r.Out.Context(), director, err))
 		return
 	}
 
-	*r = *r.WithContext(context.WithValue(r.Context(), ContextKeyMatchedRule, rl))
-	s, err := d.r.ProxyRequestHandler().HandleRequest(r, rl)
+	*r.Out = *r.Out.WithContext(context.WithValue(r.Out.Context(), ContextKeyMatchedRule, rl))
+	s, err := d.r.ProxyRequestHandler().HandleRequest(r.Out, rl)
 	if err != nil {
-		*r = *r.WithContext(context.WithValue(r.Context(), director, err))
+		*r.Out = *r.Out.WithContext(context.WithValue(r.Out.Context(), director, err))
 		return
 	}
-	*r = *r.WithContext(context.WithValue(r.Context(), ContextKeySession, s))
+	*r.Out = *r.Out.WithContext(context.WithValue(r.Out.Context(), ContextKeySession, s))
 
-	CopyHeaders(s.Header, r)
+	CopyHeaders(s.Header, r.Out)
 
-	if err := ConfigureBackendURL(r, rl); err != nil {
-		*r = *r.WithContext(context.WithValue(r.Context(), director, err))
+	if err := ConfigureBackendURL(r.Out, rl); err != nil {
+		*r.Out = *r.Out.WithContext(context.WithValue(r.Out.Context(), director, err))
 		return
 	}
 
 	var en error // need to set it to error but with nil value
-	*r = *r.WithContext(context.WithValue(r.Context(), director, en))
+	*r.Out = *r.Out.WithContext(context.WithValue(r.Out.Context(), director, en))
 }
 
 func CopyHeaders(headers http.Header, r *http.Request) {
@@ -149,11 +150,11 @@ func CopyHeaders(headers http.Header, r *http.Request) {
 
 // EnrichRequestedURL sets Scheme and Host values in a URL passed down by a http server. Per default, the URL
 // does not contain host nor scheme values.
-func EnrichRequestedURL(r *http.Request) {
-	r.URL.Scheme = "http"
-	r.URL.Host = r.Host
-	if r.TLS != nil || strings.EqualFold(r.Header.Get("X-Forwarded-Proto"), "https") {
-		r.URL.Scheme = "https"
+func EnrichRequestedURL(r *httputil.ProxyRequest) {
+	r.Out.URL.Scheme = "http"
+	r.Out.URL.Host = r.In.Host
+	if r.In.TLS != nil || strings.EqualFold(r.In.Header.Get("X-Forwarded-Proto"), "https") {
+		r.Out.URL.Scheme = "https"
 	}
 }
 

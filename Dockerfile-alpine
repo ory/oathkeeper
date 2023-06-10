@@ -1,7 +1,7 @@
 # To compile this image manually run:
 #
 # $ make docker
-FROM alpine:3.17.2
+FROM alpine:3.18
 
 RUN addgroup -S ory; \
     adduser -S ory -G ory -D -H -s /bin/nologin
@@ -10,6 +10,9 @@ RUN apk --no-cache --update-cache --upgrade --latest add ca-certificates
 COPY oathkeeper /usr/bin/oathkeeper
 
 USER ory
+
+EXPOSE 4455
+EXPOSE 4456
 
 ENTRYPOINT ["oathkeeper"]
 CMD ["serve"]

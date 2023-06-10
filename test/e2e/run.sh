@@ -22,32 +22,29 @@ killall oathkeeper || true
 killall okapi || true
 killall okclient || true
 
-OATHKEEPER="go run ../.."
-OKAPI="go run ./okapi"
-OKCLIENT="go run ./okclient"
-
 export OATHKEEPER_PROXY=http://127.0.0.1:6660
 export OATHKEEPER_API=http://127.0.0.1:6661
 export GO111MODULE=on
 
-[[ "$(command -v oathkeeper)" == "" ]] &&
-    (cd ../../; make install)
-
-$OATHKEEPER --config ./config.yml serve > ./oathkeeper.e2e.log 2>&1 &
-PORT=6662 $OKAPI > ./api.e2e.log 2>&1 &
+go build -o . ../..
+./oathkeeper --config ./config.yml serve > ./oathkeeper.e2e.log 2>&1 &
+PORT=6662 go run ./okapi > ./api.e2e.log 2>&1 &
 
 waitport 6660
 waitport 6661
 waitport 6662
 
 function finish {
+  echo ::group::Oathkeeper Log
   cat ./oathkeeper.e2e.log
-  echo "-----"
+  echo ::endgroup::
+  echo ::group::OK API Log
   cat ./api.e2e.log
+  echo ::endgroup::
 }
 trap finish EXIT
 
-$OKCLIENT
+go run ./okclient
 
 kill %1 || true
 kill %2 || true

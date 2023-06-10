@@ -93,6 +93,8 @@ func NewKoanfProvider(ctx context.Context, flags *pflag.FlagSet, l *logrusx.Logg
 		return nil, err
 	}
 
+	l.UseConfig(kp.source)
+
 	for k, v := range kp.source.All() {
 		l.Infof("Loaded config: %v = %v", k, v)
 	}
