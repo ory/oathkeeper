@@ -18,7 +18,7 @@ import (
 	"github.com/dgraph-io/ristretto"
 
 	"github.com/google/uuid"
-	"github.com/knadh/koanf"
+	"github.com/knadh/koanf/v2"
 	"github.com/pkg/errors"
 	"github.com/rs/cors"
 	"github.com/spf13/pflag"
