@@ -191,6 +191,11 @@ func forwardRequestToSessionStore(client *http.Client, r *http.Request, cf Authe
 
 	defer res.Body.Close()
 
+	// HTTP 406 Not Acceptable
+	if res.StatusCode == http.StatusNotAcceptable {
+		return nil, errors.WithStack(ErrAuthenticatorNotResponsible)
+	}
+
 	if res.StatusCode == http.StatusOK {
 		body, err := io.ReadAll(res.Body)
 		if err != nil {

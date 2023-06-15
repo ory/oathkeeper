@@ -14,6 +14,7 @@ const (
 
 type BearerTokenLocation struct {
 	Header         *string `json:"header"`
+	AuthScheme     *string `json:"auth_scheme"`
 	QueryParameter *string `json:"query_parameter"`
 	Cookie         *string `json:"cookie"`
 }
@@ -22,7 +23,11 @@ func BearerTokenFromRequest(r *http.Request, tokenLocation *BearerTokenLocation)
 	if tokenLocation != nil {
 		if tokenLocation.Header != nil {
 			if *tokenLocation.Header == defaultAuthorizationHeader {
-				return DefaultBearerTokenFromRequest(r)
+				authScheme := "Bearer"
+				if tokenLocation.AuthScheme != nil {
+					authScheme = *tokenLocation.AuthScheme
+				}
+				return DefaultBearerTokenFromRequest(r, authScheme)
 			}
 			return r.Header.Get(*tokenLocation.Header)
 		} else if tokenLocation.QueryParameter != nil {
@@ -36,13 +41,17 @@ func BearerTokenFromRequest(r *http.Request, tokenLocation *BearerTokenLocation)
 		}
 	}
 
-	return DefaultBearerTokenFromRequest(r)
+	return DefaultBearerTokenFromRequest(r, "Bearer")
 }
 
-func DefaultBearerTokenFromRequest(r *http.Request) string {
+func DefaultBearerTokenFromRequest(r *http.Request, authScheme string) string {
 	token := r.Header.Get(defaultAuthorizationHeader)
+	if authScheme == "" {
+		return token
+	}
+
 	split := strings.SplitN(token, " ", 2)
-	if len(split) != 2 || !strings.EqualFold(strings.ToLower(split[0]), "bearer") {
+	if len(split) != 2 || !strings.EqualFold(strings.ToLower(split[0]), strings.ToLower(authScheme)) {
 		return ""
 	}
 	return split[1]
