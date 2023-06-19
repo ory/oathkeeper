@@ -4,7 +4,10 @@
 package helper_test
 
 import (
+	"io"
 	"net/http"
+	"net/url"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -54,9 +57,7 @@ func TestBearerTokenFromRequest(t *testing.T) {
 		expectedToken := "token"
 		customQueryParameterName := "Custom-Auth"
 		request := &http.Request{
-			Form: map[string][]string{
-				customQueryParameterName: {expectedToken},
-			},
+			URL: &url.URL{RawQuery: customQueryParameterName + "=" + expectedToken},
 		}
 		tokenLocation := helper.BearerTokenLocation{QueryParameter: &customQueryParameterName}
 		token := helper.BearerTokenFromRequest(request, &tokenLocation)
@@ -76,5 +77,29 @@ func TestBearerTokenFromRequest(t *testing.T) {
 		tokenLocation := helper.BearerTokenLocation{Header: &customHeaderName}
 		token := helper.BearerTokenFromRequest(request, &tokenLocation)
 		assert.Equal(t, expectedToken, token)
+	})
+
+	t.Run("case=Should not consume body when token from query parameter and Content-type is 'application/x-www-form-urlencoded' ", func(t *testing.T) {
+		expectedToken := "token"
+		customQueryParameterName := "Custom-Auth"
+
+		request := &http.Request{
+			Method: http.MethodPost,
+			URL: &url.URL{
+				RawQuery: customQueryParameterName + "=" + expectedToken,
+			},
+			Body: io.NopCloser(strings.NewReader("body")),
+			Header: http.Header{
+				"Content-Type": {"application/x-www-form-urlencoded"},
+			},
+		}
+
+		tokenLocation := helper.BearerTokenLocation{QueryParameter: &customQueryParameterName}
+		token := helper.BearerTokenFromRequest(request, &tokenLocation)
+		assert.Equal(t, expectedToken, token)
+
+		b, err := io.ReadAll(request.Body)
+		assert.NoError(t, err)
+		assert.Equal(t, "body", string(b))
 	})
 }

@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"testing"
 	"time"
 
@@ -113,8 +114,8 @@ func TestAuthenticatorOAuth2Introspection(t *testing.T) {
 			{
 				d: "should pass because the valid token was provided in a proper location (custom query parameter)",
 				r: &http.Request{
-					Form: map[string][]string{
-						"token": {"token"},
+					URL: &url.URL{
+						RawQuery: "token=" + "token",
 					},
 				},
 				config:    []byte(`{"token_from": {"query_parameter": "token"}}`),
