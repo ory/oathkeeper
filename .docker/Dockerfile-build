@@ -3,8 +3,7 @@ FROM golang:1.20-bullseye AS builder
 
 WORKDIR /go/src/github.com/ory/oathkeeper
 
-RUN apt-get update && apt-get upgrade -y &&\
-    mkdir -p /var/lib/sqlite
+RUN apt-get update && apt-get upgrade -y
 
 COPY go.mod go.mod
 COPY go.sum go.sum
