@@ -5,7 +5,7 @@
 
 **Table of Contents**
 
-- [0.0.0 (2023-06-26)](#000-2023-06-26)
+- [0.0.0 (2023-07-04)](#000-2023-07-04)
   - [Bug Fixes](#bug-fixes)
   - [Features](#features)
   - [Tests](#tests)
@@ -321,7 +321,7 @@
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-# [0.0.0](https://github.com/ory/oathkeeper/compare/v0.40.3...v0.0.0) (2023-06-26)
+# [0.0.0](https://github.com/ory/oathkeeper/compare/v0.40.3...v0.0.0) (2023-07-04)
 
 ### Bug Fixes
 
@@ -334,6 +334,8 @@
 
 ### Features
 
+- Add distroless images ([#1114](https://github.com/ory/oathkeeper/issues/1114))
+  ([8ac1dac](https://github.com/ory/oathkeeper/commit/8ac1dac6c34f6e1cdf5a5e7a1a699c5951333d03))
 - Sqa metrics v2 ([#1110](https://github.com/ory/oathkeeper/issues/1110))
   ([baeecc6](https://github.com/ory/oathkeeper/commit/baeecc6b79d04c7f332b42f597f6f02cf56d88d2))
 
