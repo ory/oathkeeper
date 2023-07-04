@@ -82,10 +82,7 @@ install:
 
 .PHONY: docker
 docker:
-	CGO_ENABLED=0 GO111MODULE=on GOOS=linux GOARCH=amd64 go build
-	DOCKER_BUILDKIT=1 DOCKER_CONTENT_TRUST=1 docker build -t oryd/oathkeeper:${IMAGE_TAG} --progress=plain .
-	DOCKER_BUILDKIT=1 DOCKER_CONTENT_TRUST=1 docker build -t oryd/oathkeeper:${IMAGE_TAG}-alpine --progress=plain -f Dockerfile-alpine .
-	rm oathkeeper
+	DOCKER_BUILDKIT=1 DOCKER_CONTENT_TRUST=1 docker build -t oryd/oathkeeper:${IMAGE_TAG} --progress=plain -f .docker/Dockerfile-build . 
 
 docs/cli: .bin/clidoc
 	clidoc .

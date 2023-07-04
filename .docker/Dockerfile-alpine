@@ -1,6 +1,3 @@
-# To compile this image manually run:
-#
-# $ make docker
 FROM alpine:3.18
 
 RUN addgroup -S ory; \
