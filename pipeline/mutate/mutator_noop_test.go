@@ -33,6 +33,16 @@ func TestMutatorNoop(t *testing.T) {
 		assert.EqualValues(t, r.Header, s.Header)
 	})
 
+	t.Run("method=mutate/case=ensure authentication session headers are kept", func(t *testing.T) {
+		r := &http.Request{Header: http.Header{"foo": {"foo"}}}
+		s := &authn.AuthenticationSession{Header: http.Header{"bar": {"bar"}}}
+		combinedHeaders := http.Header{"foo": {"foo"}}
+		combinedHeaders.Set("bar", "bar")
+		err := a.Mutate(r, s, nil, nil)
+		require.NoError(t, err)
+		assert.EqualValues(t, r.Header, combinedHeaders)
+	})
+
 	t.Run("method=validate", func(t *testing.T) {
 		conf.SetForTest(t, configuration.MutatorNoopIsEnabled, true)
 		require.NoError(t, a.Validate(nil))

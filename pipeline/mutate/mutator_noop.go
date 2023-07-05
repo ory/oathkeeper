@@ -23,7 +23,22 @@ func (a *MutatorNoop) GetID() string {
 }
 
 func (a *MutatorNoop) Mutate(r *http.Request, session *authn.AuthenticationSession, config json.RawMessage, _ pipeline.Rule) error {
+	currentSessionHeaders := session.Header.Clone()
 	session.Header = r.Header
+	if session.Header == nil {
+		session.Header = make(map[string][]string)
+	}
+
+	for k, v := range currentSessionHeaders {
+		var val string
+		if len(v) == 0 {
+			val = ""
+		} else {
+			val = v[0]
+		}
+		session.SetHeader(k, val)
+	}
+
 	return nil
 }
 
