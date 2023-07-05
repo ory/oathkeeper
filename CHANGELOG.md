@@ -5,7 +5,7 @@
 
 **Table of Contents**
 
-- [0.0.0 (2023-07-04)](#000-2023-07-04)
+- [0.0.0 (2023-07-05)](#000-2023-07-05)
   - [Bug Fixes](#bug-fixes)
   - [Features](#features)
   - [Tests](#tests)
@@ -321,13 +321,16 @@
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-# [0.0.0](https://github.com/ory/oathkeeper/compare/v0.40.3...v0.0.0) (2023-07-04)
+# [0.0.0](https://github.com/ory/oathkeeper/compare/v0.40.3...v0.0.0) (2023-07-05)
 
 ### Bug Fixes
 
 - Ensure logger uses config
   ([#1104](https://github.com/ory/oathkeeper/issues/1104))
   ([d9b0965](https://github.com/ory/oathkeeper/commit/d9b096595f1a6ea65604da11c7f6e2040100396d))
+- Noop mutator don't overwrite session headers
+  ([#1091](https://github.com/ory/oathkeeper/issues/1091))
+  ([3a716f2](https://github.com/ory/oathkeeper/commit/3a716f2608afd50d9a996a884cb3d2bed576994b))
 - Use Query.Get when fetching QueryParameter
   ([#1106](https://github.com/ory/oathkeeper/issues/1106))
   ([c520e50](https://github.com/ory/oathkeeper/commit/c520e503511599b27967388a5db5e6d163c04212))
