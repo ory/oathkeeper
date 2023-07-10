@@ -140,7 +140,7 @@ func (m *RepositoryMemory) Match(ctx context.Context, method string, u *url.URL,
 		if m.trie.root == nil {
 			return nil, errors.WithStack(errors.New("prefix trie is nil"))
 		} else {
-			matchedRules := m.trie.Match(method, u)
+			matchedRules := m.trie.Match(method, u, protocol)
 			for _, r := range matchedRules {
 				rules = append(rules, &r)
 			}

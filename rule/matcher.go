@@ -9,7 +9,7 @@ import (
 )
 
 type (
-	Protocol int
+	Protocol string
 
 	Matcher interface {
 		Match(ctx context.Context, method string, u *url.URL, protocol Protocol) (*Rule, error)
@@ -17,6 +17,6 @@ type (
 )
 
 const (
-	ProtocolHTTP Protocol = iota
-	ProtocolGRPC
+	ProtocolHTTP Protocol = "http"
+	ProtocolGRPC Protocol = "grpc"
 )

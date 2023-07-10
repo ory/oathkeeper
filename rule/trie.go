@@ -38,6 +38,14 @@ func (t *Trie) InsertRule(r Rule) error {
 		return err
 	}
 
+	// insert the protocol into the trie
+	if _, ok := node.children[string(r.Match.Protocol())]; !ok {
+		node.children[string(r.Match.Protocol())] = &TrieNode{
+			children: make(map[string]*TrieNode),
+		}
+	}
+	node = node.children[string(r.Match.Protocol())]
+
 	// insert the methods into the trie
 	for _, method := range r.Match.GetMethods() {
 		// reset the node to the root
@@ -128,8 +136,14 @@ func (t *Trie) LongestPrefix(u *url.URL) string {
 }
 
 // return the rules of the longest prefix of the url that is in the trie
-func (t *Trie) Match(method string, u *url.URL) []Rule {
+func (t *Trie) Match(method string, u *url.URL, protocol Protocol) []Rule {
 	node := t.root
+
+	// check the protocol
+	if _, ok := node.children[string(protocol)]; !ok {
+		return nil
+	}
+	node = node.children[string(protocol)]
 
 	// check the method
 	if _, ok := node.children[method]; !ok {
