@@ -48,8 +48,9 @@ func (t *Trie) InsertRule(r Rule) error {
 
 	// insert the methods into the trie
 	for _, method := range r.Match.GetMethods() {
-		// reset the node to the root
+		// reset the node to the root, followed by the protocol
 		node = t.root
+		node = node.children[string(r.Match.Protocol())]
 		if _, ok := node.children[method]; !ok {
 			node.children[method] = &TrieNode{
 				children: make(map[string]*TrieNode),
