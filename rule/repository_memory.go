@@ -62,7 +62,7 @@ func (m *RepositoryMemory) WithRules(rules []Rule) {
 	m.Lock()
 	m.rules = rules
 	for _, rule := range rules {
-		m.trie.InsertRule(&rule)
+		m.trie.InsertRule(rule)
 	}
 	m.Unlock()
 }
@@ -102,6 +102,11 @@ func (m *RepositoryMemory) Set(ctx context.Context, rules []Rule) error {
 	m.rules = make([]Rule, 0, len(rules))
 	m.invalidRules = make([]Rule, 0)
 
+	// Reset the trie if we are using prefix matching and the rules have changed.
+	if m.matchingStrategy == configuration.Prefix {
+		m.trie = NewTrie()
+	}
+
 	for _, check := range rules {
 		if err := m.r.RuleValidator().Validate(&check); err != nil {
 			m.r.Logger().WithError(err).WithField("rule_id", check.ID).
@@ -110,7 +115,7 @@ func (m *RepositoryMemory) Set(ctx context.Context, rules []Rule) error {
 		} else {
 			m.rules = append(m.rules, check)
 			if m.matchingStrategy == configuration.Prefix {
-				if err := m.trie.InsertRule(&check); err != nil {
+				if err := m.trie.InsertRule(check); err != nil {
 					m.r.Logger().WithError(err).WithField("rule_id", check.ID).
 						Errorf("A Prefix Rule could not be loaded into the trie so all requests will be sent to the closest matching prefix. You should resolve this issue now.")
 				}
@@ -135,7 +140,10 @@ func (m *RepositoryMemory) Match(ctx context.Context, method string, u *url.URL,
 		if m.trie.root == nil {
 			return nil, errors.WithStack(errors.New("prefix trie is nil"))
 		} else {
-			rules = m.trie.Match(u)
+			matchedRules := m.trie.Match(method, u)
+			for _, r := range matchedRules {
+				rules = append(rules, &r)
+			}
 		}
 	} else {
 		for k := range m.rules {

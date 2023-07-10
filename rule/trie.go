@@ -11,7 +11,7 @@ import (
 // types for a trie root node
 type TrieNode struct {
 	children map[string]*TrieNode
-	rules    []*Rule
+	rules    []Rule
 	// isWord   bool
 }
 
@@ -30,7 +30,7 @@ func NewTrie() *Trie {
 }
 
 // Insert a url host and paths into the trie
-func (t *Trie) InsertRule(r *Rule) error {
+func (t *Trie) InsertRule(r Rule) error {
 	node := t.root
 
 	matchURL, err := url.Parse(r.Match.GetURL())
@@ -38,42 +38,54 @@ func (t *Trie) InsertRule(r *Rule) error {
 		return err
 	}
 
-	// insert the scheme into the trie
-	if _, ok := node.children[matchURL.Scheme]; !ok {
-		node.children[matchURL.Scheme] = &TrieNode{
-			children: make(map[string]*TrieNode),
-		}
-	}
-	node = node.children[matchURL.Scheme]
-
-	// insert the host into the trie
-	if _, ok := node.children[matchURL.Host]; !ok {
-		node.children[matchURL.Host] = &TrieNode{
-			children: make(map[string]*TrieNode),
-		}
-	}
-	node = node.children[matchURL.Host]
-	// remove the leading and trailing slash
-	trimmedPath := strings.Trim(matchURL.Path, "/")
-
-	if len(trimmedPath) == 0 {
-		node.rules = append(node.rules, r)
-	} else {
-
-		// insert the paths into the trie
-		splitPaths := strings.Split(trimmedPath, "/")
-		i := 0
-		for _, path := range splitPaths {
-			i++
-			if _, ok := node.children[string(path)]; !ok {
-				node.children[string(path)] = &TrieNode{
-					children: make(map[string]*TrieNode),
-				}
+	// insert the methods into the trie
+	for _, method := range r.Match.GetMethods() {
+		// reset the node to the root
+		node = t.root
+		if _, ok := node.children[method]; !ok {
+			node.children[method] = &TrieNode{
+				children: make(map[string]*TrieNode),
 			}
-			node = node.children[string(path)]
-			// if this is the last path, append the rule
-			if i == len(splitPaths) {
-				node.rules = append(node.rules, r)
+		}
+		node = node.children[method]
+
+		// insert the scheme into the trie
+		if _, ok := node.children[matchURL.Scheme]; !ok {
+			node.children[matchURL.Scheme] = &TrieNode{
+				children: make(map[string]*TrieNode),
+			}
+		}
+		node = node.children[matchURL.Scheme]
+
+		// insert the host into the trie
+		if _, ok := node.children[matchURL.Host]; !ok {
+			node.children[matchURL.Host] = &TrieNode{
+				children: make(map[string]*TrieNode),
+			}
+		}
+		node = node.children[matchURL.Host]
+		// remove the leading and trailing slash
+		trimmedPath := strings.Trim(matchURL.Path, "/")
+
+		if len(trimmedPath) == 0 {
+			node.rules = append(node.rules, r)
+		} else {
+
+			// insert the paths into the trie
+			splitPaths := strings.Split(trimmedPath, "/")
+			i := 0
+			for _, path := range splitPaths {
+				i++
+				if _, ok := node.children[string(path)]; !ok {
+					node.children[string(path)] = &TrieNode{
+						children: make(map[string]*TrieNode),
+					}
+				}
+				node = node.children[string(path)]
+				// if this is the last path, append the rule
+				if i == len(splitPaths) {
+					node.rules = append(node.rules, r)
+				}
 			}
 		}
 	}
@@ -116,25 +128,30 @@ func (t *Trie) LongestPrefix(u *url.URL) string {
 }
 
 // return the rules of the longest prefix of the url that is in the trie
-func (t *Trie) Match(u *url.URL) []*Rule {
+func (t *Trie) Match(method string, u *url.URL) []Rule {
 	node := t.root
-	var rules []*Rule
+
+	// check the method
+	if _, ok := node.children[method]; !ok {
+		return nil
+	}
+	node = node.children[method]
+
 	// check the scheme
 	if _, ok := node.children[u.Scheme]; !ok {
-		return rules
+		return nil
 	}
 	node = node.children[u.Scheme]
 
 	// check the host
 	if _, ok := node.children[u.Host]; !ok {
-		return rules
+		return nil
 	}
 	node = node.children[u.Host]
 	// remove the leading and trailing slash
 	trimmedPath := strings.Trim(u.Path, "/")
 	if len(trimmedPath) == 0 {
-		rules = node.rules
-		return rules
+		return node.rules
 	} else {
 		// check the paths
 		splitPaths := strings.Split(trimmedPath, "/")
@@ -144,7 +161,6 @@ func (t *Trie) Match(u *url.URL) []*Rule {
 			}
 			node = node.children[string(path)]
 		}
-		rules = node.rules
-		return rules
+		return node.rules
 	}
 }
