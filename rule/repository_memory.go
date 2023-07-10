@@ -31,6 +31,7 @@ type RepositoryMemory struct {
 	invalidRules     []Rule
 	matchingStrategy configuration.MatchingStrategy
 	r                repositoryMemoryRegistry
+	trie             *Trie
 }
 
 // MatchingStrategy returns current MatchingStrategy.
@@ -52,6 +53,7 @@ func NewRepositoryMemory(r repositoryMemoryRegistry) *RepositoryMemory {
 	return &RepositoryMemory{
 		r:     r,
 		rules: make([]Rule, 0),
+		trie:  NewTrie(),
 	}
 }
 
@@ -59,6 +61,9 @@ func NewRepositoryMemory(r repositoryMemoryRegistry) *RepositoryMemory {
 func (m *RepositoryMemory) WithRules(rules []Rule) {
 	m.Lock()
 	m.rules = rules
+	for _, rule := range rules {
+		m.trie.InsertRule(&rule)
+	}
 	m.Unlock()
 }
 
@@ -105,6 +110,7 @@ func (m *RepositoryMemory) Set(ctx context.Context, rules []Rule) error {
 		} else {
 			m.rules = append(m.rules, check)
 		}
+		m.trie.InsertRule(&check) // TODO: this needs error handling
 	}
 
 	return nil
@@ -119,20 +125,35 @@ func (m *RepositoryMemory) Match(ctx context.Context, method string, u *url.URL,
 	defer m.Unlock()
 
 	var rules []*Rule
-	for k := range m.rules {
-		r := &m.rules[k]
-		if matched, err := r.IsMatching(m.matchingStrategy, method, u, protocol); err != nil {
-			return nil, errors.WithStack(err)
-		} else if matched {
-			rules = append(rules, r)
+
+	var rulesFromTrie []*Rule
+	if m.trie != nil {
+		rulesFromTrie = m.trie.Match(u)
+
+		for _, r := range rulesFromTrie {
+			if matched, err := r.IsMatching(m.matchingStrategy, method, u, protocol); err != nil {
+				return nil, errors.WithStack(err)
+			} else if matched {
+				rules = append(rules, r)
+			}
 		}
-	}
-	for k := range m.invalidRules {
-		r := &m.invalidRules[k]
-		if matched, err := r.IsMatching(m.matchingStrategy, method, u, protocol); err != nil {
-			return nil, errors.WithStack(err)
-		} else if matched {
-			rules = append(rules, r)
+	} else {
+
+		for k := range m.rules {
+			r := &m.rules[k]
+			if matched, err := r.IsMatching(m.matchingStrategy, method, u, protocol); err != nil {
+				return nil, errors.WithStack(err)
+			} else if matched {
+				rules = append(rules, r)
+			}
+		}
+		for k := range m.invalidRules {
+			r := &m.invalidRules[k]
+			if matched, err := r.IsMatching(m.matchingStrategy, method, u, protocol); err != nil {
+				return nil, errors.WithStack(err)
+			} else if matched {
+				rules = append(rules, r)
+			}
 		}
 	}
 
