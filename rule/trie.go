@@ -1,7 +1,9 @@
+// Copyright © 2023 Ory Corp
+// SPDX-License-Identifier: Apache-2.0
+
 package rule
 
 import (
-	"fmt"
 	"net/url"
 	"strings"
 )
@@ -27,64 +29,22 @@ func NewTrie() *Trie {
 	}
 }
 
-// Insert inserts a word into the trie
-func (t *Trie) InsertString(word string) {
-	node := t.root
-	if _, ok := node.children[word]; !ok {
-		node.children[word] = &TrieNode{
-			children: make(map[string]*TrieNode),
-		}
-	}
-	node = node.children[word]
-}
-
-// Insert a url host and paths into the trie along with the rule
-func (t *Trie) InsertURL(u *url.URL, r *Rule) {
-	// TODO: should this also handle scheme?
-
-	node := t.root
-	// insert the host into the trie
-	if _, ok := node.children[u.Host]; !ok {
-		node.children[u.Host] = &TrieNode{
-			children: make(map[string]*TrieNode),
-		}
-	}
-	node = node.children[u.Host]
-
-	// remove the leading and trailing slash
-	trimmedPath := strings.Trim(u.Path, "/")
-	if len(trimmedPath) == 0 {
-		node.rules = append(node.rules, r)
-	} else {
-		// insert the paths into the trie
-		splitPaths := strings.Split(trimmedPath, "/")
-		i := 0
-		for _, path := range splitPaths {
-			i++
-			if _, ok := node.children[string(path)]; !ok {
-				node.children[string(path)] = &TrieNode{
-					children: make(map[string]*TrieNode),
-				}
-			}
-			node = node.children[string(path)]
-			if i == len(splitPaths) {
-				node.rules = append(node.rules, r)
-			}
-		}
-	}
-}
-
 // Insert a url host and paths into the trie
-func (t *Trie) InsertRule(r *Rule) {
+func (t *Trie) InsertRule(r *Rule) error {
 	node := t.root
 
-	// TODO: handle error properly
 	matchURL, err := url.Parse(r.Match.GetURL())
 	if err != nil {
-		fmt.Println("error parsing url")
+		return err
 	}
 
-	// TODO: should this also handle scheme?
+	// insert the scheme into the trie
+	if _, ok := node.children[matchURL.Scheme]; !ok {
+		node.children[matchURL.Scheme] = &TrieNode{
+			children: make(map[string]*TrieNode),
+		}
+	}
+	node = node.children[matchURL.Scheme]
 
 	// insert the host into the trie
 	if _, ok := node.children[matchURL.Host]; !ok {
@@ -117,12 +77,20 @@ func (t *Trie) InsertRule(r *Rule) {
 			}
 		}
 	}
+	return nil
 }
 
 // return the longest prefix of the url that is in the trie
 func (t *Trie) LongestPrefix(u *url.URL) string {
 	node := t.root
 	var prefix string
+	// check the scheme
+	if _, ok := node.children[u.Scheme]; !ok {
+		return prefix
+	}
+	prefix += u.Scheme
+	node = node.children[u.Scheme]
+
 	// check the host
 	if _, ok := node.children[u.Host]; !ok {
 		return prefix
@@ -151,6 +119,12 @@ func (t *Trie) LongestPrefix(u *url.URL) string {
 func (t *Trie) Match(u *url.URL) []*Rule {
 	node := t.root
 	var rules []*Rule
+	// check the scheme
+	if _, ok := node.children[u.Scheme]; !ok {
+		return rules
+	}
+	node = node.children[u.Scheme]
+
 	// check the host
 	if _, ok := node.children[u.Host]; !ok {
 		return rules

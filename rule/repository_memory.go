@@ -109,8 +109,13 @@ func (m *RepositoryMemory) Set(ctx context.Context, rules []Rule) error {
 			m.invalidRules = append(m.invalidRules, check)
 		} else {
 			m.rules = append(m.rules, check)
+			if m.matchingStrategy == configuration.Prefix {
+				if err := m.trie.InsertRule(&check); err != nil {
+					m.r.Logger().WithError(err).WithField("rule_id", check.ID).
+						Errorf("A Prefix Rule could not be loaded into the trie so all requests will be sent to the closest matching prefix. You should resolve this issue now.")
+				}
+			}
 		}
-		m.trie.InsertRule(&check) // TODO: this needs error handling
 	}
 
 	return nil
@@ -126,19 +131,13 @@ func (m *RepositoryMemory) Match(ctx context.Context, method string, u *url.URL,
 
 	var rules []*Rule
 
-	var rulesFromTrie []*Rule
-	if m.trie != nil {
-		rulesFromTrie = m.trie.Match(u)
-
-		for _, r := range rulesFromTrie {
-			if matched, err := r.IsMatching(m.matchingStrategy, method, u, protocol); err != nil {
-				return nil, errors.WithStack(err)
-			} else if matched {
-				rules = append(rules, r)
-			}
+	if m.matchingStrategy == configuration.Prefix {
+		if m.trie.root == nil {
+			return nil, errors.WithStack(errors.New("prefix trie is nil"))
+		} else {
+			rules = m.trie.Match(u)
 		}
 	} else {
-
 		for k := range m.rules {
 			r := &m.rules[k]
 			if matched, err := r.IsMatching(m.matchingStrategy, method, u, protocol); err != nil {

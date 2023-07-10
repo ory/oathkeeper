@@ -28,6 +28,7 @@ type MatchingStrategy string
 const (
 	Regexp                  MatchingStrategy = "regexp"
 	Glob                    MatchingStrategy = "glob"
+	Prefix                  MatchingStrategy = "prefix"
 	DefaultMatchingStrategy                  = Regexp
 )
 
