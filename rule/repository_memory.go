@@ -30,6 +30,7 @@ type RepositoryMemory struct {
 	rules            []Rule
 	invalidRules     []Rule
 	matchingStrategy configuration.MatchingStrategy
+	prefixMatching   bool
 	r                repositoryMemoryRegistry
 	trie             *Trie
 }
@@ -46,6 +47,21 @@ func (m *RepositoryMemory) SetMatchingStrategy(_ context.Context, ms configurati
 	m.Lock()
 	defer m.Unlock()
 	m.matchingStrategy = ms
+	return nil
+}
+
+// PrefixMatching returns current PrefixMatching.
+func (m *RepositoryMemory) PrefixMatching(_ context.Context) (bool, error) {
+	m.RLock()
+	defer m.RUnlock()
+	return m.prefixMatching, nil
+}
+
+// SetPrefixMatching updates PrefixMatching.
+func (m *RepositoryMemory) SetPrefixMatching(_ context.Context, enabled bool) error {
+	m.Lock()
+	defer m.Unlock()
+	m.prefixMatching = enabled
 	return nil
 }
 
@@ -103,7 +119,7 @@ func (m *RepositoryMemory) Set(ctx context.Context, rules []Rule) error {
 	m.invalidRules = make([]Rule, 0)
 
 	// Reset the trie if we are using prefix matching and the rules have changed.
-	if m.matchingStrategy == configuration.Prefix {
+	if m.prefixMatching {
 		m.trie = NewTrie()
 	}
 
@@ -114,7 +130,7 @@ func (m *RepositoryMemory) Set(ctx context.Context, rules []Rule) error {
 			m.invalidRules = append(m.invalidRules, check)
 		} else {
 			m.rules = append(m.rules, check)
-			if m.matchingStrategy == configuration.Prefix {
+			if m.prefixMatching {
 				if err := m.trie.InsertRule(check); err != nil {
 					m.r.Logger().WithError(err).WithField("rule_id", check.ID).
 						Errorf("A Prefix Rule could not be loaded into the trie so all requests will be sent to the closest matching prefix. You should resolve this issue now.")
@@ -136,13 +152,22 @@ func (m *RepositoryMemory) Match(ctx context.Context, method string, u *url.URL,
 
 	var rules []*Rule
 
-	if m.matchingStrategy == configuration.Prefix {
+	if m.prefixMatching {
 		if m.trie.root == nil {
 			return nil, errors.WithStack(errors.New("prefix trie is nil"))
 		} else {
 			matchedRules := m.trie.Match(method, u, protocol)
 			for _, r := range matchedRules {
-				rules = append(rules, &r)
+				// if there are multiple rules that match, we will procede to filter them using the matching strategy
+				if len(matchedRules) > 1 {
+					if matched, err := r.IsMatching(m.matchingStrategy, method, u, protocol); err != nil {
+						return nil, errors.WithStack(err)
+					} else if matched {
+						rules = append(rules, &r)
+					}
+				} else {
+					rules = append(rules, &r)
+				}
 			}
 		}
 	} else {

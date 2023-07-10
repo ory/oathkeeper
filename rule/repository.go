@@ -17,5 +17,7 @@ type Repository interface {
 	Count(context.Context) (int, error)
 	MatchingStrategy(context.Context) (configuration.MatchingStrategy, error)
 	SetMatchingStrategy(context.Context, configuration.MatchingStrategy) error
+	PrefixMatching(context.Context) (bool, error)
+	SetPrefixMatching(context.Context, bool) error
 	ReadyChecker(*http.Request) error
 }

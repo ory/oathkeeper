@@ -6,6 +6,8 @@ package rule
 import (
 	"net/url"
 	"strings"
+
+	"github.com/dlclark/regexp2"
 )
 
 // types for a trie root node
@@ -17,7 +19,8 @@ type TrieNode struct {
 
 // types for a trie node
 type Trie struct {
-	root *TrieNode
+	root        *TrieNode
+	pathCleaner *regexp2.Regexp
 }
 
 // NewTrie creates a new trie
@@ -26,6 +29,8 @@ func NewTrie() *Trie {
 		root: &TrieNode{
 			children: make(map[string]*TrieNode),
 		},
+		// if the path contains a regex, we don't need to insert it or anything after into the trie
+		pathCleaner: regexp2.MustCompile(`<.*>.*`, 0),
 	}
 }
 
@@ -73,8 +78,15 @@ func (t *Trie) InsertRule(r Rule) error {
 			}
 		}
 		node = node.children[matchURL.Host]
+
+		// remove any regex from the path
+		cleanPath, err := t.pathCleaner.Replace(matchURL.Path, "", 0, -1)
+		if err != nil {
+			return err
+		}
+
 		// remove the leading and trailing slash
-		trimmedPath := strings.Trim(matchURL.Path, "/")
+		trimmedPath := strings.Trim(cleanPath, "/")
 
 		if len(trimmedPath) == 0 {
 			node.rules = append(node.rules, r)
