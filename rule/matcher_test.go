@@ -129,7 +129,7 @@ var testRulesPrefix = []Rule{
 	},
 	{
 		ID:             "grpc1",
-		Match:          &MatchGRPC{Authority: "baz.example.com", FullMethod: "grpc.api/Call"},
+		Match:          &MatchGRPC{Authority: "bar.example.com", FullMethod: "grpc.api/Call"},
 		Description:    "gRPC Rule",
 		Authorizer:     Handler{Handler: "allow", Config: []byte(`{"type":"any"}`)},
 		Authenticators: []Handler{{Handler: "anonymous", Config: []byte(`{"name":"anonymous1"}`)}},
