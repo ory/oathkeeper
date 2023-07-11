@@ -3,7 +3,7 @@
 
 package middleware_test
 
-//go:generate mockgen -destination=grpc_mock_server_test.go -package=middleware_test google.golang.org/grpc/test/grpc_testing TestServiceServer
+//go:generate mockgen -destination=grpc_mock_server_test.go -package=middleware_test google.golang.org/grpc/interop/grpc_testing TestServiceServer
 
 import (
 	"context"
@@ -23,9 +23,9 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/grpc/interop/grpc_testing"
 	"google.golang.org/grpc/status"
 	"google.golang.org/grpc/test/bufconn"
-	"google.golang.org/grpc/test/grpc_testing"
 
 	"github.com/ory/oathkeeper/driver"
 	"github.com/ory/oathkeeper/driver/configuration"
