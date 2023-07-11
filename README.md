@@ -48,6 +48,16 @@ This service is stable, but under active development and may introduce breaking
 changes in future releases. Any breaking change will have extensive
 documentation and upgrade instructions.
 
+## Ory Network Hybrid Support Plan
+
+Ory offers a support plan for Ory Network Hybrid, including Ory on private cloud
+deployments. If you have a self-hosted solution and would like help, consider a
+support plan! The team at Ory has years of experience in cloud computing. Ory's
+offering is the only official program for qualified support from the
+maintainers. For more information see the
+**[website](https://www.ory.sh/support/)** or
+**[book a meeting](https://www.ory.sh/contact/)**!
+
 ## Project Renaming
 
 The Ory Oathkeeper project was started in 2017 in Germany and owes its name to
