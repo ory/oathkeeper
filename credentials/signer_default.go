@@ -54,8 +54,8 @@ func (s *DefaultSigner) key(ctx context.Context, location *url.URL) (*jose.JSONW
 		return nil, "", err
 	}
 
-	if len(keys) != 1 {
-		return nil, "", errors.Errorf("credentials: expected exactly one JSON Web Key Set to be returned but got: %d", len(keys))
+	if len(keys) == 0 {
+		return nil, "", errors.Errorf("credentials: expected at least one JSON Web Key Set to be returned but got: %d", len(keys))
 	}
 
 	var pk jose.JSONWebKey
