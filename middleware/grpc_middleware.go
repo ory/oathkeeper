@@ -89,7 +89,7 @@ func (m *middleware) unaryInterceptor(ctx context.Context, req interface{}, info
 
 	log.Debug("matching HTTP request build from gRPC")
 
-	r, err := m.RuleMatcher().Match(traceCtx, httpReq.Method, httpReq.URL, rule.ProtocolGRPC)
+	r, err := m.RuleMatcher().Match(traceCtx, httpReq.Method, httpReq.URL, httpReq.Header, rule.ProtocolGRPC)
 	if err != nil {
 		log.WithError(err).Warn("could not find a matching rule")
 		span.SetAttributes(attribute.String("oathkeeper.verdict", "denied"))
@@ -138,7 +138,7 @@ func (m *middleware) streamInterceptor(
 
 	log.Debug("matching HTTP request build from gRPC")
 
-	r, err := m.RuleMatcher().Match(ctx, httpReq.Method, httpReq.URL, rule.ProtocolGRPC)
+	r, err := m.RuleMatcher().Match(ctx, httpReq.Method, httpReq.URL, httpReq.Header, rule.ProtocolGRPC)
 	if err != nil {
 		log.WithError(err).Warn("could not find a matching rule")
 		span.SetAttributes(attribute.String("oathkeeper.verdict", "denied"))

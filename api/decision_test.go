@@ -352,7 +352,7 @@ func (*decisionHandlerRegistryMock) Logger() *logrusx.Logger {
 	return logrusx.New("", "")
 }
 
-func (m *decisionHandlerRegistryMock) Match(ctx context.Context, method string, u *url.URL, _ rule.Protocol) (*rule.Rule, error) {
+func (m *decisionHandlerRegistryMock) Match(ctx context.Context, method string, u *url.URL, _ http.Header, _ rule.Protocol) (*rule.Rule, error) {
 	args := m.Called(ctx, method, u)
 	return args.Get(0).(*rule.Rule), args.Error(1)
 }

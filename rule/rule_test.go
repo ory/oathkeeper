@@ -5,6 +5,7 @@ package rule
 
 import (
 	"encoding/json"
+	"net/http"
 	"net/url"
 	"strconv"
 	"testing"
@@ -71,7 +72,7 @@ func TestRule(t *testing.T) {
 	for ind, tcase := range tests {
 		t.Run(strconv.FormatInt(int64(ind), 10), func(t *testing.T) {
 			testFunc := func(rule Rule, strategy configuration.MatchingStrategy) {
-				matched, err := rule.IsMatching(strategy, tcase.method, mustParse(t, tcase.url), ProtocolHTTP)
+				matched, err := rule.IsMatching(strategy, tcase.method, mustParse(t, tcase.url), http.Header{}, ProtocolHTTP)
 				assert.Equal(t, tcase.expectedMatch, matched)
 				assert.Equal(t, tcase.expectedErr, err)
 			}
@@ -123,7 +124,7 @@ func TestRule1(t *testing.T) {
 	}
 	for ind, tcase := range tests {
 		t.Run(strconv.FormatInt(int64(ind), 10), func(t *testing.T) {
-			matched, err := r.IsMatching(configuration.Regexp, tcase.method, mustParse(t, tcase.url), ProtocolHTTP)
+			matched, err := r.IsMatching(configuration.Regexp, tcase.method, mustParse(t, tcase.url), http.Header{}, ProtocolHTTP)
 			assert.Equal(t, tcase.expectedMatch, matched)
 			assert.Equal(t, tcase.expectedErr, err)
 		})
@@ -165,7 +166,103 @@ func TestRuleWithCustomMethod(t *testing.T) {
 	}
 	for ind, tcase := range tests {
 		t.Run(strconv.FormatInt(int64(ind), 10), func(t *testing.T) {
-			matched, err := r.IsMatching(configuration.Regexp, tcase.method, mustParse(t, tcase.url), ProtocolHTTP)
+			matched, err := r.IsMatching(configuration.Regexp, tcase.method, mustParse(t, tcase.url), http.Header{}, ProtocolHTTP)
+			assert.Equal(t, tcase.expectedMatch, matched)
+			assert.Equal(t, tcase.expectedErr, err)
+		})
+	}
+}
+
+func TestRuleWithHeaders(t *testing.T) {
+	r := &Rule{
+		Match: &Match{
+			Methods: []string{"DELETE"},
+			URL:     "https://localhost/users/<(?!admin).*>",
+			Headers: http.Header{
+				"Content-Type":    {"application+v2.json"},
+				"x-custom-header": {"foo"},
+			},
+		},
+	}
+
+	var tests = []struct {
+		method        string
+		url           string
+		headers       http.Header
+		expectedMatch bool
+		expectedErr   error
+	}{
+		{
+			method:        "DELETE",
+			url:           "https://localhost/users/foo",
+			headers:       http.Header{},
+			expectedMatch: false,
+			expectedErr:   nil,
+		},
+		{
+			method: "DELETE",
+			url:    "https://localhost/users/foo",
+			headers: http.Header{
+				"Content-Type": {"application+v2.json"},
+			},
+			expectedMatch: false,
+			expectedErr:   nil,
+		},
+		{
+			method: "DELETE",
+			url:    "https://localhost/users/foo",
+			headers: http.Header{
+				"Content-Type": {"application+v2.json"},
+			},
+			expectedMatch: false,
+			expectedErr:   nil,
+		},
+		{
+			method: "DELETE",
+			url:    "https://localhost/users/foo",
+			headers: http.Header{
+				"Content-Type":    {"application+v2.json"},
+				"x-custom-header": {"bar"},
+			},
+			expectedMatch: false,
+			expectedErr:   nil,
+		},
+		{
+			method: "DELETE",
+			url:    "https://localhost/users/foo",
+			headers: http.Header{
+				"Content-Type":    {"application+v1.json"},
+				"x-custom-header": {"foo"},
+			},
+			expectedMatch: false,
+			expectedErr:   nil,
+		},
+		{
+			method: "DELETE",
+			url:    "https://localhost/users/foo",
+			headers: http.Header{
+				"Content-Type":        {"application+v2.json"},
+				"x-custom-header":     {"foo"},
+				"x-irrelevant-header": {"something", "not", "important"},
+			},
+			expectedMatch: true,
+			expectedErr:   nil,
+		},
+		{
+			method: "DELETE",
+			url:    "https://localhost/users/foo",
+			headers: http.Header{
+				"Content-Type":        {"application+v2.json", "application+v1.json"},
+				"x-custom-header":     {"foo", "bar"},
+				"x-irrelevant-header": {"something", "not", "important"},
+			},
+			expectedMatch: false,
+			expectedErr:   nil,
+		},
+	}
+	for ind, tcase := range tests {
+		t.Run(strconv.FormatInt(int64(ind), 10), func(t *testing.T) {
+			matched, err := r.IsMatching(configuration.Regexp, tcase.method, mustParse(t, tcase.url), tcase.headers, ProtocolHTTP)
 			assert.Equal(t, tcase.expectedMatch, matched)
 			assert.Equal(t, tcase.expectedErr, err)
 		})

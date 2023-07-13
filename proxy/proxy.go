@@ -108,7 +108,7 @@ func (d *Proxy) RoundTrip(r *http.Request) (*http.Response, error) {
 
 func (d *Proxy) Rewrite(r *httputil.ProxyRequest) {
 	EnrichRequestedURL(r)
-	rl, err := d.r.RuleMatcher().Match(r.Out.Context(), r.Out.Method, r.Out.URL, rule.ProtocolHTTP)
+	rl, err := d.r.RuleMatcher().Match(r.Out.Context(), r.Out.Method, r.Out.URL, r.Out.Header, rule.ProtocolHTTP)
 	if err != nil {
 		*r.Out = *r.Out.WithContext(context.WithValue(r.Out.Context(), director, err))
 		return

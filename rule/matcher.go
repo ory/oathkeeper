@@ -5,6 +5,7 @@ package rule
 
 import (
 	"context"
+	"net/http"
 	"net/url"
 )
 
@@ -12,7 +13,7 @@ type (
 	Protocol int
 
 	Matcher interface {
-		Match(ctx context.Context, method string, u *url.URL, protocol Protocol) (*Rule, error)
+		Match(ctx context.Context, method string, u *url.URL, headers http.Header, protocol Protocol) (*Rule, error)
 	}
 )
 
