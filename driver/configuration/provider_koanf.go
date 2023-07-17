@@ -384,6 +384,10 @@ func (v *KoanfProvider) AuthenticatorIsEnabled(id string) bool {
 	return v.pipelineIsEnabled("authenticators", id)
 }
 
+func (v *KoanfProvider) ProxyTrustForwardedHeaders() bool {
+	return v.source.Bool(ProxyTrustForwardedHeaders)
+}
+
 func (v *KoanfProvider) AuthenticatorConfig(id string, override json.RawMessage, dest interface{}) error {
 	return v.PipelineConfig("authenticators", id, override, dest)
 }
