@@ -5,12 +5,13 @@ package proxy
 
 import (
 	"context"
-	"github.com/ory/oathkeeper/driver/configuration"
 	"io"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
 	"strings"
+
+	"github.com/ory/oathkeeper/driver/configuration"
 
 	"github.com/ory/oathkeeper/pipeline/authn"
 	"github.com/ory/oathkeeper/x"
