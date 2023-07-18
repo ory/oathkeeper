@@ -209,7 +209,7 @@ func TestProxy(t *testing.T) {
 				conf.SetForTest(t, configuration.ProxyTrustForwardedHeaders, true)
 			},
 			transform: func(r *http.Request) {
-				r.Header.Set("X-Forwarded-For", "foobar.com")
+				r.Header.Set("X-Forwarded-Host", "foobar.com")
 			},
 			url: ts.URL + "/authn-anon/authz-allow/cred-noop/1234",
 			rulesRegexp: []rule.Rule{{
@@ -231,13 +231,13 @@ func TestProxy(t *testing.T) {
 				"authorization=",
 				"url=/authn-anon/authz-allow/cred-noop/1234",
 				"host=" + x.ParseURLOrPanic(backend.URL).Host,
-				"header X-Forwarded-Proto=http",
+				"header X-Forwarded-Host=foobar.com",
 			},
 		},
 		{
 			d: "should pass and remove x-forwarded headers",
 			transform: func(r *http.Request) {
-				r.Header.Set("X-Forwarded-For", "foobar.com")
+				r.Header.Set("X-Forwarded-Host", "foobar.com")
 			},
 			url: ts.URL + "/authn-anon/authz-allow/cred-noop/1234",
 			rulesRegexp: []rule.Rule{{
@@ -256,7 +256,7 @@ func TestProxy(t *testing.T) {
 			}},
 			code: http.StatusOK,
 			messagesNot: []string{
-				"header X-Forwarded-Proto=http",
+				"header X-Forwarded-Host=foobar.com",
 			},
 		},
 		{
