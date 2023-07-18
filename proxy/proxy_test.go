@@ -256,7 +256,7 @@ func TestProxy(t *testing.T) {
 			}},
 			code: http.StatusOK,
 			messagesNot: []string{
-				"header X-Forwarded-Host=foobar.com",t
+				"header X-Forwarded-Host=foobar.com",
 			},
 		},
 		{
