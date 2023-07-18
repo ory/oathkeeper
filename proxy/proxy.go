@@ -110,7 +110,16 @@ func (d *Proxy) RoundTrip(r *http.Request) (*http.Response, error) {
 
 func (d *Proxy) Rewrite(r *httputil.ProxyRequest) {
 	if d.c.ProxyTrustForwardedHeaders() {
-		r.SetXForwarded()
+		headers := []string{
+			"X-Forwarded-Host",
+			"X-Forwarded-Proto",
+			"X-Forwarded-For",
+		}
+		for _, h := range headers {
+			if v := r.In.Header.Get(h); v != "" {
+				r.Out.Header.Set(h, v)
+			}
+		}
 	}
 
 	EnrichRequestedURL(r)
