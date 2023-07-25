@@ -1,295 +1,261 @@
 {
-    "$id": "https://github.com/ory/oathkeeper/.schema/version.schema.json",
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "oneOf": [
+  "$id": "https://github.com/ory/oathkeeper/.schema/version.schema.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "oneOf": [
+    {
+      "allOf": [
         {
-            "allOf": [
-                {
-                    "properties": {
-                        "version": {
-                            "const": "v0.40.6"
-                        }
-                    },
-                    "required": [
-                        "version"
-                    ]
-                },
-                {
-                    "$ref": "https://raw.githubusercontent.com/ory/oathkeeper/v0.40.6/.schema/config.schema.json"
-                }
-            ]
+          "properties": {
+            "version": {
+              "const": "v0.40.6"
+            }
+          },
+          "required": ["version"]
         },
         {
-            "allOf": [
-                {
-                    "properties": {
-                        "version": {
-                            "const": "v0.40.5"
-                        }
-                    },
-                    "required": [
-                        "version"
-                    ]
-                },
-                {
-                    "$ref": "https://raw.githubusercontent.com/ory/oathkeeper/v0.40.5/.schema/config.schema.json"
-                }
-            ]
-        },
-        {
-            "allOf": [
-                {
-                    "properties": {
-                        "version": {
-                            "const": "v0.40.4"
-                        }
-                    },
-                    "required": [
-                        "version"
-                    ]
-                },
-                {
-                    "$ref": "https://raw.githubusercontent.com/ory/oathkeeper/v0.40.4/.schema/config.schema.json"
-                }
-            ]
-        },
-        {
-            "allOf": [
-                {
-                    "properties": {
-                        "version": {
-                            "const": "v0.40.3"
-                        }
-                    },
-                    "required": [
-                        "version"
-                    ]
-                },
-                {
-                    "$ref": "https://raw.githubusercontent.com/ory/oathkeeper/v0.40.3/.schema/config.schema.json"
-                }
-            ]
-        },
-        {
-            "allOf": [
-                {
-                    "properties": {
-                        "version": {
-                            "const": "v0.40.2"
-                        }
-                    },
-                    "required": [
-                        "version"
-                    ]
-                },
-                {
-                    "$ref": "https://raw.githubusercontent.com/ory/oathkeeper/v0.40.2/.schema/config.schema.json"
-                }
-            ]
-        },
-        {
-            "allOf": [
-                {
-                    "properties": {
-                        "version": {
-                            "const": "v0.40.1"
-                        }
-                    },
-                    "required": [
-                        "version"
-                    ]
-                },
-                {
-                    "$ref": "https://raw.githubusercontent.com/ory/oathkeeper/v0.40.1/spec/config.schema.json"
-                }
-            ]
-        },
-        {
-            "allOf": [
-                {
-                    "properties": {
-                        "version": {
-                            "const": "v0.40.0"
-                        }
-                    },
-                    "required": [
-                        "version"
-                    ]
-                },
-                {
-                    "$ref": "https://raw.githubusercontent.com/ory/oathkeeper/v0.40.0/spec/config.schema.json"
-                }
-            ]
-        },
-        {
-            "allOf": [
-                {
-                    "properties": {
-                        "version": {
-                            "const": "v0.38.4-beta.1"
-                        }
-                    },
-                    "required": [
-                        "version"
-                    ]
-                },
-                {
-                    "$ref": "https://raw.githubusercontent.com/ory/oathkeeper/v0.38.4-beta.1/.schema/config.schema.json"
-                }
-            ]
-        },
-        {
-            "allOf": [
-                {
-                    "properties": {
-                        "version": {
-                            "const": "v0.38.5-beta.1"
-                        }
-                    },
-                    "required": [
-                        "version"
-                    ]
-                },
-                {
-                    "$ref": "https://raw.githubusercontent.com/ory/oathkeeper/v0.38.5-beta.1/.schema/config.schema.json"
-                }
-            ]
-        },
-        {
-            "allOf": [
-                {
-                    "properties": {
-                        "version": {
-                            "const": "v0.38.9-beta.1"
-                        }
-                    },
-                    "required": [
-                        "version"
-                    ]
-                },
-                {
-                    "$ref": "https://raw.githubusercontent.com/ory/oathkeeper/v0.38.9-beta.1/.schema/config.schema.json"
-                }
-            ]
-        },
-        {
-            "allOf": [
-                {
-                    "properties": {
-                        "version": {
-                            "const": "v0.38.14-beta.1"
-                        }
-                    },
-                    "required": [
-                        "version"
-                    ]
-                },
-                {
-                    "$ref": "https://raw.githubusercontent.com/ory/oathkeeper/v0.38.14-beta.1/.schema/config.schema.json"
-                }
-            ]
-        },
-        {
-            "allOf": [
-                {
-                    "properties": {
-                        "version": {
-                            "const": "v0.38.15-beta.1"
-                        }
-                    },
-                    "required": [
-                        "version"
-                    ]
-                },
-                {
-                    "$ref": "https://raw.githubusercontent.com/ory/oathkeeper/v0.38.15-beta.1/.schema/config.schema.json"
-                }
-            ]
-        },
-        {
-            "allOf": [
-                {
-                    "properties": {
-                        "version": {
-                            "const": "v0.38.17-beta.1"
-                        }
-                    },
-                    "required": [
-                        "version"
-                    ]
-                },
-                {
-                    "$ref": "https://raw.githubusercontent.com/ory/oathkeeper/v0.38.17-beta.1/.schema/config.schema.json"
-                }
-            ]
-        },
-        {
-            "allOf": [
-                {
-                    "properties": {
-                        "version": {
-                            "const": "v0.38.19-beta.1"
-                        }
-                    },
-                    "required": [
-                        "version"
-                    ]
-                },
-                {
-                    "$ref": "https://raw.githubusercontent.com/ory/oathkeeper/v0.38.19-beta.1/.schema/config.schema.json"
-                }
-            ]
-        },
-        {
-            "allOf": [
-                {
-                    "properties": {
-                        "version": {
-                            "const": "v0.38.20-beta.1"
-                        }
-                    },
-                    "required": [
-                        "version"
-                    ]
-                },
-                {
-                    "$ref": "https://raw.githubusercontent.com/ory/oathkeeper/v0.38.20-beta.1/.schema/config.schema.json"
-                }
-            ]
-        },
-        {
-            "allOf": [
-                {
-                    "oneOf": [
-                        {
-                            "properties": {
-                                "version": {
-                                    "type": "string",
-                                    "maxLength": 0
-                                }
-                            },
-                            "required": [
-                                "version"
-                            ]
-                        },
-                        {
-                            "not": {
-                                "properties": {
-                                    "version": {}
-                                },
-                                "required": [
-                                    "version"
-                                ]
-                            }
-                        }
-                    ]
-                },
-                {
-                    "$ref": "#/oneOf/0/allOf/1"
-                }
-            ]
+          "$ref": "https://raw.githubusercontent.com/ory/oathkeeper/v0.40.6/.schema/config.schema.json"
         }
-    ],
-    "title": "All Versions of the ORY Oathkeeper Configuration",
-    "type": "object"
+      ]
+    },
+    {
+      "allOf": [
+        {
+          "properties": {
+            "version": {
+              "const": "v0.40.5"
+            }
+          },
+          "required": ["version"]
+        },
+        {
+          "$ref": "https://raw.githubusercontent.com/ory/oathkeeper/v0.40.5/.schema/config.schema.json"
+        }
+      ]
+    },
+    {
+      "allOf": [
+        {
+          "properties": {
+            "version": {
+              "const": "v0.40.4"
+            }
+          },
+          "required": ["version"]
+        },
+        {
+          "$ref": "https://raw.githubusercontent.com/ory/oathkeeper/v0.40.4/.schema/config.schema.json"
+        }
+      ]
+    },
+    {
+      "allOf": [
+        {
+          "properties": {
+            "version": {
+              "const": "v0.40.3"
+            }
+          },
+          "required": ["version"]
+        },
+        {
+          "$ref": "https://raw.githubusercontent.com/ory/oathkeeper/v0.40.3/.schema/config.schema.json"
+        }
+      ]
+    },
+    {
+      "allOf": [
+        {
+          "properties": {
+            "version": {
+              "const": "v0.40.2"
+            }
+          },
+          "required": ["version"]
+        },
+        {
+          "$ref": "https://raw.githubusercontent.com/ory/oathkeeper/v0.40.2/.schema/config.schema.json"
+        }
+      ]
+    },
+    {
+      "allOf": [
+        {
+          "properties": {
+            "version": {
+              "const": "v0.40.1"
+            }
+          },
+          "required": ["version"]
+        },
+        {
+          "$ref": "https://raw.githubusercontent.com/ory/oathkeeper/v0.40.1/spec/config.schema.json"
+        }
+      ]
+    },
+    {
+      "allOf": [
+        {
+          "properties": {
+            "version": {
+              "const": "v0.40.0"
+            }
+          },
+          "required": ["version"]
+        },
+        {
+          "$ref": "https://raw.githubusercontent.com/ory/oathkeeper/v0.40.0/spec/config.schema.json"
+        }
+      ]
+    },
+    {
+      "allOf": [
+        {
+          "properties": {
+            "version": {
+              "const": "v0.38.4-beta.1"
+            }
+          },
+          "required": ["version"]
+        },
+        {
+          "$ref": "https://raw.githubusercontent.com/ory/oathkeeper/v0.38.4-beta.1/.schema/config.schema.json"
+        }
+      ]
+    },
+    {
+      "allOf": [
+        {
+          "properties": {
+            "version": {
+              "const": "v0.38.5-beta.1"
+            }
+          },
+          "required": ["version"]
+        },
+        {
+          "$ref": "https://raw.githubusercontent.com/ory/oathkeeper/v0.38.5-beta.1/.schema/config.schema.json"
+        }
+      ]
+    },
+    {
+      "allOf": [
+        {
+          "properties": {
+            "version": {
+              "const": "v0.38.9-beta.1"
+            }
+          },
+          "required": ["version"]
+        },
+        {
+          "$ref": "https://raw.githubusercontent.com/ory/oathkeeper/v0.38.9-beta.1/.schema/config.schema.json"
+        }
+      ]
+    },
+    {
+      "allOf": [
+        {
+          "properties": {
+            "version": {
+              "const": "v0.38.14-beta.1"
+            }
+          },
+          "required": ["version"]
+        },
+        {
+          "$ref": "https://raw.githubusercontent.com/ory/oathkeeper/v0.38.14-beta.1/.schema/config.schema.json"
+        }
+      ]
+    },
+    {
+      "allOf": [
+        {
+          "properties": {
+            "version": {
+              "const": "v0.38.15-beta.1"
+            }
+          },
+          "required": ["version"]
+        },
+        {
+          "$ref": "https://raw.githubusercontent.com/ory/oathkeeper/v0.38.15-beta.1/.schema/config.schema.json"
+        }
+      ]
+    },
+    {
+      "allOf": [
+        {
+          "properties": {
+            "version": {
+              "const": "v0.38.17-beta.1"
+            }
+          },
+          "required": ["version"]
+        },
+        {
+          "$ref": "https://raw.githubusercontent.com/ory/oathkeeper/v0.38.17-beta.1/.schema/config.schema.json"
+        }
+      ]
+    },
+    {
+      "allOf": [
+        {
+          "properties": {
+            "version": {
+              "const": "v0.38.19-beta.1"
+            }
+          },
+          "required": ["version"]
+        },
+        {
+          "$ref": "https://raw.githubusercontent.com/ory/oathkeeper/v0.38.19-beta.1/.schema/config.schema.json"
+        }
+      ]
+    },
+    {
+      "allOf": [
+        {
+          "properties": {
+            "version": {
+              "const": "v0.38.20-beta.1"
+            }
+          },
+          "required": ["version"]
+        },
+        {
+          "$ref": "https://raw.githubusercontent.com/ory/oathkeeper/v0.38.20-beta.1/.schema/config.schema.json"
+        }
+      ]
+    },
+    {
+      "allOf": [
+        {
+          "oneOf": [
+            {
+              "properties": {
+                "version": {
+                  "type": "string",
+                  "maxLength": 0
+                }
+              },
+              "required": ["version"]
+            },
+            {
+              "not": {
+                "properties": {
+                  "version": {}
+                },
+                "required": ["version"]
+              }
+            }
+          ]
+        },
+        {
+          "$ref": "#/oneOf/0/allOf/1"
+        }
+      ]
+    }
+  ],
+  "title": "All Versions of the ORY Oathkeeper Configuration",
+  "type": "object"
 }
