@@ -15,8 +15,8 @@ import (
 	"github.com/pkg/errors"
 	"github.com/tidwall/gjson"
 
-	"github.com/ory/go-convenience/stringsx"
 	"github.com/ory/oathkeeper/x/header"
+	"github.com/ory/x/stringsx"
 
 	"github.com/ory/herodot"
 
