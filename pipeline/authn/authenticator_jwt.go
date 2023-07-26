@@ -12,13 +12,12 @@ import (
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/pkg/errors"
 
-	"github.com/ory/go-convenience/jwtx"
 	"github.com/ory/herodot"
-
 	"github.com/ory/oathkeeper/credentials"
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/helper"
 	"github.com/ory/oathkeeper/pipeline"
+	"github.com/ory/x/jwtx"
 )
 
 type AuthenticatorJWTRegistry interface {

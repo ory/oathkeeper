@@ -14,22 +14,18 @@ import (
 	"sync"
 	"time"
 
-	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
-
-	"github.com/ory/fosite"
-
 	"github.com/dgraph-io/ristretto"
-
 	"github.com/pkg/errors"
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"golang.org/x/oauth2/clientcredentials"
 
-	"github.com/ory/go-convenience/stringslice"
-	"github.com/ory/x/httpx"
-	"github.com/ory/x/logrusx"
-
+	"github.com/ory/fosite"
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/helper"
 	"github.com/ory/oathkeeper/pipeline"
+	"github.com/ory/x/httpx"
+	"github.com/ory/x/logrusx"
+	"github.com/ory/x/stringslice"
 )
 
 type AuthenticatorOAuth2IntrospectionConfiguration struct {

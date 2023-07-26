@@ -12,12 +12,11 @@ import (
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"go.opentelemetry.io/otel/trace"
 
-	"github.com/ory/go-convenience/stringsx"
-	"github.com/ory/oathkeeper/x/header"
-
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/helper"
 	"github.com/ory/oathkeeper/pipeline"
+	"github.com/ory/oathkeeper/x/header"
+	"github.com/ory/x/stringsx"
 )
 
 func init() {
