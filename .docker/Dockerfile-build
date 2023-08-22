@@ -1,0 +1,29 @@
+# Workaround for https://github.com/GoogleContainerTools/distroless/issues/1342
+FROM golang:1.20-bullseye AS builder
+
+WORKDIR /go/src/github.com/ory/oathkeeper
+
+RUN apt-get update && apt-get upgrade -y
+
+COPY go.mod go.mod
+COPY go.sum go.sum
+
+ENV CGO_ENABLED 0
+ENV GO111MODULE on
+
+RUN go mod download
+
+COPY . .
+
+RUN go build -o /usr/bin/oathkeeper .
+
+#########################
+
+FROM gcr.io/distroless/static-debian11:nonroot AS runner
+
+COPY --from=builder --chown=nonroot:nonroot /usr/bin/oathkeeper /usr/bin/oathkeeper
+
+EXPOSE 4455 4456
+
+ENTRYPOINT ["oathkeeper"]
+CMD ["serve"]

@@ -1,8 +1,9 @@
 SHELL=/bin/bash -o pipefail
 
-export GO111MODULE := on
-export PATH := .bin:${PATH}
-export PWD := $(shell pwd)
+export GO111MODULE	:= on
+export PATH					:= .bin:${PATH}
+export PWD					:= $(shell pwd)
+export IMAGE_TAG		:= $(if $(IMAGE_TAG),$(IMAGE_TAG),dev)
 
 GO_DEPENDENCIES = github.com/ory/go-acc \
 				  github.com/go-swagger/go-swagger/cmd/swagger \
@@ -81,10 +82,7 @@ install:
 
 .PHONY: docker
 docker:
-	CGO_ENABLED=0 GO111MODULE=on GOOS=linux GOARCH=amd64 go build
-	docker build -t oryd/oathkeeper:dev .
-	docker build -t oryd/oathkeeper:dev-alpine -f Dockerfile-alpine .
-	rm oathkeeper
+	DOCKER_BUILDKIT=1 DOCKER_CONTENT_TRUST=1 docker build -t oryd/oathkeeper:${IMAGE_TAG} --progress=plain -f .docker/Dockerfile-build . 
 
 docs/cli: .bin/clidoc
 	clidoc .

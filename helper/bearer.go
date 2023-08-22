@@ -26,7 +26,10 @@ func BearerTokenFromRequest(r *http.Request, tokenLocation *BearerTokenLocation)
 			}
 			return r.Header.Get(*tokenLocation.Header)
 		} else if tokenLocation.QueryParameter != nil {
-			return r.FormValue(*tokenLocation.QueryParameter)
+			if r.URL == nil {
+				return ""
+			}
+			return r.URL.Query().Get(*tokenLocation.QueryParameter)
 		} else if tokenLocation.Cookie != nil {
 			cookie, err := r.Cookie(*tokenLocation.Cookie)
 			if err != nil {

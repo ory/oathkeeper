@@ -66,11 +66,11 @@ type RegistryMemory struct {
 }
 
 func (r *RegistryMemory) Init() {
+	_ = r.Tracer() // make sure tracer is initialized
 	if err := r.RuleFetcher().Watch(context.Background()); err != nil {
 		r.Logger().WithError(err).Fatal("Access rule watcher could not be initialized.")
 	}
 	_ = r.RuleRepository()
-	_ = r.Tracer() // make sure tracer is initialized
 }
 
 func (r *RegistryMemory) RuleFetcher() rule.Fetcher {
@@ -326,7 +326,7 @@ func (r *RegistryMemory) AvailablePipelineMutators() (available []string) {
 
 func (r *RegistryMemory) Proxy() *proxy.Proxy {
 	if r.proxyProxy == nil {
-		r.proxyProxy = proxy.NewProxy(r)
+		r.proxyProxy = proxy.NewProxy(r, r.c)
 	}
 
 	return r.proxyProxy
@@ -380,7 +380,7 @@ func (r *RegistryMemory) prepareAuthz() {
 		interim := []authz.Authorizer{
 			authz.NewAuthorizerAllow(r.c),
 			authz.NewAuthorizerDeny(r.c),
-			authz.NewAuthorizerKetoEngineACPORY(r.c),
+			authz.NewAuthorizerKetoEngineACPORY(r.c, r),
 			authz.NewAuthorizerRemote(r.c, r),
 			authz.NewAuthorizerRemoteJSON(r.c, r),
 		}

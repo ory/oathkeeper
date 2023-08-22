@@ -1176,6 +1176,12 @@
               "title": "Host",
               "description": "The network interface to listen on. Leave empty to listen on all interfaces."
             },
+            "trust_forwarded_headers": {
+              "type": "boolean",
+              "default": false,
+              "title": "Trust X-Forwarded Headers",
+              "description": "Trust the X-Forwarded-* headers from the reverse proxy. This is useful when running behind a load balancer or similar. Set this to false if you are not running behind a reverse proxy that prevents Hop-by-Hop attacks."
+            },
             "timeout": {
               "$ref": "#/definitions/serverTimeout"
             },

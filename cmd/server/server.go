@@ -21,7 +21,7 @@ import (
 	"github.com/urfave/negroni"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 
-	"github.com/ory/analytics-go/v4"
+	"github.com/ory/analytics-go/v5"
 	"github.com/ory/graceful"
 	"github.com/ory/x/corsx"
 	"github.com/ory/x/healthx"
@@ -38,16 +38,30 @@ import (
 	"github.com/ory/oathkeeper/x"
 )
 
+func isTimeoutError(err error) bool {
+	var te interface{ Timeout() bool } = nil
+	return errors.As(err, &te) && te.Timeout() || errors.Is(err, context.DeadlineExceeded)
+}
+
 func runProxy(d driver.Driver, n *negroni.Negroni, logger *logrusx.Logger, prom *metrics.PrometheusRepository) func() {
 	return func() {
 		proxy := d.Registry().Proxy()
 		transport := otelhttp.NewTransport(proxy, otelhttp.WithSpanNameFormatter(func(operation string, r *http.Request) string { return "upstream" }))
 		proxyHandler := &httputil.ReverseProxy{
-			Director:  proxy.Director,
+			Rewrite:   proxy.Rewrite,
 			Transport: transport,
-			ErrorHandler: func(w http.ResponseWriter, _ *http.Request, err error) {
-				logger.WithError(err).Errorf("http: proxy error: %v", err)
-				w.WriteHeader(http.StatusBadGateway)
+			ErrorHandler: func(w http.ResponseWriter, r *http.Request, err error) {
+				switch {
+				case errors.Is(r.Context().Err(), context.Canceled):
+					logger.WithError(err).Warn("http: client canceled request")
+					w.WriteHeader(499) // http://nginx.org/en/docs/dev/development_guide.html
+				case isTimeoutError(err):
+					logger.WithError(err).Errorf("http: gateway timeout")
+					w.WriteHeader(http.StatusGatewayTimeout)
+				default:
+					logger.WithError(err).Errorf("http: gateway error")
+					w.WriteHeader(http.StatusBadGateway)
+				}
 			},
 		}
 
@@ -209,8 +223,8 @@ func RunServe(version, build, date string) func(cmd *cobra.Command, args []strin
 		publicmw := negroni.New()
 
 		telemetry := metricsx.New(cmd, logger, d.Configuration().Source(), &metricsx.Options{
-			Service:       "ory-oathkeeper",
-			ClusterID:     metricsx.Hash(clusterID(d.Configuration())),
+			Service:       "oathkeeper",
+			DeploymentId:  metricsx.Hash(clusterID(d.Configuration())),
 			IsDevelopment: isDevelopment(d.Configuration()),
 			WriteKey:      "xRVRP48SAKw6ViJEnvB0u2PY8bVlsO6O",
 			WhitelistedPaths: []string{
@@ -229,8 +243,8 @@ func RunServe(version, build, date string) func(cmd *cobra.Command, args []strin
 				Endpoint:             "https://sqa.ory.sh",
 				GzipCompressionLevel: 6,
 				BatchMaxSize:         500 * 1000,
-				BatchSize:            250,
-				Interval:             time.Hour * 24,
+				BatchSize:            1000,
+				Interval:             time.Hour * 6,
 			},
 		})
 

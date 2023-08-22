@@ -3,7 +3,7 @@
 
 package middleware_test
 
-//go:generate mockgen -destination=grpc_mock_server_test.go -package=middleware_test google.golang.org/grpc/test/grpc_testing TestServiceServer
+//go:generate mockgen -destination=grpc_mock_server_test.go -package=middleware_test google.golang.org/grpc/interop/grpc_testing TestServiceServer
 
 import (
 	"context"
@@ -23,10 +23,9 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/grpc/interop/grpc_testing"
 	"google.golang.org/grpc/status"
 	"google.golang.org/grpc/test/bufconn"
-	"google.golang.org/grpc/test/grpc_testing"
-	grpcTesting "google.golang.org/grpc/test/grpc_testing"
 
 	"github.com/ory/oathkeeper/driver"
 	"github.com/ory/oathkeeper/driver/configuration"
@@ -34,7 +33,7 @@ import (
 	"github.com/ory/oathkeeper/rule"
 )
 
-func testClient(t *testing.T, l *bufconn.Listener, dialOpts ...grpc.DialOption) grpcTesting.TestServiceClient {
+func testClient(t *testing.T, l *bufconn.Listener, dialOpts ...grpc.DialOption) grpc_testing.TestServiceClient {
 	conn, err := grpc.Dial("bufnet",
 		append(dialOpts,
 			grpc.WithTransportCredentials(insecure.NewCredentials()),
@@ -45,7 +44,7 @@ func testClient(t *testing.T, l *bufconn.Listener, dialOpts ...grpc.DialOption) 
 	require.NoError(t, err)
 	t.Cleanup(func() { conn.Close() })
 
-	return grpcTesting.NewTestServiceClient(conn)
+	return grpc_testing.NewTestServiceClient(conn)
 }
 
 func testTokenCheckServer(t *testing.T) *httptest.Server {
@@ -126,7 +125,7 @@ mutators:
 		grpc.UnaryInterceptor(mw.UnaryInterceptor()),
 		grpc.StreamInterceptor(mw.StreamInterceptor()),
 	)
-	grpcTesting.RegisterTestServiceServer(s, upstream)
+	grpc_testing.RegisterTestServiceServer(s, upstream)
 	go func() {
 		if err := s.Serve(l); err != nil {
 			t.Logf("Server exited with error: %v", err)
@@ -137,7 +136,7 @@ mutators:
 	upstream.EXPECT().
 		EmptyCall(gomock.Any(), gomock.Any()).
 		AnyTimes().
-		Return(&grpcTesting.Empty{}, nil)
+		Return(&grpc_testing.Empty{}, nil)
 
 	cases := []struct {
 		name     string
@@ -337,13 +336,13 @@ mutators:
 					require.NoError(t, reg.RuleRepository().SetMatchingStrategy(ctx, s))
 					require.NoError(t, reg.RuleRepository().Set(ctx, tc.rules[s]))
 
-					_, err := client.EmptyCall(ctx, &grpcTesting.Empty{})
+					_, err := client.EmptyCall(ctx, &grpc_testing.Empty{})
 					tc.assert(t, err)
 
-					_, err = client.UnaryCall(ctx, &grpcTesting.SimpleRequest{})
+					_, err = client.UnaryCall(ctx, &grpc_testing.SimpleRequest{})
 					assertErrDenied(t, err)
 
-					stream, _ := client.StreamingOutputCall(ctx, &grpcTesting.StreamingOutputCallRequest{})
+					stream, _ := client.StreamingOutputCall(ctx, &grpc_testing.StreamingOutputCallRequest{})
 					_, err = stream.Recv()
 					assertErrDenied(t, err)
 				})
