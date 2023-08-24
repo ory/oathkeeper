@@ -3,6 +3,8 @@
 
 package api
 
+//lint:file-ignore U1000 Used to generate Swagger/OpenAPI definitions.
+
 // Alive returns an ok status if the instance is ready to handle HTTP requests.
 //
 // swagger:route GET /health/alive api isInstanceAlive

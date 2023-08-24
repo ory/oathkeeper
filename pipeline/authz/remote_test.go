@@ -6,7 +6,7 @@ package authz_test
 import (
 	"context"
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -83,7 +83,7 @@ func TestAuthorizerRemoteAuthorize(t *testing.T) {
 				return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 					assert.Contains(t, r.Header, "Content-Type")
 					assert.Contains(t, r.Header["Content-Type"], "text/plain")
-					body, err := ioutil.ReadAll(r.Body)
+					body, err := io.ReadAll(r.Body)
 					require.NoError(t, err)
 					assert.Equal(t, "", string(body))
 					w.WriteHeader(http.StatusOK)
@@ -99,7 +99,7 @@ func TestAuthorizerRemoteAuthorize(t *testing.T) {
 					assert.Contains(t, r.Header, "Content-Type")
 					assert.Contains(t, r.Header["Content-Type"], "text/plain")
 					assert.Nil(t, r.Header["Authorization"])
-					body, err := ioutil.ReadAll(r.Body)
+					body, err := io.ReadAll(r.Body)
 					require.NoError(t, err)
 					assert.Equal(t, "testtest", string(body))
 					w.WriteHeader(http.StatusOK)
@@ -112,7 +112,7 @@ func TestAuthorizerRemoteAuthorize(t *testing.T) {
 			name: "ok with large body",
 			setup: func(t *testing.T) *httptest.Server {
 				return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-					body, err := ioutil.ReadAll(r.Body)
+					body, err := io.ReadAll(r.Body)
 					require.NoError(t, err)
 					assert.True(t, strings.Repeat("1", 1024*1024) == string(body))
 					w.WriteHeader(http.StatusOK)
@@ -186,7 +186,7 @@ func TestAuthorizerRemoteAuthorize(t *testing.T) {
 				},
 			}
 			if tt.body != "" {
-				r.Body = ioutil.NopCloser(strings.NewReader(tt.body))
+				r.Body = io.NopCloser(strings.NewReader(tt.body))
 			}
 			if err := a.Authorize(r, tt.session, tt.config, &rule.Rule{}); (err != nil) != tt.wantErr {
 				t.Errorf("Authorize() error = %v, wantErr %v", err, tt.wantErr)

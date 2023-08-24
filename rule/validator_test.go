@@ -169,9 +169,3 @@ func TestValidateRule(t *testing.T) {
 		})
 	}
 }
-
-func assertReason(t *testing.T, err error, sub string) {
-	require.Error(t, err)
-	reason := errors.Cause(err).(*herodot.DefaultError).ReasonField
-	assert.True(t, strings.Contains(reason, sub), "%s", reason)
-}

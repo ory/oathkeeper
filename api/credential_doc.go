@@ -3,6 +3,8 @@
 
 package api
 
+//lint:file-ignore U1000 Used to generate Swagger/OpenAPI definitions.
+
 // swagger:model jsonWebKeySet
 type swaggerJSONWebKeySet struct {
 	// The value of the "keys" parameter is an array of JWK values.  By
