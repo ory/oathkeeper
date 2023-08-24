@@ -84,6 +84,12 @@ install:
 docker:
 	DOCKER_BUILDKIT=1 DOCKER_CONTENT_TRUST=1 docker build -t oryd/oathkeeper:${IMAGE_TAG} --progress=plain -f .docker/Dockerfile-build . 
 
+.PHONY: docker-k3d
+docker-k3d:
+	CGO_ENABLED=0 GOOS=linux go build
+	DOCKER_BUILDKIT=1 DOCKER_CONTENT_TRUST=1 docker build -t k3d-localhost:5111/oryd/oathkeeper:dev --push -f .docker/Dockerfile-distroless-static . 
+	rm oathkeeper
+
 docs/cli: .bin/clidoc
 	clidoc .
 
