@@ -18,6 +18,7 @@ import (
 
 	"github.com/ghodss/yaml"
 	"github.com/pkg/errors"
+	"go.opentelemetry.io/otel/trace"
 	"gocloud.dev/blob"
 	_ "gocloud.dev/blob/azureblob"
 	_ "gocloud.dev/blob/gcsblob"
@@ -37,6 +38,7 @@ var _ Fetcher = new(FetcherDefault)
 type fetcherRegistry interface {
 	x.RegistryLogger
 	RuleRepository() Repository
+	Tracer() trace.Tracer
 }
 
 type FetcherDefault struct {
@@ -57,10 +59,13 @@ func NewFetcherDefault(
 	registry fetcherRegistry,
 ) *FetcherDefault {
 	return &FetcherDefault{
-		registry:       registry,
-		config:         config,
-		mux:            cloudstorage.NewURLMux(),
-		hc:             httpx.NewResilientClient(httpx.ResilientClientWithConnectionTimeout(15 * time.Second)).StandardClient(),
+		registry: registry,
+		config:   config,
+		mux:      cloudstorage.NewURLMux(),
+		hc: httpx.NewResilientClient(
+			httpx.ResilientClientWithConnectionTimeout(15*time.Second),
+			httpx.ResilientClientWithTracer(registry.Tracer()),
+		).StandardClient(),
 		cache:          make(map[string][]Rule),
 		cancelWatchers: make(map[string]context.CancelFunc),
 		events:         make(chan watcherx.Event),

@@ -15,6 +15,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"go.opentelemetry.io/otel/trace"
 
 	"github.com/ory/x/logrusx"
 
@@ -33,6 +34,16 @@ var sets = [...]json.RawMessage{
 	json.RawMessage(`invalid json ¯\_(ツ)_/¯`),
 }
 
+type reg struct{}
+
+func (*reg) Logger() *logrusx.Logger {
+	return logrusx.New("", "", logrusx.ForceLevel(logrus.DebugLevel))
+}
+
+func (*reg) Tracer() trace.Tracer {
+	return trace.NewNoopTracerProvider().Tracer("")
+}
+
 func TestFetcherDefault(t *testing.T) {
 	t.Parallel()
 
@@ -42,7 +53,7 @@ func TestFetcherDefault(t *testing.T) {
 
 	l := logrusx.New("", "", logrusx.ForceLevel(logrus.DebugLevel))
 	w := herodot.NewJSONWriter(l)
-	s := NewFetcherDefault(l, maxWait, JWKsTTL)
+	s := NewFetcherDefault(&reg{}, maxWait, JWKsTTL)
 
 	timeOutServer := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
 		time.Sleep(timeoutServerDelay)
@@ -177,7 +188,7 @@ func TestFetcherDefault(t *testing.T) {
 	t.Run("name=should fetch from s3 object storage", func(t *testing.T) {
 		t.Parallel()
 		ctx := context.Background()
-		s := NewFetcherDefault(l, maxWait, JWKsTTL, WithURLMux(cloudstorage.NewTestURLMux(t)))
+		s := NewFetcherDefault(&reg{}, maxWait, JWKsTTL, WithURLMux(cloudstorage.NewTestURLMux(t)))
 
 		key, err := s.ResolveKey(ctx, []url.URL{
 			*urlx.ParseOrPanic("s3://oathkeeper-test-bucket/path/prefix/jwks.json"),
@@ -189,7 +200,7 @@ func TestFetcherDefault(t *testing.T) {
 	t.Run("name=should fetch from gs object storage", func(t *testing.T) {
 		t.Parallel()
 		ctx := context.Background()
-		s := NewFetcherDefault(l, maxWait, JWKsTTL, WithURLMux(cloudstorage.NewTestURLMux(t)))
+		s := NewFetcherDefault(&reg{}, maxWait, JWKsTTL, WithURLMux(cloudstorage.NewTestURLMux(t)))
 
 		key, err := s.ResolveKey(ctx, []url.URL{
 			*urlx.ParseOrPanic("gs://oathkeeper-test-bucket/path/prefix/jwks.json"),
@@ -201,7 +212,7 @@ func TestFetcherDefault(t *testing.T) {
 	t.Run("name=should fetch from azure object storage", func(t *testing.T) {
 		t.Parallel()
 		ctx := context.Background()
-		s := NewFetcherDefault(l, maxWait, JWKsTTL, WithURLMux(cloudstorage.NewTestURLMux(t)))
+		s := NewFetcherDefault(&reg{}, maxWait, JWKsTTL, WithURLMux(cloudstorage.NewTestURLMux(t)))
 
 		jwkKey, err := s.ResolveKey(ctx, []url.URL{
 			*urlx.ParseOrPanic("azblob://path/prefix/jwks.json"),

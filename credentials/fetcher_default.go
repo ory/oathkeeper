@@ -14,6 +14,8 @@ import (
 	"sync"
 	"time"
 
+	"go.opentelemetry.io/otel/trace"
+
 	"github.com/ory/oathkeeper/internal/cloudstorage"
 
 	"github.com/pkg/errors"
@@ -49,6 +51,11 @@ type FetcherDefault struct {
 	mux         *blob.URLMux
 }
 
+type dependencies interface {
+	Logger() *logrusx.Logger
+	Tracer() trace.Tracer
+}
+
 type FetcherOption func(f *FetcherDefault)
 
 func WithURLMux(mux *blob.URLMux) FetcherOption {
@@ -60,15 +67,18 @@ func WithURLMux(mux *blob.URLMux) FetcherOption {
 //   - cancelAfter: If reached, the fetcher will stop waiting for responses and return an error.
 //   - waitForResponse: While the fetcher might stop waiting for responses, we will give the server more time to respond
 //     and add the keys to the registry unless waitForResponse is reached in which case we'll terminate the request.
-func NewFetcherDefault(l *logrusx.Logger, cancelAfter time.Duration, ttl time.Duration, opts ...FetcherOption) *FetcherDefault {
+func NewFetcherDefault(d dependencies, cancelAfter time.Duration, ttl time.Duration, opts ...FetcherOption) *FetcherDefault {
 	f := &FetcherDefault{
 		cancelAfter: cancelAfter,
-		l:           l,
+		l:           d.Logger(),
 		ttl:         ttl,
 		keys:        make(map[string]jose.JSONWebKeySet),
 		fetchedAt:   make(map[string]time.Time),
-		client:      httpx.NewResilientClient(httpx.ResilientClientWithConnectionTimeout(15 * time.Second)).StandardClient(),
-		mux:         cloudstorage.NewURLMux(),
+		client: httpx.NewResilientClient(
+			httpx.ResilientClientWithConnectionTimeout(15*time.Second),
+			httpx.ResilientClientWithTracer(d.Tracer()),
+		).StandardClient(),
+		mux: cloudstorage.NewURLMux(),
 	}
 	for _, o := range opts {
 		o(f)
@@ -112,7 +122,7 @@ func (s *FetcherDefault) fetchParallel(ctx context.Context, locations []url.URL)
 		}
 	}()
 
-	go s.resolveAll(done, errs, locations)
+	go s.resolveAll(ctx, done, errs, locations)
 
 	select {
 	case <-ctx.Done():
@@ -183,17 +193,16 @@ func (s *FetcherDefault) set(locations []url.URL, staleKeyAcceptable bool) []jos
 }
 
 func (s *FetcherDefault) isKeyExpired(expiredKeyAcceptable bool, fetchedAt time.Time) bool {
-	return expiredKeyAcceptable == false &&
-		fetchedAt.Add(s.ttl).Before(time.Now().UTC())
+	return !expiredKeyAcceptable && time.Since(fetchedAt) > s.ttl
 }
 
-func (s *FetcherDefault) resolveAll(done chan struct{}, errs chan error, locations []url.URL) {
+func (s *FetcherDefault) resolveAll(ctx context.Context, done chan struct{}, errs chan error, locations []url.URL) {
 	var wg sync.WaitGroup
 
 	for _, l := range locations {
 		l := l
 		wg.Add(1)
-		go s.resolve(&wg, errs, l)
+		go s.resolve(ctx, &wg, errs, l)
 	}
 
 	wg.Wait()
@@ -201,7 +210,7 @@ func (s *FetcherDefault) resolveAll(done chan struct{}, errs chan error, locatio
 	close(errs)
 }
 
-func (s *FetcherDefault) resolve(wg *sync.WaitGroup, errs chan error, location url.URL) {
+func (s *FetcherDefault) resolve(ctx context.Context, wg *sync.WaitGroup, errs chan error, location url.URL) {
 	defer wg.Done()
 	var (
 		reader io.ReadCloser
@@ -210,7 +219,6 @@ func (s *FetcherDefault) resolve(wg *sync.WaitGroup, errs chan error, location u
 
 	switch location.Scheme {
 	case "azblob", "gs", "s3":
-		ctx := context.Background()
 		bucket, err := s.mux.OpenBucket(ctx, location.Scheme+"://"+location.Host)
 		if err != nil {
 			errs <- errors.WithStack(herodot.
@@ -255,7 +263,19 @@ func (s *FetcherDefault) resolve(wg *sync.WaitGroup, errs chan error, location u
 		defer reader.Close()
 
 	case "http", "https":
-		res, err := s.client.Get(location.String())
+		req, err := http.NewRequestWithContext(ctx, "GET", location.String(), nil)
+		if err != nil {
+			errs <- errors.WithStack(herodot.
+				ErrInternalServerError.
+				WithReasonf(
+					`Unable to fetch JSON Web Keys from location "%s" because "%s".`,
+					location.String(),
+					err,
+				),
+			)
+			return
+		}
+		res, err := s.client.Do(req)
 		if err != nil {
 			errs <- errors.WithStack(herodot.
 				ErrInternalServerError.
