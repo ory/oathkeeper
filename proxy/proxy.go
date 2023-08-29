@@ -184,20 +184,46 @@ func ConfigureBackendURL(r *http.Request, rl *rule.Rule) error {
 	}
 
 	proxyHost := r.Host
-	proxyPath := r.URL.Path
+	proxyPath := r.URL.EscapedPath()
 
 	backendHost := p.Host
-	backendPath := p.Path
+	backendPath := p.EscapedPath()
 	backendScheme := p.Scheme
+
+	// We need to build a new path from the incoming *escaped* path components,
+	// because just relying on the already-escaped URL.Path results in escaped
+	// slashes (%2F) being irreversibly converted to actual slashes.
+	//
+	// However, once the new escaped path is built, we can't immediately assign it
+	// to the resulting URL:
+	// - Assigning to URL.Path would mean assigning an escaped path to
+	//   the unescaped path attribute, which would end up double-escaping
+	//   everything.
+	// - Setting RawPath on its own will result in its value being ignored,
+	//   because URL.EscapedPath() (used by URL.String()) will ignore RawPath
+	//   if it does not match an escaped version of Path.
+	// - Directly escaping the path ourselves first to assign it to Path isn't
+	//   possible, because net/url exposes *no* way to escape an entire path,
+	//   only path segments.
+	//
+	// In order to be able to set both URL.Path and URL.RawPath, we re-parse the
+	// escaped path as an intermediate URL. This gives us the correct Path and
+	// RawPath values that can then be set on the forward URL.
+	newEscapedPath := "/" + strings.TrimLeft("/"+strings.Trim(backendPath, "/")+"/"+strings.TrimLeft(proxyPath, "/"), "/")
+	if rl.Upstream.StripPath != "" {
+		newEscapedPath = strings.Replace(newEscapedPath, "/"+strings.Trim(rl.Upstream.StripPath, "/"), "", 1)
+	}
+
+	intermediatePathURL, err := url.Parse(newEscapedPath)
+	if err != nil {
+		return errors.WithStack(err)
+	}
 
 	forwardURL := r.URL
 	forwardURL.Scheme = backendScheme
 	forwardURL.Host = backendHost
-	forwardURL.Path = "/" + strings.TrimLeft("/"+strings.Trim(backendPath, "/")+"/"+strings.TrimLeft(proxyPath, "/"), "/")
-
-	if rl.Upstream.StripPath != "" {
-		forwardURL.Path = strings.Replace(forwardURL.Path, "/"+strings.Trim(rl.Upstream.StripPath, "/"), "", 1)
-	}
+	forwardURL.RawPath = intermediatePathURL.RawPath
+	forwardURL.Path = intermediatePathURL.Path
 
 	r.Host = backendHost
 	if rl.Upstream.PreserveHost {
