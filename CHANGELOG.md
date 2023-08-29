@@ -5,7 +5,7 @@
 
 **Table of Contents**
 
-- [0.0.0 (2023-08-07)](#000-2023-08-07)
+- [0.0.0 (2023-08-29)](#000-2023-08-29)
   - [Bug Fixes](#bug-fixes)
 - [0.40.6 (2023-07-18)](#0406-2023-07-18)
   - [Bug Fixes](#bug-fixes-1)
@@ -330,12 +330,14 @@
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-# [0.0.0](https://github.com/ory/oathkeeper/compare/v0.40.6...v0.0.0) (2023-08-07)
+# [0.0.0](https://github.com/ory/oathkeeper/compare/v0.40.6...v0.0.0) (2023-08-29)
 
 ### Bug Fixes
 
 - Ignore version.schema.json (prettier)
   ([58690ae](https://github.com/ory/oathkeeper/commit/58690aeda0c4c66a5e06ec29651da439129e59fd))
+- Update alpine version ([#1128](https://github.com/ory/oathkeeper/issues/1128))
+  ([5bf9b70](https://github.com/ory/oathkeeper/commit/5bf9b703edc8d42c776f9612ebb58b4de2a25462))
 
 # [0.40.6](https://github.com/ory/oathkeeper/compare/v0.40.5...v0.40.6) (2023-07-18)
 
