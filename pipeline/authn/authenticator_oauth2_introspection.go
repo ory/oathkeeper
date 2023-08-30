@@ -17,6 +17,7 @@ import (
 	"github.com/dgraph-io/ristretto"
 	"github.com/pkg/errors"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
+	"go.opentelemetry.io/otel/trace"
 	"golang.org/x/oauth2/clientcredentials"
 
 	"github.com/ory/fosite"
@@ -26,6 +27,7 @@ import (
 	"github.com/ory/oathkeeper/x/header"
 	"github.com/ory/x/httpx"
 	"github.com/ory/x/logrusx"
+	"github.com/ory/x/otelx"
 	"github.com/ory/x/stringslice"
 )
 
@@ -72,10 +74,11 @@ type AuthenticatorOAuth2Introspection struct {
 	tokenCache *ristretto.Cache
 	cacheTTL   *time.Duration
 	logger     *logrusx.Logger
+	provider   trace.TracerProvider
 }
 
-func NewAuthenticatorOAuth2Introspection(c configuration.Provider, logger *logrusx.Logger) *AuthenticatorOAuth2Introspection {
-	return &AuthenticatorOAuth2Introspection{c: c, logger: logger, clientMap: make(map[string]*http.Client)}
+func NewAuthenticatorOAuth2Introspection(c configuration.Provider, l *logrusx.Logger, p trace.TracerProvider) *AuthenticatorOAuth2Introspection {
+	return &AuthenticatorOAuth2Introspection{c: c, logger: l, provider: p, clientMap: make(map[string]*http.Client)}
 }
 
 func (a *AuthenticatorOAuth2Introspection) GetID() string {
@@ -171,7 +174,12 @@ func (a *AuthenticatorOAuth2Introspection) tokenToCache(config *AuthenticatorOAu
 	}
 }
 
-func (a *AuthenticatorOAuth2Introspection) Authenticate(r *http.Request, session *AuthenticationSession, config json.RawMessage, _ pipeline.Rule) error {
+func (a *AuthenticatorOAuth2Introspection) Authenticate(r *http.Request, session *AuthenticationSession, config json.RawMessage, _ pipeline.Rule) (err error) {
+	tp := trace.SpanFromContext(r.Context()).TracerProvider()
+	ctx, span := tp.Tracer("oauthkeeper/pipeline/authn").Start(r.Context(), "authn.oauth2_introspection")
+	defer otelx.End(span, &err)
+	r = r.WithContext(ctx)
+
 	cf, client, err := a.Config(config)
 	if err != nil {
 		return err
@@ -195,7 +203,7 @@ func (a *AuthenticatorOAuth2Introspection) Authenticate(r *http.Request, session
 			body.Add("scope", strings.Join(cf.Scopes, " "))
 		}
 
-		introspectReq, err := http.NewRequest(http.MethodPost, cf.IntrospectionURL, strings.NewReader(body.Encode()))
+		introspectReq, err := http.NewRequestWithContext(ctx, http.MethodPost, cf.IntrospectionURL, strings.NewReader(body.Encode()))
 		if err != nil {
 			return errors.WithStack(err)
 		}
@@ -210,7 +218,7 @@ func (a *AuthenticatorOAuth2Introspection) Authenticate(r *http.Request, session
 			introspectReq.Header.Set(header.XForwardedHost, r.Host)
 		}
 
-		resp, err := client.Do(introspectReq.WithContext(r.Context()))
+		resp, err := client.Do(introspectReq)
 		if err != nil {
 			return errors.WithStack(err)
 		}
@@ -348,7 +356,7 @@ func (a *AuthenticatorOAuth2Introspection) Config(config json.RawMessage) (*Auth
 			httpx.ResilientClientWithMaxRetryWait(maxWait),
 			httpx.ResilientClientWithConnectionTimeout(timeout),
 		).StandardClient()
-		client.Transport = otelhttp.NewTransport(rt)
+		client.Transport = otelhttp.NewTransport(rt, otelhttp.WithTracerProvider(a.provider))
 		a.mu.Lock()
 		a.clientMap[clientKey] = client
 		a.mu.Unlock()

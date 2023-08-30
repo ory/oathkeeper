@@ -12,15 +12,16 @@ import (
 	"testing"
 	"time"
 
+	"go.opentelemetry.io/otel/trace"
+
 	"github.com/ory/x/assertx"
 	"github.com/ory/x/configx"
+	"github.com/ory/x/logrusx"
 
 	"github.com/julienschmidt/httprouter"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/tidwall/sjson"
-
-	"github.com/ory/x/logrusx"
 
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/internal"
@@ -791,7 +792,7 @@ func TestAuthenticatorOAuth2Introspection(t *testing.T) {
 
 	t.Run("method=config", func(t *testing.T) {
 		logger := logrusx.New("test", "1")
-		authenticator := NewAuthenticatorOAuth2Introspection(conf, logger)
+		authenticator := NewAuthenticatorOAuth2Introspection(conf, logger, trace.NewNoopTracerProvider())
 
 		noPreauthConfig := []byte(`{ "introspection_url":"http://localhost/oauth2/token" }`)
 		preAuthConfigOne := []byte(`{ "introspection_url":"http://localhost/oauth2/token","pre_authorization":{"token_url":"http://localhost/oauth2/token","client_id":"some_id","client_secret":"some_secret","enabled":true} }`)

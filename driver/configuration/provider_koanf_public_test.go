@@ -13,6 +13,7 @@ import (
 	"github.com/rs/cors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"go.opentelemetry.io/otel/trace"
 
 	"github.com/ory/x/configx"
 	"github.com/ory/x/logrusx"
@@ -285,7 +286,7 @@ func TestKoanfProvider(t *testing.T) {
 		})
 
 		t.Run("authenticator=oauth2_introspection", func(t *testing.T) {
-			a := authn.NewAuthenticatorOAuth2Introspection(p, logger)
+			a := authn.NewAuthenticatorOAuth2Introspection(p, logger, trace.NewNoopTracerProvider())
 			assert.True(t, p.AuthenticatorIsEnabled(a.GetID()))
 			require.NoError(t, a.Validate(nil))
 
@@ -433,7 +434,7 @@ func TestAuthenticatorOAuth2TokenIntrospectionPreAuthorization(t *testing.T) {
 		{enabled: true, id: "a", secret: "b", turl: "https://some-url", err: false},
 	} {
 		t.Run(fmt.Sprintf("case=%d", k), func(t *testing.T) {
-			a := authn.NewAuthenticatorOAuth2Introspection(p, logrusx.New("", ""))
+			a := authn.NewAuthenticatorOAuth2Introspection(p, logrusx.New("", ""), trace.NewNoopTracerProvider())
 
 			config, _, err := a.Config(json.RawMessage(fmt.Sprintf(`{
 	"pre_authorization": {

@@ -10,6 +10,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"go.opentelemetry.io/otel/trace"
 
 	"github.com/ory/fosite"
 	"github.com/ory/oathkeeper/driver/configuration"
@@ -30,7 +31,7 @@ func TestCache(t *testing.T) {
 		}))
 	require.NoError(t, err)
 
-	a := NewAuthenticatorOAuth2Introspection(c, logger)
+	a := NewAuthenticatorOAuth2Introspection(c, logger, trace.NewNoopTracerProvider())
 	assert.Equal(t, "oauth2_introspection", a.GetID())
 
 	config, _, err := a.Config(nil)
