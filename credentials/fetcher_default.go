@@ -104,8 +104,6 @@ func (s *FetcherDefault) ResolveSets(ctx context.Context, locations []url.URL) (
 }
 
 func (s *FetcherDefault) fetchParallel(ctx context.Context, locations []url.URL) error {
-	ctx, cancel := context.WithTimeout(ctx, s.cancelAfter)
-	defer cancel()
 	errs := make(chan error)
 	done := make(chan struct{})
 
@@ -125,9 +123,9 @@ func (s *FetcherDefault) fetchParallel(ctx context.Context, locations []url.URL)
 	go s.resolveAll(ctx, done, errs, locations)
 
 	select {
-	case <-ctx.Done():
-		s.l.WithError(ctx.Err()).Errorf("Ignoring JSON Web Keys from at least one URI because the request timed out waiting for a response.")
-		return ctx.Err()
+	case <-time.After(s.cancelAfter):
+		s.l.Errorf("Ignoring JSON Web Keys from at least one URI because the request timed out waiting for a response.")
+		return context.DeadlineExceeded
 	case <-done:
 		// We're done!
 		return nil
@@ -197,6 +195,7 @@ func (s *FetcherDefault) isKeyExpired(expiredKeyAcceptable bool, fetchedAt time.
 }
 
 func (s *FetcherDefault) resolveAll(ctx context.Context, done chan struct{}, errs chan error, locations []url.URL) {
+	ctx = context.WithoutCancel(ctx)
 	var wg sync.WaitGroup
 
 	for _, l := range locations {
