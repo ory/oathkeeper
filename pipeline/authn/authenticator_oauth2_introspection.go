@@ -23,6 +23,7 @@ import (
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/helper"
 	"github.com/ory/oathkeeper/pipeline"
+	"github.com/ory/oathkeeper/x/header"
 	"github.com/ory/x/httpx"
 	"github.com/ory/x/logrusx"
 	"github.com/ory/x/stringslice"
@@ -35,6 +36,7 @@ type AuthenticatorOAuth2IntrospectionConfiguration struct {
 	PreAuth                     *AuthenticatorOAuth2IntrospectionPreAuthConfiguration `json:"pre_authorization"`
 	ScopeStrategy               string                                                `json:"scope_strategy"`
 	IntrospectionURL            string                                                `json:"introspection_url"`
+	PreserveHost                bool                                                  `json:"preserve_host"`
 	BearerTokenLocation         *helper.BearerTokenLocation                           `json:"token_from"`
 	IntrospectionRequestHeaders map[string]string                                     `json:"introspection_request_headers"`
 	Retry                       *AuthenticatorOAuth2IntrospectionRetryConfiguration   `json:"retry"`
@@ -204,6 +206,10 @@ func (a *AuthenticatorOAuth2Introspection) Authenticate(r *http.Request, session
 		// set/override the content-type header
 		introspectReq.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
+		if cf.PreserveHost {
+			introspectReq.Header.Set(header.XForwardedHost, r.Host)
+		}
+
 		resp, err := client.Do(introspectReq.WithContext(r.Context()))
 		if err != nil {
 			return errors.WithStack(err)
@@ -239,7 +245,7 @@ func (a *AuthenticatorOAuth2Introspection) Authenticate(r *http.Request, session
 
 	if len(cf.Issuers) > 0 {
 		if !stringslice.Has(cf.Issuers, i.Issuer) {
-			return errors.WithStack(helper.ErrForbidden.WithReason(fmt.Sprintf("Token issuer does not match any trusted issuer")))
+			return errors.WithStack(helper.ErrForbidden.WithReason("Token issuer does not match any trusted issuer"))
 		}
 	}
 

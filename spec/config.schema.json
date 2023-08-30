@@ -822,6 +822,12 @@
             "type": "string"
           }
         },
+        "preserve_host": {
+          "title": "Preserve Host",
+          "type": "boolean",
+          "description": "When set to true the HTTP Header X-Forwarded-Host will be set to the original HTTP host.",
+          "default": false
+        },
         "introspection_request_headers": {
           "title": "Introspection Request Headers",
           "description": "Additional headers to be added to the introspection request.",
