@@ -6,6 +6,7 @@ package authn
 import (
 	"encoding/json"
 	"net/http"
+	"strings"
 
 	"github.com/pkg/errors"
 	"github.com/tidwall/gjson"
@@ -31,6 +32,7 @@ type AuthenticatorBearerTokenFilter struct {
 type AuthenticatorBearerTokenConfiguration struct {
 	CheckSessionURL     string                      `json:"check_session_url"`
 	BearerTokenLocation *helper.BearerTokenLocation `json:"token_from"`
+	Prefix              string                      `json:"prefix"`
 	PreserveQuery       bool                        `json:"preserve_query"`
 	PreservePath        bool                        `json:"preserve_path"`
 	PreserveHost        bool                        `json:"preserve_host"`
@@ -128,7 +130,7 @@ func (a *AuthenticatorBearerToken) Authenticate(r *http.Request, session *Authen
 	}
 
 	token := helper.BearerTokenFromRequest(r, cf.BearerTokenLocation)
-	if token == "" {
+	if token == "" || !strings.HasPrefix(token, cf.Prefix) {
 		return errors.WithStack(ErrAuthenticatorNotResponsible)
 	}
 

@@ -40,6 +40,7 @@ type AuthenticatorOAuth2IntrospectionConfiguration struct {
 	IntrospectionURL            string                                                `json:"introspection_url"`
 	PreserveHost                bool                                                  `json:"preserve_host"`
 	BearerTokenLocation         *helper.BearerTokenLocation                           `json:"token_from"`
+	Prefix                      string                                                `json:"prefix"`
 	IntrospectionRequestHeaders map[string]string                                     `json:"introspection_request_headers"`
 	Retry                       *AuthenticatorOAuth2IntrospectionRetryConfiguration   `json:"retry"`
 	Cache                       cacheConfig                                           `json:"cache"`
@@ -186,7 +187,7 @@ func (a *AuthenticatorOAuth2Introspection) Authenticate(r *http.Request, session
 	}
 
 	token := helper.BearerTokenFromRequest(r, cf.BearerTokenLocation)
-	if token == "" {
+	if token == "" || !strings.HasPrefix(token, cf.Prefix) {
 		return errors.WithStack(ErrAuthenticatorNotResponsible)
 	}
 

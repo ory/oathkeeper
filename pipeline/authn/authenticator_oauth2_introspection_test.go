@@ -79,6 +79,13 @@ func TestAuthenticatorOAuth2Introspection(t *testing.T) {
 				expectExactErr: ErrAuthenticatorNotResponsible,
 			},
 			{
+				d:              "should return error saying that authenticator is not responsible for validating the request, as the token does not have the specified prefix",
+				r:              &http.Request{Header: http.Header{"Authorization": {"bearer secret_token"}}},
+				config:         []byte(`{"prefix": "not_secret"}`),
+				expectErr:      true,
+				expectExactErr: ErrAuthenticatorNotResponsible,
+			},
+			{
 				d: "should return error saying that authenticator is not responsible for validating the request, as the token was not provided in a proper location (custom query parameter)",
 				r: &http.Request{
 					Form: map[string][]string{
@@ -119,7 +126,7 @@ func TestAuthenticatorOAuth2Introspection(t *testing.T) {
 						RawQuery: "token=" + "token",
 					},
 				},
-				config:    []byte(`{"token_from": {"query_parameter": "token"}}`),
+				config:    []byte(`{"token_from": {"query_parameter": "token"}, "prefix": "tok"}`),
 				expectErr: false,
 				setup: func(t *testing.T, m *httprouter.Router) {
 					m.POST("/oauth2/introspect", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
