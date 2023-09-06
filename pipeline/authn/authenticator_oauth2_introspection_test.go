@@ -174,6 +174,49 @@ func TestAuthenticatorOAuth2Introspection(t *testing.T) {
 				expectErr: true,
 			},
 			{
+				d:      "should pass and set host when preserve_host is true",
+				r:      &http.Request{Host: "some-host", Header: http.Header{"Authorization": {"bearer token"}}, Method: "POST"},
+				config: []byte(`{"preserve_host": true}`),
+				setup: func(t *testing.T, m *httprouter.Router) {
+					m.POST("/oauth2/introspect", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+						require.NoError(t, r.ParseForm())
+						require.Equal(t, "token", r.Form.Get("token"))
+						require.Equal(t, "some-host", r.Header.Get("X-Forwarded-Host"))
+						require.NoError(t, json.NewEncoder(w).Encode(&AuthenticatorOAuth2IntrospectionResult{
+							Active:   true,
+							Subject:  "subject",
+							Audience: []string{"audience"},
+							Issuer:   "issuer",
+							Username: "username",
+							Extra:    map[string]interface{}{"extra": "foo"},
+						}))
+					})
+				},
+				expectErr: false,
+			}, {
+				d:      "should pass additional headers to introspection endpoint ",
+				r:      &http.Request{Host: "some-host", Header: http.Header{"Authorization": {"bearer token"}}, Method: "POST"},
+				config: []byte(`{"preserve_host": true, "introspection_request_headers": {"X-Test": "test123", "X-Forwarded-For": "some-other-host", "Z-Test": "test987"}}`),
+				setup: func(t *testing.T, m *httprouter.Router) {
+					m.POST("/oauth2/introspect", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+						require.NoError(t, r.ParseForm())
+						require.Equal(t, "token", r.Form.Get("token"))
+						require.Equal(t, "some-host", r.Header.Get("X-Forwarded-Host"), "preserve_host takes precedence over introspection_request_headers")
+						require.Equal(t, "test123", r.Header.Get("X-Test"), "value configured in introspection_request_headers is set")
+						require.Equal(t, "test987", r.Header.Get("Z-Test"), "value configured in introspection_request_headers is set")
+						require.NoError(t, json.NewEncoder(w).Encode(&AuthenticatorOAuth2IntrospectionResult{
+							Active:   true,
+							Subject:  "subject",
+							Audience: []string{"audience"},
+							Issuer:   "issuer",
+							Username: "username",
+							Extra:    map[string]interface{}{"extra": "foo"},
+						}))
+					})
+				},
+				expectErr: false,
+			},
+			{
 				d:      "should pass because active and no issuer / audience expected",
 				r:      &http.Request{Header: http.Header{"Authorization": {"bearer token"}}},
 				config: []byte(`{}`),
