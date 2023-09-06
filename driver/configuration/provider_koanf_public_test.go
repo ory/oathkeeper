@@ -248,7 +248,7 @@ func TestKoanfProvider(t *testing.T) {
 		})
 
 		t.Run("authenticator=cookie_session", func(t *testing.T) {
-			a := authn.NewAuthenticatorCookieSession(p, nil)
+			a := authn.NewAuthenticatorCookieSession(p, trace.NewNoopTracerProvider())
 			assert.True(t, p.AuthenticatorIsEnabled(a.GetID()))
 			require.NoError(t, a.Validate(nil))
 

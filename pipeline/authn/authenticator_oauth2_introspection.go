@@ -177,7 +177,7 @@ func (a *AuthenticatorOAuth2Introspection) tokenToCache(config *AuthenticatorOAu
 
 func (a *AuthenticatorOAuth2Introspection) Authenticate(r *http.Request, session *AuthenticationSession, config json.RawMessage, _ pipeline.Rule) (err error) {
 	tp := trace.SpanFromContext(r.Context()).TracerProvider()
-	ctx, span := tp.Tracer("oauthkeeper/pipeline/authn").Start(r.Context(), "authn.oauth2_introspection")
+	ctx, span := tp.Tracer("oauthkeeper/pipeline/authn").Start(r.Context(), "pipeline.authn.AuthenticatorOAuth2Introspection.Authenticate")
 	defer otelx.End(span, &err)
 	r = r.WithContext(ctx)
 

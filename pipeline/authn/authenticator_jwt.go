@@ -75,7 +75,7 @@ func (a *AuthenticatorJWT) Config(config json.RawMessage) (*AuthenticatorOAuth2J
 }
 
 func (a *AuthenticatorJWT) Authenticate(r *http.Request, session *AuthenticationSession, config json.RawMessage, _ pipeline.Rule) (err error) {
-	ctx, span := a.r.Tracer().Start(r.Context(), "authn.jwt")
+	ctx, span := a.r.Tracer().Start(r.Context(), "pipeline.authn.AuthenticatorJWT.Authenticate")
 	defer otelx.End(span, &err)
 	r = r.WithContext(ctx)
 

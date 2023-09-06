@@ -65,7 +65,7 @@ func (a *AuthorizerRemote) GetID() string {
 
 // Authorize implements the Authorizer interface.
 func (a *AuthorizerRemote) Authorize(r *http.Request, session *authn.AuthenticationSession, config json.RawMessage, rl pipeline.Rule) (err error) {
-	ctx, span := a.tracer.Start(r.Context(), "authz.remote")
+	ctx, span := a.tracer.Start(r.Context(), "pipeline.authz.AuthorizerRemote.Authorize")
 	defer otelx.End(span, &err)
 	r = r.WithContext(ctx)
 
