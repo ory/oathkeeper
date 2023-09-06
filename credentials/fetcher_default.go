@@ -123,6 +123,8 @@ func (s *FetcherDefault) fetchParallel(ctx context.Context, locations []url.URL)
 	go s.resolveAll(ctx, done, errs, locations)
 
 	select {
+	case <-ctx.Done():
+		return ctx.Err()
 	case <-time.After(s.cancelAfter):
 		s.l.Errorf("Ignoring JSON Web Keys from at least one URI because the request timed out waiting for a response.")
 		return context.DeadlineExceeded
