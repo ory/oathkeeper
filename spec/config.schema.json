@@ -486,7 +486,7 @@
         "prefix": {
           "title": "Token Prefix",
           "type": "string",
-          "description": "The token is considered only if starts with this string."
+          "description": "The token is considered only if it starts with this string."
         },
         "preserve_query": {
           "title": "Preserve Query",
