@@ -483,6 +483,11 @@
             }
           ]
         },
+        "prefix": {
+          "title": "Token Prefix",
+          "type": "string",
+          "description": "The token is considered only if it starts with this string."
+        },
         "preserve_query": {
           "title": "Preserve Query",
           "type": "boolean",
@@ -821,6 +826,17 @@
           "items": {
             "type": "string"
           }
+        },
+        "prefix": {
+          "title": "Token Prefix",
+          "type": "string",
+          "description": "The token is considered only if it starts with this string."
+        },
+        "preserve_host": {
+          "title": "Preserve Host",
+          "type": "boolean",
+          "description": "When set to true the HTTP Header X-Forwarded-Host will be set to the original HTTP host.",
+          "default": false
         },
         "introspection_request_headers": {
           "title": "Introspection Request Headers",

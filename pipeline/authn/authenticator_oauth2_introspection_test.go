@@ -12,15 +12,16 @@ import (
 	"testing"
 	"time"
 
+	"go.opentelemetry.io/otel/trace"
+
 	"github.com/ory/x/assertx"
 	"github.com/ory/x/configx"
+	"github.com/ory/x/logrusx"
 
 	"github.com/julienschmidt/httprouter"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/tidwall/sjson"
-
-	"github.com/ory/x/logrusx"
 
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/internal"
@@ -78,6 +79,13 @@ func TestAuthenticatorOAuth2Introspection(t *testing.T) {
 				expectExactErr: ErrAuthenticatorNotResponsible,
 			},
 			{
+				d:              "should return error saying that authenticator is not responsible for validating the request, as the token does not have the specified prefix",
+				r:              &http.Request{Header: http.Header{"Authorization": {"bearer secret_token"}}},
+				config:         []byte(`{"prefix": "not_secret"}`),
+				expectErr:      true,
+				expectExactErr: ErrAuthenticatorNotResponsible,
+			},
+			{
 				d: "should return error saying that authenticator is not responsible for validating the request, as the token was not provided in a proper location (custom query parameter)",
 				r: &http.Request{
 					Form: map[string][]string{
@@ -118,7 +126,7 @@ func TestAuthenticatorOAuth2Introspection(t *testing.T) {
 						RawQuery: "token=" + "token",
 					},
 				},
-				config:    []byte(`{"token_from": {"query_parameter": "token"}}`),
+				config:    []byte(`{"token_from": {"query_parameter": "token"}, "prefix": "tok"}`),
 				expectErr: false,
 				setup: func(t *testing.T, m *httprouter.Router) {
 					m.POST("/oauth2/introspect", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
@@ -164,6 +172,49 @@ func TestAuthenticatorOAuth2Introspection(t *testing.T) {
 					})
 				},
 				expectErr: true,
+			},
+			{
+				d:      "should pass and set host when preserve_host is true",
+				r:      &http.Request{Host: "some-host", Header: http.Header{"Authorization": {"bearer token"}}, Method: "POST"},
+				config: []byte(`{"preserve_host": true}`),
+				setup: func(t *testing.T, m *httprouter.Router) {
+					m.POST("/oauth2/introspect", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+						require.NoError(t, r.ParseForm())
+						require.Equal(t, "token", r.Form.Get("token"))
+						require.Equal(t, "some-host", r.Header.Get("X-Forwarded-Host"))
+						require.NoError(t, json.NewEncoder(w).Encode(&AuthenticatorOAuth2IntrospectionResult{
+							Active:   true,
+							Subject:  "subject",
+							Audience: []string{"audience"},
+							Issuer:   "issuer",
+							Username: "username",
+							Extra:    map[string]interface{}{"extra": "foo"},
+						}))
+					})
+				},
+				expectErr: false,
+			}, {
+				d:      "should pass additional headers to introspection endpoint ",
+				r:      &http.Request{Host: "some-host", Header: http.Header{"Authorization": {"bearer token"}}, Method: "POST"},
+				config: []byte(`{"preserve_host": true, "introspection_request_headers": {"X-Test": "test123", "X-Forwarded-For": "some-other-host", "Z-Test": "test987"}}`),
+				setup: func(t *testing.T, m *httprouter.Router) {
+					m.POST("/oauth2/introspect", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+						require.NoError(t, r.ParseForm())
+						require.Equal(t, "token", r.Form.Get("token"))
+						require.Equal(t, "some-host", r.Header.Get("X-Forwarded-Host"), "preserve_host takes precedence over introspection_request_headers")
+						require.Equal(t, "test123", r.Header.Get("X-Test"), "value configured in introspection_request_headers is set")
+						require.Equal(t, "test987", r.Header.Get("Z-Test"), "value configured in introspection_request_headers is set")
+						require.NoError(t, json.NewEncoder(w).Encode(&AuthenticatorOAuth2IntrospectionResult{
+							Active:   true,
+							Subject:  "subject",
+							Audience: []string{"audience"},
+							Issuer:   "issuer",
+							Username: "username",
+							Extra:    map[string]interface{}{"extra": "foo"},
+						}))
+					})
+				},
+				expectErr: false,
 			},
 			{
 				d:      "should pass because active and no issuer / audience expected",
@@ -791,7 +842,7 @@ func TestAuthenticatorOAuth2Introspection(t *testing.T) {
 
 	t.Run("method=config", func(t *testing.T) {
 		logger := logrusx.New("test", "1")
-		authenticator := NewAuthenticatorOAuth2Introspection(conf, logger)
+		authenticator := NewAuthenticatorOAuth2Introspection(conf, logger, trace.NewNoopTracerProvider())
 
 		noPreauthConfig := []byte(`{ "introspection_url":"http://localhost/oauth2/token" }`)
 		preAuthConfigOne := []byte(`{ "introspection_url":"http://localhost/oauth2/token","pre_authorization":{"token_url":"http://localhost/oauth2/token","client_id":"some_id","client_secret":"some_secret","enabled":true} }`)

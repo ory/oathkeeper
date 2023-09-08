@@ -11,6 +11,7 @@ import (
 
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/pkg/errors"
+	"go.opentelemetry.io/otel/trace"
 
 	"github.com/ory/herodot"
 	"github.com/ory/oathkeeper/credentials"
@@ -18,10 +19,12 @@ import (
 	"github.com/ory/oathkeeper/helper"
 	"github.com/ory/oathkeeper/pipeline"
 	"github.com/ory/x/jwtx"
+	"github.com/ory/x/otelx"
 )
 
 type AuthenticatorJWTRegistry interface {
 	credentials.VerifierRegistry
+	Tracer() trace.Tracer
 }
 
 type AuthenticatorOAuth2JWTConfiguration struct {
@@ -71,7 +74,11 @@ func (a *AuthenticatorJWT) Config(config json.RawMessage) (*AuthenticatorOAuth2J
 	return &c, nil
 }
 
-func (a *AuthenticatorJWT) Authenticate(r *http.Request, session *AuthenticationSession, config json.RawMessage, _ pipeline.Rule) error {
+func (a *AuthenticatorJWT) Authenticate(r *http.Request, session *AuthenticationSession, config json.RawMessage, _ pipeline.Rule) (err error) {
+	ctx, span := a.r.Tracer().Start(r.Context(), "pipeline.authn.AuthenticatorJWT.Authenticate")
+	defer otelx.End(span, &err)
+	r = r.WithContext(ctx)
+
 	cf, err := a.Config(config)
 	if err != nil {
 		return err

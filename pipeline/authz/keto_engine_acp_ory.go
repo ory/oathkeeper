@@ -97,7 +97,7 @@ func (a *AuthorizerKetoEngineACPORY) WithContextCreator(f authorizerKetoWardenCo
 }
 
 func (a *AuthorizerKetoEngineACPORY) Authorize(r *http.Request, session *authn.AuthenticationSession, config json.RawMessage, _ pipeline.Rule) (err error) {
-	ctx, span := a.tracer.Start(r.Context(), "authz.keto_engine_acp_ory")
+	ctx, span := a.tracer.Start(r.Context(), "pipeline.authz.AuthorizerKetoEngineACPORY.Authorize")
 	defer otelx.End(span, &err)
 	r = r.WithContext(ctx)
 

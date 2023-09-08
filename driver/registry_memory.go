@@ -198,7 +198,7 @@ func (r *RegistryMemory) DecisionHandler() *api.DecisionHandler {
 
 func (r *RegistryMemory) CredentialsFetcher() credentials.Fetcher {
 	if r.credentialsFetcher == nil {
-		r.credentialsFetcher = credentials.NewFetcherDefault(r.Logger(), r.c.AuthenticatorJwtJwkMaxWait(), r.c.AuthenticatorJwtJwkTtl())
+		r.credentialsFetcher = credentials.NewFetcherDefault(r, r.c.AuthenticatorJwtJwkMaxWait(), r.c.AuthenticatorJwtJwkTtl())
 	}
 
 	return r.credentialsFetcher
@@ -362,7 +362,7 @@ func (r *RegistryMemory) prepareAuthn() {
 			authn.NewAuthenticatorJWT(r.c, r),
 			authn.NewAuthenticatorNoOp(r.c),
 			authn.NewAuthenticatorOAuth2ClientCredentials(r.c, r.Logger()),
-			authn.NewAuthenticatorOAuth2Introspection(r.c, r.Logger()),
+			authn.NewAuthenticatorOAuth2Introspection(r.c, r.Logger(), r.trc.Provider()),
 			authn.NewAuthenticatorUnauthorized(r.c),
 		}
 

@@ -65,6 +65,13 @@ func TestAuthenticatorBearerToken(t *testing.T) {
 				expectExactErr: ErrAuthenticatorNotResponsible,
 			},
 			{
+				d:              "should return error saying that authenticator is not responsible for validating the request, as the token does not have the specified prefix",
+				r:              &http.Request{Header: http.Header{"Authorization": {"bearer secret_token"}}},
+				config:         []byte(`{"prefix": "not_secret"}`),
+				expectErr:      true,
+				expectExactErr: ErrAuthenticatorNotResponsible,
+			},
+			{
 				d: "should fail because session store returned 400",
 				r: &http.Request{Header: http.Header{"Authorization": {"bearer token"}}, URL: &url.URL{Path: ""}},
 				setup: func(t *testing.T, m *httprouter.Router) {
@@ -132,7 +139,7 @@ func TestAuthenticatorBearerToken(t *testing.T) {
 					w.WriteHeader(200)
 					w.Write([]byte(`{"sub": "123"}`))
 				},
-				config:    []byte(`{"preserve_path": true, "force_method": "GET"}`),
+				config:    []byte(`{"preserve_path": true, "force_method": "GET", "prefix": "zy"}`),
 				expectErr: false,
 				expectSess: &AuthenticationSession{
 					Subject: "123",

@@ -16,6 +16,7 @@ import (
 	"github.com/tidwall/gjson"
 
 	"github.com/ory/oathkeeper/x/header"
+	"github.com/ory/x/otelx"
 	"github.com/ory/x/stringsx"
 
 	"github.com/ory/herodot"
@@ -78,6 +79,7 @@ func (a *AuthenticatorCookieSessionConfiguration) GetForceMethod() string {
 type AuthenticatorCookieSession struct {
 	c      configuration.Provider
 	client *http.Client
+	tracer trace.Tracer
 }
 
 var _ AuthenticatorForwardConfig = new(AuthenticatorCookieSessionConfiguration)
@@ -89,8 +91,9 @@ func NewAuthenticatorCookieSession(c configuration.Provider, provider trace.Trac
 			Transport: otelhttp.NewTransport(
 				http.DefaultTransport,
 				otelhttp.WithTracerProvider(provider),
-				otelhttp.WithSpanNameFormatter(func(operation string, r *http.Request) string { return "authn.cookie_session" })),
+			),
 		},
+		tracer: provider.Tracer("oauthkeeper/pipeline/authn"),
 	}
 }
 
@@ -127,7 +130,11 @@ func (a *AuthenticatorCookieSession) Config(config json.RawMessage) (*Authentica
 	return &c, nil
 }
 
-func (a *AuthenticatorCookieSession) Authenticate(r *http.Request, session *AuthenticationSession, config json.RawMessage, _ pipeline.Rule) error {
+func (a *AuthenticatorCookieSession) Authenticate(r *http.Request, session *AuthenticationSession, config json.RawMessage, _ pipeline.Rule) (err error) {
+	ctx, span := a.tracer.Start(r.Context(), "pipeline.authn.AuthenticatorCookieSession.Authenticate")
+	defer otelx.End(span, &err)
+	r = r.WithContext(ctx)
+
 	cf, err := a.Config(config)
 	if err != nil {
 		return err

@@ -7,7 +7,7 @@ import (
 	"bytes"
 	"crypto/rsa"
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"os"
 	"time"
@@ -85,7 +85,7 @@ func requestWithJWT(token string) (*http.Response, string) {
 	res, err := http.DefaultClient.Do(req)
 	cmdx.Must(err, "%s", err)
 	defer res.Body.Close()
-	body, err := ioutil.ReadAll(res.Body)
+	body, err := io.ReadAll(res.Body)
 	cmdx.Must(err, "%s", err)
 	return res, string(body)
 }
@@ -98,7 +98,7 @@ func decisionWithJWT(token string) (*http.Response, string) {
 	res, err := http.DefaultClient.Do(req)
 	cmdx.Must(err, "%s", err)
 	defer res.Body.Close()
-	body, err := ioutil.ReadAll(res.Body)
+	body, err := io.ReadAll(res.Body)
 	cmdx.Must(err, "%s", err)
 	return res, string(body)
 }

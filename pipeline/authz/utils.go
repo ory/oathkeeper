@@ -6,7 +6,6 @@ package authz
 import (
 	"bytes"
 	"io"
-	"io/ioutil"
 	"net/http"
 )
 
@@ -21,6 +20,6 @@ func pipeRequestBody(r *http.Request, w io.Writer) error {
 	if err != nil {
 		return err
 	}
-	r.Body = ioutil.NopCloser(&body)
+	r.Body = io.NopCloser(&body)
 	return err
 }

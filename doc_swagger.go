@@ -3,6 +3,8 @@
 
 package main
 
+//lint:file-ignore U1000 Used to generate Swagger/OpenAPI definitions.
+
 // The standard error format
 // swagger:model genericError
 type genericError struct {

@@ -6,6 +6,7 @@ package authn
 import (
 	"encoding/json"
 	"net/http"
+	"strings"
 
 	"github.com/pkg/errors"
 	"github.com/tidwall/gjson"
@@ -16,6 +17,7 @@ import (
 	"github.com/ory/oathkeeper/helper"
 	"github.com/ory/oathkeeper/pipeline"
 	"github.com/ory/oathkeeper/x/header"
+	"github.com/ory/x/otelx"
 	"github.com/ory/x/stringsx"
 )
 
@@ -31,6 +33,7 @@ type AuthenticatorBearerTokenFilter struct {
 type AuthenticatorBearerTokenConfiguration struct {
 	CheckSessionURL     string                      `json:"check_session_url"`
 	BearerTokenLocation *helper.BearerTokenLocation `json:"token_from"`
+	Prefix              string                      `json:"prefix"`
 	PreserveQuery       bool                        `json:"preserve_query"`
 	PreservePath        bool                        `json:"preserve_path"`
 	PreserveHost        bool                        `json:"preserve_host"`
@@ -72,6 +75,7 @@ func (a *AuthenticatorBearerTokenConfiguration) GetForceMethod() string {
 type AuthenticatorBearerToken struct {
 	c      configuration.Provider
 	client *http.Client
+	tracer trace.Tracer
 }
 
 var _ AuthenticatorForwardConfig = new(AuthenticatorBearerTokenConfiguration)
@@ -83,8 +87,9 @@ func NewAuthenticatorBearerToken(c configuration.Provider, provider trace.Tracer
 			Transport: otelhttp.NewTransport(
 				http.DefaultTransport,
 				otelhttp.WithTracerProvider(provider),
-				otelhttp.WithSpanNameFormatter(func(operation string, r *http.Request) string { return "authn.bearer_token" })),
+			),
 		},
+		tracer: provider.Tracer("oauthkeeper/pipeline/authn"),
 	}
 }
 
@@ -121,14 +126,18 @@ func (a *AuthenticatorBearerToken) Config(config json.RawMessage) (*Authenticato
 	return &c, nil
 }
 
-func (a *AuthenticatorBearerToken) Authenticate(r *http.Request, session *AuthenticationSession, config json.RawMessage, _ pipeline.Rule) error {
+func (a *AuthenticatorBearerToken) Authenticate(r *http.Request, session *AuthenticationSession, config json.RawMessage, _ pipeline.Rule) (err error) {
+	ctx, span := a.tracer.Start(r.Context(), "pipeline.authn.AuthenticatorBearerToken.Authenticate")
+	defer otelx.End(span, &err)
+	r = r.WithContext(ctx)
+
 	cf, err := a.Config(config)
 	if err != nil {
 		return err
 	}
 
 	token := helper.BearerTokenFromRequest(r, cf.BearerTokenLocation)
-	if token == "" {
+	if token == "" || !strings.HasPrefix(token, cf.Prefix) {
 		return errors.WithStack(ErrAuthenticatorNotResponsible)
 	}
 

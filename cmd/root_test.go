@@ -20,30 +20,12 @@ import (
 
 var apiPort, proxyPort int
 
-func freePort() (int, int) {
-	var err error
-	r := make([]int, 2)
-
-	if r[0], err = freeport.GetFreePort(); err != nil {
-		panic(err.Error())
-	}
-
-	tries := 0
-	for {
-		r[1], err = freeport.GetFreePort()
-		if r[0] != r[1] {
-			break
-		}
-		tries++
-		if tries > 10 {
-			panic("Unable to find free port")
-		}
-	}
-	return r[0], r[1]
-}
-
 func init() {
-	apiPort, proxyPort = freePort()
+	p, err := freeport.GetFreePorts(2)
+	if err != nil {
+		panic(err)
+	}
+	apiPort, proxyPort = p[0], p[1]
 
 	os.Setenv("SERVE_API_PORT", fmt.Sprintf("%d", apiPort))
 	os.Setenv("SERVE_PROXY_PORT", fmt.Sprintf("%d", proxyPort))
