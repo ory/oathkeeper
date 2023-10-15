@@ -181,7 +181,7 @@ func (a *AuthenticatorOAuth2ClientCredentials) tokenToCache(config *Authenticato
 		return
 	} else if a.cacheTTL != nil {
 		// Allow up-to at most the cache TTL, otherwise use token expiry
-		ttl := token.Expiry.Sub(time.Now())
+		ttl := time.Until(token.Expiry)
 		if ttl > *a.cacheTTL {
 			ttl = *a.cacheTTL
 		}
@@ -191,7 +191,7 @@ func (a *AuthenticatorOAuth2ClientCredentials) tokenToCache(config *Authenticato
 		// If token has no expiry apply the same to the cache
 		ttl := time.Duration(0)
 		if !token.Expiry.IsZero() {
-			ttl = token.Expiry.Sub(time.Now())
+			ttl = time.Until(token.Expiry)
 		}
 
 		a.tokenCache.SetWithTTL(key, v, 1, ttl)

@@ -10,7 +10,6 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 
 	"github.com/ory/herodot"
@@ -250,25 +249,6 @@ errors:
 			tc.assert(t, w)
 		})
 	}
-}
-
-type testWriter struct{ t *testing.T }
-
-func (tw *testWriter) Write(p []byte) (n int, err error) {
-	tw.t.Log(string(p))
-	return len(p), nil
-}
-
-type logHook struct{ t *testing.T }
-
-func (l *logHook) Levels() []logrus.Level { return logrus.AllLevels }
-func (l *logHook) Fire(e *logrus.Entry) error {
-	s, err := e.String()
-	if err != nil {
-		return err
-	}
-	l.t.Log(s)
-	return nil
 }
 
 func TestRequestHandler(t *testing.T) {

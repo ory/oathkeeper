@@ -11,6 +11,8 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/ory/oathkeeper/driver/configuration"
+
 	"github.com/ory/oathkeeper/pipeline/authn"
 	"github.com/ory/oathkeeper/x"
 
@@ -22,17 +24,17 @@ import (
 type proxyRegistry interface {
 	x.RegistryLogger
 	x.RegistryWriter
-
 	ProxyRequestHandler() RequestHandler
 	RuleMatcher() rule.Matcher
 }
 
-func NewProxy(r proxyRegistry) *Proxy {
-	return &Proxy{r: r}
+func NewProxy(r proxyRegistry, c configuration.Provider) *Proxy {
+	return &Proxy{r: r, c: c}
 }
 
 type Proxy struct {
 	r proxyRegistry
+	c configuration.Provider
 }
 
 type key int
@@ -107,6 +109,19 @@ func (d *Proxy) RoundTrip(r *http.Request) (*http.Response, error) {
 }
 
 func (d *Proxy) Rewrite(r *httputil.ProxyRequest) {
+	if d.c.ProxyTrustForwardedHeaders() {
+		headers := []string{
+			"X-Forwarded-Host",
+			"X-Forwarded-Proto",
+			"X-Forwarded-For",
+		}
+		for _, h := range headers {
+			if v := r.In.Header.Get(h); v != "" {
+				r.Out.Header.Set(h, v)
+			}
+		}
+	}
+
 	EnrichRequestedURL(r)
 	rl, err := d.r.RuleMatcher().Match(r.Out.Context(), r.Out.Method, r.Out.URL, rule.ProtocolHTTP)
 	if err != nil {

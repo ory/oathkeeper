@@ -12,8 +12,8 @@ import (
 	"github.com/golang/gddo/httputil/header"
 	"github.com/pkg/errors"
 
-	"github.com/ory/go-convenience/stringsx"
 	"github.com/ory/x/errorsx"
+	"github.com/ory/x/stringsx"
 )
 
 type (

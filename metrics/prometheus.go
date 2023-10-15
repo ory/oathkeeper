@@ -43,11 +43,9 @@ type UpdateRequest func(counter *prometheus.CounterVec, service, request, method
 
 // PrometheusRepository provides methods to manage prometheus metrics
 type PrometheusRepository struct {
-	logger                 *logrusx.Logger
-	requestDurationObserve RequestDurationObserve
-	updateRequest          UpdateRequest
-	Registry               *prometheus.Registry
-	metrics                []prometheus.Collector
+	logger   *logrusx.Logger
+	Registry *prometheus.Registry
+	metrics  []prometheus.Collector
 }
 
 // NewConfigurablePrometheusRepository creates a new prometheus repository with the given settings

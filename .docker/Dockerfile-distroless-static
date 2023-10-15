@@ -1,0 +1,7 @@
+FROM gcr.io/distroless/static-debian11:nonroot
+
+COPY --chown=nonroot:nonroot oathkeeper /usr/bin/oathkeeper
+EXPOSE 4455 4456
+
+ENTRYPOINT ["oathkeeper"]
+CMD ["oathkeeper"]

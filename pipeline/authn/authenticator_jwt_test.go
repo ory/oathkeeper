@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"net/url"
 	"testing"
 	"time"
 
@@ -137,13 +138,11 @@ func TestAuthenticatorJWT(t *testing.T) {
 			{
 				d: "should pass because the valid JWT token was provided in a proper location (custom query parameter)",
 				r: &http.Request{
-					Form: map[string][]string{
-						"token": {
-							gen(keys[1], jwt.MapClaims{
-								"sub": "sub",
-								"exp": now.Add(time.Hour).Unix(),
-							}),
-						},
+					URL: &url.URL{
+						RawQuery: "token=" + gen(keys[1], jwt.MapClaims{
+							"sub": "sub",
+							"exp": now.Add(time.Hour).Unix(),
+						}),
 					},
 				},
 				config:    `{"token_from": {"query_parameter": "token"}}`,

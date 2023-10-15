@@ -18,7 +18,7 @@ import (
 	"github.com/dgraph-io/ristretto"
 
 	"github.com/google/uuid"
-	"github.com/knadh/koanf"
+	"github.com/knadh/koanf/v2"
 	"github.com/pkg/errors"
 	"github.com/rs/cors"
 	"github.com/spf13/pflag"
@@ -382,6 +382,10 @@ func (v *KoanfProvider) ErrorHandlerIsEnabled(id string) bool {
 
 func (v *KoanfProvider) AuthenticatorIsEnabled(id string) bool {
 	return v.pipelineIsEnabled("authenticators", id)
+}
+
+func (v *KoanfProvider) ProxyTrustForwardedHeaders() bool {
+	return v.source.Bool(ProxyTrustForwardedHeaders)
 }
 
 func (v *KoanfProvider) AuthenticatorConfig(id string, override json.RawMessage, dest interface{}) error {

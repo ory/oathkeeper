@@ -93,10 +93,12 @@ func TestProxy(t *testing.T) {
 		url         string
 		code        int
 		messages    []string
+		messagesNot []string
 		rulesRegexp []rule.Rule
 		rulesGlob   []rule.Rule
 		transform   func(r *http.Request)
 		d           string
+		prep        func(t *testing.T)
 	}{
 		{
 			d:           "should fail because url does not exist in rule set",
@@ -199,6 +201,62 @@ func TestProxy(t *testing.T) {
 				"authorization=",
 				"url=/authn-anon/authz-allow/cred-noop/1234",
 				"host=" + x.ParseURLOrPanic(backend.URL).Host,
+			},
+		},
+		{
+			d: "should pass and set x-forwarded headers",
+			prep: func(t *testing.T) {
+				conf.SetForTest(t, configuration.ProxyTrustForwardedHeaders, true)
+			},
+			transform: func(r *http.Request) {
+				r.Header.Set("X-Forwarded-Host", "foobar.com")
+			},
+			url: ts.URL + "/authn-anon/authz-allow/cred-noop/1234",
+			rulesRegexp: []rule.Rule{{
+				Match:          &rule.Match{Methods: []string{"GET"}, URL: ts.URL + "/authn-anon/authz-allow/cred-noop/<[0-9]+>"},
+				Authenticators: []rule.Handler{{Handler: "anonymous"}},
+				Authorizer:     rule.Handler{Handler: "allow"},
+				Mutators:       []rule.Handler{{Handler: "noop"}},
+				Upstream:       rule.Upstream{URL: backend.URL},
+			}},
+			rulesGlob: []rule.Rule{{
+				Match:          &rule.Match{Methods: []string{"GET"}, URL: ts.URL + "/authn-anon/authz-allow/cred-noop/<[0-9]*>"},
+				Authenticators: []rule.Handler{{Handler: "anonymous"}},
+				Authorizer:     rule.Handler{Handler: "allow"},
+				Mutators:       []rule.Handler{{Handler: "noop"}},
+				Upstream:       rule.Upstream{URL: backend.URL},
+			}},
+			code: http.StatusOK,
+			messages: []string{
+				"authorization=",
+				"url=/authn-anon/authz-allow/cred-noop/1234",
+				"host=" + x.ParseURLOrPanic(backend.URL).Host,
+				"header X-Forwarded-Host=foobar.com",
+			},
+		},
+		{
+			d: "should pass and remove x-forwarded headers",
+			transform: func(r *http.Request) {
+				r.Header.Set("X-Forwarded-Host", "foobar.com")
+			},
+			url: ts.URL + "/authn-anon/authz-allow/cred-noop/1234",
+			rulesRegexp: []rule.Rule{{
+				Match:          &rule.Match{Methods: []string{"GET"}, URL: ts.URL + "/authn-anon/authz-allow/cred-noop/<[0-9]+>"},
+				Authenticators: []rule.Handler{{Handler: "anonymous"}},
+				Authorizer:     rule.Handler{Handler: "allow"},
+				Mutators:       []rule.Handler{{Handler: "noop"}},
+				Upstream:       rule.Upstream{URL: backend.URL},
+			}},
+			rulesGlob: []rule.Rule{{
+				Match:          &rule.Match{Methods: []string{"GET"}, URL: ts.URL + "/authn-anon/authz-allow/cred-noop/<[0-9]*>"},
+				Authenticators: []rule.Handler{{Handler: "anonymous"}},
+				Authorizer:     rule.Handler{Handler: "allow"},
+				Mutators:       []rule.Handler{{Handler: "noop"}},
+				Upstream:       rule.Upstream{URL: backend.URL},
+			}},
+			code: http.StatusOK,
+			messagesNot: []string{
+				"header X-Forwarded-Host=foobar.com",
 			},
 		},
 		{
@@ -339,6 +397,10 @@ func TestProxy(t *testing.T) {
 	} {
 		t.Run(fmt.Sprintf("description=%s", tc.d), func(t *testing.T) {
 			testFunc := func(t *testing.T, strategy configuration.MatchingStrategy, rules []rule.Rule) {
+				if tc.prep != nil {
+					tc.prep(t)
+				}
+
 				reg.RuleRepository().(*rule.RepositoryMemory).WithRules(rules)
 				require.NoError(t, reg.RuleRepository().SetMatchingStrategy(context.Background(), strategy))
 
@@ -358,6 +420,13 @@ func TestProxy(t *testing.T) {
 				assert.Equal(t, tc.code, res.StatusCode, "%s", res.Body)
 				for _, m := range tc.messages {
 					assert.True(t, strings.Contains(string(greeting), m), `Value "%s" not found in message:
+%s
+proxy_url=%s
+backend_url=%s
+`, m, greeting, ts.URL, backend.URL)
+				}
+				for _, m := range tc.messagesNot {
+					assert.False(t, strings.Contains(string(greeting), m), `Value "%s" found in message but not expected:
 %s
 proxy_url=%s
 backend_url=%s

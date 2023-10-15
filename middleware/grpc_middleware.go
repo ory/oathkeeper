@@ -17,6 +17,7 @@ import (
 	"google.golang.org/grpc/metadata"
 
 	"github.com/ory/herodot"
+	"github.com/ory/x/otelx"
 
 	"github.com/ory/oathkeeper/rule"
 )
@@ -73,8 +74,8 @@ func (m *middleware) UnaryInterceptor() grpc.UnaryServerInterceptor {
 }
 
 func (m *middleware) unaryInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
-	traceCtx, span := trace.SpanFromContext(ctx).TracerProvider().Tracer("oathkeeper/middleware").Start(ctx, "Oathkeeper.UnaryInterceptor")
-	defer span.End()
+	traceCtx, span := trace.SpanFromContext(ctx).TracerProvider().Tracer("oathkeeper/middleware").Start(ctx, "middleware.UnaryInterceptor")
+	defer otelx.End(span, &err)
 
 	log := m.Logger().WithField("middleware", "oathkeeper")
 
@@ -122,8 +123,8 @@ func (m *middleware) streamInterceptor(
 	info *grpc.StreamServerInfo,
 	handler grpc.StreamHandler) (err error) {
 	ctx := stream.Context()
-	ctx, span := trace.SpanFromContext(ctx).TracerProvider().Tracer("oathkeeper/middleware").Start(ctx, "Oathkeeper.UnaryInterceptor")
-	defer span.End()
+	ctx, span := trace.SpanFromContext(ctx).TracerProvider().Tracer("oathkeeper/middleware").Start(ctx, "middleware.StreamInterceptor")
+	otelx.End(span, &err)
 
 	log := m.Logger().WithField("middleware", "oathkeeper")
 

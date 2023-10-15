@@ -14,22 +14,21 @@ import (
 	"sync"
 	"time"
 
-	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
-
-	"github.com/ory/fosite"
-
 	"github.com/dgraph-io/ristretto"
-
 	"github.com/pkg/errors"
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
+	"go.opentelemetry.io/otel/trace"
 	"golang.org/x/oauth2/clientcredentials"
 
-	"github.com/ory/go-convenience/stringslice"
-	"github.com/ory/x/httpx"
-	"github.com/ory/x/logrusx"
-
+	"github.com/ory/fosite"
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/helper"
 	"github.com/ory/oathkeeper/pipeline"
+	"github.com/ory/oathkeeper/x/header"
+	"github.com/ory/x/httpx"
+	"github.com/ory/x/logrusx"
+	"github.com/ory/x/otelx"
+	"github.com/ory/x/stringslice"
 )
 
 type AuthenticatorOAuth2IntrospectionConfiguration struct {
@@ -39,7 +38,9 @@ type AuthenticatorOAuth2IntrospectionConfiguration struct {
 	PreAuth                     *AuthenticatorOAuth2IntrospectionPreAuthConfiguration `json:"pre_authorization"`
 	ScopeStrategy               string                                                `json:"scope_strategy"`
 	IntrospectionURL            string                                                `json:"introspection_url"`
+	PreserveHost                bool                                                  `json:"preserve_host"`
 	BearerTokenLocation         *helper.BearerTokenLocation                           `json:"token_from"`
+	Prefix                      string                                                `json:"prefix"`
 	IntrospectionRequestHeaders map[string]string                                     `json:"introspection_request_headers"`
 	Retry                       *AuthenticatorOAuth2IntrospectionRetryConfiguration   `json:"retry"`
 	Cache                       cacheConfig                                           `json:"cache"`
@@ -74,10 +75,11 @@ type AuthenticatorOAuth2Introspection struct {
 	tokenCache *ristretto.Cache
 	cacheTTL   *time.Duration
 	logger     *logrusx.Logger
+	provider   trace.TracerProvider
 }
 
-func NewAuthenticatorOAuth2Introspection(c configuration.Provider, logger *logrusx.Logger) *AuthenticatorOAuth2Introspection {
-	return &AuthenticatorOAuth2Introspection{c: c, logger: logger, clientMap: make(map[string]*http.Client)}
+func NewAuthenticatorOAuth2Introspection(c configuration.Provider, l *logrusx.Logger, p trace.TracerProvider) *AuthenticatorOAuth2Introspection {
+	return &AuthenticatorOAuth2Introspection{c: c, logger: l, provider: p, clientMap: make(map[string]*http.Client)}
 }
 
 func (a *AuthenticatorOAuth2Introspection) GetID() string {
@@ -173,14 +175,19 @@ func (a *AuthenticatorOAuth2Introspection) tokenToCache(config *AuthenticatorOAu
 	}
 }
 
-func (a *AuthenticatorOAuth2Introspection) Authenticate(r *http.Request, session *AuthenticationSession, config json.RawMessage, _ pipeline.Rule) error {
+func (a *AuthenticatorOAuth2Introspection) Authenticate(r *http.Request, session *AuthenticationSession, config json.RawMessage, _ pipeline.Rule) (err error) {
+	tp := trace.SpanFromContext(r.Context()).TracerProvider()
+	ctx, span := tp.Tracer("oauthkeeper/pipeline/authn").Start(r.Context(), "pipeline.authn.AuthenticatorOAuth2Introspection.Authenticate")
+	defer otelx.End(span, &err)
+	r = r.WithContext(ctx)
+
 	cf, client, err := a.Config(config)
 	if err != nil {
 		return err
 	}
 
 	token := helper.BearerTokenFromRequest(r, cf.BearerTokenLocation)
-	if token == "" {
+	if token == "" || !strings.HasPrefix(token, cf.Prefix) {
 		return errors.WithStack(ErrAuthenticatorNotResponsible)
 	}
 
@@ -197,7 +204,7 @@ func (a *AuthenticatorOAuth2Introspection) Authenticate(r *http.Request, session
 			body.Add("scope", strings.Join(cf.Scopes, " "))
 		}
 
-		introspectReq, err := http.NewRequest(http.MethodPost, cf.IntrospectionURL, strings.NewReader(body.Encode()))
+		introspectReq, err := http.NewRequestWithContext(ctx, http.MethodPost, cf.IntrospectionURL, strings.NewReader(body.Encode()))
 		if err != nil {
 			return errors.WithStack(err)
 		}
@@ -208,7 +215,11 @@ func (a *AuthenticatorOAuth2Introspection) Authenticate(r *http.Request, session
 		// set/override the content-type header
 		introspectReq.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
-		resp, err := client.Do(introspectReq.WithContext(r.Context()))
+		if cf.PreserveHost {
+			introspectReq.Header.Set(header.XForwardedHost, r.Host)
+		}
+
+		resp, err := client.Do(introspectReq)
 		if err != nil {
 			return errors.WithStack(err)
 		}
@@ -243,7 +254,7 @@ func (a *AuthenticatorOAuth2Introspection) Authenticate(r *http.Request, session
 
 	if len(cf.Issuers) > 0 {
 		if !stringslice.Has(cf.Issuers, i.Issuer) {
-			return errors.WithStack(helper.ErrForbidden.WithReason(fmt.Sprintf("Token issuer does not match any trusted issuer")))
+			return errors.WithStack(helper.ErrForbidden.WithReason("Token issuer does not match any trusted issuer"))
 		}
 	}
 
@@ -346,7 +357,7 @@ func (a *AuthenticatorOAuth2Introspection) Config(config json.RawMessage) (*Auth
 			httpx.ResilientClientWithMaxRetryWait(maxWait),
 			httpx.ResilientClientWithConnectionTimeout(timeout),
 		).StandardClient()
-		client.Transport = otelhttp.NewTransport(rt)
+		client.Transport = otelhttp.NewTransport(rt, otelhttp.WithTracerProvider(a.provider))
 		a.mu.Lock()
 		a.clientMap[clientKey] = client
 		a.mu.Unlock()

@@ -15,7 +15,6 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/ory/oathkeeper/x"
-	"github.com/ory/x/logrusx"
 )
 
 type defaultSignerMockRegistry struct {
@@ -23,7 +22,7 @@ type defaultSignerMockRegistry struct {
 }
 
 func newDefaultSignerMockRegistry() *defaultSignerMockRegistry {
-	return &defaultSignerMockRegistry{f: NewFetcherDefault(logrusx.New("", ""), time.Millisecond*100, time.Millisecond*500)}
+	return &defaultSignerMockRegistry{f: NewFetcherDefault(&reg{}, time.Millisecond*100, time.Millisecond*500)}
 }
 
 func (m *defaultSignerMockRegistry) CredentialsFetcher() Fetcher {
@@ -42,7 +41,7 @@ func TestSignerDefault(t *testing.T) {
 			token, err := signer.Sign(context.Background(), x.ParseURLOrPanic(src), jwt.MapClaims{"sub": "foo"})
 			require.NoError(t, err)
 
-			fetcher := NewFetcherDefault(logrusx.New("", ""), time.Second, time.Second)
+			fetcher := NewFetcherDefault(&reg{}, time.Second, time.Second)
 
 			_, err = verify(t, token, fetcher, src)
 			require.NoError(t, err)

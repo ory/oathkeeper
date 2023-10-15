@@ -3,6 +3,8 @@
 
 package api
 
+//lint:file-ignore U1000 Used to generate Swagger/OpenAPI definitions.
+
 import "github.com/ory/oathkeeper/rule"
 
 // A rule
