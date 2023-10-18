@@ -192,6 +192,16 @@ func TestAuthorizerRemoteAuthorize(t *testing.T) {
 				t.Errorf("Authorize() error = %v, wantErr %v", err, tt.wantErr)
 			}
 
+			// Issue #1136 - Authorizer "remote" throws exception "invalid Read on closed Body" if request body is present in request
+			// This test was added to verify that the request body is retained after the AuthorizerRemote pipeline processing.
+			if tt.body != "" {
+				processedBody, _ := io.ReadAll(r.Body)
+				if result := tt.body == string(processedBody); result == false {
+					t.Errorf("Authorize() error = payload body failure, body mismatch")
+				}
+			}
+			// end Issue #1136
+
 			if tt.sessionHeaderMatch != nil {
 				assert.Equal(t, tt.sessionHeaderMatch, &tt.session.Header)
 			}
