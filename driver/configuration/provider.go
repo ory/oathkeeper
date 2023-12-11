@@ -5,10 +5,11 @@ package configuration
 
 import (
 	"encoding/json"
-	"github.com/ory/oathkeeper/credentials"
 	"net/url"
 	"testing"
 	"time"
+
+	"github.com/ory/oathkeeper/credentials"
 
 	"github.com/rs/cors"
 

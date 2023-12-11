@@ -9,13 +9,14 @@ import (
 	"crypto/sha256"
 	"encoding/json"
 	"fmt"
-	"github.com/knadh/koanf/v2"
-	"github.com/ory/oathkeeper/credentials"
 	"net/url"
 	"strings"
 	"sync"
 	"testing"
 	"time"
+
+	"github.com/knadh/koanf/v2"
+	"github.com/ory/oathkeeper/credentials"
 
 	"github.com/dgraph-io/ristretto"
 
