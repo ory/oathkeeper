@@ -9,6 +9,8 @@ import (
 	"crypto/sha256"
 	"encoding/json"
 	"fmt"
+	"github.com/knadh/koanf/v2"
+	"github.com/ory/oathkeeper/credentials"
 	"net/url"
 	"strings"
 	"sync"
@@ -18,7 +20,6 @@ import (
 	"github.com/dgraph-io/ristretto"
 
 	"github.com/google/uuid"
-	"github.com/knadh/koanf/v2"
 	"github.com/pkg/errors"
 	"github.com/rs/cors"
 	"github.com/spf13/pflag"
@@ -266,6 +267,18 @@ func (v *KoanfProvider) getURL(value string, key string) *url.URL {
 	}
 
 	return u
+}
+
+func (v *KoanfProvider) ToScopesValidation(value string, key string) credentials.ScopesValidator {
+	switch strings.ToLower(value) {
+	case "default":
+		return credentials.DefaultValidation
+	case "any":
+		return credentials.AnyValidation
+	default:
+		v.l.Errorf(`Configuration key "%s" declares unknown scope strategy "%s", only "default", "any", are supported. Falling back to strategy "default".`, key, value)
+		return credentials.DefaultValidation
+	}
 }
 
 func (v *KoanfProvider) ToScopeStrategy(value string, key string) fosite.ScopeStrategy {

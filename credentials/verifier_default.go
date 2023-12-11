@@ -120,11 +120,16 @@ func (v *VerifierDefault) Verify(
 	claims["scp"] = s
 
 	if r.ScopeStrategy != nil {
+		scopeResult := make(map[string]bool, len(r.Scope))
+
 		for _, sc := range r.Scope {
-			if !r.ScopeStrategy(s, sc) {
-				return nil, herodot.ErrUnauthorized.WithReasonf(`JSON Web Token is missing required scope "%s".`, sc)
-			}
+			scopeResult[sc] = r.ScopeStrategy(s, sc)
 		}
+
+		if err := r.ScopesValidator(scopeResult); err != nil {
+			return nil, err
+		}
+
 	} else {
 		if len(r.Scope) > 0 {
 			return nil, errors.WithStack(helper.ErrRuleFeatureDisabled.WithReason("Scope validation was requested but scope strategy is set to \"none\"."))

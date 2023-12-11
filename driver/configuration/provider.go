@@ -5,6 +5,7 @@ package configuration
 
 import (
 	"encoding/json"
+	"github.com/ory/oathkeeper/credentials"
 	"net/url"
 	"testing"
 	"time"
@@ -70,6 +71,7 @@ type Provider interface {
 	PrometheusHideRequestPaths() bool
 	PrometheusCollapseRequestPaths() bool
 
+	ToScopesValidation(value string, key string) credentials.ScopesValidator
 	ToScopeStrategy(value string, key string) fosite.ScopeStrategy
 	ParseURLs(sources []string) ([]url.URL, error)
 	JSONWebKeyURLs() []string
