@@ -389,6 +389,21 @@ func TestKoanfProvider(t *testing.T) {
 	})
 }
 
+func TestToScopesValidation(t *testing.T) {
+	p, err := configuration.NewKoanfProvider(
+		context.Background(),
+		nil,
+		logrusx.New("", ""),
+		configx.WithConfigFiles("./../../internal/config/.oathkeeper.yaml"),
+	)
+	require.NoError(t, err)
+
+	assert.Nil(t, p.ToScopesValidation("default", "foo")(map[string]bool{"foo": true}))
+	assert.NotNil(t, p.ToScopesValidation("default", "foo")(map[string]bool{"foo": true, "bar": false}))
+	assert.Nil(t, p.ToScopesValidation("any", "foo")(map[string]bool{"foo": true, "bar": false}))
+	assert.NotNil(t, p.ToScopesValidation("whatever", "foo")(map[string]bool{"foo": true, "bar": false}))
+}
+
 func TestToScopeStrategy(t *testing.T) {
 	p, err := configuration.NewKoanfProvider(
 		context.Background(),
