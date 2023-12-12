@@ -204,10 +204,7 @@
     "scopesValidator": {
       "title": "Scope Validator",
       "type": "string",
-      "enum": [
-        "default",
-        "any"
-      ],
+      "enum": ["default", "any"],
       "default": "default",
       "description": "Sets the strategy verifier algorithm. Default is logical AND and any serves as OR"
     },
