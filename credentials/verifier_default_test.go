@@ -52,7 +52,7 @@ func TestVerifierDefault(t *testing.T) {
 				Scope:           []string{"scope-1", "scope-2"},
 				KeyURLs:         []url.URL{*x.ParseURLOrPanic("file://../test/stub/jwks-hs.json")},
 				ScopeStrategy:   fosite.ExactScopeStrategy,
-				ScopesValidator: DefaultValidation,
+				ScopeValidation: DefaultValidation,
 			},
 			token: sign(jwt.MapClaims{
 				"sub":   "sub",
@@ -78,7 +78,7 @@ func TestVerifierDefault(t *testing.T) {
 				Scope:           []string{"scope-1", "not-scope-2"},
 				KeyURLs:         []url.URL{*x.ParseURLOrPanic("file://../test/stub/jwks-hs.json")},
 				ScopeStrategy:   fosite.ExactScopeStrategy,
-				ScopesValidator: AnyValidation,
+				ScopeValidation: AnyValidation,
 			},
 			token: sign(jwt.MapClaims{
 				"sub":   "sub",
@@ -104,7 +104,7 @@ func TestVerifierDefault(t *testing.T) {
 				Scope:           []string{"scope-1", "not-scope-2"},
 				KeyURLs:         []url.URL{*x.ParseURLOrPanic("file://../test/stub/jwks-hs.json")},
 				ScopeStrategy:   fosite.ExactScopeStrategy,
-				ScopesValidator: DefaultValidation,
+				ScopeValidation: DefaultValidation,
 			},
 			token: sign(jwt.MapClaims{
 				"sub":   "sub",
@@ -131,7 +131,7 @@ func TestVerifierDefault(t *testing.T) {
 				Scope:           []string{"scope-1", "scope-2"},
 				KeyURLs:         []url.URL{*x.ParseURLOrPanic("file://../test/stub/jwks-hs.json")},
 				ScopeStrategy:   fosite.ExactScopeStrategy,
-				ScopesValidator: DefaultValidation,
+				ScopeValidation: DefaultValidation,
 			},
 			token: sign(jwt.MapClaims{
 				"sub":   "sub",
@@ -157,7 +157,7 @@ func TestVerifierDefault(t *testing.T) {
 				Scope:           []string{"scope-1", "scope-2"},
 				KeyURLs:         []url.URL{*x.ParseURLOrPanic("file://../test/stub/jwks-hs.json")},
 				ScopeStrategy:   fosite.ExactScopeStrategy,
-				ScopesValidator: DefaultValidation,
+				ScopeValidation: DefaultValidation,
 			},
 			token: sign(jwt.MapClaims{
 				"sub": "sub",
@@ -183,7 +183,7 @@ func TestVerifierDefault(t *testing.T) {
 				Scope:           []string{"scope-1", "scope-2"},
 				KeyURLs:         []url.URL{*x.ParseURLOrPanic("file://../test/stub/jwks-hs.json")},
 				ScopeStrategy:   fosite.ExactScopeStrategy,
-				ScopesValidator: DefaultValidation,
+				ScopeValidation: DefaultValidation,
 			},
 			token: sign(jwt.MapClaims{
 				"sub":    "sub",
@@ -227,7 +227,7 @@ func TestVerifierDefault(t *testing.T) {
 				Scope:           []string{"scope-1", "scope-2"},
 				KeyURLs:         []url.URL{*x.ParseURLOrPanic("file://../test/stub/jwks-rsa-single.json")},
 				ScopeStrategy:   fosite.ExactScopeStrategy,
-				ScopesValidator: DefaultValidation,
+				ScopeValidation: DefaultValidation,
 			},
 			token: sign(jwt.MapClaims{
 				"sub":   "sub",
@@ -247,7 +247,7 @@ func TestVerifierDefault(t *testing.T) {
 				Scope:           []string{"scope-1", "scope-2"},
 				KeyURLs:         []url.URL{*x.ParseURLOrPanic("file://../test/stub/jwks-hs.json")},
 				ScopeStrategy:   fosite.ExactScopeStrategy,
-				ScopesValidator: DefaultValidation,
+				ScopeValidation: DefaultValidation,
 			},
 			token: sign(jwt.MapClaims{
 				"sub":   "sub",
@@ -267,7 +267,7 @@ func TestVerifierDefault(t *testing.T) {
 				Scope:           []string{"scope-1", "scope-2"},
 				KeyURLs:         []url.URL{*x.ParseURLOrPanic("file://../test/stub/jwks-hs.json")},
 				ScopeStrategy:   fosite.ExactScopeStrategy,
-				ScopesValidator: DefaultValidation,
+				ScopeValidation: DefaultValidation,
 			},
 			token: sign(jwt.MapClaims{
 				"sub":   "sub",
@@ -287,7 +287,7 @@ func TestVerifierDefault(t *testing.T) {
 				Scope:           []string{"scope-1", "scope-2"},
 				KeyURLs:         []url.URL{*x.ParseURLOrPanic("file://../test/stub/jwks-hs.json")},
 				ScopeStrategy:   fosite.ExactScopeStrategy,
-				ScopesValidator: DefaultValidation,
+				ScopeValidation: DefaultValidation,
 			},
 			token: sign(jwt.MapClaims{
 				"sub":   "sub",
@@ -307,7 +307,7 @@ func TestVerifierDefault(t *testing.T) {
 				Scope:           []string{"scope-1", "scope-2"},
 				KeyURLs:         []url.URL{*x.ParseURLOrPanic("file://../test/stub/jwks-hs.json")},
 				ScopeStrategy:   fosite.ExactScopeStrategy,
-				ScopesValidator: DefaultValidation,
+				ScopeValidation: DefaultValidation,
 			},
 			token: sign(jwt.MapClaims{
 				"sub":   "sub",
@@ -327,7 +327,7 @@ func TestVerifierDefault(t *testing.T) {
 				Scope:           []string{"scope-1", "scope-2"},
 				KeyURLs:         []url.URL{*x.ParseURLOrPanic("file://../test/stub/jwks-hs.json")},
 				ScopeStrategy:   fosite.ExactScopeStrategy,
-				ScopesValidator: DefaultValidation,
+				ScopeValidation: DefaultValidation,
 			},
 			token: sign(jwt.MapClaims{
 				"sub":   "sub",
@@ -348,7 +348,7 @@ func TestVerifierDefault(t *testing.T) {
 				Scope:           []string{"scope-1", "scope-2"},
 				KeyURLs:         []url.URL{*x.ParseURLOrPanic("file://../test/stub/jwks-hs.json")},
 				ScopeStrategy:   fosite.ExactScopeStrategy,
-				ScopesValidator: DefaultValidation,
+				ScopeValidation: DefaultValidation,
 			},
 			token: sign(jwt.MapClaims{
 				"sub":   "sub",

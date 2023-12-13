@@ -201,8 +201,8 @@
       "default": "none",
       "description": "Sets the strategy validation algorithm."
     },
-    "scopesValidator": {
-      "title": "Scope Validator",
+    "scopeValidation": {
+      "title": "Scope Validation",
       "type": "string",
       "enum": ["default", "any"],
       "default": "default",
@@ -611,8 +611,8 @@
         "scope_strategy": {
           "$ref": "#/definitions/scopeStrategy"
         },
-        "scopes_validator": {
-          "$ref": "#/definitions/scopesValidator"
+        "scope_validation": {
+          "$ref": "#/definitions/ScopeValidation"
         },
         "token_from": {
           "title": "Token From",
@@ -722,8 +722,8 @@
         "scope_strategy": {
           "$ref": "#/definitions/scopeStrategy"
         },
-        "scopes_validator": {
-          "$ref": "#/definitions/scopesValidator"
+        "scope_validation": {
+          "$ref": "#/definitions/scopeValidation"
         },
         "pre_authorization": {
           "title": "Pre-Authorization",

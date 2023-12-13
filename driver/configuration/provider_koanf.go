@@ -271,7 +271,7 @@ func (v *KoanfProvider) getURL(value string, key string) *url.URL {
 	return u
 }
 
-func (v *KoanfProvider) ToScopesValidation(value string, key string) credentials.ScopesValidator {
+func (v *KoanfProvider) ToScopeValidation(value string, key string) credentials.ScopeValidation {
 	switch strings.ToLower(value) {
 	case "default":
 		return credentials.DefaultValidation

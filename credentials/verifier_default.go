@@ -126,7 +126,7 @@ func (v *VerifierDefault) Verify(
 			scopeResult[sc] = r.ScopeStrategy(s, sc)
 		}
 
-		if err := r.ScopesValidator(scopeResult); err != nil {
+		if err := r.ScopeValidation(scopeResult); err != nil {
 			return nil, err
 		}
 

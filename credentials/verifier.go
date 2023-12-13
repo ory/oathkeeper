@@ -29,7 +29,7 @@ type ValidationContext struct {
 	Issuers         []string
 	Audiences       []string
 	ScopeStrategy   fosite.ScopeStrategy
-	ScopesValidator ScopesValidator
+	ScopeValidation ScopeValidation
 	Scope           []string
 	KeyURLs         []url.URL
 }

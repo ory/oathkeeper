@@ -389,7 +389,7 @@ func TestKoanfProvider(t *testing.T) {
 	})
 }
 
-func TestToScopesValidation(t *testing.T) {
+func TestToScopeValidation(t *testing.T) {
 	p, err := configuration.NewKoanfProvider(
 		context.Background(),
 		nil,
@@ -398,11 +398,11 @@ func TestToScopesValidation(t *testing.T) {
 	)
 	require.NoError(t, err)
 
-	assert.Nil(t, p.ToScopesValidation("default", "foo")(map[string]bool{"foo": true}))
-	assert.NotNil(t, p.ToScopesValidation("default", "foo")(map[string]bool{"foo": true, "bar": false}))
-	assert.Nil(t, p.ToScopesValidation("any", "foo")(map[string]bool{"foo": true, "bar": false}))
-	assert.NotNil(t, p.ToScopesValidation("any", "foo")(map[string]bool{}))
-	assert.NotNil(t, p.ToScopesValidation("whatever", "foo")(map[string]bool{"foo": true, "bar": false}))
+	assert.Nil(t, p.ToScopeValidation("default", "foo")(map[string]bool{"foo": true}))
+	assert.NotNil(t, p.ToScopeValidation("default", "foo")(map[string]bool{"foo": true, "bar": false}))
+	assert.Nil(t, p.ToScopeValidation("any", "foo")(map[string]bool{"foo": true, "bar": false}))
+	assert.NotNil(t, p.ToScopeValidation("any", "foo")(map[string]bool{}))
+	assert.NotNil(t, p.ToScopeValidation("whatever", "foo")(map[string]bool{"foo": true, "bar": false}))
 
 }
 

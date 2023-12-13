@@ -9,7 +9,7 @@ import (
 	"github.com/ory/herodot"
 )
 
-type ScopesValidator func(scopeResult map[string]bool) error
+type ScopeValidation func(scopeResult map[string]bool) error
 
 func DefaultValidation(scopeResult map[string]bool) error {
 	for sc, result := range scopeResult {

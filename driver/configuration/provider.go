@@ -72,7 +72,7 @@ type Provider interface {
 	PrometheusHideRequestPaths() bool
 	PrometheusCollapseRequestPaths() bool
 
-	ToScopesValidation(value string, key string) credentials.ScopesValidator
+	ToScopeValidation(value string, key string) credentials.ScopeValidation
 	ToScopeStrategy(value string, key string) fosite.ScopeStrategy
 	ParseURLs(sources []string) ([]url.URL, error)
 	JSONWebKeyURLs() []string
