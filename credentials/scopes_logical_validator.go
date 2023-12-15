@@ -14,7 +14,7 @@ type ScopeValidation func(scopeResult map[string]bool) error
 func DefaultValidation(scopeResult map[string]bool) error {
 	for sc, result := range scopeResult {
 		if !result {
-			return errors.WithStack(herodot.ErrInternalServerError.WithReasonf(`JSON Web Token is missing required scope "%s".`, sc))
+			return errors.WithStack(herodot.ErrInternalServerError.WithReasonf(`JSON Web Token is missing required scope "%s"`, sc))
 		}
 	}
 

@@ -278,7 +278,7 @@ func (v *KoanfProvider) ToScopeValidation(value string, key string) credentials.
 	case "any":
 		return credentials.AnyValidation
 	default:
-		v.l.Errorf(`Configuration key "%s" declares unknown scope strategy "%s", only "default", "any", are supported. Falling back to strategy "default".`, key, value)
+		v.l.Errorf(`Configuration key "%s" declares unknown scope validation policy "%s", only "default" and "any" are supported. Falling back to policy "default".`, key, value)
 		return credentials.DefaultValidation
 	}
 }
