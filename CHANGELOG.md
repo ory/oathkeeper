@@ -5,7 +5,7 @@
 
 **Table of Contents**
 
-- [0.0.0 (2023-09-08)](#000-2023-09-08)
+- [0.0.0 (2024-02-28)](#000-2024-02-28)
   - [Bug Fixes](#bug-fixes)
   - [Features](#features)
 - [0.40.6 (2023-07-18)](#0406-2023-07-18)
@@ -331,7 +331,7 @@
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-# [0.0.0](https://github.com/ory/oathkeeper/compare/v0.40.6...v0.0.0) (2023-09-08)
+# [0.0.0](https://github.com/ory/oathkeeper/compare/v0.40.6...v0.0.0) (2024-02-28)
 
 ### Bug Fixes
 
@@ -342,6 +342,9 @@
 
 ### Features
 
+- Add headers option for remote_json authorizer
+  ([#1140](https://github.com/ory/oathkeeper/issues/1140))
+  ([1ee445d](https://github.com/ory/oathkeeper/commit/1ee445d1387dcf49cf75540267703d352be46ed2))
 - Preserve_host feature for oauth2_introspect, better tracing, introspection
   prefixes ([#1131](https://github.com/ory/oathkeeper/issues/1131))
   ([b5d4d88](https://github.com/ory/oathkeeper/commit/b5d4d88e69fc38c0536aef1f00155255683e815d)):
