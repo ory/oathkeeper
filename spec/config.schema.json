@@ -1295,6 +1295,12 @@
           "default": "regexp",
           "enum": ["glob", "regexp"],
           "examples": ["glob"]
+        },
+        "prefix_matching_enabled": {
+          "title": "Enable prefix matching",
+          "description": "This an optional field describing if rules should be matched using path prefixes, defaults to false.",
+          "type": "boolean",
+          "default": false
         }
       }
     },
