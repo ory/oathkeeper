@@ -18,6 +18,7 @@ import (
 )
 
 var ErrAuthenticatorNotResponsible = errors.New("Authenticator not responsible")
+var ErrAuthenticatorDelegate = errors.New("Authentication should be delegated")
 var ErrAuthenticatorNotEnabled = herodot.DefaultError{
 	ErrorField:  "authenticator matching this route is misconfigured or disabled",
 	CodeField:   http.StatusInternalServerError,

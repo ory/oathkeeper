@@ -46,6 +46,7 @@ func TestProxy(t *testing.T) {
 	defer ts.Close()
 
 	conf.SetForTest(t, configuration.AuthenticatorNoopIsEnabled, true)
+	conf.SetForTest(t, configuration.AuthenticatorDelegateIsEnabled, true)
 	conf.SetForTest(t, configuration.AuthenticatorUnauthorizedIsEnabled, true)
 	conf.SetForTest(t, configuration.AuthenticatorAnonymousIsEnabled, true)
 	conf.SetForTest(t, configuration.AuthorizerAllowIsEnabled, true)
@@ -81,6 +82,35 @@ func TestProxy(t *testing.T) {
 		Authenticators: []rule.Handler{{Handler: "noop"}},
 		Authorizer:     rule.Handler{Handler: "allow"},
 		Mutators:       []rule.Handler{{Handler: "noop"}},
+		Upstream:       rule.Upstream{URL: backend.URL, StripPath: "/strip-path/", PreserveHost: true},
+	}
+
+	ruleDelegateAuthenticator := rule.Rule{
+		Match:          &rule.Match{Methods: []string{"GET"}, URL: ts.URL + "/authn-delegate/<[0-9]+>"},
+		Authenticators: []rule.Handler{{Handler: "delegate"}},
+		Authorizer:     rule.Handler{Handler: "allow"},
+		Mutators:       []rule.Handler{{Handler: "delegate"}},
+		Upstream:       rule.Upstream{URL: backend.URL},
+	}
+	ruleDelegateAuthenticatorModifyUpstream := rule.Rule{
+		Match:          &rule.Match{Methods: []string{"GET"}, URL: ts.URL + "/strip-path/authn-delegate/<[0-9]+>"},
+		Authenticators: []rule.Handler{{Handler: "delegate"}},
+		Authorizer:     rule.Handler{Handler: "allow"},
+		Mutators:       []rule.Handler{{Handler: "delegate"}},
+		Upstream:       rule.Upstream{URL: backend.URL, StripPath: "/strip-path/", PreserveHost: true},
+	}
+	ruleDelegateAuthenticatorGlob := rule.Rule{
+		Match:          &rule.Match{Methods: []string{"GET"}, URL: ts.URL + "/authn-delegate/<[0-9]*>"},
+		Authenticators: []rule.Handler{{Handler: "delegate"}},
+		Authorizer:     rule.Handler{Handler: "allow"},
+		Mutators:       []rule.Handler{{Handler: "delegate"}},
+		Upstream:       rule.Upstream{URL: backend.URL},
+	}
+	ruleDelegateAuthenticatorModifyUpstreamGlob := rule.Rule{
+		Match:          &rule.Match{Methods: []string{"GET"}, URL: ts.URL + "/strip-path/authn-delegate/<[0-9]*>"},
+		Authenticators: []rule.Handler{{Handler: "delegate"}},
+		Authorizer:     rule.Handler{Handler: "allow"},
+		Mutators:       []rule.Handler{{Handler: "delegate"}},
 		Upstream:       rule.Upstream{URL: backend.URL, StripPath: "/strip-path/", PreserveHost: true},
 	}
 
@@ -392,6 +422,43 @@ func TestProxy(t *testing.T) {
 			},
 			transform: func(r *http.Request) {
 				r.Header.Set("Connection", "x-arbitrary")
+			},
+		},
+		{
+			d:           "should fail because url does exist but is matched by two rules",
+			url:         ts.URL + "/authn-delegate/1234",
+			rulesRegexp: []rule.Rule{ruleDelegateAuthenticator, ruleDelegateAuthenticator},
+			rulesGlob:   []rule.Rule{ruleDelegateAuthenticatorGlob, ruleDelegateAuthenticatorGlob},
+			code:        http.StatusInternalServerError,
+		},
+		{
+			d:           "should pass",
+			url:         ts.URL + "/authn-delegate/1234",
+			rulesRegexp: []rule.Rule{ruleDelegateAuthenticator},
+			rulesGlob:   []rule.Rule{ruleDelegateAuthenticatorGlob},
+			code:        http.StatusOK,
+			transform: func(r *http.Request) {
+				r.Header.Add("Authorization", "bearer token")
+			},
+			messages: []string{
+				"authorization=bearer token",
+				"url=/authn-delegate/1234",
+				"host=" + x.ParseURLOrPanic(backend.URL).Host,
+			},
+		},
+		{
+			d:           "should pass",
+			url:         ts.URL + "/strip-path/authn-delegate/1234",
+			rulesRegexp: []rule.Rule{ruleDelegateAuthenticatorModifyUpstream},
+			rulesGlob:   []rule.Rule{ruleDelegateAuthenticatorModifyUpstreamGlob},
+			code:        http.StatusOK,
+			transform: func(r *http.Request) {
+				r.Header.Add("Authorization", "bearer token")
+			},
+			messages: []string{
+				"authorization=bearer token",
+				"url=/authn-delegate/1234",
+				"host=" + x.ParseURLOrPanic(ts.URL).Host,
 			},
 		},
 	} {

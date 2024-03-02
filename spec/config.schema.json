@@ -354,6 +354,13 @@
       },
       "additionalProperties": false
     },
+    "configAuthenticatorsDelegate": {
+      "type": "object",
+      "title": "Delegate Authenticator Configuration",
+      "description": "This section is optional when the authenticator is disabled.",
+      "properties": {},
+      "additionalProperties": false
+    },
     "configAuthenticatorsCookieSession": {
       "type": "object",
       "title": "Cookie Session Authenticator Configuration",
@@ -1321,6 +1328,17 @@
         "noop": {
           "title": "No Operation (noop)",
           "description": "The [`noop` authenticator](https://www.ory.sh/oathkeeper/docs/pipeline/authn#noop).",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "enabled": {
+              "$ref": "#/definitions/handlerSwitch"
+            }
+          }
+        },
+        "delegate": {
+          "title": "Delegate Operation (delegate)",
+          "description": "The [`delegate` authenticator](https://www.ory.sh/oathkeeper/docs/pipeline/authn#delegate).",
           "type": "object",
           "additionalProperties": false,
           "properties": {

@@ -1009,6 +1009,17 @@
             }
           }
         },
+        "delegate": {
+          "title": "Delegate Operation (delegate)",
+          "description": "The [`delegate` authenticator](https://www.ory.sh/docs/oathkeeper/pipeline/authn#delegate).",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "enabled": {
+              "$ref": "#/definitions/handlerSwitch"
+            }
+          }
+        },
         "unauthorized": {
           "title": "Unauthorized",
           "description": "The [`unauthorized` authenticator](https://www.ory.sh/docs/oathkeeper/pipeline/authn#unauthorized).",
