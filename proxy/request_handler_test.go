@@ -453,6 +453,19 @@ func TestRequestHandler(t *testing.T) {
 				Authenticators: []rule.Handler{{Handler: "delegate"}},
 			},
 		},
+		{
+			d: "should pass with delegate even with invalid authz and mutators",
+			setup: func(t *testing.T, config configuration.Provider) {
+				config.SetForTest(t, configuration.AuthenticatorDelegateIsEnabled, true)
+			},
+			expectErr: false,
+			r:         newTestRequest("http://localhost"),
+			rule: rule.Rule{
+				Authenticators: []rule.Handler{{Handler: "delegate"}},
+				Authorizer:     rule.Handler{Handler: "invalid-id"},
+				Mutators:       []rule.Handler{{Handler: "invalid-id"}},
+			},
+		},
 	} {
 		t.Run(fmt.Sprintf("case=%d/description=%s", k, tc.d), func(t *testing.T) {
 			// log, hook := test.NewNullLogger()
