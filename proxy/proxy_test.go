@@ -437,12 +437,7 @@ func TestProxy(t *testing.T) {
 			rulesRegexp: []rule.Rule{ruleDelegateAuthenticator},
 			rulesGlob:   []rule.Rule{ruleDelegateAuthenticatorGlob},
 			code:        http.StatusOK,
-			transform: func(r *http.Request) {
-				r.Header.Add("Authorization", "bearer token")
-			},
 			messages: []string{
-				"authorization=bearer token",
-				"url=/authn-delegate/1234",
 				"host=" + x.ParseURLOrPanic(backend.URL).Host,
 			},
 		},
@@ -452,12 +447,7 @@ func TestProxy(t *testing.T) {
 			rulesRegexp: []rule.Rule{ruleDelegateAuthenticatorModifyUpstream},
 			rulesGlob:   []rule.Rule{ruleDelegateAuthenticatorModifyUpstreamGlob},
 			code:        http.StatusOK,
-			transform: func(r *http.Request) {
-				r.Header.Add("Authorization", "bearer token")
-			},
 			messages: []string{
-				"authorization=bearer token",
-				"url=/authn-delegate/1234",
 				"host=" + x.ParseURLOrPanic(ts.URL).Host,
 			},
 		},

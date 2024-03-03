@@ -23,17 +23,13 @@ func (a *AuthenticatorDelegate) GetID() string {
 	return "delegate"
 }
 
-func (a *AuthenticatorDelegate) Validate(config json.RawMessage) error {
+func (a *AuthenticatorDelegate) Validate(_ json.RawMessage) error {
 	if !a.c.AuthenticatorIsEnabled(a.GetID()) {
 		return NewErrAuthenticatorNotEnabled(a)
-	}
-
-	if err := a.c.AuthenticatorConfig(a.GetID(), config, nil); err != nil {
-		return NewErrAuthenticatorMisconfigured(a, err)
 	}
 	return nil
 }
 
-func (a *AuthenticatorDelegate) Authenticate(r *http.Request, session *AuthenticationSession, config json.RawMessage, _ pipeline.Rule) error {
+func (a *AuthenticatorDelegate) Authenticate(r *http.Request, _ *AuthenticationSession, _ json.RawMessage, _ pipeline.Rule) error {
 	return ErrAuthenticatorDelegate
 }
