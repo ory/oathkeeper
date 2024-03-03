@@ -208,10 +208,10 @@ func (d *requestHandler) HandleRequest(r *http.Request, rl *rule.Rule) (session 
 			case authn.ErrAuthenticatorNotResponsible.Error():
 				// The authentication handler is not responsible for handling this request, skip to the next handler
 				break
-			// case ErrAuthenticatorBypassed.Error():
-			// The authentication handler says that no further authentication/authorization is required, and the request should
-			// be forwarded to its final destination.
-			// return nil
+			case authn.ErrAuthenticatorDelegate.Error():
+				//The authentication handler says that no further authentication/authorization is required, and the request should
+				//be forwarded to its final destination.
+				return session, nil
 			case helper.ErrUnauthorized.ErrorField:
 				d.r.Logger().Info(err)
 				return nil, err

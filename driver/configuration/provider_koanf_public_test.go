@@ -146,6 +146,7 @@ func BenchmarkPipelineEnabled(b *testing.B) {
 	for n := 0; n < b.N; n++ {
 		p.AuthorizerIsEnabled("allow")
 		p.AuthenticatorIsEnabled("noop")
+		p.AuthenticatorIsEnabled("delegate")
 		p.MutatorIsEnabled("noop")
 	}
 }
@@ -243,6 +244,12 @@ func TestKoanfProvider(t *testing.T) {
 
 		t.Run("authenticator=noop", func(t *testing.T) {
 			a := authn.NewAuthenticatorNoOp(p)
+			assert.True(t, p.AuthenticatorIsEnabled(a.GetID()))
+			require.NoError(t, a.Validate(nil))
+		})
+
+		t.Run("authenticator=delegate", func(t *testing.T) {
+			a := authn.NewAuthenticatorDelegate(p)
 			assert.True(t, p.AuthenticatorIsEnabled(a.GetID()))
 			require.NoError(t, a.Validate(nil))
 		})

@@ -98,6 +98,8 @@ func TestMiddleware(t *testing.T) {
 authenticators:
   noop:
     enabled: true
+  delegate:
+    enabled: true
   anonymous:
     enabled: true
   bearer_token:

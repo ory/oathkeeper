@@ -1,0 +1,9 @@
+{
+  "$id": "https://raw.githubusercontent.com/ory/oathkeeper/master/.schemas/authenticators.delegate.schema.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "title": "Delegate Authenticator Configuration",
+  "description": "This section is optional when the authenticator is disabled.",
+  "properties": {},
+  "additionalProperties": false
+}
