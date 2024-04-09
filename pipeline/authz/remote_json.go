@@ -29,6 +29,7 @@ import (
 // AuthorizerRemoteJSONConfiguration represents a configuration for the remote_json authorizer.
 type AuthorizerRemoteJSONConfiguration struct {
 	Remote                           string                                  `json:"remote"`
+	Headers                          map[string]string                       `json:"headers"`
 	Payload                          string                                  `json:"payload"`
 	ForwardResponseHeadersToUpstream []string                                `json:"forward_response_headers_to_upstream"`
 	Retry                            *AuthorizerRemoteJSONRetryConfiguration `json:"retry"`
@@ -69,7 +70,7 @@ func (a *AuthorizerRemoteJSON) GetID() string {
 }
 
 // Authorize implements the Authorizer interface.
-func (a *AuthorizerRemoteJSON) Authorize(r *http.Request, session *authn.AuthenticationSession, config json.RawMessage, _ pipeline.Rule) (err error) {
+func (a *AuthorizerRemoteJSON) Authorize(r *http.Request, session *authn.AuthenticationSession, config json.RawMessage, rl pipeline.Rule) (err error) {
 	ctx, span := a.tracer.Start(r.Context(), "pipeline.authz.AuthorizerRemoteJSON.Authorize")
 	defer otelx.End(span, &err)
 	r = r.WithContext(ctx)
@@ -109,8 +110,33 @@ func (a *AuthorizerRemoteJSON) Authorize(r *http.Request, session *authn.Authent
 		req.Header.Add("Authorization", authz)
 	}
 
-	res, err := a.client.Do(req.WithContext(r.Context()))
+	for hdr, templateString := range c.Headers {
+		var tmpl *template.Template
+		var err error
 
+		templateId := fmt.Sprintf("%s:%s", rl.GetID(), hdr)
+		tmpl = a.t.Lookup(templateId)
+		if tmpl == nil {
+			tmpl, err = a.t.New(templateId).Parse(templateString)
+			if err != nil {
+				return errors.Wrapf(err, `booo error parsing headers template "%s" in rule "%s"`, templateString, rl.GetID())
+			}
+		}
+
+		headerValue := bytes.Buffer{}
+		err = tmpl.Execute(&headerValue, session)
+		if err != nil {
+			return errors.Wrapf(err, `error executing headers template "%s" in rule "%s"`, templateString, rl.GetID())
+		}
+		// Don't send empty headers
+		if headerValue.String() == "" {
+			continue
+		}
+
+		req.Header.Set(hdr, headerValue.String())
+	}
+
+	res, err := a.client.Do(req.WithContext(r.Context()))
 	if err != nil {
 		return errors.WithStack(err)
 	}

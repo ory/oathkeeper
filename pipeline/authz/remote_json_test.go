@@ -67,6 +67,24 @@ func TestAuthorizerRemoteJSONAuthorize(t *testing.T) {
 			wantErr: true,
 		},
 		{
+			name:    "invalid headers type",
+			session: &authn.AuthenticationSession{},
+			config:  json.RawMessage(`{"remote":"http://host/path","payload":"{\"match\":\"baz\"}","headers":"string"}`),
+			wantErr: true,
+		},
+		{
+			name:    "invalid headers template",
+			session: &authn.AuthenticationSession{},
+			config:  json.RawMessage(`{"remote":"http://host/path","payload":"{\"match\":\"baz\"}","headers":{"Subject":"{{ Invalid Template }}"}}`),
+			wantErr: true,
+		},
+		{
+			name:    "headers template with unknown field",
+			session: &authn.AuthenticationSession{},
+			config:  json.RawMessage(`{"remote":"http://host/path","payload":"{\"match\":\"baz\"}","headers":{"Subject":"{{ .UnknownField }}"}}`),
+			wantErr: true,
+		},
+		{
 			name: "forbidden",
 			setup: func(t *testing.T) *httptest.Server {
 				return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
@@ -106,7 +124,7 @@ func TestAuthorizerRemoteJSONAuthorize(t *testing.T) {
 			config:  json.RawMessage(`{"payload":"{}"}`),
 		},
 		{
-			name: "ok with allowed headers",
+			name: "ok with allowed response headers",
 			setup: func(t *testing.T) *httptest.Server {
 				return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 					w.Header().Set("X-Foo", "bar")
@@ -118,7 +136,7 @@ func TestAuthorizerRemoteJSONAuthorize(t *testing.T) {
 			config:             json.RawMessage(`{"payload":"{}","forward_response_headers_to_upstream":["X-Foo"]}`),
 		},
 		{
-			name: "ok with not allowed headers",
+			name: "ok with not allowed response headers",
 			setup: func(t *testing.T) *httptest.Server {
 				return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 					w.Header().Set("X-Bar", "foo")
@@ -147,6 +165,23 @@ func TestAuthorizerRemoteJSONAuthorize(t *testing.T) {
 				},
 			},
 			config: json.RawMessage(`{"payload":"{\"subject\":\"{{ .Subject }}\",\"extra\":\"{{ .Extra.foo }}\",\"match\":\"{{ index .MatchContext.RegexpCaptureGroups 0 }}\"}"}`),
+		},
+		{
+			name: "authentication session with extra request headers",
+			setup: func(t *testing.T) *httptest.Server {
+				return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+					body, err := io.ReadAll(r.Body)
+
+					require.NoError(t, err)
+					assert.Equal(t, string(body), `{"match":"baz"}`)
+					assert.Equal(t, r.Header.Get("Subject"), "alice")
+					w.WriteHeader(http.StatusOK)
+				}))
+			},
+			session: &authn.AuthenticationSession{
+				Subject: "alice",
+			},
+			config: json.RawMessage(`{"payload":"{\"match\":\"baz\"}","headers":{"Subject":"{{ .Subject }}","Empty-Header":""}}`),
 		},
 		{
 			name: "json array",
@@ -235,6 +270,11 @@ func TestAuthorizerRemoteJSONValidate(t *testing.T) {
 			name:    "valid configuration",
 			enabled: true,
 			config:  json.RawMessage(`{"remote":"http://host/path","payload":"{}"}`),
+		},
+		{
+			name:    "valid configuration with headers",
+			enabled: true,
+			config:  json.RawMessage(`{"remote":"http://host/path","payload":"{}","headers":{"Authorization":"Bearer token"}}`),
 		},
 		{
 			name:    "valid configuration with partial retry 1",

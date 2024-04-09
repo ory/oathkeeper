@@ -50,9 +50,21 @@ func TestAuthorizerRemoteAuthorize(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name:    "invalid json",
+			name:    "invalid headers type",
 			session: &authn.AuthenticationSession{},
-			config:  json.RawMessage(`{"remote":"http://host/path","headers":"{"}`),
+			config:  json.RawMessage(`{"remote":"http://host/path","headers":"string"}`),
+			wantErr: true,
+		},
+		{
+			name:    "invalid headers template",
+			session: &authn.AuthenticationSession{},
+			config:  json.RawMessage(`{"remote":"http://host/path","headers":{"Subject":"{{ Invalid Template }}"}}`),
+			wantErr: true,
+		},
+		{
+			name:    "headers template with unknown field",
+			session: &authn.AuthenticationSession{},
+			config:  json.RawMessage(`{"remote":"http://host/path","headers":{"Subject":"{{ .UnknownField }}"}}`),
 			wantErr: true,
 		},
 		{
