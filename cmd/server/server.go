@@ -251,6 +251,13 @@ func RunServe(version, build, date string) func(cmd *cobra.Command, args []strin
 		adminmw.Use(telemetry)
 		publicmw.Use(telemetry)
 
+		// Override the `graceful.DefaultShutdownTimeout` value
+		graceful.DefaultShutdownTimeout = 5 * time.Second
+		defaultShutdownTimeout, _ := cmd.Flags().GetInt("default-shutdown-timeout")
+		if defaultShutdownTimeout > 0 {
+			graceful.DefaultShutdownTimeout = time.Duration(defaultShutdownTimeout) * time.Second
+		}
+
 		prometheusRepo := metrics.NewConfigurablePrometheusRepository(d, logger)
 		var wg sync.WaitGroup
 		tasks := []func(){
