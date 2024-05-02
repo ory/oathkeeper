@@ -32,14 +32,18 @@ var (
 	`
 	metricsNotCollapsed string = metricMetadata + rootMetric + `
 	ory_oathkeeper_requests_total{method="GET",request="/hello/world",service="test",status_code="200"} 1
+	ory_oathkeeper_requests_total{method="GET",request="/hello/world?foo=bar",service="test",status_code="200"} 1
+	ory_oathkeeper_requests_total{method="GET",request="/hello?foo=bar",service="test",status_code="200"} 1
 	`
 	metricsCollapsed string = metricMetadata + rootMetric + `
-	ory_oathkeeper_requests_total{method="GET",request="/hello",service="test",status_code="200"} 1
+	ory_oathkeeper_requests_total{method="GET",request="/hello",service="test",status_code="200"} 3
 	`
 	metricsHidden string = metricMetadata + `
-	ory_oathkeeper_requests_total{method="GET",request="",service="test",status_code="200"} 2
+	ory_oathkeeper_requests_total{method="GET",request="",service="test",status_code="200"} 4
 	`
-	serverContextPaths []string = []string{"/", "/hello/world"}
+
+	serverConfigPaths  []string = []string{"/", "/hello", "/hello/world"}
+	serverRequestPaths []string = []string{"/", "/hello?foo=bar", "/hello/world", "/hello/world?foo=bar"}
 
 	configurableMetricMetadata string = `
 	# HELP http_requests_total Total number of requests
@@ -49,10 +53,12 @@ var (
 	http_requests_total{method="GET",request="/",service="test",status_code="200"} 1
 	`
 	configurableMetricsNotCollapsed string = configurableMetricMetadata + configurableRootMetric + `
+	http_requests_total{method="GET",request="/hello?foo=bar",service="test",status_code="200"} 1
 	http_requests_total{method="GET",request="/hello/world",service="test",status_code="200"} 1
+	http_requests_total{method="GET",request="/hello/world?foo=bar",service="test",status_code="200"} 1
 	`
 	configurableMetricsCollapsed string = configurableMetricMetadata + configurableRootMetric + `
-	http_requests_total{method="GET",request="/hello",service="test",status_code="200"} 1
+	http_requests_total{method="GET",request="/hello",service="test",status_code="200"} 3
 	`
 )
 
@@ -73,7 +79,7 @@ func PrometheusTestApp(middleware *Middleware) http.Handler {
 
 	r := httprouter.New()
 
-	for _, path := range serverContextPaths {
+	for _, path := range serverConfigPaths {
 		r.GET(path, func(res http.ResponseWriter, req *http.Request, p httprouter.Params) {
 			fmt.Fprint(res, "OK")
 		})
@@ -108,7 +114,7 @@ func TestPrometheusRequestTotalMetrics(t *testing.T) {
 			ts := httptest.NewServer(PrometheusTestApp(promMiddleware))
 			defer ts.Close()
 
-			for _, path := range serverContextPaths {
+			for _, path := range serverRequestPaths {
 				req, err := http.NewRequest("GET", ts.URL+path, nil)
 				if err != nil {
 					t.Fatal(err)
@@ -156,7 +162,7 @@ serve:
 			ts := httptest.NewServer(PrometheusTestApp(promMiddleware))
 			defer ts.Close()
 
-			for _, path := range serverContextPaths {
+			for _, path := range serverRequestPaths {
 				req, err := http.NewRequest("GET", ts.URL+path, nil)
 				if err != nil {
 					t.Fatal(err)

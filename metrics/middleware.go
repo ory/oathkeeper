@@ -92,7 +92,9 @@ func (m *Middleware) getFirstPathSegment(requestURI string) string {
 	// Will split /my/example/uri in []string{"", "my", "example/uri"}
 	uriSegments := strings.SplitN(requestURI, "/", 3)
 	if len(uriSegments) > 1 {
-		return "/" + uriSegments[1]
+		// Remove any query string from the segment
+		// For example /my?query=string should return /my
+		return "/" + strings.SplitN(uriSegments[1], "?", 2)[0]
 	}
 	return "/"
 

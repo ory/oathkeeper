@@ -33,14 +33,22 @@ node_modules: package-lock.json
 	curl https://raw.githubusercontent.com/ory/meta/master/install.sh | bash -s -- -b .bin ory v0.2.2
 	touch .bin/ory
 
+.bin/golangci-lint: Makefile
+	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -d -b .bin v1.56.2
+
 authors:  # updates the AUTHORS file
 	curl https://raw.githubusercontent.com/ory/ci/master/authors/authors.sh | env PRODUCT="Ory Oathkeeper" bash
 
+.PHONY: format
 format: .bin/goimports .bin/ory node_modules
 	.bin/ory dev headers copyright --type=open-source --exclude=internal/httpclient
 	goimports -w --local github.com/ory .
 	gofmt -l -s -w .
 	npm exec -- prettier --write .
+
+.PHONY: lint
+lint: .bin/golangci-lint
+	.bin/golangci-lint run --timeout 10m0s
 
 licenses: .bin/licenses node_modules  # checks open-source licenses
 	.bin/licenses

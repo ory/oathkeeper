@@ -990,6 +990,12 @@
           "description": "The URL of the remote authorizer. The remote authorizer is expected to return either 200 OK or 403 Forbidden to allow/deny access.\n\n>If this authorizer is enabled, this value is required.",
           "examples": ["https://host/path"]
         },
+        "headers": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
         "payload": {
           "title": "JSON Payload",
           "type": "string",
