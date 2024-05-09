@@ -387,11 +387,15 @@ func (a *AuthenticatorOAuth2Introspection) Config(config json.RawMessage) (*Auth
 		a.logger.Debugf("Creating cache with max cost: %d", c.Cache.MaxCost)
 		cache, err := ristretto.NewCache(&ristretto.Config{
 			// This will hold about 1000 unique mutation responses.
-			NumCounters: 10000,
+			NumCounters: cost * 10,
 			// Allocate a max
 			MaxCost: cost,
 			// This is a best-practice value.
 			BufferItems: 64,
+			Cost: func(value interface{}) int64 {
+				return 1
+			},
+			IgnoreInternalCost: true,
 		})
 		if err != nil {
 			return nil, nil, err
