@@ -133,6 +133,7 @@ func (a *AuthenticatorOAuth2ClientCredentials) Config(config json.RawMessage) (*
 			Cost: func(value interface{}) int64 {
 				return 1
 			},
+			IgnoreInternalCost: true,
 		})
 		if err != nil {
 			return nil, err
