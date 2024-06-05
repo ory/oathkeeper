@@ -67,7 +67,24 @@ func (a *AuthorizerRemote) GetID() string {
 func (a *AuthorizerRemote) Authorize(r *http.Request, session *authn.AuthenticationSession, config json.RawMessage, rl pipeline.Rule) (err error) {
 	ctx, span := a.tracer.Start(r.Context(), "pipeline.authz.AuthorizerRemote.Authorize")
 	defer otelx.End(span, &err)
-	r = r.WithContext(ctx)
+
+	// Issue #1136 - Authorizer "remote" throws exception "invalid Read on closed Body" if request body is present in request
+	// Original code
+	//r = r.WithContext(ctx)
+	//
+	// Problem with the original code is when r.WithContext is called, it creates a new request with the same body as the original request with a modified context.
+	// r is a pointer and when its assigned to the new request message it scope becomes local to this function.
+	// The calling function expects the original request message to be modified as the message is processed by the pipeline.
+	// When message processing is complete the calling function does not have access to the modified http message (r)
+	//
+	// There are several possible solutions:
+	// 1. Create a function in http.request to .SetContext(ctx) which replaces context but does not create new http.Request instance
+	// 2. Modify the Authorize function to return a new http.Request pointer used by this function during message processing
+	// 3. Assign the new request to the original request pointer
+	//
+	// The change below implements option 3
+	*r = *(r.WithContext(ctx))
+	// End of change
 
 	c, err := a.Config(config)
 	if err != nil {
