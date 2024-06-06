@@ -19,7 +19,7 @@ RUN go build -o /usr/bin/oathkeeper .
 
 #########################
 
-FROM gcr.io/distroless/static-debian11:nonroot AS runner
+FROM gcr.io/distroless/static-debian12:nonroot AS runner
 
 COPY --from=builder --chown=nonroot:nonroot /usr/bin/oathkeeper /usr/bin/oathkeeper
 
