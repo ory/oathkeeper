@@ -34,6 +34,7 @@ type AuthenticatorOAuth2JWTConfiguration struct {
 	AllowedAlgorithms   []string                    `json:"allowed_algorithms"`
 	JWKSURLs            []string                    `json:"jwks_urls"`
 	ScopeStrategy       string                      `json:"scope_strategy"`
+	ScopeValidation     string                      `json:"scope_validation"`
 	BearerTokenLocation *helper.BearerTokenLocation `json:"token_from"`
 }
 
@@ -105,12 +106,13 @@ func (a *AuthenticatorJWT) Authenticate(r *http.Request, session *Authentication
 	}
 
 	pt, err := a.r.CredentialsVerifier().Verify(r.Context(), token, &credentials.ValidationContext{
-		Algorithms:    cf.AllowedAlgorithms,
-		KeyURLs:       jwksu,
-		Scope:         cf.Scope,
-		Issuers:       cf.Issuers,
-		Audiences:     cf.Audience,
-		ScopeStrategy: a.c.ToScopeStrategy(cf.ScopeStrategy, "authenticators.jwt.Config.scope_strategy"),
+		Algorithms:      cf.AllowedAlgorithms,
+		KeyURLs:         jwksu,
+		Scope:           cf.Scope,
+		Issuers:         cf.Issuers,
+		Audiences:       cf.Audience,
+		ScopeStrategy:   a.c.ToScopeStrategy(cf.ScopeStrategy, "authenticators.jwt.Config.scope_strategy"),
+		ScopeValidation: a.c.ToScopeValidation(cf.ScopeValidation, "authenticators.jwt.Config.scope_validation"),
 	})
 	if err != nil {
 		de := herodot.ToDefaultError(err, "")
