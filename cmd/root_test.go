@@ -30,6 +30,7 @@ func init() {
 	os.Setenv("SERVE_API_PORT", fmt.Sprintf("%d", apiPort))
 	os.Setenv("SERVE_PROXY_PORT", fmt.Sprintf("%d", proxyPort))
 	os.Setenv("AUTHENTICATORS_NOOP_ENABLED", "1")
+	os.Setenv("AUTHENTICATORS_DELEGATE_ENABLED", "1")
 	os.Setenv("AUTHENTICATORS_ANONYMOUS_ENABLED", "true")
 	os.Setenv("AUTHORIZERS_ALLOW_ENABLED", "true")
 	os.Setenv("MUTATORS_NOOP_ENABLED", "true")
@@ -54,6 +55,9 @@ func init() {
       },
       {
         "handler": "anonymous"
+      },
+      {
+        "handler": "delegate"
       }
     ],
     "authorizer": {

@@ -39,6 +39,7 @@ func TestHealth(t *testing.T) {
 	conf.SetForTest(t, configuration.AuthorizerAllowIsEnabled, true)
 	conf.SetForTest(t, configuration.AuthorizerDenyIsEnabled, true)
 	conf.SetForTest(t, configuration.AuthenticatorNoopIsEnabled, true)
+	conf.SetForTest(t, configuration.AuthenticatorDelegateIsEnabled, true)
 	conf.SetForTest(t, configuration.AuthenticatorAnonymousIsEnabled, true)
 	conf.SetForTest(t, configuration.MutatorNoopIsEnabled, true)
 	conf.SetForTest(t, "mutators.header.config", map[string]interface{}{"headers": map[string]interface{}{}})

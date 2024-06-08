@@ -361,6 +361,7 @@ func (r *RegistryMemory) prepareAuthn() {
 			authn.NewAuthenticatorBearerToken(r.c, r.trc.Provider()),
 			authn.NewAuthenticatorJWT(r.c, r),
 			authn.NewAuthenticatorNoOp(r.c),
+			authn.NewAuthenticatorDelegate(r.c),
 			authn.NewAuthenticatorOAuth2ClientCredentials(r.c, r.Logger()),
 			authn.NewAuthenticatorOAuth2Introspection(r.c, r.Logger(), r.trc.Provider()),
 			authn.NewAuthenticatorUnauthorized(r.c),

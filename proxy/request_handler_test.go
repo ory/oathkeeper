@@ -273,6 +273,7 @@ func TestRequestHandler(t *testing.T) {
 			d: "should fail because the rule is missing authn, authz, and mutator even when some pipelines are enabled",
 			setup: func(t *testing.T, config configuration.Provider) {
 				config.SetForTest(t, configuration.AuthenticatorNoopIsEnabled, true)
+				config.SetForTest(t, configuration.AuthenticatorDelegateIsEnabled, true)
 				config.SetForTest(t, configuration.AuthorizerAllowIsEnabled, true)
 				config.SetForTest(t, configuration.MutatorNoopIsEnabled, true)
 			},
@@ -416,6 +417,52 @@ func TestRequestHandler(t *testing.T) {
 			rule: rule.Rule{
 				Authenticators: []rule.Handler{{Handler: "anonymous"}},
 				Authorizer:     rule.Handler{Handler: "allow"},
+				Mutators:       []rule.Handler{{Handler: "invalid-id"}},
+			},
+		},
+		{
+			d: "should pass",
+			setup: func(t *testing.T, config configuration.Provider) {
+				config.SetForTest(t, configuration.AuthenticatorDelegateIsEnabled, true)
+			},
+			expectErr: false,
+			r:         newTestRequest("http://localhost"),
+			rule: rule.Rule{
+				Authenticators: []rule.Handler{{Handler: "delegate"}},
+			},
+		},
+		{
+			d: "should fail when authn is invalid because not enabled",
+			setup: func(t *testing.T, config configuration.Provider) {
+				config.SetForTest(t, configuration.AuthenticatorDelegateIsEnabled, false)
+			},
+			expectErr: true,
+			r:         newTestRequest("http://localhost"),
+			rule: rule.Rule{
+				Authenticators: []rule.Handler{{Handler: "delegate"}},
+			},
+		},
+		{
+			d: "should pass when authn since delegate skips authz and mutators",
+			setup: func(t *testing.T, config configuration.Provider) {
+				config.SetForTest(t, configuration.AuthenticatorDelegateIsEnabled, true)
+			},
+			expectErr: false,
+			r:         newTestRequest("http://localhost"),
+			rule: rule.Rule{
+				Authenticators: []rule.Handler{{Handler: "delegate"}},
+			},
+		},
+		{
+			d: "should pass with delegate even with invalid authz and mutators",
+			setup: func(t *testing.T, config configuration.Provider) {
+				config.SetForTest(t, configuration.AuthenticatorDelegateIsEnabled, true)
+			},
+			expectErr: false,
+			r:         newTestRequest("http://localhost"),
+			rule: rule.Rule{
+				Authenticators: []rule.Handler{{Handler: "delegate"}},
+				Authorizer:     rule.Handler{Handler: "invalid-id"},
 				Mutators:       []rule.Handler{{Handler: "invalid-id"}},
 			},
 		},

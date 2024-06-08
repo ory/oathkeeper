@@ -55,6 +55,9 @@ const (
 	// noop
 	AuthenticatorNoopIsEnabled Key = "authenticators.noop.enabled"
 
+	// delegate
+	AuthenticatorDelegateIsEnabled Key = "authenticators.delegate.enabled"
+
 	// cookie session
 	AuthenticatorCookieSessionIsEnabled Key = "authenticators.cookie_session.enabled"
 
