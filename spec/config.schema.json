@@ -1013,6 +1013,30 @@
           "uniqueItems": true,
           "default": []
         },
+        "match_json_field": {
+          "description": "Match the JSON field in response from the remote authorizer to allow/deny access. Only applicable if it respond with HTTP 200",
+          "title": "Match JSON Response",
+          "type": "object",
+          "required": ["field"],
+          "properties": {
+            "field": {
+              "type": "string",
+              "description": "Path to field in [gjson path](https://github.com/tidwall/gjson/blob/v1.14.3/SYNTAX.md) format. If the field is not found, the request will be denied.",
+              "examples": ["allowed"]
+            },
+            "str_val": {
+              "type": "string",
+              "description": "String value to match the field against.",
+              "examples": ["true"]
+            },
+            "bool_val": {
+              "type": "boolean",
+              "description": "Boolean value to match the field against.",
+              "examples": ["true"]
+            }
+          },
+          "additionalProperties": false
+        },
         "retry": {
           "$ref": "#/definitions/retry"
         }
