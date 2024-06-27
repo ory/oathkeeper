@@ -10,7 +10,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/golang-jwt/jwt/v4"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/pkg/errors"
 
 	"github.com/ory/fosite"
@@ -82,15 +82,8 @@ func (v *VerifierDefault) Verify(
 		}
 
 		return nil, errors.WithStack(herodot.ErrBadRequest.WithReasonf(`The signing key algorithm does not match the algorithm from the token header.`))
-	})
+	}, jwt.WithIssuedAt())
 	if err != nil {
-		if e, ok := errors.Cause(err).(*jwt.ValidationError); ok {
-			if _, ok := errors.Cause(e.Inner).(*herodot.DefaultError); !ok {
-				return nil, herodot.ErrInternalServerError.WithErrorf(e.Error()).WithTrace(err)
-			}
-
-			return nil, e.Inner
-		}
 		return nil, err
 	} else if !t.Valid {
 		return nil, errors.WithStack(fosite.ErrInactiveToken)
