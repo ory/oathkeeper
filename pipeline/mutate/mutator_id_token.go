@@ -15,7 +15,7 @@ import (
 
 	"github.com/dgraph-io/ristretto"
 
-	"github.com/golang-jwt/jwt/v4"
+	"github.com/golang-jwt/jwt/v5"
 
 	"github.com/pborman/uuid"
 	"github.com/pkg/errors"

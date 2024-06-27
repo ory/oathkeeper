@@ -9,7 +9,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/golang-jwt/jwt/v4"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/pkg/errors"
 	"go.opentelemetry.io/otel/trace"
 
@@ -130,7 +130,7 @@ func (a *AuthenticatorJWT) Authenticate(r *http.Request, session *Authentication
 }
 
 func (a *AuthenticatorJWT) tryEnrichResultErr(token string, err *herodot.DefaultError) *herodot.DefaultError {
-	t, _ := jwt.ParseWithClaims(token, jwt.MapClaims{}, nil)
+	t, _ := jwt.ParseWithClaims(token, jwt.MapClaims{}, nil, jwt.WithIssuedAt())
 	if t == nil {
 		return err
 	}
