@@ -5,7 +5,7 @@
 
 **Table of Contents**
 
-- [0.0.0 (2024-04-15)](#000-2024-04-15)
+- [0.0.0 (2024-07-24)](#000-2024-07-24)
   - [Bug Fixes](#bug-fixes)
 - [0.40.7 (2024-02-29)](#0407-2024-02-29)
   - [Code Generation](#code-generation)
@@ -336,10 +336,12 @@
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-# [0.0.0](https://github.com/ory/oathkeeper/compare/v0.40.7...v0.0.0) (2024-04-15)
+# [0.0.0](https://github.com/ory/oathkeeper/compare/v0.40.7...v0.0.0) (2024-07-24)
 
 ### Bug Fixes
 
+- Improve caching configuration
+  ([2373057](https://github.com/ory/oathkeeper/commit/23730570e0ac35bec214f78a0e951501f58c598b))
 - **metrics:** Remove query string from collapsed path segment
   ([#1159](https://github.com/ory/oathkeeper/issues/1159))
   ([15ee438](https://github.com/ory/oathkeeper/commit/15ee43883742b435fb744ef3b30d151039978a30))
