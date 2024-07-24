@@ -1,0 +1,8 @@
+version: "2"
+plugins:
+  gofmt:
+    enabled: true
+  golint:
+    enabled: true
+  govet:
+    enabled: true
