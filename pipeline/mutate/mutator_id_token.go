@@ -38,15 +38,20 @@ type MutatorIDToken struct {
 	templates     *template.Template
 	templatesLock sync.Mutex
 
-	tokenCache        *ristretto.Cache
-	tokenCacheEnabled bool
+	tokenCache *ristretto.Cache
 }
 
 type CredentialsIDTokenConfig struct {
-	Claims    string `json:"claims"`
-	IssuerURL string `json:"issuer_url"`
-	JWKSURL   string `json:"jwks_url"`
-	TTL       string `json:"ttl"`
+	Claims    string             `json:"claims"`
+	IssuerURL string             `json:"issuer_url"`
+	JWKSURL   string             `json:"jwks_url"`
+	TTL       string             `json:"ttl"`
+	Cache     idTokenCacheConfig `json:"cache"`
+}
+
+type idTokenCacheConfig struct {
+	Enabled bool `json:"enabled"`
+	MaxCost int  `json:"max_cost"`
 }
 
 func (c *CredentialsIDTokenConfig) ClaimsTemplateID() string {
@@ -54,12 +59,7 @@ func (c *CredentialsIDTokenConfig) ClaimsTemplateID() string {
 }
 
 func NewMutatorIDToken(c configuration.Provider, r MutatorIDTokenRegistry) *MutatorIDToken {
-	cache, _ := ristretto.NewCache(&ristretto.Config{
-		NumCounters: 10000,
-		MaxCost:     1 << 25,
-		BufferItems: 64,
-	})
-	return &MutatorIDToken{r: r, c: c, templates: x.NewTemplate("id_token"), tokenCache: cache, tokenCacheEnabled: true}
+	return &MutatorIDToken{r: r, c: c, templates: x.NewTemplate("id_token")}
 }
 
 func (a *MutatorIDToken) GetID() string {
@@ -68,10 +68,6 @@ func (a *MutatorIDToken) GetID() string {
 
 func (a *MutatorIDToken) WithCache(t *template.Template) {
 	a.templates = t
-}
-
-func (a *MutatorIDToken) SetCaching(token bool) {
-	a.tokenCacheEnabled = token
 }
 
 type idTokenCacheContainer struct {
@@ -87,7 +83,7 @@ func (a *MutatorIDToken) cacheKey(config *CredentialsIDTokenConfig, ttl time.Dur
 }
 
 func (a *MutatorIDToken) tokenFromCache(config *CredentialsIDTokenConfig, session *authn.AuthenticationSession, claims []byte, ttl time.Duration) (string, bool) {
-	if !a.tokenCacheEnabled {
+	if !config.Cache.Enabled {
 		return "", false
 	}
 
@@ -108,7 +104,7 @@ func (a *MutatorIDToken) tokenFromCache(config *CredentialsIDTokenConfig, sessio
 }
 
 func (a *MutatorIDToken) tokenToCache(config *CredentialsIDTokenConfig, session *authn.AuthenticationSession, claims []byte, ttl time.Duration, expiresAt time.Time, token string) {
-	if !a.tokenCacheEnabled {
+	if !config.Cache.Enabled {
 		return
 	}
 
@@ -195,13 +191,41 @@ func (a *MutatorIDToken) Validate(config json.RawMessage) error {
 }
 
 func (a *MutatorIDToken) Config(config json.RawMessage) (*CredentialsIDTokenConfig, error) {
-	var c CredentialsIDTokenConfig
+	c := CredentialsIDTokenConfig{
+		Cache: idTokenCacheConfig{
+			Enabled: true, // default to true
+		},
+	}
 	if err := a.c.MutatorConfig(a.GetID(), config, &c); err != nil {
 		return nil, NewErrMutatorMisconfigured(a, err)
 	}
 
 	if c.TTL == "" {
 		c.TTL = "15m"
+	}
+
+	if a.tokenCache == nil {
+		cost := int64(c.Cache.MaxCost)
+		if cost == 0 {
+			cost = 1 << 25
+		}
+
+		cache, err := ristretto.NewCache(&ristretto.Config{
+			NumCounters: cost * 10,
+			// Allocate a max
+			MaxCost: cost,
+			// This is a best-practice value.
+			BufferItems: 64,
+			Cost: func(value interface{}) int64 {
+				return 1
+			},
+			IgnoreInternalCost: true,
+		})
+
+		if err != nil {
+			return nil, err
+		}
+		a.tokenCache = cache
 	}
 
 	return &c, nil
