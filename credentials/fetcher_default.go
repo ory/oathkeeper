@@ -18,8 +18,8 @@ import (
 
 	"github.com/ory/oathkeeper/internal/cloudstorage"
 
+	"github.com/go-jose/go-jose/v3"
 	"github.com/pkg/errors"
-	"gopkg.in/square/go-jose.v2"
 
 	"github.com/ory/x/logrusx"
 	"github.com/ory/x/urlx"

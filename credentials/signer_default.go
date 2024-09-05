@@ -10,10 +10,10 @@ import (
 	"net/url"
 	"reflect"
 
+	"github.com/go-jose/go-jose/v3"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/pkg/errors"
 	"golang.org/x/crypto/ed25519"
-	"gopkg.in/square/go-jose.v2"
 )
 
 var _ Signer = new(DefaultSigner)

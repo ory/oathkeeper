@@ -12,8 +12,8 @@ import (
 	"os"
 	"time"
 
+	"github.com/go-jose/go-jose/v3"
 	"github.com/golang-jwt/jwt/v4"
-	"github.com/square/go-jose"
 
 	"github.com/ory/oathkeeper/x"
 	"github.com/ory/x/cmdx"
