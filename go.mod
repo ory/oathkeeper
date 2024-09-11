@@ -7,7 +7,7 @@ replace github.com/mattn/go-sqlite3 => github.com/mattn/go-sqlite3 v1.14.10
 require (
 	github.com/Azure/azure-pipeline-go v0.2.2
 	github.com/Azure/azure-storage-blob-go v0.9.0
-	github.com/Masterminds/sprig/v3 v3.2.2
+	github.com/Masterminds/sprig/v3 v3.2.3
 	github.com/auth0/go-jwt-middleware/v2 v2.1.0
 	github.com/aws/aws-sdk-go v1.34.28
 	github.com/blang/semver v3.5.1+incompatible
@@ -16,12 +16,12 @@ require (
 	github.com/ghodss/yaml v1.0.0
 	github.com/go-faker/faker/v4 v4.0.0-beta.2
 	github.com/go-openapi/errors v0.20.3
-	github.com/go-openapi/runtime v0.24.2
+	github.com/go-openapi/runtime v0.25.0
 	github.com/go-openapi/strfmt v0.21.3
 	github.com/go-openapi/swag v0.22.3
 	github.com/go-openapi/validate v0.22.0
 	github.com/go-sql-driver/mysql v1.7.0
-	github.com/go-swagger/go-swagger v0.30.0
+	github.com/go-swagger/go-swagger v0.30.4
 	github.com/gobuffalo/httptest v1.5.2
 	github.com/gobwas/glob v0.2.3
 	github.com/golang-jwt/jwt/v4 v4.4.3
@@ -80,7 +80,7 @@ require (
 	github.com/Azure/go-autorest/autorest v0.11.1 // indirect
 	github.com/Azure/go-autorest/autorest/adal v0.9.5 // indirect
 	github.com/Masterminds/goutils v1.1.1 // indirect
-	github.com/Masterminds/semver/v3 v3.1.1 // indirect
+	github.com/Masterminds/semver/v3 v3.2.0 // indirect
 	github.com/Microsoft/go-winio v0.6.0 // indirect
 	github.com/Nvveen/Gotty v0.0.0-20120604004816-cd527374f1e5 // indirect
 	github.com/asaskevich/govalidator v0.0.0-20210307081110-f21760c49a8d // indirect
@@ -116,7 +116,7 @@ require (
 	github.com/go-openapi/jsonpointer v0.19.5 // indirect
 	github.com/go-openapi/jsonreference v0.20.0 // indirect
 	github.com/go-openapi/loads v0.21.2 // indirect
-	github.com/go-openapi/spec v0.20.7 // indirect
+	github.com/go-openapi/spec v0.20.8 // indirect
 	github.com/gobuffalo/envy v1.10.2 // indirect
 	github.com/gobuffalo/fizz v1.14.4 // indirect
 	github.com/gobuffalo/flect v0.3.0 // indirect
@@ -149,7 +149,7 @@ require (
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.18.1 // indirect
 	github.com/hashicorp/go-cleanhttp v0.5.2 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
-	github.com/huandu/xstrings v1.3.2 // indirect
+	github.com/huandu/xstrings v1.3.3 // indirect
 	github.com/imdario/mergo v0.3.13 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/inhies/go-bytesize v0.0.0-20220417184213-4913239db9cf // indirect
@@ -233,7 +233,7 @@ require (
 	github.com/xeipuuv/gojsonreference v0.0.0-20180127040603-bd5ef7bd5415 // indirect
 	github.com/xeipuuv/gojsonschema v1.2.0 // indirect
 	github.com/xtgo/uuid v0.0.0-20140804021211-a0b114877d4c // indirect
-	go.mongodb.org/mongo-driver v1.10.3 // indirect
+	go.mongodb.org/mongo-driver v1.11.1 // indirect
 	go.opencensus.io v0.24.0 // indirect
 	go.opentelemetry.io/contrib/instrumentation/net/http/httptrace/otelhttptrace v0.45.0 // indirect
 	go.opentelemetry.io/contrib/propagators/b3 v1.20.0 // indirect
