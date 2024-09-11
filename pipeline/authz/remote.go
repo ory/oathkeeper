@@ -67,7 +67,6 @@ func (a *AuthorizerRemote) GetID() string {
 func (a *AuthorizerRemote) Authorize(r *http.Request, session *authn.AuthenticationSession, config json.RawMessage, rl pipeline.Rule) (err error) {
 	ctx, span := a.tracer.Start(r.Context(), "pipeline.authz.AuthorizerRemote.Authorize")
 	defer otelx.End(span, &err)
-	r = r.WithContext(ctx)
 
 	c, err := a.Config(config)
 	if err != nil {
@@ -80,7 +79,7 @@ func (a *AuthorizerRemote) Authorize(r *http.Request, session *authn.Authenticat
 		write.CloseWithError(errors.Wrapf(err, `could not pipe request body in rule "%s"`, rl.GetID()))
 	}()
 
-	req, err := http.NewRequest("POST", c.Remote, read)
+	req, err := http.NewRequestWithContext(ctx, "POST", c.Remote, read)
 	if err != nil {
 		return errors.WithStack(err)
 	}
@@ -116,7 +115,7 @@ func (a *AuthorizerRemote) Authorize(r *http.Request, session *authn.Authenticat
 		req.Header.Set(hdr, headerValue.String())
 	}
 
-	res, err := a.client.Do(req.WithContext(r.Context()))
+	res, err := a.client.Do(req)
 
 	if err != nil {
 		return errors.WithStack(err)

@@ -203,6 +203,11 @@ func TestAuthorizerRemoteAuthorize(t *testing.T) {
 			if err := a.Authorize(r, tt.session, tt.config, &rule.Rule{}); (err != nil) != tt.wantErr {
 				t.Errorf("Authorize() error = %v, wantErr %v", err, tt.wantErr)
 			}
+			if tt.body != "" {
+				body, err := io.ReadAll(r.Body)
+				require.NoError(t, err)
+				require.Equal(t, tt.body, string(body), "body must stay intact")
+			}
 
 			if tt.sessionHeaderMatch != nil {
 				assert.Equal(t, tt.sessionHeaderMatch, &tt.session.Header)
