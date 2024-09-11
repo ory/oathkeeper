@@ -483,6 +483,11 @@
             }
           ]
         },
+        "prefix": {
+          "title": "Token Prefix",
+          "type": "string",
+          "description": "The token is considered only if it starts with this string."
+        },
         "preserve_query": {
           "title": "Preserve Query",
           "type": "boolean",
@@ -822,6 +827,17 @@
             "type": "string"
           }
         },
+        "prefix": {
+          "title": "Token Prefix",
+          "type": "string",
+          "description": "The token is considered only if it starts with this string."
+        },
+        "preserve_host": {
+          "title": "Preserve Host",
+          "type": "boolean",
+          "description": "When set to true the HTTP Header X-Forwarded-Host will be set to the original HTTP host.",
+          "default": false
+        },
         "introspection_request_headers": {
           "title": "Introspection Request Headers",
           "description": "Additional headers to be added to the introspection request.",
@@ -973,6 +989,12 @@
           "format": "uri",
           "description": "The URL of the remote authorizer. The remote authorizer is expected to return either 200 OK or 403 Forbidden to allow/deny access.\n\n>If this authorizer is enabled, this value is required.",
           "examples": ["https://host/path"]
+        },
+        "headers": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
         },
         "payload": {
           "title": "JSON Payload",
@@ -1175,6 +1197,12 @@
               "examples": ["localhost", "127.0.0.1"],
               "title": "Host",
               "description": "The network interface to listen on. Leave empty to listen on all interfaces."
+            },
+            "trust_forwarded_headers": {
+              "type": "boolean",
+              "default": false,
+              "title": "Trust X-Forwarded Headers",
+              "description": "Trust the X-Forwarded-* headers from the reverse proxy. This is useful when running behind a load balancer or similar. Set this to false if you are not running behind a reverse proxy that prevents Hop-by-Hop attacks."
             },
             "timeout": {
               "$ref": "#/definitions/serverTimeout"
@@ -1843,10 +1871,10 @@
       }
     },
     "log": {
-      "$ref": "https://raw.githubusercontent.com/ory/x/v0.0.532/logrusx/config.schema.json"
+      "$ref": "https://raw.githubusercontent.com/ory/x/v0.0.605/logrusx/config.schema.json"
     },
     "tracing": {
-      "$ref": "https://raw.githubusercontent.com/ory/x/v0.0.532/tracing/config.schema.json"
+      "$ref": "https://raw.githubusercontent.com/ory/x/v0.0.605/otelx/config.schema.json"
     },
     "profiling": {
       "title": "Profiling",
