@@ -1,1 +1,6 @@
 project: oathkeeper
+
+pre_release_hooks:
+  - ./scripts/render-schemas.sh
+  - git config --unset user.email
+  - git config --unset user.name
