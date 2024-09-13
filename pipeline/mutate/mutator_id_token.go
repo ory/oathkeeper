@@ -72,7 +72,6 @@ func (a *MutatorIDToken) WithCache(t *template.Template) {
 
 type idTokenCacheContainer struct {
 	ExpiresAt time.Time
-	TTL       time.Duration
 	Token     string
 }
 
@@ -111,7 +110,6 @@ func (a *MutatorIDToken) tokenToCache(config *CredentialsIDTokenConfig, session 
 	a.tokenCache.SetWithTTL(
 		key,
 		&idTokenCacheContainer{
-			TTL:       ttl,
 			ExpiresAt: expiresAt,
 			Token:     token,
 		},
