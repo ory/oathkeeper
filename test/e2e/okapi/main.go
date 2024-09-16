@@ -31,7 +31,7 @@ func init() {
 		jwksProvider.KeyFunc,
 		validator.RS256,
 		jwksProvider.IssuerURL.String(),
-		[]string{},
+		[]string{jwksProvider.IssuerURL.String()},
 	)
 	if err != nil {
 		panic(err)
