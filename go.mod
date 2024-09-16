@@ -1,9 +1,6 @@
 go 1.22
-<<<<<<< hperl/bump-go-jose
 
 toolchain go1.22.5
-=======
->>>>>>> master
 
 module github.com/ory/oathkeeper
 
