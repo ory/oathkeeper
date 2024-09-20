@@ -17,8 +17,8 @@ import (
 	"github.com/ory/oathkeeper/x"
 	"github.com/ory/x/urlx"
 
+	"github.com/go-jose/go-jose/v3"
 	"github.com/julienschmidt/httprouter"
-	"gopkg.in/square/go-jose.v2"
 )
 
 const (
