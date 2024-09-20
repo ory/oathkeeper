@@ -38,6 +38,7 @@ func TestAuthenticatorBearerToken(t *testing.T) {
 	t.Run("method=authenticate", func(t *testing.T) {
 		for k, tc := range []struct {
 			d              string
+			token          string
 			r              *http.Request
 			setup          func(*testing.T, *httprouter.Router)
 			router         func(http.ResponseWriter, *http.Request)
@@ -90,6 +91,54 @@ func TestAuthenticatorBearerToken(t *testing.T) {
 						w.Write([]byte(`{"sub": "123", "extra": {"foo": "bar"}}`))
 					})
 				},
+				expectErr: false,
+				expectSess: &AuthenticationSession{
+					Subject: "123",
+					Extra:   map[string]interface{}{"foo": "bar"},
+				},
+			},
+			{
+				d:     "should pass because session token was provided in the correct custom header",
+				token: "custom-header-token-value",
+				r:     &http.Request{Header: http.Header{"X-Custom-Header": {"custom-header-token-value"}}, URL: &url.URL{Path: ""}},
+				router: func(w http.ResponseWriter, r *http.Request) {
+					assert.Equal(t, r.Header.Get("Authorization"), "bearer custom-header-token-value")
+					w.WriteHeader(200)
+					w.Write([]byte(`{"sub": "123", "extra": {"foo": "bar"}}`))
+				},
+				config:    []byte(`{"token_from": {"header": "X-Custom-Header"}}`),
+				expectErr: false,
+				expectSess: &AuthenticationSession{
+					Subject: "123",
+					Extra:   map[string]interface{}{"foo": "bar"},
+				},
+			},
+			{
+				d:     "should pass because session token was provided in the correct custom query parameter",
+				token: "query-param-token-value",
+				r:     &http.Request{Header: http.Header{}, URL: &url.URL{Path: "", RawQuery: "custom-query-param=query-param-token-value"}},
+				router: func(w http.ResponseWriter, r *http.Request) {
+					assert.Equal(t, r.Header.Get("Authorization"), "bearer query-param-token-value")
+					w.WriteHeader(200)
+					w.Write([]byte(`{"sub": "123", "extra": {"foo": "bar"}}`))
+				},
+				config:    []byte(`{"token_from": {"query_parameter": "custom-query-param"}}`),
+				expectErr: false,
+				expectSess: &AuthenticationSession{
+					Subject: "123",
+					Extra:   map[string]interface{}{"foo": "bar"},
+				},
+			},
+			{
+				d:     "should pass because session token was provided in the correct cookie",
+				token: "cooke-token-value",
+				r:     &http.Request{Header: http.Header{"Cookie": {"custom-cookie-name=cooke-token-value"}}, URL: &url.URL{Path: ""}},
+				router: func(w http.ResponseWriter, r *http.Request) {
+					assert.Equal(t, r.Header.Get("Authorization"), "bearer cooke-token-value")
+					w.WriteHeader(200)
+					w.Write([]byte(`{"sub": "123", "extra": {"foo": "bar"}}`))
+				},
+				config:    []byte(`{"token_from": {"cookie": "custom-cookie-name"}}`),
 				expectErr: false,
 				expectSess: &AuthenticationSession{
 					Subject: "123",
@@ -308,9 +357,12 @@ func TestAuthenticatorBearerToken(t *testing.T) {
 
 				tc.config, _ = sjson.SetBytes(tc.config, "check_session_url", testCheckSessionUrl.String())
 				sess := new(AuthenticationSession)
-				originalHeaders := http.Header{}
+				expectedHeaders := http.Header{}
 				for k, v := range tc.r.Header {
-					originalHeaders[k] = v
+					expectedHeaders[k] = v
+				}
+				if tc.token != "" {
+					expectedHeaders.Set("Authorization", "bearer "+tc.token)
 				}
 
 				err = pipelineAuthenticator.Authenticate(tc.r, sess, tc.config, nil)
@@ -323,7 +375,7 @@ func TestAuthenticatorBearerToken(t *testing.T) {
 					require.NoError(t, err)
 				}
 
-				require.True(t, reflect.DeepEqual(tc.r.Header, originalHeaders))
+				require.True(t, reflect.DeepEqual(tc.r.Header, expectedHeaders))
 
 				if tc.expectSess != nil {
 					assert.Equal(t, tc.expectSess, sess)

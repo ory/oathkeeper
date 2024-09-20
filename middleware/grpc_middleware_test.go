@@ -50,7 +50,7 @@ func testClient(t *testing.T, l *bufconn.Listener, dialOpts ...grpc.DialOption) 
 func testTokenCheckServer(t *testing.T) *httptest.Server {
 	s := httptest.NewServer(http.HandlerFunc(
 		func(w http.ResponseWriter, r *http.Request) {
-			if r.Header.Get("authorization") != "Bearer correct token" {
+			if r.Header.Get("Authorization") != "bearer correct token" {
 				t.Logf("denied request %+v", r)
 				w.WriteHeader(http.StatusForbidden)
 				return
@@ -77,7 +77,7 @@ func writeTestConfig(t *testing.T, pattern string, content string) string {
 type testToken string
 
 func (t testToken) GetRequestMetadata(context.Context, ...string) (map[string]string, error) {
-	return map[string]string{"authorization": "Bearer " + string(t)}, nil
+	return map[string]string{"Authorization": "bearer " + string(t)}, nil
 }
 func (t testToken) RequireTransportSecurity() bool { return false }
 
