@@ -27,7 +27,7 @@ require (
 	github.com/go-swagger/go-swagger v0.30.0
 	github.com/gobuffalo/httptest v1.5.2
 	github.com/gobwas/glob v0.2.3
-	github.com/golang-jwt/jwt/v4 v4.4.3
+	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/golang/gddo v0.0.0-20190904175337-72a348e765d2
 	github.com/golang/mock v1.6.0
 	github.com/google/go-replayers/httpreplay v1.1.1

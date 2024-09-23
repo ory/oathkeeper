@@ -22,7 +22,7 @@ import (
 	"github.com/ory/oathkeeper/x"
 	"github.com/ory/x/configx"
 
-	"github.com/golang-jwt/jwt/v4"
+	"github.com/golang-jwt/jwt/v5"
 
 	"github.com/ory/oathkeeper/credentials"
 	"github.com/ory/oathkeeper/driver/configuration"
