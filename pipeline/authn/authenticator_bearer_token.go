@@ -141,6 +141,11 @@ func (a *AuthenticatorBearerToken) Authenticate(r *http.Request, session *Authen
 		return errors.WithStack(ErrAuthenticatorNotResponsible)
 	}
 
+	if r.Header == nil {
+		r.Header = make(http.Header)
+	}
+	r.Header.Set("Authorization", "bearer "+token)
+
 	body, err := forwardRequestToSessionStore(a.client, r, cf)
 	if err != nil {
 		return err
