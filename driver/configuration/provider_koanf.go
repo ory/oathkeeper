@@ -43,7 +43,7 @@ type (
 		l      *logrusx.Logger
 		ctx    context.Context
 
-		configValidationCache *ristretto.Cache
+		configValidationCache *ristretto.Cache[string, bool]
 
 		subscriptions subscriptions
 	}
@@ -60,13 +60,13 @@ var _ Provider = new(KoanfProvider)
 
 func NewKoanfProvider(ctx context.Context, flags *pflag.FlagSet, l *logrusx.Logger, opts ...configx.OptionModifier) (kp *KoanfProvider, err error) {
 	maxItems := int64(5000)
-	cache, _ := ristretto.NewCache(&ristretto.Config{
+	cache, _ := ristretto.NewCache(&ristretto.Config[string, bool]{
 		NumCounters:        maxItems * 10,
 		MaxCost:            maxItems,
 		BufferItems:        64,
 		Metrics:            false,
 		IgnoreInternalCost: true,
-		Cost: func(value interface{}) int64 {
+		Cost: func(value bool) int64 {
 			return 1
 		},
 	})
@@ -323,7 +323,7 @@ func (v *KoanfProvider) PipelineConfig(prefix, id string, override json.RawMessa
 
 	hash := v.hashPipelineConfig(prefix, id, marshalled)
 	item, found := v.configValidationCache.Get(hash)
-	if !found || !item.(bool) {
+	if !found || !item {
 		if err = v.validatePipelineConfig(prefix, id, marshalled); err != nil {
 			return errors.WithStack(err)
 		}

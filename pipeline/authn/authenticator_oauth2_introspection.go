@@ -72,7 +72,7 @@ type AuthenticatorOAuth2Introspection struct {
 	clientMap map[string]*http.Client
 	mu        sync.RWMutex
 
-	tokenCache *ristretto.Cache
+	tokenCache *ristretto.Cache[string, []byte]
 	cacheTTL   *time.Duration
 	logger     *logrusx.Logger
 	provider   trace.TracerProvider
@@ -140,13 +140,8 @@ func (a *AuthenticatorOAuth2Introspection) tokenFromCache(config *AuthenticatorO
 		return nil
 	}
 
-	item, found := a.tokenCache.Get(token)
+	i, found := a.tokenCache.Get(token)
 	if !found {
-		return nil
-	}
-
-	i, ok := item.([]byte)
-	if !ok {
 		return nil
 	}
 
@@ -385,14 +380,14 @@ func (a *AuthenticatorOAuth2Introspection) Config(config json.RawMessage) (*Auth
 			cost = 100000000
 		}
 		a.logger.Debugf("Creating cache with max cost: %d", c.Cache.MaxCost)
-		cache, err := ristretto.NewCache(&ristretto.Config{
+		cache, err := ristretto.NewCache(&ristretto.Config[string, []byte]{
 			// This will hold about 1000 unique mutation responses.
 			NumCounters: cost * 10,
 			// Allocate a max
 			MaxCost: cost,
 			// This is a best-practice value.
 			BufferItems: 64,
-			Cost: func(value interface{}) int64 {
+			Cost: func(value []byte) int64 {
 				return 1
 			},
 			IgnoreInternalCost: true,

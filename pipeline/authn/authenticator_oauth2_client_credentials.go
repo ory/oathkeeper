@@ -46,7 +46,7 @@ type AuthenticatorOAuth2ClientCredentials struct {
 	c      configuration.Provider
 	client *http.Client
 
-	tokenCache *ristretto.Cache
+	tokenCache *ristretto.Cache[string, []byte]
 	cacheTTL   *time.Duration
 	logger     *logrusx.Logger
 }
@@ -122,7 +122,7 @@ func (a *AuthenticatorOAuth2ClientCredentials) Config(config json.RawMessage) (*
 			maxTokens = 1000
 		}
 		a.logger.Debugf("Creating cache with max tokens: %d", maxTokens)
-		cache, err := ristretto.NewCache(&ristretto.Config{
+		cache, err := ristretto.NewCache(&ristretto.Config[string, []byte]{
 			// This will hold about 1000 unique mutation responses.
 			NumCounters: 10 * maxTokens,
 			// Allocate a maximum amount of tokens to cache
@@ -130,7 +130,7 @@ func (a *AuthenticatorOAuth2ClientCredentials) Config(config json.RawMessage) (*
 			// This is a best-practice value.
 			BufferItems: 64,
 			// Use a static cost of 1, so we can limit the amount of tokens that can be stored
-			Cost: func(value interface{}) int64 {
+			Cost: func(value []byte) int64 {
 				return 1
 			},
 			IgnoreInternalCost: true,
@@ -154,13 +154,8 @@ func (a *AuthenticatorOAuth2ClientCredentials) tokenFromCache(config *Authentica
 		return nil
 	}
 
-	item, found := a.tokenCache.Get(clientCredentialsConfigToKey(clientCredentials))
+	i, found := a.tokenCache.Get(clientCredentialsConfigToKey(clientCredentials))
 	if !found {
-		return nil
-	}
-
-	i, ok := item.([]byte)
-	if !ok {
 		return nil
 	}
 

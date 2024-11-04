@@ -38,7 +38,7 @@ type MutatorIDToken struct {
 	templates     *template.Template
 	templatesLock sync.Mutex
 
-	tokenCache        *ristretto.Cache
+	tokenCache        *ristretto.Cache[string, *idTokenCacheContainer]
 	tokenCacheEnabled bool
 }
 
@@ -54,7 +54,7 @@ func (c *CredentialsIDTokenConfig) ClaimsTemplateID() string {
 }
 
 func NewMutatorIDToken(c configuration.Provider, r MutatorIDTokenRegistry) *MutatorIDToken {
-	cache, _ := ristretto.NewCache(&ristretto.Config{
+	cache, _ := ristretto.NewCache(&ristretto.Config[string, *idTokenCacheContainer]{
 		NumCounters: 10000,
 		MaxCost:     1 << 25,
 		BufferItems: 64,
@@ -98,13 +98,12 @@ func (a *MutatorIDToken) tokenFromCache(config *CredentialsIDTokenConfig, sessio
 		return "", false
 	}
 
-	container := item.(*idTokenCacheContainer)
-	if container.ExpiresAt.Before(time.Now().Add(ttl * 1 / 10)) {
+	if item.ExpiresAt.Before(time.Now().Add(ttl * 1 / 10)) {
 		a.tokenCache.Del(key)
 		return "", false
 	}
 
-	return container.Token, true
+	return item.Token, true
 }
 
 func (a *MutatorIDToken) tokenToCache(config *CredentialsIDTokenConfig, session *authn.AuthenticationSession, claims []byte, ttl time.Duration, expiresAt time.Time, token string) {
