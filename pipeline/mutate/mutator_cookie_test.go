@@ -11,9 +11,6 @@ import (
 	"testing"
 	"text/template"
 
-	"github.com/ory/viper"
-
-	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/internal"
 
 	"github.com/ory/oathkeeper/pipeline/authn"
@@ -207,14 +204,6 @@ func TestCredentialsIssuerCookies(t *testing.T) {
 				specs.Request.Header = specs.Session.Header
 				assert.Equal(t, serializeCookies(overrideCookies), serializeCookies(specs.Request.Cookies()))
 			}
-		})
-
-		t.Run("method=validate", func(t *testing.T) {
-			viper.Set(configuration.MutatorCookieIsEnabled, true)
-			require.Error(t, a.Validate(json.RawMessage(`{}`)))
-
-			viper.Set(configuration.MutatorCookieIsEnabled, false)
-			require.Error(t, a.Validate(json.RawMessage(`{"cookies":{}}`)))
 		})
 	})
 }

@@ -39,7 +39,7 @@ type MutatorHydrator struct {
 	c configuration.Provider
 	d mutatorHydratorDependencies
 
-	hydrateCache *ristretto.Cache
+	hydrateCache *ristretto.Cache[string, *authn.AuthenticationSession]
 }
 
 type BasicAuth struct {
@@ -80,7 +80,7 @@ type mutatorHydratorDependencies interface {
 }
 
 func NewMutatorHydrator(c configuration.Provider, d mutatorHydratorDependencies) *MutatorHydrator {
-	cache, _ := ristretto.NewCache(&ristretto.Config{
+	cache, _ := ristretto.NewCache(&ristretto.Config[string, *authn.AuthenticationSession]{
 		// This will hold about 1000 unique mutation responses.
 		NumCounters: 10000,
 		// Allocate a max of 32MB
@@ -113,7 +113,7 @@ func (a *MutatorHydrator) hydrateFromCache(config *MutatorHydratorConfig, sessio
 		return nil, false
 	}
 
-	return item.(*authn.AuthenticationSession).Copy(), true
+	return item.Copy(), true
 }
 
 func (a *MutatorHydrator) hydrateToCache(config *MutatorHydratorConfig, key string, session *authn.AuthenticationSession) {
