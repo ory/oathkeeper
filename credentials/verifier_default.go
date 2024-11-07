@@ -85,7 +85,6 @@ func (v *VerifierDefault) Verify(
 	}, jwt.WithIssuedAt())
 	if err != nil {
 		if errors.Is(err, jwt.ErrTokenUnverifiable) ||
-			errors.Is(err, jwt.ErrTokenUnverifiable) ||
 			errors.Is(err, jwt.ErrTokenSignatureInvalid) ||
 			errors.Is(err, jwt.ErrTokenInvalidClaims) ||
 			errors.Is(err, jwt.ErrTokenMalformed) {
