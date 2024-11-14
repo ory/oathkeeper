@@ -18,7 +18,7 @@ require (
 	github.com/Azure/azure-storage-blob-go v0.9.0
 	github.com/Masterminds/sprig/v3 v3.2.2
 	github.com/auth0/go-jwt-middleware/v2 v2.2.2
-	github.com/aws/aws-sdk-go v1.34.28
+	github.com/aws/aws-sdk-go v1.55.5
 	github.com/blang/semver v3.5.1+incompatible
 	github.com/dgraph-io/ristretto v1.0.0
 	github.com/dlclark/regexp2 v1.2.0
@@ -70,7 +70,7 @@ require (
 	go.opentelemetry.io/otel v1.21.0
 	go.opentelemetry.io/otel/trace v1.21.0
 	gocloud.dev v0.20.0
-	golang.org/x/crypto v0.24.0
+	golang.org/x/crypto v0.29.0
 	golang.org/x/oauth2 v0.14.0
 	google.golang.org/api v0.149.0
 	google.golang.org/grpc v1.59.0
@@ -102,7 +102,7 @@ require (
 	github.com/containerd/continuity v0.4.3 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.2 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
-	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.2.0 // indirect
+	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.3.0 // indirect
 	github.com/distribution/reference v0.6.0 // indirect
 	github.com/docker/cli v26.1.4+incompatible // indirect
 	github.com/docker/docker v26.1.4+incompatible // indirect
@@ -133,7 +133,7 @@ require (
 	github.com/gobuffalo/pop/v6 v6.1.1 // indirect
 	github.com/gobuffalo/tags/v3 v3.1.4 // indirect
 	github.com/gobuffalo/validate/v3 v3.3.3 // indirect
-	github.com/goccy/go-json v0.10.2 // indirect
+	github.com/goccy/go-json v0.10.3 // indirect
 	github.com/goccy/go-yaml v1.9.6 // indirect
 	github.com/gofrs/flock v0.8.1 // indirect
 	github.com/gofrs/uuid v4.3.1+incompatible // indirect
@@ -163,9 +163,9 @@ require (
 	github.com/jackc/pgio v1.0.0 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgproto3/v2 v2.3.3 // indirect
-	github.com/jackc/pgservicefile v0.0.0-20221227161230-091c0ba34f0a // indirect
-	github.com/jackc/pgtype v1.14.0 // indirect
-	github.com/jackc/pgx/v4 v4.18.2 // indirect
+	github.com/jackc/pgservicefile v0.0.0-20240606120523-5a60cdf6a761 // indirect
+	github.com/jackc/pgtype v1.14.4 // indirect
+	github.com/jackc/pgx/v4 v4.18.3 // indirect
 	github.com/jandelgado/gcov2lcov v1.0.5 // indirect
 	github.com/jessevdk/go-flags v1.5.0 // indirect
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
@@ -184,7 +184,7 @@ require (
 	github.com/lestrrat-go/blackmagic v1.0.2 // indirect
 	github.com/lestrrat-go/httpcc v1.0.1 // indirect
 	github.com/lestrrat-go/iter v1.0.2 // indirect
-	github.com/lestrrat-go/jwx v1.2.29 // indirect
+	github.com/lestrrat-go/jwx v1.2.30 // indirect
 	github.com/lestrrat-go/option v1.0.1 // indirect
 	github.com/luna-duclos/instrumentedsql v1.1.3 // indirect
 	github.com/magiconair/properties v1.8.7 // indirect
@@ -255,9 +255,9 @@ require (
 	golang.org/x/exp v0.0.0-20231110203233-9a3e6036ecaa // indirect
 	golang.org/x/mod v0.17.0 // indirect
 	golang.org/x/net v0.26.0 // indirect
-	golang.org/x/sync v0.8.0 // indirect
-	golang.org/x/sys v0.25.0 // indirect
-	golang.org/x/text v0.16.0 // indirect
+	golang.org/x/sync v0.9.0 // indirect
+	golang.org/x/sys v0.27.0 // indirect
+	golang.org/x/text v0.20.0 // indirect
 	golang.org/x/tools v0.21.1-0.20240508182429-e35e4ccd0d2d // indirect
 	golang.org/x/xerrors v0.0.0-20231012003039-104605ab7028 // indirect
 	google.golang.org/appengine v1.6.8 // indirect
