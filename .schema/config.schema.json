@@ -201,6 +201,13 @@
       "default": "none",
       "description": "Sets the strategy validation algorithm."
     },
+    "scopeValidation": {
+      "title": "Scope Validation",
+      "type": "string",
+      "enum": ["default", "any"],
+      "default": "default",
+      "description": "Sets the strategy verifier algorithm. Default is logical AND and any serves as OR"
+    },
     "configErrorsRedirect": {
       "type": "object",
       "title": "HTTP Redirect Error Handler",
@@ -609,6 +616,9 @@
         "scope_strategy": {
           "$ref": "#/definitions/scopeStrategy"
         },
+        "scope_validation": {
+          "$ref": "#/definitions/ScopeValidation"
+        },
         "token_from": {
           "title": "Token From",
           "description": "The location of the token.\n If not configured, the token will be received from a default location - 'Authorization' header.\n One and only one location (header or query) must be specified.",
@@ -716,6 +726,9 @@
         },
         "scope_strategy": {
           "$ref": "#/definitions/scopeStrategy"
+        },
+        "scope_validation": {
+          "$ref": "#/definitions/scopeValidation"
         },
         "pre_authorization": {
           "title": "Pre-Authorization",
