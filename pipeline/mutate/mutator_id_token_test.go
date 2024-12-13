@@ -386,8 +386,8 @@ func BenchmarkMutatorIDToken(b *testing.B) {
 	} {
 		b.Run("alg="+alg, func(b *testing.B) {
 			for _, enableCache := range []bool{true, false} {
-				a.(*MutatorIDToken).SetCaching(enableCache)
 				b.Run(fmt.Sprintf("cache=%v", enableCache), func(b *testing.B) {
+					conf.SetForTest(b, "mutators.id_token.config.cache.enabled", true)
 					var tc idTokenTestCase
 					var config []byte
 
