@@ -112,11 +112,16 @@ func (a *MutatorIDToken) tokenToCache(config *CredentialsIDTokenConfig, session 
 	}
 
 	key := a.cacheKey(config, ttl, claims, session)
-	a.tokenCache.Set(key, &idTokenCacheContainer{
-		TTL:       ttl,
-		ExpiresAt: expiresAt,
-		Token:     token,
-	}, 0)
+	a.tokenCache.SetWithTTL(
+		key,
+		&idTokenCacheContainer{
+			TTL:       ttl,
+			ExpiresAt: expiresAt,
+			Token:     token,
+		},
+		0,
+		ttl,
+	)
 }
 
 func (a *MutatorIDToken) Mutate(r *http.Request, session *authn.AuthenticationSession, config json.RawMessage, rl pipeline.Rule) error {
