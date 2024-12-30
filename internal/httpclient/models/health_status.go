@@ -12,7 +12,7 @@ import (
 	"github.com/go-openapi/swag"
 )
 
-// HealthStatus health status
+// HealthStatus The health status of the service.
 //
 // swagger:model healthStatus
 type HealthStatus struct {
