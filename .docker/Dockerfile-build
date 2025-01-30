@@ -8,8 +8,8 @@ RUN apt-get update && apt-get upgrade -y
 COPY go.mod go.mod
 COPY go.sum go.sum
 
-ENV CGO_ENABLED 0
-ENV GO111MODULE on
+ENV CGO_ENABLED=0
+ENV GO111MODULE=on
 
 RUN go mod download
 

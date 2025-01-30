@@ -7,6 +7,23 @@
                 {
                     "properties": {
                         "version": {
+                            "const": "v0.40.9"
+                        }
+                    },
+                    "required": [
+                        "version"
+                    ]
+                },
+                {
+                    "$ref": "https://raw.githubusercontent.com/ory/oathkeeper/v0.40.9/.schema/config.schema.json"
+                }
+            ]
+        },
+        {
+            "allOf": [
+                {
+                    "properties": {
+                        "version": {
                             "const": "v0.40.7"
                         }
                     },
