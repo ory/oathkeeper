@@ -132,7 +132,7 @@ that your company deserves a spot here, reach out to
             <td>OpenAI</td>
             <td align="center">
                 <picture>
-                    <source media="(prefers-color-scheme: dark)" srcset="../../../static/adopters/light/openai.svg" />
+                    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/ory/meta/master/static/adopters/light/openai.svg" />
                     <img height="32px" src="https://raw.githubusercontent.com/ory/meta/master/static/adopters/dark/openai.svg" alt="OpenAI">
                 </picture>
             </td>
@@ -143,7 +143,7 @@ that your company deserves a spot here, reach out to
             <td>Fandom</td>
             <td align="center">
                 <picture>
-                    <source media="(prefers-color-scheme: dark)" srcset="../../../static/adopters/light/fandom.svg" />
+                    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/ory/meta/master/static/adopters/light/fandom.svg" />
                     <img height="32px" src="https://raw.githubusercontent.com/ory/meta/master/static/adopters/dark/fandom.svg" alt="Fandom">
                 </picture>
             </td>
@@ -154,7 +154,7 @@ that your company deserves a spot here, reach out to
             <td>Lumin</td>
             <td align="center">
                 <picture>
-                    <source media="(prefers-color-scheme: dark)" srcset="../../../static/adopters/light/lumin.svg" />
+                    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/ory/meta/master/static/adopters/light/lumin.svg" />
                     <img height="32px" src="https://raw.githubusercontent.com/ory/meta/master/static/adopters/dark/lumin.svg" alt="Lumin">
                 </picture>
             </td>
@@ -165,7 +165,7 @@ that your company deserves a spot here, reach out to
             <td>Sencrop</td>
             <td align="center">
                 <picture>
-                    <source media="(prefers-color-scheme: dark)" srcset="../../../static/adopters/light/sencrop.svg" />
+                    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/ory/meta/master/static/adopters/light/sencrop.svg" />
                     <img height="32px" src="https://raw.githubusercontent.com/ory/meta/master/static/adopters/dark/sencrop.svg" alt="Sencrop">
                 </picture>
             </td>
@@ -176,7 +176,7 @@ that your company deserves a spot here, reach out to
             <td>OSINT Industries</td>
             <td align="center">
                 <picture>
-                    <source media="(prefers-color-scheme: dark)" srcset="../../../static/adopters/light/osint.svg" />
+                    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/ory/meta/master/static/adopters/light/osint.svg" />
                     <img height="32px" src="https://raw.githubusercontent.com/ory/meta/master/static/adopters/dark/osint.svg" alt="OSINT Industries">
                 </picture>
             </td>
@@ -187,7 +187,7 @@ that your company deserves a spot here, reach out to
             <td>HGV</td>
             <td align="center">
                 <picture>
-                    <source media="(prefers-color-scheme: dark)" srcset="../../../static/adopters/light/hgv.svg" />
+                    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/ory/meta/master/static/adopters/light/hgv.svg" />
                     <img height="32px" src="https://raw.githubusercontent.com/ory/meta/master/static/adopters/dark/hgv.svg" alt="HGV">
                 </picture>
             </td>
@@ -198,7 +198,7 @@ that your company deserves a spot here, reach out to
             <td>Maxroll</td>
             <td align="center">
                 <picture>
-                    <source media="(prefers-color-scheme: dark)" srcset="../../../static/adopters/light/maxroll.svg" />
+                    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/ory/meta/master/static/adopters/light/maxroll.svg" />
                     <img height="32px" src="https://raw.githubusercontent.com/ory/meta/master/static/adopters/dark/maxroll.svg" alt="Maxroll">
                 </picture>
             </td>
@@ -209,7 +209,7 @@ that your company deserves a spot here, reach out to
             <td>Zezam</td>
             <td align="center">
                 <picture>
-                    <source media="(prefers-color-scheme: dark)" srcset="../../../static/adopters/light/zezam.svg" />
+                    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/ory/meta/master/static/adopters/light/zezam.svg" />
                     <img height="32px" src="https://raw.githubusercontent.com/ory/meta/master/static/adopters/dark/zezam.svg" alt="Zezam">
                 </picture>
             </td>
@@ -220,7 +220,7 @@ that your company deserves a spot here, reach out to
             <td>T.RowePrice</td>
             <td align="center">
                 <picture>
-                    <source media="(prefers-color-scheme: dark)" srcset="../../../static/adopters/light/troweprice.svg" />
+                    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/ory/meta/master/static/adopters/light/troweprice.svg" />
                     <img height="32px" src="https://raw.githubusercontent.com/ory/meta/master/static/adopters/dark/troweprice.svg" alt="T.RowePrice">
                 </picture>
             </td>
@@ -230,7 +230,7 @@ that your company deserves a spot here, reach out to
             <td>Mistral</td>
             <td align="center">
                 <picture>
-                    <source media="(prefers-color-scheme: dark)" srcset="../../../static/adopters/light/mistral.svg" />
+                    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/ory/meta/master/static/adopters/light/mistral.svg" />
                     <img height="32px" src="https://raw.githubusercontent.com/ory/meta/master/static/adopters/dark/mistral.svg" alt="Mistral">
                 </picture>
             </td>
@@ -240,7 +240,7 @@ that your company deserves a spot here, reach out to
             <td>Axel Springer</td>
             <td align="center">
                 <picture>
-                    <source media="(prefers-color-scheme: dark)" srcset="../../../static/adopters/light/axelspringer.svg" />
+                    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/ory/meta/master/static/adopters/light/axelspringer.svg" />
                     <img height="22px" src="https://raw.githubusercontent.com/ory/meta/master/static/adopters/dark/axelspringer.svg" alt="Axel Springer">
                 </picture>
             </td>
@@ -250,7 +250,7 @@ that your company deserves a spot here, reach out to
             <td>Hemnet</td>
             <td align="center">
                 <picture>
-                    <source media="(prefers-color-scheme: dark)" srcset="../../../static/adopters/light/hemnet.svg" />
+                    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/ory/meta/master/static/adopters/light/hemnet.svg" />
                     <img height="32px" src="https://raw.githubusercontent.com/ory/meta/master/static/adopters/dark/hemnet.svg" alt="Hemnet">
                 </picture>
             </td>
@@ -260,7 +260,7 @@ that your company deserves a spot here, reach out to
             <td>Cisco</td>
             <td align="center">
                 <picture>
-                    <source media="(prefers-color-scheme: dark)" srcset="../../../static/adopters/light/cisco.svg" />
+                    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/ory/meta/master/static/adopters/light/cisco.svg" />
                     <img height="32px" src="https://raw.githubusercontent.com/ory/meta/master/static/adopters/dark/cisco.svg" alt="Cisco">
                 </picture>
             </td>
@@ -270,7 +270,7 @@ that your company deserves a spot here, reach out to
             <td>Presidencia de la República Dominicana</td>
             <td align="center">
                 <picture>
-                    <source media="(prefers-color-scheme: dark)" srcset="../../../static/adopters/light/republica-dominicana.svg" />
+                    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/ory/meta/master/static/adopters/light/republica-dominicana.svg" />
                     <img height="42px" src="https://raw.githubusercontent.com/ory/meta/master/static/adopters/dark/republica-dominicana.svg" alt="Presidencia de la República Dominicana">
                 </picture>
             </td>
@@ -280,7 +280,7 @@ that your company deserves a spot here, reach out to
             <td>Moonpig</td>
             <td align="center">
                 <picture>
-                    <source media="(prefers-color-scheme: dark)" srcset="../../../static/adopters/light/moonpig.svg" />
+                    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/ory/meta/master/static/adopters/light/moonpig.svg" />
                     <img height="32px" src="https://raw.githubusercontent.com/ory/meta/master/static/adopters/dark/moonpig.svg" alt="Moonpig">
                 </picture>
             </td>
@@ -290,7 +290,7 @@ that your company deserves a spot here, reach out to
             <td>Booster</td>
             <td align="center">
                 <picture>
-                    <source media="(prefers-color-scheme: dark)" srcset="../../../static/adopters/light/booster.svg" />
+                    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/ory/meta/master/static/adopters/light/booster.svg" />
                     <img height="18px" src="https://raw.githubusercontent.com/ory/meta/master/static/adopters/dark/booster.svg" alt="Booster">
                 </picture>
             </td>
@@ -300,7 +300,7 @@ that your company deserves a spot here, reach out to
             <td>Zaptec</td>
             <td align="center">
                 <picture>
-                    <source media="(prefers-color-scheme: dark)" srcset="../../../static/adopters/light/zaptec.svg" />
+                    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/ory/meta/master/static/adopters/light/zaptec.svg" />
                     <img height="24px" src="https://raw.githubusercontent.com/ory/meta/master/static/adopters/dark/zaptec.svg" alt="Zaptec">
                 </picture>
             </td>
@@ -310,7 +310,7 @@ that your company deserves a spot here, reach out to
             <td>Klarna</td>
             <td align="center">
                 <picture>
-                    <source media="(prefers-color-scheme: dark)" srcset="../../../static/adopters/light/klarna.svg" />
+                    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/ory/meta/master/static/adopters/light/klarna.svg" />
                     <img height="24px" src="https://raw.githubusercontent.com/ory/meta/master/static/adopters/dark/klarna.svg" alt="Klarna">
                 </picture>
             </td>
