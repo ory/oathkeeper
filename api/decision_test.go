@@ -444,11 +444,11 @@ func TestDecisionAPIHeaderUsage(t *testing.T) {
 			},
 		},
 		{
-			name:           "scheme is taken from the `forwarded` headers and url from `original` headers",
+			name:           "schemethodme is taken from the `forwarded` headers and url from `original` headers",
 			expectedUrl:    &url.URL{Scheme: "https", Host: defaultUrl.Host, Path: defaultUrl.Path},
 			expectedMethod: defaultMethod,
 			transform: func(req *http.Request) {
-				req.Header.Add("X-Forwarded-Proto", "https")
+				req.Header.Add("X-Forwarded-Method", "POST")
 				req.Header.Add("X-Original-Url", "https://test.dev/bar")
 			},
 		},
