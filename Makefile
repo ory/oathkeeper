@@ -103,4 +103,4 @@ docs/cli: .bin/clidoc
 
 .PHONY: post-release
 post-release:
-	echo "nothing to do"
+	echo "nothing to do!!!!"
