@@ -595,7 +595,6 @@ Our services collect summarized, anonymized data which can optionally be turned
 off. Click [here](https://www.ory.sh/docs/ecosystem/sqa) to learn more.
 
 ## Documentation
-
 ### Guide
 
 The Guide is available [here](https://www.ory.sh/oathkeeper/docs/).
