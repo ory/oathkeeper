@@ -90,16 +90,18 @@ func TestClientCredentialsCache(t *testing.T) {
 
 			config, _ := a.Config([]byte(`{ "cache": { "ttl": "100ms" } }`))
 			a.tokenToCache(config, cc, token)
-			// wait cache to save value
-			time.Sleep(time.Millisecond * 10)
+			a.tokenCache.Wait()
 
-			v := a.tokenFromCache(config, cc)
-			require.NotNil(t, v)
+			assert.EventuallyWithT(t, func(t *assert.CollectT) {
+				v := a.tokenFromCache(config, cc)
+				assert.NotNil(t, v)
+			}, 90*time.Millisecond, 10*time.Millisecond)
 
 			// wait cache to be expired
-			time.Sleep(time.Millisecond * 100)
-			v = a.tokenFromCache(config, cc)
-			require.Nil(t, v)
+			assert.EventuallyWithT(t, func(t *assert.CollectT) {
+				v := a.tokenFromCache(config, cc)
+				assert.Nil(t, v)
+			}, 120*time.Millisecond, 10*time.Millisecond)
 		})
 	})
 

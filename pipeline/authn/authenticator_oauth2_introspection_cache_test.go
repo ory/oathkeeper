@@ -84,18 +84,20 @@ func TestCache(t *testing.T) {
 				Active: true,
 			}
 
-			config, _, _ := a.Config([]byte(`{ "cache": { "ttl": "100ms" } }`))
+			config, _, _ := a.Config([]byte(`{ "cache": { "ttl": "500ms" } }`))
 			a.tokenToCache(config, i, "token", fosite.WildcardScopeStrategy)
-			// wait cache to save value
-			time.Sleep(time.Millisecond * 10)
+			a.tokenCache.Wait()
 
-			v := a.tokenFromCache(config, "token", fosite.WildcardScopeStrategy)
-			require.NotNil(t, v)
+			assert.EventuallyWithT(t, func(t *assert.CollectT) {
+				v := a.tokenFromCache(config, "token", fosite.WildcardScopeStrategy)
+				assert.NotNil(t, v)
+			}, 490*time.Millisecond, 10*time.Millisecond)
 
 			// wait cache to be expired
-			time.Sleep(time.Millisecond * 100)
-			v = a.tokenFromCache(config, "token", fosite.WildcardScopeStrategy)
-			require.Nil(t, v)
+			assert.EventuallyWithT(t, func(t *assert.CollectT) {
+				v := a.tokenFromCache(config, "token", fosite.WildcardScopeStrategy)
+				assert.Nil(t, v)
+			}, 700*time.Millisecond, 10*time.Millisecond)
 		})
 	})
 
