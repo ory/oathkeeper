@@ -13,22 +13,9 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  sdk-generate:
-    name: Generate SDKs
-    runs-on: ubuntu-latest
-    outputs:
-      sdk-cache-key: ${{ steps.sdk-generate.outputs.sdk-cache-key }}
-    steps:
-      - uses: ory/ci/sdk/generate@master
-        with:
-          token: ${{ secrets.ORY_BOT_PAT }}
-        id: sdk-generate
-
   validate:
     name: Run tests and lints
     runs-on: ubuntu-latest
-    needs:
-      - sdk-generate
     steps:
       - uses: ory/ci/checkout@master
       - uses: actions/cache@v3
@@ -64,8 +51,6 @@ jobs:
     strategy:
       matrix:
         name: ["reload", "e2e", "forwarded-header", "bearer-token"]
-    needs:
-      - sdk-generate
     steps:
       - uses: ory/ci/checkout@master
       - uses: actions/setup-go@v2
@@ -99,20 +84,6 @@ jobs:
       - uses: ory/ci/changelog@master
         with:
           token: ${{ secrets.ORY_BOT_PAT }}
-
-  sdk-release:
-    name: Release SDKs
-    runs-on: ubuntu-latest
-    if: ${{ github.ref_type == 'tag' }}
-    needs:
-      - test
-      - sdk-generate
-      - release
-    steps:
-      - uses: ory/ci/sdk/release@master
-        with:
-          token: ${{ secrets.ORY_BOT_PAT }}
-          swag-spec-location: spec/swagger.json
 
   release:
     name: Generate release
