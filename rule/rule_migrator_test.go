@@ -26,25 +26,25 @@ func TestRuleMigration(t *testing.T) {
 		{
 			d:       "should work with v0.19.0-beta.1",
 			in:      `{}`,
-			out:     `{"id":"","version":"v0.19.0-beta.1","description":"","match":null,"errors":null,"authenticators":null,"authorizer":{"handler":"","config":null},"mutators":null,"upstream":{"preserve_host":false,"strip_path":"","url":""}}`,
+			out:     `{"id":"","version":"v0.19.0-beta.1","description":"","match":null,"errors":null,"authenticators":null,"authorizer":{"handler":"","config":null},"mutators":null,"upstream":{"insecure_skip_verify":false,"preserve_host":false,"strip_path":"","url":""}}`,
 			version: "v0.19.0-beta.1",
 		},
 		{
 			d:       "should work with v0.19.0-beta.1+oryOS.12",
 			in:      `{}`,
-			out:     `{"id":"","version":"v0.19.0-beta.1","description":"","match":null,"errors":null,"authenticators":null,"authorizer":{"handler":"","config":null},"mutators":null,"upstream":{"preserve_host":false,"strip_path":"","url":""}}`,
+			out:     `{"id":"","version":"v0.19.0-beta.1","description":"","match":null,"errors":null,"authenticators":null,"authorizer":{"handler":"","config":null},"mutators":null,"upstream":{"insecure_skip_verify":false,"preserve_host":false,"strip_path":"","url":""}}`,
 			version: "v0.19.0-beta.1+oryOS.12",
 		},
 		{
 			d:       "should work with v0.19.0-beta.1",
 			in:      `{"version":"v0.19.0-beta.1"}`,
-			out:     `{"id":"","version":"v0.19.0-beta.1","description":"","match":null,"errors":null,"authenticators":null,"authorizer":{"handler":"","config":null},"mutators":null,"upstream":{"preserve_host":false,"strip_path":"","url":""}}`,
+			out:     `{"id":"","version":"v0.19.0-beta.1","description":"","match":null,"errors":null,"authenticators":null,"authorizer":{"handler":"","config":null},"mutators":null,"upstream":{"insecure_skip_verify":false,"preserve_host":false,"strip_path":"","url":""}}`,
 			version: "v0.19.0-beta.1",
 		},
 		{
 			d:       "should work with 0.19.0-beta.1",
 			in:      `{"version":"0.19.0-beta.1"}`,
-			out:     `{"id":"","version":"v0.19.0-beta.1","description":"","match":null,"errors":null,"authenticators":null,"authorizer":{"handler":"","config":null},"mutators":null,"upstream":{"preserve_host":false,"strip_path":"","url":""}}`,
+			out:     `{"id":"","version":"v0.19.0-beta.1","description":"","match":null,"errors":null,"authenticators":null,"authorizer":{"handler":"","config":null},"mutators":null,"upstream":{"insecure_skip_verify":false,"preserve_host":false,"strip_path":"","url":""}}`,
 			version: "v0.19.0-beta.1+oryOS.12",
 		},
 		{
@@ -80,7 +80,7 @@ func TestRuleMigration(t *testing.T) {
       }
     }
   ],
-  "upstream":{"preserve_host":false,"strip_path":"","url":""}
+  "upstream":{"insecure_skip_verify":false,"preserve_host":false,"strip_path":"","url":""}
 }`,
 			version: "v0.33.0-beta.1+oryOS.12",
 		},
@@ -112,7 +112,7 @@ func TestRuleMigration(t *testing.T) {
 					}
 				  },
 				"mutators": null,
-				"upstream":{"preserve_host":false,"strip_path":"","url":""}
+				"upstream":{"insecure_skip_verify":false,"preserve_host":false,"strip_path":"","url":""}
 			  }`,
 			version: "v0.37.0+oryOS.18",
 		},
