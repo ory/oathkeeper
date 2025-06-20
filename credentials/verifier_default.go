@@ -89,7 +89,7 @@ func (v *VerifierDefault) Verify(
 			errors.Is(err, jwt.ErrTokenSignatureInvalid) ||
 			errors.Is(err, jwt.ErrTokenInvalidClaims) ||
 			errors.Is(err, jwt.ErrTokenMalformed) {
-			return nil, herodot.ErrInternalServerError.WithErrorf(err.Error()).WithTrace(err)
+			return nil, herodot.ErrInternalServerError.WithError(err.Error()).WithTrace(err)
 		}
 		return nil, err
 	} else if !t.Valid {

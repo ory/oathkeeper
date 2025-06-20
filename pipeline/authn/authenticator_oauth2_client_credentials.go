@@ -207,12 +207,12 @@ func (a *AuthenticatorOAuth2ClientCredentials) Authenticate(r *http.Request, ses
 
 	user, err = url.QueryUnescape(user)
 	if err != nil {
-		return errors.Wrapf(helper.ErrUnauthorized, err.Error())
+		return errors.Wrap(helper.ErrUnauthorized, err.Error())
 	}
 
 	password, err = url.QueryUnescape(password)
 	if err != nil {
-		return errors.Wrapf(helper.ErrUnauthorized, err.Error())
+		return errors.Wrap(helper.ErrUnauthorized, err.Error())
 	}
 
 	c := clientcredentials.Config{
@@ -236,18 +236,18 @@ func (a *AuthenticatorOAuth2ClientCredentials) Authenticate(r *http.Request, ses
 			if rErr, ok := err.(*oauth2.RetrieveError); ok {
 				switch httpStatusCode := rErr.Response.StatusCode; httpStatusCode {
 				case http.StatusServiceUnavailable:
-					return errors.Wrapf(helper.ErrUpstreamServiceNotAvailable, err.Error())
+					return errors.Wrap(helper.ErrUpstreamServiceNotAvailable, err.Error())
 				case http.StatusInternalServerError:
-					return errors.Wrapf(helper.ErrUpstreamServiceInternalServerError, err.Error())
+					return errors.Wrap(helper.ErrUpstreamServiceInternalServerError, err.Error())
 				case http.StatusGatewayTimeout:
-					return errors.Wrapf(helper.ErrUpstreamServiceTimeout, err.Error())
+					return errors.Wrap(helper.ErrUpstreamServiceTimeout, err.Error())
 				case http.StatusNotFound:
-					return errors.Wrapf(helper.ErrUpstreamServiceNotFound, err.Error())
+					return errors.Wrap(helper.ErrUpstreamServiceNotFound, err.Error())
 				default:
-					return errors.Wrapf(helper.ErrUnauthorized, err.Error())
+					return errors.Wrap(helper.ErrUnauthorized, err.Error())
 				}
 			} else {
-				return errors.Wrapf(helper.ErrUpstreamServiceNotAvailable, err.Error())
+				return errors.Wrap(helper.ErrUpstreamServiceNotAvailable, err.Error())
 			}
 		}
 

@@ -199,7 +199,7 @@ func TestKoanfProvider(t *testing.T) {
 
 		t.Run("group=tls", func(t *testing.T) {
 			for _, daemon := range []string{"proxy", "api"} {
-				t.Run(fmt.Sprintf("daemon="+daemon), func(t *testing.T) {
+				t.Run(fmt.Sprintf("daemon=%s", daemon), func(t *testing.T) {
 					assert.Equal(t,
 						"LS0tLS1CRUdJTiBFTkNSWVBURUQgUFJJVkFURSBLRVktLS0tLVxuTUlJRkRqQkFCZ2txaGtpRzl3MEJCUTB3...",
 						p.TLSConfig(daemon).Key.Base64,
