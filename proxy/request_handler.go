@@ -216,6 +216,9 @@ func (d *requestHandler) HandleRequest(r *http.Request, rl *rule.Rule) (session 
 			case helper.ErrUnauthorized.ErrorField:
 				d.r.Logger().Info(err)
 				return nil, err
+			case helper.ErrTooManyRequests.ErrorField:
+				d.r.Logger().Info(err)
+				return nil, err
 			default:
 				d.r.Logger().WithError(err).
 					WithFields(fields).
