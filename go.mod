@@ -4,7 +4,7 @@ toolchain go1.24.4
 
 module github.com/ory/oathkeeper
 
-replace github.com/mattn/go-sqlite3 => github.com/mattn/go-sqlite3 v1.14.10
+replace github.com/mattn/go-sqlite3 => github.com/mattn/go-sqlite3 v1.14.28
 
 replace github.com/ory/x => ./oryx
 
