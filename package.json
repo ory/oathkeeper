@@ -6,6 +6,9 @@
   "browser": {
     "fs": false
   },
+  "overrides": {
+    "form-data": "^4.0.4"
+  },
   "scripts": {
     "doctoc": "doctoc README.md"
   },
