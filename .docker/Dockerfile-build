@@ -7,6 +7,8 @@ RUN apt-get update && apt-get upgrade -y
 
 COPY go.mod go.mod
 COPY go.sum go.sum
+COPY oryx/go.mod oryx/go.mod
+COPY oryx/go.sum proto/go.sum
 
 ENV CGO_ENABLED=0
 ENV GO111MODULE=on
