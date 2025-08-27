@@ -25,10 +25,11 @@ type VerifierRegistry interface {
 }
 
 type ValidationContext struct {
-	Algorithms    []string
-	Issuers       []string
-	Audiences     []string
-	ScopeStrategy fosite.ScopeStrategy
-	Scope         []string
-	KeyURLs       []url.URL
+	Algorithms      []string
+	Issuers         []string
+	Audiences       []string
+	ScopeStrategy   fosite.ScopeStrategy
+	ScopeValidation ScopeValidation
+	Scope           []string
+	KeyURLs         []url.URL
 }

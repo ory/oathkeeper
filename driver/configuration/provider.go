@@ -9,6 +9,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/ory/oathkeeper/credentials"
+
 	"github.com/rs/cors"
 
 	"github.com/ory/fosite"
@@ -70,6 +72,7 @@ type Provider interface {
 	PrometheusHideRequestPaths() bool
 	PrometheusCollapseRequestPaths() bool
 
+	ToScopeValidation(value string, key string) credentials.ScopeValidation
 	ToScopeStrategy(value string, key string) fosite.ScopeStrategy
 	ParseURLs(sources []string) ([]url.URL, error)
 	JSONWebKeyURLs() []string
