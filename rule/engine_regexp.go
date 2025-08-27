@@ -4,8 +4,10 @@
 package rule
 
 import (
-	"errors"
 	"hash/crc64"
+	"strings"
+
+	"github.com/pkg/errors"
 
 	"github.com/dlclark/regexp2"
 
@@ -23,7 +25,17 @@ func (re *regexpMatchingEngine) compile(pattern string) error {
 		re.table = crc64.MakeTable(polynomial)
 	}
 	if checksum := crc64.Checksum([]byte(pattern), re.table); checksum != re.checksum {
-		compiled, err := compiler.CompileRegex(pattern, '<', '>')
+		startDelim := byte('<')
+		endDelim := byte('>')
+		if strings.Contains(pattern, "(?>") || strings.Contains(pattern, "(?<") {
+			if strings.ContainsRune(pattern, '{') && strings.ContainsRune(pattern, '}') {
+				startDelim = byte('{')
+				endDelim = byte('}')
+			} else {
+				return errors.Errorf("attempted to use regex 'possessive match' or regex 'lookbehind' without changing delimiters from '<...>' to '{...}' in: %s", pattern)
+			}
+		}
+		compiled, err := compiler.CompileRegex(pattern, startDelim, endDelim)
 		if err != nil {
 			return err
 		}
