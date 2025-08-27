@@ -130,6 +130,9 @@ type Rule struct {
 }
 
 type Upstream struct {
+	// InsecureSkipVerify, if true, skips TLS verification when forwarding the request to the upstream URL.
+	InsecureSkipVerify bool `json:"insecure_skip_verify"`
+
 	// PreserveHost, if false (the default), tells ORY Oathkeeper to set the upstream request's Host header to the
 	// hostname of the API's upstream's URL. Setting this flag to true instructs ORY Oathkeeper not to do so.
 	PreserveHost bool `json:"preserve_host"`
