@@ -193,7 +193,7 @@ func TestFetcherWatchConfig(t *testing.T) {
 	}))
 	t.Cleanup(ts.Close)
 
-	require.NoError(t, os.WriteFile(configFile.Name(), []byte(""), 0o666))
+	require.NoError(t, os.WriteFile(configFile.Name(), []byte(""), 0o600))
 
 	require.NoError(t, r.RuleFetcher().Watch(ctx))
 
@@ -265,7 +265,7 @@ access_rules:
 		},
 	} {
 		t.Run(fmt.Sprintf("case=%d", k), func(t *testing.T) {
-			require.NoError(t, os.WriteFile(configFile.Name(), []byte(tc.config), 0o666))
+			require.NoError(t, os.WriteFile(configFile.Name(), []byte(tc.config), 0o600))
 			<-configChanged
 
 			rules := eventuallyListRules(ctx, t, r, len(tc.expectIDs))
@@ -414,10 +414,10 @@ func TestFetcherWatchRepositoryFromKubernetesConfigMap(t *testing.T) {
 	configMapUpdate := func(t *testing.T, data string, cleanup func()) func() {
 		// this is the equivalent of /etc/rules/..2019_08_01_07_42_33.068812649
 		dir := filepath.Join(watchDir, ".."+uuid.Must(uuid.NewV4()).String())
-		require.NoError(t, os.Mkdir(dir, 0o777))
+		require.NoError(t, os.Mkdir(dir, 0o700))
 
 		fp := filepath.Join(dir, "access-rules.json")
-		require.NoError(t, os.WriteFile(fp, []byte(data), 0o640))
+		require.NoError(t, os.WriteFile(fp, []byte(data), 0o600))
 
 		// this is the symlink: ..data -> ..2019_08_01_07_42_33.068812649
 		_ = os.Rename(filepath.Join(watchDir, "..data"), filepath.Join(watchDir, "..data_tmp"))
