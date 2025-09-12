@@ -246,6 +246,7 @@ func RunServe(version, build, date string) func(cmd *cobra.Command, args []strin
 				BatchSize:            1000,
 				Interval:             time.Hour * 6,
 			},
+			Hostname: "", // TODO: figure out config to use
 		})
 
 		adminmw.Use(telemetry)

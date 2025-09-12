@@ -24,19 +24,17 @@ jobs:
           key: ${{ needs.sdk-generate.outputs.sdk-cache-key }}
       - uses: actions/setup-go@v2
         with:
-          go-version: "1.22"
+          go-version: "1.25"
       - run: go list -json > go.list
       - name: Run nancy
         uses: sonatype-nexus-community/nancy-github-action@v1.0.2
       - name: Run golangci-lint
-        uses: golangci/golangci-lint-action@v4
+        uses: golangci/golangci-lint-action@v8
         env:
           GOGC: 100
         with:
           args: --timeout 10m0s
-          version: v1.56.2
-          skip-pkg-cache: true
-          skip-build-cache: true
+          version: latest
       - name: Run go-acc (tests)
         run: |
           make .bin/go-acc
@@ -55,7 +53,7 @@ jobs:
       - uses: ory/ci/checkout@master
       - uses: actions/setup-go@v2
         with:
-          go-version: "1.22"
+          go-version: "1.25"
       - run: |
           ./test/${{ matrix.name }}/run.sh
 
@@ -71,7 +69,7 @@ jobs:
           output-dir: docs/oathkeeper/cli
       - uses: actions/setup-go@v2
         with:
-          go-version: "1.22"
+          go-version: "1.25"
 
   changelog:
     name: Generate changelog

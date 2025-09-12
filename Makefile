@@ -41,7 +41,7 @@ authors:  # updates the AUTHORS file
 
 .PHONY: format
 format: .bin/goimports .bin/ory node_modules
-	.bin/ory dev headers copyright --type=open-source --exclude=internal/httpclient
+	.bin/ory dev headers copyright --type=open-source --exclude=internal/httpclient --exclude=oryx
 	goimports -w --local github.com/ory .
 	gofmt -l -s -w .
 	npm exec -- prettier --write .
