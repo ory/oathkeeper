@@ -34,7 +34,13 @@ type ClientService interface {
 
 	GetRule(params *GetRuleParams, opts ...ClientOption) (*GetRuleOK, error)
 
+	GetVersion(params *GetVersionParams, opts ...ClientOption) (*GetVersionOK, error)
+
 	GetWellKnownJSONWebKeys(params *GetWellKnownJSONWebKeysParams, opts ...ClientOption) (*GetWellKnownJSONWebKeysOK, error)
+
+	IsInstanceAlive(params *IsInstanceAliveParams, opts ...ClientOption) (*IsInstanceAliveOK, error)
+
+	IsInstanceReady(params *IsInstanceReadyParams, opts ...ClientOption) (*IsInstanceReadyOK, error)
 
 	ListRules(params *ListRulesParams, opts ...ClientOption) (*ListRulesOK, error)
 
@@ -126,6 +132,52 @@ func (a *Client) GetRule(params *GetRuleParams, opts ...ClientOption) (*GetRuleO
 }
 
 /*
+	GetVersion gets service version
+
+	This endpoint returns the service version typically notated using semantic versioning.
+
+If the service supports TLS Edge Termination, this endpoint does not require the
+`X-Forwarded-Proto` header to be set.
+
+Be aware that if you are running multiple nodes of this service, the health status will never
+refer to the cluster state, only to a single instance.
+*/
+func (a *Client) GetVersion(params *GetVersionParams, opts ...ClientOption) (*GetVersionOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetVersionParams()
+	}
+	op := &runtime.ClientOperation{
+		ID:                 "getVersion",
+		Method:             "GET",
+		PathPattern:        "/version",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &GetVersionReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	}
+	for _, opt := range opts {
+		opt(op)
+	}
+
+	result, err := a.transport.Submit(op)
+	if err != nil {
+		return nil, err
+	}
+	success, ok := result.(*GetVersionOK)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	// safeguard: normally, absent a default response, unknown success responses return an error above: so this is a codegen issue
+	msg := fmt.Sprintf("unexpected success response for getVersion: API contract not enforced by server. Client expected to get an error, but got: %T", result)
+	panic(msg)
+}
+
+/*
 GetWellKnownJSONWebKeys lists cryptographic keys
 
 This endpoint returns cryptographic keys that are required to, for example, verify signatures of ID Tokens.
@@ -162,6 +214,102 @@ func (a *Client) GetWellKnownJSONWebKeys(params *GetWellKnownJSONWebKeysParams, 
 	// unexpected success response
 	// safeguard: normally, absent a default response, unknown success responses return an error above: so this is a codegen issue
 	msg := fmt.Sprintf("unexpected success response for getWellKnownJSONWebKeys: API contract not enforced by server. Client expected to get an error, but got: %T", result)
+	panic(msg)
+}
+
+/*
+	IsInstanceAlive checks alive status
+
+	This endpoint returns a 200 status code when the HTTP server is up running.
+
+This status does currently not include checks whether the database connection is working.
+
+If the service supports TLS Edge Termination, this endpoint does not require the
+`X-Forwarded-Proto` header to be set.
+
+Be aware that if you are running multiple nodes of this service, the health status will never
+refer to the cluster state, only to a single instance.
+*/
+func (a *Client) IsInstanceAlive(params *IsInstanceAliveParams, opts ...ClientOption) (*IsInstanceAliveOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewIsInstanceAliveParams()
+	}
+	op := &runtime.ClientOperation{
+		ID:                 "isInstanceAlive",
+		Method:             "GET",
+		PathPattern:        "/health/alive",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &IsInstanceAliveReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	}
+	for _, opt := range opts {
+		opt(op)
+	}
+
+	result, err := a.transport.Submit(op)
+	if err != nil {
+		return nil, err
+	}
+	success, ok := result.(*IsInstanceAliveOK)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	// safeguard: normally, absent a default response, unknown success responses return an error above: so this is a codegen issue
+	msg := fmt.Sprintf("unexpected success response for isInstanceAlive: API contract not enforced by server. Client expected to get an error, but got: %T", result)
+	panic(msg)
+}
+
+/*
+	IsInstanceReady checks readiness status
+
+	This endpoint returns a 200 status code when the HTTP server is up running and the environment dependencies (e.g.
+
+the database) are responsive as well.
+
+If the service supports TLS Edge Termination, this endpoint does not require the
+`X-Forwarded-Proto` header to be set.
+
+Be aware that if you are running multiple nodes of this service, the health status will never
+refer to the cluster state, only to a single instance.
+*/
+func (a *Client) IsInstanceReady(params *IsInstanceReadyParams, opts ...ClientOption) (*IsInstanceReadyOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewIsInstanceReadyParams()
+	}
+	op := &runtime.ClientOperation{
+		ID:                 "isInstanceReady",
+		Method:             "GET",
+		PathPattern:        "/health/ready",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &IsInstanceReadyReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	}
+	for _, opt := range opts {
+		opt(op)
+	}
+
+	result, err := a.transport.Submit(op)
+	if err != nil {
+		return nil, err
+	}
+	success, ok := result.(*IsInstanceReadyOK)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	// safeguard: normally, absent a default response, unknown success responses return an error above: so this is a codegen issue
+	msg := fmt.Sprintf("unexpected success response for isInstanceReady: API contract not enforced by server. Client expected to get an error, but got: %T", result)
 	panic(msg)
 }
 

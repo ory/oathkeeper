@@ -21,7 +21,7 @@ type GenericError struct {
 	Code int64 `json:"code,omitempty"`
 
 	// details
-	Details []interface{} `json:"details"`
+	Details []map[string]interface{} `json:"details"`
 
 	// message
 	Message string `json:"message,omitempty"`
