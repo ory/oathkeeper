@@ -1299,7 +1299,6 @@ Web Token debuggability, and resolves other issues.
 
 - Add dotnet sdk ([#683](https://github.com/ory/oathkeeper/issues/683))
   ([05ae925](https://github.com/ory/oathkeeper/commit/05ae9259414882015f30cc8d5c01e64afb65afbc)):
-
   - docs: add dotnet sdk
 
   - docs: add dotnet sdk versioned
@@ -1964,7 +1963,6 @@ https://github.com/ory/oathkeeper/pull/358/commits/fd16ceb230a1b14ebb01a147d2d70
   docker compose file, considering these changes and the newly introduced
   Dockerfile in the previous commit, make these changes to the
   docker-compose.yml:
-
   1. Bump the version of the compose file to 3.
   2. Remove the need for the postgres database app, since Oathkeeper no longer
      needs a database.
@@ -3659,7 +3657,6 @@ Build oathekeeper docker image statically (#14)
 - Build oathekeeper docker image statically (#14)
   ([dbd2037](https://github.com/ory/oathkeeper/commit/dbd2037b56b6104b79607b20394be0e9a30e67e1)),
   closes [#14](https://github.com/ory/oathkeeper/issues/14):
-
   - Build oathekeeper docker image statically
 
   - Build oathekeeper docker image statically
