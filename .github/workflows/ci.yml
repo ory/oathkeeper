@@ -18,11 +18,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: ory/ci/checkout@master
-      - uses: actions/cache@v3
+      - uses: actions/cache@v4
         with:
           path: internal/httpclient
           key: ${{ needs.sdk-generate.outputs.sdk-cache-key }}
-      - uses: actions/setup-go@v2
+      - uses: actions/setup-go@v6
         with:
           go-version: "1.25"
       - run: go list -json > go.list
@@ -51,7 +51,7 @@ jobs:
         name: ["reload", "e2e", "forwarded-header", "bearer-token"]
     steps:
       - uses: ory/ci/checkout@master
-      - uses: actions/setup-go@v2
+      - uses: actions/setup-go@v6
         with:
           go-version: "1.25"
       - run: |
@@ -67,7 +67,7 @@ jobs:
         with:
           token: ${{ secrets.ORY_BOT_PAT }}
           output-dir: docs/oathkeeper/cli
-      - uses: actions/setup-go@v2
+      - uses: actions/setup-go@v6
         with:
           go-version: "1.25"
 
