@@ -453,3 +453,48 @@ func TestAuthenticatorOAuth2TokenIntrospectionPreAuthorization(t *testing.T) {
 		})
 	}
 }
+
+func TestLogRedactHeaders(t *testing.T) {
+	t.Run("case=returns empty array when not configured", func(t *testing.T) {
+		p, err := configuration.NewKoanfProvider(
+			context.Background(),
+			nil,
+			logrusx.New("", ""),
+		)
+		require.NoError(t, err)
+
+		headers := p.LogRedactHeaders()
+		assert.Empty(t, headers)
+	})
+
+	t.Run("case=returns configured headers", func(t *testing.T) {
+		p, err := configuration.NewKoanfProvider(
+			context.Background(),
+			nil,
+			logrusx.New("", ""),
+			configx.SkipValidation(),
+			configx.WithValues(map[string]interface{}{
+				"log.redact_headers": []string{"x-custom-authorization", "x-api-key"},
+			}),
+		)
+		require.NoError(t, err)
+
+		headers := p.LogRedactHeaders()
+		assert.Equal(t, []string{"x-custom-authorization", "x-api-key"}, headers)
+	})
+
+	t.Run("case=reads from config file", func(t *testing.T) {
+		p, err := configuration.NewKoanfProvider(
+			context.Background(),
+			nil,
+			logrusx.New("", ""),
+			configx.SkipValidation(),
+			configx.WithConfigFiles("testdata/log_redact_headers_config.yaml"),
+		)
+		require.NoError(t, err)
+
+		headers := p.LogRedactHeaders()
+		assert.Contains(t, headers, "x-custom-authorization")
+		assert.Contains(t, headers, "x-api-key")
+	})
+}
