@@ -435,6 +435,10 @@ func (v *KoanfProvider) TracingConfig() *otelx.Config {
 	return v.source.TracingConfig(v.TracingServiceName())
 }
 
+func (v *KoanfProvider) LogRedactHeaders() []string {
+	return v.source.StringsF(LogRedactHeaders, []string{})
+}
+
 func (v *KoanfProvider) PrometheusHideRequestPaths() bool {
 	return v.source.BoolF(PrometheusServeHideRequestPaths, false)
 }
