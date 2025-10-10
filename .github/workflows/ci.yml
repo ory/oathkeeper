@@ -78,7 +78,6 @@ jobs:
     needs:
       - test
       - validate
-      - changelog
     steps:
       - uses: ory/ci/releaser@master
         with:
