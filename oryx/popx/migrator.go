@@ -11,16 +11,15 @@ import (
 	"os"
 	"regexp"
 	"slices"
-	"sort"
 	"strings"
 	"time"
 
 	"github.com/cockroachdb/cockroach-go/v2/crdb"
-	"github.com/ory/pop/v6"
 	"github.com/pkg/errors"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/trace"
 
+	"github.com/ory/pop/v6"
 	"github.com/ory/x/cmdx"
 	"github.com/ory/x/logrusx"
 	"github.com/ory/x/otelx"
@@ -154,7 +153,8 @@ func (mb *MigrationBox) Down(ctx context.Context, steps int) (err error) {
 		}
 		steps = min(steps, count)
 
-		mfs := mb.migrationsDown.sortAndFilter(c.Dialect.Name(), sort.Reverse)
+		mfs := mb.migrationsDown.sortAndFilter(c.Dialect.Name())
+		slices.Reverse(mfs)
 		if len(mfs) > count {
 			// skip all migrations that were not yet applied
 			mfs = mfs[len(mfs)-count:]

@@ -34,14 +34,14 @@ node_modules: package-lock.json
 	touch .bin/ory
 
 .bin/golangci-lint: Makefile
-	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -d -b .bin v1.56.2
+	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -d -b .bin v1.64.8
 
 authors:  # updates the AUTHORS file
 	curl https://raw.githubusercontent.com/ory/ci/master/authors/authors.sh | env PRODUCT="Ory Oathkeeper" bash
 
 .PHONY: format
 format: .bin/goimports .bin/ory node_modules
-	.bin/ory dev headers copyright --type=open-source --exclude=internal/httpclient
+	.bin/ory dev headers copyright --type=open-source --exclude=internal/httpclient --exclude=oryx
 	goimports -w --local github.com/ory .
 	gofmt -l -s -w .
 	npm exec -- prettier --write .
@@ -100,6 +100,10 @@ docker-k3d:
 
 docs/cli: .bin/clidoc
 	clidoc .
+
+.PHONY: pre-release
+pre-release:
+	echo "nothing to do"
 
 .PHONY: post-release
 post-release:

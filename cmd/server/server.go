@@ -30,6 +30,7 @@ import (
 	"github.com/ory/x/otelx"
 	"github.com/ory/x/reqlog"
 	"github.com/ory/x/tlsx"
+	"github.com/ory/x/urlx"
 
 	"github.com/ory/oathkeeper/api"
 	"github.com/ory/oathkeeper/driver"
@@ -222,6 +223,20 @@ func RunServe(version, build, date string) func(cmd *cobra.Command, args []strin
 		adminmw := negroni.New()
 		publicmw := negroni.New()
 
+		urls := []string{
+			d.Configuration().APIServeAddress(),
+			d.Configuration().ProxyServeAddress(),
+		}
+
+		if c, y := d.Configuration().CORS("api"); y {
+			urls = append(urls, c.AllowedOrigins...)
+		}
+		if c, y := d.Configuration().CORS("proxy"); y {
+			urls = append(urls, c.AllowedOrigins...)
+		}
+
+		host := urlx.ExtractPublicAddress(urls...)
+
 		telemetry := metricsx.New(cmd, logger, d.Configuration().Source(), &metricsx.Options{
 			Service:       "oathkeeper",
 			DeploymentId:  metricsx.Hash(clusterID(d.Configuration())),
@@ -246,6 +261,7 @@ func RunServe(version, build, date string) func(cmd *cobra.Command, args []strin
 				BatchSize:            1000,
 				Interval:             time.Hour * 6,
 			},
+			Hostname: host,
 		})
 
 		adminmw.Use(telemetry)

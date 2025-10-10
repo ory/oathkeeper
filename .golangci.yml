@@ -1,6 +1,9 @@
+version: "2"
+
 linters:
-  enable-all: false
-  disable-all: true
   enable:
-    - vet
-    - goimports
+    - gosec
+    - errcheck
+    - ineffassign
+    - staticcheck
+    - unused

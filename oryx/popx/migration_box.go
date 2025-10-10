@@ -6,8 +6,10 @@ package popx
 import (
 	"fmt"
 	"io/fs"
+	"path"
 	"regexp"
 	"slices"
+	"sort"
 	"strings"
 	"testing"
 	"time"
@@ -216,7 +218,13 @@ func (mb *MigrationBox) findMigrations(
 			return errors.WithStack(err)
 		}
 
-		if info.IsDir() {
+		if !info.Type().IsRegular() {
+			mb.l.Tracef("ignoring non file %s", info.Name())
+			return nil
+		}
+
+		if path.Ext(info.Name()) != ".sql" {
+			mb.l.Tracef("ignoring non SQL file %s", info.Name())
 			return nil
 		}
 
@@ -230,8 +238,7 @@ func (mb *MigrationBox) findMigrations(
 		}
 
 		if details == nil {
-			mb.l.Tracef("This is usually ok - ignoring migration file %s because it does not match the file pattern.", info.Name())
-			return nil
+			return errors.WithStack(fmt.Errorf("Found a migration file that does not match the file pattern: filename=%s pattern=%s", info.Name(), MigrationFileRegexp))
 		}
 
 		content, err := fs.ReadFile(dir, p)
@@ -267,10 +274,11 @@ func (mb *MigrationBox) findMigrations(
 	})
 
 	// Sort descending.
-	slices.SortFunc(mb.migrationsDown, func(a, b Migration) int { return -compareMigration(a, b) })
+	sort.Sort(mb.migrationsDown)
+	slices.Reverse(mb.migrationsDown)
 
 	// Sort ascending.
-	slices.SortFunc(mb.migrationsUp, compareMigration)
+	sort.Sort(mb.migrationsUp)
 
 	return err
 }

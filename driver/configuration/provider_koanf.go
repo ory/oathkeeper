@@ -16,8 +16,7 @@ import (
 	"time"
 
 	"github.com/dgraph-io/ristretto"
-
-	"github.com/google/uuid"
+	"github.com/gofrs/uuid"
 	"github.com/knadh/koanf/v2"
 	"github.com/pkg/errors"
 	"github.com/rs/cors"
@@ -115,7 +114,7 @@ func (v *KoanfProvider) configChangeHandler(event watcherx.Event, err error) {
 // AddWatcher ensures that the callback is called when the configuration
 // changes. The returned subscription can be used to remove the watcher.
 func (v *KoanfProvider) AddWatcher(cb callback) SubscriptionID {
-	sID := SubscriptionID(uuid.New())
+	sID := SubscriptionID(uuid.Must(uuid.NewV4()))
 
 	v.subscriptions.Lock()
 	v.subscriptions.data[sID] = cb
@@ -127,12 +126,15 @@ func (v *KoanfProvider) AddWatcher(cb callback) SubscriptionID {
 func (v *KoanfProvider) Get(k Key) interface{} {
 	return v.source.Get(k)
 }
+
 func (v *KoanfProvider) String(k Key) string {
 	return v.source.String(k)
 }
+
 func (v *KoanfProvider) AllSettings() map[string]interface{} {
 	return v.source.All()
 }
+
 func (v *KoanfProvider) Source() *configx.Provider {
 	return v.source
 }

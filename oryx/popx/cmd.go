@@ -10,14 +10,12 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/ory/pop/v6"
 	"github.com/ory/x/cmdx"
 	"github.com/ory/x/errorsx"
 	"github.com/ory/x/flagx"
 )
 
 type MigrationProvider interface {
-	Connection(context.Context) *pop.Connection
 	MigrationStatus(context.Context) (MigrationStatuses, error)
 	MigrateUp(context.Context) error
 	MigrateDown(context.Context, int) error
@@ -58,17 +56,6 @@ Apply all pending migrations:
 }
 
 func MigrateSQLUp(cmd *cobra.Command, p MigrationProvider) (err error) {
-	conn := p.Connection(cmd.Context())
-	if conn == nil {
-		_, _ = fmt.Fprintln(cmd.ErrOrStderr(), "Migrations can only be executed against a SQL-compatible driver but DSN is not a SQL source.")
-		return cmdx.FailSilently(cmd)
-	}
-
-	if err := conn.Open(); err != nil {
-		_, _ = fmt.Fprintf(cmd.ErrOrStderr(), "Could not open the database connection:\n%+v\n", err)
-		return cmdx.FailSilently(cmd)
-	}
-
 	// convert migration tables
 	if prep, ok := p.(MigrationPreparer); ok {
 		if err := prep.PrepareMigration(cmd.Context()); err != nil {
@@ -158,17 +145,6 @@ func MigrateSQLDown(cmd *cobra.Command, p MigrationProvider) (err error) {
 		return cmdx.FailSilently(cmd)
 	}
 
-	conn := p.Connection(cmd.Context())
-	if conn == nil {
-		_, _ = fmt.Fprintln(cmd.ErrOrStderr(), "Migrations can only be executed against a SQL-compatible driver but DSN is not a SQL source.")
-		return cmdx.FailSilently(cmd)
-	}
-
-	if err := conn.Open(); err != nil {
-		_, _ = fmt.Fprintf(cmd.ErrOrStderr(), "Could not open the database connection:\n%+v\n", err)
-		return cmdx.FailSilently(cmd)
-	}
-
 	// convert migration tables
 	if prep, ok := p.(MigrationPreparer); ok {
 		if err := prep.PrepareMigration(cmd.Context()); err != nil {
@@ -186,14 +162,12 @@ func MigrateSQLDown(cmd *cobra.Command, p MigrationProvider) (err error) {
 	// Now we need to rollback the last `steps` migrations that have a status of "Applied":
 	var count int
 	var rollingBack int
-	var contents []string
 	for i := len(status) - 1; i >= 0; i-- {
 		if status[i].State == Applied {
 			count++
 			if steps > 0 && count <= steps {
 				status[i].State = "Rollback"
 				rollingBack++
-				contents = append(contents, status[i].ContentDown)
 			}
 		}
 	}
@@ -268,17 +242,6 @@ Block until all migrations are applied:
 }
 
 func MigrateStatus(cmd *cobra.Command, p MigrationProvider) (err error) {
-	conn := p.Connection(cmd.Context())
-	if conn == nil {
-		_, _ = fmt.Fprintln(cmd.ErrOrStderr(), "Migrations can only be checked against a SQL-compatible driver but DSN is not a SQL source.")
-		return cmdx.FailSilently(cmd)
-	}
-
-	if err := conn.Open(); err != nil {
-		_, _ = fmt.Fprintf(cmd.ErrOrStderr(), "Could not open the database connection:\n%+v\n", err)
-		return cmdx.FailSilently(cmd)
-	}
-
 	block := flagx.MustGetBool(cmd, "block")
 	ctx := cmd.Context()
 	s, err := p.MigrationStatus(ctx)
