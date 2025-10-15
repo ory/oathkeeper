@@ -18,10 +18,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: ory/ci/checkout@master
-      - uses: actions/cache@v4
-        with:
-          path: internal/httpclient
-          key: ${{ needs.sdk-generate.outputs.sdk-cache-key }}
       - uses: actions/setup-go@v6
         with:
           go-version: "1.25"
@@ -29,12 +25,14 @@ jobs:
       - name: Run nancy
         uses: sonatype-nexus-community/nancy-github-action@v1.0.2
       - name: Run golangci-lint
+        if: ${{ github.ref_type != 'tag' }}
         uses: golangci/golangci-lint-action@v8
         env:
           GOGC: 100
         with:
           args: --timeout 10m0s
           version: latest
+          only-new-issues: "true"
       - name: Run go-acc (tests)
         run: |
           make .bin/go-acc
@@ -71,18 +69,6 @@ jobs:
         with:
           go-version: "1.25"
 
-  changelog:
-    name: Generate changelog
-    runs-on: ubuntu-latest
-    if: ${{ github.ref_type == 'tag' || github.ref_name == 'master' }}
-    needs:
-      - test
-      - validate
-    steps:
-      - uses: ory/ci/changelog@master
-        with:
-          token: ${{ secrets.ORY_BOT_PAT }}
-
   release:
     name: Generate release
     runs-on: ubuntu-latest
@@ -90,7 +76,6 @@ jobs:
     needs:
       - test
       - validate
-      - changelog
     steps:
       - uses: ory/ci/releaser@master
         with:
@@ -99,18 +84,6 @@ jobs:
           cosign_pwd: ${{ secrets.COSIGN_PWD }}
           docker_username: ${{ secrets.DOCKERHUB_USERNAME }}
           docker_password: ${{ secrets.DOCKERHUB_PASSWORD }}
-
-  render-version-schema:
-    name: Render version schema
-    runs-on: ubuntu-latest
-    if: ${{ github.ref_type == 'tag' }}
-    needs:
-      - release
-    steps:
-      - uses: ory/ci/releaser/render-version-schema@master
-        with:
-          schema-path: .schema/config.schema.json
-          token: ${{ secrets.ORY_BOT_PAT }}
 
   newsletter-draft:
     name: Draft newsletter
