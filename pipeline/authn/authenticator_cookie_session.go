@@ -4,11 +4,16 @@
 package authn
 
 import (
+	"crypto/md5"
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"net/url"
+	"strings"
+	"time"
 
+	"github.com/dgraph-io/ristretto"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"go.opentelemetry.io/otel/trace"
 
@@ -16,6 +21,7 @@ import (
 	"github.com/tidwall/gjson"
 
 	"github.com/ory/oathkeeper/x/header"
+	"github.com/ory/x/logrusx"
 	"github.com/ory/x/otelx"
 	"github.com/ory/x/stringsx"
 
@@ -36,16 +42,23 @@ type AuthenticatorCookieSessionFilter struct {
 }
 
 type AuthenticatorCookieSessionConfiguration struct {
-	Only               []string          `json:"only"`
-	CheckSessionURL    string            `json:"check_session_url"`
-	PreserveQuery      bool              `json:"preserve_query"`
-	PreservePath       bool              `json:"preserve_path"`
-	ExtraFrom          string            `json:"extra_from"`
-	SubjectFrom        string            `json:"subject_from"`
-	PreserveHost       bool              `json:"preserve_host"`
-	ForwardHTTPHeaders []string          `json:"forward_http_headers"`
-	SetHeaders         map[string]string `json:"additional_headers"`
-	ForceMethod        string            `json:"force_method"`
+	Only               []string                 `json:"only"`
+	CheckSessionURL    string                   `json:"check_session_url"`
+	PreserveQuery      bool                     `json:"preserve_query"`
+	PreservePath       bool                     `json:"preserve_path"`
+	ExtraFrom          string                   `json:"extra_from"`
+	SubjectFrom        string                   `json:"subject_from"`
+	PreserveHost       bool                     `json:"preserve_host"`
+	ForwardHTTPHeaders []string                 `json:"forward_http_headers"`
+	SetHeaders         map[string]string        `json:"additional_headers"`
+	ForceMethod        string                   `json:"force_method"`
+	Cache              cookieSessionCacheConfig `json:"cache"`
+}
+
+type cookieSessionCacheConfig struct {
+	Enabled bool   `json:"enabled"`
+	TTL     string `json:"ttl"`
+	MaxCost int    `json:"max_cost"`
 }
 
 func (a *AuthenticatorCookieSessionConfiguration) GetCheckSessionURL() string {
@@ -77,16 +90,20 @@ func (a *AuthenticatorCookieSessionConfiguration) GetForceMethod() string {
 }
 
 type AuthenticatorCookieSession struct {
-	c      configuration.Provider
-	client *http.Client
-	tracer trace.Tracer
+	c            configuration.Provider
+	client       *http.Client
+	tracer       trace.Tracer
+	sessionCache *ristretto.Cache[string, []byte]
+	cacheTTL     *time.Duration
+	logger       *logrusx.Logger
 }
 
 var _ AuthenticatorForwardConfig = new(AuthenticatorCookieSessionConfiguration)
 
-func NewAuthenticatorCookieSession(c configuration.Provider, provider trace.TracerProvider) *AuthenticatorCookieSession {
+func NewAuthenticatorCookieSession(c configuration.Provider, logger *logrusx.Logger, provider trace.TracerProvider) *AuthenticatorCookieSession {
 	return &AuthenticatorCookieSession{
-		c: c,
+		c:      c,
+		logger: logger,
 		client: &http.Client{
 			Transport: otelhttp.NewTransport(
 				http.DefaultTransport,
@@ -124,10 +141,97 @@ func (a *AuthenticatorCookieSession) Config(config json.RawMessage) (*Authentica
 		c.SubjectFrom = "subject"
 	}
 
-	// Add Authorization and Cookie headers for backward compatibility
 	c.ForwardHTTPHeaders = append(c.ForwardHTTPHeaders, []string{header.Cookie}...)
 
+	if c.Cache.TTL != "" {
+		cacheTTL, err := time.ParseDuration(c.Cache.TTL)
+		if err != nil {
+			return nil, err
+		}
+
+		if a.sessionCache != nil {
+			if a.cacheTTL == nil || (a.cacheTTL != nil && a.cacheTTL.Seconds() > cacheTTL.Seconds()) {
+				a.sessionCache.Clear()
+			}
+		}
+
+		a.cacheTTL = &cacheTTL
+	}
+
+	if a.sessionCache == nil {
+		cost := int64(c.Cache.MaxCost)
+		if cost == 0 {
+			cost = 10000000
+		}
+		a.logger.Debugf("Creating session cache with max cost: %d", cost)
+		cache, err := ristretto.NewCache(&ristretto.Config[string, []byte]{
+			NumCounters: cost * 10,
+			MaxCost:     cost,
+			BufferItems: 64,
+			Cost: func(value []byte) int64 {
+				return 1
+			},
+			IgnoreInternalCost: true,
+		})
+		if err != nil {
+			return nil, err
+		}
+
+		a.sessionCache = cache
+	}
+
 	return &c, nil
+}
+
+func cookiesToCacheKey(cookies []*http.Cookie) string {
+	var parts []string
+	for _, cookie := range cookies {
+		parts = append(parts, fmt.Sprintf("%s=%s", cookie.Name, cookie.Value))
+	}
+	return fmt.Sprintf("%x", md5.Sum([]byte(strings.Join(parts, "|"))))
+}
+
+type cachedSessionData struct {
+	Subject string                 `json:"subject"`
+	Extra   map[string]interface{} `json:"extra"`
+}
+
+func (a *AuthenticatorCookieSession) sessionFromCache(config *AuthenticatorCookieSessionConfiguration, r *http.Request) *cachedSessionData {
+	if !config.Cache.Enabled {
+		return nil
+	}
+
+	key := cookiesToCacheKey(r.Cookies())
+	i, found := a.sessionCache.Get(key)
+	if !found {
+		return nil
+	}
+
+	var v cachedSessionData
+	if err := json.Unmarshal(i, &v); err != nil {
+		return nil
+	}
+	return &v
+}
+
+func (a *AuthenticatorCookieSession) sessionToCache(config *AuthenticatorCookieSessionConfiguration, r *http.Request, subject string, extra map[string]interface{}) {
+	if !config.Cache.Enabled {
+		return
+	}
+
+	key := cookiesToCacheKey(r.Cookies())
+	data := cachedSessionData{
+		Subject: subject,
+		Extra:   extra,
+	}
+
+	if v, err := json.Marshal(data); err != nil {
+		return
+	} else if a.cacheTTL != nil {
+		a.sessionCache.SetWithTTL(key, v, 1, *a.cacheTTL)
+	} else {
+		a.sessionCache.Set(key, v, 1)
+	}
 }
 
 func (a *AuthenticatorCookieSession) Authenticate(r *http.Request, session *AuthenticationSession, config json.RawMessage, _ pipeline.Rule) (err error) {
@@ -142,6 +246,13 @@ func (a *AuthenticatorCookieSession) Authenticate(r *http.Request, session *Auth
 
 	if !cookieSessionResponsible(r, cf.Only) {
 		return errors.WithStack(ErrAuthenticatorNotResponsible)
+	}
+
+	cachedSession := a.sessionFromCache(cf, r)
+	if cachedSession != nil {
+		session.Subject = cachedSession.Subject
+		session.Extra = cachedSession.Extra
+		return nil
 	}
 
 	body, err := forwardRequestToSessionStore(a.client, r, cf)
@@ -167,6 +278,9 @@ func (a *AuthenticatorCookieSession) Authenticate(r *http.Request, session *Auth
 
 	session.Subject = subject
 	session.Extra = extra
+
+	a.sessionToCache(cf, r, subject, extra)
+
 	return nil
 }
 
@@ -204,7 +318,20 @@ func forwardRequestToSessionStore(client *http.Client, r *http.Request, cf Authe
 			return json.RawMessage{}, errors.WithStack(herodot.ErrInternalServerError.WithReasonf("Unable to fetch cookie session context from remote: %+v", err))
 		}
 		return body, nil
-	} else {
+	}
+
+	switch res.StatusCode {
+	case http.StatusTooManyRequests:
+		return json.RawMessage{}, errors.WithStack(helper.ErrTooManyRequests.WithReason("Session store rate limit exceeded"))
+	case http.StatusServiceUnavailable:
+		return json.RawMessage{}, errors.WithStack(helper.ErrUpstreamServiceNotAvailable.WithReason("Session store is unavailable"))
+	case http.StatusInternalServerError:
+		return json.RawMessage{}, errors.WithStack(helper.ErrUpstreamServiceInternalServerError.WithReason("Session store returned internal server error"))
+	case http.StatusGatewayTimeout:
+		return json.RawMessage{}, errors.WithStack(helper.ErrUpstreamServiceTimeout.WithReason("Session store request timed out"))
+	case http.StatusNotFound:
+		return json.RawMessage{}, errors.WithStack(helper.ErrUpstreamServiceNotFound.WithReason("Session store endpoint not found"))
+	default:
 		return json.RawMessage{}, errors.WithStack(helper.ErrUnauthorized)
 	}
 }
