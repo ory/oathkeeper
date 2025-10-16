@@ -58,7 +58,7 @@ type AuthenticatorCookieSessionConfiguration struct {
 type cookieSessionCacheConfig struct {
 	Enabled bool   `json:"enabled"`
 	TTL     string `json:"ttl"`
-	MaxCost int    `json:"max_cost"`
+	MaxCost int64  `json:"max_cost"`
 }
 
 func (a *AuthenticatorCookieSessionConfiguration) GetCheckSessionURL() string {
@@ -159,7 +159,7 @@ func (a *AuthenticatorCookieSession) Config(config json.RawMessage) (*Authentica
 	}
 
 	if a.sessionCache == nil {
-		cost := int64(c.Cache.MaxCost)
+		cost := c.Cache.MaxCost
 		if cost == 0 {
 			cost = 10000000
 		}
