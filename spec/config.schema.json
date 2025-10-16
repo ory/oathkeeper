@@ -439,9 +439,9 @@
             "ttl": {
               "type": "string",
               "title": "Cache TTL",
-              "description": "The time to live for cached sessions. Defaults to 60s.",
-              "default": "60s",
-              "examples": ["60s", "5m", "1h"]
+              "description": "The time to live for cached sessions. Defaults to 1s.",
+              "default": "1s",
+              "examples": ["1s", "60s", "5m", "1h"]
             },
             "max_cost": {
               "type": "integer",
