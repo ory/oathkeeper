@@ -4,7 +4,7 @@
 package authn
 
 import (
-	"crypto/md5"
+	"crypto/md5" //#nosec G501 -- MD5 is used for cache key generation, not cryptography
 	"encoding/json"
 	"fmt"
 	"io"
@@ -189,7 +189,7 @@ func cookiesToCacheKey(cookies []*http.Cookie) string {
 	for _, cookie := range cookies {
 		parts = append(parts, fmt.Sprintf("%s=%s", cookie.Name, cookie.Value))
 	}
-	return fmt.Sprintf("%x", md5.Sum([]byte(strings.Join(parts, "|"))))
+	return fmt.Sprintf("%x", md5.Sum([]byte(strings.Join(parts, "|")))) //#nosec G401 -- MD5 is used for cache key generation, not cryptography
 }
 
 type cachedSessionData struct {

@@ -11,7 +11,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"go.opentelemetry.io/otel/trace"
+	"go.opentelemetry.io/otel/trace/noop"
 
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/x/configx"
@@ -31,7 +31,7 @@ func TestCookieSessionCache(t *testing.T) {
 		}))
 	require.NoError(t, err)
 
-	a := NewAuthenticatorCookieSession(c, logger, trace.NewNoopTracerProvider())
+	a := NewAuthenticatorCookieSession(c, logger, noop.NewTracerProvider())
 	assert.Equal(t, "cookie_session", a.GetID())
 
 	config, err := a.Config(nil)
@@ -50,7 +50,6 @@ func TestCookieSessionCache(t *testing.T) {
 			a.sessionToCache(config, req, subject, extra)
 			time.Sleep(time.Millisecond * 10)
 
-			subject = "modified-subject"
 			v := a.sessionFromCache(config, req)
 			require.NotNil(t, v)
 			require.Equal(t, "test-subject", v.Subject)
