@@ -141,6 +141,7 @@ func (a *AuthenticatorCookieSession) Config(config json.RawMessage) (*Authentica
 		c.SubjectFrom = "subject"
 	}
 
+	// Add Authorization and Cookie headers for backward compatibility
 	c.ForwardHTTPHeaders = append(c.ForwardHTTPHeaders, []string{header.Cookie}...)
 
 	if c.Cache.TTL != "" {
