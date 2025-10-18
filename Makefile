@@ -101,6 +101,10 @@ docker-k3d:
 docs/cli: .bin/clidoc
 	clidoc .
 
+.PHONY: pre-release
+pre-release:
+	echo "nothing to do"
+
 .PHONY: post-release
 post-release:
 	echo "nothing to do"
