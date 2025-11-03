@@ -42,7 +42,7 @@ require (
 	github.com/ory/go-acc v0.2.9-0.20230103102148-6b1c9a70dbbe
 	github.com/ory/gojsonschema v1.2.0
 	github.com/ory/graceful v0.1.1
-	github.com/ory/herodot v0.10.5
+	github.com/ory/herodot v0.10.7
 	github.com/ory/jsonschema/v3 v3.0.9-0.20250317235931-280c5fc7bf0e
 	github.com/ory/ladon v1.1.0
 	github.com/ory/x v0.0.677
