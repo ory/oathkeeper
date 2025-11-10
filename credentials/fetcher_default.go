@@ -75,8 +75,7 @@ func NewFetcherDefault(d dependencies, cancelAfter time.Duration, ttl time.Durat
 		keys:        make(map[string]jose.JSONWebKeySet),
 		fetchedAt:   make(map[string]time.Time),
 		client: httpx.NewResilientClient(
-			httpx.ResilientClientWithConnectionTimeout(15*time.Second),
-			httpx.ResilientClientWithTracer(d.Tracer()),
+			httpx.ResilientClientWithConnectionTimeout(15 * time.Second),
 		).StandardClient(),
 		mux: cloudstorage.NewURLMux(),
 	}

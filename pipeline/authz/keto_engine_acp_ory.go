@@ -66,7 +66,6 @@ func NewAuthorizerKetoEngineACPORY(c configuration.Provider, d interface{ Tracer
 		client: httpx.NewResilientClient(
 			httpx.ResilientClientWithMaxRetryWait(100*time.Millisecond),
 			httpx.ResilientClientWithMaxRetry(5),
-			httpx.ResilientClientWithTracer(d.Tracer()),
 		),
 		contextCreator: func(r *http.Request) map[string]interface{} {
 			return map[string]interface{}{

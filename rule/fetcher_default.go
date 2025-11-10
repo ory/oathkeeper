@@ -63,8 +63,7 @@ func NewFetcherDefault(
 		config:   config,
 		mux:      cloudstorage.NewURLMux(),
 		hc: httpx.NewResilientClient(
-			httpx.ResilientClientWithConnectionTimeout(15*time.Second),
-			httpx.ResilientClientWithTracer(registry.Tracer()),
+			httpx.ResilientClientWithConnectionTimeout(15 * time.Second),
 		).StandardClient(),
 		cache:          make(map[string][]Rule),
 		cancelWatchers: make(map[string]context.CancelFunc),

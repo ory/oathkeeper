@@ -191,7 +191,6 @@ func (a *MutatorHydrator) Mutate(r *http.Request, session *authn.AuthenticationS
 			}
 		}
 		clientOpts := []httpx.ResilientOptions{
-			httpx.ResilientClientWithTracer(a.d.Tracer()),
 			httpx.ResilientClientWithConnectionTimeout(giveUpAfter),
 			httpx.ResilientClientWithMaxRetryWait(maxRetryDelay)}
 		client = httpx.NewResilientClient(clientOpts...).StandardClient()

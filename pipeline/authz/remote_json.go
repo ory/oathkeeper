@@ -58,7 +58,7 @@ type AuthorizerRemoteJSON struct {
 func NewAuthorizerRemoteJSON(c configuration.Provider, d interface{ Tracer() trace.Tracer }) *AuthorizerRemoteJSON {
 	return &AuthorizerRemoteJSON{
 		c:      c,
-		client: httpx.NewResilientClient(httpx.ResilientClientWithTracer(d.Tracer())).StandardClient(),
+		client: httpx.NewResilientClient().StandardClient(),
 		t:      x.NewTemplate("remote_json"),
 		tracer: d.Tracer(),
 	}
@@ -190,7 +190,6 @@ func (a *AuthorizerRemoteJSON) Config(config json.RawMessage) (*AuthorizerRemote
 	a.client = httpx.NewResilientClient(
 		httpx.ResilientClientWithMaxRetryWait(maxWait),
 		httpx.ResilientClientWithConnectionTimeout(timeout),
-		httpx.ResilientClientWithTracer(a.tracer),
 	).StandardClient()
 
 	return &c, nil
