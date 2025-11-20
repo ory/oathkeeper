@@ -70,7 +70,7 @@ trap finish EXIT
 run_oathkekeper
 run_api
 
-curl -X POST -f http://127.0.0.1:6060/test?token=token -F fk=fv -H "Content-Type: application/x-www-form-urlencoded" -i
+curl --retry 7 --retry-connrefused -X POST -f http://127.0.0.1:6060/test?token=token -F fk=fv -H "Content-Type: application/x-www-form-urlencoded" -i
 
 kill %1 || true
 

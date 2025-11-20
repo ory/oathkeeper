@@ -36,7 +36,7 @@ make_request() {
   expected_status_code=$2
   shift 2
 
-  [[ $(curl --silent --output /dev/null -f ${url} -w '%{http_code}' "$@") -eq $expected_status_code ]]
+  [[ $(curl --retry 7 --retry-connrefused --silent --output /dev/null -f ${url} -w '%{http_code}' "$@") -eq $expected_status_code ]]
 }
 
 SUCCESS_TEST=()

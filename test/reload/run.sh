@@ -46,35 +46,35 @@ trap finish EXIT
 sleep 5
 
 echo "Executing request against no configured rules -> 404"
-[[ $(curl -f ${OATHKEEPER_PROXY}/rules -w '%{http_code}') -ne 404 ]] && exit 1
+[[ $(curl --retry 7 --retry-connrefused -f ${OATHKEEPER_PROXY}/rules -w '%{http_code}') -ne 404 ]] && exit 1
 
 echo "Executing request against a now configured rule -> 200"
-cp config.2.yaml config.yaml; sleep 3; [[ $(curl -s -o /dev/null -f ${OATHKEEPER_PROXY}/rules -w '%{http_code}') -ne 200 ]] && exit 1
+cp config.2.yaml config.yaml; sleep 3; [[ $(curl --retry 7 --retry-connrefused -s -o /dev/null -f ${OATHKEEPER_PROXY}/rules -w '%{http_code}') -ne 200 ]] && exit 1
 
 echo "Executing request against updated rule with deny in it -> 403"
-cp config.3.yaml config.yaml; sleep 3; [[ $(curl -s -o /dev/null -f ${OATHKEEPER_PROXY}/rules -w '%{http_code}') -ne 403 ]] && exit 1
+cp config.3.yaml config.yaml; sleep 3; [[ $(curl --retry 7 --retry-connrefused -s -o /dev/null -f ${OATHKEEPER_PROXY}/rules -w '%{http_code}') -ne 403 ]] && exit 1
 
 echo "Executing request against updated rule with deny deny disabled -> 500"
-cp config.4.yaml config.yaml; sleep 3; [[ $(curl -s -o /dev/null -f ${OATHKEEPER_PROXY}/rules -w '%{http_code}') -ne 500 ]] && exit 1
+cp config.4.yaml config.yaml; sleep 3; [[ $(curl --retry 7 --retry-connrefused -s -o /dev/null -f ${OATHKEEPER_PROXY}/rules -w '%{http_code}') -ne 500 ]] && exit 1
 
 echo "Making sure route to be registered is not available yet -> 404"
-[[ $(curl -s -o /dev/null -f ${OATHKEEPER_PROXY}/other-rules -w '%{http_code}') -ne 404 ]] && exit 1
+[[ $(curl --retry 7 --retry-connrefused -s -o /dev/null -f ${OATHKEEPER_PROXY}/other-rules -w '%{http_code}') -ne 404 ]] && exit 1
 
 echo "Load another rule set -> all 200"
 cp rules.3.1.json rules.3.json
 cp config.5.yaml config.yaml; sleep 3
-[[ $(curl -s -o /dev/null -f ${OATHKEEPER_PROXY}/rules -w '%{http_code}') -ne 200 ]] && exit 1
-[[ $(curl -s -o /dev/null -f ${OATHKEEPER_PROXY}/other-rules -w '%{http_code}') -ne 200 ]] && exit 1
+[[ $(curl --retry 7 --retry-connrefused -s -o /dev/null -f ${OATHKEEPER_PROXY}/rules -w '%{http_code}') -ne 200 ]] && exit 1
+[[ $(curl --retry 7 --retry-connrefused -s -o /dev/null -f ${OATHKEEPER_PROXY}/other-rules -w '%{http_code}') -ne 200 ]] && exit 1
 
 echo "Make changes to other rule -> should 403"
 cp rules.3.2.json rules.3.json; sleep 3
-[[ $(curl -s -o /dev/null -f ${OATHKEEPER_PROXY}/rules -w '%{http_code}') -ne 200 ]] && exit 1
-[[ $(curl -s -o /dev/null -f ${OATHKEEPER_PROXY}/other-rules -w '%{http_code}') -ne 403 ]] && exit 1
+[[ $(curl --retry 7 --retry-connrefused -s -o /dev/null -f ${OATHKEEPER_PROXY}/rules -w '%{http_code}') -ne 200 ]] && exit 1
+[[ $(curl --retry 7 --retry-connrefused -s -o /dev/null -f ${OATHKEEPER_PROXY}/other-rules -w '%{http_code}') -ne 403 ]] && exit 1
 
 echo "Remove all configs -> all 404"
 cp config.6.yaml config.yaml; sleep 3
-[[ $(curl -s -o /dev/null -f ${OATHKEEPER_PROXY}/rules -w '%{http_code}') -ne 404 ]] && exit 1
-[[ $(curl -s -o /dev/null -f ${OATHKEEPER_PROXY}/other-rules -w '%{http_code}') -ne 404 ]] && exit 1
+[[ $(curl --retry 7 --retry-connrefused -s -o /dev/null -f ${OATHKEEPER_PROXY}/rules -w '%{http_code}') -ne 404 ]] && exit 1
+[[ $(curl --retry 7 --retry-connrefused -s -o /dev/null -f ${OATHKEEPER_PROXY}/other-rules -w '%{http_code}') -ne 404 ]] && exit 1
 
 kill %1 || true
 
