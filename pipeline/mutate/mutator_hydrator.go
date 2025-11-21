@@ -5,9 +5,12 @@ package mutate
 
 import (
 	"bytes"
+	"compress/gzip"
+	"compress/zlib"
 	"crypto/md5"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"net/url"
 	"time"
@@ -33,6 +36,8 @@ const (
 	ErrNoCredentialsProvided            = "No credentials were provided in mutator configuration"
 	contentTypeHeaderKey                = "Content-Type"
 	contentTypeJSONHeaderValue          = "application/json"
+	acceptEncodingHeaderKey             = "Accept-Encoding"
+	acceptEncodingHeaderValue           = "gzip, deflate"
 )
 
 type MutatorHydrator struct {
@@ -168,6 +173,7 @@ func (a *MutatorHydrator) Mutate(r *http.Request, session *authn.AuthenticationS
 		req.SetBasicAuth(credentials.Username, credentials.Password)
 	}
 	req.Header.Set(contentTypeHeaderKey, contentTypeJSONHeaderValue)
+	req.Header.Set(acceptEncodingHeaderKey, acceptEncodingHeaderValue)
 
 	client := http.DefaultClient
 	if a.d.Tracer() != nil {
@@ -214,8 +220,21 @@ func (a *MutatorHydrator) Mutate(r *http.Request, session *authn.AuthenticationS
 		return errors.New(ErrNon200ResponseFromAPI)
 	}
 
+	// Handle compressed data
+	var reader io.ReadCloser
+	switch res.Header.Get("Content-Encoding") {
+	case "gzip":
+		reader, err = gzip.NewReader(res.Body)
+		defer reader.Close()
+	case "deflate":
+		reader, err = zlib.NewReader(res.Body)
+		defer reader.Close()
+	default:
+		reader = res.Body
+	}
+
 	sessionFromUpstream := authn.AuthenticationSession{}
-	err = json.NewDecoder(res.Body).Decode(&sessionFromUpstream)
+	err = json.NewDecoder(reader).Decode(&sessionFromUpstream)
 	if err != nil {
 		return errors.WithStack(err)
 	}
