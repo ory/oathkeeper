@@ -74,6 +74,8 @@ func runProxy(d driver.Driver, n *negroni.Negroni, logger *logrusx.Logger, prom 
 			return d.Configuration().CORS("proxy")
 		}))
 
+		n.UseFunc(otelx.SpanNameRecorderNegroniFunc)
+
 		n.UseHandler(proxyHandler)
 
 		certs := cert(d.Configuration(), "proxy", logger)
@@ -81,7 +83,7 @@ func runProxy(d driver.Driver, n *negroni.Negroni, logger *logrusx.Logger, prom 
 		addr := d.Configuration().ProxyServeAddress()
 		server := graceful.WithDefaults(&http.Server{
 			Addr:         addr,
-			Handler:      otelx.NewHandler(n, "proxy"),
+			Handler:      otelx.NewMiddleware(n, "proxy"),
 			TLSConfig:    &tls.Config{Certificates: certs},
 			ReadTimeout:  d.Configuration().ProxyReadTimeout(),
 			WriteTimeout: d.Configuration().ProxyWriteTimeout(),
@@ -120,13 +122,15 @@ func runAPI(d driver.Driver, n *negroni.Negroni, logger *logrusx.Logger, prom *m
 		}))
 		n.Use(d.Registry().DecisionHandler()) // This needs to be the last entry, otherwise the judge API won't work
 
+		n.UseFunc(otelx.SpanNameRecorderNegroniFunc)
+
 		n.UseHandler(router)
 
 		certs := cert(d.Configuration(), "api", logger)
 		addr := d.Configuration().APIServeAddress()
 		server := graceful.WithDefaults(&http.Server{
 			Addr:         addr,
-			Handler:      otelx.TraceHandler(n),
+			Handler:      otelx.NewMiddleware(n, "api"),
 			TLSConfig:    &tls.Config{Certificates: certs},
 			ReadTimeout:  d.Configuration().APIReadTimeout(),
 			WriteTimeout: d.Configuration().APIWriteTimeout(),
