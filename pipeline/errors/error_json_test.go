@@ -15,6 +15,7 @@ import (
 
 	"github.com/ory/herodot"
 
+	"github.com/ory/oathkeeper/helper"
 	"github.com/ory/oathkeeper/internal"
 )
 
@@ -63,6 +64,26 @@ func TestErrorJSON(t *testing.T) {
 					assert.Equal(t, "application/json", rw.Header().Get("Content-Type"))
 					assert.Equal(t, "this must show up in the error details", gjson.Get(body, "error.reason").String())
 					assert.Equal(t, int64(404), gjson.Get(body, "error.code").Int())
+				},
+			},
+			{
+				d:          "should preserve 429 Too Many Requests error without wrapping",
+				givenError: helper.ErrTooManyRequests.WithReasonf("rate limit exceeded"),
+				assert: func(t *testing.T, rw *httptest.ResponseRecorder) {
+					body := rw.Body.String()
+					assert.Equal(t, "application/json", rw.Header().Get("Content-Type"))
+					assert.Empty(t, gjson.Get(body, "error.reason").String())
+					assert.Equal(t, int64(429), gjson.Get(body, "error.code").Int())
+				},
+			},
+			{
+				d:          "should preserve 429 Too Many Requests error without wrapping",
+				givenError: helper.ErrTooManyRequests.WithReasonf("rate limit exceeded"),
+				assert: func(t *testing.T, rw *httptest.ResponseRecorder) {
+					body := rw.Body.String()
+					assert.Equal(t, "application/json", rw.Header().Get("Content-Type"))
+					assert.Empty(t, gjson.Get(body, "error.reason").String())
+					assert.Equal(t, int64(429), gjson.Get(body, "error.code").Int())
 				},
 			},
 		} {

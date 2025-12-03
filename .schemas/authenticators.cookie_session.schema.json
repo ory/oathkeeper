@@ -25,6 +25,33 @@
       "title": "Preserve Path",
       "type": "boolean",
       "description": "When set to true, any path specified in `check_session_url` will be preserved instead of overwriting the path with the path from the original request"
+    },
+    "cache": {
+      "type": "object",
+      "title": "Session Cache Configuration",
+      "description": "Configures the session cache which reduces the number of requests to the session store.",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "title": "Enable Cache",
+          "description": "Enable the session cache. Defaults to false.",
+          "default": false
+        },
+        "ttl": {
+          "type": "string",
+          "title": "Cache TTL",
+          "description": "The time to live for cached sessions. Defaults to 1s.",
+          "default": "1s",
+          "examples": ["1s", "60s", "5m", "1h"]
+        },
+        "max_cost": {
+          "type": "integer",
+          "title": "Maximum Cache Cost",
+          "description": "The maximum cost of the cache in bytes. Defaults to 100000000 (100MB).",
+          "default": 100000000
+        }
+      },
+      "additionalProperties": false
     }
   },
   "required": ["check_session_url"],

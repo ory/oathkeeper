@@ -76,4 +76,9 @@ var (
 		CodeField:   http.StatusNotFound,
 		StatusField: http.StatusText(http.StatusNotFound),
 	}
+	ErrTooManyRequests = &herodot.DefaultError{
+		ErrorField:  "The upstream service rate limit was exceeded",
+		CodeField:   http.StatusTooManyRequests,
+		StatusField: http.StatusText(http.StatusTooManyRequests),
+	}
 )
