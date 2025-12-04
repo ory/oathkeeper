@@ -5,7 +5,7 @@ package mutate
 
 import (
 	"bytes"
-	"crypto/md5"
+	"crypto/md5" //nolint:gosec
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -50,7 +50,7 @@ type CredentialsIDTokenConfig struct {
 }
 
 func (c *CredentialsIDTokenConfig) ClaimsTemplateID() string {
-	return fmt.Sprintf("%x", md5.Sum([]byte(c.Claims)))
+	return fmt.Sprintf("%x", md5.Sum([]byte(c.Claims))) //nolint:gosec
 }
 
 func NewMutatorIDToken(c configuration.Provider, r MutatorIDTokenRegistry) *MutatorIDToken {
@@ -81,7 +81,7 @@ type idTokenCacheContainer struct {
 
 func (a *MutatorIDToken) cacheKey(config *CredentialsIDTokenConfig, ttl time.Duration, claims []byte, session *authn.AuthenticationSession) string {
 	return fmt.Sprintf("%x",
-		md5.Sum([]byte(fmt.Sprintf("%s|%s|%s|%s|%s", config.IssuerURL, ttl, config.JWKSURL, claims, session.Subject))),
+		md5.Sum([]byte(fmt.Sprintf("%s|%s|%s|%s|%s", config.IssuerURL, ttl, config.JWKSURL, claims, session.Subject))), //nolint:gosec // md5 only used to generate cache key
 	)
 }
 

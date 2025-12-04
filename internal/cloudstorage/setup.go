@@ -135,12 +135,12 @@ func awsSession(region string, client *http.Client) (*session.Session, error) {
 // can mutate the recorder to add service-specific header filters, for example.
 // An initState is returned for tests that need a state to have deterministic
 // results, for example, a seed to generate random sequences.
-func NewRecordReplayClient(t *testing.T, suffix string, rf func(r *httpreplay.Recorder)) (e error, c *http.Client, cleanup func(), initState int64) {
+func NewRecordReplayClient(t *testing.T, suffix string, rf func(r *httpreplay.Recorder)) (e error, c *http.Client, cleanup func(), initState int64) { //nolint:staticcheck // legacy signature used by tests
 	httpreplay.DebugHeaders()
 	path := filepath.Join("testdata", t.Name()+"-"+suffix+".replay")
 	if *Record {
 		t.Logf("Recording into golden file %s", path)
-		if err := os.MkdirAll(filepath.Dir(path), 0755); err != nil {
+		if err := os.MkdirAll(filepath.Dir(path), 0o750); err != nil {
 			t.Fatal(err)
 		}
 		state := time.Now()
@@ -168,7 +168,7 @@ func NewRecordReplayClient(t *testing.T, suffix string, rf func(r *httpreplay.Re
 		return err, nil, nil, 0
 	}
 
-	return nil, rep.Client(), func() { rep.Close() }, recState.UnixNano()
+	return nil, rep.Client(), func() { _ = rep.Close() }, recState.UnixNano()
 }
 
 // NewAWSSession creates a new session for testing against AWS.
@@ -178,7 +178,7 @@ func NewRecordReplayClient(t *testing.T, suffix string, rf func(r *httpreplay.Re
 // which never makes an outgoing HTTP call and uses fake credentials.
 // An initState is returned for tests that need a state to have deterministic
 // results, for example, a seed to generate random sequences.
-func NewAWSSession(t *testing.T, region string) (e error, sess *session.Session, cleanup func()) {
+func NewAWSSession(t *testing.T, region string) (e error, sess *session.Session, cleanup func()) { //nolint:staticcheck // legacy signature used by tests
 	err, client, cleanup, _ := NewRecordReplayClient(t, "s3", func(r *httpreplay.Recorder) {
 		r.RemoveQueryParams("X-Amz-Credential", "X-Amz-Signature", "X-Amz-Security-Token")
 		r.RemoveRequestHeaders("Authorization", "Duration", "X-Amz-Security-Token")
@@ -201,7 +201,7 @@ func NewAWSSession(t *testing.T, region string) (e error, sess *session.Session,
 // results are recorded in a replay file.
 // Otherwise, the session reads a replay file and runs the test as a replay,
 // which never makes an outgoing HTTP call and uses fake credentials.
-func NewGCPClient(ctx context.Context, t *testing.T) (e error, client *gcp.HTTPClient, done func()) {
+func NewGCPClient(ctx context.Context, t *testing.T) (e error, client *gcp.HTTPClient, done func()) { //nolint:staticcheck // legacy signature used by tests
 	err, c, cleanup, _ := NewRecordReplayClient(t, "gs", func(r *httpreplay.Recorder) {
 		r.ClearQueryParams("Expires")
 		r.ClearQueryParams("Signature")
@@ -254,7 +254,7 @@ func (f contentTypeInjector) New(node pipeline.Policy, opts *pipeline.PolicyOpti
 }
 
 // NewAzureTestPipeline creates a new connection for testing against Azure Blob.
-func NewAzureTestPipeline(t *testing.T, api string, credential azblob.Credential) (error, pipeline.Pipeline, func()) {
+func NewAzureTestPipeline(t *testing.T, api string, credential azblob.Credential) (error, pipeline.Pipeline, func()) { //nolint:staticcheck // legacy signature used by tests
 	err, client, done, _ := NewRecordReplayClient(t, "azblob", func(r *httpreplay.Recorder) {
 		r.RemoveQueryParams("se", "sig")
 		r.RemoveQueryParams("X-Ms-Date")

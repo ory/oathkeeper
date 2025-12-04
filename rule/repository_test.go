@@ -55,7 +55,7 @@ func (r *mockRepositoryRegistry) Logger() *logrusx.Logger {
 func init() {
 	err := faker.AddProvider("urlProvider", func(v reflect.Value) (interface{}, error) {
 		var m any
-		if rand.Intn(2) == 0 {
+		if rand.Intn(2) == 0 { //nolint:gosec // math/rand acceptable for test shuffling
 			m = new(Match)
 		} else {
 			m = new(MatchGRPC)
@@ -89,8 +89,8 @@ func TestRepository(t *testing.T) {
 
 			inserted := make([]Rule, len(rules))
 			copy(inserted, rules)
-			inserted = inserted[:len(inserted)-1] // insert all elements but the last
-			repo.Set(context.Background(), inserted)
+			inserted = inserted[:len(inserted)-1]    // insert all elements but the last
+			repo.Set(context.Background(), inserted) //nolint:errcheck,gosec // tests ignore batch insert errors
 			assert.NoError(t, repo.ReadyChecker(new(http.Request)))
 
 			for _, expect := range inserted {
@@ -106,7 +106,7 @@ func TestRepository(t *testing.T) {
 			updated := make([]Rule, len(rules))
 			copy(updated, rules)
 			updated = append(updated[:len(updated)-2], updated[len(updated)-1]) // insert all elements (including last) except before last
-			repo.Set(context.Background(), updated)
+			repo.Set(context.Background(), updated)                             //nolint:errcheck,gosec // tests ignore batch insert errors
 
 			count, err = repo.Count(context.Background())
 			require.NoError(t, err)

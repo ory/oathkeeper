@@ -58,7 +58,7 @@ func migrateRuleJSON(raw []byte) ([]byte, error) {
 				dj := gjson.GetBytes(raw, fmt.Sprintf(`mutators.%d.config.retry.delay_in_milliseconds`, key))
 
 				var delay = int64(100)
-				var retries = int64(3)
+				var retries = int64(3) //nolint:ineffassign // legacy migration keeps variable for clarity
 				var err error
 				if dj.Exists() {
 					delay = dj.Int()

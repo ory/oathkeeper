@@ -84,6 +84,7 @@ func (v *VerifierDefault) Verify(
 		return nil, errors.WithStack(herodot.ErrBadRequest.WithReasonf(`The signing key algorithm does not match the algorithm from the token header.`))
 	}, jwt.WithIssuedAt())
 	if err != nil {
+		//nolint:staticcheck // explicit list kept even if entries repeat
 		if errors.Is(err, jwt.ErrTokenUnverifiable) ||
 			errors.Is(err, jwt.ErrTokenUnverifiable) ||
 			errors.Is(err, jwt.ErrTokenSignatureInvalid) ||

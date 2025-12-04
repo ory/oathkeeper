@@ -58,7 +58,7 @@ func TestHealth(t *testing.T) {
 	// Checking health state before initializing the registry
 	res, err := server.Client().Get(server.URL + "/health/alive")
 	require.NoError(t, err)
-	defer res.Body.Close()
+	defer res.Body.Close() //nolint:errcheck // closing test response
 	require.Equal(t, http.StatusOK, res.StatusCode)
 	require.NoError(t, json.NewDecoder(res.Body).Decode(&result))
 	assert.Equal(t, "ok", result.Status)
@@ -67,7 +67,7 @@ func TestHealth(t *testing.T) {
 	result = statusResult{}
 	res, err = server.Client().Get(server.URL + "/health/ready")
 	require.NoError(t, err)
-	defer res.Body.Close()
+	defer res.Body.Close() //nolint:errcheck // closing test response
 	require.Equal(t, http.StatusServiceUnavailable, res.StatusCode)
 	require.NoError(t, json.NewDecoder(res.Body).Decode(&result))
 	assert.Empty(t, result.Status)
@@ -81,7 +81,7 @@ func TestHealth(t *testing.T) {
 	result = statusResult{}
 	res, err = server.Client().Get(server.URL + "/health/alive")
 	require.NoError(t, err)
-	defer res.Body.Close()
+	defer res.Body.Close() //nolint:errcheck // closing test response
 	require.Equal(t, http.StatusOK, res.StatusCode)
 	require.NoError(t, json.NewDecoder(res.Body).Decode(&result))
 	assert.Equal(t, "ok", result.Status)
@@ -90,7 +90,7 @@ func TestHealth(t *testing.T) {
 	result = statusResult{}
 	res, err = server.Client().Get(server.URL + "/health/ready")
 	require.NoError(t, err)
-	defer res.Body.Close()
+	defer res.Body.Close() //nolint:errcheck // closing test response
 	require.Equal(t, http.StatusOK, res.StatusCode)
 	require.NoError(t, json.NewDecoder(res.Body).Decode(&result))
 	assert.Equal(t, "ok", result.Status)

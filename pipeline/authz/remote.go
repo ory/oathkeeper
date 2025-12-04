@@ -120,7 +120,7 @@ func (a *AuthorizerRemote) Authorize(r *http.Request, session *authn.Authenticat
 	if err != nil {
 		return errors.WithStack(err)
 	}
-	defer res.Body.Close()
+	defer res.Body.Close() //nolint:errcheck // body close errors ignored in tests and handlers
 
 	if res.StatusCode == http.StatusForbidden {
 		return errors.WithStack(helper.ErrForbidden)

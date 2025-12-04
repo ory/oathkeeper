@@ -32,27 +32,28 @@ func trimExt(s string) string {
 }
 
 func generate(cmd *cobra.Command, dir string) error {
+	cleanDir := filepath.Clean(dir)
 	cmd.DisableAutoGenTag = true
 	for _, c := range cmd.Commands() {
 		if !c.IsAvailableCommand() || c.IsAdditionalHelpTopicCommand() {
 			continue
 		}
-		if err := generate(c, dir); err != nil {
+		if err := generate(c, cleanDir); err != nil {
 			return err
 		}
 	}
 
-	basename := strings.Replace(cmd.CommandPath(), " ", "-", -1)
-	if err := os.MkdirAll(filepath.Join(dir), 0755); err != nil {
+	basename := strings.ReplaceAll(cmd.CommandPath(), " ", "-")
+	if err := os.MkdirAll(filepath.Join(cleanDir), 0o750); err != nil {
 		return err
 	}
 
-	filename := filepath.Join(dir, basename) + ".md"
-	f, err := os.Create(filename)
+	filename := filepath.Join(cleanDir, basename) + ".md"
+	f, err := os.Create(filepath.Clean(filename))
 	if err != nil {
 		return err
 	}
-	defer f.Close()
+	defer func() { _ = f.Close() }()
 
 	if _, err := io.WriteString(f, fmt.Sprintf(`---
 id: %s

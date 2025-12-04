@@ -231,7 +231,7 @@ func (s *FetcherDefault) resolve(ctx context.Context, wg *sync.WaitGroup, errs c
 			)
 			return
 		}
-		defer bucket.Close()
+		defer func() { _ = bucket.Close() }()
 
 		reader, err = bucket.NewReader(ctx, location.Path[1:], nil)
 		if err != nil {
@@ -245,7 +245,7 @@ func (s *FetcherDefault) resolve(ctx context.Context, wg *sync.WaitGroup, errs c
 			)
 			return
 		}
-		defer reader.Close()
+		defer func() { _ = reader.Close() }()
 
 	case "", "file":
 		reader, err = os.Open(urlx.GetURLFilePath(&location))
@@ -260,7 +260,7 @@ func (s *FetcherDefault) resolve(ctx context.Context, wg *sync.WaitGroup, errs c
 			)
 			return
 		}
-		defer reader.Close()
+		defer func() { _ = reader.Close() }()
 
 	case "http", "https":
 		req, err := http.NewRequestWithContext(ctx, "GET", location.String(), nil)
@@ -288,7 +288,7 @@ func (s *FetcherDefault) resolve(ctx context.Context, wg *sync.WaitGroup, errs c
 			return
 		}
 		reader = res.Body
-		defer reader.Close()
+		defer func() { _ = reader.Close() }()
 
 		if res.StatusCode < 200 || res.StatusCode >= 400 {
 			errs <- errors.WithStack(herodot.

@@ -20,6 +20,12 @@ import (
 
 var apiPort, proxyPort int
 
+func mustSetenv(key, value string) {
+	if err := os.Setenv(key, value); err != nil {
+		panic(err)
+	}
+}
+
 func init() {
 	p, err := freeport.GetFreePorts(2)
 	if err != nil {
@@ -27,13 +33,13 @@ func init() {
 	}
 	apiPort, proxyPort = p[0], p[1]
 
-	os.Setenv("SERVE_API_PORT", fmt.Sprintf("%d", apiPort))
-	os.Setenv("SERVE_PROXY_PORT", fmt.Sprintf("%d", proxyPort))
-	os.Setenv("AUTHENTICATORS_NOOP_ENABLED", "1")
-	os.Setenv("AUTHENTICATORS_ANONYMOUS_ENABLED", "true")
-	os.Setenv("AUTHORIZERS_ALLOW_ENABLED", "true")
-	os.Setenv("MUTATORS_NOOP_ENABLED", "true")
-	os.Setenv("ACCESS_RULES_REPOSITORIES", "inline://"+base64.StdEncoding.EncodeToString([]byte(`[
+	mustSetenv("SERVE_API_PORT", fmt.Sprintf("%d", apiPort))
+	mustSetenv("SERVE_PROXY_PORT", fmt.Sprintf("%d", proxyPort))
+	mustSetenv("AUTHENTICATORS_NOOP_ENABLED", "1")
+	mustSetenv("AUTHENTICATORS_ANONYMOUS_ENABLED", "true")
+	mustSetenv("AUTHORIZERS_ALLOW_ENABLED", "true")
+	mustSetenv("MUTATORS_NOOP_ENABLED", "true")
+	mustSetenv("ACCESS_RULES_REPOSITORIES", "inline://"+base64.StdEncoding.EncodeToString([]byte(`[
   {
     "id": "test-rule-4",
     "upstream": {
@@ -74,7 +80,7 @@ func ensureOpen(t *testing.T, port int) bool {
 		t.Logf("Network error while polling for server: %s", err)
 		return true
 	}
-	defer res.Body.Close()
+	defer func() { _ = res.Body.Close() }()
 	return err != nil
 }
 

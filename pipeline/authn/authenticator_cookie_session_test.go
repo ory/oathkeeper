@@ -174,12 +174,13 @@ func TestAuthenticatorCookieSession(t *testing.T) {
 
 		t.Run("description=does not pass request body through to auth server", func(t *testing.T) {
 			testServer, requestRecorder := makeServer(t, 200, `{}`)
-			pipelineAuthenticator.Authenticate(
+			err := pipelineAuthenticator.Authenticate(
 				makeRequest("POST", "/", "", map[string]string{"sessionid": "zyx"}, "Some body..."),
 				session,
 				json.RawMessage(fmt.Sprintf(`{"check_session_url": "%s"}`, testServer.URL)),
 				nil,
 			)
+			require.NoError(t, err)
 			assert.Len(t, requestRecorder.requests, 1)
 			assert.Len(t, requestRecorder.bodies, 1)
 			r := requestRecorder.requests[0]
@@ -262,7 +263,7 @@ func TestAuthenticatorCookieSession(t *testing.T) {
 					return
 				}
 				w.WriteHeader(http.StatusOK)
-				w.Write([]byte(`{"identity": {"id": "123"}, "session": {"foo": "bar"}}`))
+				w.Write([]byte(`{"identity": {"id": "123"}, "session": {"foo": "bar"}}`)) //nolint:errcheck,gosec // test handler response best effort
 			}))
 			req := makeRequest("GET", "/", "", map[string]string{"sessionid": "zyx"}, "")
 			req.Header.Add("X-UsEr", "123")
@@ -343,7 +344,7 @@ func makeServer(t *testing.T, statusCode int, responseBody string) (*httptest.Se
 		requestBody, _ := io.ReadAll(r.Body)
 		requestRecorder.bodies = append(requestRecorder.bodies, requestBody)
 		w.WriteHeader(statusCode)
-		w.Write([]byte(responseBody))
+		w.Write([]byte(responseBody)) //nolint:errcheck,gosec // test helper ignores write errors
 	}))
 	t.Cleanup(testServer.Close)
 	return testServer, requestRecorder

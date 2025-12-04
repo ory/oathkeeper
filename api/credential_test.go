@@ -56,7 +56,7 @@ func TestCredentialsHandler(t *testing.T) {
 
 	res, err := server.Client().Get(server.URL + "/.well-known/jwks.json")
 	require.NoError(t, err)
-	defer res.Body.Close()
+	defer res.Body.Close() //nolint:errcheck // closing test response best effort
 	require.Equal(t, http.StatusOK, res.StatusCode)
 
 	var j jose.JSONWebKeySet

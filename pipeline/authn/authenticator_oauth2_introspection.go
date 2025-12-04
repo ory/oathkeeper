@@ -5,7 +5,7 @@ package authn
 
 import (
 	"context"
-	"crypto/md5"
+	"crypto/md5" //nolint:gosec
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -218,7 +218,7 @@ func (a *AuthenticatorOAuth2Introspection) Authenticate(r *http.Request, session
 		if err != nil {
 			return errors.WithStack(err)
 		}
-		defer resp.Body.Close()
+		defer resp.Body.Close() //nolint:errcheck
 
 		if resp.StatusCode != http.StatusOK {
 			return errors.Errorf("Introspection returned status code %d but expected %d", resp.StatusCode, http.StatusOK)
@@ -303,7 +303,7 @@ func (a *AuthenticatorOAuth2Introspection) Config(config json.RawMessage) (*Auth
 		return nil, nil, errors.WithStack(err)
 	}
 
-	clientKey := fmt.Sprintf("%x", md5.Sum(rawKey))
+	clientKey := fmt.Sprintf("%x", md5.Sum(rawKey)) //nolint:gosec
 	a.mu.RLock()
 	client, ok := a.clientMap[clientKey]
 	a.mu.RUnlock()

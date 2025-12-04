@@ -5,7 +5,7 @@ package mutate
 
 import (
 	"bytes"
-	"crypto/md5"
+	"crypto/md5" //nolint:gosec
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -29,7 +29,7 @@ const (
 	ErrMissingAPIURL                    = "Missing URL in mutator configuration"
 	ErrInvalidAPIURL                    = "Invalid URL in mutator configuration"
 	ErrNon200ResponseFromAPI            = "The call to an external API returned a non-200 HTTP response"
-	ErrInvalidCredentials               = "Invalid credentials were provided in mutator configuration"
+	ErrInvalidCredentials               = "Invalid credentials were provided in mutator configuration" //nolint:gosec // user-facing error text
 	ErrNoCredentialsProvided            = "No credentials were provided in mutator configuration"
 	contentTypeHeaderKey                = "Content-Type"
 	contentTypeJSONHeaderValue          = "application/json"
@@ -100,7 +100,7 @@ func (a *MutatorHydrator) GetID() string {
 }
 
 func (a *MutatorHydrator) cacheKey(config *MutatorHydratorConfig, session string) string {
-	return fmt.Sprintf("%s|%x", config.Api.URL, md5.Sum([]byte(session)))
+	return fmt.Sprintf("%s|%x", config.Api.URL, md5.Sum([]byte(session))) //nolint:gosec
 }
 
 func (a *MutatorHydrator) hydrateFromCache(config *MutatorHydratorConfig, session string) (*authn.AuthenticationSession, bool) {
@@ -200,7 +200,7 @@ func (a *MutatorHydrator) Mutate(r *http.Request, session *authn.AuthenticationS
 	if err != nil {
 		return errors.WithStack(err)
 	}
-	defer res.Body.Close()
+	defer res.Body.Close() //nolint:errcheck
 
 	switch res.StatusCode {
 	case http.StatusOK:

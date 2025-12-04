@@ -17,8 +17,8 @@ func WriteFile(t *testing.T, content string) string {
 		t.Error(err)
 		return ""
 	}
-	defer f.Close()
-	io.WriteString(f, content)
+	defer f.Close()            //nolint:errcheck
+	io.WriteString(f, content) //nolint:errcheck,gosec // helper ignores write errors
 
 	return f.Name()
 }

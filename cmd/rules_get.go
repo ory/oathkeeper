@@ -26,7 +26,7 @@ var getCmd = &cobra.Command{
 
 		r, err := client.API.GetRule(api.NewGetRuleParams().WithID(args[0]))
 		if err != nil {
-			fmt.Fprintf(cmd.ErrOrStderr(), "Could not get rule: %s", err)
+			_, _ = fmt.Fprintf(cmd.ErrOrStderr(), "Could not get rule: %s", err)
 			return cmdx.FailSilently(cmd)
 		}
 		fmt.Println(cmdx.FormatResponse(r.Payload))

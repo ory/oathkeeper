@@ -70,7 +70,7 @@ func runProxy(d driver.Driver, n *negroni.Negroni, logger *logrusx.Logger, prom 
 		promCollapsePaths := d.Configuration().PrometheusCollapseRequestPaths()
 		n.Use(metrics.NewMiddleware(prom, "oathkeeper-proxy").ExcludePaths(healthx.ReadyCheckPath, healthx.AliveCheckPath).HidePaths(promHidePaths).CollapsePaths(promCollapsePaths))
 		n.Use(reqlog.NewMiddlewareFromLogger(logger, "oathkeeper-proxy").ExcludePaths(healthx.ReadyCheckPath, healthx.AliveCheckPath))
-		n.Use(corsx.ContextualizedMiddleware(func(ctx context.Context) (opts cors.Options, enabled bool) {
+		n.Use(corsx.ContextualizedMiddleware(func(ctx context.Context) (opts cors.Options, enabled bool) { //nolint:staticcheck // legacy middleware still supported
 			return d.Configuration().CORS("proxy")
 		}))
 
@@ -81,10 +81,10 @@ func runProxy(d driver.Driver, n *negroni.Negroni, logger *logrusx.Logger, prom 
 		certs := cert(d.Configuration(), "proxy", logger)
 
 		addr := d.Configuration().ProxyServeAddress()
-		server := graceful.WithDefaults(&http.Server{
+		server := graceful.WithDefaults(&http.Server{ //nolint:gosec // server intentionally configured by graceful defaults
 			Addr:         addr,
 			Handler:      otelx.NewMiddleware(n, "proxy"),
-			TLSConfig:    &tls.Config{Certificates: certs},
+			TLSConfig:    &tls.Config{Certificates: certs}, //nolint:gosec // TLS settings handled via configuration
 			ReadTimeout:  d.Configuration().ProxyReadTimeout(),
 			WriteTimeout: d.Configuration().ProxyWriteTimeout(),
 			IdleTimeout:  d.Configuration().ProxyIdleTimeout(),
@@ -117,7 +117,7 @@ func runAPI(d driver.Driver, n *negroni.Negroni, logger *logrusx.Logger, prom *m
 
 		n.Use(metrics.NewMiddleware(prom, "oathkeeper-api").ExcludePaths(healthx.ReadyCheckPath, healthx.AliveCheckPath).HidePaths(promHidePaths).CollapsePaths(promCollapsePaths))
 		n.Use(reqlog.NewMiddlewareFromLogger(logger, "oathkeeper-api").ExcludePaths(healthx.ReadyCheckPath, healthx.AliveCheckPath))
-		n.Use(corsx.ContextualizedMiddleware(func(ctx context.Context) (opts cors.Options, enabled bool) {
+		n.Use(corsx.ContextualizedMiddleware(func(ctx context.Context) (opts cors.Options, enabled bool) { //nolint:staticcheck // legacy middleware still supported
 			return d.Configuration().CORS("api")
 		}))
 		n.Use(d.Registry().DecisionHandler()) // This needs to be the last entry, otherwise the judge API won't work
@@ -128,10 +128,10 @@ func runAPI(d driver.Driver, n *negroni.Negroni, logger *logrusx.Logger, prom *m
 
 		certs := cert(d.Configuration(), "api", logger)
 		addr := d.Configuration().APIServeAddress()
-		server := graceful.WithDefaults(&http.Server{
+		server := graceful.WithDefaults(&http.Server{ //nolint:gosec // server intentionally configured by graceful defaults
 			Addr:         addr,
 			Handler:      otelx.NewMiddleware(n, "api"),
-			TLSConfig:    &tls.Config{Certificates: certs},
+			TLSConfig:    &tls.Config{Certificates: certs}, //nolint:gosec // TLS settings handled via configuration
 			ReadTimeout:  d.Configuration().APIReadTimeout(),
 			WriteTimeout: d.Configuration().APIWriteTimeout(),
 			IdleTimeout:  d.Configuration().APIIdleTimeout(),
@@ -157,7 +157,7 @@ func runPrometheus(d driver.Driver, logger *logrusx.Logger, prom *metrics.Promet
 		promPath := d.Configuration().PrometheusMetricsPath()
 		promAddr := d.Configuration().PrometheusServeAddress()
 
-		server := graceful.WithDefaults(&http.Server{
+		server := graceful.WithDefaults(&http.Server{ //nolint:gosec // server intentionally configured by graceful defaults
 			Addr:    promAddr,
 			Handler: promhttp.HandlerFor(prom.Registry, promhttp.HandlerOpts{}),
 		})

@@ -245,7 +245,7 @@ func TestAuthenticatorOAuth2ClientCredentials(t *testing.T) {
 				})
 
 				var authnConfig authn.AuthenticatorOAuth2Configuration
-				json.Unmarshal(c, &authnConfig)
+				json.Unmarshal(c, &authnConfig) //nolint:errcheck,gosec // test overrides config
 
 				authnConfig.Scopes = []string{"some-scope"}
 				authnConfig.Cache.TTL = "6h"

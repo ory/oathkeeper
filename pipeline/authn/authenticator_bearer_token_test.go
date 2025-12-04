@@ -87,7 +87,7 @@ func TestAuthenticatorBearerToken(t *testing.T) {
 				setup: func(t *testing.T, m *httprouter.Router) {
 					m.GET("/", func(w http.ResponseWriter, _ *http.Request, _ httprouter.Params) {
 						w.WriteHeader(200)
-						w.Write([]byte(`{"sub": "123", "extra": {"foo": "bar"}}`))
+						_, _ = w.Write([]byte(`{"sub": "123", "extra": {"foo": "bar"}}`))
 					})
 				},
 				expectErr: false,
@@ -105,7 +105,7 @@ func TestAuthenticatorBearerToken(t *testing.T) {
 					assert.Equal(t, r.URL.RawQuery, "")
 					assert.Equal(t, r.Header.Get("Authorization"), "bearer zyx")
 					w.WriteHeader(200)
-					w.Write([]byte(`{"sub": "123"}`))
+					_, _ = w.Write([]byte(`{"sub": "123"}`))
 				},
 				config:    []byte(`{"preserve_query": true}`),
 				expectErr: false,
@@ -122,7 +122,7 @@ func TestAuthenticatorBearerToken(t *testing.T) {
 					assert.Equal(t, r.URL.RawQuery, "query=string")
 					assert.Equal(t, r.Header.Get("Authorization"), "bearer zyx")
 					w.WriteHeader(200)
-					w.Write([]byte(`{"sub": "123"}`))
+					_, _ = w.Write([]byte(`{"sub": "123"}`))
 				},
 				config:    []byte(`{"preserve_path": true, "preserve_query": false}`),
 				expectErr: false,
@@ -137,7 +137,7 @@ func TestAuthenticatorBearerToken(t *testing.T) {
 					assert.Equal(t, r.Method, "GET")
 					assert.Equal(t, r.Header.Get("Authorization"), "bearer zyx")
 					w.WriteHeader(200)
-					w.Write([]byte(`{"sub": "123"}`))
+					_, _ = w.Write([]byte(`{"sub": "123"}`))
 				},
 				config:    []byte(`{"preserve_path": true, "force_method": "GET", "prefix": "zy"}`),
 				expectErr: false,
@@ -154,7 +154,7 @@ func TestAuthenticatorBearerToken(t *testing.T) {
 					assert.Equal(t, r.URL.RawQuery, "")
 					assert.Equal(t, r.Header.Get("Authorization"), "bearer zyx")
 					w.WriteHeader(200)
-					w.Write([]byte(`{"sub": "123"}`))
+					_, _ = w.Write([]byte(`{"sub": "123"}`))
 				},
 				config:    []byte(`{"preserve_path": false, "preserve_query": true}`),
 				expectErr: false,
@@ -169,7 +169,7 @@ func TestAuthenticatorBearerToken(t *testing.T) {
 					assert.Equal(t, r.URL.Path, "/configured/path")
 					assert.Equal(t, r.URL.RawQuery, "q=configured-query")
 					w.WriteHeader(200)
-					w.Write([]byte(`{"sub": "123"}`))
+					_, _ = w.Write([]byte(`{"sub": "123"}`))
 				},
 				config:    []byte(`{"preserve_path": true, "preserve_query": true, "check_session_url": "http://origin-replaced-in-test/configured/path?q=configured-query"}`),
 				expectErr: false,
@@ -185,7 +185,7 @@ func TestAuthenticatorBearerToken(t *testing.T) {
 					assert.Equal(t, "some-host", r.Header.Get("X-Forwarded-Host"))
 					assert.Equal(t, r.Header.Get("Authorization"), "bearer zyx")
 					w.WriteHeader(200)
-					w.Write([]byte(`{"sub": "123"}`))
+					_, _ = w.Write([]byte(`{"sub": "123"}`))
 				},
 				config:    []byte(`{"preserve_host": true}`),
 				expectErr: false,
@@ -202,7 +202,7 @@ func TestAuthenticatorBearerToken(t *testing.T) {
 					assert.Equal(t, "bar", r.Header.Get("X-Foo"))
 					assert.Equal(t, r.Header.Get("Authorization"), "bearer zyx")
 					w.WriteHeader(200)
-					w.Write([]byte(`{"sub": "123"}`))
+					_, _ = w.Write([]byte(`{"sub": "123"}`))
 				},
 				config:    []byte(`{"preserve_host": true, "additional_headers": {"X-Foo": "bar","X-Forwarded-For": "not-some-host"}}`),
 				expectErr: false,
@@ -226,7 +226,7 @@ func TestAuthenticatorBearerToken(t *testing.T) {
 					assert.Equal(t, r.ContentLength, int64(0))
 					assert.Equal(t, requestBody, []byte{})
 					w.WriteHeader(200)
-					w.Write([]byte(`{"sub": "123"}`))
+					_, _ = w.Write([]byte(`{"sub": "123"}`))
 				},
 				expectErr: false,
 				expectSess: &AuthenticationSession{
@@ -239,7 +239,7 @@ func TestAuthenticatorBearerToken(t *testing.T) {
 				setup: func(t *testing.T, m *httprouter.Router) {
 					m.GET("/", func(w http.ResponseWriter, _ *http.Request, _ httprouter.Params) {
 						w.WriteHeader(200)
-						w.Write([]byte(`{"sub": "123", "session": {"foo": "bar"}}`))
+						_, _ = w.Write([]byte(`{"sub": "123", "session": {"foo": "bar"}}`))
 					})
 				},
 				config:    []byte(`{"extra_from": "session"}`),
@@ -255,7 +255,7 @@ func TestAuthenticatorBearerToken(t *testing.T) {
 				setup: func(t *testing.T, m *httprouter.Router) {
 					m.GET("/", func(w http.ResponseWriter, _ *http.Request, _ httprouter.Params) {
 						w.WriteHeader(200)
-						w.Write([]byte(`{"identity": {"id": "123"}, "session": {"foo": "bar"}}`))
+						_, _ = w.Write([]byte(`{"identity": {"id": "123"}, "session": {"foo": "bar"}}`))
 					})
 				},
 				config:    []byte(`{"subject_from": "identity.id", "extra_from": "@this"}`),
@@ -275,7 +275,7 @@ func TestAuthenticatorBearerToken(t *testing.T) {
 							return
 						}
 						w.WriteHeader(200)
-						w.Write([]byte(`{"identity": {"id": "123"}, "session": {"foo": "bar"}}`))
+						_, _ = w.Write([]byte(`{"identity": {"id": "123"}, "session": {"foo": "bar"}}`))
 					})
 				},
 				config:    []byte(`{"subject_from": "identity.id", "extra_from": "@this", "forward_http_headers": ["X-UsEr"]}`),

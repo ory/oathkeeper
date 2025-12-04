@@ -315,7 +315,9 @@ func (v *KoanfProvider) PipelineConfig(prefix, id string, override json.RawMessa
 		if err := overrideCfg.Load(configx.NewKoanfMemory(v.ctx, override), nil); err != nil {
 			return errors.WithStack(err)
 		}
-		pipelineCfg.Merge(overrideCfg)
+		if err := pipelineCfg.Merge(overrideCfg); err != nil {
+			return errors.WithStack(err)
+		}
 	}
 
 	marshalled, err := json.Marshal(pipelineCfg.Raw())

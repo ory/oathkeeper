@@ -315,7 +315,7 @@ func (f *FetcherDefault) fetchRemote(source string) ([]Rule, error) {
 	if err != nil {
 		return nil, errors.Wrapf(err, "rule: %s", source)
 	}
-	defer res.Body.Close()
+	defer res.Body.Close() //nolint:errcheck // nothing to do if close fails
 	if res.StatusCode != http.StatusOK {
 		return nil, errors.Errorf("rule: expected http response status code 200 but got %d when fetching: %s", res.StatusCode, source)
 	}
@@ -353,13 +353,13 @@ func (f *FetcherDefault) fetchFromStorage(source url.URL) ([]Rule, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer bucket.Close()
+	defer bucket.Close() //nolint:errcheck
 
 	r, err := bucket.NewReader(ctx, source.Path[1:], nil)
 	if err != nil {
 		return nil, err
 	}
-	defer r.Close()
+	defer r.Close() //nolint:errcheck
 
 	return f.decode(r)
 }

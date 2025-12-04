@@ -16,6 +16,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/otel/trace"
+	nooptrace "go.opentelemetry.io/otel/trace/noop"
 
 	"github.com/ory/x/logrusx"
 
@@ -41,7 +42,7 @@ func (*reg) Logger() *logrusx.Logger {
 }
 
 func (*reg) Tracer() trace.Tracer {
-	return trace.NewNoopTracerProvider().Tracer("")
+	return nooptrace.NewTracerProvider().Tracer("")
 }
 
 func TestFetcherDefault(t *testing.T) {
@@ -74,7 +75,7 @@ func TestFetcherDefault(t *testing.T) {
 
 	invalidServer := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, _ *http.Request) {
 		rw.Header().Set("Content-Type", "application/json")
-		rw.Write(sets[3])
+		_, _ = rw.Write(sets[3])
 	}))
 	defer invalidServer.Close()
 

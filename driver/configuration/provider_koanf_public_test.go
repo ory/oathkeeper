@@ -119,7 +119,7 @@ func BenchmarkPipelineConfig(b *testing.B) {
 	b.ResetTimer()
 	for n := 0; n < b.N; n++ {
 		res := json.RawMessage{}
-		p.PipelineConfig("authenticators", "oauth2_introspection", nil, &res)
+		p.PipelineConfig("authenticators", "oauth2_introspection", nil, &res) //nolint:errcheck,gosec // benchmark ignores errors
 	}
 }
 
@@ -248,7 +248,7 @@ func TestKoanfProvider(t *testing.T) {
 		})
 
 		t.Run("authenticator=cookie_session", func(t *testing.T) {
-			a := authn.NewAuthenticatorCookieSession(p, trace.NewNoopTracerProvider())
+			a := authn.NewAuthenticatorCookieSession(p, trace.NewNoopTracerProvider()) //nolint:staticcheck // tests only need noop tracer
 			assert.True(t, p.AuthenticatorIsEnabled(a.GetID()))
 			require.NoError(t, a.Validate(nil))
 
@@ -286,7 +286,7 @@ func TestKoanfProvider(t *testing.T) {
 		})
 
 		t.Run("authenticator=oauth2_introspection", func(t *testing.T) {
-			a := authn.NewAuthenticatorOAuth2Introspection(p, logger, trace.NewNoopTracerProvider())
+			a := authn.NewAuthenticatorOAuth2Introspection(p, logger, trace.NewNoopTracerProvider()) //nolint:staticcheck // tests only need noop tracer
 			assert.True(t, p.AuthenticatorIsEnabled(a.GetID()))
 			require.NoError(t, a.Validate(nil))
 
@@ -434,7 +434,7 @@ func TestAuthenticatorOAuth2TokenIntrospectionPreAuthorization(t *testing.T) {
 		{enabled: true, id: "a", secret: "b", turl: "https://some-url", err: false},
 	} {
 		t.Run(fmt.Sprintf("case=%d", k), func(t *testing.T) {
-			a := authn.NewAuthenticatorOAuth2Introspection(p, logrusx.New("", ""), trace.NewNoopTracerProvider())
+			a := authn.NewAuthenticatorOAuth2Introspection(p, logrusx.New("", ""), trace.NewNoopTracerProvider()) //nolint:staticcheck // tests only need noop tracer
 
 			config, _, err := a.Config(json.RawMessage(fmt.Sprintf(`{
 	"pre_authorization": {

@@ -29,11 +29,11 @@ import (
 func TestProxy(t *testing.T) {
 	backend := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// assert.NotEmpty(t, helper.BearerTokenFromRequest(r))
-		fmt.Fprint(w, "authorization="+r.Header.Get("Authorization")+"\n")
-		fmt.Fprint(w, "host="+r.Host+"\n")
-		fmt.Fprint(w, "url="+r.URL.String()+"\n")
+		fmt.Fprint(w, "authorization="+r.Header.Get("Authorization")+"\n") //nolint:errcheck // best-effort debug output
+		fmt.Fprint(w, "host="+r.Host+"\n")                                 //nolint:errcheck // best-effort debug output
+		fmt.Fprint(w, "url="+r.URL.String()+"\n")                          //nolint:errcheck // best-effort debug output
 		for k, v := range r.Header {
-			fmt.Fprint(w, "header "+k+"="+strings.Join(v, ",")+"\n")
+			fmt.Fprint(w, "header "+k+"="+strings.Join(v, ",")+"\n") //nolint:errcheck // best-effort debug output
 		}
 	}))
 	defer backend.Close()

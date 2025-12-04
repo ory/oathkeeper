@@ -84,7 +84,7 @@ func requestWithJWT(token string) (*http.Response, string) {
 	req.Header.Set("Authorization", "Bearer "+token)
 	res, err := http.DefaultClient.Do(req)
 	cmdx.Must(err, "%s", err)
-	defer res.Body.Close()
+	defer res.Body.Close() //nolint:errcheck
 	body, err := io.ReadAll(res.Body)
 	cmdx.Must(err, "%s", err)
 	return res, string(body)
@@ -97,7 +97,7 @@ func decisionWithJWT(token string) (*http.Response, string) {
 	req.Header.Set("Authorization", "Bearer "+token)
 	res, err := http.DefaultClient.Do(req)
 	cmdx.Must(err, "%s", err)
-	defer res.Body.Close()
+	defer res.Body.Close() //nolint:errcheck
 	body, err := io.ReadAll(res.Body)
 	cmdx.Must(err, "%s", err)
 	return res, string(body)

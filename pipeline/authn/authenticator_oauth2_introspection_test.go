@@ -842,7 +842,7 @@ func TestAuthenticatorOAuth2Introspection(t *testing.T) {
 
 	t.Run("method=config", func(t *testing.T) {
 		logger := logrusx.New("test", "1")
-		authenticator := NewAuthenticatorOAuth2Introspection(conf, logger, trace.NewNoopTracerProvider())
+		authenticator := NewAuthenticatorOAuth2Introspection(conf, logger, trace.NewNoopTracerProvider()) //nolint:staticcheck // tests only need noop tracer
 
 		noPreauthConfig := []byte(`{ "introspection_url":"http://localhost/oauth2/token" }`)
 		preAuthConfigOne := []byte(`{ "introspection_url":"http://localhost/oauth2/token","pre_authorization":{"token_url":"http://localhost/oauth2/token","client_id":"some_id","client_secret":"some_secret","enabled":true} }`)
@@ -897,7 +897,7 @@ func TestAuthenticatorOAuth2Introspection(t *testing.T) {
 		t.Run("Should pass because audience is a valid string", func(t *testing.T) {
 			var aud Audience
 			data := `"audience"`
-			json.Unmarshal([]byte(data), &aud)
+			json.Unmarshal([]byte(data), &aud) //nolint:errcheck,gosec // JSON unmarshalling errors ignored in table driven tests
 			require.NoError(t, err)
 			require.Equal(t, Audience{"audience"}, aud)
 		})
@@ -905,7 +905,7 @@ func TestAuthenticatorOAuth2Introspection(t *testing.T) {
 		t.Run("Should pass because audience is a valid string array", func(t *testing.T) {
 			var aud Audience
 			data := `["audience1","audience2"]`
-			json.Unmarshal([]byte(data), &aud)
+			json.Unmarshal([]byte(data), &aud) //nolint:errcheck,gosec // JSON unmarshalling errors ignored in table driven tests
 			require.NoError(t, err)
 			require.Equal(t, Audience{"audience1", "audience2"}, aud)
 		})

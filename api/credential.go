@@ -22,7 +22,7 @@ import (
 )
 
 const (
-	CredentialsPath = "/.well-known/jwks.json"
+	CredentialsPath = "/.well-known/jwks.json" //nolint:gosec // public metadata location, not a credential literal
 )
 
 type credentialHandlerRegistry interface {

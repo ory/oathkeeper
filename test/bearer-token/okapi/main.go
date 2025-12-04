@@ -23,7 +23,7 @@ func main() {
 		port = "6662"
 	}
 
-	server := http.Server{
+	server := http.Server{ //nolint:gosec // test server without custom timeouts is acceptable
 		Addr:    fmt.Sprintf(":%s", port),
 		Handler: router,
 	}

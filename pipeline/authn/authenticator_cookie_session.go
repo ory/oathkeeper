@@ -196,7 +196,7 @@ func forwardRequestToSessionStore(client *http.Client, r *http.Request, cf Authe
 		return nil, helper.ErrForbidden.WithReason(err.Error()).WithTrace(err)
 	}
 
-	defer res.Body.Close()
+	defer func() { _ = res.Body.Close() }()
 
 	if res.StatusCode == http.StatusOK {
 		body, err := io.ReadAll(res.Body)

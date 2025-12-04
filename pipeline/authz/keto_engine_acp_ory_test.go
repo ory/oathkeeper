@@ -75,7 +75,7 @@ func TestAuthorizerKetoWarden(t *testing.T) {
 					assert.Contains(t, r.Header, "Content-Type")
 					assert.Contains(t, r.Header["Content-Type"], "application/json")
 					assert.Contains(t, r.URL.Path, "exact")
-					w.Write([]byte(`{"allowed":false}`))
+					w.Write([]byte(`{"allowed":false}`)) //nolint:errcheck,gosec // test handler ignores errors
 				}))
 			},
 			session:   new(authn.AuthenticationSession),
@@ -95,7 +95,7 @@ func TestAuthorizerKetoWarden(t *testing.T) {
 						Subject:  "peter",
 					}, ki)
 					assert.Contains(t, r.URL.Path, "regex")
-					w.Write([]byte(`{"allowed":true}`))
+					w.Write([]byte(`{"allowed":true}`)) //nolint:errcheck,gosec // test handler ignores errors
 				}))
 			},
 			session: &authn.AuthenticationSession{
@@ -120,7 +120,7 @@ func TestAuthorizerKetoWarden(t *testing.T) {
 						Subject:  "peter",
 					}, ki)
 					assert.Contains(t, r.URL.Path, "regex")
-					w.Write([]byte(`{"allowed":true}`))
+					w.Write([]byte(`{"allowed":true}`)) //nolint:errcheck,gosec // test handler ignores errors
 				}))
 			},
 			session: &authn.AuthenticationSession{
@@ -144,7 +144,7 @@ func TestAuthorizerKetoWarden(t *testing.T) {
 						Subject:  "peter",
 					}, ki)
 					assert.Contains(t, r.URL.Path, "regex")
-					w.Write([]byte(`{"allowed":true}`))
+					w.Write([]byte(`{"allowed":true}`)) //nolint:errcheck,gosec // test handler ignores errors
 				}))
 			},
 			session: &authn.AuthenticationSession{

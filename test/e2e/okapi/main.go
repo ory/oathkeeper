@@ -55,7 +55,7 @@ func main() {
 	n.UseFunc(func(_ http.ResponseWriter, _ *http.Request, next http.HandlerFunc) {
 		jwtm.CheckJWT(next)
 	})
-	server := http.Server{
+	server := http.Server{ //nolint:gosec // test server without custom timeouts is acceptable
 		Addr:    fmt.Sprintf(":%s", port),
 		Handler: n,
 	}

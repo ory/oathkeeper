@@ -81,7 +81,7 @@ func PrometheusTestApp(middleware *Middleware) http.Handler {
 
 	for _, path := range serverConfigPaths {
 		r.GET(path, func(res http.ResponseWriter, req *http.Request, p httprouter.Params) {
-			fmt.Fprint(res, "OK")
+			_, _ = fmt.Fprint(res, "OK")
 		})
 	}
 	n.UseHandler(r)

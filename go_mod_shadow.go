@@ -1,6 +1,7 @@
 // Copyright © 2023 Ory Corp
 // SPDX-License-Identifier: Apache-2.0
 
+//nolint:govet // keep legacy build tag for older Go toolchains
 //go:build tools
 // +build tools
 

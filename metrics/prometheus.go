@@ -71,8 +71,8 @@ func NewConfigurablePrometheusRepository(d driver.Driver, logger *logrusx.Logger
 // NewPrometheusRepository creates a new prometheus repository
 func NewPrometheusRepository(logger *logrusx.Logger) *PrometheusRepository {
 	m := []prometheus.Collector{
-		prometheus.NewGoCollector(),
-		prometheus.NewProcessCollector(prometheus.ProcessCollectorOpts{}),
+		prometheus.NewGoCollector(),                                       //nolint:staticcheck // compatible with current deps
+		prometheus.NewProcessCollector(prometheus.ProcessCollectorOpts{}), //nolint:staticcheck // compatible with current deps
 		RequestTotal,
 		HistogramRequestDuration,
 	}

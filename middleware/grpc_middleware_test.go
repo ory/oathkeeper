@@ -34,7 +34,7 @@ import (
 )
 
 func testClient(t *testing.T, l *bufconn.Listener, dialOpts ...grpc.DialOption) grpc_testing.TestServiceClient {
-	conn, err := grpc.Dial("bufnet",
+	conn, err := grpc.Dial("bufnet", //nolint:staticcheck // grpc.Dial is adequate for tests in grpc v1.x
 		append(dialOpts,
 			grpc.WithTransportCredentials(insecure.NewCredentials()),
 			grpc.WithAuthority("myproject.apis.ory.sh"),
@@ -42,7 +42,7 @@ func testClient(t *testing.T, l *bufconn.Listener, dialOpts ...grpc.DialOption) 
 		)...,
 	)
 	require.NoError(t, err)
-	t.Cleanup(func() { conn.Close() })
+	t.Cleanup(func() { conn.Close() }) //nolint:errcheck,gosec // cleanup best effort
 
 	return grpc_testing.NewTestServiceClient(conn)
 }
@@ -56,7 +56,7 @@ func testTokenCheckServer(t *testing.T) *httptest.Server {
 				return
 			}
 			t.Logf("allowed request %+v", r)
-			io.WriteString(w, "{}")
+			io.WriteString(w, "{}") //nolint:errcheck,gosec // best-effort response write
 		}))
 	t.Cleanup(s.Close)
 	return s
@@ -68,8 +68,8 @@ func writeTestConfig(t *testing.T, pattern string, content string) string {
 		t.Error(err)
 		return ""
 	}
-	defer f.Close()
-	io.WriteString(f, content)
+	defer f.Close()            //nolint:errcheck
+	io.WriteString(f, content) //nolint:errcheck,gosec // helper ignores write errors
 
 	return f.Name()
 }

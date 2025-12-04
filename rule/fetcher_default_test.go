@@ -44,11 +44,11 @@ const (
 func copyToFile(t *testing.T, src string, dst *os.File) {
 	t.Helper()
 
-	source, err := os.Open(filepath.Join(testConfigPath, src))
+	source, err := os.Open(filepath.Join(testConfigPath, src)) //nolint:gosec
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer source.Close()
+	defer source.Close() //nolint:errcheck
 
 	_, err = dst.Seek(0, 0)
 	if err != nil {
@@ -80,7 +80,7 @@ func TestFetcherReload(t *testing.T) {
 
 	configFile, err := os.CreateTemp(t.TempDir(), "config-*.yaml")
 	require.NoError(t, err)
-	t.Cleanup(func() { configFile.Close() })
+	t.Cleanup(func() { configFile.Close() }) //nolint:errcheck,gosec // tests ignore cleanup failures
 
 	configChanged := make(chan struct{})
 
@@ -164,7 +164,7 @@ func TestFetcherWatchConfig(t *testing.T) {
 
 	configFile, err := os.CreateTemp(t.TempDir(), "config-*.yaml")
 	require.NoError(t, err)
-	configFile.Close()
+	configFile.Close() //nolint:errcheck,gosec // best-effort cleanup
 	configChanged := make(chan struct{})
 	conf := internal.NewConfigurationWithDefaults(
 		configx.WithContext(ctx),
@@ -293,15 +293,16 @@ func TestFetcherWatchRepositoryFromFS(t *testing.T) {
 	tempDir := t.TempDir()
 	configFile, err := os.CreateTemp(tempDir, "config-*.yaml")
 	require.NoError(t, err)
-	t.Cleanup(func() { configFile.Close() })
+	t.Cleanup(func() { configFile.Close() }) //nolint:errcheck,gosec // tests ignore cleanup failures
 
 	repoFile, err := os.CreateTemp(tempDir, "access-rules-*.json")
 	require.NoError(t, err)
-	t.Cleanup(func() { repoFile.Close() })
+	t.Cleanup(func() { repoFile.Close() }) //nolint:errcheck,gosec // tests ignore cleanup failures
 
-	repoFile.WriteString("[]")
+	repoFile.WriteString("[]") //nolint:errcheck,gosec // temporary file writes best effort
 	require.NoError(t, repoFile.Sync())
 
+	//nolint:errcheck,gosec,staticcheck // write config template best effort
 	configFile.WriteString(fmt.Sprintf(`
 access_rules:
   repositories:
@@ -355,9 +356,9 @@ access_rules:
 			}
 			content := fmt.Sprintf("[%s]", strings.Join(rawRules, ","))
 
-			repoFile.Truncate(0)
-			repoFile.WriteAt([]byte(content), 0)
-			repoFile.Sync()
+			repoFile.Truncate(0)                 //nolint:errcheck,gosec // temporary file maintenance
+			repoFile.WriteAt([]byte(content), 0) //nolint:errcheck,gosec // temporary file maintenance
+			repoFile.Sync()                      //nolint:errcheck,gosec // temporary file maintenance
 
 			actualRules := eventuallyListRules(ctx, t, r, len(tc.ids))
 
@@ -421,13 +422,13 @@ func TestFetcherWatchRepositoryFromKubernetesConfigMap(t *testing.T) {
 
 		// this is the symlink: ..data -> ..2019_08_01_07_42_33.068812649
 		_ = os.Rename(filepath.Join(watchDir, "..data"), filepath.Join(watchDir, "..data_tmp"))
-		require.NoError(t, exec.Command("ln", "-sfn", dir, filepath.Join(watchDir, "..data")).Run())
+		require.NoError(t, exec.Command("ln", "-sfn", dir, filepath.Join(watchDir, "..data")).Run()) //nolint:gosec
 		if cleanup != nil {
 			cleanup()
 		}
 
 		// symlink equivalent: access-rules.json -> ..data/access-rules.json
-		require.NoError(t, exec.Command("ln", "-sfn", filepath.Join(watchDir, "..data", "access-rules.json"), watchFile).Run())
+		require.NoError(t, exec.Command("ln", "-sfn", filepath.Join(watchDir, "..data", "access-rules.json"), watchFile).Run()) //nolint:gosec
 
 		t.Logf("Created access rule file at: file://%s", fp)
 		t.Logf("Created symbolink link at: file://%s", filepath.Join(watchDir, "..data"))
@@ -477,6 +478,7 @@ func TestFetchRulesFromObjectStorage(t *testing.T) {
 	defer cancel()
 
 	configFile, _ := os.CreateTemp(t.TempDir(), ".oathkeeper-*.yml")
+	//nolint:errcheck,gosec // best-effort fixture generation
 	configFile.WriteString(`
 authenticators:
   noop: { enabled: true }
@@ -487,7 +489,7 @@ authorizers:
 mutators:
   noop: { enabled: true }
   header: { enabled: true }
-  id_token: 
+  id_token:
     enabled: true
     config:
       jwks_url: https://stub/.well-known/jwks.json

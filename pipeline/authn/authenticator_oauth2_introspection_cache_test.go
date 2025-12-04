@@ -31,7 +31,7 @@ func TestCache(t *testing.T) {
 		}))
 	require.NoError(t, err)
 
-	a := NewAuthenticatorOAuth2Introspection(c, logger, trace.NewNoopTracerProvider())
+	a := NewAuthenticatorOAuth2Introspection(c, logger, trace.NewNoopTracerProvider()) //nolint:staticcheck // tests only need noop tracer
 	assert.Equal(t, "oauth2_introspection", a.GetID())
 
 	config, _, err := a.Config(nil)

@@ -314,7 +314,7 @@ func TestDecisionAPI(t *testing.T) {
 
 				entireBody, err := io.ReadAll(res.Body)
 				require.NoError(t, err)
-				defer res.Body.Close()
+				defer res.Body.Close() //nolint:errcheck // closing test response
 
 				assert.Equal(t, tc.authz, res.Header.Get("Authorization"))
 				assert.Equal(t, tc.code, res.StatusCode)
