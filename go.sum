@@ -686,8 +686,8 @@ github.com/ory/jsonschema/v3 v3.0.9-0.20250317235931-280c5fc7bf0e/go.mod h1:XWLx
 github.com/ory/ladon v1.1.0 h1:6tgazU2J3Z3odPs1f0qn729kRXCAtlJROliuWUHedV0=
 github.com/ory/ladon v1.1.0/go.mod h1:25bNc/Glx/8xCH7MbItDxjvviAmFQ+aYxb1V1SE5wlg=
 github.com/ory/pagination v0.0.1/go.mod h1:d1ToRROAUleriPhmb2dYbhANhhLwZ8s395m2yJCDFh8=
-github.com/ory/pop/v6 v6.3.1 h1:d73i7e2kqxMMCgyHBkQk3TqfPBnOMS8EJd+EP5bIP6A=
-github.com/ory/pop/v6 v6.3.1/go.mod h1:PEqjxMcIV87rBhlyDDha76I7/w2W/FHenSq3V3X1A/A=
+github.com/ory/pop/v6 v6.3.2-0.20251203152233-a32233875f7e h1:gsbAteu8HZYnkIF4WVBaxklvF/s5IbcxYcCi6qX93ms=
+github.com/ory/pop/v6 v6.3.2-0.20251203152233-a32233875f7e/go.mod h1:PEqjxMcIV87rBhlyDDha76I7/w2W/FHenSq3V3X1A/A=
 github.com/pborman/uuid v1.2.0/go.mod h1:X/NO0urCmaxf9VXbdlT7C2Yzkj2IKimNn4k+gtPdI/k=
 github.com/pborman/uuid v1.2.1 h1:+ZZIw58t/ozdjRaXh/3awHfmWRbzYxJoAdNJxe/3pvw=
 github.com/pborman/uuid v1.2.1/go.mod h1:X/NO0urCmaxf9VXbdlT7C2Yzkj2IKimNn4k+gtPdI/k=

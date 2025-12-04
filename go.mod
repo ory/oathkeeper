@@ -220,7 +220,7 @@ require (
 	github.com/ory/dockertest/v3 v3.12.0 // indirect
 	github.com/ory/go-convenience v0.1.0 // indirect
 	github.com/ory/gojsonreference v0.0.0-20190720135523-6b606c2d8ee8 // indirect
-	github.com/ory/pop/v6 v6.3.1 // indirect
+	github.com/ory/pop/v6 v6.3.2-0.20251203152233-a32233875f7e // indirect
 	github.com/pelletier/go-toml v1.9.5 // indirect
 	github.com/pelletier/go-toml/v2 v2.2.3 // indirect
 	github.com/pkg/profile v1.7.0 // indirect
