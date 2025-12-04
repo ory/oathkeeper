@@ -42,8 +42,8 @@ const (
 	MutatorHeaderIsEnabled   Key = "mutators.header.enabled"
 	MutatorNoopIsEnabled     Key = "mutators.noop.enabled"
 	MutatorHydratorIsEnabled Key = "mutators.hydrator.enabled"
-	MutatorIDTokenIsEnabled  Key = "mutators.id_token.enabled" //nolint:gosec // configuration key, not credential
-	MutatorIDTokenJWKSURL    Key = "mutators.id_token.config.jwks_url" //nolint:gosec // configuration key, not credential
+	MutatorIDTokenIsEnabled  Key = "mutators.id_token.enabled"           //nolint:gosec // configuration key, not credential
+	MutatorIDTokenJWKSURL    Key = "mutators.id_token.config.jwks_url"   //nolint:gosec // configuration key, not credential
 	MutatorIDTokenIssuerURL  Key = "mutators.id_token.config.issuer_url" //nolint:gosec // configuration key, not credential
 )
 
