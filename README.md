@@ -1,113 +1,107 @@
-<h1 align="center"><img src="https://raw.githubusercontent.com/ory/meta/master/static/banners/oathkeeper.svg" alt="ORY Oathkeeper - Cloud Native Identity & Access Proxy"></h1>
+<h1 align="center">
+  <img src="https://raw.githubusercontent.com/ory/meta/master/static/banners/oathkeeper.svg" alt="Ory Oathkeeper - Cloud Native Identity & Access Proxy">
+</h1>
 
 <h4 align="center">
-    <a href="https://www.ory.sh/chat">Chat</a> |
-    <a href="https://github.com/ory/oathkeeper/discussions">Discussions</a> |
-    <a href="https://www.ory.sh/l/sign-up-newsletter">Newsletter</a><br/><br/>
-    <a href="https://www.ory.sh/oathkeeper/docs/reference/api">API Docs</a> |
-    <a href="https://www.ory.sh/oathkeeper/docs/">Guide</a> |
-    <a href="https://godoc.org/github.com/ory/oathkeeper">Code Docs</a><br/><br/>
-    <a href="https://console.ory.sh/">Support this project!</a><br/><br/>
-    <a href="https://www.ory.sh/jobs/">Work in Open Source, Ory is hiring!</a>
+  <a href="https://www.ory.sh/chat">Chat</a> ·
+  <a href="https://github.com/ory/oathkeeper/discussions">Discussions</a> ·
+  <a href="https://www.ory.sh/l/sign-up-newsletter">Newsletter</a> ·
+  <a href="https://www.ory.sh/docs/">Docs</a> ·
+  <a href="https://console.ory.sh/">Try Ory Network</a> ·
+  <a href="https://www.ory.sh/jobs/">Jobs</a>
 </h4>
 
----
-
-<p align="left">
-    <a href="https://github.com/ory/oathkeeper/actions/workflows/ci.yml"><img src="https://github.com/ory/oathkeeper/actions/workflows/ci.yml/badge.svg" alt="Build Status"></a>
-    <a href="https://coveralls.io/github/ory/oathkeeper?branch=master"> <img src="https://coveralls.io/repos/ory/oathkeeper/badge.svg?branch=master&service=github" alt="Coverage Status"></a>
-    <a href="https://goreportcard.com/report/github.com/ory/oathkeeper"><img src="https://goreportcard.com/badge/github.com/ory/oathkeeper" alt="Go Report Card"></a>
-    <a href="https://pkg.go.dev/github.com/ory/oathkeeper"><img src="https://pkg.go.dev/badge/www.github.com/ory/oathkeeper" alt="PkgGoDev"></a>
-    <a href="#backers" alt="sponsors on Open Collective"><img src="https://opencollective.com/ory/backers/badge.svg" /></a> <a href="#sponsors" alt="Sponsors on Open Collective"><img src="https://opencollective.com/ory/sponsors/badge.svg" /></a>
-    <a href="https://github.com/ory/oathkeeper/blob/master/CODE_OF_CONDUCT.md" alt="Ory Code of Conduct"><img src="https://img.shields.io/badge/ory-code%20of%20conduct-green" /></a>
-</p>
-
-ORY Oathkeeper is an Identity & Access Proxy (IAP) and Access Control Decision
-API that authorizes HTTP requests based on sets of Access Rules. The BeyondCorp
-Model is designed by [Google](https://cloud.google.com/beyondcorp/) and secures
-applications in Zero-Trust networks.
-
-An Identity & Access Proxy is typically deployed in front of (think API Gateway)
-web-facing applications and is capable of authenticating and optionally
-authorizing access requests. The Access Control Decision API can be deployed
-alongside an existing API Gateway or reverse proxy. ORY Oathkeeper's Access
-Control Decision API works with:
-
-- [Ambassador](https://github.com/datawire/ambassador) via
-  [auth service](https://www.getambassador.io/reference/services/auth-service).
-- [Envoy](https://www.envoyproxy.io) via the
-  [External Authorization HTTP Filter](https://www.envoyproxy.io/docs/envoy/latest/configuration/http/http_filters/ext_authz_filter)
-- [AWS API Gateway](https://aws.amazon.com/api-gateway/) via
-  [Custom Authorizers](https://aws.amazon.com/de/blogs/compute/introducing-custom-authorizers-in-amazon-api-gateway/)
-- [Nginx](https://www.nginx.com) via
-  [Authentication Based on Subrequest Result](https://docs.nginx.com/nginx/admin-guide/security-controls/configuring-subrequest-authentication/)
-
-among others.
-
-This service is stable, but under active development and may introduce breaking
-changes in future releases. Any breaking change will have extensive
-documentation and upgrade instructions.
-
-## Ory Oathkeeper On-premise support
-
-Are you running Ory Oathkeeper in a mission-critical, commercial environment?
-The Ory Enterprise License (OEL) provides enhanced features, security, and
-expert support directly from the Ory core maintainers.
-
-Organizations that require advanced features, enhanced security, and
-enterprise-grade support for Ory's identity and access management solutions
-benefit from the Ory Enterprise License (OEL) as a self-hosted, premium offering
-including:
-
-- Additional features not available in the open-source version.
-- Regular releases that address CVEs and security vulnerabilities, with strict
-  SLAs for patching based on severity.
-- Support for advanced scaling and multi-tenancy features.
-- Premium support options, including SLAs, direct engineer access, and concierge
-  onboarding.
-- Access to private Docker registry for a faster, more reliable access to vetted
-  enterprise builds.
-
-A valid Ory Enterprise License and access to the Ory Enterprise Docker Registry
-are required to use these features. OEL is designed for mission-critical,
-production, and global applications where organizations need maximum control and
-flexibility over their identity infrastructure. Ory's offering is the only
-official program for qualified support from the maintainers. For more
-information book a meeting with the Ory team to
-**[discuss your needs](https://www.ory.sh/contact/)**!
+Ory Oathkeeper is an Identity & Access Proxy (IAP) and Access Control Decision API that authorizes HTTP requests based on sets of Access Rules. It follows the BeyondCorp model designed by Google and secures applications in Zero-Trust networks.
 
 ---
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
-- [Installation](#installation)
-- [Who's using it?](#whos-using-it)
+- [What is Ory Oathkeeper?](#what-is-ory-oathkeeper)
+  - [Why Ory Oathkeeper](#why-ory-oathkeeper)
+- [Deployment options](#deployment-options)
+  - [Installation](#installation)
+- [Quickstart](#quickstart)
+- [Who is using Ory Oathkeeper](#who-is-using-ory-oathkeeper)
 - [Ecosystem](#ecosystem)
   - [Ory Kratos: Identity and User Infrastructure and Management](#ory-kratos-identity-and-user-infrastructure-and-management)
   - [Ory Hydra: OAuth2 & OpenID Connect Server](#ory-hydra-oauth2--openid-connect-server)
   - [Ory Oathkeeper: Identity & Access Proxy](#ory-oathkeeper-identity--access-proxy)
   - [Ory Keto: Access Control Policies as a Server](#ory-keto-access-control-policies-as-a-server)
+- [Documentation](#documentation)
+- [Developing Ory Oathkeeper](#developing-ory-oathkeeper)
 - [Security](#security)
   - [Disclosing vulnerabilities](#disclosing-vulnerabilities)
 - [Telemetry](#telemetry)
-- [Documentation](#documentation)
-  - [Guide](#guide)
-  - [HTTP API documentation](#http-api-documentation)
-  - [Upgrading and Changelog](#upgrading-and-changelog)
-  - [Command line documentation](#command-line-documentation)
-  - [Develop](#develop)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-## Installation
+## What is Ory Oathkeeper?
 
-Head over to the
-[ORY Developer Documentation](https://www.ory.sh/oathkeeper/docs/install) to
-learn how to install ORY Oathkeeper on Linux, macOS, Windows, and Docker and how
-to build ORY Oathkeeper from source.
+Ory Oathkeeper is an Identity & Access Proxy (IAP) and Access Control Decision API. It follows [cloud architecture best practices](https://www.ory.sh/docs/ecosystem/software-architecture-philosophy) and focuses on:
 
-## Who's using it?
+- Authenticating and authorizing HTTP requests
+- Acting as a reverse proxy or decision API
+- Mutating requests with identity information
+- Integrating with existing API gateways and proxies
+- Supporting multiple authentication and authorization strategies
+- Working in Zero-Trust network architectures
+
+We recommend starting with the [Ory Oathkeeper introduction docs](https://www.ory.sh/docs/oathkeeper) to learn more about its architecture, feature set, and how it compares to other systems.
+
+### Why Ory Oathkeeper
+
+Ory Oathkeeper is designed to:
+
+- Decouple authentication and authorization from application code
+- Work as an API Gateway plugin or standalone proxy
+- Support flexible access rules for different endpoints
+- Integrate with Ambassador, Envoy, AWS API Gateway, Nginx, and more
+- Provide both proxy and sidecar deployment modes
+- Scale without effort in cloud native environments
+
+Oathkeeper works with:
+
+- [Ambassador](https://github.com/datawire/ambassador) via [auth service](https://www.getambassador.io/reference/services/auth-service)
+- [Envoy](https://www.envoyproxy.io) via the [External Authorization HTTP Filter](https://www.envoyproxy.io/docs/envoy/latest/configuration/http/http_filters/ext_authz_filter)
+- [AWS API Gateway](https://aws.amazon.com/api-gateway/) via [Custom Authorizers](https://aws.amazon.com/de/blogs/compute/introducing-custom-authorizers-in-amazon-api-gateway/)
+- [Nginx](https://www.nginx.com) via [Authentication Based on Subrequest Result](https://docs.nginx.com/nginx/admin-guide/security-controls/configuring-subrequest-authentication/)
+
+## Deployment options
+
+You can run Ory Oathkeeper in two main ways:
+
+- As a managed service on the Ory Network
+- As a self hosted service under your own control, with or without the Ory Enterprise License
+
+### Installation
+
+You can run Ory Oathkeeper yourself for full control over infrastructure, deployment, and customization.
+
+The [install guide](https://www.ory.sh/docs/oathkeeper/install) explains how to:
+
+* Install Oathkeeper on Linux, macOS, Windows, and Docker
+* Configure access rules and authentication strategies
+* Deploy to Kubernetes and other orchestration systems
+
+This guide uses the open source distribution to get you started without license requirements. It is a great fit for individuals, researchers, hackers, and companies that want to experiment, prototype, or run unimportant workloads without SLAs. You get the full core engine, and you are free to inspect, extend, and build it from source.
+
+If you run Oathkeeper as part of a business-critical system, you should use a commercial agreement to reduce operational and security risk. The **Ory Enterprise License (OEL)** layers on top of self-hosted Oathkeeper and provides:
+
+* Additional enterprise features that are not available in the open source version
+* Regular security releases, including CVE patches, with service level agreements
+* Support for advanced scaling, multi-tenancy, and complex deployments
+* Premium support options with SLAs, direct access to engineers, and onboarding help
+* Access to a private Docker registry with frequent and vetted, up-to-date enterprise builds
+
+For guaranteed CVE fixes, current enterprise builds, advanced features, and support in production, you need a valid [Ory Enterprise License](https://www.ory.com/ory-enterprise-license) and access to the Ory Enterprise Docker registry. To learn more, [contact the Ory team](https://www.ory.sh/contact/).
+
+## Quickstart
+
+Head over to the [Ory Developer Documentation](https://www.ory.sh/docs/oathkeeper/install) to learn how to install Ory Oathkeeper on Linux, macOS, Windows, and Docker and how to build Ory Oathkeeper from source.
+
+## Who is using Ory Oathkeeper
 
 <!--BEGIN ADOPTERS-->
 
@@ -507,6 +501,27 @@ to perform a certain action on a resource.
 
 <!--END ECOSYSTEM-->
 
+## Documentation
+
+The full Ory Oathkeeper documentation is available at [www.ory.sh/docs/oathkeeper](https://www.ory.sh/docs/oathkeeper), including:
+
+- [Installation guides](https://www.ory.sh/docs/oathkeeper/install)
+- [Configuration reference](https://www.ory.sh/docs/oathkeeper/reference/configuration)
+- [HTTP API documentation](https://www.ory.sh/docs/oathkeeper/reference/api)
+- [Access rule configuration](https://www.ory.sh/docs/oathkeeper/pipeline)
+
+For upgrading and changelogs, check [UPGRADE.md](./UPGRADE.md) and [CHANGELOG.md](./CHANGELOG.md).
+
+## Developing Ory Oathkeeper
+
+See [DEVELOP.md](./DEVELOP.md) for information on:
+
+- Contribution guidelines
+- Prerequisites
+- Install from source
+- Running tests
+- Build Docker image
+
 ## Security
 
 ### Disclosing vulnerabilities
@@ -518,38 +533,5 @@ responsible disclosure in our
 
 ## Telemetry
 
-Our services collect summarized, anonymized data which can optionally be turned
+Our services collect summarized, anonymized data that can optionally be turned
 off. Click [here](https://www.ory.sh/docs/ecosystem/sqa) to learn more.
-
-## Documentation
-
-### Guide
-
-The Guide is available [here](https://www.ory.sh/oathkeeper/docs/).
-
-### HTTP API documentation
-
-The HTTP API is documented
-[here](https://www.ory.sh/oathkeeper/docs/reference/api).
-
-### Upgrading and Changelog
-
-New releases might introduce breaking changes. To help you identify and
-incorporate those changes, we document these changes in
-[UPGRADE.md](./UPGRADE.md) and [CHANGELOG.md](./CHANGELOG.md).
-
-### Command line documentation
-
-Run `oathkeeper -h` or `oathkeeper help`.
-
-### Develop
-
-Developing with ORY Oathkeeper is as easy as:
-
-```shell
-$ cd ~
-$ go get -d -u github.com/ory/oathkeeper
-$ cd $GOPATH/src/github.com/ory/oathkeeper
-$ export GO111MODULE=on
-$ go test ./...
-```
