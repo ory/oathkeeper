@@ -5,6 +5,7 @@ package proxy
 
 import (
 	"context"
+	"crypto/tls"
 	"io"
 	"net/http"
 	"net/http/httputil"
@@ -74,7 +75,9 @@ func (d *Proxy) RoundTrip(r *http.Request) (*http.Response, error) {
 			Header:     rw.header,
 		}, nil
 	} else if err == nil {
-		res, err := http.DefaultTransport.RoundTrip(r)
+		tr := http.DefaultTransport.(*http.Transport).Clone()
+		tr.TLSClientConfig = &tls.Config{InsecureSkipVerify: rl.Upstream.InsecureSkipVerify}
+		res, err := tr.RoundTrip(r)
 		if err != nil {
 			d.r.Logger().
 				WithError(errors.WithStack(err)).
