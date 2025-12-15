@@ -8,11 +8,13 @@ import (
 	"crypto/sha256"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"text/template"
 	"time"
 
 	"github.com/pkg/errors"
+	"github.com/tidwall/gjson"
 
 	"github.com/ory/x/httpx"
 	"github.com/ory/x/otelx"
@@ -28,16 +30,23 @@ import (
 
 // AuthorizerRemoteJSONConfiguration represents a configuration for the remote_json authorizer.
 type AuthorizerRemoteJSONConfiguration struct {
-	Remote                           string                                  `json:"remote"`
-	Headers                          map[string]string                       `json:"headers"`
-	Payload                          string                                  `json:"payload"`
-	ForwardResponseHeadersToUpstream []string                                `json:"forward_response_headers_to_upstream"`
-	Retry                            *AuthorizerRemoteJSONRetryConfiguration `json:"retry"`
+	Remote                           string                                    `json:"remote"`
+	Headers                          map[string]string                         `json:"headers"`
+	Payload                          string                                    `json:"payload"`
+	ForwardResponseHeadersToUpstream []string                                  `json:"forward_response_headers_to_upstream"`
+	Retry                            *AuthorizerRemoteJSONRetryConfiguration   `json:"retry"`
+	MatchJsonField                   *AuthorizerRemoteJSONMatchJsonFieldConfig `json:"match_json_field"`
 }
 
 type AuthorizerRemoteJSONRetryConfiguration struct {
 	Timeout string `json:"max_delay"`
 	MaxWait string `json:"give_up_after"`
+}
+
+type AuthorizerRemoteJSONMatchJsonFieldConfig struct {
+	Field   string `json:"field"`
+	StrVal  string `json:"str_val"`
+	BoolVal *bool  `json:"bool_val"`
 }
 
 // PayloadTemplateID returns a string with which to associate the payload template.
@@ -146,6 +155,25 @@ func (a *AuthorizerRemoteJSON) Authorize(r *http.Request, session *authn.Authent
 		return errors.WithStack(helper.ErrForbidden)
 	} else if res.StatusCode != http.StatusOK {
 		return errors.Errorf("expected status code %d but got %d", http.StatusOK, res.StatusCode)
+	} else if c.MatchJsonField != nil {
+		var body []byte
+		if body, err = io.ReadAll(res.Body); err != nil {
+			return errors.WithStack(err)
+		}
+		fieldValue := gjson.GetBytes(body, c.MatchJsonField.Field)
+		if !fieldValue.Exists() {
+			return errors.Errorf("field %s to match not found in response", c.MatchJsonField.Field)
+		}
+		switch fieldValue.Type {
+		case gjson.String:
+			if fieldValue.String() != c.MatchJsonField.StrVal {
+				return errors.WithStack(helper.ErrForbidden)
+			}
+		case gjson.True, gjson.False:
+			if c.MatchJsonField.BoolVal == nil || fieldValue.Bool() != *c.MatchJsonField.BoolVal {
+				return errors.WithStack(helper.ErrForbidden)
+			}
+		}
 	}
 
 	for _, allowedHeader := range c.ForwardResponseHeadersToUpstream {
@@ -161,8 +189,14 @@ func (a *AuthorizerRemoteJSON) Validate(config json.RawMessage) error {
 		return NewErrAuthorizerNotEnabled(a)
 	}
 
-	_, err := a.Config(config)
-	return err
+	c, err := a.Config(config)
+	if err != nil {
+		return err
+	}
+	if c.MatchJsonField != nil && c.MatchJsonField.BoolVal == nil && c.MatchJsonField.StrVal == "" {
+		return errors.New("either bool_val or str_val must be set")
+	}
+	return nil
 }
 
 // Config merges config and the authorizer's configuration and validates the
