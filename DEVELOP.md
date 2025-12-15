@@ -1,10 +1,13 @@
 # Development
 
-This document explains how to develop Ory Oathkeeper, run tests, and work with the tooling around it.
+This document explains how to develop Ory Oathkeeper, run tests, and work with
+the tooling around it.
 
 ## Upgrading and changelog
 
-New releases might introduce breaking changes. To help you identify and incorporate those changes, we document these changes in [UPGRADE.md](./UPGRADE.md) and [CHANGELOG.md](./CHANGELOG.md).
+New releases might introduce breaking changes. To help you identify and
+incorporate those changes, we document these changes in
+[UPGRADE.md](./UPGRADE.md) and [CHANGELOG.md](./CHANGELOG.md).
 
 ## Command line documentation
 
@@ -18,7 +21,8 @@ oathkeeper help
 
 ## Contribution guidelines
 
-We encourage all contributions. Before opening a pull request, read the [contribution guidelines](./CONTRIBUTING.md).
+We encourage all contributions. Before opening a pull request, read the
+[contribution guidelines](./CONTRIBUTING.md).
 
 ## Prerequisites
 
@@ -28,7 +32,8 @@ You need Go 1.16+ and, for the test suites:
 - `make`
 - Node.js and npm
 
-You can develop Ory Oathkeeper on Windows, but most guides assume a Unix shell such as `bash` or `zsh`.
+You can develop Ory Oathkeeper on Windows, but most guides assume a Unix shell
+such as `bash` or `zsh`.
 
 ## Install from source
 
