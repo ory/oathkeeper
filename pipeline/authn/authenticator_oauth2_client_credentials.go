@@ -12,7 +12,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/dgraph-io/ristretto"
+	"github.com/dgraph-io/ristretto/v2"
 	"golang.org/x/oauth2"
 
 	"github.com/ory/x/logrusx"

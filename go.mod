@@ -13,7 +13,7 @@ require (
 	github.com/auth0/go-jwt-middleware/v2 v2.3.0
 	github.com/aws/aws-sdk-go v1.55.6
 	github.com/blang/semver v3.5.1+incompatible
-	github.com/dgraph-io/ristretto v1.0.0
+	github.com/dgraph-io/ristretto/v2 v2.2.0
 	github.com/dlclark/regexp2 v1.2.0
 	github.com/ghodss/yaml v1.0.0
 	github.com/go-faker/faker/v4 v4.0.0-beta.2
@@ -107,7 +107,7 @@ require (
 	github.com/cpuguy83/go-md2man/v2 v2.0.6 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.4.0 // indirect
-	github.com/dgraph-io/ristretto/v2 v2.2.0 // indirect
+	github.com/dgraph-io/ristretto v1.0.0 // indirect
 	github.com/distribution/reference v0.6.0 // indirect
 	github.com/docker/cli v28.3.3+incompatible // indirect
 	github.com/docker/docker v28.3.3+incompatible // indirect
