@@ -396,7 +396,7 @@ func TestDecisionAPIHeaderUsage(t *testing.T) {
 			},
 		},
 		{
-			name:           "all arguments are taken from the headers",
+			name:           "all arguments are taken from the `forwarded` headers",
 			expectedUrl:    &url.URL{Scheme: "https", Host: "test.dev", Path: "/bar"},
 			expectedMethod: "POST",
 			transform: func(req *http.Request) {
@@ -407,7 +407,16 @@ func TestDecisionAPIHeaderUsage(t *testing.T) {
 			},
 		},
 		{
-			name:           "argument from the headers doesn't get url encoded",
+			name:           "all arguments are taken from the `original` headers",
+			expectedUrl:    &url.URL{Scheme: "https", Host: "test.dev", Path: "/bar"},
+			expectedMethod: "POST",
+			transform: func(req *http.Request) {
+				req.Header.Add("X-Original-Method", "POST")
+				req.Header.Add("X-Original-Url", "https://test.dev/bar")
+			},
+		},
+		{
+			name:           "argument from the `forwarded` headers doesn't get url encoded",
 			expectedUrl:    &url.URL{Scheme: "https", Host: "test.dev", Path: "/bar"},
 			expectedMethod: "POST",
 			transform: func(req *http.Request) {
@@ -418,11 +427,29 @@ func TestDecisionAPIHeaderUsage(t *testing.T) {
 			},
 		},
 		{
+			name:           "argument from the `original` headers doesn't get url encoded",
+			expectedUrl:    &url.URL{Scheme: "https", Host: "test.dev", Path: "/bar"},
+			expectedMethod: "POST",
+			transform: func(req *http.Request) {
+				req.Header.Add("X-Original-Method", "POST")
+				req.Header.Add("X-Original-Url", "https://test.dev/bar?this=is&a=test")
+			},
+		},
+		{
 			name:           "only scheme is taken from the headers",
 			expectedUrl:    &url.URL{Scheme: "https", Host: defaultUrl.Host, Path: defaultUrl.Path},
 			expectedMethod: defaultMethod,
 			transform: func(req *http.Request) {
 				req.Header.Add("X-Forwarded-Proto", "https")
+			},
+		},
+		{
+			name:           "schemethodme is taken from the `forwarded` headers and url from `original` headers",
+			expectedUrl:    &url.URL{Scheme: "https", Host: defaultUrl.Host, Path: defaultUrl.Path},
+			expectedMethod: defaultMethod,
+			transform: func(req *http.Request) {
+				req.Header.Add("X-Forwarded-Method", "POST")
+				req.Header.Add("X-Original-Url", "https://test.dev/bar")
 			},
 		},
 		{

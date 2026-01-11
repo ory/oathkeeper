@@ -5,6 +5,7 @@ package api
 
 import (
 	"net/http"
+	"net/url"
 	"strings"
 
 	"github.com/ory/oathkeeper/pipeline/authn"
@@ -21,6 +22,8 @@ const (
 	xForwardedProto  = "X-Forwarded-Proto"
 	xForwardedHost   = "X-Forwarded-Host"
 	xForwardedUri    = "X-Forwarded-Uri"
+	xOriginalMethod  = "X-Original-Method"
+	xOriginalUrl     = "X-Original-Url"
 )
 
 type decisionHandlerRegistry interface {
@@ -41,11 +44,21 @@ func NewJudgeHandler(r decisionHandlerRegistry) *DecisionHandler {
 
 func (h *DecisionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
 	if len(r.URL.Path) >= len(DecisionPath) && r.URL.Path[:len(DecisionPath)] == DecisionPath {
-		r.Method = x.OrDefaultString(r.Header.Get(xForwardedMethod), r.Method)
-		r.URL.Scheme = x.OrDefaultString(r.Header.Get(xForwardedProto),
-			x.IfThenElseString(r.TLS != nil, "https", "http"))
-		r.URL.Host = x.OrDefaultString(r.Header.Get(xForwardedHost), r.Host)
-		r.URL.Path = x.OrDefaultString(strings.SplitN(r.Header.Get(xForwardedUri), "?", 2)[0], r.URL.Path[len(DecisionPath):])
+		r.Method = x.OrDefaultString(r.Header.Get(xForwardedMethod), x.OrDefaultString(r.Header.Get(xOriginalMethod), r.Method))
+
+		originalURL := r.Header.Get(xOriginalUrl)
+		if originalURL != "" {
+			if parsedURL, err := url.Parse(originalURL); err == nil {
+				r.URL.Scheme = parsedURL.Scheme
+				r.URL.Host = parsedURL.Host
+				r.URL.Path = parsedURL.Path
+			}
+		} else {
+			r.URL.Scheme = x.OrDefaultString(r.Header.Get(xForwardedProto),
+				x.IfThenElseString(r.TLS != nil, "https", "http"))
+			r.URL.Host = x.OrDefaultString(r.Header.Get(xForwardedHost), r.Host)
+			r.URL.Path = x.OrDefaultString(strings.SplitN(r.Header.Get(xForwardedUri), "?", 2)[0], r.URL.Path[len(DecisionPath):])
+		}
 
 		h.decisions(w, r)
 	} else {
