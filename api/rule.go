@@ -13,6 +13,7 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/ory/oathkeeper/helper"
+	"github.com/ory/x/httpx"
 	"github.com/ory/x/pagination"
 )
 
@@ -25,7 +26,7 @@ type RuleHandler struct {
 }
 
 type ruleHandlerRegistry interface {
-	x.RegistryWriter
+	httpx.WriterProvider
 	rule.Registry
 }
 

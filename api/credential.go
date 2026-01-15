@@ -15,6 +15,7 @@ import (
 	"github.com/ory/oathkeeper/pipeline/mutate"
 	"github.com/ory/oathkeeper/rule"
 	"github.com/ory/oathkeeper/x"
+	"github.com/ory/x/httpx"
 	"github.com/ory/x/urlx"
 
 	"github.com/go-jose/go-jose/v3"
@@ -26,7 +27,7 @@ const (
 )
 
 type credentialHandlerRegistry interface {
-	x.RegistryWriter
+	httpx.WriterProvider
 	credentials.FetcherRegistry
 	rule.Registry
 }

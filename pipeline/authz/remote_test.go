@@ -190,7 +190,7 @@ func TestAuthorizerRemoteAuthorize(t *testing.T) {
 			if err != nil {
 				l.WithError(err).Fatal("Failed to initialize configuration")
 			}
-			a := NewAuthorizerRemote(p, otelx.NewNoop(l, p.TracingConfig()))
+			a := NewAuthorizerRemote(p, otelx.NewNoop())
 			r := &http.Request{
 				Header: map[string][]string{
 					"Content-Type": {"text/plain"},
@@ -273,8 +273,7 @@ func TestAuthorizerRemoteValidate(t *testing.T) {
 				context.Background(), nil, logrusx.New("", ""),
 				configx.SkipValidation())
 			require.NoError(t, err)
-			l := logrusx.New("", "")
-			a := NewAuthorizerRemote(p, otelx.NewNoop(l, p.TracingConfig()))
+			a := NewAuthorizerRemote(p, otelx.NewNoop())
 			p.SetForTest(t, configuration.AuthorizerRemoteIsEnabled, tt.enabled)
 			if err := a.Validate(tt.config); (err != nil) != tt.wantErr {
 				t.Errorf("Validate() error = %v, wantErr %v", err, tt.wantErr)

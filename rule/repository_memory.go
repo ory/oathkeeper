@@ -13,8 +13,8 @@ import (
 
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/helper"
-	"github.com/ory/oathkeeper/x"
 
+	"github.com/ory/x/logrusx"
 	"github.com/ory/x/pagination"
 )
 
@@ -22,7 +22,7 @@ var _ Repository = new(RepositoryMemory)
 
 type repositoryMemoryRegistry interface {
 	RuleValidator() Validator
-	x.RegistryLogger
+	logrusx.Provider
 }
 
 type RepositoryMemory struct {

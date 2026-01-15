@@ -4,13 +4,14 @@
 package errors
 
 import (
+	"cmp"
 	"encoding/json"
 	"net/http"
 	"net/url"
 
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/pipeline"
-	"github.com/ory/oathkeeper/x"
+	"github.com/ory/x/httpx"
 )
 
 var _ Handler = new(ErrorRedirect)
@@ -32,7 +33,7 @@ type (
 		d ErrorRedirectDependencies
 	}
 	ErrorRedirectDependencies interface {
-		x.RegistryWriter
+		httpx.WriterProvider
 	}
 )
 
@@ -49,9 +50,9 @@ func (a *ErrorRedirect) Handle(w http.ResponseWriter, r *http.Request, config js
 		return err
 	}
 
-	r.URL.Scheme = x.OrDefaultString(r.Header.Get(xForwardedProto), r.URL.Scheme)
-	r.URL.Host = x.OrDefaultString(r.Header.Get(xForwardedHost), r.URL.Host)
-	r.URL.Path = x.OrDefaultString(r.Header.Get(xForwardedUri), r.URL.Path)
+	r.URL.Scheme = cmp.Or(r.Header.Get(xForwardedProto), r.URL.Scheme)
+	r.URL.Host = cmp.Or(r.Header.Get(xForwardedHost), r.URL.Host)
+	r.URL.Path = cmp.Or(r.Header.Get(xForwardedUri), r.URL.Path)
 
 	http.Redirect(w, r, a.RedirectURL(r.URL, c), c.Code)
 	return nil

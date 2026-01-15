@@ -6,6 +6,7 @@ package driver
 import (
 	"go.opentelemetry.io/otel/trace"
 
+	"github.com/ory/x/httpx"
 	"github.com/ory/x/logrusx"
 
 	"github.com/ory/x/healthx"
@@ -20,7 +21,6 @@ import (
 	"github.com/ory/oathkeeper/pipeline/authz"
 	"github.com/ory/oathkeeper/pipeline/mutate"
 	"github.com/ory/oathkeeper/rule"
-	"github.com/ory/oathkeeper/x"
 )
 
 type Registry interface {
@@ -53,8 +53,8 @@ type Registry interface {
 	credentials.SignerRegistry
 	credentials.VerifierRegistry
 
-	x.RegistryWriter
-	x.RegistryLogger
+	httpx.WriterProvider
+	logrusx.Provider
 }
 
 func NewRegistry(c configuration.Provider) Registry {

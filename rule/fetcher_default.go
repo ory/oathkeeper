@@ -25,18 +25,18 @@ import (
 	_ "gocloud.dev/blob/s3blob"
 
 	"github.com/ory/x/httpx"
+	"github.com/ory/x/logrusx"
 	"github.com/ory/x/urlx"
 	"github.com/ory/x/watcherx"
 
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/internal/cloudstorage"
-	"github.com/ory/oathkeeper/x"
 )
 
 var _ Fetcher = new(FetcherDefault)
 
 type fetcherRegistry interface {
-	x.RegistryLogger
+	logrusx.Provider
 	RuleRepository() Repository
 	Tracer() trace.Tracer
 }

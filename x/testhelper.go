@@ -7,6 +7,8 @@ import (
 	"io"
 	"os"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 // WriteFile writes the content to a new file in a temporary location and
@@ -17,8 +19,9 @@ func WriteFile(t *testing.T, content string) string {
 		t.Error(err)
 		return ""
 	}
-	defer f.Close()            //nolint:errcheck
-	io.WriteString(f, content) //nolint:errcheck,gosec // helper ignores write errors
+	defer func() { _ = f.Close() }()
+	_, err = io.WriteString(f, content)
+	require.NoError(t, err)
 
 	return f.Name()
 }

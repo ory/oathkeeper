@@ -12,9 +12,10 @@ import (
 	"strings"
 
 	"github.com/ory/oathkeeper/driver/configuration"
+	"github.com/ory/x/httpx"
+	"github.com/ory/x/logrusx"
 
 	"github.com/ory/oathkeeper/pipeline/authn"
-	"github.com/ory/oathkeeper/x"
 
 	"github.com/pkg/errors"
 
@@ -22,8 +23,8 @@ import (
 )
 
 type proxyRegistry interface {
-	x.RegistryLogger
-	x.RegistryWriter
+	logrusx.Provider
+	httpx.WriterProvider
 	ProxyRequestHandler() RequestHandler
 	RuleMatcher() rule.Matcher
 }

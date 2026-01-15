@@ -13,7 +13,7 @@ import (
 	"github.com/rs/cors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"go.opentelemetry.io/otel/trace"
+	"go.opentelemetry.io/otel/trace/noop"
 
 	"github.com/ory/x/configx"
 	"github.com/ory/x/logrusx"
@@ -117,9 +117,9 @@ func BenchmarkPipelineConfig(b *testing.B) {
 	require.NoError(b, err)
 
 	b.ResetTimer()
-	for n := 0; n < b.N; n++ {
+	for b.Loop() {
 		res := json.RawMessage{}
-		p.PipelineConfig("authenticators", "oauth2_introspection", nil, &res) //nolint:errcheck,gosec // benchmark ignores errors
+		require.NoError(b, p.PipelineConfig("authenticators", "oauth2_introspection", nil, &res))
 	}
 }
 
@@ -248,7 +248,7 @@ func TestKoanfProvider(t *testing.T) {
 		})
 
 		t.Run("authenticator=cookie_session", func(t *testing.T) {
-			a := authn.NewAuthenticatorCookieSession(p, trace.NewNoopTracerProvider()) //nolint:staticcheck // tests only need noop tracer
+			a := authn.NewAuthenticatorCookieSession(p, noop.NewTracerProvider())
 			assert.True(t, p.AuthenticatorIsEnabled(a.GetID()))
 			require.NoError(t, a.Validate(nil))
 
@@ -286,7 +286,7 @@ func TestKoanfProvider(t *testing.T) {
 		})
 
 		t.Run("authenticator=oauth2_introspection", func(t *testing.T) {
-			a := authn.NewAuthenticatorOAuth2Introspection(p, logger, trace.NewNoopTracerProvider()) //nolint:staticcheck // tests only need noop tracer
+			a := authn.NewAuthenticatorOAuth2Introspection(p, logger, noop.NewTracerProvider())
 			assert.True(t, p.AuthenticatorIsEnabled(a.GetID()))
 			require.NoError(t, a.Validate(nil))
 
@@ -324,8 +324,7 @@ func TestKoanfProvider(t *testing.T) {
 		})
 
 		t.Run("authorizer=keto_engine_acp_ory", func(t *testing.T) {
-			l := logrusx.New("", "")
-			a := authz.NewAuthorizerKetoEngineACPORY(p, otelx.NewNoop(l, p.TracingConfig()))
+			a := authz.NewAuthorizerKetoEngineACPORY(p, otelx.NewNoop())
 			assert.True(t, p.AuthorizerIsEnabled(a.GetID()))
 			require.NoError(t, a.Validate(nil))
 
@@ -336,8 +335,7 @@ func TestKoanfProvider(t *testing.T) {
 		})
 
 		t.Run("authorizer=remote_json", func(t *testing.T) {
-			l := logrusx.New("", "")
-			a := authz.NewAuthorizerRemoteJSON(p, otelx.NewNoop(l, p.TracingConfig()))
+			a := authz.NewAuthorizerRemoteJSON(p, otelx.NewNoop())
 			assert.True(t, p.AuthorizerIsEnabled(a.GetID()))
 			require.NoError(t, a.Validate(nil))
 
@@ -434,7 +432,7 @@ func TestAuthenticatorOAuth2TokenIntrospectionPreAuthorization(t *testing.T) {
 		{enabled: true, id: "a", secret: "b", turl: "https://some-url", err: false},
 	} {
 		t.Run(fmt.Sprintf("case=%d", k), func(t *testing.T) {
-			a := authn.NewAuthenticatorOAuth2Introspection(p, logrusx.New("", ""), trace.NewNoopTracerProvider()) //nolint:staticcheck // tests only need noop tracer
+			a := authn.NewAuthenticatorOAuth2Introspection(p, logrusx.New("", ""), noop.NewTracerProvider()) //nolint:staticcheck // tests only need noop tracer
 
 			config, _, err := a.Config(json.RawMessage(fmt.Sprintf(`{
 	"pre_authorization": {

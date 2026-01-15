@@ -140,7 +140,7 @@ func (a *AuthorizerRemoteJSON) Authorize(r *http.Request, session *authn.Authent
 	if err != nil {
 		return errors.WithStack(err)
 	}
-	defer res.Body.Close() //nolint:errcheck // close failure cannot be handled here
+	defer func() { _ = res.Body.Close() }()
 
 	if res.StatusCode == http.StatusForbidden {
 		return errors.WithStack(helper.ErrForbidden)

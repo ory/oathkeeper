@@ -20,8 +20,8 @@ import (
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/pipeline"
 	"github.com/ory/oathkeeper/pipeline/authn"
-	"github.com/ory/oathkeeper/x"
 	"github.com/ory/x/httpx"
+	"github.com/ory/x/logrusx"
 )
 
 const (
@@ -75,7 +75,7 @@ type MutatorHydratorConfig struct {
 }
 
 type mutatorHydratorDependencies interface {
-	x.RegistryLogger
+	logrusx.Provider
 	Tracer() trace.Tracer
 }
 

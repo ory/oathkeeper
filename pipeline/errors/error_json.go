@@ -9,10 +9,10 @@ import (
 
 	"github.com/ory/herodot"
 	"github.com/ory/x/errorsx"
+	"github.com/ory/x/httpx"
 
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/pipeline"
-	"github.com/ory/oathkeeper/x"
 )
 
 var _ Handler = new(ErrorJSON)
@@ -26,7 +26,7 @@ type (
 		d errorJSONDependencies
 	}
 	errorJSONDependencies interface {
-		x.RegistryWriter
+		httpx.WriterProvider
 	}
 )
 

@@ -7,8 +7,6 @@ import (
 	"go.opentelemetry.io/otel/trace"
 
 	"github.com/ory/x/logrusx"
-
-	"github.com/ory/herodot"
 )
 
 type TestLoggerProvider struct{}
@@ -19,12 +17,4 @@ func (lp *TestLoggerProvider) Logger() *logrusx.Logger {
 
 func (lp *TestLoggerProvider) Tracer() trace.Tracer {
 	return nil
-}
-
-type RegistryLogger interface {
-	Logger() *logrusx.Logger
-}
-
-type RegistryWriter interface {
-	Writer() herodot.Writer
 }

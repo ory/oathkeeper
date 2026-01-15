@@ -10,7 +10,7 @@ import (
 
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/pipeline"
-	"github.com/ory/oathkeeper/x"
+	"github.com/ory/x/httpx"
 )
 
 var _ Handler = new(ErrorWWWAuthenticate)
@@ -24,7 +24,7 @@ type (
 		d ErrorWWWAuthenticateDependencies
 	}
 	ErrorWWWAuthenticateDependencies interface {
-		x.RegistryWriter
+		httpx.WriterProvider
 	}
 )
 

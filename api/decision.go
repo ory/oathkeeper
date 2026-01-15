@@ -4,11 +4,14 @@
 package api
 
 import (
+	"cmp"
 	"net/http"
 	"strings"
 
 	"github.com/ory/oathkeeper/pipeline/authn"
 	"github.com/ory/oathkeeper/x"
+	"github.com/ory/x/httpx"
+	"github.com/ory/x/logrusx"
 
 	"github.com/ory/oathkeeper/proxy"
 	"github.com/ory/oathkeeper/rule"
@@ -24,8 +27,8 @@ const (
 )
 
 type decisionHandlerRegistry interface {
-	x.RegistryWriter
-	x.RegistryLogger
+	httpx.WriterProvider
+	logrusx.Provider
 
 	RuleMatcher() rule.Matcher
 	ProxyRequestHandler() proxy.RequestHandler
@@ -41,11 +44,11 @@ func NewJudgeHandler(r decisionHandlerRegistry) *DecisionHandler {
 
 func (h *DecisionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
 	if len(r.URL.Path) >= len(DecisionPath) && r.URL.Path[:len(DecisionPath)] == DecisionPath {
-		r.Method = x.OrDefaultString(r.Header.Get(xForwardedMethod), r.Method)
-		r.URL.Scheme = x.OrDefaultString(r.Header.Get(xForwardedProto),
+		r.Method = cmp.Or(r.Header.Get(xForwardedMethod), r.Method)
+		r.URL.Scheme = cmp.Or(r.Header.Get(xForwardedProto),
 			x.IfThenElseString(r.TLS != nil, "https", "http"))
-		r.URL.Host = x.OrDefaultString(r.Header.Get(xForwardedHost), r.Host)
-		r.URL.Path = x.OrDefaultString(strings.SplitN(r.Header.Get(xForwardedUri), "?", 2)[0], r.URL.Path[len(DecisionPath):])
+		r.URL.Host = cmp.Or(r.Header.Get(xForwardedHost), r.Host)
+		r.URL.Path = cmp.Or(strings.SplitN(r.Header.Get(xForwardedUri), "?", 2)[0], r.URL.Path[len(DecisionPath):])
 
 		h.decisions(w, r)
 	} else {

@@ -9,9 +9,10 @@ import (
 
 	"github.com/ory/herodot"
 	"github.com/ory/x/errorsx"
+	"github.com/ory/x/httpx"
+	"github.com/ory/x/logrusx"
 
 	"github.com/ory/oathkeeper/driver/configuration"
-	"github.com/ory/oathkeeper/x"
 
 	"github.com/ory/oathkeeper/pipeline/authn"
 	"github.com/ory/oathkeeper/pipeline/authz"
@@ -25,8 +26,8 @@ import (
 )
 
 type requestHandlerRegistry interface {
-	x.RegistryWriter
-	x.RegistryLogger
+	httpx.WriterProvider
+	logrusx.Provider
 
 	authn.Registry
 	authz.Registry
