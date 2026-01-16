@@ -204,6 +204,20 @@ func forwardRequestToSessionStore(client *http.Client, r *http.Request, cf Authe
 			return json.RawMessage{}, errors.WithStack(herodot.ErrInternalServerError.WithReasonf("Unable to fetch cookie session context from remote: %+v", err))
 		}
 		return body, nil
+	} else if res.StatusCode == http.StatusTooManyRequests {
+		// Handle rate limiting - pass through the response
+		body, _ := io.ReadAll(res.Body)
+		err := helper.ErrTooManyRequests
+		if len(body) > 0 {
+			err = err.WithReasonf("%s", string(body))
+		}
+		// Pass through important rate limit headers
+		for _, header := range []string{"Retry-After", "X-RateLimit-Limit", "X-RateLimit-Remaining", "X-RateLimit-Reset", "X-RateLimit-Type"} {
+			if value := res.Header.Get(header); value != "" {
+				err = err.WithDetail(header, value)
+			}
+		}
+		return json.RawMessage{}, errors.WithStack(err)
 	} else {
 		return json.RawMessage{}, errors.WithStack(helper.ErrUnauthorized)
 	}
