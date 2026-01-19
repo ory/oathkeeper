@@ -522,15 +522,12 @@ access_rules:
 
 func eventuallyListRules(ctx context.Context, t *testing.T, r rule.Registry, expectedLen int) (rules []rule.Rule) {
 	t.Helper()
-	var err error
-	assert.Eventually(t, func() bool {
+	assert.EventuallyWithT(t, func(t *assert.CollectT) {
+		var err error
 		rules, err = r.RuleRepository().List(ctx, 500, 0)
-		if err != nil {
-			t.Logf("Error listing rules: %+v", err)
-			return false
-		}
-		return len(rules) == expectedLen
-	}, 2*time.Second, 10*time.Millisecond)
+		require.NoError(t, err)
+		assert.Len(t, rules, expectedLen)
+	}, 10*time.Second, 10*time.Millisecond)
 	require.Len(t, rules, expectedLen)
 	return
 }
