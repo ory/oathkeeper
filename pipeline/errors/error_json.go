@@ -12,6 +12,7 @@ import (
 	"github.com/ory/x/httpx"
 
 	"github.com/ory/oathkeeper/driver/configuration"
+	"github.com/ory/oathkeeper/helper"
 	"github.com/ory/oathkeeper/pipeline"
 )
 
@@ -56,6 +57,8 @@ func (a *ErrorJSON) Handle(w http.ResponseWriter, r *http.Request, config json.R
 				handleError = herodot.ErrUnauthorized.WithTrace(handleError)
 			case http.StatusBadRequest:
 				handleError = herodot.ErrBadRequest.WithTrace(handleError)
+			case http.StatusTooManyRequests:
+				handleError = helper.ErrTooManyRequests.WithTrace(handleError)
 			case http.StatusUnsupportedMediaType:
 				handleError = herodot.ErrUnsupportedMediaType.WithTrace(handleError)
 			case http.StatusConflict:

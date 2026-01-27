@@ -142,7 +142,9 @@ func (a *AuthorizerRemoteJSON) Authorize(r *http.Request, session *authn.Authent
 	}
 	defer func() { _ = res.Body.Close() }()
 
-	if res.StatusCode == http.StatusForbidden {
+	if res.StatusCode == http.StatusTooManyRequests {
+		return errors.WithStack(helper.ErrTooManyRequests)
+	} else if res.StatusCode == http.StatusForbidden {
 		return errors.WithStack(helper.ErrForbidden)
 	} else if res.StatusCode != http.StatusOK {
 		return errors.Errorf("expected status code %d but got %d", http.StatusOK, res.StatusCode)
