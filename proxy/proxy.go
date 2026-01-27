@@ -124,6 +124,14 @@ func (d *Proxy) Rewrite(r *httputil.ProxyRequest) {
 	}
 
 	EnrichRequestedURL(r)
+
+	// Preserve the original query string from the incoming request. Go's httputil.ReverseProxy
+	// calls cleanQueryParams which drops semicolon-separated parameters (e.g. "a=b;c=d") as
+	// they are considered invalid per RFC 3986. However, as an identity proxy, we need to
+	// maintain transparency and pass through the original query parameters to allow backends
+	// to handle them according to their own validation rules.
+	r.Out.URL.RawQuery = r.In.URL.RawQuery
+
 	rl, err := d.r.RuleMatcher().Match(r.Out.Context(), r.Out.Method, r.Out.URL, rule.ProtocolHTTP)
 	if err != nil {
 		*r.Out = *r.Out.WithContext(context.WithValue(r.Out.Context(), director, err))
