@@ -103,12 +103,12 @@ this repository!
 A new feature was introduced which allows you to handle errors in different ways
 (e.g. redirect to login, return JSON error, ...) depending on the error and HTTP
 request type. For more information, head over to:
-https://www.ory.sh/docs/next/oathkeeper/pipeline/error
+https://www.ory.com/docs/next/oathkeeper/pipeline/error
 
 One backwards incompatible change has been made, as JSON errors returned by ORY
 Oathkeeper now include only minimal information about the error source. You can
 change this behavior by setting `verbose` to `true`, see:
-https://www.ory.sh/docs/next/oathkeeper/pipeline/error#json
+https://www.ory.com/docs/next/oathkeeper/pipeline/error#json
 
 No other backwards incompatible changes have been made!
 
@@ -270,7 +270,7 @@ ORY Oathkeeper was changed according to discussion
 [177](https://github.com/ory/oathkeeper/issues/177). Several issues have been
 resolved that could not be resolved before due to design decisions. We strongly
 encourage you to re-read the
-[documentation](https://www.ory.sh/oathkeeper/docs/) but to give you a short
+[documentation](https://www.ory.com/oathkeeper/docs/) but to give you a short
 overview of the most important changes:
 
 1. Commands `oathkeeper serve api` and `oathkeeper serve proxy` have been
@@ -557,7 +557,7 @@ We recommend re-reading the user guide.
 
 If you are upgrading a production deployment and have issues or questions, reach
 out to the [ORY Community](https://discord.gg/PAMQWkr) or to
-[mailto:hi@ory.sh](hi@ory.sh).
+[hi@ory.com](mailto:hi@ory.com).
 
 ### Changes to the CLI
 

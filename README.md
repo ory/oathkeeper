@@ -3,12 +3,12 @@
 </h1>
 
 <h4 align="center">
-  <a href="https://www.ory.sh/chat">Chat</a> ·
+  <a href="https://www.ory.com/chat">Chat</a> ·
   <a href="https://github.com/ory/oathkeeper/discussions">Discussions</a> ·
-  <a href="https://www.ory.sh/l/sign-up-newsletter">Newsletter</a> ·
-  <a href="https://www.ory.sh/docs/">Docs</a> ·
+  <a href="https://www.ory.com/l/sign-up-newsletter">Newsletter</a> ·
+  <a href="https://www.ory.com/docs/">Docs</a> ·
   <a href="https://console.ory.sh/">Try Ory Network</a> ·
-  <a href="https://www.ory.sh/jobs/">Jobs</a>
+  <a href="https://www.ory.com/jobs/">Jobs</a>
 </h4>
 
 Ory Oathkeeper is an Identity & Access Proxy (IAP) and Access Control Decision
@@ -44,7 +44,7 @@ networks.
 
 Ory Oathkeeper is an Identity & Access Proxy (IAP) and Access Control Decision
 API. It follows
-[cloud architecture best practices](https://www.ory.sh/docs/ecosystem/software-architecture-philosophy)
+[cloud architecture best practices](https://www.ory.com/docs/ecosystem/software-architecture-philosophy)
 and focuses on:
 
 - Authenticating and authorizing HTTP requests
@@ -55,7 +55,7 @@ and focuses on:
 - Working in Zero-Trust network architectures
 
 We recommend starting with the
-[Ory Oathkeeper introduction docs](https://www.ory.sh/docs/oathkeeper) to learn
+[Ory Oathkeeper introduction docs](https://www.ory.com/docs/oathkeeper) to learn
 more about its architecture, feature set, and how it compares to other systems.
 
 ### Why Ory Oathkeeper
@@ -93,7 +93,8 @@ You can run Ory Oathkeeper in two main ways:
 You can run Ory Oathkeeper yourself for full control over infrastructure,
 deployment, and customization.
 
-The [install guide](https://www.ory.sh/docs/oathkeeper/install) explains how to:
+The [install guide](https://www.ory.com/docs/oathkeeper/install) explains how
+to:
 
 - Install Oathkeeper on Linux, macOS, Windows, and Docker
 - Configure access rules and authentication strategies
@@ -123,12 +124,12 @@ For guaranteed CVE fixes, current enterprise builds, advanced features, and
 support in production, you need a valid
 [Ory Enterprise License](https://www.ory.com/ory-enterprise-license) and access
 to the Ory Enterprise Docker registry. To learn more,
-[contact the Ory team](https://www.ory.sh/contact/).
+[contact the Ory team](https://www.ory.com/contact/).
 
 ## Quickstart
 
 Head over to the
-[Ory Developer Documentation](https://www.ory.sh/docs/oathkeeper/install) to
+[Ory Developer Documentation](https://www.ory.com/docs/oathkeeper/install) to
 learn how to install Ory Oathkeeper on Linux, macOS, Windows, and Docker and how
 to build Ory Oathkeeper from source.
 
@@ -146,7 +147,7 @@ this would have been possible without each and everyone of you!
 The following list represents companies that have accompanied us along the way
 and that have made outstanding contributions to our ecosystem. _If you think
 that your company deserves a spot here, reach out to
-<a href="mailto:office@ory.sh">office@ory.sh</a> now_!
+<a href="mailto:office@ory.com">office@ory.com</a> now_!
 
 <table>
     <thead>
@@ -167,7 +168,7 @@ that your company deserves a spot here, reach out to
                 </picture>
             </td>
             <td><a href="https://openai.com/">openai.com</a></td>
-            <td><a href="https://www.ory.sh/case-studies/openai">OpenAI Case Study</a></td>
+            <td><a href="https://www.ory.com/case-studies/openai">OpenAI Case Study</a></td>
         </tr>
         <tr>
             <td>Fandom</td>
@@ -178,7 +179,7 @@ that your company deserves a spot here, reach out to
                 </picture>
             </td>
             <td><a href="https://www.fandom.com/">fandom.com</a></td>
-            <td><a href="https://www.ory.sh/case-studies/fandom">Fandom Case Study</a></td>
+            <td><a href="https://www.ory.com/case-studies/fandom">Fandom Case Study</a></td>
         </tr>
         <tr>
             <td>Lumin</td>
@@ -189,7 +190,7 @@ that your company deserves a spot here, reach out to
                 </picture>
             </td>
             <td><a href="https://www.luminpdf.com/">luminpdf.com</a></td>
-            <td><a href="https://www.ory.sh/case-studies/lumin">Lumin Case Study</a></td>
+            <td><a href="https://www.ory.com/case-studies/lumin">Lumin Case Study</a></td>
         </tr>
         <tr>
             <td>Sencrop</td>
@@ -200,7 +201,7 @@ that your company deserves a spot here, reach out to
                 </picture>
             </td>
             <td><a href="https://sencrop.com/">sencrop.com</a></td>
-            <td><a href="https://www.ory.sh/case-studies/sencrop">Sencrop Case Study</a></td>
+            <td><a href="https://www.ory.com/case-studies/sencrop">Sencrop Case Study</a></td>
         </tr>
         <tr>
             <td>OSINT Industries</td>
@@ -211,7 +212,7 @@ that your company deserves a spot here, reach out to
                 </picture>
             </td>
             <td><a href="https://www.osint.industries/">osint.industries</a></td>
-            <td><a href="https://www.ory.sh/case-studies/osint">OSINT Industries Case Study</a></td>
+            <td><a href="https://www.ory.com/case-studies/osint">OSINT Industries Case Study</a></td>
         </tr>
         <tr>
             <td>HGV</td>
@@ -222,7 +223,7 @@ that your company deserves a spot here, reach out to
                 </picture>
             </td>
             <td><a href="https://www.hgv.it/">hgv.it</a></td>
-            <td><a href="https://www.ory.sh/case-studies/hgv">HGV Case Study</a></td>
+            <td><a href="https://www.ory.com/case-studies/hgv">HGV Case Study</a></td>
         </tr>
         <tr>
             <td>Maxroll</td>
@@ -233,7 +234,7 @@ that your company deserves a spot here, reach out to
                 </picture>
             </td>
             <td><a href="https://maxroll.gg/">maxroll.gg</a></td>
-            <td><a href="https://www.ory.sh/case-studies/maxroll">Maxroll Case Study</a></td>
+            <td><a href="https://www.ory.com/case-studies/maxroll">Maxroll Case Study</a></td>
         </tr>
         <tr>
             <td>Zezam</td>
@@ -244,7 +245,7 @@ that your company deserves a spot here, reach out to
                 </picture>
             </td>
             <td><a href="https://www.zezam.io/">zezam.io</a></td>
-            <td><a href="https://www.ory.sh/case-studies/zezam">Zezam Case Study</a></td>
+            <td><a href="https://www.ory.com/case-studies/zezam">Zezam Case Study</a></td>
         </tr>
         <tr>
             <td>T.RowePrice</td>
@@ -502,7 +503,7 @@ dependencies (Java, Node, Ruby, libxml, ...).
 
 [Ory Kratos](https://github.com/ory/kratos) is an API-first Identity and User
 Management system that is built according to
-[cloud architecture best practices](https://www.ory.sh/docs/next/ecosystem/software-architecture-philosophy).
+[cloud architecture best practices](https://www.ory.com/docs/next/ecosystem/software-architecture-philosophy).
 It implements core use cases that almost every software application needs to
 deal with: Self-service Login and Registration, Multi-Factor Authentication
 (MFA/2FA), Account Recovery and Verification, Profile, and Account Management.
@@ -534,13 +535,13 @@ to perform a certain action on a resource.
 
 ## Documentation
 
-The full Ory Oathkeeper documentation is available at
-[www.ory.sh/docs/oathkeeper](https://www.ory.sh/docs/oathkeeper), including:
+The full Oathkeeper documentation is available at
+[www.ory.com/docs/oathkeeper](https://www.ory.com/docs/oathkeeper), including:
 
-- [Installation guides](https://www.ory.sh/docs/oathkeeper/install)
-- [Configuration reference](https://www.ory.sh/docs/oathkeeper/reference/configuration)
-- [HTTP API documentation](https://www.ory.sh/docs/oathkeeper/reference/api)
-- [Access rule configuration](https://www.ory.sh/docs/oathkeeper/pipeline)
+- [Installation guides](https://www.ory.com/docs/oathkeeper/install)
+- [Configuration reference](https://www.ory.com/docs/oathkeeper/reference/configuration)
+- [HTTP API documentation](https://www.ory.com/docs/oathkeeper/reference/api)
+- [Access rule configuration](https://www.ory.com/docs/oathkeeper/pipeline)
 
 For upgrading and changelogs, check [UPGRADE.md](./UPGRADE.md) and
 [CHANGELOG.md](./CHANGELOG.md).
@@ -562,9 +563,9 @@ See [DEVELOP.md](./DEVELOP.md) for information on:
 If you think you found a security vulnerability, please refrain from posting it
 publicly on the forums, the chat, or GitHub. You can find all info for
 responsible disclosure in our
-[security.txt](https://www.ory.sh/.well-known/security.txt).
+[security.txt](https://www.ory.com/.well-known/security.txt).
 
 ## Telemetry
 
 Our services collect summarized, anonymized data that can optionally be turned
-off. Click [here](https://www.ory.sh/docs/ecosystem/sqa) to learn more.
+off. Click [here](https://www.ory.com/docs/ecosystem/sqa) to learn more.
