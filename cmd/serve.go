@@ -32,4 +32,5 @@ func init() {
 
 	serveCmd.PersistentFlags().Bool("disable-telemetry", false, "Disable anonymized telemetry reports - for more information please visit https://www.ory.sh/docs/ecosystem/sqa")
 	serveCmd.PersistentFlags().Bool("sqa-opt-out", false, "Disable anonymized telemetry reports - for more information please visit https://www.ory.sh/docs/ecosystem/sqa")
+	serveCmd.PersistentFlags().Int("default-shutdown-timeout", 5, "Set the default shutdown timeout in seconds for server shutdown when trapping SIGTERM and SIGINT")
 }
