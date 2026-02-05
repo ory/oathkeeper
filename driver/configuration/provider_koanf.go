@@ -174,6 +174,11 @@ func (v *KoanfProvider) AccessRuleMatchingStrategy() MatchingStrategy {
 	return MatchingStrategy(v.source.String(AccessRuleMatchingStrategy))
 }
 
+// AcccessRulePrefixMatching returns if prefix matching should be used.
+func (v *KoanfProvider) AcccessRulePrefixMatchingEnabled() bool {
+	return v.source.Bool(AcccessRulePrefixMatchingEnabled)
+}
+
 func (v *KoanfProvider) CORSEnabled(iface string) bool {
 	_, enabled := v.CORS(iface)
 	return enabled

@@ -60,6 +60,7 @@ type Provider interface {
 
 	AccessRuleRepositories() []url.URL
 	AccessRuleMatchingStrategy() MatchingStrategy
+	AcccessRulePrefixMatchingEnabled() bool
 
 	ProxyServeAddress() string
 	APIServeAddress() string

@@ -99,6 +99,63 @@ var testRulesGlob = []Rule{
 	},
 }
 
+var testRulesPrefix = []Rule{
+	{
+		ID:             "foo1",
+		Match:          &Match{URL: "https://localhost:1234/<foo|bar>", Methods: []string{"POST"}},
+		Description:    "Create users rule",
+		Authorizer:     Handler{Handler: "allow", Config: []byte(`{"type":"any"}`)},
+		Authenticators: []Handler{{Handler: "anonymous", Config: []byte(`{"name":"anonymous1"}`)}},
+		Mutators:       []Handler{{Handler: "id_token", Config: []byte(`{"issuer":"anything"}`)}},
+		Upstream:       Upstream{URL: "http://localhost:1235/", StripPath: "/bar", PreserveHost: true},
+	},
+	{
+		ID:             "foo2",
+		Match:          &Match{URL: "https://localhost:1234/foo/<baz|bar>", Methods: []string{"POST"}},
+		Description:    "Create users rule",
+		Authorizer:     Handler{Handler: "allow", Config: []byte(`{"type":"any"}`)},
+		Authenticators: []Handler{{Handler: "anonymous", Config: []byte(`{"name":"anonymous1"}`)}},
+		Mutators:       []Handler{{Handler: "id_token", Config: []byte(`{"issuer":"anything"}`)}},
+		Upstream:       Upstream{URL: "http://localhost:1235/", StripPath: "/bar", PreserveHost: true},
+	},
+	{
+		ID:             "foo3",
+		Match:          &Match{URL: "https://localhost:1234/foo/something/<baz|bar>", Methods: []string{"POST"}},
+		Description:    "Create users rule",
+		Authorizer:     Handler{Handler: "allow", Config: []byte(`{"type":"any"}`)},
+		Authenticators: []Handler{{Handler: "anonymous", Config: []byte(`{"name":"anonymous1"}`)}},
+		Mutators:       []Handler{{Handler: "id_token", Config: []byte(`{"issuer":"anything"}`)}},
+		Upstream:       Upstream{URL: "http://localhost:1235/", StripPath: "/bar", PreserveHost: true},
+	},
+	{
+		ID:             "foo4",
+		Match:          &Match{URL: "https://localhost:34/<baz|bar>", Methods: []string{"GET"}},
+		Description:    "Get users rule",
+		Authorizer:     Handler{Handler: "deny", Config: []byte(`{"type":"any"}`)},
+		Authenticators: []Handler{{Handler: "oauth2_introspection", Config: []byte(`{"name":"anonymous1"}`)}},
+		Mutators:       []Handler{{Handler: "id_token", Config: []byte(`{"issuer":"anything"}`)}},
+		Upstream:       Upstream{URL: "http://localhost:333/", StripPath: "/foo", PreserveHost: false},
+	},
+	{
+		ID:             "foo5",
+		Match:          &Match{URL: "https://localhost:343/<baz|bar>", Methods: []string{"GET"}},
+		Description:    "Get users rule",
+		Authorizer:     Handler{Handler: "deny"},
+		Authenticators: []Handler{{Handler: "oauth2_introspection"}},
+		Mutators:       []Handler{{Handler: "id_token"}},
+		Upstream:       Upstream{URL: "http://localhost:3333/", StripPath: "/foo", PreserveHost: false},
+	},
+	{
+		ID:             "grpc1",
+		Match:          &MatchGRPC{Authority: "bar.example.com", FullMethod: "grpc.api/Call"},
+		Description:    "gRPC Rule",
+		Authorizer:     Handler{Handler: "allow", Config: []byte(`{"type":"any"}`)},
+		Authenticators: []Handler{{Handler: "anonymous", Config: []byte(`{"name":"anonymous1"}`)}},
+		Mutators:       []Handler{{Handler: "id_token", Config: []byte(`{"issuer":"anything"}`)}},
+		Upstream:       Upstream{URL: "http://bar.example.com/", PreserveHost: false},
+	},
+}
+
 func TestMatcher(t *testing.T) {
 	type m interface {
 		Matcher
@@ -188,6 +245,44 @@ func TestMatcher(t *testing.T) {
 
 			t.Run("case=updated", func(t *testing.T) {
 				testMatcher(t, matcher, "GET", "https://localhost:34/baz", ProtocolHTTP, false, &testRulesGlob[1])
+				testMatcher(t, matcher, "POST", "https://localhost:1234/foo", ProtocolHTTP, true, nil)
+				testMatcher(t, matcher, "DELETE", "https://localhost:1234/foo", ProtocolHTTP, true, nil)
+			})
+		})
+		t.Run(fmt.Sprintf("prefix matcher=%s", name), func(t *testing.T) {
+			require.NoError(t, matcher.SetMatchingStrategy(context.Background(), configuration.Regexp))
+			require.NoError(t, matcher.SetPrefixMatching(context.Background(), true))
+			require.NoError(t, matcher.Set(context.Background(), []Rule{}))
+			t.Run("case=empty", func(t *testing.T) {
+				testMatcher(t, matcher, "GET", "https://localhost:34/baz", ProtocolHTTP, true, nil)
+				testMatcher(t, matcher, "POST", "https://localhost:1234/foo", ProtocolHTTP, true, nil)
+				testMatcher(t, matcher, "DELETE", "https://localhost:1234/foo", ProtocolHTTP, true, nil)
+			})
+
+			require.NoError(t, matcher.Set(context.Background(), testRulesPrefix))
+
+			t.Run("case=created", func(t *testing.T) {
+				testMatcher(t, matcher, "POST", "https://localhost:1234/", ProtocolHTTP, false, &testRulesPrefix[0])
+				testMatcher(t, matcher, "POST", "https://localhost:1234/foo", ProtocolHTTP, false, &testRulesPrefix[1])
+				testMatcher(t, matcher, "POST", "https://localhost:1234/foo/something/very/long", ProtocolHTTP, false, &testRulesPrefix[2])
+				testMatcher(t, matcher, "POST", "https://localhost:1234/foo/baz/something/very/long", ProtocolHTTP, false, &testRulesPrefix[1])
+				testMatcher(t, matcher, "GET", "https://localhost:34/baz", ProtocolHTTP, false, &testRulesPrefix[3])
+				testMatcher(t, matcher, "DELETE", "https://localhost:1234/foo", ProtocolHTTP, true, nil)
+				testMatcher(t, matcher, "POST", "grpc://bar.example.com/grpc.api/Call", ProtocolGRPC, false, &testRulesPrefix[5])
+			})
+
+			t.Run("case=cache", func(t *testing.T) {
+				r, err := matcher.Match(context.Background(), "GET", mustParseURL(t, "https://localhost:34/baz"), ProtocolHTTP)
+				require.NoError(t, err)
+				_, err = matcher.Get(context.Background(), r.ID)
+				require.NoError(t, err)
+				// assert.NotEmpty(t, got.matchingEngine.Checksum())
+			})
+
+			require.NoError(t, matcher.Set(context.Background(), testRulesPrefix[3:]))
+
+			t.Run("case=updated", func(t *testing.T) {
+				testMatcher(t, matcher, "GET", "https://localhost:34/baz", ProtocolHTTP, false, &testRulesPrefix[3])
 				testMatcher(t, matcher, "POST", "https://localhost:1234/foo", ProtocolHTTP, true, nil)
 				testMatcher(t, matcher, "DELETE", "https://localhost:1234/foo", ProtocolHTTP, true, nil)
 			})
