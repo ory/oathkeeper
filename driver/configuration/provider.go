@@ -79,6 +79,8 @@ type Provider interface {
 
 	TLSConfig(daemon string) *TLSConfig
 
+	LogRedactHeaders() []string
+
 	SetForTest(t testing.TB, key string, value interface{})
 }
 
