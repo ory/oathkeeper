@@ -69,6 +69,7 @@ type Provider interface {
 	PrometheusMetricsNamePrefix() string
 	PrometheusHideRequestPaths() bool
 	PrometheusCollapseRequestPaths() bool
+	PrometheusCollapseRequestPathsDepth() int
 
 	ToScopeStrategy(value string, key string) fosite.ScopeStrategy
 	ParseURLs(sources []string) ([]url.URL, error)
