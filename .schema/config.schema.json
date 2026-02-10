@@ -1140,6 +1140,25 @@
           "pattern": "^[0-9]+(ns|us|ms|s|m|h)$",
           "default": "15m",
           "examples": ["1h", "1m", "30s"]
+        },
+        "cache": {
+          "additionalProperties": false,
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "title": "Enabled",
+              "type": "boolean",
+              "default": true,
+              "examples": [false, true],
+              "description": "En-/disables this component."
+            },
+            "max_cost": {
+              "type": "integer",
+              "default": 33554432,
+              "title": "Maximum Cached Cost",
+              "description": "The cost of one cached JSON Web Token is the length of its string form."
+            }
+          }
         }
       },
       "additionalProperties": false
