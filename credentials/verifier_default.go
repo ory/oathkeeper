@@ -6,6 +6,7 @@ package credentials
 import (
 	"context"
 	"crypto/ecdsa"
+	"crypto/ed25519"
 	"crypto/rsa"
 	"fmt"
 	"strings"
@@ -67,6 +68,10 @@ func (v *VerifierDefault) Verify(
 			}
 		case *jwt.SigningMethodECDSA:
 			if k, ok := key.Key.(*ecdsa.PublicKey); ok {
+				return k, nil
+			}
+		case *jwt.SigningMethodEd25519:
+			if k, ok := key.Key.(ed25519.PublicKey); ok {
 				return k, nil
 			}
 		case *jwt.SigningMethodRSAPSS:
