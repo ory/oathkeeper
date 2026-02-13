@@ -220,7 +220,9 @@ func (a *AuthenticatorOAuth2Introspection) Authenticate(r *http.Request, session
 		}
 		defer resp.Body.Close() //nolint:errcheck
 
-		if resp.StatusCode != http.StatusOK {
+		if resp.StatusCode == http.StatusTooManyRequests {
+			return errors.WithStack(helper.ErrTooManyRequests)
+		} else if resp.StatusCode != http.StatusOK {
 			return errors.Errorf("Introspection returned status code %d but expected %d", resp.StatusCode, http.StatusOK)
 		}
 

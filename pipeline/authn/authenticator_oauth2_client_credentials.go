@@ -235,6 +235,8 @@ func (a *AuthenticatorOAuth2ClientCredentials) Authenticate(r *http.Request, ses
 		if err != nil {
 			if rErr, ok := err.(*oauth2.RetrieveError); ok {
 				switch httpStatusCode := rErr.Response.StatusCode; httpStatusCode {
+				case http.StatusTooManyRequests:
+					return errors.Wrap(helper.ErrTooManyRequests, err.Error())
 				case http.StatusServiceUnavailable:
 					return errors.Wrap(helper.ErrUpstreamServiceNotAvailable, err.Error())
 				case http.StatusInternalServerError:

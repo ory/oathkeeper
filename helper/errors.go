@@ -56,6 +56,11 @@ var (
 		CodeField:   http.StatusBadRequest,
 		StatusField: http.StatusText(http.StatusBadRequest),
 	}
+	ErrTooManyRequests = &herodot.DefaultError{
+		ErrorField:  "Too many requests",
+		CodeField:   http.StatusTooManyRequests,
+		StatusField: http.StatusText(http.StatusTooManyRequests),
+	}
 	ErrUpstreamServiceNotAvailable = &herodot.DefaultError{
 		ErrorField:  "The upstream service is not available",
 		CodeField:   http.StatusServiceUnavailable,
