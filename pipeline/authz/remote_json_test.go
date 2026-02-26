@@ -6,6 +6,7 @@ package authz_test
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -15,6 +16,9 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/tidwall/sjson"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/propagation"
+	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 
 	"github.com/ory/x/configx"
 	"github.com/ory/x/logrusx"
@@ -359,4 +363,39 @@ func TestAuthorizerRemoteJSONConfig(t *testing.T) {
 			assert.Equal(t, tt.expected, actual)
 		})
 	}
+}
+
+// This test must NOT use t.Parallel() because it mutates global OTEL state.
+func TestAuthorizerRemoteJSONTracePropagation(t *testing.T) {
+	// Set up a real tracer provider so otelhttp.NewTransport creates sampled spans.
+	tp := sdktrace.NewTracerProvider(sdktrace.WithSampler(sdktrace.AlwaysSample()))
+
+	prevTP := otel.GetTracerProvider()
+	prevProp := otel.GetTextMapPropagator()
+	otel.SetTracerProvider(tp)
+	otel.SetTextMapPropagator(propagation.TraceContext{})
+	t.Cleanup(func() {
+		otel.SetTracerProvider(prevTP)
+		otel.SetTextMapPropagator(prevProp)
+		_ = tp.Shutdown(context.Background())
+	})
+
+	var gotTraceparent string
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		gotTraceparent = r.Header.Get("Traceparent")
+		w.WriteHeader(http.StatusOK)
+	}))
+	defer server.Close()
+
+	config := json.RawMessage(fmt.Sprintf(`{"remote":%q,"payload":"{}"}`, server.URL))
+
+	p, err := configuration.NewKoanfProvider(context.Background(), nil, logrusx.New("", ""))
+	require.NoError(t, err)
+
+	a := NewAuthorizerRemoteJSON(p, otelx.NewNoop())
+	r, err := http.NewRequestWithContext(context.Background(), "", "", nil)
+	require.NoError(t, err)
+	err = a.Authorize(r, &authn.AuthenticationSession{}, config, &rule.Rule{})
+	require.NoError(t, err)
+	assert.NotEmpty(t, gotTraceparent, "expected traceparent header to be propagated to remote_json authorizer endpoint")
 }
