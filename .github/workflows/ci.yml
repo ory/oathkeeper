@@ -63,6 +63,7 @@ jobs:
     needs:
       - test
     steps:
+      - uses: ory/ci/checkout@master
       - uses: ory/ci/docs/cli-next@master
         with:
           token: ${{ secrets.ORY_BOT_PAT }}
