@@ -26,16 +26,35 @@ import (
 	"github.com/ory/x/otelx"
 )
 
+type authorizeTestStruct struct {
+	name               string
+	setup              func(t *testing.T) *httptest.Server
+	session            *authn.AuthenticationSession
+	sessionHeaderMatch *http.Header
+	config             json.RawMessage
+	wantErr            bool
+}
+
+func matchJsonFieldTest(name string, response string, config string, wantErr bool) authorizeTestStruct {
+	return authorizeTestStruct{
+		name: name,
+		setup: func(t *testing.T) *httptest.Server {
+			return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				_, err := io.ReadAll(r.Body)
+				require.NoError(t, err)
+				w.WriteHeader(http.StatusOK)
+				w.Write([]byte(response))
+			}))
+		},
+		session: &authn.AuthenticationSession{},
+		config:  json.RawMessage(config),
+		wantErr: wantErr,
+	}
+}
+
 func TestAuthorizerRemoteJSONAuthorize(t *testing.T) {
 	t.Parallel()
-	tests := []struct {
-		name               string
-		setup              func(t *testing.T) *httptest.Server
-		session            *authn.AuthenticationSession
-		sessionHeaderMatch *http.Header
-		config             json.RawMessage
-		wantErr            bool
-	}{
+	tests := []authorizeTestStruct{
 		{
 			name:    "invalid configuration",
 			session: &authn.AuthenticationSession{},
@@ -106,6 +125,30 @@ func TestAuthorizerRemoteJSONAuthorize(t *testing.T) {
 			config:  json.RawMessage(`{"payload":"{}"}`),
 			wantErr: true,
 		},
+		matchJsonFieldTest("match_json_field denied empty body",
+			"",
+			`{"payload":"{}","match_json_field": {"field":"result", "str_val": "allowed"}}`,
+			true),
+		matchJsonFieldTest("match_json_field denied bool",
+			`{"allowed": false}`,
+			`{"payload":"{}","match_json_field": {"field":"allowed", "bool_val": true}}`,
+			true),
+		matchJsonFieldTest("match_json_field denied bool false",
+			`{"denied": true}`,
+			`{"payload":"{}","match_json_field": {"field":"denied", "bool_val": false}}`,
+			true),
+		matchJsonFieldTest("match_json_field denied str",
+			`{"result": "denied"}`,
+			`{"payload":"{}","match_json_field": {"field":"result", "str_val": "allowed"}}`,
+			true),
+		matchJsonFieldTest("match_json_field denied wrong type",
+			`{"result": "denied"}`,
+			`{"payload":"{}","match_json_field": {"field":"result", "bool_val": true}}`,
+			true),
+		matchJsonFieldTest("match_json_field denied true as string",
+			`{"allowed": "true"}`,
+			`{"payload":"{}","match_json_field": {"field":"allowed", "bool_val": true}}`,
+			true),
 		{
 			name: "ok",
 			setup: func(t *testing.T) *httptest.Server {
@@ -196,6 +239,18 @@ func TestAuthorizerRemoteJSONAuthorize(t *testing.T) {
 			session: &authn.AuthenticationSession{},
 			config:  json.RawMessage(`{"payload":"[\"foo\",\"bar\"]"}`),
 		},
+		matchJsonFieldTest("match_json_field bool field",
+			`{"allowed": true}`,
+			`{"payload":"{}","match_json_field": {"field":"allowed", "bool_val": true}}`,
+			false),
+		matchJsonFieldTest("match_json_field str field",
+			`{"result": "allowed"}`,
+			`{"payload":"{}","match_json_field": {"field":"result", "str_val": "allowed"}}`,
+			false),
+		matchJsonFieldTest("match_json_field nested",
+			`{"deeply": {"nested": {"result": "allowed"}}}`,
+			`{"payload":"{}","match_json_field": {"field":"deeply.nested.result", "str_val": "allowed"}}`,
+			false),
 	}
 	for _, tt := range tests {
 		tt := tt
@@ -267,6 +322,18 @@ func TestAuthorizerRemoteJSONValidate(t *testing.T) {
 			wantErr: true,
 		},
 		{
+			name:    "match response empty",
+			enabled: true,
+			config:  json.RawMessage(`{"remote":"http://host/path", "payload":"{}", "match_json_field":{}}`),
+			wantErr: true,
+		},
+		{
+			name:    "match response no value",
+			enabled: true,
+			config:  json.RawMessage(`{"remote":"http://host/path", "payload":"{}", "match_json_field":{"field":"foo"}}`),
+			wantErr: true,
+		},
+		{
 			name:    "valid configuration",
 			enabled: true,
 			config:  json.RawMessage(`{"remote":"http://host/path","payload":"{}"}`),
@@ -290,6 +357,16 @@ func TestAuthorizerRemoteJSONValidate(t *testing.T) {
 			name:    "valid configuration with retry",
 			enabled: true,
 			config:  json.RawMessage(`{"remote":"http://host/path","payload":"{}","retry":{"give_up_after":"3s", "max_delay":"100ms"}}`),
+		},
+		{
+			name:    "valid configuration with match bool field",
+			enabled: true,
+			config:  json.RawMessage(`{"remote":"http://host/path","payload":"{}","match_json_field":{"field":"foo","bool_val":true}}`),
+		},
+		{
+			name:    "valid configuration with match str field",
+			enabled: true,
+			config:  json.RawMessage(`{"remote":"http://host/path","payload":"{}","match_json_field":{"field":"foo","str_val":"bar"}}`),
 		},
 	}
 	for _, tt := range tests {
