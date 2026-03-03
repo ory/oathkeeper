@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 
 	"github.com/ory/x/httpx"
 	"github.com/ory/x/otelx"
@@ -50,9 +51,11 @@ type AuthorizerRemote struct {
 
 // NewAuthorizerRemote creates a new AuthorizerRemote.
 func NewAuthorizerRemote(c configuration.Provider, d interface{ Tracer() trace.Tracer }) *AuthorizerRemote {
+	client := httpx.NewResilientClient().StandardClient()
+	client.Transport = otelhttp.NewTransport(client.Transport)
 	return &AuthorizerRemote{
 		c:      c,
-		client: httpx.NewResilientClient().StandardClient(),
+		client: client,
 		t:      x.NewTemplate("remote"),
 		tracer: d.Tracer(),
 	}
@@ -177,10 +180,12 @@ func (a *AuthorizerRemote) Config(config json.RawMessage) (*AuthorizerRemoteConf
 		return nil, err
 	}
 	timeout := time.Millisecond * duration
-	a.client = httpx.NewResilientClient(
+	client := httpx.NewResilientClient(
 		httpx.ResilientClientWithMaxRetryWait(maxWait),
 		httpx.ResilientClientWithConnectionTimeout(timeout),
 	).StandardClient()
+	client.Transport = otelhttp.NewTransport(client.Transport)
+	a.client = client
 
 	return &c, nil
 }
