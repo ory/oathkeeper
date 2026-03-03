@@ -103,7 +103,7 @@ type AuthenticatorOAuth2IntrospectionResult struct {
 }
 
 func (a *Audience) UnmarshalJSON(b []byte) error {
-	var errUnsupportedType = errors.New("Unsupported aud type, only string or []string are allowed")
+	errUnsupportedType := errors.New("Unsupported aud type, only string or []string are allowed")
 
 	var jsonObject interface{}
 	err := json.Unmarshal(b, &jsonObject)
@@ -220,7 +220,9 @@ func (a *AuthenticatorOAuth2Introspection) Authenticate(r *http.Request, session
 		}
 		defer resp.Body.Close() //nolint:errcheck
 
-		if resp.StatusCode != http.StatusOK {
+		if resp.StatusCode == http.StatusTooManyRequests {
+			return errors.WithStack(helper.NewErrTooManyRequestsWithHeaders(resp))
+		} else if resp.StatusCode != http.StatusOK {
 			return errors.Errorf("Introspection returned status code %d but expected %d", resp.StatusCode, http.StatusOK)
 		}
 

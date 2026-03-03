@@ -166,7 +166,9 @@ func (a *AuthorizerKetoEngineACPORY) Authorize(r *http.Request, session *authn.A
 	}
 	defer res.Body.Close() //nolint:errcheck // response body close failure not actionable
 
-	if res.StatusCode == http.StatusForbidden {
+	if res.StatusCode == http.StatusTooManyRequests {
+		return errors.WithStack(helper.NewErrTooManyRequestsWithHeaders(res))
+	} else if res.StatusCode == http.StatusForbidden {
 		return errors.WithStack(helper.ErrForbidden)
 	} else if res.StatusCode != http.StatusOK {
 		return errors.Errorf("expected status code %d but got %d", http.StatusOK, res.StatusCode)
@@ -187,7 +189,6 @@ func (a *AuthorizerKetoEngineACPORY) Authorize(r *http.Request, session *authn.A
 }
 
 func (a *AuthorizerKetoEngineACPORY) parseParameter(session *authn.AuthenticationSession, templateID, templateString string) (string, error) {
-
 	t := a.t.Lookup(templateID)
 	if t == nil {
 		var err error

@@ -32,8 +32,7 @@ func init() {
 	})
 }
 
-type AuthenticatorCookieSessionFilter struct {
-}
+type AuthenticatorCookieSessionFilter struct{}
 
 type AuthenticatorCookieSessionConfiguration struct {
 	Only               []string          `json:"only"`
@@ -191,7 +190,6 @@ func forwardRequestToSessionStore(client *http.Client, r *http.Request, cf Authe
 	}
 
 	res, err := client.Do(req.WithContext(r.Context()))
-
 	if err != nil {
 		return nil, helper.ErrForbidden.WithReason(err.Error()).WithTrace(err)
 	}
@@ -204,6 +202,8 @@ func forwardRequestToSessionStore(client *http.Client, r *http.Request, cf Authe
 			return json.RawMessage{}, errors.WithStack(herodot.ErrInternalServerError.WithReasonf("Unable to fetch cookie session context from remote: %+v", err))
 		}
 		return body, nil
+	} else if res.StatusCode == http.StatusTooManyRequests {
+		return json.RawMessage{}, errors.WithStack(helper.NewErrTooManyRequestsWithHeaders(res))
 	} else {
 		return json.RawMessage{}, errors.WithStack(helper.ErrUnauthorized)
 	}

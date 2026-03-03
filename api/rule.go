@@ -92,7 +92,7 @@ func (h *RuleHandler) listRules(w http.ResponseWriter, r *http.Request, _ httpro
 //	  500: genericError
 func (h *RuleHandler) getRules(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	rl, err := h.r.RuleRepository().Get(r.Context(), ps.ByName("id"))
-	if errors.Cause(err) == helper.ErrResourceNotFound {
+	if errors.Is(err, helper.ErrResourceNotFound) {
 		h.r.Writer().WriteErrorCode(w, r, http.StatusNotFound, err)
 		return
 	} else if err != nil {

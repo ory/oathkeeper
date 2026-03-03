@@ -51,7 +51,7 @@ func TestProxy(t *testing.T) {
 	conf.SetForTest(t, configuration.AuthorizerAllowIsEnabled, true)
 	conf.SetForTest(t, configuration.AuthorizerDenyIsEnabled, true)
 	conf.SetForTest(t, configuration.MutatorNoopIsEnabled, true)
-	conf.SetForTest(t, "mutators.header.config", map[string]interface{}{"headers": map[string]string{}})
+	conf.SetForTest(t, "mutators.header.config", map[string]any{"headers": map[string]string{}})
 	conf.SetForTest(t, configuration.MutatorHeaderIsEnabled, true)
 	conf.SetForTest(t, configuration.ErrorsWWWAuthenticateIsEnabled, true)
 
@@ -564,6 +564,63 @@ func TestCopyHeaders(t *testing.T) {
 		assert.EqualValues(t, canonicalHeaders, nr.Header)
 	}
 
+}
+
+func TestRateLimitHeaderPropagation(t *testing.T) {
+	// Mock upstream that returns 429 with rate-limit headers, simulating
+	// an authn provider that is rate-limiting requests.
+	rateLimitUpstream := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Retry-After", "30")
+		w.Header().Set("X-Ratelimit-Limit", "100")
+		w.Header().Set("X-Ratelimit-Remaining", "0")
+		w.Header().Set("X-Ratelimit-Reset", "1709042400")
+		w.WriteHeader(http.StatusTooManyRequests)
+	}))
+	defer rateLimitUpstream.Close()
+
+	backend := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		fmt.Fprint(w, "ok") //nolint:errcheck // test
+	}))
+	defer backend.Close()
+
+	conf := internal.NewConfigurationWithDefaults()
+	reg := internal.NewRegistry(conf)
+
+	d := reg.Proxy()
+	ts := httptest.NewServer(&httputil.ReverseProxy{Rewrite: d.Rewrite, Transport: d})
+	defer ts.Close()
+
+	conf.SetForTest(t, "authenticators.cookie_session.config.check_session_url", rateLimitUpstream.URL)
+	conf.SetForTest(t, configuration.AuthenticatorCookieSessionIsEnabled, true)
+	conf.SetForTest(t, configuration.AuthorizerAllowIsEnabled, true)
+	conf.SetForTest(t, configuration.MutatorNoopIsEnabled, true)
+	conf.SetForTest(t, configuration.ErrorsJSONIsEnabled, true)
+
+	rl := rule.Rule{
+		Match:          &rule.Match{Methods: []string{"GET"}, URL: ts.URL + "/rate-limit-test/<[0-9]*>"},
+		Authenticators: []rule.Handler{{Handler: "cookie_session", Config: json.RawMessage(fmt.Sprintf(`{"check_session_url": "%s"}`, rateLimitUpstream.URL))}},
+		Authorizer:     rule.Handler{Handler: "allow"},
+		Mutators:       []rule.Handler{{Handler: "noop"}},
+		Upstream:       rule.Upstream{URL: backend.URL},
+		Errors:         []rule.ErrorHandler{{Handler: "json"}},
+	}
+
+	reg.RuleRepository().(*rule.RepositoryMemory).WithRules([]rule.Rule{rl})
+	require.NoError(t, reg.RuleRepository().SetMatchingStrategy(context.Background(), configuration.Glob))
+
+	req, err := http.NewRequest("GET", ts.URL+"/rate-limit-test/1234", nil)
+	require.NoError(t, err)
+	req.AddCookie(&http.Cookie{Name: "session", Value: "test-token"})
+
+	res, err := http.DefaultClient.Do(req)
+	require.NoError(t, err)
+	defer func() { _ = res.Body.Close() }()
+
+	assert.Equal(t, http.StatusTooManyRequests, res.StatusCode)
+	assert.Equal(t, "30", res.Header.Get("Retry-After"))
+	assert.Equal(t, "100", res.Header.Get("X-Ratelimit-Limit"))
+	assert.Equal(t, "0", res.Header.Get("X-Ratelimit-Remaining"))
+	assert.Equal(t, "1709042400", res.Header.Get("X-Ratelimit-Reset"))
 }
 
 //

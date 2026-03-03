@@ -5,13 +5,16 @@ package errors
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 
+	pkgerrors "github.com/pkg/errors"
+
 	"github.com/ory/herodot"
-	"github.com/ory/x/errorsx"
 	"github.com/ory/x/httpx"
 
 	"github.com/ory/oathkeeper/driver/configuration"
+	"github.com/ory/oathkeeper/helper"
 	"github.com/ory/oathkeeper/pipeline"
 )
 
@@ -43,26 +46,39 @@ func (a *ErrorJSON) Handle(w http.ResponseWriter, r *http.Request, config json.R
 		return err
 	}
 
+	var errH *helper.ErrWithHeaders
+	if errors.As(handleError, &errH) {
+		for key, vals := range errH.Headers {
+			for _, v := range vals {
+				w.Header().Set(key, v)
+			}
+		}
+	}
+
 	if !c.Verbose {
-		if sc, ok := errorsx.Cause(handleError).(statusCoder); ok {
+		wrapped := pkgerrors.WithStack(handleError)
+		var sc statusCoder
+		if errors.As(handleError, &sc) {
 			switch sc.StatusCode() {
 			case http.StatusInternalServerError:
-				handleError = herodot.ErrInternalServerError.WithTrace(handleError)
+				handleError = herodot.ErrInternalServerError.WithWrap(wrapped)
 			case http.StatusForbidden:
-				handleError = herodot.ErrForbidden.WithTrace(handleError)
+				handleError = herodot.ErrForbidden.WithWrap(wrapped)
 			case http.StatusNotFound:
-				handleError = herodot.ErrNotFound.WithTrace(handleError)
+				handleError = herodot.ErrNotFound.WithWrap(wrapped)
 			case http.StatusUnauthorized:
-				handleError = herodot.ErrUnauthorized.WithTrace(handleError)
+				handleError = herodot.ErrUnauthorized.WithWrap(wrapped)
 			case http.StatusBadRequest:
-				handleError = herodot.ErrBadRequest.WithTrace(handleError)
+				handleError = herodot.ErrBadRequest.WithWrap(wrapped)
+			case http.StatusTooManyRequests:
+				handleError = helper.ErrTooManyRequests.WithWrap(wrapped)
 			case http.StatusUnsupportedMediaType:
-				handleError = herodot.ErrUnsupportedMediaType.WithTrace(handleError)
+				handleError = herodot.ErrUnsupportedMediaType.WithWrap(wrapped)
 			case http.StatusConflict:
-				handleError = herodot.ErrConflict.WithTrace(handleError)
+				handleError = herodot.ErrConflict.WithWrap(wrapped)
 			}
 		} else {
-			handleError = herodot.ErrInternalServerError.WithTrace(handleError)
+			handleError = herodot.ErrInternalServerError.WithWrap(wrapped)
 		}
 	}
 

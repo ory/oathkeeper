@@ -18,6 +18,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
+	"github.com/ory/oathkeeper/helper"
 	"github.com/ory/oathkeeper/internal"
 	. "github.com/ory/oathkeeper/pipeline/authn"
 	"github.com/ory/oathkeeper/x/header"
@@ -367,4 +368,75 @@ func makeRequest(method string, path string, rawQuery string, cookies map[string
 		req.AddCookie(&http.Cookie{Name: name, Value: value})
 	}
 	return req
+}
+
+func TestAuthenticatorCookieSession429Headers(t *testing.T) {
+	conf := internal.NewConfigurationWithDefaults()
+	reg := internal.NewRegistry(conf)
+
+	pipelineAuthenticator, err := reg.PipelineAuthenticator("cookie_session")
+	require.NoError(t, err)
+
+	session := &AuthenticationSession{}
+
+	t.Run("case=should_capture_rate_limit_headers_from_429_response", func(t *testing.T) {
+		testServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Set("Retry-After", "120")
+			w.Header().Set("X-RateLimit-Limit", "1000")
+			w.Header().Set("X-RateLimit-Remaining", "0")
+			w.Header().Set("X-RateLimit-Reset", "1609459200")
+			w.Header().Set("X-RateLimit-Type", "user")
+			w.WriteHeader(http.StatusTooManyRequests)
+			_, _ = w.Write([]byte(`{"error": "rate limit exceeded"}`))
+		}))
+		defer testServer.Close()
+
+		err := pipelineAuthenticator.Authenticate(
+			makeRequest("GET", "/", "", map[string]string{"sessionid": "abc"}, ""),
+			session,
+			json.RawMessage(fmt.Sprintf(`{"check_session_url": "%s"}`, testServer.URL)),
+			nil,
+		)
+
+		require.Error(t, err)
+
+		// Verify it's an ErrWithHeaders
+		var errH *helper.ErrWithHeaders
+		require.True(t, errors.As(err, &errH), "error should be ErrWithHeaders")
+
+		// Verify all rate-limit headers were captured
+		assert.Equal(t, "120", errH.Headers.Get("Retry-After"))
+		assert.Equal(t, "1000", errH.Headers.Get("X-RateLimit-Limit"))
+		assert.Equal(t, "0", errH.Headers.Get("X-RateLimit-Remaining"))
+		assert.Equal(t, "1609459200", errH.Headers.Get("X-RateLimit-Reset"))
+		assert.Equal(t, "user", errH.Headers.Get("X-RateLimit-Type"))
+
+		// Verify the wrapped error is ErrTooManyRequests
+		assert.ErrorIs(t, errH.Err, helper.ErrTooManyRequests)
+	})
+
+	t.Run("case=should_handle_429_with_partial_headers", func(t *testing.T) {
+		testServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Set("Retry-After", "60")
+			// Only one header - others missing
+			w.WriteHeader(http.StatusTooManyRequests)
+		}))
+		defer testServer.Close()
+
+		err := pipelineAuthenticator.Authenticate(
+			makeRequest("GET", "/", "", map[string]string{"sessionid": "xyz"}, ""),
+			session,
+			json.RawMessage(fmt.Sprintf(`{"check_session_url": "%s"}`, testServer.URL)),
+			nil,
+		)
+
+		require.Error(t, err)
+
+		var errH *helper.ErrWithHeaders
+		require.True(t, errors.As(err, &errH))
+
+		// Verify only the present header was captured
+		assert.Equal(t, "60", errH.Headers.Get("Retry-After"))
+		assert.Empty(t, errH.Headers.Get("X-RateLimit-Limit"))
+	})
 }
