@@ -206,7 +206,10 @@ func (f *FetcherDefault) processStrategyUpdate(ctx context.Context, newValue con
 func (f *FetcherDefault) processRemoteRepoUpdate(ctx context.Context, oldRepos, newRepos map[url.URL]struct{}) error {
 	repoChanged := false
 	for repo := range newRepos {
-		if _, ok := f.cache[repo.String()]; !ok {
+		f.lock.Lock()
+		_, ok := f.cache[repo.String()]
+		f.lock.Unlock()
+		if !ok {
 			repoChanged = true
 			f.registry.Logger().WithField("repo", repo.String()).Info("New repo detected, fetching access rules.")
 

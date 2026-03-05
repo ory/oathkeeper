@@ -196,16 +196,17 @@ func forwardRequestToSessionStore(client *http.Client, r *http.Request, cf Authe
 
 	defer func() { _ = res.Body.Close() }()
 
-	if res.StatusCode == http.StatusOK {
+	switch res.StatusCode {
+	default:
+		return json.RawMessage{}, errors.WithStack(helper.ErrUnauthorized)
+	case http.StatusOK:
 		body, err := io.ReadAll(res.Body)
 		if err != nil {
 			return json.RawMessage{}, errors.WithStack(herodot.ErrInternalServerError.WithReasonf("Unable to fetch cookie session context from remote: %+v", err))
 		}
 		return body, nil
-	} else if res.StatusCode == http.StatusTooManyRequests {
+	case http.StatusTooManyRequests:
 		return json.RawMessage{}, errors.WithStack(helper.NewErrTooManyRequestsWithHeaders(res))
-	} else {
-		return json.RawMessage{}, errors.WithStack(helper.ErrUnauthorized)
 	}
 }
 
