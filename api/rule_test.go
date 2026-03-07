@@ -110,10 +110,11 @@ func TestHandler(t *testing.T) {
 	}
 
 	t.Run("case=create a new rule", func(t *testing.T) {
+		limit := int64(10)
 		testFunc := func(strategy configuration.MatchingStrategy, rules []rule.Rule) {
 			reg.RuleRepository().(*rule.RepositoryMemory).WithRules(rules)
 			require.NoError(t, reg.RuleRepository().SetMatchingStrategy(context.Background(), strategy))
-			results, err := cl.API.ListRules(sdkrule.NewListRulesParams().WithLimit(new(int64(10))))
+			results, err := cl.API.ListRules(sdkrule.NewListRulesParams().WithLimit(&limit))
 			require.NoError(t, err)
 			require.Len(t, results.Payload, 2)
 			assert.True(t, results.Payload[0].ID != results.Payload[1].ID)
