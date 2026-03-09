@@ -394,6 +394,50 @@ func TestProxy(t *testing.T) {
 				r.Header.Set("Connection", "x-arbitrary")
 			},
 		},
+		{
+			d:           "should preserve semicolons in query strings",
+			url:         ts.URL + "/authn-noop/1234?a=b;c=d",
+			rulesRegexp: []rule.Rule{ruleNoOpAuthenticator},
+			rulesGlob:   []rule.Rule{ruleNoOpAuthenticatorGlob},
+			code:        http.StatusOK,
+			messages: []string{
+				"url=/authn-noop/1234?a=b;c=d",
+				"host=" + x.ParseURLOrPanic(backend.URL).Host,
+			},
+		},
+		{
+			d:           "should preserve complex semicolon query strings",
+			url:         ts.URL + "/authn-noop/1234?param1=value1;param2=value2;param3=value3&normal=param",
+			rulesRegexp: []rule.Rule{ruleNoOpAuthenticator},
+			rulesGlob:   []rule.Rule{ruleNoOpAuthenticatorGlob},
+			code:        http.StatusOK,
+			messages: []string{
+				"url=/authn-noop/1234?param1=value1;param2=value2;param3=value3&normal=param",
+				"host=" + x.ParseURLOrPanic(backend.URL).Host,
+			},
+		},
+		{
+			d:           "should preserve trailing semicolon in query strings",
+			url:         ts.URL + "/authn-noop/1234?a=b;",
+			rulesRegexp: []rule.Rule{ruleNoOpAuthenticator},
+			rulesGlob:   []rule.Rule{ruleNoOpAuthenticatorGlob},
+			code:        http.StatusOK,
+			messages: []string{
+				"url=/authn-noop/1234?a=b;",
+				"host=" + x.ParseURLOrPanic(backend.URL).Host,
+			},
+		},
+		{
+			d:           "should preserve URL encoded semicolons in query strings",
+			url:         ts.URL + "/authn-noop/1234?data=value%3Bseparated",
+			rulesRegexp: []rule.Rule{ruleNoOpAuthenticator},
+			rulesGlob:   []rule.Rule{ruleNoOpAuthenticatorGlob},
+			code:        http.StatusOK,
+			messages: []string{
+				"url=/authn-noop/1234?data=value%3Bseparated",
+				"host=" + x.ParseURLOrPanic(backend.URL).Host,
+			},
+		},
 	} {
 		t.Run(fmt.Sprintf("description=%s", tc.d), func(t *testing.T) {
 			testFunc := func(t *testing.T, strategy configuration.MatchingStrategy, rules []rule.Rule) {
