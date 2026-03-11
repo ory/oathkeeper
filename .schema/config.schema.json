@@ -1255,7 +1255,13 @@
               "type": "boolean",
               "default": true,
               "title": "CollapsePaths",
-              "description": "When set to true the request label will include just the first segment of the request path"
+              "description": "When set to true the request label will include just the first N segments of the request path, based on the collapse_request_paths_depth value"
+            },
+            "collapse_request_paths_depth": {
+              "type": "integer",
+              "default": 1,
+              "title": "CollapsePathsDepth",
+              "description": "When set to a value greater than 0 the request label will include the first N segments of the request path"
             }
           }
         }

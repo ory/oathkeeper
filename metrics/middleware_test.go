@@ -89,15 +89,16 @@ func PrometheusTestApp(middleware *Middleware) http.Handler {
 }
 
 var prometheusParams = []struct {
-	name            string
-	collapsePaths   bool
-	hidePaths       bool
-	expectedMetrics string
+	name               string
+	collapsePaths      bool
+	collapsePathsDepth int
+	hidePaths          bool
+	expectedMetrics    string
 }{
-	{"Not collapsed paths", false, false, metricsNotCollapsed},
-	{"Collapsed paths", true, false, metricsCollapsed},
-	{"Hidden not collapsed paths", false, true, metricsHidden},
-	{"Hidden collapsed paths", true, true, metricsHidden},
+	{"Not collapsed paths", false, 1, false, metricsNotCollapsed},
+	{"Collapsed paths", true, 1, false, metricsCollapsed},
+	{"Hidden not collapsed paths", false, 1, true, metricsHidden},
+	{"Hidden collapsed paths", true, 1, true, metricsHidden},
 }
 
 func TestPrometheusRequestTotalMetrics(t *testing.T) {
@@ -108,7 +109,7 @@ func TestPrometheusRequestTotalMetrics(t *testing.T) {
 
 			promRepo := NewTestPrometheusRepository(RequestTotal)
 			promMiddleware := NewMiddleware(promRepo, "test")
-			promMiddleware.CollapsePaths(tt.collapsePaths)
+			promMiddleware.CollapsePaths(tt.collapsePaths, tt.collapsePathsDepth)
 			promMiddleware.HidePaths(tt.hidePaths)
 
 			ts := httptest.NewServer(PrometheusTestApp(promMiddleware))
@@ -133,12 +134,13 @@ func TestPrometheusRequestTotalMetrics(t *testing.T) {
 }
 
 var configurablePrometheusParams = []struct {
-	name            string
-	collapsePaths   bool
-	expectedMetrics string
+	name               string
+	collapsePaths      bool
+	collapsePathsDepth int
+	expectedMetrics    string
 }{
-	{"Not collapsed paths", false, configurableMetricsNotCollapsed},
-	{"Collapsed paths", true, configurableMetricsCollapsed},
+	{"Not collapsed paths", false, 1, configurableMetricsNotCollapsed},
+	{"Collapsed paths", true, 1, configurableMetricsCollapsed},
 }
 
 func TestConfigurablePrometheusRequestTotalMetrics(t *testing.T) {
@@ -157,7 +159,7 @@ serve:
 			)
 			promRepo := NewConfigurablePrometheusRepository(d, logger)
 			promMiddleware := NewMiddleware(promRepo, "test")
-			promMiddleware.CollapsePaths(tt.collapsePaths)
+			promMiddleware.CollapsePaths(tt.collapsePaths, tt.collapsePathsDepth)
 
 			ts := httptest.NewServer(PrometheusTestApp(promMiddleware))
 			defer ts.Close()
@@ -181,23 +183,48 @@ serve:
 }
 
 var requestURIParams = []struct {
-	name         string
-	originalPath string
-	firstSegment string
+	name          string
+	originalPath  string
+	firstSegment  string
+	collapseDepth int
 }{
-	{"root path", "/", "/"},
-	{"single segment", "/test", "/test"},
-	{"two segments", "/test/path", "/test"},
-	{"multiple segments", "/test/path/segments", "/test"},
+	// depth = 1 (default behaviour)
+	{"root path depth 1", "/", "/", 1},
+	{"single segment depth 1", "/test", "/test", 1},
+	{"single segment depth 1 with query", "/test?foo=bar", "/test", 1},
+	{"two segments depth 1", "/test/path", "/test", 1},
+	{"multiple segments depth 1", "/test/path/segments", "/test", 1},
+	{"with query depth 1", "/test/path?foo=bar", "/test", 1},
+	{"three segments depth 1", "/test/path/segments", "/test", 1},
+	{"four segments depth 1", "/test/path/segments/foo", "/test", 1},
+
+	// depth = 2
+	{"root path depth 2", "/", "/", 2},
+	{"single segment depth 2", "/test", "/test", 2},
+	{"single segment depth 2 with query", "/test?foo=bar", "/test", 2},
+	{"two segments depth 2", "/test/path", "/test/path", 2},
+	{"two segments depth 2 with query", "/test/path?foo=bar", "/test/path", 2},
+	{"multiple segments depth 2", "/test/path/segments", "/test/path", 2},
+	{"with query depth 2", "/test/path/segments?foo=bar", "/test/path", 2},
+
+	// depth = 3
+	{"root path depth 3", "/", "/", 3},
+	{"single segment depth 3", "/test", "/test", 3},
+	{"two segments depth 3", "/test/path", "/test/path", 3},
+	{"two segments depth 3 with query", "/test/path?foo=bar", "/test/path", 3},
+	{"multiple segments depth 3", "/test/path/segments", "/test/path/segments", 3},
+	{"with query depth 3", "/test/path/segments?foo=bar", "/test/path/segments", 3},
+	{"four segments depth 3", "/test/path/segments/foo", "/test/path/segments", 3},
+	{"five segments depth 3", "/test/path/segments/foo/bar", "/test/path/segments", 3},
 }
 
-func TestMiddlewareGetFirstPathSegment(t *testing.T) {
+func TestMiddlewareGetFirstNPathSegments(t *testing.T) {
 	promMiddleware := NewMiddleware(nil, "test")
 
 	for _, tt := range requestURIParams {
 		t.Run(tt.name, func(t *testing.T) {
-			promMiddleware.CollapsePaths(true)
-			collapsed := promMiddleware.getFirstPathSegment(tt.originalPath)
+			promMiddleware.CollapsePaths(true, tt.collapseDepth)
+			collapsed := promMiddleware.getFirstNPathSegments(tt.originalPath, tt.collapseDepth)
 			if collapsed != tt.firstSegment {
 				t.Fatalf("Expected first segment: %s to be equal to: %s", collapsed, tt.firstSegment)
 			}
