@@ -5,7 +5,7 @@ package mutate
 
 import (
 	"bytes"
-	"crypto/md5" //nolint:gosec
+	//nolint:gosec
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -99,11 +99,11 @@ func (a *MutatorHydrator) GetID() string {
 	return "hydrator"
 }
 
-func (a *MutatorHydrator) cacheKey(config *MutatorHydratorConfig, session string) string {
-	return fmt.Sprintf("%s|%x", config.Api.URL, md5.Sum([]byte(session))) //nolint:gosec
+func (a *MutatorHydrator) cacheKey(config *MutatorHydratorConfig, session []byte) string {
+	return fmt.Sprintf("%s|%s", session, config.Api.URL)
 }
 
-func (a *MutatorHydrator) hydrateFromCache(config *MutatorHydratorConfig, session string) (*authn.AuthenticationSession, bool) {
+func (a *MutatorHydrator) hydrateFromCache(config *MutatorHydratorConfig, session []byte) (*authn.AuthenticationSession, bool) {
 	if !config.Cache.Enabled {
 		return nil, false
 	}
@@ -116,12 +116,12 @@ func (a *MutatorHydrator) hydrateFromCache(config *MutatorHydratorConfig, sessio
 	return item.Copy(), true
 }
 
-func (a *MutatorHydrator) hydrateToCache(config *MutatorHydratorConfig, key string, session *authn.AuthenticationSession) {
+func (a *MutatorHydrator) hydrateToCache(config *MutatorHydratorConfig, rawSession []byte, session *authn.AuthenticationSession) {
 	if !config.Cache.Enabled {
 		return
 	}
 
-	if a.hydrateCache.SetWithTTL(a.cacheKey(config, key), session.Copy(), 0, config.Cache.ttl) {
+	if a.hydrateCache.SetWithTTL(a.cacheKey(config, rawSession), session.Copy(), 0, config.Cache.ttl) {
 		a.d.Logger().Debug("Cache reject item")
 	}
 }
@@ -132,12 +132,10 @@ func (a *MutatorHydrator) Mutate(r *http.Request, session *authn.AuthenticationS
 		return err
 	}
 
-	var b bytes.Buffer
-	if err := json.NewEncoder(&b).Encode(session); err != nil {
+	encodedSession, err := json.Marshal(session)
+	if err != nil {
 		return errors.WithStack(err)
 	}
-
-	encodedSession := b.String()
 	if cacheSession, ok := a.hydrateFromCache(cfg, encodedSession); ok {
 		*session = *cacheSession
 		return nil
@@ -148,7 +146,7 @@ func (a *MutatorHydrator) Mutate(r *http.Request, session *authn.AuthenticationS
 	} else if _, err := url.ParseRequestURI(cfg.Api.URL); err != nil {
 		return errors.New(ErrInvalidAPIURL)
 	}
-	req, err := http.NewRequest("POST", cfg.Api.URL, &b)
+	req, err := http.NewRequest("POST", cfg.Api.URL, bytes.NewReader(encodedSession))
 	if err != nil {
 		return errors.WithStack(err)
 	}
@@ -200,7 +198,7 @@ func (a *MutatorHydrator) Mutate(r *http.Request, session *authn.AuthenticationS
 	if err != nil {
 		return errors.WithStack(err)
 	}
-	defer res.Body.Close() //nolint:errcheck
+	defer func() { _ = res.Body.Close() }()
 
 	switch res.StatusCode {
 	case http.StatusOK:

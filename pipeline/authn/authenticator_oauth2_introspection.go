@@ -82,8 +82,12 @@ func NewAuthenticatorOAuth2Introspection(c configuration.Provider, l *logrusx.Lo
 	return &AuthenticatorOAuth2Introspection{c: c, logger: l, provider: p, clientMap: make(map[string]*http.Client)}
 }
 
-func (a *AuthenticatorOAuth2Introspection) GetID() string {
-	return "oauth2_introspection"
+func (a *AuthenticatorOAuth2Introspection) GetID() string { return "oauth2_introspection" }
+
+func (a *AuthenticatorOAuth2Introspection) WaitForCache() {
+	if a.tokenCache != nil {
+		a.tokenCache.Wait()
+	}
 }
 
 type Audience []string
@@ -131,6 +135,10 @@ func (a *Audience) UnmarshalJSON(b []byte) error {
 	return errUnsupportedType
 }
 
+func tokenCacheKey(token, endpoint string) string {
+	return fmt.Sprintf("%s|%s", token, endpoint)
+}
+
 func (a *AuthenticatorOAuth2Introspection) tokenFromCache(config *AuthenticatorOAuth2IntrospectionConfiguration, token string, ss fosite.ScopeStrategy) *AuthenticatorOAuth2IntrospectionResult {
 	if !config.Cache.Enabled {
 		return nil
@@ -140,7 +148,8 @@ func (a *AuthenticatorOAuth2Introspection) tokenFromCache(config *AuthenticatorO
 		return nil
 	}
 
-	i, found := a.tokenCache.Get(token)
+	key := tokenCacheKey(token, config.IntrospectionURL)
+	i, found := a.tokenCache.Get(key)
 	if !found {
 		return nil
 	}
@@ -161,12 +170,16 @@ func (a *AuthenticatorOAuth2Introspection) tokenToCache(config *AuthenticatorOAu
 		return
 	}
 
-	if v, err := json.Marshal(i); err != nil {
+	key := tokenCacheKey(token, config.IntrospectionURL)
+	v, err := json.Marshal(i)
+	if err != nil {
 		return
-	} else if a.cacheTTL != nil {
-		a.tokenCache.SetWithTTL(token, v, 1, *a.cacheTTL)
+	}
+
+	if a.cacheTTL != nil {
+		a.tokenCache.SetWithTTL(key, v, 1, *a.cacheTTL)
 	} else {
-		a.tokenCache.Set(token, v, 1)
+		a.tokenCache.Set(key, v, 1)
 	}
 }
 
@@ -218,7 +231,7 @@ func (a *AuthenticatorOAuth2Introspection) Authenticate(r *http.Request, session
 		if err != nil {
 			return errors.WithStack(err)
 		}
-		defer resp.Body.Close() //nolint:errcheck
+		defer func() { _ = resp.Body.Close() }()
 
 		if resp.StatusCode == http.StatusTooManyRequests {
 			return errors.WithStack(helper.NewErrTooManyRequestsWithHeaders(resp))
@@ -231,8 +244,8 @@ func (a *AuthenticatorOAuth2Introspection) Authenticate(r *http.Request, session
 		}
 	}
 
-	if len(i.TokenUse) > 0 && i.TokenUse != "access_token" {
-		return errors.WithStack(helper.ErrForbidden.WithReason(fmt.Sprintf("Use of introspected token is not an access token but \"%s\"", i.TokenUse)))
+	if i.TokenUse != "" && i.TokenUse != "access_token" {
+		return errors.WithStack(helper.ErrForbidden.WithReason(fmt.Sprintf("Use of introspected token is not an access token but %q", i.TokenUse)))
 	}
 
 	if !i.Active {
@@ -244,7 +257,7 @@ func (a *AuthenticatorOAuth2Introspection) Authenticate(r *http.Request, session
 	}
 
 	for _, audience := range cf.Audience {
-		if !slices.Contains([]string(i.Audience), audience) {
+		if !slices.Contains(i.Audience, audience) {
 			return errors.WithStack(helper.ErrForbidden.WithReason(fmt.Sprintf("Token audience is not intended for target audience %s", audience)))
 		}
 	}
