@@ -3,6 +3,7 @@ serve:
     port: 6061
   proxy:
     port: 6060
+    trust_forwarded_headers: true
 
 access_rules:
   repositories:
