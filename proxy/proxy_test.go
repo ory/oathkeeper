@@ -496,10 +496,10 @@ func TestConfigureBackendURL(t *testing.T) {
 			eHost: "localhost:3000",
 		},
 		{
-			r:     &http.Request{Host: "localhost:3000", URL: &url.URL{Path: "/api/users/1234", Scheme: "http"}},
-			rl:    &rule.Rule{Upstream: rule.Upstream{URL: "http://localhost:4000/foo/", PreserveHost: true, StripPath: "api"}},
-			eURL:  "http://localhost:4000/foo/users/1234",
-			eHost: "localhost:3000",
+			r:     &http.Request{Host: "localhost:3000", URL: &url.URL{Path: "/api/../users/1234", Scheme: "http"}},
+			rl:    &rule.Rule{Upstream: rule.Upstream{URL: "http://localhost:4000"}},
+			eURL:  "http://localhost:4000/users/1234",
+			eHost: "localhost:4000",
 		},
 	} {
 		t.Run(fmt.Sprintf("case=%d", k), func(t *testing.T) {

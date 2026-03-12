@@ -444,18 +444,18 @@ func TestRequestHandler(t *testing.T) {
 }
 
 func TestInitializeSession(t *testing.T) {
-	for k, tc := range []struct {
-		d                string
-		ruleMatch        rule.Match
-		matchingStrategy configuration.MatchingStrategy
-		r                *http.Request
-		expectContext    authn.MatchContext
+	for _, tc := range []struct {
+		desc          string
+		match         rule.Match
+		strategy      configuration.MatchingStrategy
+		url           string
+		expectContext authn.MatchContext
 	}{
 		{
-			d:                "Rule without capture",
-			r:                newTestRequest("http://localhost"),
-			matchingStrategy: configuration.Regexp,
-			ruleMatch: rule.Match{
+			desc:     "Rule without capture",
+			url:      "http://localhost",
+			strategy: configuration.Regexp,
+			match: rule.Match{
 				URL: "http://localhost",
 			},
 			expectContext: authn.MatchContext{
@@ -466,10 +466,10 @@ func TestInitializeSession(t *testing.T) {
 			},
 		},
 		{
-			d:                "Rule with one capture",
-			r:                newTestRequest("http://localhost/user"),
-			matchingStrategy: configuration.Regexp,
-			ruleMatch: rule.Match{
+			desc:     "Rule with one capture",
+			url:      "http://localhost/user",
+			strategy: configuration.Regexp,
+			match: rule.Match{
 				URL: "http://localhost/<.*>",
 			},
 			expectContext: authn.MatchContext{
@@ -480,10 +480,10 @@ func TestInitializeSession(t *testing.T) {
 			},
 		},
 		{
-			d:                "Request with query params",
-			r:                newTestRequest("http://localhost/user?param=test"),
-			matchingStrategy: configuration.Regexp,
-			ruleMatch: rule.Match{
+			desc:     "Request with query params",
+			url:      "http://localhost/user?param=test",
+			strategy: configuration.Regexp,
+			match: rule.Match{
 				URL: "http://localhost/<.*>",
 			},
 			expectContext: authn.MatchContext{
@@ -494,10 +494,10 @@ func TestInitializeSession(t *testing.T) {
 			},
 		},
 		{
-			d:                "Rule with 2 captures",
-			r:                newTestRequest("http://localhost/user?param=test"),
-			matchingStrategy: configuration.Regexp,
-			ruleMatch: rule.Match{
+			desc:     "Rule with 2 captures",
+			url:      "http://localhost/user?param=test",
+			strategy: configuration.Regexp,
+			match: rule.Match{
 				URL: "<http|https>://localhost/<.*>",
 			},
 			expectContext: authn.MatchContext{
@@ -508,10 +508,24 @@ func TestInitializeSession(t *testing.T) {
 			},
 		},
 		{
-			d:                "Rule with Glob matching strategy",
-			r:                newTestRequest("http://localhost/user?param=test"),
-			matchingStrategy: configuration.Glob,
-			ruleMatch: rule.Match{
+			desc:     "Rule with 1 capture and path traversal",
+			url:      "http://localhost/user/../admin/secrets?param=test",
+			strategy: configuration.Regexp,
+			match: rule.Match{
+				URL: "http://localhost/admin/<.*>",
+			},
+			expectContext: authn.MatchContext{
+				RegexpCaptureGroups: []string{"secrets"},
+				URL:                 x.ParseURLOrPanic("http://localhost/admin/secrets?param=test"),
+				Method:              "GET",
+				Header:              TestHeader,
+			},
+		},
+		{
+			desc:     "Rule with Glob matching strategy",
+			url:      "http://localhost/user?param=test",
+			strategy: configuration.Glob,
+			match: rule.Match{
 				URL: "<http|https>://localhost/<*>",
 			},
 			expectContext: authn.MatchContext{
@@ -522,23 +536,17 @@ func TestInitializeSession(t *testing.T) {
 			},
 		},
 	} {
-		t.Run(fmt.Sprintf("case=%d/description=%s", k, tc.d), func(t *testing.T) {
-
-			conf := internal.NewConfigurationWithDefaults()
+		t.Run(fmt.Sprintf("description=%s", tc.desc), func(t *testing.T) {
+			conf := internal.NewConfigurationWithDefaults(configx.WithValue(configuration.AccessRuleMatchingStrategy, tc.strategy))
 			reg := internal.NewRegistry(conf)
-			conf.SetForTest(t, configuration.AccessRuleMatchingStrategy, string(tc.matchingStrategy))
 
-			rule := rule.Rule{
-				Match:          &tc.ruleMatch,
-				Authenticators: []rule.Handler{},
-				Authorizer:     rule.Handler{},
-				Mutators:       []rule.Handler{},
-			}
+			session := reg.ProxyRequestHandler().InitializeAuthnSession(
+				newTestRequest(tc.url),
+				&rule.Rule{Match: &tc.match},
+			)
 
-			session := reg.ProxyRequestHandler().InitializeAuthnSession(tc.r, &rule)
-
-			assert.NotNil(t, session)
-			assert.NotNil(t, session.MatchContext.Header)
+			require.NotNil(t, session)
+			require.NotNil(t, session.MatchContext.Header)
 			assert.EqualValues(t, tc.expectContext, session.MatchContext)
 		})
 	}

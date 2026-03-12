@@ -47,33 +47,29 @@ func TestRule(t *testing.T) {
 		method        string
 		url           string
 		expectedMatch bool
-		expectedErr   error
 	}{
 		{
 			method:        "DELETE",
 			url:           "https://localhost/users/1234",
 			expectedMatch: true,
-			expectedErr:   nil,
 		},
 		{
 			method:        "DELETE",
 			url:           "https://localhost/users/1234?key=value&key1=value1",
 			expectedMatch: true,
-			expectedErr:   nil,
 		},
 		{
 			method:        "DELETE",
 			url:           "https://localhost/users/abcd",
 			expectedMatch: false,
-			expectedErr:   nil,
 		},
 	}
 	for ind, tcase := range tests {
 		t.Run(strconv.FormatInt(int64(ind), 10), func(t *testing.T) {
 			testFunc := func(rule Rule, strategy configuration.MatchingStrategy) {
 				matched, err := rule.IsMatching(strategy, tcase.method, mustParse(t, tcase.url), ProtocolHTTP)
+				require.NoError(t, err)
 				assert.Equal(t, tcase.expectedMatch, matched)
-				assert.Equal(t, tcase.expectedErr, err)
 			}
 			t.Run("rule0", func(t *testing.T) {
 				testFunc(rules[0], configuration.Regexp)
@@ -100,32 +96,28 @@ func TestRule1(t *testing.T) {
 		method        string
 		url           string
 		expectedMatch bool
-		expectedErr   error
 	}{
 		{
 			method:        "DELETE",
 			url:           "https://localhost/users/manager",
 			expectedMatch: true,
-			expectedErr:   nil,
 		},
 		{
 			method:        "DELETE",
 			url:           "https://localhost/users/1234?key=value&key1=value1",
 			expectedMatch: true,
-			expectedErr:   nil,
 		},
 		{
 			method:        "DELETE",
 			url:           "https://localhost/users/admin",
 			expectedMatch: false,
-			expectedErr:   nil,
 		},
 	}
 	for ind, tcase := range tests {
 		t.Run(strconv.FormatInt(int64(ind), 10), func(t *testing.T) {
 			matched, err := r.IsMatching(configuration.Regexp, tcase.method, mustParse(t, tcase.url), ProtocolHTTP)
+			require.NoError(t, err)
 			assert.Equal(t, tcase.expectedMatch, matched)
-			assert.Equal(t, tcase.expectedErr, err)
 		})
 	}
 }
@@ -142,34 +134,48 @@ func TestRuleWithCustomMethod(t *testing.T) {
 		method        string
 		url           string
 		expectedMatch bool
-		expectedErr   error
 	}{
 		{
 			method:        "CUSTOM",
 			url:           "https://localhost/users/manager",
 			expectedMatch: true,
-			expectedErr:   nil,
 		},
 		{
 			method:        "CUSTOM",
 			url:           "https://localhost/users/1234?key=value&key1=value1",
 			expectedMatch: true,
-			expectedErr:   nil,
 		},
 		{
 			method:        "DELETE",
 			url:           "https://localhost/users/admin",
 			expectedMatch: false,
-			expectedErr:   nil,
 		},
 	}
 	for ind, tcase := range tests {
 		t.Run(strconv.FormatInt(int64(ind), 10), func(t *testing.T) {
 			matched, err := r.IsMatching(configuration.Regexp, tcase.method, mustParse(t, tcase.url), ProtocolHTTP)
+			require.NoError(t, err)
 			assert.Equal(t, tcase.expectedMatch, matched)
-			assert.Equal(t, tcase.expectedErr, err)
 		})
 	}
+}
+
+func TestRulePathTraversal(t *testing.T) {
+	r := &Rule{
+		Match: &Match{
+			Methods: []string{"POST"},
+			URL:     "https://localhost/admin/<.*>",
+		},
+	}
+
+	u := &url.URL{
+		Scheme: "https",
+		Host:   "localhost",
+		Path:   "/public/../admin/secrets",
+	}
+	matched, err := r.IsMatching(configuration.Regexp, "POST", u, ProtocolHTTP)
+	require.NoError(t, err)
+	assert.True(t, matched)
 }
 
 func TestRule_UnmarshalJSON(t *testing.T) {

@@ -6,6 +6,7 @@ package proxy
 import (
 	"encoding/json"
 	"net/http"
+	"path"
 
 	"github.com/ory/herodot"
 	"github.com/ory/x/errorsx"
@@ -327,9 +328,12 @@ func (d *requestHandler) HandleRequest(r *http.Request, rl *rule.Rule) (session 
 
 // InitializeAuthnSession creates an authentication session and initializes it with a Match context if possible
 func (d *requestHandler) InitializeAuthnSession(r *http.Request, rl *rule.Rule) *authn.AuthenticationSession {
-
 	session := &authn.AuthenticationSession{
 		Subject: "",
+	}
+
+	if r.URL.Path != "" {
+		r.URL.Path = path.Clean(r.URL.Path)
 	}
 
 	values, err := rl.ExtractRegexGroups(d.c.AccessRuleMatchingStrategy(), r.URL)

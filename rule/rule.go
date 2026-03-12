@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/url"
+	"path"
 	"strings"
 
 	"github.com/pkg/errors"
@@ -218,6 +219,9 @@ func (r *Rule) IsMatching(strategy configuration.MatchingStrategy, method string
 		return false, nil
 	}
 
+	if u.Path != "" {
+		u.Path = path.Clean(u.Path)
+	}
 	matchAgainst := fmt.Sprintf("%s://%s%s", u.Scheme, u.Host, u.Path)
 	return r.matchingEngine.IsMatching(r.Match.GetURL(), matchAgainst)
 }

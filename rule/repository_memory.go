@@ -110,7 +110,7 @@ func (m *RepositoryMemory) Set(ctx context.Context, rules []Rule) error {
 	return nil
 }
 
-func (m *RepositoryMemory) Match(ctx context.Context, method string, u *url.URL, protocol Protocol) (*Rule, error) {
+func (m *RepositoryMemory) Match(_ context.Context, method string, u *url.URL, protocol Protocol) (*Rule, error) {
 	if u == nil {
 		return nil, errors.WithStack(errors.New("nil URL provided"))
 	}
