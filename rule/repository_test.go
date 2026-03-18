@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"math/rand"
 	"net/http"
+	"os"
 	"reflect"
 	"testing"
 
@@ -20,15 +21,11 @@ import (
 
 	"github.com/ory/x/logrusx"
 
-	"github.com/ory/x/sqlcon/dockertest"
-
 	"github.com/ory/oathkeeper/driver/configuration"
 )
 
 func TestMain(m *testing.M) {
-	ex := dockertest.Register()
-	code := m.Run()
-	ex.Exit(code)
+	os.Exit(m.Run())
 }
 
 type validatorNoop struct {
@@ -47,6 +44,7 @@ type mockRepositoryRegistry struct {
 func (r *mockRepositoryRegistry) RuleValidator() Validator {
 	return &r.v
 }
+
 func (r *mockRepositoryRegistry) Logger() *logrusx.Logger {
 	r.loggerCalled++
 	return logrusx.New("", "")
@@ -135,7 +133,6 @@ func TestRepository(t *testing.T) {
 			strategy, err = repo.MatchingStrategy(context.Background())
 			require.NoError(t, err)
 			require.Equal(t, configuration.Glob, strategy)
-
 		})
 	}
 
