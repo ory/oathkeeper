@@ -112,14 +112,23 @@ func (d *Proxy) RoundTrip(r *http.Request) (*http.Response, error) {
 
 func (d *Proxy) Rewrite(r *httputil.ProxyRequest) {
 	if d.c.ProxyTrustForwardedHeaders() {
-		headers := []string{
+		for _, h := range []string{
 			"X-Forwarded-Host",
 			"X-Forwarded-Proto",
 			"X-Forwarded-For",
-		}
-		for _, h := range headers {
+		} {
 			if v := r.In.Header.Get(h); v != "" {
 				r.Out.Header.Set(h, v)
+			}
+		}
+	} else {
+		// Remove any forwarded headers if the proxy is not trusted to prevent spoofing.
+		// The httputil.ReverseProxy removes X-Forwarded, X-Forwarded-Host, and X-Forwarded-Proto
+		// headers by default, but we want to be sure that all of them are removed.
+		for h := range r.Out.Header {
+			lh := strings.ToLower(h)
+			if strings.HasPrefix(lh, "x-forwarded") || lh == "forwarded" {
+				r.Out.Header.Del(h)
 			}
 		}
 	}

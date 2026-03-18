@@ -626,17 +626,18 @@ func TestRateLimitHeaderPropagation(t *testing.T) {
 	assert.Equal(t, "1709042400", res.Header.Get("X-Ratelimit-Reset"))
 }
 
-func TestXForwardedProtoMustNotAffectMatchWhenUntrusted(t *testing.T) {
-	backend := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) { w.WriteHeader(http.StatusOK) }))
-	t.Cleanup(backend.Close)
-
+func TestDoNotUseXForwardedWhenUntrusted(t *testing.T) {
 	conf := internal.NewConfigurationWithDefaults(configx.WithValues(map[string]any{
-		configuration.ProxyTrustForwardedHeaders:      false,
-		configuration.AuthenticatorAnonymousIsEnabled: true,
-		configuration.AuthorizerAllowIsEnabled:        true,
-		configuration.AuthorizerDenyIsEnabled:         true,
-		configuration.MutatorNoopIsEnabled:            true,
-		configuration.ErrorsJSONIsEnabled:             true,
+		configuration.ProxyTrustForwardedHeaders:                                false,
+		configuration.AuthenticatorAnonymousIsEnabled:                           true,
+		configuration.AuthorizerAllowIsEnabled:                                  true,
+		configuration.AuthorizerDenyIsEnabled:                                   true,
+		configuration.MutatorNoopIsEnabled:                                      true,
+		configuration.ErrorsJSONIsEnabled:                                       true,
+		configuration.ErrorsRedirectIsEnabled:                                   true,
+		configuration.ErrorsHandlers + ".redirect.config.to":                    "http://example.com/error",
+		configuration.ErrorsHandlers + ".redirect.config.return_to_query_param": "return_to",
+		configuration.ErrorsFallback:                                            []string{"redirect"},
 	}))
 	reg := internal.NewRegistry(conf)
 
@@ -651,7 +652,6 @@ func TestXForwardedProtoMustNotAffectMatchWhenUntrusted(t *testing.T) {
 		Authenticators: []rule.Handler{{Handler: "anonymous"}},
 		Authorizer:     rule.Handler{Handler: "allow"},
 		Mutators:       []rule.Handler{{Handler: "noop"}},
-		Upstream:       rule.Upstream{URL: backend.URL},
 		Errors:         []rule.ErrorHandler{{Handler: "json"}},
 	}, {
 		ID:             "http-deny",
@@ -659,7 +659,6 @@ func TestXForwardedProtoMustNotAffectMatchWhenUntrusted(t *testing.T) {
 		Authenticators: []rule.Handler{{Handler: "anonymous"}},
 		Authorizer:     rule.Handler{Handler: "deny"},
 		Mutators:       []rule.Handler{{Handler: "noop"}},
-		Upstream:       rule.Upstream{URL: backend.URL},
 		Errors:         []rule.ErrorHandler{{Handler: "json"}},
 	}}
 
@@ -667,19 +666,43 @@ func TestXForwardedProtoMustNotAffectMatchWhenUntrusted(t *testing.T) {
 	repo.WithRules(rls)
 	require.NoError(t, repo.SetMatchingStrategy(t.Context(), configuration.Regexp))
 
-	// Baseline: plain HTTP request does not match HTTPS-only rule.
-	res1, err := http.Get(ruleURL) // #nosec G107 -- this is a test supposed to make an HTTP request
-	require.NoError(t, err)
-	_ = res1.Body.Close()
-	require.Equal(t, http.StatusForbidden, res1.StatusCode)
+	t.Run("x-forwarded-proto during matching", func(t *testing.T) {
+		// Baseline: plain HTTP request does not match HTTPS-only rule.
+		res1, err := http.Get(ruleURL) // #nosec G107 -- this is a test supposed to make an HTTP request
+		require.NoError(t, err)
+		_ = res1.Body.Close()
+		require.Equal(t, http.StatusForbidden, res1.StatusCode)
 
-	// try to spoof scheme via untrusted X-Forwarded-Proto header; should still be denied
-	req2, err := http.NewRequest(http.MethodGet, ruleURL, nil) // #nosec G107 -- this is a test supposed to make an HTTP request
-	require.NoError(t, err)
-	req2.Header.Set("X-Forwarded-Proto", "https")
-	res2, err := http.DefaultClient.Do(req2)
-	require.NoError(t, err)
-	_ = res2.Body.Close()
+		// try to spoof scheme via untrusted X-Forwarded-Proto header; should still be denied
+		req2, err := http.NewRequest(http.MethodGet, ruleURL, nil) // #nosec G107 -- this is a test supposed to make an HTTP request
+		require.NoError(t, err)
+		req2.Header.Set("X-Forwarded-Proto", "https")
+		res2, err := http.DefaultClient.Do(req2)
+		require.NoError(t, err)
+		_ = res2.Body.Close()
 
-	require.Equal(t, http.StatusForbidden, res2.StatusCode, "X-Forwarded-Proto unexpectedly affected URL scheme matching")
+		assert.Equal(t, http.StatusForbidden, res2.StatusCode, "X-Forwarded-Proto unexpectedly affected URL scheme matching")
+	})
+
+	t.Run("x-forwarded headers not used for redirect on error", func(t *testing.T) {
+		req, err := http.NewRequest(http.MethodGet, ruleURL+"/404", nil) // #nosec G107 -- this is a test supposed to make an HTTP request
+		require.NoError(t, err)
+		req.Header.Set("X-Forwarded-Proto", "https")
+		req.Header.Set("X-Forwarded-Host", "otherhost.com")
+		req.Header.Set("X-Forwarded-Uri", "/otherpath")
+
+		cl := http.Client{}
+		cl.CheckRedirect = func(_ *http.Request, _ []*http.Request) error { return http.ErrUseLastResponse }
+		res, err := cl.Do(req)
+		require.NoError(t, err)
+		_ = res.Body.Close()
+
+		require.Equal(t, http.StatusFound, res.StatusCode)
+		u, err := url.Parse(res.Header.Get("Location"))
+		require.NoError(t, err)
+		assert.Equal(t, "http", u.Scheme)
+		assert.Equal(t, "example.com", u.Host)
+		assert.Equal(t, "/error", u.Path)
+		assert.Equal(t, ruleURL+"/404", u.Query().Get("return_to"))
+	})
 }
