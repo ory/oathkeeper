@@ -5,202 +5,209 @@
 
 **Table of Contents**
 
-- [0.0.0 (2025-11-07)](#000-2025-11-07)
-- [25.4.0 (2025-11-06)](#2540-2025-11-06)
+- [0.0.0 (2026-03-20)](#000-2026-03-20)
+- [26.2.0 (2026-03-20)](#2620-2026-03-20)
   - [Bug Fixes](#bug-fixes)
   - [Chores](#chores)
   - [Code Refactoring](#code-refactoring)
+  - [Documentation](#documentation)
   - [Features](#features)
   - [Tests](#tests)
-- [0.40.9 (2025-01-30)](#0409-2025-01-30)
+- [25.4.0 (2025-11-07)](#2540-2025-11-07)
   - [Bug Fixes](#bug-fixes-1)
   - [Code Generation](#code-generation)
-- [0.40.8 (2024-12-13)](#0408-2024-12-13)
+  - [Code Refactoring](#code-refactoring-1)
+  - [Features](#features-1)
+  - [Tests](#tests-1)
+- [0.40.9 (2025-01-30)](#0409-2025-01-30)
   - [Bug Fixes](#bug-fixes-2)
   - [Code Generation](#code-generation-1)
-- [0.40.7 (2024-02-29)](#0407-2024-02-29)
-  - [Code Generation](#code-generation-2)
-- [0.40.7-pre.0 (2024-02-29)](#0407-pre0-2024-02-29)
+- [0.40.8 (2024-12-13)](#0408-2024-12-13)
   - [Bug Fixes](#bug-fixes-3)
+  - [Code Generation](#code-generation-2)
+- [0.40.7 (2024-02-29)](#0407-2024-02-29)
   - [Code Generation](#code-generation-3)
-  - [Features](#features-1)
-- [0.40.6 (2023-07-18)](#0406-2023-07-18)
+- [0.40.7-pre.0 (2024-02-29)](#0407-pre0-2024-02-29)
   - [Bug Fixes](#bug-fixes-4)
   - [Code Generation](#code-generation-4)
-- [0.40.5 (2023-07-17)](#0405-2023-07-17)
-  - [Code Generation](#code-generation-5)
   - [Features](#features-2)
-- [0.40.4 (2023-07-13)](#0404-2023-07-13)
+- [0.40.6 (2023-07-18)](#0406-2023-07-18)
   - [Bug Fixes](#bug-fixes-5)
+  - [Code Generation](#code-generation-5)
+- [0.40.5 (2023-07-17)](#0405-2023-07-17)
   - [Code Generation](#code-generation-6)
   - [Features](#features-3)
-  - [Tests](#tests-1)
-- [0.40.3 (2023-04-25)](#0403-2023-04-25)
+- [0.40.4 (2023-07-13)](#0404-2023-07-13)
   - [Bug Fixes](#bug-fixes-6)
   - [Code Generation](#code-generation-7)
   - [Features](#features-4)
-- [0.40.2 (2023-03-15)](#0402-2023-03-15)
+  - [Tests](#tests-2)
+- [0.40.3 (2023-04-25)](#0403-2023-04-25)
   - [Bug Fixes](#bug-fixes-7)
   - [Code Generation](#code-generation-8)
-  - [Documentation](#documentation)
   - [Features](#features-5)
-- [0.40.1 (2023-01-17)](#0401-2023-01-17)
+- [0.40.2 (2023-03-15)](#0402-2023-03-15)
   - [Bug Fixes](#bug-fixes-8)
   - [Code Generation](#code-generation-9)
   - [Documentation](#documentation-1)
   - [Features](#features-6)
-  - [Tests](#tests-2)
-- [0.40.0 (2022-09-14)](#0400-2022-09-14)
+- [0.40.1 (2023-01-17)](#0401-2023-01-17)
   - [Bug Fixes](#bug-fixes-9)
   - [Code Generation](#code-generation-10)
-  - [Code Refactoring](#code-refactoring-1)
+  - [Documentation](#documentation-2)
   - [Features](#features-7)
   - [Tests](#tests-3)
-- [0.39.4 (2022-08-31)](#0394-2022-08-31)
+- [0.40.0 (2022-09-14)](#0400-2022-09-14)
+  - [Bug Fixes](#bug-fixes-10)
   - [Code Generation](#code-generation-11)
+  - [Code Refactoring](#code-refactoring-2)
+  - [Features](#features-8)
+  - [Tests](#tests-4)
+- [0.39.4 (2022-08-31)](#0394-2022-08-31)
+  - [Code Generation](#code-generation-12)
   - [Unclassified](#unclassified)
 - [0.39.3 (2022-08-18)](#0393-2022-08-18)
-  - [Code Generation](#code-generation-12)
-- [0.39.3-pre.0 (2022-08-18)](#0393-pre0-2022-08-18)
   - [Code Generation](#code-generation-13)
-- [0.39.2 (2022-08-18)](#0392-2022-08-18)
-  - [Bug Fixes](#bug-fixes-10)
+- [0.39.3-pre.0 (2022-08-18)](#0393-pre0-2022-08-18)
   - [Code Generation](#code-generation-14)
-  - [Documentation](#documentation-2)
-  - [Features](#features-8)
+- [0.39.2 (2022-08-18)](#0392-2022-08-18)
+  - [Bug Fixes](#bug-fixes-11)
+  - [Code Generation](#code-generation-15)
+  - [Documentation](#documentation-3)
+  - [Features](#features-9)
 - [0.39.0 (2022-06-27)](#0390-2022-06-27)
   - [Breaking Changes](#breaking-changes)
-    - [Bug Fixes](#bug-fixes-11)
-    - [Code Generation](#code-generation-15)
-    - [Features](#features-9)
+    - [Bug Fixes](#bug-fixes-12)
+    - [Code Generation](#code-generation-16)
+    - [Features](#features-10)
 - [0.38.25-beta.1 (2022-04-13)](#03825-beta1-2022-04-13)
-  - [Bug Fixes](#bug-fixes-12)
-  - [Code Generation](#code-generation-16)
-  - [Documentation](#documentation-3)
-- [0.38.24-beta.1 (2022-04-06)](#03824-beta1-2022-04-06)
+  - [Bug Fixes](#bug-fixes-13)
   - [Code Generation](#code-generation-17)
-  - [Features](#features-10)
-- [0.38.23-beta.1 (2022-02-24)](#03823-beta1-2022-02-24)
+  - [Documentation](#documentation-4)
+- [0.38.24-beta.1 (2022-04-06)](#03824-beta1-2022-04-06)
   - [Code Generation](#code-generation-18)
   - [Features](#features-11)
-- [0.38.22-beta.1 (2022-02-23)](#03822-beta1-2022-02-23)
-  - [Bug Fixes](#bug-fixes-13)
+- [0.38.23-beta.1 (2022-02-24)](#03823-beta1-2022-02-24)
   - [Code Generation](#code-generation-19)
-- [0.38.20-beta.1 (2022-02-14)](#03820-beta1-2022-02-14)
+  - [Features](#features-12)
+- [0.38.22-beta.1 (2022-02-23)](#03822-beta1-2022-02-23)
   - [Bug Fixes](#bug-fixes-14)
   - [Code Generation](#code-generation-20)
-  - [Code Refactoring](#code-refactoring-2)
-  - [Documentation](#documentation-4)
-  - [Features](#features-12)
-- [0.38.19-beta.1 (2022-02-04)](#03819-beta1-2022-02-04)
+- [0.38.20-beta.1 (2022-02-14)](#03820-beta1-2022-02-14)
   - [Bug Fixes](#bug-fixes-15)
   - [Code Generation](#code-generation-21)
+  - [Code Refactoring](#code-refactoring-3)
   - [Documentation](#documentation-5)
   - [Features](#features-13)
-- [0.38.17-beta.1 (2022-02-03)](#03817-beta1-2022-02-03)
-  - [Continuous Integration](#continuous-integration)
-- [0.38.18-beta.1 (2022-02-03)](#03818-beta1-2022-02-03)
+- [0.38.19-beta.1 (2022-02-04)](#03819-beta1-2022-02-04)
   - [Bug Fixes](#bug-fixes-16)
   - [Code Generation](#code-generation-22)
   - [Documentation](#documentation-6)
   - [Features](#features-14)
-  - [Tests](#tests-4)
-  - [Unclassified](#unclassified-1)
-- [0.38.15-beta.1 (2021-08-28)](#03815-beta1-2021-08-28)
+- [0.38.17-beta.1 (2022-02-03)](#03817-beta1-2022-02-03)
+  - [Continuous Integration](#continuous-integration)
+- [0.38.18-beta.1 (2022-02-03)](#03818-beta1-2022-02-03)
   - [Bug Fixes](#bug-fixes-17)
   - [Code Generation](#code-generation-23)
   - [Documentation](#documentation-7)
   - [Features](#features-15)
-- [0.38.14-beta.1 (2021-07-14)](#03814-beta1-2021-07-14)
+  - [Tests](#tests-5)
+  - [Unclassified](#unclassified-1)
+- [0.38.15-beta.1 (2021-08-28)](#03815-beta1-2021-08-28)
   - [Bug Fixes](#bug-fixes-18)
   - [Code Generation](#code-generation-24)
   - [Documentation](#documentation-8)
   - [Features](#features-16)
-  - [Reverts](#reverts)
-- [0.38.12-beta.1 (2021-06-22)](#03812-beta1-2021-06-22)
+- [0.38.14-beta.1 (2021-07-14)](#03814-beta1-2021-07-14)
   - [Bug Fixes](#bug-fixes-19)
   - [Code Generation](#code-generation-25)
+  - [Documentation](#documentation-9)
   - [Features](#features-17)
-  - [Tests](#tests-5)
-  - [Unclassified](#unclassified-2)
-- [0.38.11-beta.1 (2021-05-13)](#03811-beta1-2021-05-13)
+  - [Reverts](#reverts)
+- [0.38.12-beta.1 (2021-06-22)](#03812-beta1-2021-06-22)
   - [Bug Fixes](#bug-fixes-20)
   - [Code Generation](#code-generation-26)
-  - [Reverts](#reverts-1)
-- [0.38.10-beta.2 (2021-05-05)](#03810-beta2-2021-05-05)
+  - [Features](#features-18)
+  - [Tests](#tests-6)
+  - [Unclassified](#unclassified-2)
+- [0.38.11-beta.1 (2021-05-13)](#03811-beta1-2021-05-13)
   - [Bug Fixes](#bug-fixes-21)
   - [Code Generation](#code-generation-27)
-  - [Code Refactoring](#code-refactoring-3)
-  - [Documentation](#documentation-9)
-  - [Features](#features-18)
-- [0.38.9-beta.1 (2021-03-17)](#0389-beta1-2021-03-17)
-  - [Code Generation](#code-generation-28)
-- [0.38.9-beta.1.pre.3 (2021-03-16)](#0389-beta1pre3-2021-03-16)
+  - [Reverts](#reverts-1)
+- [0.38.10-beta.2 (2021-05-05)](#03810-beta2-2021-05-05)
   - [Bug Fixes](#bug-fixes-22)
+  - [Code Generation](#code-generation-28)
+  - [Code Refactoring](#code-refactoring-4)
+  - [Documentation](#documentation-10)
+  - [Features](#features-19)
+- [0.38.9-beta.1 (2021-03-17)](#0389-beta1-2021-03-17)
   - [Code Generation](#code-generation-29)
-- [0.38.9-beta.1.pre.2 (2021-03-15)](#0389-beta1pre2-2021-03-15)
-  - [Code Generation](#code-generation-30)
-- [0.38.9-beta.1.pre.1 (2021-03-15)](#0389-beta1pre1-2021-03-15)
+- [0.38.9-beta.1.pre.3 (2021-03-16)](#0389-beta1pre3-2021-03-16)
   - [Bug Fixes](#bug-fixes-23)
+  - [Code Generation](#code-generation-30)
+- [0.38.9-beta.1.pre.2 (2021-03-15)](#0389-beta1pre2-2021-03-15)
   - [Code Generation](#code-generation-31)
-  - [Unclassified](#unclassified-3)
-- [0.38.8-beta.1 (2021-02-25)](#0388-beta1-2021-02-25)
+- [0.38.9-beta.1.pre.1 (2021-03-15)](#0389-beta1pre1-2021-03-15)
   - [Bug Fixes](#bug-fixes-24)
   - [Code Generation](#code-generation-32)
-  - [Unclassified](#unclassified-4)
-- [0.38.7-beta.1 (2021-02-22)](#0387-beta1-2021-02-22)
+  - [Unclassified](#unclassified-3)
+- [0.38.8-beta.1 (2021-02-25)](#0388-beta1-2021-02-25)
   - [Bug Fixes](#bug-fixes-25)
   - [Code Generation](#code-generation-33)
-  - [Features](#features-19)
-- [0.38.6-beta.1 (2021-01-27)](#0386-beta1-2021-01-27)
-  - [Code Generation](#code-generation-34)
-  - [Documentation](#documentation-10)
-  - [Features](#features-20)
-- [0.38.5-beta.1 (2020-12-10)](#0385-beta1-2020-12-10)
+  - [Unclassified](#unclassified-4)
+- [0.38.7-beta.1 (2021-02-22)](#0387-beta1-2021-02-22)
   - [Bug Fixes](#bug-fixes-26)
+  - [Code Generation](#code-generation-34)
+  - [Features](#features-20)
+- [0.38.6-beta.1 (2021-01-27)](#0386-beta1-2021-01-27)
   - [Code Generation](#code-generation-35)
   - [Documentation](#documentation-11)
   - [Features](#features-21)
-  - [Unclassified](#unclassified-5)
-- [0.38.4-beta.1 (2020-09-28)](#0384-beta1-2020-09-28)
+- [0.38.5-beta.1 (2020-12-10)](#0385-beta1-2020-12-10)
   - [Bug Fixes](#bug-fixes-27)
   - [Code Generation](#code-generation-36)
   - [Documentation](#documentation-12)
   - [Features](#features-22)
-  - [Unclassified](#unclassified-6)
-- [0.38.3-beta.1 (2020-07-29)](#0383-beta1-2020-07-29)
+  - [Unclassified](#unclassified-5)
+- [0.38.4-beta.1 (2020-09-28)](#0384-beta1-2020-09-28)
   - [Bug Fixes](#bug-fixes-28)
   - [Code Generation](#code-generation-37)
   - [Documentation](#documentation-13)
   - [Features](#features-23)
-- [0.38.2-beta.1 (2020-05-25)](#0382-beta1-2020-05-25)
+  - [Unclassified](#unclassified-6)
+- [0.38.3-beta.1 (2020-07-29)](#0383-beta1-2020-07-29)
   - [Bug Fixes](#bug-fixes-29)
-  - [Chores](#chores-1)
+  - [Code Generation](#code-generation-38)
   - [Documentation](#documentation-14)
   - [Features](#features-24)
-- [0.38.1-beta.1 (2020-05-08)](#0381-beta1-2020-05-08)
+- [0.38.2-beta.1 (2020-05-25)](#0382-beta1-2020-05-25)
   - [Bug Fixes](#bug-fixes-30)
-  - [Chores](#chores-2)
-- [0.38.0-beta.2 (2020-05-07)](#0380-beta2-2020-05-07)
-  - [Bug Fixes](#bug-fixes-31)
-  - [Chores](#chores-3)
-  - [Code Refactoring](#code-refactoring-4)
+  - [Chores](#chores-1)
   - [Documentation](#documentation-15)
   - [Features](#features-25)
+- [0.38.1-beta.1 (2020-05-08)](#0381-beta1-2020-05-08)
+  - [Bug Fixes](#bug-fixes-31)
+  - [Chores](#chores-2)
+- [0.38.0-beta.2 (2020-05-07)](#0380-beta2-2020-05-07)
+  - [Bug Fixes](#bug-fixes-32)
+  - [Chores](#chores-3)
+  - [Code Refactoring](#code-refactoring-5)
+  - [Documentation](#documentation-16)
+  - [Features](#features-26)
 - [0.37.1-beta.1 (2020-04-03)](#0371-beta1-2020-04-03)
   - [Chores](#chores-4)
-  - [Documentation](#documentation-16)
+  - [Documentation](#documentation-17)
 - [0.37.0-beta.1 (2020-04-02)](#0370-beta1-2020-04-02)
   - [Breaking Changes](#breaking-changes-1)
-    - [Bug Fixes](#bug-fixes-32)
-    - [Documentation](#documentation-17)
-    - [Features](#features-26)
+    - [Bug Fixes](#bug-fixes-33)
+    - [Documentation](#documentation-18)
+    - [Features](#features-27)
 - [0.36.0-beta.4 (2020-02-14)](#0360-beta4-2020-02-14)
-  - [Bug Fixes](#bug-fixes-33)
-  - [Documentation](#documentation-18)
-- [0.36.0-beta.1 (2020-02-05)](#0360-beta1-2020-02-05)
+  - [Bug Fixes](#bug-fixes-34)
   - [Documentation](#documentation-19)
-  - [Features](#features-27)
+- [0.36.0-beta.1 (2020-02-05)](#0360-beta1-2020-02-05)
+  - [Documentation](#documentation-20)
+  - [Features](#features-28)
   - [Unclassified](#unclassified-7)
 - [0.35.5-beta.2 (2020-01-31)](#0355-beta2-2020-01-31)
   - [Unclassified](#unclassified-8)
@@ -209,68 +216,68 @@
 - [0.35.4-beta.1 (2020-01-26)](#0354-beta1-2020-01-26)
   - [Unclassified](#unclassified-10)
 - [0.35.3-beta.1 (2020-01-26)](#0353-beta1-2020-01-26)
-  - [Documentation](#documentation-20)
+  - [Documentation](#documentation-21)
   - [Unclassified](#unclassified-11)
 - [0.35.1-beta.1 (2020-01-14)](#0351-beta1-2020-01-14)
   - [Unclassified](#unclassified-12)
 - [0.35.0-beta.1 (2020-01-13)](#0350-beta1-2020-01-13)
-  - [Documentation](#documentation-21)
+  - [Documentation](#documentation-22)
   - [Unclassified](#unclassified-13)
 - [0.34.0-beta.1 (2019-12-26)](#0340-beta1-2019-12-26)
-  - [Documentation](#documentation-22)
+  - [Documentation](#documentation-23)
   - [Unclassified](#unclassified-14)
 - [0.33.1-beta.1 (2019-12-18)](#0331-beta1-2019-12-18)
-  - [Documentation](#documentation-23)
+  - [Documentation](#documentation-24)
   - [Unclassified](#unclassified-15)
 - [0.33.0-beta.1 (2019-12-16)](#0330-beta1-2019-12-16)
-  - [Documentation](#documentation-24)
+  - [Documentation](#documentation-25)
   - [Unclassified](#unclassified-16)
 - [0.32.1-beta.1 (2019-10-30)](#0321-beta1-2019-10-30)
-  - [Documentation](#documentation-25)
+  - [Documentation](#documentation-26)
   - [Unclassified](#unclassified-17)
 - [0.32.0-beta.1 (2019-10-20)](#0320-beta1-2019-10-20)
-  - [Documentation](#documentation-26)
-- [0.31.0-beta.1 (2019-10-20)](#0310-beta1-2019-10-20)
   - [Documentation](#documentation-27)
+- [0.31.0-beta.1 (2019-10-20)](#0310-beta1-2019-10-20)
+  - [Documentation](#documentation-28)
   - [Unclassified](#unclassified-18)
 - [0.19.0-beta.1 (2019-09-23)](#0190-beta1-2019-09-23)
   - [Unclassified](#unclassified-19)
 - [0.18.0-beta.1 (2019-08-22)](#0180-beta1-2019-08-22)
-  - [Documentation](#documentation-28)
+  - [Documentation](#documentation-29)
   - [Unclassified](#unclassified-20)
 - [0.17.4-beta.1 (2019-08-09)](#0174-beta1-2019-08-09)
-  - [Documentation](#documentation-29)
+  - [Documentation](#documentation-30)
   - [Unclassified](#unclassified-21)
 - [0.17.3-beta.1 (2019-08-03)](#0173-beta1-2019-08-03)
-  - [Documentation](#documentation-30)
+  - [Documentation](#documentation-31)
   - [Unclassified](#unclassified-22)
 - [0.17.2-beta.1 (2019-08-02)](#0172-beta1-2019-08-02)
-  - [Documentation](#documentation-31)
+  - [Documentation](#documentation-32)
   - [Unclassified](#unclassified-23)
 - [0.17.1-beta.1 (2019-07-23)](#0171-beta1-2019-07-23)
-  - [Documentation](#documentation-32)
+  - [Documentation](#documentation-33)
   - [Unclassified](#unclassified-24)
 - [0.17.0-beta.1 (2019-07-18)](#0170-beta1-2019-07-18)
   - [Continuous Integration](#continuous-integration-1)
-  - [Documentation](#documentation-33)
+  - [Documentation](#documentation-34)
   - [Unclassified](#unclassified-25)
 - [0.16.0-beta.5 (2019-06-28)](#0160-beta5-2019-06-28)
-  - [Documentation](#documentation-34)
+  - [Documentation](#documentation-35)
   - [Unclassified](#unclassified-26)
 - [0.16.0-beta.4 (2019-05-28)](#0160-beta4-2019-05-28)
-  - [Documentation](#documentation-35)
+  - [Documentation](#documentation-36)
   - [Unclassified](#unclassified-27)
 - [0.16.0-beta.3 (2019-05-19)](#0160-beta3-2019-05-19)
   - [Continuous Integration](#continuous-integration-2)
-  - [Documentation](#documentation-36)
+  - [Documentation](#documentation-37)
   - [Unclassified](#unclassified-28)
 - [0.15.2 (2019-05-04)](#0152-2019-05-04)
-  - [Documentation](#documentation-37)
+  - [Documentation](#documentation-38)
   - [Unclassified](#unclassified-29)
 - [0.15.1 (2019-04-29)](#0151-2019-04-29)
   - [Unclassified](#unclassified-30)
 - [0.15.0 (2019-04-29)](#0150-2019-04-29)
-  - [Documentation](#documentation-38)
+  - [Documentation](#documentation-39)
   - [Unclassified](#unclassified-31)
 - [0.14.2+oryOS.10 (2018-12-13)](#0142oryos10-2018-12-13)
   - [Continuous Integration](#continuous-integration-3)
@@ -278,10 +285,10 @@
   - [Continuous Integration](#continuous-integration-4)
 - [0.14.0+oryOS.10 (2018-12-13)](#0140oryos10-2018-12-13)
   - [Continuous Integration](#continuous-integration-5)
-  - [Documentation](#documentation-39)
+  - [Documentation](#documentation-40)
   - [Unclassified](#unclassified-32)
 - [0.11.12 (2018-05-07)](#01112-2018-05-07)
-  - [Documentation](#documentation-40)
+  - [Documentation](#documentation-41)
   - [Unclassified](#unclassified-33)
 - [0.0.29 (2017-12-19)](#0029-2017-12-19)
   - [Unclassified](#unclassified-34)
@@ -296,14 +303,14 @@
 - [0.0.24 (2017-11-26)](#0024-2017-11-26)
   - [Unclassified](#unclassified-39)
 - [0.0.23 (2017-11-24)](#0023-2017-11-24)
-  - [Documentation](#documentation-41)
+  - [Documentation](#documentation-42)
   - [Unclassified](#unclassified-40)
 - [0.0.22 (2017-11-20)](#0022-2017-11-20)
   - [Unclassified](#unclassified-41)
 - [0.0.21 (2017-11-19)](#0021-2017-11-19)
   - [Unclassified](#unclassified-42)
 - [0.0.20 (2017-11-18)](#0020-2017-11-18)
-  - [Documentation](#documentation-42)
+  - [Documentation](#documentation-43)
   - [Unclassified](#unclassified-43)
 - [0.0.19 (2017-11-13)](#0019-2017-11-13)
   - [Unclassified](#unclassified-44)
@@ -342,14 +349,236 @@
 - [0.0.2 (2017-10-12)](#002-2017-10-12)
   - [Unclassified](#unclassified-61)
 - [0.0.1 (2017-10-10)](#001-2017-10-10)
-  - [Documentation](#documentation-43)
+  - [Documentation](#documentation-44)
   - [Unclassified](#unclassified-62)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-# [0.0.0](https://github.com/ory/oathkeeper/compare/v25.4.0...v0.0.0) (2025-11-07)
+# [0.0.0](https://github.com/ory/oathkeeper/compare/v26.2.0...v0.0.0) (2026-03-20)
 
-# [25.4.0](https://github.com/ory/oathkeeper/compare/v0.40.9...v25.4.0) (2025-11-06)
+# [26.2.0](https://github.com/ory/oathkeeper/compare/v25.4.0...v26.2.0) (2026-03-20)
+
+v26.2.0
+
+### Bug Fixes
+
+- Always retry curl invocations to surmount transient third-party failures
+  ([9a8bda2](https://github.com/ory/oathkeeper/commit/9a8bda23f60d15da245f17f1ffbf1935be42105c)):
+
+  GitOrigin-RevId: b23ca94a4e1ba11367012a70a9e528b614f3ceb9
+
+- Clean path while matching to prevent path traversal
+  ([8e00021](https://github.com/ory/oathkeeper/commit/8e0002140491c592db41fa141dc6ad68f417e2b2)):
+
+  GitOrigin-RevId: b435835e8d0dbe811dcb12e654deec0477a15040
+
+- Context passing in jsonnetsecure
+  ([664432e](https://github.com/ory/oathkeeper/commit/664432ee20d888faf9ee7c08a4584f123ccc4a67)):
+
+  GitOrigin-RevId: 5545bf7446208fafbc8f45f88ab2903a7000a318
+
+- Correctly scan SQL `NULL` into go JSON types
+  ([9088f91](https://github.com/ory/oathkeeper/commit/9088f915d34dd0a077e8b02f831fe52d905a146f)):
+
+  GitOrigin-RevId: 7493c9efdb70ceea61e216660b83408bc7a5d367
+
+- Down migrations in newer MySQL versions
+  ([c92bc2c](https://github.com/ory/oathkeeper/commit/c92bc2cdf816daf51a11cd068e13a52ff65d7d85)):
+
+  GitOrigin-RevId: 85c133fa17445d2579918d673db27d9e68e3fc8b
+
+- Drop all `X-Forwarded-*` headers when untrusted
+  ([36a676e](https://github.com/ory/oathkeeper/commit/36a676e4f6b3edfeb0572cb1b53a5e43111177e5)):
+
+  GitOrigin-RevId: e8346349443a3504b022fcb4f189a939542f6b63
+
+- Fix benchmark test
+  ([5862cf6](https://github.com/ory/oathkeeper/commit/5862cf6830f54a58fb6ed71033ad13760e64b304)):
+
+  GitOrigin-RevId: 8cd5d90c7d7124671389cafbb89b87e6c9ced34c
+
+- Incorrect default value for page_tokens
+  ([9667983](https://github.com/ory/oathkeeper/commit/96679830dfce647262321f549b6869b7196eda6e)):
+
+  GitOrigin-RevId: 74d3aa40f77a7b08f7616a5d00dd6097b6441e08
+
+- Incorrect usage of database/sql
+  ([73009ca](https://github.com/ory/oathkeeper/commit/73009caa301518de0e9a079e13ed37d13eff1d42)):
+
+  GitOrigin-RevId: a6bc423928fb9910a76e0b18afa2fc2a56fc052d
+
+- Only use `X-Forwarded-Proto` header when trusted
+  ([e9acca1](https://github.com/ory/oathkeeper/commit/e9acca14a04d246250557550065e4b4576525bd5)):
+
+  GitOrigin-RevId: e39fcc16d88b4e819c4ef20b7278b9eec3fcd8ad
+
+- Remove flaky test for unused function
+  ([ee67087](https://github.com/ory/oathkeeper/commit/ee670874270115166c63cf8f596f8a9ecd8d48d0)):
+
+  GitOrigin-RevId: 736a6ab0e4bbdc424705c3d4589caf61b72d00d1
+
+- Remove WithDumpMigrations option to MigrationBox
+  ([5964b69](https://github.com/ory/oathkeeper/commit/5964b69425270d4e29891d20d20e270a3a49fe32)):
+
+  GitOrigin-RevId: ec8bf6fb2d78337c71a158ba2f65dfe2e2d612f6
+
+- Request log config key
+  ([5ce8122](https://github.com/ory/oathkeeper/commit/5ce8122126050c738ab251a28a937784245e0c1b)):
+
+  GitOrigin-RevId: d81d89baac28e6ac486b3a0b1ca3683f537eb15e
+
+- Restore OTEL trace propagation in remote and remote_json authorizers
+  ([6c8b787](https://github.com/ory/oathkeeper/commit/6c8b78795850fd5d588c1ed29f606815942ed229)):
+
+  GitOrigin-RevId: 883f2c43841ea861b907ce3ca8d6c24135fa8f9c
+
+- Scope cache config key to introspection URL
+  ([198a2bc](https://github.com/ory/oathkeeper/commit/198a2bc82a99e0a77bd0ffe290cbdd5285a1b17c)):
+
+  GitOrigin-RevId: 37e21364bf54c471dab10d829ee23004ec9a820e
+
+- Stray debug print
+  ([b9a2725](https://github.com/ory/oathkeeper/commit/b9a2725deeb5243906ab59c14a32c581ddcf8ebb)):
+
+  GitOrigin-RevId: eeb3d3c38faa92f79d2c0b5eb758bdf912a43bc7
+
+- Update CONTRIBUTING.md
+  ([3af6f3c](https://github.com/ory/oathkeeper/commit/3af6f3c0b5f4268eaca1083c98cb27a56ddce83e)):
+
+  GitOrigin-RevId: c40330cae452ab009c3a86892c0c2772d82ccfb8
+
+- Update packages to fix GHSA-7h2j-956f-4vf2
+  ([0b855e4](https://github.com/ory/oathkeeper/commit/0b855e44c4b78b4ba374e36a88129790db9db1a0)):
+
+  GitOrigin-RevId: 55aad6f8b36d1d22a6e149b842d035eae6ccae35
+
+- Upgrade vulnerable dependencies across Go and npm
+  ([afdef7d](https://github.com/ory/oathkeeper/commit/afdef7df6c15d7a0497eac0b3fc327f523cccdd1)):
+
+  Co-authored-by: Deepak Prabhakara <deepak.prabhakara@ory.sh> GitOrigin-RevId:
+  c3fc33561a0d0eedbc9be03ff551f62452f1c905
+
+- X data race and parallize some tests
+  ([ecbebd3](https://github.com/ory/oathkeeper/commit/ecbebd38da91f5a7dfbce316a6b920d39b22b1de)):
+
+  GitOrigin-RevId: 737267e41d80a6278bcb8cc657208a3a0cf13dcd
+
+### Chores
+
+- Fix for critical CVE - GHSA-p77j-4mvh-x3m3
+  ([77eee56](https://github.com/ory/oathkeeper/commit/77eee565dbaeee72e20270e389cf65401404f0c6)):
+
+  GitOrigin-RevId: c1804f28dfd04a89db4e7dc36ad00018e4ac1bf2
+
+### Code Refactoring
+
+- Squash merge old backoffice migration and fix up command
+  ([1350d8a](https://github.com/ory/oathkeeper/commit/1350d8ada6fdcc464421e3fb42aadd6a4257f169)):
+
+  GitOrigin-RevId: 047d524cb71a5f0e7a082c4f3ebec6426935739d
+
+### Documentation
+
+- Update readmes
+  ([0e3dc10](https://github.com/ory/oathkeeper/commit/0e3dc1020f4650fae841ef46f91e39860f16a5b6)):
+
+  GitOrigin-RevId: 936016692123f481c9addb607355ac326edee206
+
+### Features
+
+- Add support for NULL and more column types to keysetpagination
+  ([8e36fb7](https://github.com/ory/oathkeeper/commit/8e36fb7e3dcc49479943b8252b5686f3afb1a278)):
+
+  GitOrigin-RevId: 4e314fd71e85ebeb0fc5ef3bd8d5e892c610f01e
+
+- Automatic transaction retries for postgres
+  ([de668c1](https://github.com/ory/oathkeeper/commit/de668c110f0f06f81dbd9ea89975b9af615929bf)):
+
+  GitOrigin-RevId: e7d567988621937fb25e9f41af7892b6f0aad65d
+
+- Collect external latency data and write to logs
+  ([e4e2644](https://github.com/ory/oathkeeper/commit/e4e2644b3c923dbadbdc99d6aabe310b085ec2ef)):
+
+  GitOrigin-RevId: 6ffdbd26c4346ed65646a8f508a4ed44dd4b7637
+
+- Consider Go migrations DirHash when restoring full schema from backups
+  ([cb65b07](https://github.com/ory/oathkeeper/commit/cb65b0709b3fc15e00401f1db73ef54eeddb3658)):
+
+  GitOrigin-RevId: 3b1e15bede6a985c746e16aee512d778c7bf9743
+
+- Forward (some) user request headers to SMS HTTP channel
+  ([f9ef1b2](https://github.com/ory/oathkeeper/commit/f9ef1b29c10cd43c468484db80395fe584ccdbc4)):
+
+  GitOrigin-RevId: 2f63cc936d612b530a3b1058656e54716f71559f
+
+- Generate events for SSO and SCIM provider revisions
+  ([bf85260](https://github.com/ory/oathkeeper/commit/bf852603e503c27e749b4f780f4e308eb46afb5a)):
+
+  GitOrigin-RevId: 61d08f591404d69e55057d745e0342c17446a713
+
+- Hydra benchmarking tool
+  ([7dc973b](https://github.com/ory/oathkeeper/commit/7dc973b4b6c81849b026ee63e99e559bb39666af)):
+
+  GitOrigin-RevId: a2db2f17a2eaf000ff7ffbfdd71c422721259d39
+
+- Improved tracing
+  ([a362e6e](https://github.com/ory/oathkeeper/commit/a362e6e096a5ac23f6125575ecb1afc8b7337272)):
+
+  GitOrigin-RevId: 98ae16a6f1de4414538c7692758af850aa0caaac
+
+- Keto-cli improvements
+  ([44167e9](https://github.com/ory/oathkeeper/commit/44167e9a6e32b3bcde3c680c6c41c92b8199ab02)):
+
+  GitOrigin-RevId: 7e569c384d891743c8b9a5c2cfca635e550cfc89
+
+- Make 429 passthrough instead return 401
+  ([12cc3da](https://github.com/ory/oathkeeper/commit/12cc3daf567952061b8fab77094c4eb3c1729e24)):
+
+  GitOrigin-RevId: f3ef3d3c3ac3d3469d0869b91853edc4b5bc42f7
+
+- Make SCIM work with MySQL
+  ([d717289](https://github.com/ory/oathkeeper/commit/d7172891c1c87edac8af9165f9191854a5def72b)):
+
+  GitOrigin-RevId: a833fe21172d9c218b55d7229e4ed3a131cfcb6c
+
+- Rename project revision columns
+  ([96fee1c](https://github.com/ory/oathkeeper/commit/96fee1ccbd241c6ea9511a611df6b81ebb106d5c)):
+
+  GitOrigin-RevId: b20a153d86d72c43f83f7107b4c3ed602bcb5009
+
+- Use keysetpagination planner for keto read queries
+  ([2b33f5a](https://github.com/ory/oathkeeper/commit/2b33f5a2bd507361a80c14c4c7864737e7c21f2c)):
+
+  GitOrigin-RevId: e2ed9c3eecc60fd26eaedb3f8cca4f222fd1cb1e
+
+### Tests
+
+- Deflake and improve performance
+  ([5c91d9d](https://github.com/ory/oathkeeper/commit/5c91d9d6ed4549c92501098075c6b96bd6f3d7b5)):
+
+  GitOrigin-RevId: 0f7be9e16ea12f9cb277f8cb3f03058e9db1aaa9
+
+- Deflake directory watcherx
+  ([9ef6345](https://github.com/ory/oathkeeper/commit/9ef6345d691b42d58761e160f318566fbfb4c404)):
+
+  GitOrigin-RevId: 6b1c66f96f46833273490b22179aadcb5c7ce01c
+
+- Faster and more reliable courier tests
+  ([7dd339a](https://github.com/ory/oathkeeper/commit/7dd339ac58b1a0fa93a14aa9e9f2a4062355bdd3)):
+
+  GitOrigin-RevId: 30c7ebf095fd5c233e173dc0a645d7bcbe69115f
+
+- **hydra:** Add plaintext backups for all DB types
+  ([cdc1e05](https://github.com/ory/oathkeeper/commit/cdc1e05858c5b07e674a484a893a99be2b4fc764)):
+
+  GitOrigin-RevId: ee2c8ff9ffacff66d09241827780350979957dba
+
+- Minor setup improvements
+  ([d9f227a](https://github.com/ory/oathkeeper/commit/d9f227a3817ea1d813b89bf9dd5774a9f4591945)):
+
+  GitOrigin-RevId: cc7740e9ef1c5469df10001c6dd1bca50368ee01
+
+# [25.4.0](https://github.com/ory/oathkeeper/compare/v0.40.9...v25.4.0) (2025-11-07)
 
 v25.4.0
 
@@ -481,12 +710,12 @@ v25.4.0
 
   GitOrigin-RevId: 04533493184c6abdc3a211daffd98f6b68e1c9cc
 
-### Chores
+### Code Generation
 
-- Update opencontainers/runc to v1.3.3
-  ([8b82b03](https://github.com/ory/oathkeeper/commit/8b82b0308847acc7d31d897435cb870da6a67e1f)):
+- Prepare for OSS release - v25.4.0
+  ([2020997](https://github.com/ory/oathkeeper/commit/2020997ed914fbc8c4b048effbe28841c34ac23d)):
 
-  GitOrigin-RevId: 85b6b76ebe34f6d7c0304074c945a5dc0b7e6a45
+  GitOrigin-RevId: 8a80ff652290d5faf26d05286b077325672b6fc5
 
 ### Code Refactoring
 

@@ -1871,10 +1871,10 @@
       }
     },
     "log": {
-      "$ref": "https://raw.githubusercontent.com/ory/oathkeeper/8b82b03/oryx/logrusx/config.schema.json"
+      "$ref": "https://raw.githubusercontent.com/ory/oathkeeper/77eee56/oryx/logrusx/config.schema.json"
     },
     "tracing": {
-      "$ref": "https://raw.githubusercontent.com/ory/oathkeeper/8b82b03/oryx/otelx/config.schema.json"
+      "$ref": "https://raw.githubusercontent.com/ory/oathkeeper/77eee56/oryx/otelx/config.schema.json"
     },
     "profiling": {
       "title": "Profiling",
