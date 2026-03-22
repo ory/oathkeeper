@@ -299,6 +299,32 @@ func TestDecisionAPI(t *testing.T) {
 			code:  http.StatusOK,
 			authz: "",
 		},
+		{
+			d:   "should pass when X-Forwarded-Uri contains a query string",
+			url: ts.URL + "/decisions",
+			rulesRegexp: []rule.Rule{{
+				Match:          &rule.Match{Methods: []string{"GET"}, URL: ts.URL + "/authn-noop/<[0-9]+>"},
+				Authenticators: []rule.Handler{{Handler: "noop"}},
+				Authorizer:     rule.Handler{Handler: "allow"},
+				Mutators:       []rule.Handler{{Handler: "noop"}},
+				Upstream:       rule.Upstream{URL: ""},
+			}},
+			rulesGlob: []rule.Rule{{
+				Match:          &rule.Match{Methods: []string{"GET"}, URL: ts.URL + "/authn-noop/<[0-9]*>"},
+				Authenticators: []rule.Handler{{Handler: "noop"}},
+				Authorizer:     rule.Handler{Handler: "allow"},
+				Mutators:       []rule.Handler{{Handler: "noop"}},
+				Upstream:       rule.Upstream{URL: ""},
+			}},
+			transform: func(r *http.Request) {
+				r.Header.Add("X-Forwarded-Method", "GET")
+				r.Header.Add("X-Forwarded-Proto", "http")
+				r.Header.Add("X-Forwarded-Host", r.URL.Host)
+				r.Header.Add("X-Forwarded-Uri", "/authn-noop/1234?foo=bar")
+			},
+			code:  http.StatusOK,
+			authz: "",
+		},
 	} {
 		t.Run(fmt.Sprintf("case=%d/description=%s", k, tc.d), func(t *testing.T) {
 			testFunc := func(strategy configuration.MatchingStrategy) {
@@ -408,7 +434,7 @@ func TestDecisionAPIHeaderUsage(t *testing.T) {
 		},
 		{
 			name:           "argument from the headers doesn't get url encoded",
-			expectedUrl:    &url.URL{Scheme: "https", Host: "test.dev", Path: "/bar"},
+			expectedUrl:    &url.URL{Scheme: "https", Host: "test.dev", Path: "/bar", RawQuery: "this=is&a=test"},
 			expectedMethod: "POST",
 			transform: func(req *http.Request) {
 				req.Header.Add("X-Forwarded-Method", "POST")
