@@ -224,9 +224,6 @@ func RunServe(version, build, date string) func(cmd *cobra.Command, args []strin
 		d := driver.NewDefaultDriver(logger, version, build, date, cmd.Flags())
 		d.Registry().Init()
 
-		adminmw := negroni.New()
-		publicmw := negroni.New()
-
 		urls := []string{
 			d.Configuration().APIServeAddress(),
 			d.Configuration().ProxyServeAddress(),
@@ -268,8 +265,17 @@ func RunServe(version, build, date string) func(cmd *cobra.Command, args []strin
 			Hostname: host,
 		})
 
-		adminmw.Use(telemetry)
-		publicmw.Use(telemetry)
+		recovery := negroni.NewRecovery()
+		recovery.Logger = logger
+
+		adminmw := negroni.New(
+			recovery,
+			telemetry,
+		)
+		publicmw := negroni.New(
+			recovery,
+			telemetry,
+		)
 
 		prometheusRepo := metrics.NewConfigurablePrometheusRepository(d, logger)
 		var wg sync.WaitGroup
