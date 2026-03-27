@@ -197,7 +197,8 @@ func TestAuthenticatorOAuth2Introspection(t *testing.T) {
 					})
 				},
 				expectErr: false,
-			}, {
+			},
+			{
 				d:      "should pass additional headers to introspection endpoint ",
 				r:      &http.Request{Host: "some-host", Header: http.Header{"Authorization": {"bearer token"}}, Method: "POST"},
 				config: []byte(`{"preserve_host": true, "introspection_request_headers": {"X-Test": "test123", "X-Forwarded-For": "some-other-host", "Z-Test": "test987"}}`),
@@ -689,6 +690,7 @@ func TestAuthenticatorOAuth2Introspection(t *testing.T) {
 				require.NoError(t, a.Authenticate(r, expected, config, nil))
 				assert.False(t, cacheWasUsed())
 			})
+			a.WaitForCache()
 
 			// We expect to use the cache here because we are not interested to validate the scope. Usually we would
 			// expect to make the upstream call if the upstream has to validate the scope.
@@ -748,6 +750,7 @@ func TestAuthenticatorOAuth2Introspection(t *testing.T) {
 
 			require.NoError(t, a.Authenticate(r, expected, config, nil))
 			assert.False(t, cacheWasUsed())
+			a.WaitForCache()
 
 			t.Run("case=request succeeds and uses the cache", func(t *testing.T) {
 				config := setup(t, `{ "trusted_issuers": ["foo", "bar"], "target_audience": ["audience"] }`)
@@ -791,7 +794,7 @@ func TestAuthenticatorOAuth2Introspection(t *testing.T) {
 			})
 
 			t.Run("case=cache cleared after ttl", func(t *testing.T) {
-				//time.Sleep(time.Second)
+				// time.Sleep(time.Second)
 				config := setup(t, `{ "required_scope": ["scope-a"], "trusted_issuers": ["foo", "bar"], "target_audience": ["audience"], "cache": { "ttl": "100ms" } }`)
 
 				require.NoError(t, a.Authenticate(r, expected, config, nil))

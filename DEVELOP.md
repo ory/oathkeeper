@@ -71,14 +71,14 @@ Short tests run quickly and use SQLite.
 Run all short tests:
 
 ```shell
-go test -short -tags sqlite ./...
+go test -short  ./...
 ```
 
 Run short tests in a specific module:
 
 ```shell
 cd internal/check
-go test -short -tags sqlite .
+go test -short  .
 ```
 
 ## Build Docker image
