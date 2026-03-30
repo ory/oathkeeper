@@ -4,17 +4,6 @@ export PATH					:= .bin:${PATH}
 export PWD					:= $(shell pwd)
 export IMAGE_TAG		:= $(if $(IMAGE_TAG),$(IMAGE_TAG),dev)
 
-GO_DEPENDENCIES = github.com/ory/go-acc \
-				  github.com/go-swagger/go-swagger/cmd/swagger \
-				  github.com/go-bindata/go-bindata/go-bindata
-
-define make-go-dependency
-  # go install is responsible for not re-building when the code hasn't changed
-  .bin/$(notdir $1): go.sum go.mod
-		GOBIN=$(PWD)/.bin/ go install $1
-endef
-$(foreach dep, $(GO_DEPENDENCIES), $(eval $(call make-go-dependency, $(dep))))
-
 node_modules: package-lock.json
 	npm ci
 	touch node_modules
@@ -54,15 +43,15 @@ licenses: .bin/licenses node_modules  # checks open-source licenses
 
 # Generates the SDK
 .PHONY: sdk
-sdk: .bin/swagger .bin/ory node_modules
+sdk: .bin/ory node_modules
 	rm -rf internal/httpclient
 	mkdir -p internal/httpclient
 
-	swagger generate spec -m -o spec/swagger.json \
+	go tool swagger generate spec -m -o spec/swagger.json \
 		-c github.com/ory/oathkeeper \
 		-c github.com/ory/x/healthx
 	ory dev swagger sanitize ./spec/swagger.json
-	swagger validate ./spec/swagger.json
+	go tool swagger validate ./spec/swagger.json
 	CIRCLE_PROJECT_USERNAME=ory CIRCLE_PROJECT_REPONAME=oathkeeper \
 		ory dev openapi migrate \
 			--health-path-tags metadata \
@@ -70,7 +59,7 @@ sdk: .bin/swagger .bin/ory node_modules
 			-p file://.schema/openapi/patches/meta.yaml \
 			spec/swagger.json spec/api.json
 
-	swagger generate client -f ./spec/swagger.json -t internal/httpclient -A Ory_Oathkeeper
+	go tool swagger generate client -f ./spec/swagger.json -t internal/httpclient -A Ory_Oathkeeper
 
 	make --no-print-dir format
 
