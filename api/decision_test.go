@@ -15,13 +15,13 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/julienschmidt/httprouter"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
-	"github.com/urfave/negroni"
 
 	"github.com/ory/herodot"
+	"github.com/ory/x/configx"
+	"github.com/ory/x/httprouterx"
 	"github.com/ory/x/logrusx"
 
 	"github.com/ory/oathkeeper/api"
@@ -33,23 +33,21 @@ import (
 )
 
 func TestDecisionAPI(t *testing.T) {
-	conf := internal.NewConfigurationWithDefaults()
-	conf.SetForTest(t, configuration.AuthenticatorNoopIsEnabled, true)
-	conf.SetForTest(t, configuration.AuthenticatorUnauthorizedIsEnabled, true)
-	conf.SetForTest(t, configuration.AuthenticatorAnonymousIsEnabled, true)
-	conf.SetForTest(t, configuration.AuthorizerAllowIsEnabled, true)
-	conf.SetForTest(t, configuration.AuthorizerDenyIsEnabled, true)
-	conf.SetForTest(t, configuration.MutatorNoopIsEnabled, true)
-	conf.SetForTest(t, configuration.ErrorsWWWAuthenticateIsEnabled, true)
+	conf := internal.NewConfigurationWithDefaults(configx.WithValues(map[string]any{
+		configuration.AuthenticatorNoopIsEnabled:         true,
+		configuration.AuthenticatorUnauthorizedIsEnabled: true,
+		configuration.AuthenticatorAnonymousIsEnabled:    true,
+		configuration.AuthorizerAllowIsEnabled:           true,
+		configuration.AuthorizerDenyIsEnabled:            true,
+		configuration.MutatorNoopIsEnabled:               true,
+		configuration.ErrorsWWWAuthenticateIsEnabled:     true,
+	}))
 	reg := internal.NewRegistry(conf).WithBrokenPipelineMutator()
 
-	d := reg.DecisionHandler()
-
-	n := negroni.New(d)
-	n.UseHandler(httprouter.New())
-
-	ts := httptest.NewServer(n)
-	defer ts.Close()
+	router := httprouterx.NewRouter()
+	reg.DecisionHandler().SetRoutes(router)
+	ts := httptest.NewServer(router)
+	t.Cleanup(ts.Close)
 
 	ruleNoOpAuthenticator := rule.Rule{
 		Match:          &rule.Match{Methods: []string{"GET"}, URL: ts.URL + "/authn-noop/<[0-9]+>"},
@@ -81,7 +79,7 @@ func TestDecisionAPI(t *testing.T) {
 		Upstream:       rule.Upstream{URL: "", StripPath: "/strip-path/", PreserveHost: true},
 	}
 
-	for k, tc := range []struct {
+	for _, tc := range []struct {
 		url         string
 		code        int
 		reqBody     []byte
@@ -299,34 +297,81 @@ func TestDecisionAPI(t *testing.T) {
 			code:  http.StatusOK,
 			authz: "",
 		},
+		{
+			d:   "only forwarded headers are passed",
+			url: ts.URL + "/decisions",
+			rulesRegexp: []rule.Rule{{
+				Match:          &rule.Match{Methods: []string{"POST"}, URL: "https://foobar.ory/some/path"},
+				Authenticators: []rule.Handler{{Handler: "anonymous"}},
+				Authorizer:     rule.Handler{Handler: "allow"},
+				Mutators:       []rule.Handler{{Handler: "noop"}},
+				Upstream:       rule.Upstream{URL: ""},
+			}},
+			rulesGlob: []rule.Rule{{
+				Match:          &rule.Match{Methods: []string{"POST"}, URL: "https://foobar.ory/some/path"},
+				Authenticators: []rule.Handler{{Handler: "anonymous"}},
+				Authorizer:     rule.Handler{Handler: "allow"},
+				Mutators:       []rule.Handler{{Handler: "noop"}},
+				Upstream:       rule.Upstream{URL: ""},
+			}},
+			transform: func(r *http.Request) {
+				r.Header.Set("X-Forwarded-Method", "POST")
+				r.Header.Set("X-Forwarded-Proto", "https")
+				r.Header.Set("X-Forwarded-Host", "foobar.ory")
+				r.Header.Set("X-Forwarded-Uri", "/some/path")
+			},
+			code: http.StatusOK,
+		},
+		{
+			d:   "path is empty after being stripped",
+			url: ts.URL + "/decisions",
+			rulesRegexp: []rule.Rule{{
+				Match:          &rule.Match{Methods: []string{"GET"}, URL: ts.URL},
+				Authenticators: []rule.Handler{{Handler: "anonymous"}},
+				Authorizer:     rule.Handler{Handler: "allow"},
+				Mutators:       []rule.Handler{{Handler: "noop"}},
+				Upstream:       rule.Upstream{URL: ""},
+			}},
+			rulesGlob: []rule.Rule{{
+				Match:          &rule.Match{Methods: []string{"GET"}, URL: ts.URL},
+				Authenticators: []rule.Handler{{Handler: "anonymous"}},
+				Authorizer:     rule.Handler{Handler: "allow"},
+				Mutators:       []rule.Handler{{Handler: "noop"}},
+				Upstream:       rule.Upstream{URL: ""},
+			}},
+			code: http.StatusOK,
+		},
 	} {
-		t.Run(fmt.Sprintf("case=%d/description=%s", k, tc.d), func(t *testing.T) {
-			testFunc := func(strategy configuration.MatchingStrategy) {
-				require.NoError(t, reg.RuleRepository().SetMatchingStrategy(context.Background(), strategy))
-				req, err := http.NewRequest("GET", tc.url, bytes.NewBuffer(tc.reqBody))
+		t.Run(fmt.Sprintf("description=%s", tc.d), func(t *testing.T) {
+			testFunc := func(t *testing.T, strategy configuration.MatchingStrategy) {
+				require.NoError(t, reg.RuleRepository().SetMatchingStrategy(t.Context(), strategy))
+				req, err := http.NewRequest("GET", tc.url, bytes.NewReader(tc.reqBody))
 				require.NoError(t, err)
 				if tc.transform != nil {
 					tc.transform(req)
 				}
 
-				res, err := http.DefaultClient.Do(req)
+				cl := http.Client{}
+				cl.CheckRedirect = func(req *http.Request, via []*http.Request) error { return http.ErrUseLastResponse }
+
+				res, err := cl.Do(req)
 				require.NoError(t, err)
+				defer func() { _ = res.Body.Close() }()
 
 				entireBody, err := io.ReadAll(res.Body)
 				require.NoError(t, err)
-				defer res.Body.Close() //nolint:errcheck // closing test response
 
 				assert.Equal(t, tc.authz, res.Header.Get("Authorization"))
 				assert.Equal(t, tc.code, res.StatusCode)
 				assert.Equal(t, strconv.Itoa(len(entireBody)), res.Header.Get("Content-Length"))
 			}
-			t.Run("regexp", func(_ *testing.T) {
+			t.Run("regexp", func(t *testing.T) {
 				reg.RuleRepository().(*rule.RepositoryMemory).WithRules(tc.rulesRegexp)
-				testFunc(configuration.Regexp)
+				testFunc(t, configuration.Regexp)
 			})
-			t.Run("glob", func(_ *testing.T) {
+			t.Run("glob", func(t *testing.T) {
 				reg.RuleRepository().(*rule.RepositoryMemory).WithRules(tc.rulesGlob)
-				testFunc(configuration.Glob)
+				testFunc(t, configuration.Glob)
 			})
 		})
 	}
@@ -461,7 +506,7 @@ func TestDecisionAPIHeaderUsage(t *testing.T) {
 				mock.MatchedBy(func(val string) bool { return val == tc.expectedMethod }),
 				mock.MatchedBy(func(val *url.URL) bool { return *val == *tc.expectedUrl })).
 				Return(&rule.Rule{}, nil)
-			h.ServeHTTP(res, req, nil)
+			h.Decisions(res, req)
 
 			r.AssertExpectations(t)
 		})

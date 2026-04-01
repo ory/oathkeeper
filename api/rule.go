@@ -6,15 +6,14 @@ package api
 import (
 	"net/http"
 
-	"github.com/ory/oathkeeper/rule"
-	"github.com/ory/oathkeeper/x"
-
-	"github.com/julienschmidt/httprouter"
 	"github.com/pkg/errors"
 
-	"github.com/ory/oathkeeper/helper"
+	"github.com/ory/x/httprouterx"
 	"github.com/ory/x/httpx"
 	"github.com/ory/x/pagination"
+
+	"github.com/ory/oathkeeper/helper"
+	"github.com/ory/oathkeeper/rule"
 )
 
 const (
@@ -34,9 +33,9 @@ func NewRuleHandler(r ruleHandlerRegistry) *RuleHandler {
 	return &RuleHandler{r: r}
 }
 
-func (h *RuleHandler) SetRoutes(r *x.RouterAPI) {
+func (h *RuleHandler) SetRoutes(r httprouterx.Router) {
 	r.GET(RulesPath, h.listRules)
-	r.GET(RulesPath+"/:id", h.getRules)
+	r.GET(RulesPath+"/{id}", h.getRules)
 }
 
 // swagger:route GET /rules api listRules
@@ -57,7 +56,7 @@ func (h *RuleHandler) SetRoutes(r *x.RouterAPI) {
 //	Responses:
 //	  200: rules
 //	  500: genericError
-func (h *RuleHandler) listRules(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+func (h *RuleHandler) listRules(w http.ResponseWriter, r *http.Request) {
 	limit, offset := pagination.Parse(r, 50, 0, 500)
 	rules, err := h.r.RuleRepository().List(r.Context(), limit, offset)
 	if err != nil {
@@ -90,8 +89,8 @@ func (h *RuleHandler) listRules(w http.ResponseWriter, r *http.Request, _ httpro
 //	  200: rule
 //	  404: genericError
 //	  500: genericError
-func (h *RuleHandler) getRules(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	rl, err := h.r.RuleRepository().Get(r.Context(), ps.ByName("id"))
+func (h *RuleHandler) getRules(w http.ResponseWriter, r *http.Request) {
+	rl, err := h.r.RuleRepository().Get(r.Context(), r.PathValue("id"))
 	if errors.Is(err, helper.ErrResourceNotFound) {
 		h.r.Writer().WriteErrorCode(w, r, http.StatusNotFound, err)
 		return

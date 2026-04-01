@@ -11,23 +11,23 @@ import (
 	"net/url"
 	"testing"
 
-	"github.com/ory/oathkeeper/driver/configuration"
-	"github.com/ory/oathkeeper/x"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
+	"github.com/ory/x/httprouterx"
+
+	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/internal"
 	"github.com/ory/oathkeeper/internal/httpclient/client"
 	sdkrule "github.com/ory/oathkeeper/internal/httpclient/client/api"
 	"github.com/ory/oathkeeper/rule"
-
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 )
 
 func TestHandler(t *testing.T) {
 	conf := internal.NewConfigurationWithDefaults()
 	reg := internal.NewRegistry(conf).WithBrokenPipelineMutator()
 
-	router := x.NewAPIRouter()
+	router := httprouterx.NewRouter()
 	reg.RuleHandler().SetRoutes(router)
 	server := httptest.NewServer(router)
 

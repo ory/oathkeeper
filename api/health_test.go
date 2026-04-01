@@ -10,14 +10,14 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ory/herodot"
-	"github.com/ory/oathkeeper/driver/configuration"
-
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
+	"github.com/ory/herodot"
+	"github.com/ory/x/httprouterx"
+
+	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/internal"
-	"github.com/ory/oathkeeper/x"
 )
 
 type statusResult struct {
@@ -48,8 +48,8 @@ func TestHealth(t *testing.T) {
 	conf.SetForTest(t, configuration.MutatorIDTokenIsEnabled, true)
 	r := internal.NewRegistry(conf)
 
-	router := x.NewAPIRouter()
-	r.HealthHandler().SetHealthRoutes(router.Router, true)
+	router := httprouterx.NewRouter()
+	r.HealthHandler().SetHealthRoutes(router, true)
 	server := httptest.NewServer(router)
 	defer server.Close()
 

@@ -16,11 +16,11 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/ory/x/configx"
+	"github.com/ory/x/httprouterx"
 
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/internal"
 	"github.com/ory/oathkeeper/rule"
-	"github.com/ory/oathkeeper/x"
 )
 
 func TestCredentialsHandler(t *testing.T) {
@@ -49,7 +49,7 @@ func TestCredentialsHandler(t *testing.T) {
 `)}}}}),
 	)
 
-	router := x.NewAPIRouter()
+	router := httprouterx.NewRouter()
 	r.CredentialHandler().SetRoutes(router)
 	server := httptest.NewServer(router)
 	defer server.Close()

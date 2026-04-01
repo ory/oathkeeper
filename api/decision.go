@@ -8,13 +8,14 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/ory/oathkeeper/pipeline/authn"
-	"github.com/ory/oathkeeper/x"
+	"github.com/ory/x/httprouterx"
 	"github.com/ory/x/httpx"
 	"github.com/ory/x/logrusx"
 
+	"github.com/ory/oathkeeper/pipeline/authn"
 	"github.com/ory/oathkeeper/proxy"
 	"github.com/ory/oathkeeper/rule"
+	"github.com/ory/oathkeeper/x"
 )
 
 const (
@@ -42,18 +43,9 @@ func NewJudgeHandler(r decisionHandlerRegistry) *DecisionHandler {
 	return &DecisionHandler{r: r}
 }
 
-func (h *DecisionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
-	if len(r.URL.Path) >= len(DecisionPath) && r.URL.Path[:len(DecisionPath)] == DecisionPath {
-		r.Method = cmp.Or(r.Header.Get(xForwardedMethod), r.Method)
-		r.URL.Scheme = cmp.Or(r.Header.Get(xForwardedProto),
-			x.IfThenElseString(r.TLS != nil, "https", "http"))
-		r.URL.Host = cmp.Or(r.Header.Get(xForwardedHost), r.Host)
-		r.URL.Path = cmp.Or(strings.SplitN(r.Header.Get(xForwardedUri), "?", 2)[0], r.URL.Path[len(DecisionPath):])
-
-		h.decisions(w, r)
-	} else {
-		next(w, r)
-	}
+func (h *DecisionHandler) SetRoutes(r httprouterx.Router) {
+	r.HandleFunc(DecisionPath+"/", h.Decisions)
+	r.HandleFunc(DecisionPath, h.Decisions)
 }
 
 // swagger:route GET /decisions api decisions
@@ -74,7 +66,13 @@ func (h *DecisionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request, next
 //	  403: genericError
 //	  404: genericError
 //	  500: genericError
-func (h *DecisionHandler) decisions(w http.ResponseWriter, r *http.Request) {
+func (h *DecisionHandler) Decisions(w http.ResponseWriter, r *http.Request) {
+	r.Method = cmp.Or(r.Header.Get(xForwardedMethod), r.Method)
+	r.URL.Scheme = cmp.Or(r.Header.Get(xForwardedProto),
+		x.IfThenElseString(r.TLS != nil, "https", "http"))
+	r.URL.Host = cmp.Or(r.Header.Get(xForwardedHost), r.Host)
+	r.URL.Path = cmp.Or(strings.SplitN(r.Header.Get(xForwardedUri), "?", 2)[0], r.URL.Path[len(DecisionPath):])
+
 	fields := map[string]interface{}{
 		"http_method":     r.Method,
 		"http_url":        r.URL.String(),

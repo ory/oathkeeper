@@ -25,10 +25,12 @@ import (
 	"github.com/ory/graceful"
 	"github.com/ory/x/corsx"
 	"github.com/ory/x/healthx"
+	"github.com/ory/x/httprouterx"
 	"github.com/ory/x/logrusx"
 	"github.com/ory/x/metricsx"
 	"github.com/ory/x/otelx"
 	"github.com/ory/x/reqlog"
+	"github.com/ory/x/serverx"
 	"github.com/ory/x/tlsx"
 	"github.com/ory/x/urlx"
 
@@ -36,7 +38,6 @@ import (
 	"github.com/ory/oathkeeper/driver"
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/metrics"
-	"github.com/ory/oathkeeper/x"
 )
 
 func isTimeoutError(err error) bool {
@@ -107,10 +108,12 @@ func runProxy(d driver.Driver, n *negroni.Negroni, logger *logrusx.Logger, prom 
 
 func runAPI(d driver.Driver, n *negroni.Negroni, logger *logrusx.Logger, prom *metrics.PrometheusRepository) func() {
 	return func() {
-		router := x.NewAPIRouter()
+		router := httprouterx.NewRouter()
 		d.Registry().RuleHandler().SetRoutes(router)
-		d.Registry().HealthHandler().SetHealthRoutes(router.Router, true)
+		d.Registry().HealthHandler().SetHealthRoutes(router, true)
 		d.Registry().CredentialHandler().SetRoutes(router)
+		d.Registry().DecisionHandler().SetRoutes(router)
+		router.Handle("/", serverx.DefaultNotFoundHandler)
 
 		promHidePaths := d.Configuration().PrometheusHideRequestPaths()
 		promCollapsePaths := d.Configuration().PrometheusCollapseRequestPaths()
@@ -120,7 +123,6 @@ func runAPI(d driver.Driver, n *negroni.Negroni, logger *logrusx.Logger, prom *m
 		n.Use(corsx.ContextualizedMiddleware(func(ctx context.Context) (opts cors.Options, enabled bool) { //nolint:staticcheck // legacy middleware still supported
 			return d.Configuration().CORS("api")
 		}))
-		n.Use(d.Registry().DecisionHandler()) // This needs to be the last entry, otherwise the judge API won't work
 
 		n.UseFunc(otelx.SpanNameRecorderNegroniFunc)
 

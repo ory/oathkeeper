@@ -8,18 +8,17 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/go-jose/go-jose/v3"
 	"github.com/tidwall/gjson"
+
+	"github.com/ory/x/httprouterx"
+	"github.com/ory/x/httpx"
+	"github.com/ory/x/urlx"
 
 	"github.com/ory/oathkeeper/credentials"
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/pipeline/mutate"
 	"github.com/ory/oathkeeper/rule"
-	"github.com/ory/oathkeeper/x"
-	"github.com/ory/x/httpx"
-	"github.com/ory/x/urlx"
-
-	"github.com/go-jose/go-jose/v3"
-	"github.com/julienschmidt/httprouter"
 )
 
 const (
@@ -41,7 +40,7 @@ func NewCredentialHandler(c configuration.Provider, r credentialHandlerRegistry)
 	return &CredentialsHandler{c: c, r: r}
 }
 
-func (h *CredentialsHandler) SetRoutes(r *x.RouterAPI) {
+func (h *CredentialsHandler) SetRoutes(r httprouterx.Router) {
 	r.GET("/.well-known/jwks.json", h.wellKnown)
 }
 
@@ -59,7 +58,7 @@ func (h *CredentialsHandler) SetRoutes(r *x.RouterAPI) {
 //	Responses:
 //	  200: jsonWebKeySet
 //	  500: genericError
-func (h *CredentialsHandler) wellKnown(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+func (h *CredentialsHandler) wellKnown(w http.ResponseWriter, r *http.Request) {
 	urls, err := h.jwksURLs()
 	if err != nil {
 		h.r.Writer().WriteError(w, r, err)
