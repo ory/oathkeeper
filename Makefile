@@ -27,12 +27,15 @@ node_modules: package-lock.json
 authors:  # updates the AUTHORS file
 	curl --retry 7 --retry-connrefused https://raw.githubusercontent.com/ory/ci/master/authors/authors.sh | env PRODUCT="Ory Oathkeeper" bash
 
+PRETTIER_VERSION=$(shell cat package.json | jq -r '.devDependencies["prettier"] // .dependencies["prettier"]')
+
 .PHONY: format
 format: .bin/goimports .bin/ory node_modules
 	.bin/ory dev headers copyright --type=open-source --exclude=internal/httpclient --exclude=oryx
 	goimports -w --local github.com/ory .
 	gofmt -l -s -w .
-	npm exec -- prettier --write .
+	@echo "Prettier Version: $(PRETTIER_VERSION)"
+	npx --package=prettier@$(PRETTIER_VERSION)  prettier . --write
 
 .PHONY: lint
 lint: .bin/golangci-lint
@@ -78,12 +81,12 @@ install:
 
 .PHONY: docker
 docker:
-	DOCKER_BUILDKIT=1 DOCKER_CONTENT_TRUST=1 docker build -t oryd/oathkeeper:${IMAGE_TAG} --progress=plain -f .docker/Dockerfile-build . 
+	DOCKER_BUILDKIT=1 DOCKER_CONTENT_TRUST=1 docker build -t oryd/oathkeeper:${IMAGE_TAG} --progress=plain -f .docker/Dockerfile-build .
 
 .PHONY: docker-k3d
 docker-k3d:
 	CGO_ENABLED=0 GOOS=linux go build
-	DOCKER_BUILDKIT=1 DOCKER_CONTENT_TRUST=1 docker build -t k3d-localhost:5111/oryd/oathkeeper:dev --push -f .docker/Dockerfile-distroless-static . 
+	DOCKER_BUILDKIT=1 DOCKER_CONTENT_TRUST=1 docker build -t k3d-localhost:5111/oryd/oathkeeper:dev --push -f .docker/Dockerfile-distroless-static .
 	rm oathkeeper
 
 docs/cli: .bin/clidoc
