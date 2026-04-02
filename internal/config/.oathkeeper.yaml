@@ -103,6 +103,8 @@ access_rules:
     - https://path-to-my-rules/rules.json
   # Optional fields describing matching strategy, defaults to "regexp".
   matching_strategy: glob
+  # Optional fields describing if rules should be matched using path prefixes, defaults to false.
+  prefix_matching_enabled: false
 
 errors:
   fallback:
