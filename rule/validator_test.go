@@ -43,16 +43,16 @@ func TestValidateRule(t *testing.T) {
 		},
 		{
 			r: &Rule{
-				Match:    &Match{URL: "https://www.ory.sh", Methods: []string{"POST"}},
-				Upstream: Upstream{URL: "https://www.ory.sh"},
+				Match:    &Match{URL: "https://www.ory.com", Methods: []string{"POST"}},
+				Upstream: Upstream{URL: "https://www.ory.com"},
 			},
 			expectErr: `Value of "authenticators" must be set and can not be an empty array.`,
 		},
 		{
 			setup: prep(true, false, false),
 			r: &Rule{
-				Match:          &Match{URL: "https://www.ory.sh", Methods: []string{"POST"}},
-				Upstream:       Upstream{URL: "https://www.ory.sh"},
+				Match:          &Match{URL: "https://www.ory.com", Methods: []string{"POST"}},
+				Upstream:       Upstream{URL: "https://www.ory.com"},
 				Authenticators: []Handler{{Handler: "foo"}},
 			},
 			expectErr: `Value "foo" of "authenticators[0]" is not in list of supported authenticators: `,
@@ -60,8 +60,8 @@ func TestValidateRule(t *testing.T) {
 		{
 			setup: prep(false, false, false),
 			r: &Rule{
-				Match:          &Match{URL: "https://www.ory.sh", Methods: []string{"POST"}},
-				Upstream:       Upstream{URL: "https://www.ory.sh"},
+				Match:          &Match{URL: "https://www.ory.com", Methods: []string{"POST"}},
+				Upstream:       Upstream{URL: "https://www.ory.com"},
 				Authenticators: []Handler{{Handler: "noop"}},
 			},
 			expectErr: `Authenticator "noop" is disabled per configuration.`,
@@ -69,8 +69,8 @@ func TestValidateRule(t *testing.T) {
 		{
 			setup: prep(true, false, false),
 			r: &Rule{
-				Match:          &Match{URL: "https://www.ory.sh", Methods: []string{"POST"}},
-				Upstream:       Upstream{URL: "https://www.ory.sh"},
+				Match:          &Match{URL: "https://www.ory.com", Methods: []string{"POST"}},
+				Upstream:       Upstream{URL: "https://www.ory.com"},
 				Authenticators: []Handler{{Handler: "noop"}},
 			},
 			expectErr: `Value of "authorizer.handler" can not be empty.`,
@@ -78,8 +78,8 @@ func TestValidateRule(t *testing.T) {
 		{
 			setup: prep(true, true, false),
 			r: &Rule{
-				Match:          &Match{URL: "https://www.ory.sh", Methods: []string{"POST"}},
-				Upstream:       Upstream{URL: "https://www.ory.sh"},
+				Match:          &Match{URL: "https://www.ory.com", Methods: []string{"POST"}},
+				Upstream:       Upstream{URL: "https://www.ory.com"},
 				Authenticators: []Handler{{Handler: "noop"}},
 				Authorizer:     Handler{Handler: "foo"},
 			},
@@ -88,8 +88,8 @@ func TestValidateRule(t *testing.T) {
 		{
 			setup: prep(true, true, false),
 			r: &Rule{
-				Match:          &Match{URL: "https://www.ory.sh", Methods: []string{"POST"}},
-				Upstream:       Upstream{URL: "https://www.ory.sh"},
+				Match:          &Match{URL: "https://www.ory.com", Methods: []string{"POST"}},
+				Upstream:       Upstream{URL: "https://www.ory.com"},
 				Authenticators: []Handler{{Handler: "noop"}},
 				Authorizer:     Handler{Handler: "allow"},
 			},
@@ -98,8 +98,8 @@ func TestValidateRule(t *testing.T) {
 		{
 			setup: prep(true, true, true),
 			r: &Rule{
-				Match:          &Match{URL: "https://www.ory.sh", Methods: []string{"POST"}},
-				Upstream:       Upstream{URL: "https://www.ory.sh"},
+				Match:          &Match{URL: "https://www.ory.com", Methods: []string{"POST"}},
+				Upstream:       Upstream{URL: "https://www.ory.com"},
 				Authenticators: []Handler{{Handler: "noop"}},
 				Authorizer:     Handler{Handler: "allow"},
 				Mutators:       []Handler{{Handler: "foo"}},
@@ -109,8 +109,8 @@ func TestValidateRule(t *testing.T) {
 		{
 			setup: prep(true, true, true),
 			r: &Rule{
-				Match:          &Match{URL: "https://www.ory.sh", Methods: []string{"POST"}},
-				Upstream:       Upstream{URL: "https://www.ory.sh"},
+				Match:          &Match{URL: "https://www.ory.com", Methods: []string{"POST"}},
+				Upstream:       Upstream{URL: "https://www.ory.com"},
 				Authenticators: []Handler{{Handler: "noop"}},
 				Authorizer:     Handler{Handler: "allow"},
 				Mutators:       []Handler{{Handler: "noop"}},
@@ -119,8 +119,8 @@ func TestValidateRule(t *testing.T) {
 		{
 			setup: prep(true, true, true),
 			r: &Rule{
-				Match:          &Match{URL: "https://www.ory.sh", Methods: []string{"MKCOL"}},
-				Upstream:       Upstream{URL: "https://www.ory.sh"},
+				Match:          &Match{URL: "https://www.ory.com", Methods: []string{"MKCOL"}},
+				Upstream:       Upstream{URL: "https://www.ory.com"},
 				Authenticators: []Handler{{Handler: "noop"}},
 				Authorizer:     Handler{Handler: "allow"},
 				Mutators:       []Handler{{Handler: "noop"}},
@@ -129,7 +129,7 @@ func TestValidateRule(t *testing.T) {
 		{
 			setup: prep(true, true, true),
 			r: &Rule{
-				Match:          &Match{URL: "https://www.ory.sh", Methods: []string{"MKCOL"}},
+				Match:          &Match{URL: "https://www.ory.com", Methods: []string{"MKCOL"}},
 				Upstream:       Upstream{URL: "http://tasks.foo-bar_baz"},
 				Authenticators: []Handler{{Handler: "noop"}},
 				Authorizer:     Handler{Handler: "allow"},
@@ -139,8 +139,8 @@ func TestValidateRule(t *testing.T) {
 		{
 			setup: prep(true, true, false),
 			r: &Rule{
-				Match:          &Match{URL: "https://www.ory.sh", Methods: []string{"POST"}},
-				Upstream:       Upstream{URL: "https://www.ory.sh"},
+				Match:          &Match{URL: "https://www.ory.com", Methods: []string{"POST"}},
+				Upstream:       Upstream{URL: "https://www.ory.com"},
 				Authenticators: []Handler{{Handler: "noop"}},
 				Authorizer:     Handler{Handler: "allow"},
 				Mutators:       []Handler{{Handler: "noop"}},

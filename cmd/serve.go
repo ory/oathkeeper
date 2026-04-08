@@ -20,7 +20,7 @@ var serveCmd = &cobra.Command{
 ORY Oathkeeper can be configured using environment variables as well as a configuration file. For more information
 on configuration options, open the configuration documentation:
 
->> https://www.ory.sh/oathkeeper/docs/configuration <<
+>> https://www.ory.com/oathkeeper/docs/configuration <<
 `,
 	Run: func(cmd *cobra.Command, args []string) {
 		server.RunServe(x.Version, x.Commit, x.Date)(cmd, args)
@@ -30,6 +30,6 @@ on configuration options, open the configuration documentation:
 func init() {
 	RootCmd.AddCommand(serveCmd)
 
-	serveCmd.PersistentFlags().Bool("disable-telemetry", false, "Disable anonymized telemetry reports - for more information please visit https://www.ory.sh/docs/ecosystem/sqa")
-	serveCmd.PersistentFlags().Bool("sqa-opt-out", false, "Disable anonymized telemetry reports - for more information please visit https://www.ory.sh/docs/ecosystem/sqa")
+	serveCmd.PersistentFlags().Bool("disable-telemetry", false, "Disable anonymized telemetry reports - for more information please visit https://www.ory.com/docs/ecosystem/sqa")
+	serveCmd.PersistentFlags().Bool("sqa-opt-out", false, "Disable anonymized telemetry reports - for more information please visit https://www.ory.com/docs/ecosystem/sqa")
 }

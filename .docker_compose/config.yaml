@@ -19,7 +19,7 @@ errors:
     redirect:
       enabled: true
       config:
-        to: https://www.ory.sh/docs
+        to: https://www.ory.com/docs
 
 mutators:
   header:
