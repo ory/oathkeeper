@@ -169,7 +169,7 @@ func (a *MutatorHydrator) Mutate(r *http.Request, session *authn.AuthenticationS
 
 	client := http.DefaultClient
 	if a.d.Tracer() != nil {
-		client = otelhttp.DefaultClient
+		client = &http.Client{Transport: otelhttp.NewTransport(http.DefaultTransport)}
 	}
 	if cfg.Api.Retry != nil {
 		giveUpAfter := time.Second
@@ -190,7 +190,8 @@ func (a *MutatorHydrator) Mutate(r *http.Request, session *authn.AuthenticationS
 		}
 		clientOpts := []httpx.ResilientOptions{
 			httpx.ResilientClientWithConnectionTimeout(giveUpAfter),
-			httpx.ResilientClientWithMaxRetryWait(maxRetryDelay)}
+			httpx.ResilientClientWithMaxRetryWait(maxRetryDelay),
+		}
 		client = httpx.NewResilientClient(clientOpts...).StandardClient()
 	}
 
