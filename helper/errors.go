@@ -9,69 +9,102 @@ import (
 	"github.com/ory/herodot"
 )
 
-var (
-	ErrForbidden = herodot.DefaultError{
+func ErrForbidden() *herodot.DefaultError {
+	return &herodot.DefaultError{
 		ErrorField:  "Access credentials are not sufficient to access this resource",
 		CodeField:   http.StatusForbidden,
 		StatusField: http.StatusText(http.StatusForbidden),
 	}
-	ErrUnauthorized = herodot.DefaultError{
+}
+
+func ErrUnauthorized() *herodot.DefaultError {
+	return &herodot.DefaultError{
 		ErrorField:  "Access credentials are invalid",
 		CodeField:   http.StatusUnauthorized,
 		StatusField: http.StatusText(http.StatusUnauthorized),
 	}
-	ErrMatchesMoreThanOneRule = herodot.DefaultError{
+}
+
+func ErrMatchesMoreThanOneRule() *herodot.DefaultError {
+	return &herodot.DefaultError{
 		ErrorField:  "Expected exactly one rule but found multiple rules",
 		CodeField:   http.StatusInternalServerError,
 		StatusField: http.StatusText(http.StatusInternalServerError),
 	}
-	ErrRuleFeatureDisabled = herodot.DefaultError{
+}
+
+func ErrRuleFeatureDisabled() *herodot.DefaultError {
+	return &herodot.DefaultError{
 		ErrorField:  "The matched rule uses a feature which is not enabled in the server configuration",
 		CodeField:   http.StatusInternalServerError,
 		StatusField: http.StatusText(http.StatusInternalServerError),
 	}
-	// TODO: discuss the text and status code
-	ErrNonRegexpMatchingStrategy = herodot.DefaultError{
+}
+
+// TODO: discuss the text and status code
+func ErrNonRegexpMatchingStrategy() *herodot.DefaultError {
+	return &herodot.DefaultError{
 		ErrorField:  "The matched handler uses Regexp MatchingStrategy which is not selected in the configuration",
 		CodeField:   http.StatusInternalServerError,
 		StatusField: http.StatusText(http.StatusInternalServerError),
 	}
-	ErrMatchesNoRule = herodot.DefaultError{
+}
+
+func ErrMatchesNoRule() *herodot.DefaultError {
+	return &herodot.DefaultError{
 		ErrorField:  "Requested url does not match any rules",
 		CodeField:   http.StatusNotFound,
 		StatusField: http.StatusText(http.StatusNotFound),
 	}
-	ErrResourceNotFound = herodot.DefaultError{
+}
+
+func ErrResourceNotFound() *herodot.DefaultError {
+	return &herodot.DefaultError{
 		ErrorField:  "The requested resource could not be found",
 		CodeField:   http.StatusNotFound,
 		StatusField: http.StatusText(http.StatusNotFound),
 	}
-	ErrTooManyRequests = herodot.DefaultError{
+}
+
+func ErrTooManyRequests() *herodot.DefaultError {
+	return &herodot.DefaultError{
 		ErrorField:  "Too many requests",
 		CodeField:   http.StatusTooManyRequests,
 		StatusField: http.StatusText(http.StatusTooManyRequests),
 	}
-	ErrUpstreamServiceNotAvailable = herodot.DefaultError{
+}
+
+func ErrUpstreamServiceNotAvailable() *herodot.DefaultError {
+	return &herodot.DefaultError{
 		ErrorField:  "The upstream service is not available",
 		CodeField:   http.StatusServiceUnavailable,
 		StatusField: http.StatusText(http.StatusServiceUnavailable),
 	}
-	ErrUpstreamServiceTimeout = herodot.DefaultError{
+}
+
+func ErrUpstreamServiceTimeout() *herodot.DefaultError {
+	return &herodot.DefaultError{
 		ErrorField:  "The upstream service is timing out",
 		CodeField:   http.StatusGatewayTimeout,
 		StatusField: http.StatusText(http.StatusGatewayTimeout),
 	}
-	ErrUpstreamServiceInternalServerError = herodot.DefaultError{
+}
+
+func ErrUpstreamServiceInternalServerError() *herodot.DefaultError {
+	return &herodot.DefaultError{
 		ErrorField:  "The upstream service encountered an unexpected error",
 		CodeField:   http.StatusInternalServerError,
 		StatusField: http.StatusText(http.StatusInternalServerError),
 	}
-	ErrUpstreamServiceNotFound = herodot.DefaultError{
+}
+
+func ErrUpstreamServiceNotFound() *herodot.DefaultError {
+	return &herodot.DefaultError{
 		ErrorField:  "Upstream service not found",
 		CodeField:   http.StatusNotFound,
 		StatusField: http.StatusText(http.StatusNotFound),
 	}
-)
+}
 
 // RateLimitHeaders lists headers to propagate from upstream 429 responses.
 var RateLimitHeaders = []string{
@@ -101,5 +134,5 @@ func NewErrTooManyRequestsWithHeaders(resp *http.Response) *ErrWithHeaders {
 			h.Set(key, v)
 		}
 	}
-	return &ErrWithHeaders{Err: ErrTooManyRequests, Headers: h}
+	return &ErrWithHeaders{Err: ErrTooManyRequests(), Headers: h}
 }

@@ -87,7 +87,7 @@ func (m *RepositoryMemory) Get(ctx context.Context, id string) (*Rule, error) {
 		}
 	}
 
-	return nil, errors.WithStack(helper.ErrResourceNotFound)
+	return nil, errors.WithStack(helper.ErrResourceNotFound())
 }
 
 func (m *RepositoryMemory) Set(ctx context.Context, rules []Rule) error {
@@ -137,9 +137,9 @@ func (m *RepositoryMemory) Match(_ context.Context, method string, u *url.URL, p
 	}
 
 	if len(rules) == 0 {
-		return nil, errors.WithStack(helper.ErrMatchesNoRule)
+		return nil, errors.WithStack(helper.ErrMatchesNoRule())
 	} else if len(rules) != 1 {
-		return nil, errors.WithStack(helper.ErrMatchesMoreThanOneRule)
+		return nil, errors.WithStack(helper.ErrMatchesMoreThanOneRule())
 	}
 
 	return rules[0], nil
@@ -151,7 +151,7 @@ func (m *RepositoryMemory) ReadyChecker(r *http.Request) error {
 		return err
 	}
 	if c == 0 {
-		return errors.WithStack(helper.ErrResourceNotFound.WithReason("No rules found."))
+		return errors.WithStack(helper.ErrResourceNotFound().WithReason("No rules found."))
 	}
 	return nil
 }

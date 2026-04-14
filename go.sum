@@ -568,8 +568,8 @@ github.com/ory/gojsonschema v1.2.0 h1:ePsM9vnsxVHrEHW9/bE2DyU4s34B/YdDtT4LoPnGNs
 github.com/ory/gojsonschema v1.2.0/go.mod h1:BNZpdJgB74KOLSsWFvzw6roXg1I6O51WO8roMmW+T7Y=
 github.com/ory/graceful v0.2.0 h1:5wqyCvKZG2+sorOA9rmQJm9aZP+RJdTrVHVDcvMOSuQ=
 github.com/ory/graceful v0.2.0/go.mod h1:hg2iCy+LCWOXahBZ+NQa4dk8J2govyQD79rrqrgMyY8=
-github.com/ory/herodot v0.10.8 h1:uUPsXd4FKTsNHHU+OS5gYrRNEMraU36st0kBeWiXsno=
-github.com/ory/herodot v0.10.8/go.mod h1:j6i246U6iX8TStYNKIVQxb2waweQvtOLi+b/9q+OULg=
+github.com/ory/herodot v0.10.9-0.20260330111132-da75ef0fbc22 h1:xSbAB0yH2CUPqf9tiei3EFo7xpqY5nsAGdcrwqH9o6o=
+github.com/ory/herodot v0.10.9-0.20260330111132-da75ef0fbc22/go.mod h1:by6EjQDF4bDC2OuWOBd9EBRrTjtl0+kxSzyvuizM0Iw=
 github.com/ory/jsonschema/v3 v3.0.9-0.20250317235931-280c5fc7bf0e h1:4tUrC7x4YWRVMFp+c64KACNSGchW1zXo4l6Pa9/1hA8=
 github.com/ory/jsonschema/v3 v3.0.9-0.20250317235931-280c5fc7bf0e/go.mod h1:XWLxVK4un/iuIcrw+6lCeanbF3NZwO5k6RdLeu/loQk=
 github.com/ory/ladon v1.3.0 h1:35Rc3O8d+mhFWxzmKs6Qj/ETQEHGEI5BmWQf8wtqFHk=

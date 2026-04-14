@@ -79,26 +79,26 @@ func TestMatchesWhen(t *testing.T) {
 		{in: errors.New("err")},
 		{
 			w:  Whens{When{Error: []string{statusText(http.StatusForbidden)}}},
-			in: &herodot.ErrNotFound,
+			in: herodot.ErrNotFound(),
 			ee: ErrDoesNotMatchWhen,
 		},
 		{
 			w:  Whens{When{Error: []string{"forbidden"}}},
-			in: errors.WithStack(&herodot.ErrNotFound),
+			in: errors.WithStack(herodot.ErrNotFound()),
 			ee: ErrDoesNotMatchWhen,
 		},
 		{
 			w: Whens{
 				When{Error: []string{statusText(http.StatusForbidden), statusText(http.StatusNotFound)}},
 			},
-			in: errors.WithStack(&herodot.ErrNotFound),
+			in: errors.WithStack(herodot.ErrNotFound()),
 		},
 		{
 			w: Whens{
 				When{Error: []string{statusText(http.StatusForbidden)}},
 				When{Error: []string{statusText(http.StatusForbidden), statusText(http.StatusNotFound)}},
 			},
-			in: errors.WithStack(&herodot.ErrNotFound),
+			in: errors.WithStack(herodot.ErrNotFound()),
 		},
 		{
 			w: Whens{
@@ -107,7 +107,7 @@ func TestMatchesWhen(t *testing.T) {
 					Request: &WhenRequest{},
 				},
 			},
-			in: errors.WithStack(&herodot.ErrNotFound),
+			in: errors.WithStack(herodot.ErrNotFound()),
 		},
 		{
 			w: Whens{
@@ -120,7 +120,7 @@ func TestMatchesWhen(t *testing.T) {
 					},
 				},
 			},
-			in: errors.WithStack(&herodot.ErrNotFound),
+			in: errors.WithStack(herodot.ErrNotFound()),
 			ee: ErrDoesNotMatchWhen,
 		},
 		{
@@ -134,7 +134,7 @@ func TestMatchesWhen(t *testing.T) {
 					},
 				},
 			},
-			in: errors.WithStack(&herodot.ErrNotFound),
+			in: errors.WithStack(herodot.ErrNotFound()),
 			ee: ErrDoesNotMatchWhen,
 		},
 		{
@@ -146,7 +146,7 @@ func TestMatchesWhen(t *testing.T) {
 					},
 				},
 			},
-			in: errors.WithStack(&herodot.ErrNotFound),
+			in: errors.WithStack(herodot.ErrNotFound()),
 			ee: ErrDoesNotMatchWhen,
 		},
 		{
@@ -169,7 +169,7 @@ func TestMatchesWhen(t *testing.T) {
 					},
 				},
 			},
-			in: errors.WithStack(&herodot.ErrNotFound),
+			in: errors.WithStack(herodot.ErrNotFound()),
 			ee: ErrDoesNotMatchWhen,
 		},
 		{
@@ -192,7 +192,7 @@ func TestMatchesWhen(t *testing.T) {
 					},
 				},
 			},
-			in: errors.WithStack(&herodot.ErrNotFound),
+			in: errors.WithStack(herodot.ErrNotFound()),
 		},
 		{
 			init: combine(jsonAccept, jsonContentType),
@@ -215,7 +215,7 @@ func TestMatchesWhen(t *testing.T) {
 					},
 				},
 			},
-			in: errors.WithStack(&herodot.ErrNotFound),
+			in: errors.WithStack(herodot.ErrNotFound()),
 			ee: ErrDoesNotMatchWhen,
 		},
 		{
@@ -239,7 +239,7 @@ func TestMatchesWhen(t *testing.T) {
 					},
 				},
 			},
-			in: errors.WithStack(&herodot.ErrNotFound),
+			in: errors.WithStack(herodot.ErrNotFound()),
 		},
 		{
 			init: combine(jsonAccept, jsonContentType),
@@ -259,7 +259,7 @@ func TestMatchesWhen(t *testing.T) {
 					},
 				},
 			},
-			in: errors.WithStack(&herodot.ErrNotFound),
+			in: errors.WithStack(herodot.ErrNotFound()),
 			ee: ErrDoesNotMatchWhen,
 		},
 		{
@@ -280,7 +280,7 @@ func TestMatchesWhen(t *testing.T) {
 					},
 				},
 			},
-			in: errors.WithStack(&herodot.ErrNotFound),
+			in: errors.WithStack(herodot.ErrNotFound()),
 		},
 		{
 			init: combine(jsonAccept, jsonContentType, withIPs("127.0.0.1:123")),
@@ -292,7 +292,7 @@ func TestMatchesWhen(t *testing.T) {
 					},
 				},
 			},
-			in: errors.WithStack(&herodot.ErrNotFound),
+			in: errors.WithStack(herodot.ErrNotFound()),
 			ee: ErrDoesNotMatchWhen,
 		},
 		{
@@ -305,7 +305,7 @@ func TestMatchesWhen(t *testing.T) {
 					},
 				},
 			},
-			in: errors.WithStack(&herodot.ErrNotFound),
+			in: errors.WithStack(herodot.ErrNotFound()),
 			ee: ErrDoesNotMatchWhen,
 		},
 		{
@@ -318,7 +318,7 @@ func TestMatchesWhen(t *testing.T) {
 					},
 				},
 			},
-			in: errors.WithStack(&herodot.ErrNotFound),
+			in: errors.WithStack(herodot.ErrNotFound()),
 			ee: ErrDoesNotMatchWhen,
 		},
 		{
@@ -331,7 +331,7 @@ func TestMatchesWhen(t *testing.T) {
 					},
 				},
 			},
-			in: errors.WithStack(&herodot.ErrNotFound),
+			in: errors.WithStack(herodot.ErrNotFound()),
 			ee: ErrDoesNotMatchWhen,
 		},
 		{
@@ -344,7 +344,7 @@ func TestMatchesWhen(t *testing.T) {
 					},
 				},
 			},
-			in: errors.WithStack(&herodot.ErrNotFound),
+			in: errors.WithStack(herodot.ErrNotFound()),
 		},
 		{
 			init: combine(mixedAccept, jsonContentType, withIPs("127.0.0.1:123", "127.0.0.2", "127.0.0.3", "192.168.1.2")),
@@ -360,7 +360,7 @@ func TestMatchesWhen(t *testing.T) {
 					},
 				},
 			},
-			in: errors.WithStack(&herodot.ErrNotFound),
+			in: errors.WithStack(herodot.ErrNotFound()),
 		},
 		{
 			init: combine(mixedAccept, jsonContentType),
@@ -375,7 +375,7 @@ func TestMatchesWhen(t *testing.T) {
 					},
 				},
 			},
-			in: errors.WithStack(&herodot.ErrNotFound),
+			in: errors.WithStack(herodot.ErrNotFound()),
 		},
 		{
 			init: combine(mixedAccept, jsonContentType),
@@ -390,7 +390,7 @@ func TestMatchesWhen(t *testing.T) {
 					},
 				},
 			},
-			in: errors.WithStack(&herodot.ErrNotFound),
+			in: errors.WithStack(herodot.ErrNotFound()),
 		},
 		{
 			init: combine(chromeAccept),
@@ -404,7 +404,7 @@ func TestMatchesWhen(t *testing.T) {
 					},
 				},
 			},
-			in: errors.WithStack(&herodot.ErrNotFound),
+			in: errors.WithStack(herodot.ErrNotFound()),
 			ee: ErrDoesNotMatchWhen,
 		},
 		{
@@ -419,7 +419,7 @@ func TestMatchesWhen(t *testing.T) {
 					},
 				},
 			},
-			in: errors.WithStack(&herodot.ErrNotFound),
+			in: errors.WithStack(herodot.ErrNotFound()),
 			ee: ErrDoesNotMatchWhen,
 		},
 	} {

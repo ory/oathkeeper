@@ -96,8 +96,7 @@ func (s *FetcherDefault) ResolveSets(ctx context.Context, locations []url.URL) (
 		return set, nil
 	}
 
-	return nil, errors.WithStack(herodot.
-		ErrInternalServerError.
+	return nil, errors.WithStack(herodot.ErrInternalServerError().
 		WithReasonf(`None of the provided URLs returned a valid JSON Web Key Set.`),
 	)
 }
@@ -144,8 +143,7 @@ func (s *FetcherDefault) ResolveKey(ctx context.Context, locations []url.URL, ki
 		return key, nil
 	}
 
-	return nil, errors.WithStack(herodot.
-		ErrInternalServerError.
+	return nil, errors.WithStack(herodot.ErrInternalServerError().
 		WithDetail("jwks_urls", fmt.Sprintf("%v", locations)).
 		WithReasonf(`JSON Web Key ID "%s" with use "%s" could not be found in any of the provided URIs.`, kid, use).
 		WithDebug("Check that the provided JSON Web Key URIs contain a key that can verify the signature of the provided JSON Web Key ID."),
@@ -221,8 +219,7 @@ func (s *FetcherDefault) resolve(ctx context.Context, wg *sync.WaitGroup, errs c
 	case "azblob", "gs", "s3":
 		bucket, err := s.mux.OpenBucket(ctx, location.Scheme+"://"+location.Host)
 		if err != nil {
-			errs <- errors.WithStack(herodot.
-				ErrInternalServerError.
+			errs <- errors.WithStack(herodot.ErrInternalServerError().
 				WithReasonf(
 					`Unable to fetch JSON Web Keys from location "%s" because "%s".`,
 					location.String(),
@@ -235,8 +232,7 @@ func (s *FetcherDefault) resolve(ctx context.Context, wg *sync.WaitGroup, errs c
 
 		reader, err = bucket.NewReader(ctx, location.Path[1:], nil)
 		if err != nil {
-			errs <- errors.WithStack(herodot.
-				ErrInternalServerError.
+			errs <- errors.WithStack(herodot.ErrInternalServerError().
 				WithReasonf(
 					`Unable to fetch JSON Web Keys from location "%s" because "%s".`,
 					location.String(),
@@ -250,8 +246,7 @@ func (s *FetcherDefault) resolve(ctx context.Context, wg *sync.WaitGroup, errs c
 	case "", "file":
 		reader, err = os.Open(urlx.GetURLFilePath(&location))
 		if err != nil {
-			errs <- errors.WithStack(herodot.
-				ErrInternalServerError.
+			errs <- errors.WithStack(herodot.ErrInternalServerError().
 				WithReasonf(
 					`Unable to fetch JSON Web Keys from location "%s" because "%s".`,
 					location.String(),
@@ -265,8 +260,7 @@ func (s *FetcherDefault) resolve(ctx context.Context, wg *sync.WaitGroup, errs c
 	case "http", "https":
 		req, err := http.NewRequestWithContext(ctx, "GET", location.String(), nil)
 		if err != nil {
-			errs <- errors.WithStack(herodot.
-				ErrInternalServerError.
+			errs <- errors.WithStack(herodot.ErrInternalServerError().
 				WithReasonf(
 					`Unable to fetch JSON Web Keys from location "%s" because "%s".`,
 					location.String(),
@@ -277,8 +271,7 @@ func (s *FetcherDefault) resolve(ctx context.Context, wg *sync.WaitGroup, errs c
 		}
 		res, err := s.client.Do(req)
 		if err != nil {
-			errs <- errors.WithStack(herodot.
-				ErrInternalServerError.
+			errs <- errors.WithStack(herodot.ErrInternalServerError().
 				WithReasonf(
 					`Unable to fetch JSON Web Keys from location "%s" because "%s".`,
 					location.String(),
@@ -291,8 +284,7 @@ func (s *FetcherDefault) resolve(ctx context.Context, wg *sync.WaitGroup, errs c
 		defer func() { _ = reader.Close() }()
 
 		if res.StatusCode < 200 || res.StatusCode >= 400 {
-			errs <- errors.WithStack(herodot.
-				ErrInternalServerError.
+			errs <- errors.WithStack(herodot.ErrInternalServerError().
 				WithReasonf(
 					`Expected successful status code from location "%s", but received code "%d".`,
 					location.String(),
@@ -303,8 +295,7 @@ func (s *FetcherDefault) resolve(ctx context.Context, wg *sync.WaitGroup, errs c
 		}
 
 	default:
-		errs <- errors.WithStack(herodot.
-			ErrInternalServerError.
+		errs <- errors.WithStack(herodot.ErrInternalServerError().
 			WithReasonf(
 				`Unable to fetch JSON Web Keys from location "%s" because URL scheme "%s" is not supported.`,
 				location.String(),
@@ -316,8 +307,7 @@ func (s *FetcherDefault) resolve(ctx context.Context, wg *sync.WaitGroup, errs c
 
 	var set jose.JSONWebKeySet
 	if err := json.NewDecoder(reader).Decode(&set); err != nil {
-		errs <- errors.WithStack(herodot.
-			ErrInternalServerError.
+		errs <- errors.WithStack(herodot.ErrInternalServerError().
 			WithReasonf(
 				`Unable to decode JSON Web Keys from location "%s" because "%s".`,
 				location.String(),

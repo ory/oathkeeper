@@ -22,7 +22,7 @@ import (
 	"github.com/ory/oathkeeper/rule"
 )
 
-var ErrDenied = herodot.ErrUnauthorized
+func ErrDenied() *herodot.DefaultError { return herodot.ErrUnauthorized() }
 
 // httpRequest builds an HTTP request equivalent that is used for rule matching.
 func (m *middleware) httpRequest(ctx context.Context, fullMethod string) (*http.Request, error) {
@@ -84,7 +84,7 @@ func (m *middleware) unaryInterceptor(ctx context.Context, req interface{}, info
 		log.WithError(err).Warn("could not build HTTP request")
 		span.SetAttributes(attribute.String("oathkeeper.verdict", "denied"))
 		span.SetStatus(codes.Error, err.Error())
-		return nil, ErrDenied
+		return nil, ErrDenied()
 	}
 	log = log.WithRequest(httpReq)
 
@@ -95,7 +95,7 @@ func (m *middleware) unaryInterceptor(ctx context.Context, req interface{}, info
 		log.WithError(err).Warn("could not find a matching rule")
 		span.SetAttributes(attribute.String("oathkeeper.verdict", "denied"))
 		span.SetStatus(codes.Error, err.Error())
-		return nil, ErrDenied
+		return nil, ErrDenied()
 	}
 
 	_, err = m.ProxyRequestHandler().HandleRequest(httpReq, r)
@@ -103,7 +103,7 @@ func (m *middleware) unaryInterceptor(ctx context.Context, req interface{}, info
 		log.WithError(err).Warn("failed to handle request")
 		span.SetAttributes(attribute.String("oathkeeper.verdict", "denied"))
 		span.SetStatus(codes.Error, err.Error())
-		return nil, ErrDenied
+		return nil, ErrDenied()
 	}
 
 	log.Info("access request granted")
@@ -133,7 +133,7 @@ func (m *middleware) streamInterceptor(
 		log.WithError(err).Warn("could not build HTTP request")
 		span.SetAttributes(attribute.String("oathkeeper.verdict", "denied"))
 		span.SetStatus(codes.Error, err.Error())
-		return ErrDenied
+		return ErrDenied()
 	}
 	log = log.WithRequest(httpReq)
 
@@ -144,7 +144,7 @@ func (m *middleware) streamInterceptor(
 		log.WithError(err).Warn("could not find a matching rule")
 		span.SetAttributes(attribute.String("oathkeeper.verdict", "denied"))
 		span.SetStatus(codes.Error, err.Error())
-		return ErrDenied
+		return ErrDenied()
 	}
 
 	_, err = m.ProxyRequestHandler().HandleRequest(httpReq, r)
@@ -152,7 +152,7 @@ func (m *middleware) streamInterceptor(
 		log.WithError(err).Warn("failed to handle request")
 		span.SetAttributes(attribute.String("oathkeeper.verdict", "denied"))
 		span.SetStatus(codes.Error, err.Error())
-		return ErrDenied
+		return ErrDenied()
 	}
 
 	log.Info("access request granted")

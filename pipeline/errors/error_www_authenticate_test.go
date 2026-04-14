@@ -37,7 +37,7 @@ func TestErrorWWWAuthenticate(t *testing.T) {
 		}{
 			{
 				d:          "should respond with a 401 realm message",
-				givenError: &herodot.ErrNotFound,
+				givenError: herodot.ErrNotFound(),
 				assert: func(t *testing.T, rw *httptest.ResponseRecorder) {
 					assert.Equal(t, 401, rw.Code)
 					assert.Equal(t, "Basic realm=Please authenticate.", rw.Header().Get("WWW-Authenticate"))
@@ -46,7 +46,7 @@ func TestErrorWWWAuthenticate(t *testing.T) {
 			{
 				d:          "should respond with a 401 realm message and a custom message",
 				config:     `{"realm": "foobar"}`,
-				givenError: &herodot.ErrNotFound,
+				givenError: herodot.ErrNotFound(),
 				assert: func(t *testing.T, rw *httptest.ResponseRecorder) {
 					assert.Equal(t, 401, rw.Code)
 					assert.Equal(t, "Basic realm=foobar", rw.Header().Get("WWW-Authenticate"))

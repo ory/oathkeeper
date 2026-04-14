@@ -38,7 +38,7 @@ func TestErrorRedirect(t *testing.T) {
 		}{
 			{
 				d:          "should redirect with 302 - absolute (HTTP)",
-				givenError: &herodot.ErrNotFound,
+				givenError: herodot.ErrNotFound(),
 				config:     `{"to":"http://test/test"}`,
 				assert: func(t *testing.T, rw *httptest.ResponseRecorder) {
 					assert.Equal(t, 302, rw.Code)
@@ -47,7 +47,7 @@ func TestErrorRedirect(t *testing.T) {
 			},
 			{
 				d:          "redirect with 302 should contain a return_to param - absolute (HTTP) ",
-				givenError: &herodot.ErrNotFound,
+				givenError: herodot.ErrNotFound(),
 				config:     `{"to":"http://test/signin","return_to_query_param":"return_to"}`,
 				assert: func(t *testing.T, rw *httptest.ResponseRecorder) {
 					assert.Equal(t, 302, rw.Code)
@@ -59,7 +59,7 @@ func TestErrorRedirect(t *testing.T) {
 			},
 			{
 				d:          "should redirect with 302 - absolute (HTTPS)",
-				givenError: &herodot.ErrNotFound,
+				givenError: herodot.ErrNotFound(),
 				config:     `{"to":"https://test/test"}`,
 				assert: func(t *testing.T, rw *httptest.ResponseRecorder) {
 					assert.Equal(t, 302, rw.Code)
@@ -68,7 +68,7 @@ func TestErrorRedirect(t *testing.T) {
 			},
 			{
 				d:          "redirect with 302 should contain a return_to param - absolute (HTTPS) ",
-				givenError: &herodot.ErrNotFound,
+				givenError: herodot.ErrNotFound(),
 				config:     `{"to":"https://test/signin","return_to_query_param":"return_to"}`,
 				assert: func(t *testing.T, rw *httptest.ResponseRecorder) {
 					assert.Equal(t, 302, rw.Code)
@@ -80,7 +80,7 @@ func TestErrorRedirect(t *testing.T) {
 			},
 			{
 				d:          "should redirect with 302 - relative",
-				givenError: &herodot.ErrNotFound,
+				givenError: herodot.ErrNotFound(),
 				config:     `{"to":"/test"}`,
 				assert: func(t *testing.T, rw *httptest.ResponseRecorder) {
 					assert.Equal(t, 302, rw.Code)
@@ -89,7 +89,7 @@ func TestErrorRedirect(t *testing.T) {
 			},
 			{
 				d:          "redirect with 302 should contain a return_to param - relative ",
-				givenError: &herodot.ErrNotFound,
+				givenError: herodot.ErrNotFound(),
 				config:     `{"to":"/test/signin","return_to_query_param":"return_to"}`,
 				assert: func(t *testing.T, rw *httptest.ResponseRecorder) {
 					assert.Equal(t, 302, rw.Code)
@@ -101,7 +101,7 @@ func TestErrorRedirect(t *testing.T) {
 			},
 			{
 				d:          "should redirect with 301 - absolute (HTTP)",
-				givenError: &herodot.ErrNotFound,
+				givenError: herodot.ErrNotFound(),
 				config:     `{"to":"http://test/test","code":301}`,
 				assert: func(t *testing.T, rw *httptest.ResponseRecorder) {
 					assert.Equal(t, 301, rw.Code)
@@ -110,7 +110,7 @@ func TestErrorRedirect(t *testing.T) {
 			},
 			{
 				d:          "redirect with 301 should contain a return_to param - absolute (HTTP) ",
-				givenError: &herodot.ErrNotFound,
+				givenError: herodot.ErrNotFound(),
 				config:     `{"to":"http://test/signin","return_to_query_param":"return_to","code":301}`,
 				assert: func(t *testing.T, rw *httptest.ResponseRecorder) {
 					assert.Equal(t, 301, rw.Code)
@@ -122,7 +122,7 @@ func TestErrorRedirect(t *testing.T) {
 			},
 			{
 				d:          "should redirect with 301 - absolute (HTTPS)",
-				givenError: &herodot.ErrNotFound,
+				givenError: herodot.ErrNotFound(),
 				config:     `{"to":"https://test/test","code":301}`,
 				assert: func(t *testing.T, rw *httptest.ResponseRecorder) {
 					assert.Equal(t, 301, rw.Code)
@@ -131,7 +131,7 @@ func TestErrorRedirect(t *testing.T) {
 			},
 			{
 				d:          "redirect with 301 should contain a return_to param - absolute (HTTPS) ",
-				givenError: &herodot.ErrNotFound,
+				givenError: herodot.ErrNotFound(),
 				config:     `{"to":"https://test/signin","return_to_query_param":"return_to","code":301}`,
 				assert: func(t *testing.T, rw *httptest.ResponseRecorder) {
 					assert.Equal(t, 301, rw.Code)
@@ -143,7 +143,7 @@ func TestErrorRedirect(t *testing.T) {
 			},
 			{
 				d:          "should redirect with 301 - relative",
-				givenError: &herodot.ErrNotFound,
+				givenError: herodot.ErrNotFound(),
 				config:     `{"to":"/test", "code":301}`,
 				assert: func(t *testing.T, rw *httptest.ResponseRecorder) {
 					assert.Equal(t, 301, rw.Code)
@@ -152,7 +152,7 @@ func TestErrorRedirect(t *testing.T) {
 			},
 			{
 				d:          "redirect with 301 should contain a return_to param - relative ",
-				givenError: &herodot.ErrNotFound,
+				givenError: herodot.ErrNotFound(),
 				config:     `{"to":"/test/signin","return_to_query_param":"return_to","code":301}`,
 				assert: func(t *testing.T, rw *httptest.ResponseRecorder) {
 					assert.Equal(t, 301, rw.Code)

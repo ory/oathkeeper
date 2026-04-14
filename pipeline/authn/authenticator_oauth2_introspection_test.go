@@ -716,7 +716,7 @@ func TestAuthenticatorOAuth2Introspection(t *testing.T) {
 				config := setup(t, `{ "required_scope": ["scope-b"], "trusted_issuers": ["foo", "bar"], "target_audience": ["audience"] }`)
 				sess := new(AuthenticationSession)
 
-				require.ErrorIs(t, a.Authenticate(r, sess, config, nil), helper.ErrUnauthorized)
+				require.ErrorIs(t, a.Authenticate(r, sess, config, nil), helper.ErrUnauthorized())
 				assert.False(t, cacheWasUsed())
 			})
 		})
@@ -732,9 +732,9 @@ func TestAuthenticatorOAuth2Introspection(t *testing.T) {
 					config := setup(t, `{ "required_scope": ["scope-a"], "trusted_issuers": ["foo", "bar"], "target_audience": ["audience"] }`)
 
 					// Also doesn't use the cache the second time
-					require.ErrorIs(t, a.Authenticate(r, expected, config, nil), helper.ErrUnauthorized)
+					require.ErrorIs(t, a.Authenticate(r, expected, config, nil), helper.ErrUnauthorized())
 					assert.False(t, cacheWasUsed())
-					require.ErrorIs(t, a.Authenticate(r, expected, config, nil), helper.ErrUnauthorized)
+					require.ErrorIs(t, a.Authenticate(r, expected, config, nil), helper.ErrUnauthorized())
 					assert.False(t, cacheWasUsed())
 				})
 			}
@@ -774,17 +774,17 @@ func TestAuthenticatorOAuth2Introspection(t *testing.T) {
 
 			t.Run("case=requests a scope the token does not have", func(t *testing.T) {
 				config := setup(t, `{ "required_scope": ["scope-b"], "trusted_issuers": ["foo", "bar"], "target_audience": ["audience"] }`)
-				require.ErrorIs(t, a.Authenticate(r, new(AuthenticationSession), config, nil), helper.ErrForbidden)
+				require.ErrorIs(t, a.Authenticate(r, new(AuthenticationSession), config, nil), helper.ErrForbidden())
 			})
 
 			t.Run("case=requests an audience which the token does not have", func(t *testing.T) {
 				config := setup(t, `{ "required_scope": ["scope-a"], "trusted_issuers": ["foo", "bar"], "target_audience": ["not-audience"] }`)
-				require.ErrorIs(t, a.Authenticate(r, new(AuthenticationSession), config, nil), helper.ErrForbidden)
+				require.ErrorIs(t, a.Authenticate(r, new(AuthenticationSession), config, nil), helper.ErrForbidden())
 			})
 
 			t.Run("case=does not trust the issuer", func(t *testing.T) {
 				config := setup(t, `{ "required_scope": ["scope-a"], "trusted_issuers": ["not-foo", "bar"], "target_audience": ["audience"] }`)
-				require.ErrorIs(t, a.Authenticate(r, new(AuthenticationSession), config, nil), helper.ErrForbidden)
+				require.ErrorIs(t, a.Authenticate(r, new(AuthenticationSession), config, nil), helper.ErrForbidden())
 			})
 
 			t.Run("case=respects the expiry time", func(t *testing.T) {

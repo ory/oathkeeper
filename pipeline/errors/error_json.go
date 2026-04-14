@@ -61,24 +61,24 @@ func (a *ErrorJSON) Handle(w http.ResponseWriter, r *http.Request, config json.R
 		if errors.As(handleError, &sc) {
 			switch sc.StatusCode() {
 			case http.StatusInternalServerError:
-				handleError = herodot.ErrInternalServerError.WithWrap(wrapped)
+				handleError = herodot.ErrInternalServerError().WithWrap(wrapped)
 			case http.StatusForbidden:
-				handleError = herodot.ErrForbidden.WithWrap(wrapped)
+				handleError = herodot.ErrForbidden().WithWrap(wrapped)
 			case http.StatusNotFound:
-				handleError = herodot.ErrNotFound.WithWrap(wrapped)
+				handleError = herodot.ErrNotFound().WithWrap(wrapped)
 			case http.StatusUnauthorized:
-				handleError = herodot.ErrUnauthorized.WithWrap(wrapped)
+				handleError = herodot.ErrUnauthorized().WithWrap(wrapped)
 			case http.StatusBadRequest:
-				handleError = herodot.ErrBadRequest.WithWrap(wrapped)
+				handleError = herodot.ErrBadRequest().WithWrap(wrapped)
 			case http.StatusTooManyRequests:
-				handleError = helper.ErrTooManyRequests.WithWrap(wrapped)
+				handleError = helper.ErrTooManyRequests().WithWrap(wrapped)
 			case http.StatusUnsupportedMediaType:
-				handleError = herodot.ErrUnsupportedMediaType.WithWrap(wrapped)
+				handleError = herodot.ErrUnsupportedMediaType().WithWrap(wrapped)
 			case http.StatusConflict:
-				handleError = herodot.ErrConflict.WithWrap(wrapped)
+				handleError = herodot.ErrConflict().WithWrap(wrapped)
 			}
 		} else {
-			handleError = herodot.ErrInternalServerError.WithWrap(wrapped)
+			handleError = herodot.ErrInternalServerError().WithWrap(wrapped)
 		}
 	}
 

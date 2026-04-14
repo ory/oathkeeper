@@ -39,7 +39,7 @@ func TestErrorJSON(t *testing.T) {
 		}{
 			{
 				d:          "should write to the request",
-				givenError: &herodot.ErrNotFound,
+				givenError: herodot.ErrNotFound(),
 				assert: func(t *testing.T, rw *httptest.ResponseRecorder) {
 					body := rw.Body.String()
 					assert.Equal(t, "application/json", rw.Header().Get("Content-Type"))
@@ -49,7 +49,7 @@ func TestErrorJSON(t *testing.T) {
 			},
 			{
 				d:          "should write to the request handler and omit debug info because verbose is false",
-				givenError: herodot.ErrNotFound.WithReasonf("this should not show up in the response"),
+				givenError: herodot.ErrNotFound().WithReasonf("this should not show up in the response"),
 				assert: func(t *testing.T, rw *httptest.ResponseRecorder) {
 					body := rw.Body.String()
 					assert.Equal(t, "application/json", rw.Header().Get("Content-Type"))
@@ -59,7 +59,7 @@ func TestErrorJSON(t *testing.T) {
 			},
 			{
 				d:          "should write to the request handler and include verbose error details",
-				givenError: herodot.ErrNotFound.WithReasonf("this must show up in the error details"),
+				givenError: herodot.ErrNotFound().WithReasonf("this must show up in the error details"),
 				config:     `{"verbose": true}`,
 				assert: func(t *testing.T, rw *httptest.ResponseRecorder) {
 					body := rw.Body.String()
@@ -71,7 +71,7 @@ func TestErrorJSON(t *testing.T) {
 			{
 				d: "should propagate rate-limit headers from ErrWithHeaders in non-verbose mode",
 				givenError: errors.WithStack(&helper.ErrWithHeaders{
-					Err: helper.ErrTooManyRequests,
+					Err: helper.ErrTooManyRequests(),
 					Headers: http.Header{
 						"Retry-After":           []string{"60"},
 						"X-RateLimit-Limit":     []string{"100"},
@@ -96,7 +96,7 @@ func TestErrorJSON(t *testing.T) {
 			{
 				d: "should propagate rate-limit headers from ErrWithHeaders in verbose mode",
 				givenError: &helper.ErrWithHeaders{
-					Err: helper.ErrTooManyRequests,
+					Err: helper.ErrTooManyRequests(),
 					Headers: http.Header{
 						"Retry-After": []string{"30"},
 					},
@@ -114,7 +114,7 @@ func TestErrorJSON(t *testing.T) {
 			{
 				d: "should handle ErrWithHeaders with no headers gracefully",
 				givenError: &helper.ErrWithHeaders{
-					Err:     helper.ErrTooManyRequests,
+					Err:     helper.ErrTooManyRequests(),
 					Headers: http.Header{}, // Empty headers
 				},
 				assert: func(t *testing.T, rw *httptest.ResponseRecorder) {

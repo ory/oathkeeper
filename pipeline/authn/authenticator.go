@@ -18,10 +18,13 @@ import (
 )
 
 var ErrAuthenticatorNotResponsible = errors.New("Authenticator not responsible")
-var ErrAuthenticatorNotEnabled = herodot.DefaultError{
-	ErrorField:  "authenticator matching this route is misconfigured or disabled",
-	CodeField:   http.StatusInternalServerError,
-	StatusField: http.StatusText(http.StatusInternalServerError),
+
+func ErrAuthenticatorNotEnabled() *herodot.DefaultError {
+	return &herodot.DefaultError{
+		ErrorField:  "authenticator matching this route is misconfigured or disabled",
+		CodeField:   http.StatusInternalServerError,
+		StatusField: http.StatusText(http.StatusInternalServerError),
+	}
 }
 
 type Authenticator interface {
@@ -31,11 +34,11 @@ type Authenticator interface {
 }
 
 func NewErrAuthenticatorNotEnabled(a Authenticator) *herodot.DefaultError {
-	return ErrAuthenticatorNotEnabled.WithTrace(errors.New("")).WithReasonf(`Authenticator "%s" is disabled per configuration.`, a.GetID())
+	return ErrAuthenticatorNotEnabled().WithTrace(errors.New("")).WithReasonf(`Authenticator "%s" is disabled per configuration.`, a.GetID())
 }
 
 func NewErrAuthenticatorMisconfigured(a Authenticator, err error) *herodot.DefaultError {
-	return ErrAuthenticatorNotEnabled.WithTrace(err).WithReasonf(
+	return ErrAuthenticatorNotEnabled().WithTrace(err).WithReasonf(
 		`Configuration for authenticator "%s" could not be validated: %s`,
 		a.GetID(),
 		err,

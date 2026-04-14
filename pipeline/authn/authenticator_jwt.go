@@ -115,12 +115,12 @@ func (a *AuthenticatorJWT) Authenticate(r *http.Request, session *Authentication
 	if err != nil {
 		de := herodot.ToDefaultError(err, "")
 		r := fmt.Sprintf("%+v", de)
-		return a.tryEnrichResultErr(token, helper.ErrUnauthorized.WithReason(r).WithTrace(err))
+		return a.tryEnrichResultErr(token, helper.ErrUnauthorized().WithReason(r).WithTrace(err))
 	}
 
 	claims, ok := pt.Claims.(jwt.MapClaims)
 	if !ok {
-		return errors.WithStack(herodot.ErrInternalServerError.WithReasonf("Expected JSON Web Token claims to be of type jwt.MapClaims but got: %T", pt.Claims))
+		return errors.WithStack(herodot.ErrInternalServerError().WithReasonf("Expected JSON Web Token claims to be of type jwt.MapClaims but got: %T", pt.Claims))
 	}
 
 	session.Subject = jwtx.ParseMapStringInterfaceClaims(claims).Subject

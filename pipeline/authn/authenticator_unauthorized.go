@@ -39,5 +39,5 @@ func (a *AuthenticatorUnauthorized) GetID() string {
 }
 
 func (a *AuthenticatorUnauthorized) Authenticate(r *http.Request, session *AuthenticationSession, config json.RawMessage, _ pipeline.Rule) error {
-	return errors.WithStack(helper.ErrUnauthorized)
+	return errors.WithStack(helper.ErrUnauthorized())
 }

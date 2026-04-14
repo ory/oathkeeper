@@ -107,7 +107,7 @@ func (a *AuthorizerKetoEngineACPORY) Authorize(r *http.Request, session *authn.A
 
 	// only Regexp matching strategy is supported for now.
 	if !(a.c.AccessRuleMatchingStrategy() == "" || a.c.AccessRuleMatchingStrategy() == configuration.Regexp) { //nolint:staticcheck // clarity over De Morgan form
-		return helper.ErrNonRegexpMatchingStrategy
+		return helper.ErrNonRegexpMatchingStrategy()
 	}
 
 	subject := session.Subject
@@ -169,7 +169,7 @@ func (a *AuthorizerKetoEngineACPORY) Authorize(r *http.Request, session *authn.A
 	if res.StatusCode == http.StatusTooManyRequests {
 		return errors.WithStack(helper.NewErrTooManyRequestsWithHeaders(res))
 	} else if res.StatusCode == http.StatusForbidden {
-		return errors.WithStack(helper.ErrForbidden)
+		return errors.WithStack(helper.ErrForbidden())
 	} else if res.StatusCode != http.StatusOK {
 		return errors.Errorf("expected status code %d but got %d", http.StatusOK, res.StatusCode)
 	}
@@ -182,7 +182,7 @@ func (a *AuthorizerKetoEngineACPORY) Authorize(r *http.Request, session *authn.A
 	}
 
 	if !result.Allowed {
-		return errors.WithStack(helper.ErrForbidden)
+		return errors.WithStack(helper.ErrForbidden())
 	}
 
 	return nil

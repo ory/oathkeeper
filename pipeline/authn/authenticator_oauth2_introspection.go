@@ -245,33 +245,33 @@ func (a *AuthenticatorOAuth2Introspection) Authenticate(r *http.Request, session
 	}
 
 	if i.TokenUse != "" && i.TokenUse != "access_token" {
-		return errors.WithStack(helper.ErrForbidden.WithReason(fmt.Sprintf("Use of introspected token is not an access token but %q", i.TokenUse)))
+		return errors.WithStack(helper.ErrForbidden().WithReason(fmt.Sprintf("Use of introspected token is not an access token but %q", i.TokenUse)))
 	}
 
 	if !i.Active {
-		return errors.WithStack(helper.ErrUnauthorized.WithReason("Access token is not active"))
+		return errors.WithStack(helper.ErrUnauthorized().WithReason("Access token is not active"))
 	}
 
 	if i.Expires > 0 && time.Unix(i.Expires, 0).Before(time.Now()) {
-		return errors.WithStack(helper.ErrUnauthorized.WithReason("Access token expired"))
+		return errors.WithStack(helper.ErrUnauthorized().WithReason("Access token expired"))
 	}
 
 	for _, audience := range cf.Audience {
 		if !slices.Contains(i.Audience, audience) {
-			return errors.WithStack(helper.ErrForbidden.WithReason(fmt.Sprintf("Token audience is not intended for target audience %s", audience)))
+			return errors.WithStack(helper.ErrForbidden().WithReason(fmt.Sprintf("Token audience is not intended for target audience %s", audience)))
 		}
 	}
 
 	if len(cf.Issuers) > 0 {
 		if !slices.Contains(cf.Issuers, i.Issuer) {
-			return errors.WithStack(helper.ErrForbidden.WithReason("Token issuer does not match any trusted issuer"))
+			return errors.WithStack(helper.ErrForbidden().WithReason("Token issuer does not match any trusted issuer"))
 		}
 	}
 
 	if ss != nil {
 		for _, scope := range cf.Scopes {
 			if !ss(strings.Split(i.Scope, " "), scope) {
-				return errors.WithStack(helper.ErrForbidden.WithReason(fmt.Sprintf("Scope %s was not granted", scope)))
+				return errors.WithStack(helper.ErrForbidden().WithReason(fmt.Sprintf("Scope %s was not granted", scope)))
 			}
 		}
 	}

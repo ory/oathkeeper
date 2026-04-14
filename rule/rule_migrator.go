@@ -119,5 +119,5 @@ func migrateRuleJSON(raw []byte) ([]byte, error) {
 		return raw, nil
 	}
 
-	return nil, errors.WithStack(herodot.ErrBadRequest.WithReasonf("Unknown access rule version %s, unable to migrate.", version.String()))
+	return nil, errors.WithStack(herodot.ErrBadRequest().WithReasonf("Unknown access rule version %s, unable to migrate.", version.String()))
 }

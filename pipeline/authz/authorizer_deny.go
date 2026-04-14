@@ -29,7 +29,7 @@ func (a *AuthorizerDeny) GetID() string {
 }
 
 func (a *AuthorizerDeny) Authorize(r *http.Request, session *authn.AuthenticationSession, config json.RawMessage, _ pipeline.Rule) error {
-	return errors.WithStack(helper.ErrForbidden)
+	return errors.WithStack(helper.ErrForbidden())
 }
 
 func (a *AuthorizerDeny) Validate(config json.RawMessage) error {

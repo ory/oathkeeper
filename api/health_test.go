@@ -71,7 +71,7 @@ func TestHealth(t *testing.T) {
 	require.Equal(t, http.StatusServiceUnavailable, res.StatusCode)
 	require.NoError(t, json.NewDecoder(res.Body).Decode(&result))
 	assert.Empty(t, result.Status)
-	assert.Equal(t, herodot.ErrNotFound.ErrorField, result.Error.Message)
+	assert.Equal(t, herodot.ErrNotFound().ErrorField, result.Error.Message)
 
 	r.Init()
 	// Waiting for rule load and health event propagation

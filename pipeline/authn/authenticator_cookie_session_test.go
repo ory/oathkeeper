@@ -412,7 +412,7 @@ func TestAuthenticatorCookieSession429Headers(t *testing.T) {
 		assert.Equal(t, "user", errH.Headers.Get("X-RateLimit-Type"))
 
 		// Verify the wrapped error is ErrTooManyRequests
-		assert.ErrorIs(t, errH.Err, helper.ErrTooManyRequests)
+		assert.ErrorIs(t, errH.Err, helper.ErrTooManyRequests())
 	})
 
 	t.Run("case=should_handle_429_with_partial_headers", func(t *testing.T) {

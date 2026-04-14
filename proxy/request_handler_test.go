@@ -44,7 +44,7 @@ func TestHandleError(t *testing.T) {
 	}{
 		{
 			d:        "should return a JSON error per default and work with nil rules",
-			inputErr: &herodot.ErrNotFound,
+			inputErr: herodot.ErrNotFound(),
 			assert: func(t *testing.T, w *httptest.ResponseRecorder) {
 				assert.Equal(t, 404, w.Code)
 				assert.Equal(t, "application/json", w.Header().Get("Content-Type"))
@@ -52,7 +52,7 @@ func TestHandleError(t *testing.T) {
 		},
 		{
 			d:        "should return a 500 error when no handler is enabled",
-			inputErr: &herodot.ErrNotFound,
+			inputErr: herodot.ErrNotFound(),
 			setup: func(t *testing.T, config configuration.Provider) {
 				config.SetForTest(t, configuration.ErrorsJSONIsEnabled, false)
 			},
@@ -62,7 +62,7 @@ func TestHandleError(t *testing.T) {
 		},
 		{
 			d:        "should return the found response",
-			inputErr: &herodot.ErrUnauthorized,
+			inputErr: herodot.ErrUnauthorized(),
 			setup: func(t *testing.T, config configuration.Provider) {
 				config.SetForTest(t, configuration.ErrorsRedirectIsEnabled, true)
 			},
@@ -79,7 +79,7 @@ func TestHandleError(t *testing.T) {
 		},
 		{
 			d:        "should return a JSON error because the error is not unauthorized and JSON is the default",
-			inputErr: &herodot.ErrNotFound,
+			inputErr: herodot.ErrNotFound(),
 			setup: func(t *testing.T, config configuration.Provider) {
 				config.SetForTest(t, configuration.ErrorsRedirectIsEnabled, true)
 				config.SetForTest(t, configuration.ErrorsHandlers+".redirect.config.to", "http://test/test")
@@ -97,7 +97,7 @@ func TestHandleError(t *testing.T) {
 		},
 		{
 			d:        "should pick the appropriate (json) error handler for the request when multiple are configured",
-			inputErr: &herodot.ErrNotFound,
+			inputErr: herodot.ErrNotFound(),
 			setup: func(t *testing.T, config configuration.Provider) {
 				config.SetForTest(t, configuration.ErrorsRedirectIsEnabled, true)
 			},
@@ -118,7 +118,7 @@ func TestHandleError(t *testing.T) {
 		},
 		{
 			d:        "should redirect to the specified endpoint by picking the appropriate error handler (redirect)",
-			inputErr: &herodot.ErrUnauthorized,
+			inputErr: herodot.ErrUnauthorized(),
 			setup: func(t *testing.T, config configuration.Provider) {
 				config.SetForTest(t, configuration.ErrorsRedirectIsEnabled, true)
 			},
@@ -139,7 +139,7 @@ func TestHandleError(t *testing.T) {
 		},
 		{
 			d:        "should respond with the appropriate fallback handler (here www_authenticate)",
-			inputErr: &herodot.ErrUnauthorized,
+			inputErr: herodot.ErrUnauthorized(),
 			setup: func(t *testing.T, config configuration.Provider) {
 				config.SetForTest(t, configuration.ErrorsRedirectIsEnabled, true)
 				config.SetForTest(t, configuration.ErrorsWWWAuthenticateIsEnabled, true)
@@ -162,7 +162,7 @@ func TestHandleError(t *testing.T) {
 		},
 		{
 			d:        "should respond with the appropriate fallback handler (here json)",
-			inputErr: &herodot.ErrForbidden,
+			inputErr: herodot.ErrForbidden(),
 			// We set the fallback to first run www_authenticate. But because the error is not_found, as
 			// is defined in the when clause, we should see a json error instead!
 			configOpts: []configx.OptionModifier{configx.WithConfigFiles(x.WriteFile(t, `
@@ -199,7 +199,7 @@ errors:
 		},
 		{
 			d:        "should return a 500 error because no fallback could handle the error",
-			inputErr: &herodot.ErrForbidden,
+			inputErr: herodot.ErrForbidden(),
 			// We set the fallback to first run www_authenticate. But because the error is not_found, as
 			// is defined in the when clause, we should see the 500 misconfigured error
 			configOpts: []configx.OptionModifier{configx.WithConfigFiles(x.WriteFile(t, `

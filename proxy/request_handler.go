@@ -67,7 +67,7 @@ func (d *requestHandler) matchesWhen(w http.ResponseWriter, r *http.Request, h p
 		if errorsx.Cause(err) == pe.ErrHandlerNotResponsible {
 			return err
 		}
-		d.r.Writer().WriteError(w, r, errors.WithStack(herodot.ErrInternalServerError.WithReasonf(`Unable to execute error handler "%s". This is either a bug or a configuration issue and should be reported to the administrator. Returned error: "%s". Original error: "%s"`, h.GetID(), err, handleErr)))
+		d.r.Writer().WriteError(w, r, errors.WithStack(herodot.ErrInternalServerError().WithReasonf(`Unable to execute error handler "%s". This is either a bug or a configuration issue and should be reported to the administrator. Returned error: "%s". Original error: "%s"`, h.GetID(), err, handleErr)))
 		return err
 	}
 
@@ -85,7 +85,7 @@ func (d *requestHandler) HandleError(w http.ResponseWriter, r *http.Request, rl 
 	for _, re := range rl.Errors {
 		handler, err := d.r.PipelineErrorHandler(re.Handler)
 		if err != nil {
-			d.r.Writer().WriteError(w, r, errors.WithStack(herodot.ErrInternalServerError.WithReasonf(
+			d.r.Writer().WriteError(w, r, errors.WithStack(herodot.ErrInternalServerError().WithReasonf(
 				"Unable to find error handler named: %s. This is a configuration issue and should be reported to the administrator.", re.Handler,
 			)))
 			return
@@ -99,7 +99,7 @@ func (d *requestHandler) HandleError(w http.ResponseWriter, r *http.Request, rl 
 		}
 
 		if h != nil {
-			d.r.Writer().WriteError(w, r, errors.WithStack(herodot.ErrInternalServerError.WithReasonf(
+			d.r.Writer().WriteError(w, r, errors.WithStack(herodot.ErrInternalServerError().WithReasonf(
 				`Found more than one error handlers to be responsible for this request. This is a configuration error that needs to be resolved by the system administrator."`,
 			)))
 			return
@@ -112,7 +112,7 @@ func (d *requestHandler) HandleError(w http.ResponseWriter, r *http.Request, rl 
 	if h == nil {
 		for _, name := range d.c.ErrorHandlerFallbackSpecificity() {
 			if !d.c.ErrorHandlerIsEnabled(name) {
-				d.r.Writer().WriteError(w, r, errors.WithStack(herodot.ErrInternalServerError.WithReasonf(
+				d.r.Writer().WriteError(w, r, errors.WithStack(herodot.ErrInternalServerError().WithReasonf(
 					`Fallback error handler "%s" was requested but is disabled or unknown. This is a configuration issue and should be reported to the administrator.`, name,
 				)))
 				return
@@ -120,7 +120,7 @@ func (d *requestHandler) HandleError(w http.ResponseWriter, r *http.Request, rl 
 
 			handler, err := d.r.PipelineErrorHandler(name)
 			if err != nil {
-				d.r.Writer().WriteError(w, r, errors.WithStack(herodot.ErrInternalServerError.WithReasonf(
+				d.r.Writer().WriteError(w, r, errors.WithStack(herodot.ErrInternalServerError().WithReasonf(
 					`Unable to find fallback error handler named "%s". This is a configuration issue and should be reported to the administrator.`, name,
 				)))
 				return
@@ -139,7 +139,7 @@ func (d *requestHandler) HandleError(w http.ResponseWriter, r *http.Request, rl 
 	}
 
 	if h == nil {
-		d.r.Writer().WriteError(w, r, errors.WithStack(herodot.ErrInternalServerError.WithReasonf(
+		d.r.Writer().WriteError(w, r, errors.WithStack(herodot.ErrInternalServerError().WithReasonf(
 			"Unable to handle HTTP request because no matching error handling strategy was found. This is a bug and should be reported to: http://github.com/ory/oathkeeper",
 		)))
 		return
@@ -151,7 +151,7 @@ func (d *requestHandler) HandleError(w http.ResponseWriter, r *http.Request, rl 
 	}
 
 	if err := h.Handle(w, r, config, rl, handleErr); err != nil {
-		d.r.Writer().WriteError(w, r, errors.WithStack(herodot.ErrInternalServerError.WithReasonf(
+		d.r.Writer().WriteError(w, r, errors.WithStack(herodot.ErrInternalServerError().WithReasonf(
 			`Unable to execute error handler "%s". This is either a bug or a configuration issue and should be reported to the administrator. Returned error: "%s". Original error: "%s"`, h.GetID(), err, handleErr,
 		)))
 		return
@@ -214,10 +214,10 @@ func (d *requestHandler) HandleRequest(r *http.Request, rl *rule.Rule) (session 
 			// The authentication handler says that no further authentication/authorization is required, and the request should
 			// be forwarded to its final destination.
 			// return nil
-			case helper.ErrUnauthorized.ErrorField:
+			case helper.ErrUnauthorized().ErrorField:
 				d.r.Logger().Info(err)
 				return nil, err
-			case helper.ErrTooManyRequests.ErrorField:
+			case helper.ErrTooManyRequests().ErrorField:
 				d.r.Logger().Info(err)
 				return nil, err
 			default:
@@ -238,7 +238,7 @@ func (d *requestHandler) HandleRequest(r *http.Request, rl *rule.Rule) (session 
 	}
 
 	if !found {
-		err := errors.WithStack(helper.ErrUnauthorized)
+		err := errors.WithStack(helper.ErrUnauthorized())
 		d.r.Logger().WithError(err).
 			WithFields(fields).
 			WithField("granted", false).

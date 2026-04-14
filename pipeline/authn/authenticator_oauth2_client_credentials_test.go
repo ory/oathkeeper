@@ -73,13 +73,13 @@ func TestAuthenticatorOAuth2ClientCredentials(t *testing.T) {
 		{
 			d:         "fails due to invalid client credentials",
 			r:         authInvalid,
-			expectErr: helper.ErrUnauthorized,
+			expectErr: helper.ErrUnauthorized(),
 			config:    json.RawMessage(`{}`),
 			token_url: "",
 			setup: func(t *testing.T, h *httprouter.Router, _ json.RawMessage) {
 				h.POST("/oauth2/token", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 					h := herodot.NewJSONWriter(logger)
-					h.WriteError(w, r, helper.ErrUnauthorized)
+					h.WriteError(w, r, helper.ErrUnauthorized())
 				})
 			},
 		},
@@ -110,7 +110,7 @@ func TestAuthenticatorOAuth2ClientCredentials(t *testing.T) {
 					calls++
 					if calls == 2 {
 						h := herodot.NewJSONWriter(logger)
-						h.WriteError(w, r, helper.ErrUpstreamServiceNotAvailable)
+						h.WriteError(w, r, helper.ErrUpstreamServiceNotAvailable())
 						return
 					}
 
@@ -162,7 +162,7 @@ func TestAuthenticatorOAuth2ClientCredentials(t *testing.T) {
 					calls++
 					if calls == 2 {
 						h := herodot.NewJSONWriter(logger)
-						h.WriteError(w, r, helper.ErrUpstreamServiceNotAvailable)
+						h.WriteError(w, r, helper.ErrUpstreamServiceNotAvailable())
 						return
 					}
 
@@ -193,7 +193,7 @@ func TestAuthenticatorOAuth2ClientCredentials(t *testing.T) {
 					if calls == 3 {
 						h := herodot.NewJSONWriter(logger)
 						t.Errorf("expected only 2 calls to token endpoint this is number %d", calls)
-						h.WriteError(w, r, helper.ErrUpstreamServiceNotAvailable)
+						h.WriteError(w, r, helper.ErrUpstreamServiceNotAvailable())
 						return
 					}
 
@@ -236,7 +236,7 @@ func TestAuthenticatorOAuth2ClientCredentials(t *testing.T) {
 					if calls == 3 {
 						h := herodot.NewJSONWriter(logger)
 						t.Errorf("expected only 2 calls to token endpoint this is number %d", calls)
-						h.WriteError(w, r, helper.ErrUpstreamServiceNotAvailable)
+						h.WriteError(w, r, helper.ErrUpstreamServiceNotAvailable())
 						return
 					}
 
@@ -273,46 +273,46 @@ func TestAuthenticatorOAuth2ClientCredentials(t *testing.T) {
 		{
 			d:         "fails and returns 503 Service Unavailable error due to the unavailability of the upstream service",
 			r:         upstreamFailure,
-			expectErr: helper.ErrUpstreamServiceNotAvailable,
+			expectErr: helper.ErrUpstreamServiceNotAvailable(),
 			config:    json.RawMessage(`{}`),
 			token_url: "",
 			setup: func(t *testing.T, h *httprouter.Router, _ json.RawMessage) {
 				h.POST("/oauth2/token", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 					h := herodot.NewJSONWriter(logger)
-					h.WriteError(w, r, helper.ErrUpstreamServiceNotAvailable)
+					h.WriteError(w, r, helper.ErrUpstreamServiceNotAvailable())
 				})
 			},
 		},
 		{
 			d:         "fails and returns 504 Gateway Timeout error due to upstream service timeout",
 			r:         upstreamFailure,
-			expectErr: helper.ErrUpstreamServiceTimeout,
+			expectErr: helper.ErrUpstreamServiceTimeout(),
 			config:    json.RawMessage(`{}`),
 			token_url: "",
 			setup: func(t *testing.T, h *httprouter.Router, _ json.RawMessage) {
 				h.POST("/oauth2/token", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 					h := herodot.NewJSONWriter(logger)
-					h.WriteError(w, r, helper.ErrUpstreamServiceTimeout)
+					h.WriteError(w, r, helper.ErrUpstreamServiceTimeout())
 				})
 			},
 		},
 		{
 			d:         "fails and returns 500 Internal Server Error error due to an unexpected error in the upstream service",
 			r:         upstreamFailure,
-			expectErr: helper.ErrUpstreamServiceInternalServerError,
+			expectErr: helper.ErrUpstreamServiceInternalServerError(),
 			config:    json.RawMessage(`{}`),
 			token_url: "",
 			setup: func(t *testing.T, h *httprouter.Router, _ json.RawMessage) {
 				h.POST("/oauth2/token", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 					h := herodot.NewJSONWriter(logger)
-					h.WriteError(w, r, helper.ErrUpstreamServiceInternalServerError)
+					h.WriteError(w, r, helper.ErrUpstreamServiceInternalServerError())
 				})
 			},
 		},
 		{
 			d:         "fails and returns 404 Not Found error as the upstream service could not find the requested resource ",
 			r:         upstreamFailure,
-			expectErr: helper.ErrUpstreamServiceNotFound,
+			expectErr: helper.ErrUpstreamServiceNotFound(),
 			config:    json.RawMessage(`{}`),
 			token_url: "",
 			setup: func(t *testing.T, h *httprouter.Router, _ json.RawMessage) {
@@ -325,13 +325,13 @@ func TestAuthenticatorOAuth2ClientCredentials(t *testing.T) {
 		{
 			d:         "fails and returns 401 Unauthorized error as the upstream service returns 403 Forbidden",
 			r:         upstreamFailure,
-			expectErr: helper.ErrUnauthorized,
+			expectErr: helper.ErrUnauthorized(),
 			config:    json.RawMessage(`{}`),
 			token_url: "",
 			setup: func(t *testing.T, h *httprouter.Router, _ json.RawMessage) {
 				h.POST("/oauth2/token", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 					h := herodot.NewJSONWriter(logger)
-					h.WriteError(w, r, helper.ErrForbidden)
+					h.WriteError(w, r, helper.ErrForbidden())
 				})
 			},
 		},
@@ -375,7 +375,7 @@ func TestAuthenticatorOAuth2ClientCredentials(t *testing.T) {
 		h := herodot.NewJSONWriter(logger)
 		u, p, ok := r.BasicAuth()
 		if !ok || u != "client" || p != "secret" {
-			h.WriteError(w, r, helper.ErrUnauthorized)
+			h.WriteError(w, r, helper.ErrUnauthorized())
 			return
 		}
 		h.Write(w, r, map[string]interface{}{"access_token": "foo-token"})

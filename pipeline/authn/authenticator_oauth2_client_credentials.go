@@ -207,12 +207,12 @@ func (a *AuthenticatorOAuth2ClientCredentials) Authenticate(r *http.Request, ses
 
 	user, err = url.QueryUnescape(user)
 	if err != nil {
-		return errors.Wrap(helper.ErrUnauthorized, err.Error())
+		return errors.Wrap(helper.ErrUnauthorized(), err.Error())
 	}
 
 	password, err = url.QueryUnescape(password)
 	if err != nil {
-		return errors.Wrap(helper.ErrUnauthorized, err.Error())
+		return errors.Wrap(helper.ErrUnauthorized(), err.Error())
 	}
 
 	c := clientcredentials.Config{
@@ -237,18 +237,18 @@ func (a *AuthenticatorOAuth2ClientCredentials) Authenticate(r *http.Request, ses
 				case http.StatusTooManyRequests:
 					return errors.WithStack(helper.NewErrTooManyRequestsWithHeaders(rErr.Response))
 				case http.StatusServiceUnavailable:
-					return errors.Wrap(helper.ErrUpstreamServiceNotAvailable, err.Error())
+					return errors.Wrap(helper.ErrUpstreamServiceNotAvailable(), err.Error())
 				case http.StatusInternalServerError:
-					return errors.Wrap(helper.ErrUpstreamServiceInternalServerError, err.Error())
+					return errors.Wrap(helper.ErrUpstreamServiceInternalServerError(), err.Error())
 				case http.StatusGatewayTimeout:
-					return errors.Wrap(helper.ErrUpstreamServiceTimeout, err.Error())
+					return errors.Wrap(helper.ErrUpstreamServiceTimeout(), err.Error())
 				case http.StatusNotFound:
-					return errors.Wrap(helper.ErrUpstreamServiceNotFound, err.Error())
+					return errors.Wrap(helper.ErrUpstreamServiceNotFound(), err.Error())
 				default:
-					return errors.Wrap(helper.ErrUnauthorized, err.Error())
+					return errors.Wrap(helper.ErrUnauthorized(), err.Error())
 				}
 			} else {
-				return errors.Wrap(helper.ErrUpstreamServiceNotAvailable, err.Error())
+				return errors.Wrap(helper.ErrUpstreamServiceNotAvailable(), err.Error())
 			}
 		}
 
@@ -258,7 +258,7 @@ func (a *AuthenticatorOAuth2ClientCredentials) Authenticate(r *http.Request, ses
 	}
 
 	if token.AccessToken == "" {
-		return errors.WithStack(helper.ErrUnauthorized)
+		return errors.WithStack(helper.ErrUnauthorized())
 	}
 
 	session.Subject = user

@@ -41,12 +41,12 @@ func (v *VerifierDefault) Verify(
 	// Parse the token.
 	t, err := jwt.ParseWithClaims(token, jwt.MapClaims{}, func(token *jwt.Token) (interface{}, error) {
 		if !slices.Contains(r.Algorithms, fmt.Sprintf("%s", token.Header["alg"])) {
-			return nil, errors.WithStack(herodot.ErrInternalServerError.WithReason(fmt.Sprintf(`JSON Web Token used signing method "%s" which is not allowed.`, token.Header["alg"])))
+			return nil, errors.WithStack(herodot.ErrInternalServerError().WithReason(fmt.Sprintf(`JSON Web Token used signing method "%s" which is not allowed.`, token.Header["alg"])))
 		}
 
 		kid, ok := token.Header["kid"].(string)
 		if !ok || kid == "" {
-			return nil, errors.WithStack(herodot.ErrBadRequest.WithReason("The JSON Web Token must contain a kid header value but did not."))
+			return nil, errors.WithStack(herodot.ErrBadRequest().WithReason("The JSON Web Token must contain a kid header value but did not."))
 		}
 
 		key, err := v.r.CredentialsFetcher().ResolveKey(ctx, r.KeyURLs, kid, "sig")
@@ -78,17 +78,17 @@ func (v *VerifierDefault) Verify(
 				return k, nil
 			}
 		default:
-			return nil, errors.WithStack(herodot.ErrBadRequest.WithReasonf(`This request object uses unsupported signing algorithm "%s".`, token.Header["alg"]))
+			return nil, errors.WithStack(herodot.ErrBadRequest().WithReasonf(`This request object uses unsupported signing algorithm "%s".`, token.Header["alg"]))
 		}
 
-		return nil, errors.WithStack(herodot.ErrBadRequest.WithReasonf(`The signing key algorithm does not match the algorithm from the token header.`))
+		return nil, errors.WithStack(herodot.ErrBadRequest().WithReasonf(`The signing key algorithm does not match the algorithm from the token header.`))
 	}, jwt.WithIssuedAt())
 	if err != nil {
 		if errors.Is(err, jwt.ErrTokenUnverifiable) ||
 			errors.Is(err, jwt.ErrTokenSignatureInvalid) ||
 			errors.Is(err, jwt.ErrTokenInvalidClaims) ||
 			errors.Is(err, jwt.ErrTokenMalformed) {
-			return nil, herodot.ErrInternalServerError.WithError(err.Error()).WithTrace(err)
+			return nil, herodot.ErrInternalServerError().WithError(err.Error()).WithTrace(err)
 		}
 		return nil, err
 	} else if !t.Valid {
@@ -97,19 +97,19 @@ func (v *VerifierDefault) Verify(
 
 	claims, ok := t.Claims.(jwt.MapClaims)
 	if !ok {
-		return nil, errors.WithStack(herodot.ErrInternalServerError.WithReasonf("Unable to type assert jwt claims to jwt.MapClaims."))
+		return nil, errors.WithStack(herodot.ErrInternalServerError().WithReasonf("Unable to type assert jwt claims to jwt.MapClaims."))
 	}
 
 	parsedClaims := jwtx.ParseMapStringInterfaceClaims(claims)
 	for _, audience := range r.Audiences {
 		if !slices.Contains(parsedClaims.Audience, audience) {
-			return nil, herodot.ErrUnauthorized.WithReasonf("Token audience %v is not intended for target audience %s.", parsedClaims.Audience, audience)
+			return nil, herodot.ErrUnauthorized().WithReasonf("Token audience %v is not intended for target audience %s.", parsedClaims.Audience, audience)
 		}
 	}
 
 	if len(r.Issuers) > 0 {
 		if !slices.Contains(r.Issuers, parsedClaims.Issuer) {
-			return nil, herodot.ErrUnauthorized.WithReasonf("Token issuer does not match any trusted issuer %s.", parsedClaims.Issuer).
+			return nil, herodot.ErrUnauthorized().WithReasonf("Token issuer does not match any trusted issuer %s.", parsedClaims.Issuer).
 				WithDetail("received issuers", strings.Join(r.Issuers, ", "))
 		}
 	}
@@ -121,12 +121,12 @@ func (v *VerifierDefault) Verify(
 	if r.ScopeStrategy != nil {
 		for _, sc := range r.Scope {
 			if !r.ScopeStrategy(s, sc) {
-				return nil, herodot.ErrUnauthorized.WithReasonf(`JSON Web Token is missing required scope "%s".`, sc)
+				return nil, herodot.ErrUnauthorized().WithReasonf(`JSON Web Token is missing required scope "%s".`, sc)
 			}
 		}
 	} else {
 		if len(r.Scope) > 0 {
-			return nil, errors.WithStack(helper.ErrRuleFeatureDisabled.WithReason("Scope validation was requested but scope strategy is set to \"none\"."))
+			return nil, errors.WithStack(helper.ErrRuleFeatureDisabled().WithReason("Scope validation was requested but scope strategy is set to \"none\"."))
 		}
 	}
 

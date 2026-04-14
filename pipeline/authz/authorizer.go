@@ -15,18 +15,20 @@ import (
 	"github.com/ory/oathkeeper/pipeline/authn"
 )
 
-var ErrAuthorizerNotEnabled = herodot.DefaultError{
-	ErrorField:  "authorizer matching this route is misconfigured or disabled",
-	CodeField:   http.StatusInternalServerError,
-	StatusField: http.StatusText(http.StatusInternalServerError),
+func ErrAuthorizerNotEnabled() *herodot.DefaultError {
+	return &herodot.DefaultError{
+		ErrorField:  "authorizer matching this route is misconfigured or disabled",
+		CodeField:   http.StatusInternalServerError,
+		StatusField: http.StatusText(http.StatusInternalServerError),
+	}
 }
 
 func NewErrAuthorizerNotEnabled(a Authorizer) *herodot.DefaultError {
-	return ErrAuthorizerNotEnabled.WithTrace(errors.New("")).WithReasonf(`Authorizer "%s" is disabled per configuration.`, a.GetID())
+	return ErrAuthorizerNotEnabled().WithTrace(errors.New("")).WithReasonf(`Authorizer "%s" is disabled per configuration.`, a.GetID())
 }
 
 func NewErrAuthorizerMisconfigured(a Authorizer, err error) *herodot.DefaultError {
-	return ErrAuthorizerNotEnabled.WithTrace(err).WithReasonf(
+	return ErrAuthorizerNotEnabled().WithTrace(err).WithReasonf(
 		`Configuration for authorizer "%s" could not be validated: %s`,
 		a.GetID(),
 		err,

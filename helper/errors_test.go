@@ -16,7 +16,7 @@ import (
 func TestErrWithHeaders(t *testing.T) {
 	t.Run("Error() delegates to wrapped error", func(t *testing.T) {
 		err := &helper.ErrWithHeaders{
-			Err:     helper.ErrTooManyRequests,
+			Err:     helper.ErrTooManyRequests(),
 			Headers: http.Header{},
 		}
 		assert.Equal(t, "Too many requests", err.Error())
@@ -24,15 +24,15 @@ func TestErrWithHeaders(t *testing.T) {
 
 	t.Run("Unwrap() returns wrapped error", func(t *testing.T) {
 		err := &helper.ErrWithHeaders{
-			Err:     helper.ErrTooManyRequests,
+			Err:     helper.ErrTooManyRequests(),
 			Headers: http.Header{},
 		}
-		assert.Equal(t, helper.ErrTooManyRequests, err.Unwrap())
+		assert.Equal(t, helper.ErrTooManyRequests(), err.Unwrap())
 	})
 
 	t.Run("errors.As finds ErrWithHeaders in chain", func(t *testing.T) {
 		base := &helper.ErrWithHeaders{
-			Err: helper.ErrTooManyRequests,
+			Err: helper.ErrTooManyRequests(),
 			Headers: http.Header{
 				"Retry-After": []string{"60"},
 			},
@@ -87,7 +87,7 @@ func TestNewErrTooManyRequestsWithHeaders(t *testing.T) {
 		resp := &http.Response{Header: http.Header{}}
 		err := helper.NewErrTooManyRequestsWithHeaders(resp)
 
-		assert.Equal(t, helper.ErrTooManyRequests, err.Err)
+		assert.Equal(t, helper.ErrTooManyRequests(), err.Err)
 		assert.Equal(t, "Too many requests", err.Error())
 	})
 }
