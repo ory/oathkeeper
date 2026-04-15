@@ -38,21 +38,23 @@ type Middleware struct {
 
 	// Silence metrics for specific URL paths
 	// it is protected by the mutex
-	mutex         sync.RWMutex
-	silencePaths  map[string]bool
-	collapsePaths bool
-	hidePaths     bool
+	mutex              sync.RWMutex
+	silencePaths       map[string]bool
+	collapsePaths      bool
+	collapsePathsDepth int
+	hidePaths          bool
 }
 
 // NewMiddleware returns a new *Middleware, yay!
 func NewMiddleware(prom *PrometheusRepository, name string) *Middleware {
 	return &Middleware{
-		Name:          name,
-		Prometheus:    prom,
-		clock:         &realClock{},
-		silencePaths:  map[string]bool{},
-		collapsePaths: true,
-		hidePaths:     false,
+		Name:               name,
+		Prometheus:         prom,
+		clock:              &realClock{},
+		silencePaths:       map[string]bool{},
+		collapsePaths:      true,
+		collapsePathsDepth: 1,
+		hidePaths:          false,
 	}
 }
 
@@ -71,9 +73,10 @@ func (m *Middleware) ExcludePaths(paths ...string) *Middleware {
 // eg. (when set to true):
 //   - /decisions/service/my-service -> /decisions
 //   - /decisions -> /decisions
-func (m *Middleware) CollapsePaths(flag bool) *Middleware {
+func (m *Middleware) CollapsePaths(flag bool, depth int) *Middleware {
 	m.mutex.Lock()
 	m.collapsePaths = flag
+	m.collapsePathsDepth = depth
 	m.mutex.Unlock()
 	return m
 }
@@ -88,16 +91,14 @@ func (m *Middleware) HidePaths(flag bool) *Middleware {
 	return m
 }
 
-func (m *Middleware) getFirstPathSegment(requestURI string) string {
-	// Will split /my/example/uri in []string{"", "my", "example/uri"}
-	uriSegments := strings.SplitN(requestURI, "/", 3)
-	if len(uriSegments) > 1 {
-		// Remove any query string from the segment
-		// For example /my?query=string should return /my
-		return "/" + strings.SplitN(uriSegments[1], "?", 2)[0]
+func (m *Middleware) getFirstNPathSegments(requestURI string, n int) string {
+	uriSegments := strings.SplitN(requestURI, "/", n+2)
+	end := n + 1
+	if end > len(uriSegments) {
+		end = len(uriSegments)
 	}
-	return "/"
-
+	joinedPath := "/" + strings.Join(uriSegments[1:end], "/")
+	return strings.Split(joinedPath, "?")[0]
 }
 
 func (m *Middleware) ServeHTTP(rw http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
@@ -112,7 +113,7 @@ func (m *Middleware) ServeHTTP(rw http.ResponseWriter, r *http.Request, next htt
 			requestURI = ""
 		} else {
 			if m.collapsePaths {
-				requestURI = m.getFirstPathSegment(requestURI)
+				requestURI = m.getFirstNPathSegments(requestURI, m.collapsePathsDepth)
 			}
 		}
 
