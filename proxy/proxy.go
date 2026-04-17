@@ -215,6 +215,11 @@ func ConfigureBackendURL(r *http.Request, rl *rule.Rule) error {
 	forwardURL.Host = backendHost
 	forwardURL.Path = path.Join(backendPath, proxyPath)
 
+	// path.Join removes trailing slash
+	if forwardURL.Path != "/" && strings.HasSuffix(proxyPath, "/") {
+		forwardURL.Path += "/"
+	}
+
 	if rl.Upstream.StripPath != "" {
 		forwardURL.Path = strings.Replace(forwardURL.Path, "/"+strings.Trim(rl.Upstream.StripPath, "/"), "", 1)
 	}
