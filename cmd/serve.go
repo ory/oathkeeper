@@ -20,7 +20,7 @@ var serveCmd = &cobra.Command{
 ORY Oathkeeper can be configured using environment variables as well as a configuration file. For more information
 on configuration options, open the configuration documentation:
 
->> https://www.ory.com/oathkeeper/docs/configuration <<
+>> https://www.ory.com/docs/oathkeeper/reference/configuration <<
 `,
 	Run: func(cmd *cobra.Command, args []string) {
 		server.RunServe(x.Version, x.Commit, x.Date)(cmd, args)
