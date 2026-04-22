@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"path"
+	"strings"
 
 	"github.com/ory/herodot"
 	"github.com/ory/x/errorsx"
@@ -333,7 +334,13 @@ func (d *requestHandler) InitializeAuthnSession(r *http.Request, rl *rule.Rule) 
 	}
 
 	if r.URL.Path != "" {
+		hasSlash := strings.HasSuffix(r.URL.Path, "/")
 		r.URL.Path = path.Clean(r.URL.Path)
+
+		// path.Clean removes trailing slash
+		if r.URL.Path != "/" && hasSlash {
+			r.URL.Path += "/"
+		}
 	}
 
 	values, err := rl.ExtractRegexGroups(d.c.AccessRuleMatchingStrategy(), r.URL)

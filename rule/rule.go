@@ -220,7 +220,13 @@ func (r *Rule) IsMatching(strategy configuration.MatchingStrategy, method string
 	}
 
 	if u.Path != "" {
+		hasSlash := strings.HasSuffix(u.Path, "/")
 		u.Path = path.Clean(u.Path)
+
+		// path.Clean removes trailing slash
+		if u.Path != "/" && hasSlash {
+			u.Path += "/"
+		}
 	}
 	matchAgainst := fmt.Sprintf("%s://%s%s", u.Scheme, u.Host, u.Path)
 	return r.matchingEngine.IsMatching(r.Match.GetURL(), matchAgainst)
