@@ -247,6 +247,10 @@ func (v *KoanfProvider) PrometheusCollapseRequestPaths() bool {
 	return v.source.BoolF(PrometheusServeCollapseRequestPaths, true)
 }
 
+func (v *KoanfProvider) PrometheusCollapseRequestPathsDepth() int {
+	return v.source.IntF(PrometheusServeCollapseRequestPathsDepth, 1)
+}
+
 func (v *KoanfProvider) ParseURLs(sources []string) ([]url.URL, error) {
 	r := make([]url.URL, len(sources))
 	for k, u := range sources {
