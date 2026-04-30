@@ -37,6 +37,7 @@ func TestAuthorizerRemoteAuthorize(t *testing.T) {
 		setup              func(t *testing.T) *httptest.Server
 		session            *authn.AuthenticationSession
 		sessionHeaderMatch *http.Header
+		requestHeaders     http.Header
 		body               string
 		config             json.RawMessage
 		wantErr            bool
@@ -162,6 +163,24 @@ func TestAuthorizerRemoteAuthorize(t *testing.T) {
 			config:             json.RawMessage(`{"forward_response_headers_to_upstream":["X-Foo"]}`),
 		},
 		{
+			name: "ok with forwarded request headers",
+			setup: func(t *testing.T) *httptest.Server {
+				return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+					assert.Equal(t, "sig-value", r.Header.Get("X-Signature"))
+					assert.Equal(t, "ts-value", r.Header.Get("X-Timestamp"))
+					assert.Empty(t, r.Header.Get("X-Not-Forwarded"))
+					w.WriteHeader(http.StatusOK)
+				}))
+			},
+			session: &authn.AuthenticationSession{},
+			requestHeaders: http.Header{
+				"X-Signature":     {"sig-value"},
+				"X-Timestamp":     {"ts-value"},
+				"X-Not-Forwarded": {"nope"},
+			},
+			config: json.RawMessage(`{"forward_request_headers_to_remote":["X-Signature","X-Timestamp"]}`),
+		},
+		{
 			name: "authentication session",
 			setup: func(t *testing.T) *httptest.Server {
 				return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -200,6 +219,9 @@ func TestAuthorizerRemoteAuthorize(t *testing.T) {
 					"Content-Type": {"text/plain"},
 					"User-Agent":   {"Fancy Browser 5.1"},
 				},
+			}
+			for name, values := range tt.requestHeaders {
+				r.Header[name] = values
 			}
 			if tt.body != "" {
 				r.Body = io.NopCloser(strings.NewReader(tt.body))
