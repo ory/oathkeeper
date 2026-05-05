@@ -1,0 +1,4 @@
+log:
+  redact_headers:
+    - x-custom-authorization
+    - x-api-key

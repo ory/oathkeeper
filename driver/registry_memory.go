@@ -177,7 +177,7 @@ func (r *RegistryMemory) Writer() herodot.Writer {
 
 func (r *RegistryMemory) Logger() *logrusx.Logger {
 	if r.logger == nil {
-		r.logger = logrusx.New("ORY Oathkeeper", x.Version)
+		r.logger = logrusx.New("ORY Oathkeeper", x.Version, logrusx.WithAdditionalRedactedHeaders(r.c.LogRedactHeaders()))
 	}
 	return r.logger
 }

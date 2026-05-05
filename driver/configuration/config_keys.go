@@ -81,3 +81,8 @@ const (
 	ErrorsRedirectIsEnabled        Key = ErrorsHandlers + ".redirect.enabled"
 	ErrorsWWWAuthenticateIsEnabled Key = ErrorsHandlers + ".www_authenticate.enabled"
 )
+
+// Log
+const (
+	LogRedactHeaders Key = "log.redact_headers"
+)
