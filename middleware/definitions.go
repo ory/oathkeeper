@@ -95,7 +95,7 @@ func New(ctx context.Context, opts ...Option) (Middleware, error) {
 		return nil, errors.WithStack(err)
 	}
 
-	r := driver.NewRegistry(c).WithLogger(o.logger).WithBuildInfo(x.Version, x.Commit, x.Date)
+	r := driver.NewRegistry(c).SetLogger(o.logger).SetBuildInfo(x.Version, x.Commit, x.Date)
 	r.Init()
 	if o.registryAddr != nil {
 		*o.registryAddr = r

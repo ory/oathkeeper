@@ -33,7 +33,7 @@ func setup(t *testing.T) *configuration.KoanfProvider {
 	p, err := configuration.NewKoanfProvider(
 		context.Background(),
 		nil,
-		logrusx.New(t.Name(), ""),
+		logrusx.NewT(t),
 		configx.WithConfigFiles("./../../internal/config/.oathkeeper.yaml"),
 	)
 	require.NoError(t, err)
@@ -111,7 +111,7 @@ func BenchmarkPipelineConfig(b *testing.B) {
 	p, err := configuration.NewKoanfProvider(
 		context.Background(),
 		nil,
-		logrusx.New(b.Name(), ""),
+		logrusx.NewT(b),
 		configx.WithConfigFiles("./../../internal/config/.oathkeeper.yaml"),
 	)
 	require.NoError(b, err)
@@ -137,7 +137,7 @@ func BenchmarkPipelineEnabled(b *testing.B) {
 	p, err := configuration.NewKoanfProvider(
 		context.Background(),
 		nil,
-		logrusx.New(b.Name(), ""),
+		logrusx.NewT(b),
 		configx.WithConfigFiles("./../../internal/config/.oathkeeper.yaml"),
 	)
 	require.NoError(b, err)
@@ -151,7 +151,7 @@ func BenchmarkPipelineEnabled(b *testing.B) {
 }
 
 func TestKoanfProvider(t *testing.T) {
-	logger := logrusx.New("", "")
+	logger := logrusx.NewT(t)
 	p, err := configuration.NewKoanfProvider(
 		context.Background(),
 		nil,
@@ -366,7 +366,7 @@ func TestKoanfProvider(t *testing.T) {
 		})
 
 		t.Run("mutator=hydrator", func(t *testing.T) {
-			a := mutate.NewMutatorHydrator(p, new(x.TestLoggerProvider))
+			a := mutate.NewMutatorHydrator(p, &x.TestLoggerProvider{T: t})
 			assert.True(t, p.MutatorIsEnabled(a.GetID()))
 			require.NoError(t, a.Validate(nil))
 		})
@@ -390,7 +390,7 @@ func TestToScopeStrategy(t *testing.T) {
 	p, err := configuration.NewKoanfProvider(
 		context.Background(),
 		nil,
-		logrusx.New("", ""),
+		logrusx.NewT(t),
 		configx.WithConfigFiles("./../../internal/config/.oathkeeper.yaml"),
 	)
 	require.NoError(t, err)
@@ -406,7 +406,7 @@ func TestAuthenticatorOAuth2TokenIntrospectionPreAuthorization(t *testing.T) {
 	p, err := configuration.NewKoanfProvider(
 		context.Background(),
 		nil,
-		logrusx.New("", ""),
+		logrusx.NewT(t),
 		configx.WithConfigFiles("./../../internal/config/.oathkeeper.yaml"),
 		configx.WithValue("authenticators.oauth2_introspection.enabled", true),
 		configx.WithValue("authenticators.oauth2_introspection.config.introspection_url", "http://some-url/"),
@@ -431,7 +431,7 @@ func TestAuthenticatorOAuth2TokenIntrospectionPreAuthorization(t *testing.T) {
 		{enabled: true, id: "a", secret: "b", turl: "https://some-url", err: false},
 	} {
 		t.Run(fmt.Sprintf("case=%d", k), func(t *testing.T) {
-			a := authn.NewAuthenticatorOAuth2Introspection(p, logrusx.New("", ""), noop.NewTracerProvider())
+			a := authn.NewAuthenticatorOAuth2Introspection(p, logrusx.NewT(t), noop.NewTracerProvider())
 
 			config, _, err := a.Config(json.RawMessage(fmt.Sprintf(`{
 	"pre_authorization": {

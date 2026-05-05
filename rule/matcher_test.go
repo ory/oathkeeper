@@ -105,7 +105,7 @@ func TestMatcher(t *testing.T) {
 		Repository
 	}
 
-	var testMatcher = func(t *testing.T, matcher Matcher, method string, url string, protocol Protocol, expectErr bool, expect *Rule) {
+	testMatcher := func(t *testing.T, matcher Matcher, method string, url string, protocol Protocol, expectErr bool, expect *Rule) {
 		r, err := matcher.Match(context.Background(), method, mustParseURL(t, url), protocol)
 		if expectErr {
 			require.Error(t, err)
@@ -117,7 +117,7 @@ func TestMatcher(t *testing.T) {
 	}
 
 	for name, matcher := range map[string]m{
-		"memory": NewRepositoryMemory(new(mockRepositoryRegistry)),
+		"memory": NewRepositoryMemory(&mockRepositoryRegistry{t: t}),
 	} {
 		t.Run(fmt.Sprintf("regexp matcher=%s", name), func(t *testing.T) {
 			t.Run("case=empty", func(t *testing.T) {

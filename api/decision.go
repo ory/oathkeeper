@@ -84,9 +84,14 @@ func (h *DecisionHandler) Decisions(w http.ResponseWriter, r *http.Request) {
 		fields["subject"] = sess.Subject
 	}
 
+	logger := h.r.Logger().WithSpanFromContext(r.Context())
+
 	rl, err := h.r.RuleMatcher().Match(r.Context(), r.Method, r.URL, rule.ProtocolHTTP)
+	if rl != nil {
+		fields["rule_id"] = rl.ID
+	}
 	if err != nil {
-		h.r.Logger().WithError(err).
+		logger.WithError(err).
 			WithFields(fields).
 			WithField("granted", false).
 			Warn("Access request denied")
@@ -96,7 +101,7 @@ func (h *DecisionHandler) Decisions(w http.ResponseWriter, r *http.Request) {
 
 	s, err := h.r.ProxyRequestHandler().HandleRequest(r, rl)
 	if err != nil {
-		h.r.Logger().WithError(err).
+		logger.WithError(err).
 			WithFields(fields).
 			WithField("granted", false).
 			Info("Access request denied")
@@ -104,7 +109,7 @@ func (h *DecisionHandler) Decisions(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	h.r.Logger().
+	logger.
 		WithFields(fields).
 		WithField("granted", true).
 		Info("Access request granted")

@@ -26,9 +26,9 @@ import (
 type Registry interface {
 	Init()
 
-	WithConfig(c configuration.Provider) Registry
-	WithLogger(l *logrusx.Logger) Registry
-	WithBuildInfo(version, hash, date string) Registry
+	SetConfig(c configuration.Provider) Registry
+	SetLogger(l *logrusx.Logger) Registry
+	SetBuildInfo(version, hash, date string) Registry
 	BuildVersion() string
 	BuildDate() string
 	BuildHash() string
@@ -58,5 +58,5 @@ type Registry interface {
 }
 
 func NewRegistry(c configuration.Provider) Registry {
-	return NewRegistryMemory().WithConfig(c)
+	return NewRegistryMemory().SetConfig(c)
 }

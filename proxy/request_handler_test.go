@@ -4,13 +4,17 @@
 package proxy_test
 
 import (
+	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
+	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
+	"go.opentelemetry.io/otel/trace"
 
 	"github.com/ory/herodot"
 	"github.com/ory/x/configx"
@@ -421,9 +425,7 @@ func TestRequestHandler(t *testing.T) {
 		},
 	} {
 		t.Run(fmt.Sprintf("case=%d/description=%s", k, tc.d), func(t *testing.T) {
-			// log, hook := test.NewNullLogger()
-			l := logrusx.New("", "" /*, logrusx.UseLogger(log), logrusx.WithHook(hook)*/)
-			l.Info("testing!!!")
+			l := logrusx.NewT(t)
 			conf := internal.NewConfigurationWithDefaults(
 				configx.WithLogger(l),
 			)
@@ -550,4 +552,36 @@ func TestInitializeSession(t *testing.T) {
 			assert.EqualValues(t, tc.expectContext, session.MatchContext)
 		})
 	}
+}
+
+func TestHandleRequestLoggingFields(t *testing.T) {
+	conf := internal.NewConfigurationWithDefaults()
+	reg := internal.NewRegistry(conf)
+	var buf bytes.Buffer
+	l := logrusx.NewT(t, logrusx.ForceFormat("json"), logrusx.ForceLevel(logrus.DebugLevel))
+	l.Logrus().Out = &buf
+	reg.SetLogger(l)
+
+	traceID, err := trace.TraceIDFromHex("4bf92f3577b34da6a3ce929d0e0e4736")
+	require.NoError(t, err)
+	spanID, err := trace.SpanIDFromHex("00f067aa0ba902b7")
+	require.NoError(t, err)
+	spanCtx := trace.NewSpanContext(trace.SpanContextConfig{
+		TraceID:    traceID,
+		SpanID:     spanID,
+		TraceFlags: trace.FlagsSampled,
+	})
+	ctx := trace.ContextWithSpanContext(context.Background(), spanCtx)
+
+	// Trigger the "no authentication handler was set" warning to produce a log line
+	// containing the rule_id and otel trace fields.
+	r := newTestRequest("http://localhost").WithContext(ctx)
+	rl := &rule.Rule{ID: "my-rule-id"}
+	_, err = reg.ProxyRequestHandler().HandleRequest(r, rl)
+	require.Error(t, err)
+
+	out := buf.String()
+	assert.Contains(t, out, `"rule_id":"my-rule-id"`, out)
+	assert.Contains(t, out, `"trace_id":"4bf92f3577b34da6a3ce929d0e0e4736"`, out)
+	assert.Contains(t, out, `"span_id":"00f067aa0ba902b7"`, out)
 }

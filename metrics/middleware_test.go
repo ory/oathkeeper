@@ -146,7 +146,7 @@ func TestConfigurablePrometheusRequestTotalMetrics(t *testing.T) {
 			// re-initialize to prevent double counts
 			RequestTotal.Reset()
 
-			logger := logrusx.New("ORY Oathkeeper", "1")
+			logger := logrusx.NewT(t)
 			d := driver.NewDefaultDriver(logger, "1", "test", time.Now().String(), nil,
 				configx.WithConfigFiles(x.WriteFile(t, `
 serve:

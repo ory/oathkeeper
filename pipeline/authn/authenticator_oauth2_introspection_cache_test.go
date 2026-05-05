@@ -20,7 +20,7 @@ import (
 
 func TestCache(t *testing.T) {
 	t.Parallel()
-	logger := logrusx.New("", "")
+	logger := logrusx.NewT(t)
 	c, err := configuration.NewKoanfProvider(
 		t.Context(),
 		nil,

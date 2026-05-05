@@ -14,7 +14,7 @@ import (
 )
 
 func TestGetURL(t *testing.T) {
-	kp, err := NewKoanfProvider(context.Background(), nil, logrusx.New("", ""))
+	kp, err := NewKoanfProvider(context.Background(), nil, logrusx.NewT(t))
 	require.NoError(t, err)
 	assert.Nil(t, kp.getURL("", "key"))
 	assert.Nil(t, kp.getURL("a", "key"))

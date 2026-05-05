@@ -15,7 +15,7 @@ import (
 )
 
 func TestRegistryMemoryAvailablePipelineAuthorizers(t *testing.T) {
-	c, err := configuration.NewKoanfProvider(context.Background(), nil, logrusx.New("", ""))
+	c, err := configuration.NewKoanfProvider(context.Background(), nil, logrusx.NewT(t))
 	require.NoError(t, err)
 	r := NewRegistry(c)
 	got := r.AvailablePipelineAuthorizers()
@@ -36,7 +36,7 @@ func TestRegistryMemoryPipelineAuthorizer(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.id, func(t *testing.T) {
-			c, err := configuration.NewKoanfProvider(context.Background(), nil, logrusx.New("", ""))
+			c, err := configuration.NewKoanfProvider(context.Background(), nil, logrusx.NewT(t))
 			require.NoError(t, err)
 			r := NewRegistry(c)
 			a, err := r.PipelineAuthorizer(tt.id)

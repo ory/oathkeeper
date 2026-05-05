@@ -25,7 +25,7 @@ func NewDefaultDriver(l *logrusx.Logger, version, build, date string, flags *pfl
 	if err != nil {
 		l.WithError(err).Fatal("Failed to initialize configuration")
 	}
-	r := NewRegistry(c).WithLogger(l).WithBuildInfo(version, build, date)
+	r := NewRegistry(c).SetLogger(l).SetBuildInfo(version, build, date)
 	return &DefaultDriver{r: r, c: c}
 }
 

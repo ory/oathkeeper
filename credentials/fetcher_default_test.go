@@ -12,7 +12,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/otel/trace"
@@ -35,10 +34,12 @@ var sets = [...]json.RawMessage{
 	json.RawMessage(`invalid json ¯\_(ツ)_/¯`),
 }
 
-type reg struct{}
+type reg struct {
+	l *logrusx.Logger
+}
 
-func (*reg) Logger() *logrusx.Logger {
-	return logrusx.New("", "", logrusx.ForceLevel(logrus.DebugLevel))
+func (r *reg) Logger() *logrusx.Logger {
+	return r.l
 }
 
 func (*reg) Tracer() trace.Tracer {
@@ -52,9 +53,9 @@ func TestFetcherDefault(t *testing.T) {
 	const JWKsTTL = maxWait * 7
 	const timeoutServerDelay = maxWait * 2
 
-	l := logrusx.New("", "", logrusx.ForceLevel(logrus.DebugLevel))
+	l := logrusx.NewT(t)
 	w := herodot.NewJSONWriter(l)
-	s := NewFetcherDefault(&reg{}, maxWait, JWKsTTL)
+	s := NewFetcherDefault(&reg{l}, maxWait, JWKsTTL)
 
 	timeOutServer := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
 		time.Sleep(timeoutServerDelay)
@@ -157,7 +158,7 @@ func TestFetcherDefault(t *testing.T) {
 		require.NoError(t, err)
 		assert.Len(t, sets, len(uris)-1) // this is -1 because on url is invalid!
 
-		var check = func(kid string) (found bool) {
+		check := func(kid string) (found bool) {
 			for _, set := range sets {
 				if len(set.Key(kid)) > 0 {
 					found = true

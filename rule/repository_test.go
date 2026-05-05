@@ -39,6 +39,7 @@ func (v *validatorNoop) Validate(*Rule) error {
 type mockRepositoryRegistry struct {
 	v            validatorNoop
 	loggerCalled int
+	t            *testing.T
 }
 
 func (r *mockRepositoryRegistry) RuleValidator() Validator {
@@ -47,7 +48,7 @@ func (r *mockRepositoryRegistry) RuleValidator() Validator {
 
 func (r *mockRepositoryRegistry) Logger() *logrusx.Logger {
 	r.loggerCalled++
-	return logrusx.New("", "")
+	return logrusx.NewT(r.t)
 }
 
 func init() {
@@ -68,7 +69,7 @@ func init() {
 
 func TestRepository(t *testing.T) {
 	for name, repo := range map[string]Repository{
-		"memory": NewRepositoryMemory(new(mockRepositoryRegistry)),
+		"memory": NewRepositoryMemory(&mockRepositoryRegistry{t: t}),
 	} {
 		t.Run(fmt.Sprintf("repository=%s/case=valid rule", name), func(t *testing.T) {
 			assert.Error(t, repo.ReadyChecker(new(http.Request)))
@@ -137,7 +138,7 @@ func TestRepository(t *testing.T) {
 	}
 
 	expectedErr := errors.New("this is a forced test error and can be ignored")
-	mr := &mockRepositoryRegistry{v: validatorNoop{ret: expectedErr}}
+	mr := &mockRepositoryRegistry{t: t, v: validatorNoop{ret: expectedErr}}
 	for name, repo := range map[string]Repository{
 		"memory": NewRepositoryMemory(mr),
 	} {

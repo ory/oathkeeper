@@ -379,6 +379,7 @@ func TestDecisionAPI(t *testing.T) {
 
 type decisionHandlerRegistryMock struct {
 	mock.Mock
+	t *testing.T
 }
 
 func (m *decisionHandlerRegistryMock) RuleMatcher() rule.Matcher {
@@ -393,8 +394,8 @@ func (*decisionHandlerRegistryMock) Writer() herodot.Writer {
 	return nil
 }
 
-func (*decisionHandlerRegistryMock) Logger() *logrusx.Logger {
-	return logrusx.New("", "")
+func (m *decisionHandlerRegistryMock) Logger() *logrusx.Logger {
+	return logrusx.NewT(m.t)
 }
 
 func (m *decisionHandlerRegistryMock) Match(ctx context.Context, method string, u *url.URL, _ rule.Protocol) (*rule.Rule, error) {
@@ -414,7 +415,7 @@ func (*decisionHandlerRegistryMock) InitializeAuthnSession(r *http.Request, rl *
 }
 
 func TestDecisionAPIHeaderUsage(t *testing.T) {
-	r := new(decisionHandlerRegistryMock)
+	r := &decisionHandlerRegistryMock{t: t}
 	h := api.NewJudgeHandler(r)
 	defaultUrl := &url.URL{Scheme: "http", Host: "ory.sh", Path: "/foo"}
 	defaultMethod := "GET"

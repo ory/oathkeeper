@@ -169,12 +169,14 @@ func (d *requestHandler) HandleRequest(r *http.Request, rl *rule.Rule) (session 
 		"rule_id":         rl.ID,
 	}
 
+	logger := d.r.Logger().WithSpanFromContext(r.Context())
+
 	// initialize the session used during all the flow
 	session = d.InitializeAuthnSession(r, rl)
 
 	if len(rl.Authenticators) == 0 {
 		err = errors.New("No authentication handler was set in the rule")
-		d.r.Logger().WithError(err).
+		logger.WithError(err).
 			WithFields(fields).
 			WithField("granted", false).
 			WithField("reason_id", "authentication_handler_missing").
@@ -185,7 +187,7 @@ func (d *requestHandler) HandleRequest(r *http.Request, rl *rule.Rule) (session 
 	for _, a := range rl.Authenticators {
 		anh, err := d.r.PipelineAuthenticator(a.Handler)
 		if err != nil {
-			d.r.Logger().WithError(err).
+			logger.WithError(err).
 				WithFields(fields).
 				WithField("granted", false).
 				WithField("authentication_handler", a.Handler).
@@ -195,7 +197,7 @@ func (d *requestHandler) HandleRequest(r *http.Request, rl *rule.Rule) (session 
 		}
 
 		if err := anh.Validate(a.Config); err != nil {
-			d.r.Logger().WithError(err).
+			logger.WithError(err).
 				WithFields(fields).
 				WithField("granted", false).
 				WithField("authentication_handler", a.Handler).
@@ -215,13 +217,13 @@ func (d *requestHandler) HandleRequest(r *http.Request, rl *rule.Rule) (session 
 			// be forwarded to its final destination.
 			// return nil
 			case helper.ErrUnauthorized().ErrorField:
-				d.r.Logger().Info(err)
+				logger.Info(err)
 				return nil, err
 			case helper.ErrTooManyRequests().ErrorField:
-				d.r.Logger().Info(err)
+				logger.Info(err)
 				return nil, err
 			default:
-				d.r.Logger().WithError(err).
+				logger.WithError(err).
 					WithFields(fields).
 					WithField("granted", false).
 					WithField("authentication_handler", a.Handler).
@@ -239,7 +241,7 @@ func (d *requestHandler) HandleRequest(r *http.Request, rl *rule.Rule) (session 
 
 	if !found {
 		err := errors.WithStack(helper.ErrUnauthorized())
-		d.r.Logger().WithError(err).
+		logger.WithError(err).
 			WithFields(fields).
 			WithField("granted", false).
 			WithField("reason_id", "authentication_handler_no_match").
@@ -249,7 +251,7 @@ func (d *requestHandler) HandleRequest(r *http.Request, rl *rule.Rule) (session 
 
 	azh, err := d.r.PipelineAuthorizer(rl.Authorizer.Handler)
 	if err != nil {
-		d.r.Logger().WithError(err).
+		logger.WithError(err).
 			WithFields(fields).
 			WithField("granted", false).
 			WithField("authorization_handler", rl.Authorizer.Handler).
@@ -259,7 +261,7 @@ func (d *requestHandler) HandleRequest(r *http.Request, rl *rule.Rule) (session 
 	}
 
 	if err := azh.Validate(rl.Authorizer.Config); err != nil {
-		d.r.Logger().WithError(err).
+		logger.WithError(err).
 			WithFields(fields).
 			WithField("granted", false).
 			WithField("authorization_handler", rl.Authorizer.Handler).
@@ -269,7 +271,7 @@ func (d *requestHandler) HandleRequest(r *http.Request, rl *rule.Rule) (session 
 	}
 
 	if err := azh.Authorize(r, session, rl.Authorizer.Config, rl); err != nil {
-		d.r.Logger().
+		logger.
 			WithError(err).
 			WithFields(fields).
 			WithField("granted", false).
@@ -281,7 +283,7 @@ func (d *requestHandler) HandleRequest(r *http.Request, rl *rule.Rule) (session 
 
 	if len(rl.Mutators) == 0 {
 		err = errors.New("No mutation handler was set in the rule")
-		d.r.Logger().WithError(err).
+		logger.WithError(err).
 			WithFields(fields).
 			WithField("granted", false).
 			WithField("reason_id", "mutation_handler_missing").
@@ -292,7 +294,7 @@ func (d *requestHandler) HandleRequest(r *http.Request, rl *rule.Rule) (session 
 	for _, m := range rl.Mutators {
 		sh, err := d.r.PipelineMutator(m.Handler)
 		if err != nil {
-			d.r.Logger().WithError(err).
+			logger.WithError(err).
 				WithFields(fields).
 				WithField("granted", false).
 				WithField("access_url", r.URL.String()).
@@ -303,7 +305,7 @@ func (d *requestHandler) HandleRequest(r *http.Request, rl *rule.Rule) (session 
 		}
 
 		if err := sh.Validate(m.Config); err != nil {
-			d.r.Logger().WithError(err).
+			logger.WithError(err).
 				WithFields(fields).
 				WithField("granted", false).
 				WithField("mutation_handler", m.Handler).
@@ -313,7 +315,7 @@ func (d *requestHandler) HandleRequest(r *http.Request, rl *rule.Rule) (session 
 		}
 
 		if err := sh.Mutate(r, session, m.Config, rl); err != nil {
-			d.r.Logger().WithError(err).
+			logger.WithError(err).
 				WithFields(fields).
 				WithField("granted", false).
 				WithField("mutation_handler", m.Handler).
@@ -338,7 +340,7 @@ func (d *requestHandler) InitializeAuthnSession(r *http.Request, rl *rule.Rule) 
 
 	values, err := rl.ExtractRegexGroups(d.c.AccessRuleMatchingStrategy(), r.URL)
 	if err != nil {
-		d.r.Logger().WithError(err).
+		d.r.Logger().WithSpanFromContext(r.Context()).WithError(err).
 			WithField("rule_id", rl.ID).
 			WithField("access_url", r.URL.String()).
 			WithField("reason_id", "capture_groups_error").

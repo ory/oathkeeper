@@ -188,7 +188,7 @@ func TestAuthorizerRemoteAuthorize(t *testing.T) {
 				tt.config, _ = sjson.SetBytes(tt.config, "remote", server.URL)
 			}
 
-			l := logrusx.New("", "")
+			l := logrusx.NewT(t)
 			p, err := configuration.NewKoanfProvider(
 				context.Background(), nil, l)
 			if err != nil {
@@ -274,7 +274,7 @@ func TestAuthorizerRemoteValidate(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			p, err := configuration.NewKoanfProvider(
-				context.Background(), nil, logrusx.New("", ""),
+				context.Background(), nil, logrusx.NewT(t),
 				configx.SkipValidation())
 			require.NoError(t, err)
 			a := NewAuthorizerRemote(p, otelx.NewNoop())
@@ -310,7 +310,7 @@ func TestAuthorizerRemoteTracePropagation(t *testing.T) {
 
 	config := json.RawMessage(fmt.Sprintf(`{"remote":%q}`, server.URL))
 
-	p, err := configuration.NewKoanfProvider(context.Background(), nil, logrusx.New("", ""))
+	p, err := configuration.NewKoanfProvider(context.Background(), nil, logrusx.NewT(t))
 	require.NoError(t, err)
 
 	a := NewAuthorizerRemote(p, otelx.NewNoop())

@@ -218,7 +218,7 @@ func RunServe(version, build, date string) func(cmd *cobra.Command, args []strin
 	return func(cmd *cobra.Command, _ []string) {
 		fmt.Println(banner(version))
 
-		logger := logrusx.New("ORY Oathkeeper", version)
+		logger := logrusx.New("Ory Oathkeeper", version)
 		d := driver.NewDefaultDriver(logger, version, build, date, cmd.Flags())
 		d.Registry().Init()
 

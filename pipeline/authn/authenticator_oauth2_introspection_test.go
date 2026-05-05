@@ -831,7 +831,7 @@ func TestAuthenticatorOAuth2Introspection(t *testing.T) {
 	})
 
 	t.Run("method=config", func(t *testing.T) {
-		logger := logrusx.New("test", "1")
+		logger := logrusx.NewT(t)
 		authenticator := NewAuthenticatorOAuth2Introspection(conf, logger, noop.NewTracerProvider())
 
 		noPreauthConfig := []byte(`{ "introspection_url":"http://localhost/oauth2/token" }`)

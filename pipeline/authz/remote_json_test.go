@@ -211,7 +211,7 @@ func TestAuthorizerRemoteJSONAuthorize(t *testing.T) {
 				tt.config, _ = sjson.SetBytes(tt.config, "remote", server.URL)
 			}
 
-			l := logrusx.New("", "")
+			l := logrusx.NewT(t)
 			p, err := configuration.NewKoanfProvider(context.Background(), nil, l)
 			if err != nil {
 				l.WithError(err).Fatal("Failed to initialize configuration")
@@ -301,7 +301,7 @@ func TestAuthorizerRemoteJSONValidate(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 			p, err := configuration.NewKoanfProvider(
-				context.Background(), nil, logrusx.New("", ""),
+				context.Background(), nil, logrusx.NewT(t),
 				configx.SkipValidation(),
 			)
 			require.NoError(t, err)
@@ -354,7 +354,7 @@ func TestAuthorizerRemoteJSONConfig(t *testing.T) {
 		t.Run("case="+tt.name, func(t *testing.T) {
 			t.Parallel()
 			p, err := configuration.NewKoanfProvider(
-				context.Background(), nil, logrusx.New("", ""),
+				context.Background(), nil, logrusx.NewT(t),
 			)
 			require.NoError(t, err)
 			a := NewAuthorizerRemoteJSON(p, otelx.NewNoop())
@@ -389,7 +389,7 @@ func TestAuthorizerRemoteJSONTracePropagation(t *testing.T) {
 
 	config := json.RawMessage(fmt.Sprintf(`{"remote":%q,"payload":"{}"}`, server.URL))
 
-	p, err := configuration.NewKoanfProvider(context.Background(), nil, logrusx.New("", ""))
+	p, err := configuration.NewKoanfProvider(context.Background(), nil, logrusx.NewT(t))
 	require.NoError(t, err)
 
 	a := NewAuthorizerRemoteJSON(p, otelx.NewNoop())

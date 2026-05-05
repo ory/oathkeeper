@@ -80,7 +80,7 @@ func (r *RegistryMemory) RuleFetcher() rule.Fetcher {
 	return r.ruleFetcher
 }
 
-func (r *RegistryMemory) WithRuleFetcher(fetcher rule.Fetcher) Registry {
+func (r *RegistryMemory) SetRuleFetcher(fetcher rule.Fetcher) Registry {
 	r.ruleFetcher = fetcher
 	return r
 }
@@ -113,19 +113,19 @@ func (r *RegistryMemory) BuildHash() string {
 	return r.buildHash
 }
 
-func (r *RegistryMemory) WithConfig(c configuration.Provider) Registry {
+func (r *RegistryMemory) SetConfig(c configuration.Provider) Registry {
 	r.c = c
 	return r
 }
 
-func (r *RegistryMemory) WithBuildInfo(version, hash, date string) Registry {
+func (r *RegistryMemory) SetBuildInfo(version, hash, date string) Registry {
 	r.buildVersion = version
 	r.buildHash = hash
 	r.buildDate = date
 	return r
 }
 
-func (r *RegistryMemory) WithLogger(l *logrusx.Logger) Registry {
+func (r *RegistryMemory) SetLogger(l *logrusx.Logger) Registry {
 	r.logger = l
 	return r
 }
@@ -177,7 +177,7 @@ func (r *RegistryMemory) Writer() herodot.Writer {
 
 func (r *RegistryMemory) Logger() *logrusx.Logger {
 	if r.logger == nil {
-		r.logger = logrusx.New("ORY Oathkeeper", x.Version)
+		r.logger = logrusx.New("Ory Oathkeeper", x.Version)
 	}
 	return r.logger
 }

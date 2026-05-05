@@ -61,9 +61,14 @@ func (d *Proxy) RoundTrip(r *http.Request) (*http.Response, error) {
 	}
 
 	rl, _ := r.Context().Value(ContextKeyMatchedRule).(*rule.Rule)
+	if rl != nil {
+		fields["rule_id"] = rl.ID
+	}
+
+	logger := d.r.Logger().WithSpanFromContext(r.Context())
 
 	if err, ok := r.Context().Value(director).(error); ok && err != nil {
-		d.r.Logger().WithError(err).
+		logger.WithError(err).
 			WithFields(fields).
 			WithField("granted", false).
 			Warn("Access request denied")
@@ -78,14 +83,14 @@ func (d *Proxy) RoundTrip(r *http.Request) (*http.Response, error) {
 	} else if err == nil {
 		res, err := http.DefaultTransport.RoundTrip(r)
 		if err != nil {
-			d.r.Logger().
+			logger.
 				WithError(errors.WithStack(err)).
 				WithField("granted", false).
 				WithFields(fields).
 				Warn("Access request denied because roundtrip failed")
 			// don't need to return because covered in next line
 		} else {
-			d.r.Logger().
+			logger.
 				WithField("granted", true).
 				WithFields(fields).
 				Info("Access request granted")
@@ -95,7 +100,7 @@ func (d *Proxy) RoundTrip(r *http.Request) (*http.Response, error) {
 	}
 
 	err := errors.New("Unable to type assert context")
-	d.r.Logger().
+	logger.
 		WithError(err).
 		WithField("granted", false).
 		WithFields(fields).

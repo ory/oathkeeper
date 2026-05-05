@@ -21,7 +21,7 @@ import (
 func TestClientCredentialsCache(t *testing.T) {
 	t.Parallel()
 
-	logger := logrusx.New("", "")
+	logger := logrusx.NewT(t)
 	c, err := configuration.NewKoanfProvider(
 		context.Background(),
 		nil,
@@ -100,5 +100,4 @@ func TestClientCredentialsCache(t *testing.T) {
 			}, 120*time.Millisecond, 10*time.Millisecond)
 		})
 	})
-
 }

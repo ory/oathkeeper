@@ -20,7 +20,6 @@ import (
 	"time"
 
 	"github.com/gofrs/uuid"
-	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
@@ -85,7 +84,7 @@ func TestFetcherReload(t *testing.T) {
 
 	conf := internal.NewConfigurationWithDefaults(
 		configx.WithContext(ctx),
-		configx.WithLogger(logrusx.New("", "", logrusx.ForceLevel(logrus.TraceLevel))),
+		configx.WithLogger(logrusx.NewT(t)),
 		configx.SkipValidation(),
 		configx.WithConfigFiles(configFile.Name()),
 		configx.AttachWatcher(func(event watcherx.Event, err error) {
@@ -168,7 +167,7 @@ func TestFetcherWatchConfig(t *testing.T) {
 	conf := internal.NewConfigurationWithDefaults(
 		configx.WithContext(ctx),
 		configx.SkipValidation(),
-		configx.WithLogger(logrusx.New("", "", logrusx.ForceLevel(logrus.TraceLevel))),
+		configx.WithLogger(logrusx.NewT(t)),
 		configx.WithConfigFiles(configFile.Name()),
 		configx.AttachWatcher(func(event watcherx.Event, err error) {
 			go func() { configChanged <- struct{}{} }()
@@ -312,7 +311,7 @@ access_rules:
 	conf := internal.NewConfigurationWithDefaults(
 		configx.WithContext(ctx),
 		configx.SkipValidation(),
-		configx.WithLogger(logrusx.New("", "", logrusx.ForceLevel(logrus.TraceLevel))),
+		configx.WithLogger(logrusx.NewT(t)),
 		configx.WithConfigFiles(configFile.Name()),
 	)
 	conf.SetForTest(t, configuration.AuthenticatorNoopIsEnabled, true)
@@ -386,7 +385,7 @@ func TestFetcherWatchRepositoryFromKubernetesConfigMap(t *testing.T) {
 	conf := internal.NewConfigurationWithDefaults(
 		configx.SkipValidation(),
 		configx.WithContext(ctx),
-		configx.WithLogger(logrusx.New("", "", logrusx.ForceLevel(logrus.TraceLevel))),
+		configx.WithLogger(logrusx.NewT(t)),
 	)
 	r := internal.NewRegistry(conf)
 
@@ -506,7 +505,7 @@ access_rules:
 	conf := internal.NewConfigurationWithDefaults(
 		configx.SkipValidation(),
 		configx.WithContext(ctx),
-		configx.WithLogger(logrusx.New("", "", logrusx.ForceLevel(logrus.TraceLevel))),
+		configx.WithLogger(logrusx.NewT(t)),
 		configx.WithConfigFiles(configFile.Name()),
 	)
 	r := internal.NewRegistry(conf)
