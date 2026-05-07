@@ -13,8 +13,6 @@ import (
 	"testing"
 
 	"github.com/go-faker/faker/v4"
-	_ "github.com/go-sql-driver/mysql"
-	_ "github.com/lib/pq"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

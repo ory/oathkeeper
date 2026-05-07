@@ -21,7 +21,6 @@ require (
 	github.com/go-openapi/strfmt v0.26.1
 	github.com/go-openapi/swag v0.25.5
 	github.com/go-openapi/validate v0.25.2
-	github.com/go-sql-driver/mysql v1.9.3
 	github.com/gobuffalo/httptest v1.5.2
 	github.com/gobwas/glob v0.2.3
 	github.com/gofrs/uuid v4.4.0+incompatible
@@ -31,7 +30,6 @@ require (
 	github.com/google/go-replayers/httpreplay v1.1.1
 	github.com/hashicorp/go-retryablehttp v0.7.8
 	github.com/knadh/koanf/v2 v2.2.2
-	github.com/lib/pq v1.12.0
 	github.com/mitchellh/copystructure v1.2.0
 	github.com/ory/analytics-go/v5 v5.0.1
 	github.com/ory/fosite v0.48.0
@@ -76,7 +74,6 @@ require (
 	cloud.google.com/go/storage v1.50.0 // indirect
 	code.dny.dev/ssrf v0.2.0 // indirect
 	dario.cat/mergo v1.0.2 // indirect
-	filippo.io/edwards25519 v1.2.0 // indirect
 	github.com/Azure/go-autorest/autorest v0.11.1 // indirect
 	github.com/Azure/go-autorest/autorest/adal v0.9.5 // indirect
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/detectors/gcp v1.31.0 // indirect
