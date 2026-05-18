@@ -502,6 +502,20 @@ func TestConfigureBackendURL(t *testing.T) {
 			eURL:  "http://localhost:4000/users/1234",
 			eHost: "localhost:4000",
 		},
+		// #1266: trailing slash on the inbound path survives path.Join +
+		// strip_path.
+		{
+			r:     &http.Request{Host: "localhost:3000", URL: &url.URL{Path: "/some/path/", Scheme: "http"}},
+			rl:    &rule.Rule{Upstream: rule.Upstream{URL: "http://localhost:4000/", StripPath: "/some"}},
+			eURL:  "http://localhost:4000/path/",
+			eHost: "localhost:4000",
+		},
+		{
+			r:     &http.Request{Host: "localhost:3000", URL: &url.URL{Path: "/api/users/", Scheme: "http"}},
+			rl:    &rule.Rule{Upstream: rule.Upstream{URL: "http://localhost:4000/"}},
+			eURL:  "http://localhost:4000/api/users/",
+			eHost: "localhost:4000",
+		},
 	} {
 		t.Run(fmt.Sprintf("case=%d", k), func(t *testing.T) {
 			require.NoError(t, proxy.ConfigureBackendURL(tc.r, tc.rl))
