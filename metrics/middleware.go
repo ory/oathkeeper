@@ -75,9 +75,12 @@ func (m *Middleware) ExcludePaths(paths ...string) *Middleware {
 //   - /decisions -> /decisions
 func (m *Middleware) CollapsePaths(flag bool, depth int) *Middleware {
 	m.mutex.Lock()
+	defer m.mutex.Unlock()
 	m.collapsePaths = flag
+	if depth < 1 {
+		depth = 1
+	}
 	m.collapsePathsDepth = depth
-	m.mutex.Unlock()
 	return m
 }
 
@@ -86,8 +89,8 @@ func (m *Middleware) CollapsePaths(flag bool, depth int) *Middleware {
 
 func (m *Middleware) HidePaths(flag bool) *Middleware {
 	m.mutex.Lock()
+	defer m.mutex.Unlock()
 	m.hidePaths = flag
-	m.mutex.Unlock()
 	return m
 }
 
@@ -107,13 +110,20 @@ func (m *Middleware) ServeHTTP(rw http.ResponseWriter, r *http.Request, next htt
 	latency := m.clock.Since(start)
 	res := rw.(negroni.ResponseWriter)
 
-	if _, silent := m.silencePaths[r.URL.Path]; !silent {
+	m.mutex.RLock()
+	_, silent := m.silencePaths[r.URL.Path]
+	hidePaths := m.hidePaths
+	collapsePaths := m.collapsePaths
+	collapsePathsDepth := m.collapsePathsDepth
+	m.mutex.RUnlock()
+
+	if !silent {
 		requestURI := r.RequestURI
-		if m.hidePaths {
+		if hidePaths {
 			requestURI = ""
 		} else {
-			if m.collapsePaths {
-				requestURI = m.getFirstNPathSegments(requestURI, m.collapsePathsDepth)
+			if collapsePaths {
+				requestURI = m.getFirstNPathSegments(requestURI, collapsePathsDepth)
 			}
 		}
 
