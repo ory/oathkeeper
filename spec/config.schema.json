@@ -960,6 +960,16 @@
             "type": "string"
           }
         },
+        "forward_request_headers_to_remote": {
+          "description": "A list of inbound request headers to forward to the remote authorizer.",
+          "title": "Allowed Inbound HTTP Headers to Forward to the Remote",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "uniqueItems": true,
+          "default": []
+        },
         "forward_response_headers_to_upstream": {
           "description": "A list of non simple headers the remote is allowed to return to mutate requests.",
           "title": "Allowed Remote HTTP Headers for his Responses",

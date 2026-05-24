@@ -31,6 +31,7 @@ import (
 type AuthorizerRemoteConfiguration struct {
 	Remote                           string                              `json:"remote"`
 	Headers                          map[string]string                   `json:"headers"`
+	ForwardRequestHeadersToRemote    []string                            `json:"forward_request_headers_to_remote"`
 	ForwardResponseHeadersToUpstream []string                            `json:"forward_response_headers_to_upstream"`
 	Retry                            *AuthorizerRemoteRetryConfiguration `json:"retry"`
 }
@@ -85,6 +86,16 @@ func (a *AuthorizerRemote) Authorize(r *http.Request, session *authn.Authenticat
 	req, err := http.NewRequestWithContext(ctx, "POST", c.Remote, read)
 	if err != nil {
 		return errors.WithStack(err)
+	}
+	for _, name := range c.ForwardRequestHeadersToRemote {
+		values := r.Header.Values(name)
+		if len(values) == 0 {
+			continue
+		}
+		req.Header.Del(name)
+		for _, v := range values {
+			req.Header.Add(name, v)
+		}
 	}
 	req.Header.Add("Content-Type", r.Header.Get("Content-Type"))
 	authz := r.Header.Get("Authorization")
