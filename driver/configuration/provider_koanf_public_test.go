@@ -168,6 +168,7 @@ func TestKoanfProvider(t *testing.T) {
 			assert.Equal(t, "localhost:9000", p.PrometheusServeAddress())
 			assert.Equal(t, "/metrics", p.PrometheusMetricsPath())
 			assert.Equal(t, true, p.PrometheusCollapseRequestPaths())
+			assert.Equal(t, 1, p.PrometheusCollapseRequestPathsDepth())
 		})
 
 		t.Run("group=cors", func(t *testing.T) {

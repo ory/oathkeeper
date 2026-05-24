@@ -85,6 +85,7 @@ serve:
     metrics_path: /metrics
     hide_request_paths: false
     collapse_request_paths: true
+    collapse_request_paths_depth: 1
     metric_name_prefix: ory_oathkeeper_
 
 # Configures Access Rules
