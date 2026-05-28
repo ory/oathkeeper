@@ -121,10 +121,11 @@ func (m *middleware) streamInterceptor(
 	srv interface{},
 	stream grpc.ServerStream,
 	info *grpc.StreamServerInfo,
-	handler grpc.StreamHandler) (err error) {
+	handler grpc.StreamHandler,
+) (err error) {
 	ctx := stream.Context()
 	ctx, span := trace.SpanFromContext(ctx).TracerProvider().Tracer("oathkeeper/middleware").Start(ctx, "middleware.StreamInterceptor")
-	otelx.End(span, &err)
+	defer otelx.End(span, &err)
 
 	log := m.Logger().WithField("middleware", "oathkeeper")
 
