@@ -198,7 +198,7 @@ func TestRule_UnmarshalJSON(t *testing.T) {
 			expected: Rule{
 				ID:          "123",
 				Description: "description",
-				Match:       &MatchGRPC{Authority: "example.com", FullMethod: "/full/method"},
+				Match:       &MatchRPC{Authority: "example.com", FullMethod: "/full/method"},
 			},
 			err: assert.NoError,
 		},

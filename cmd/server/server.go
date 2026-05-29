@@ -38,6 +38,7 @@ import (
 	"github.com/ory/oathkeeper/driver"
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/metrics"
+	"github.com/ory/oathkeeper/x"
 )
 
 func isTimeoutError(err error) bool {
@@ -214,81 +215,79 @@ func isDevelopment(c configuration.Provider) bool {
 	return len(c.AccessRuleRepositories()) == 0
 }
 
-func RunServe(version, build, date string) func(cmd *cobra.Command, args []string) {
-	return func(cmd *cobra.Command, _ []string) {
-		fmt.Println(banner(version))
+func RunServe(cmd *cobra.Command, _ []string) {
+	fmt.Println(banner(x.Version))
 
-		logger := logrusx.New("Ory Oathkeeper", version)
-		d := driver.NewDefaultDriver(logger, version, build, date, cmd.Flags())
-		d.Registry().Init()
+	logger := logrusx.New("Ory Oathkeeper", x.Version)
+	d := driver.NewDefaultDriver(logger, cmd.Flags())
+	d.Registry().Init()
 
-		urls := []string{
-			d.Configuration().APIServeAddress(),
-			d.Configuration().ProxyServeAddress(),
-		}
-
-		if c, y := d.Configuration().CORS("api"); y {
-			urls = append(urls, c.AllowedOrigins...)
-		}
-		if c, y := d.Configuration().CORS("proxy"); y {
-			urls = append(urls, c.AllowedOrigins...)
-		}
-
-		host := urlx.ExtractPublicAddress(urls...)
-
-		telemetry := metricsx.New(cmd, logger, d.Configuration().Source(), &metricsx.Options{
-			Service:       "oathkeeper",
-			DeploymentId:  metricsx.Hash(clusterID(d.Configuration())),
-			IsDevelopment: isDevelopment(d.Configuration()),
-			WriteKey:      "xRVRP48SAKw6ViJEnvB0u2PY8bVlsO6O",
-			WhitelistedPaths: []string{
-				"/",
-				api.CredentialsPath,
-				api.DecisionPath,
-				api.RulesPath,
-				healthx.VersionPath,
-				healthx.AliveCheckPath,
-				healthx.ReadyCheckPath,
-			},
-			BuildVersion: version,
-			BuildTime:    build,
-			BuildHash:    date,
-			Config: &analytics.Config{
-				Endpoint:             "https://sqa.ory.sh",
-				GzipCompressionLevel: 6,
-				BatchMaxSize:         500 * 1000,
-				BatchSize:            1000,
-				Interval:             time.Hour * 6,
-			},
-			Hostname: host,
-		})
-
-		recovery := negroni.NewRecovery()
-		recovery.Logger = logger
-
-		adminmw := negroni.New(
-			recovery,
-			telemetry,
-		)
-		publicmw := negroni.New(
-			recovery,
-			telemetry,
-		)
-
-		prometheusRepo := metrics.NewConfigurablePrometheusRepository(d, logger)
-		var wg sync.WaitGroup
-		tasks := []func(){
-			runAPI(d, adminmw, logger, prometheusRepo),
-			runProxy(d, publicmw, logger, prometheusRepo),
-			runPrometheus(d, logger, prometheusRepo),
-		}
-		wg.Add(len(tasks))
-		for _, t := range tasks {
-			go func(t func()) {
-				defer wg.Done()
-				t()
-			}(t)
-		}
-		wg.Wait()
+	urls := []string{
+		d.Configuration().APIServeAddress(),
+		d.Configuration().ProxyServeAddress(),
 	}
+
+	if c, y := d.Configuration().CORS("api"); y {
+		urls = append(urls, c.AllowedOrigins...)
+	}
+	if c, y := d.Configuration().CORS("proxy"); y {
+		urls = append(urls, c.AllowedOrigins...)
+	}
+
+	host := urlx.ExtractPublicAddress(urls...)
+
+	telemetry := metricsx.New(cmd, logger, d.Configuration().Source(), &metricsx.Options{
+		Service:       "oathkeeper",
+		DeploymentId:  metricsx.Hash(clusterID(d.Configuration())),
+		IsDevelopment: isDevelopment(d.Configuration()),
+		WriteKey:      "xRVRP48SAKw6ViJEnvB0u2PY8bVlsO6O",
+		WhitelistedPaths: []string{
+			"/",
+			api.CredentialsPath,
+			api.DecisionPath,
+			api.RulesPath,
+			healthx.VersionPath,
+			healthx.AliveCheckPath,
+			healthx.ReadyCheckPath,
+		},
+		BuildVersion: x.Version,
+		BuildTime:    x.Date,
+		BuildHash:    x.Commit,
+		Config: &analytics.Config{
+			Endpoint:             "https://sqa.ory.sh",
+			GzipCompressionLevel: 6,
+			BatchMaxSize:         500 * 1000,
+			BatchSize:            1000,
+			Interval:             time.Hour * 6,
+		},
+		Hostname: host,
+	})
+
+	recovery := negroni.NewRecovery()
+	recovery.Logger = logger
+
+	adminmw := negroni.New(
+		recovery,
+		telemetry,
+	)
+	publicmw := negroni.New(
+		recovery,
+		telemetry,
+	)
+
+	prometheusRepo := metrics.NewConfigurablePrometheusRepository(d, logger)
+	var wg sync.WaitGroup
+	tasks := []func(){
+		runAPI(d, adminmw, logger, prometheusRepo),
+		runProxy(d, publicmw, logger, prometheusRepo),
+		runPrometheus(d, logger, prometheusRepo),
+	}
+	wg.Add(len(tasks))
+	for _, t := range tasks {
+		go func(t func()) {
+			defer wg.Done()
+			t()
+		}(t)
+	}
+	wg.Wait()
 }

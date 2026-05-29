@@ -17,6 +17,7 @@ import (
 	"google.golang.org/grpc/metadata"
 
 	"github.com/ory/herodot"
+	"github.com/ory/x/logrusx"
 	"github.com/ory/x/otelx"
 
 	"github.com/ory/oathkeeper/rule"
@@ -24,13 +25,13 @@ import (
 
 func ErrDenied() *herodot.DefaultError { return herodot.ErrUnauthorized() }
 
-// httpRequest builds an HTTP request equivalent that is used for rule matching.
-func (m *middleware) httpRequest(ctx context.Context, fullMethod string) (*http.Request, error) {
+// httpRequestFromGRPC builds an HTTP request equivalent that is used for rule matching.
+func httpRequestFromGRPC(ctx context.Context, l *logrusx.Logger, fullMethod string) (*http.Request, error) {
 	md, ok := metadata.FromIncomingContext(ctx)
 	if !ok {
 		return nil, fmt.Errorf("no metadata found in context")
 	}
-	m.Logger().WithField("middleware", "oathkeeper").WithField("metadata", m.Logger().HTTPHeadersRedacted(http.Header(md))).Debug("using request metadata to build http header")
+	l.WithField("metadata", l.HTTPHeadersRedacted(http.Header(md))).Debug("using request metadata to build http header")
 
 	authorities := md.Get(":authority")
 	if len(authorities) != 1 {
@@ -48,9 +49,9 @@ func (m *middleware) httpRequest(ctx context.Context, fullMethod string) (*http.
 	}
 
 	u := &url.URL{
+		Scheme: "rpc",
 		Host:   authorities[0],
 		Path:   fullMethod,
-		Scheme: "grpc",
 	}
 
 	return (&http.Request{
@@ -64,8 +65,8 @@ func (m *middleware) httpRequest(ctx context.Context, fullMethod string) (*http.
 }
 
 var (
-	_ grpc.UnaryServerInterceptor  = new(middleware).unaryInterceptor
-	_ grpc.StreamServerInterceptor = new(middleware).streamInterceptor
+	_ grpc.UnaryServerInterceptor  = (*middleware)(nil).unaryInterceptor
+	_ grpc.StreamServerInterceptor = (*middleware)(nil).streamInterceptor
 )
 
 // UnaryInterceptor returns the gRPC unary interceptor of the middleware.
@@ -77,9 +78,9 @@ func (m *middleware) unaryInterceptor(ctx context.Context, req interface{}, info
 	traceCtx, span := trace.SpanFromContext(ctx).TracerProvider().Tracer("oathkeeper/middleware").Start(ctx, "middleware.UnaryInterceptor")
 	defer otelx.End(span, &err)
 
-	log := m.Logger().WithField("middleware", "oathkeeper")
+	log := m.reg.Logger().WithField("middleware", "oathkeeper")
 
-	httpReq, err := m.httpRequest(traceCtx, info.FullMethod)
+	httpReq, err := httpRequestFromGRPC(traceCtx, log, info.FullMethod)
 	if err != nil {
 		log.WithError(err).Warn("could not build HTTP request")
 		span.SetAttributes(attribute.String("oathkeeper.verdict", "denied"))
@@ -90,7 +91,7 @@ func (m *middleware) unaryInterceptor(ctx context.Context, req interface{}, info
 
 	log.Debug("matching HTTP request build from gRPC")
 
-	r, err := m.RuleMatcher().Match(traceCtx, httpReq.Method, httpReq.URL, rule.ProtocolGRPC)
+	r, err := m.reg.RuleMatcher().Match(traceCtx, httpReq.Method, httpReq.URL, rule.ProtocolRPC)
 	if err != nil {
 		log.WithError(err).Warn("could not find a matching rule")
 		span.SetAttributes(attribute.String("oathkeeper.verdict", "denied"))
@@ -98,7 +99,7 @@ func (m *middleware) unaryInterceptor(ctx context.Context, req interface{}, info
 		return nil, ErrDenied()
 	}
 
-	_, err = m.ProxyRequestHandler().HandleRequest(httpReq, r)
+	_, err = m.reg.ProxyRequestHandler().HandleRequest(httpReq, r)
 	if err != nil {
 		log.WithError(err).Warn("failed to handle request")
 		span.SetAttributes(attribute.String("oathkeeper.verdict", "denied"))
@@ -127,9 +128,9 @@ func (m *middleware) streamInterceptor(
 	ctx, span := trace.SpanFromContext(ctx).TracerProvider().Tracer("oathkeeper/middleware").Start(ctx, "middleware.StreamInterceptor")
 	defer otelx.End(span, &err)
 
-	log := m.Logger().WithField("middleware", "oathkeeper")
+	log := m.reg.Logger().WithField("middleware", "oathkeeper")
 
-	httpReq, err := m.httpRequest(ctx, info.FullMethod)
+	httpReq, err := httpRequestFromGRPC(ctx, log, info.FullMethod)
 	if err != nil {
 		log.WithError(err).Warn("could not build HTTP request")
 		span.SetAttributes(attribute.String("oathkeeper.verdict", "denied"))
@@ -140,7 +141,7 @@ func (m *middleware) streamInterceptor(
 
 	log.Debug("matching HTTP request build from gRPC")
 
-	r, err := m.RuleMatcher().Match(ctx, httpReq.Method, httpReq.URL, rule.ProtocolGRPC)
+	r, err := m.reg.RuleMatcher().Match(ctx, httpReq.Method, httpReq.URL, rule.ProtocolRPC)
 	if err != nil {
 		log.WithError(err).Warn("could not find a matching rule")
 		span.SetAttributes(attribute.String("oathkeeper.verdict", "denied"))
@@ -148,7 +149,7 @@ func (m *middleware) streamInterceptor(
 		return ErrDenied()
 	}
 
-	_, err = m.ProxyRequestHandler().HandleRequest(httpReq, r)
+	_, err = m.reg.ProxyRequestHandler().HandleRequest(httpReq, r)
 	if err != nil {
 		log.WithError(err).Warn("failed to handle request")
 		span.SetAttributes(attribute.String("oathkeeper.verdict", "denied"))

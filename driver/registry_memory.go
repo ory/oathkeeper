@@ -36,13 +36,10 @@ var _ Registry = new(RegistryMemory)
 type RegistryMemory struct {
 	sync.RWMutex
 
-	buildVersion string
-	buildHash    string
-	buildDate    string
-	logger       *logrusx.Logger
-	writer       herodot.Writer
-	c            configuration.Provider
-	trc          *otelx.Tracer
+	logger *logrusx.Logger
+	writer herodot.Writer
+	c      configuration.Provider
+	trc    *otelx.Tracer
 
 	ch *api.CredentialsHandler
 
@@ -97,33 +94,11 @@ func (r *RegistryMemory) RuleMatcher() rule.Matcher {
 	return r.ruleRepository
 }
 
-func NewRegistryMemory() *RegistryMemory {
-	return &RegistryMemory{}
+func NewRegistryMemory(c configuration.Provider) *RegistryMemory {
+	return &RegistryMemory{c: c}
 }
 
-func (r *RegistryMemory) BuildVersion() string {
-	return r.buildVersion
-}
-
-func (r *RegistryMemory) BuildDate() string {
-	return r.buildDate
-}
-
-func (r *RegistryMemory) BuildHash() string {
-	return r.buildHash
-}
-
-func (r *RegistryMemory) SetConfig(c configuration.Provider) Registry {
-	r.c = c
-	return r
-}
-
-func (r *RegistryMemory) SetBuildInfo(version, hash, date string) Registry {
-	r.buildVersion = version
-	r.buildHash = hash
-	r.buildDate = date
-	return r
-}
+func (r *RegistryMemory) Config() configuration.Provider { return r.c }
 
 func (r *RegistryMemory) SetLogger(l *logrusx.Logger) Registry {
 	r.logger = l
@@ -149,7 +124,7 @@ func (r *RegistryMemory) HealthHandler() *healthx.Handler {
 	defer r.RUnlock()
 
 	if r.healthxHandler == nil {
-		r.healthxHandler = healthx.NewHandler(r.Writer(), r.BuildVersion(), r.HealthxReadyCheckers())
+		r.healthxHandler = healthx.NewHandler(r.Writer(), x.Version, r.HealthxReadyCheckers())
 	}
 	return r.healthxHandler
 }

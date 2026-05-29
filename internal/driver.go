@@ -23,5 +23,5 @@ func NewConfigurationWithDefaults(opts ...configx.OptionModifier) configuration.
 }
 
 func NewRegistry(c configuration.Provider) *driver.RegistryMemory {
-	return driver.NewRegistryMemory().SetConfig(c).(*driver.RegistryMemory)
+	return driver.NewRegistryMemory(c)
 }

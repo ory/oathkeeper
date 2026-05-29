@@ -41,16 +41,22 @@ func (m *Match) GetURL() string       { return m.URL }
 func (m *Match) GetMethods() []string { return m.Methods }
 func (m *Match) Protocol() Protocol   { return ProtocolHTTP }
 
-type MatchGRPC struct {
-	Authority  string `json:"authority"`
-	FullMethod string `json:"full_method"`
+type MatchRPC struct {
+	Authority    string `json:"authority"`
+	FullMethod   string `json:"full_method"`
+	AllowHTTPGET bool   `json:"allow_http_get"`
 }
 
-func (m *MatchGRPC) GetURL() string {
-	return fmt.Sprintf("grpc://%s/%s", m.Authority, m.FullMethod)
+func (m *MatchRPC) GetURL() string {
+	return fmt.Sprintf("rpc://%s/%s", m.Authority, m.FullMethod)
 }
-func (m *MatchGRPC) GetMethods() []string { return []string{"POST"} }
-func (m *MatchGRPC) Protocol() Protocol   { return ProtocolGRPC }
+func (m *MatchRPC) GetMethods() []string {
+	if m.AllowHTTPGET {
+		return []string{"GET", "POST"}
+	}
+	return []string{"POST"}
+}
+func (m *MatchRPC) Protocol() Protocol { return ProtocolRPC }
 
 type Handler struct {
 	// Handler identifies the implementation which will be used to handle this specific request. Please read the user
@@ -189,9 +195,9 @@ func (r *Rule) UnmarshalJSON(raw []byte) error {
 
 // unmarshalMatch does polymorphic decoding of the match based on keys.
 func unmarshalMatch(raw json.RawMessage, v *URLProvider) error {
-	if gjson.Get(string(raw), "full_method").Exists() {
-		// full_method --> grpc matching rule
-		*v = new(MatchGRPC)
+	if gjson.GetBytes(raw, "full_method").Exists() {
+		// full_method --> rpc matching rule
+		*v = new(MatchRPC)
 	} else {
 		*v = new(Match)
 	}

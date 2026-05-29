@@ -18,5 +18,5 @@ type (
 
 const (
 	ProtocolHTTP Protocol = iota
-	ProtocolGRPC
+	ProtocolRPC
 )

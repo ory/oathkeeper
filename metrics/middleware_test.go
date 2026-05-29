@@ -9,7 +9,6 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
-	"time"
 
 	"github.com/ory/oathkeeper/driver"
 	"github.com/ory/oathkeeper/x"
@@ -147,7 +146,7 @@ func TestConfigurablePrometheusRequestTotalMetrics(t *testing.T) {
 			RequestTotal.Reset()
 
 			logger := logrusx.NewT(t)
-			d := driver.NewDefaultDriver(logger, "1", "test", time.Now().String(), nil,
+			d := driver.NewDefaultDriver(logger, nil,
 				configx.WithConfigFiles(x.WriteFile(t, `
 serve:
   prometheus:

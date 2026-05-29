@@ -55,7 +55,7 @@ func init() {
 		if rand.Intn(2) == 0 { //nolint:gosec // math/rand acceptable for test shuffling
 			m = new(Match)
 		} else {
-			m = new(MatchGRPC)
+			m = new(MatchRPC)
 		}
 		err := faker.FakeData(m)
 		return m, err

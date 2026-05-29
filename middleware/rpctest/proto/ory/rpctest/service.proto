@@ -1,0 +1,44 @@
+syntax = "proto3";
+
+package ory.rpctest;
+
+// A test service used for testing general purpose RPC servers, clients, and middlewares.
+// The implementation can be chosen freely to test any scenario.
+service TestService {
+  rpc Unary(UnaryRequest) returns (UnaryResponse);
+  rpc ServerStream(ServerStreamRequest) returns (stream ServerStreamResponse);
+  rpc ClientStream(stream ClientStreamRequest) returns (ClientStreamResponse);
+  rpc BidiStream(stream BidiStreamRequest) returns (stream BidiStreamResponse);
+}
+
+message UnaryRequest {
+  bytes data = 1;
+}
+
+message UnaryResponse {
+  bytes data = 1;
+}
+
+message ServerStreamRequest {
+  bytes data = 1;
+}
+
+message ServerStreamResponse {
+  bytes data = 1;
+}
+
+message ClientStreamRequest {
+  bytes data = 1;
+}
+
+message ClientStreamResponse {
+  bytes data = 1;
+}
+
+message BidiStreamRequest {
+  bytes data = 1;
+}
+
+message BidiStreamResponse {
+  bytes data = 1;
+}

@@ -19,13 +19,13 @@ type DefaultDriver struct {
 	r Registry
 }
 
-func NewDefaultDriver(l *logrusx.Logger, version, build, date string, flags *pflag.FlagSet, configOpts ...configx.OptionModifier) Driver {
+func NewDefaultDriver(l *logrusx.Logger, flags *pflag.FlagSet, configOpts ...configx.OptionModifier) Driver {
 	c, err := configuration.NewKoanfProvider(
 		context.Background(), flags, l, configOpts...)
 	if err != nil {
 		l.WithError(err).Fatal("Failed to initialize configuration")
 	}
-	r := NewRegistry(c).SetLogger(l).SetBuildInfo(version, build, date)
+	r := NewRegistry(c).SetLogger(l)
 	return &DefaultDriver{r: r, c: c}
 }
 

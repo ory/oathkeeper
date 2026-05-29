@@ -7,7 +7,6 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/ory/oathkeeper/cmd/server"
-	"github.com/ory/oathkeeper/x"
 )
 
 var serveCmd = &cobra.Command{
@@ -22,9 +21,7 @@ on configuration options, open the configuration documentation:
 
 >> https://www.ory.com/docs/oathkeeper/reference/configuration <<
 `,
-	Run: func(cmd *cobra.Command, args []string) {
-		server.RunServe(x.Version, x.Commit, x.Date)(cmd, args)
-	},
+	Run: server.RunServe,
 }
 
 func init() {

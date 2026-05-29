@@ -6,6 +6,7 @@ package middleware
 import (
 	"context"
 
+	"connectrpc.com/connect"
 	"github.com/pkg/errors"
 	"google.golang.org/grpc"
 
@@ -17,32 +18,23 @@ import (
 
 	"github.com/ory/oathkeeper/driver"
 	"github.com/ory/oathkeeper/driver/configuration"
-	"github.com/ory/oathkeeper/proxy"
-	"github.com/ory/oathkeeper/rule"
 	"github.com/ory/oathkeeper/x"
 )
 
 type (
-	dependencies interface {
-		Logger() *logrusx.Logger
-		RuleMatcher() rule.Matcher
-		ProxyRequestHandler() proxy.RequestHandler
-		HealthxReadyCheckers() healthx.ReadyCheckers
-	}
-
-	middleware struct{ dependencies }
+	middleware struct{ reg driver.Registry }
 
 	Middleware interface {
+		ConnectInterceptor() connect.Interceptor
 		UnaryInterceptor() grpc.UnaryServerInterceptor
 		StreamInterceptor() grpc.StreamServerInterceptor
 		HealthxReadyCheckers() healthx.ReadyCheckers
+		Registry() driver.Registry
 	}
 
 	options struct {
 		logger             *logrusx.Logger
 		configFile         string
-		registryAddr       *driver.Registry
-		configProviderAddr *configuration.Provider
 		configProviderOpts []configx.OptionModifier
 	}
 
@@ -95,14 +87,8 @@ func New(ctx context.Context, opts ...Option) (Middleware, error) {
 		return nil, errors.WithStack(err)
 	}
 
-	r := driver.NewRegistry(c).SetLogger(o.logger).SetBuildInfo(x.Version, x.Commit, x.Date)
+	r := driver.NewRegistry(c).SetLogger(o.logger)
 	r.Init()
-	if o.registryAddr != nil {
-		*o.registryAddr = r
-	}
-	if o.configProviderAddr != nil {
-		*o.configProviderAddr = c
-	}
 
 	m := &middleware{r}
 
@@ -110,5 +96,7 @@ func New(ctx context.Context, opts ...Option) (Middleware, error) {
 }
 
 func (m *middleware) HealthxReadyCheckers() healthx.ReadyCheckers {
-	return m.dependencies.HealthxReadyCheckers()
+	return m.reg.HealthxReadyCheckers()
 }
+
+func (m *middleware) Registry() driver.Registry { return m.reg }

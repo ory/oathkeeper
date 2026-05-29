@@ -26,12 +26,8 @@ import (
 type Registry interface {
 	Init()
 
-	SetConfig(c configuration.Provider) Registry
+	Config() configuration.Provider
 	SetLogger(l *logrusx.Logger) Registry
-	SetBuildInfo(version, hash, date string) Registry
-	BuildVersion() string
-	BuildDate() string
-	BuildHash() string
 
 	ProxyRequestHandler() proxy.RequestHandler
 	HealthxReadyCheckers() healthx.ReadyCheckers
@@ -58,5 +54,5 @@ type Registry interface {
 }
 
 func NewRegistry(c configuration.Provider) Registry {
-	return NewRegistryMemory().SetConfig(c)
+	return NewRegistryMemory(c)
 }

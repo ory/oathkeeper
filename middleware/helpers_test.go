@@ -1,23 +1,22 @@
 // Copyright © 2023 Ory Corp
 // SPDX-License-Identifier: Apache-2.0
 
-package middleware
+package middleware_test
 
 import (
-	"github.com/ory/oathkeeper/driver"
-	"github.com/ory/oathkeeper/driver/configuration"
+	"fmt"
+	"os"
+	"path/filepath"
+	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
-// WithRegistry is a test option that writes the internal registry used in the
-// middleware to the given pointer. The pointer must be allocaded by the caller
-// beforehand (e.g., `regPtr := new(driver.Registry)`).
-func WithRegistry(r *driver.Registry) Option {
-	return func(o *options) { o.registryAddr = r }
-}
+func writeTestConfigf(t *testing.T, format string, args ...any) string {
+	f, err := os.Create(filepath.Join(t.TempDir(), "file.yaml"))
+	require.NoError(t, err)
+	defer func() { _ = f.Close() }()
+	_, _ = fmt.Fprintf(f, format, args...)
 
-// WithConfigProvider is a test option that writes the internal config provider used in the
-// middleware to the given pointer. The pointer must be allocaded by the caller
-// beforehand (e.g., `cfgPtr := new(configuration.Provider)`).
-func WithConfigProvider(c *configuration.Provider) Option {
-	return func(o *options) { o.configProviderAddr = c }
+	return f.Name()
 }

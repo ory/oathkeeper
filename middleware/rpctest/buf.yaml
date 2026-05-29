@@ -1,0 +1,13 @@
+version: v2
+
+modules:
+  - path: proto
+    name: buf.build/ory/rpctest
+
+lint:
+  use:
+    - STANDARD
+
+breaking:
+  use:
+    - FILE
