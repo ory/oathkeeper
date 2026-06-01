@@ -7,28 +7,24 @@ import (
 	"context"
 	"sync"
 
-	"go.opentelemetry.io/otel/trace"
-
-	"github.com/ory/oathkeeper/pipeline"
-	pe "github.com/ory/oathkeeper/pipeline/errors"
-	"github.com/ory/oathkeeper/proxy"
-	"github.com/ory/oathkeeper/x"
-
-	"github.com/ory/x/logrusx"
-	"github.com/ory/x/otelx"
-
 	"github.com/pkg/errors"
 
 	"github.com/ory/herodot"
 	"github.com/ory/x/healthx"
+	"github.com/ory/x/logrusx"
+	"github.com/ory/x/otelx"
 
 	"github.com/ory/oathkeeper/api"
 	"github.com/ory/oathkeeper/credentials"
 	"github.com/ory/oathkeeper/driver/configuration"
+	"github.com/ory/oathkeeper/pipeline"
 	"github.com/ory/oathkeeper/pipeline/authn"
 	"github.com/ory/oathkeeper/pipeline/authz"
+	pe "github.com/ory/oathkeeper/pipeline/errors"
 	"github.com/ory/oathkeeper/pipeline/mutate"
+	"github.com/ory/oathkeeper/proxy"
 	"github.com/ory/oathkeeper/rule"
+	"github.com/ory/oathkeeper/x"
 )
 
 var _ Registry = new(RegistryMemory)
@@ -38,7 +34,7 @@ type RegistryMemory struct {
 
 	logger *logrusx.Logger
 	writer herodot.Writer
-	c      configuration.Provider
+	c      configuration.Configuration
 	trc    *otelx.Tracer
 
 	ch *api.CredentialsHandler
@@ -53,7 +49,6 @@ type RegistryMemory struct {
 	healthxHandler      *healthx.Handler
 
 	proxyRequestHandler proxy.RequestHandler
-	proxyProxy          *proxy.Proxy
 	ruleFetcher         rule.Fetcher
 
 	authenticators map[string]authn.Authenticator
@@ -63,7 +58,7 @@ type RegistryMemory struct {
 }
 
 func (r *RegistryMemory) Init() {
-	_ = r.Tracer() // make sure tracer is initialized
+	_ = r.Tracer(context.Background()) // make sure tracer is initialized
 	if err := r.RuleFetcher().Watch(context.Background()); err != nil {
 		r.Logger().WithError(err).Fatal("Access rule watcher could not be initialized.")
 	}
@@ -84,7 +79,7 @@ func (r *RegistryMemory) SetRuleFetcher(fetcher rule.Fetcher) Registry {
 
 func (r *RegistryMemory) ProxyRequestHandler() proxy.RequestHandler {
 	if r.proxyRequestHandler == nil {
-		r.proxyRequestHandler = proxy.NewRequestHandler(r, r.c)
+		r.proxyRequestHandler = proxy.NewRequestHandler(r)
 	}
 	return r.proxyRequestHandler
 }
@@ -94,16 +89,11 @@ func (r *RegistryMemory) RuleMatcher() rule.Matcher {
 	return r.ruleRepository
 }
 
-func NewRegistryMemory(c configuration.Provider) *RegistryMemory {
-	return &RegistryMemory{c: c}
+func NewRegistryMemory(c configuration.Configuration, l *logrusx.Logger) *RegistryMemory {
+	return &RegistryMemory{c: c, logger: l}
 }
 
-func (r *RegistryMemory) Config() configuration.Provider { return r.c }
-
-func (r *RegistryMemory) SetLogger(l *logrusx.Logger) Registry {
-	r.logger = l
-	return r
-}
+func (r *RegistryMemory) Config() configuration.Configuration { return r.c }
 
 func (r *RegistryMemory) CredentialHandler() *api.CredentialsHandler {
 	if r.ch == nil {
@@ -300,11 +290,7 @@ func (r *RegistryMemory) AvailablePipelineMutators() (available []string) {
 }
 
 func (r *RegistryMemory) Proxy() *proxy.Proxy {
-	if r.proxyProxy == nil {
-		r.proxyProxy = proxy.NewProxy(r, r.c)
-	}
-
-	return r.proxyProxy
+	return proxy.NewProxy(r)
 }
 
 func (r *RegistryMemory) PipelineMutator(id string) (mutate.Mutator, error) {
@@ -328,17 +314,17 @@ func (r *RegistryMemory) WithBrokenPipelineMutator() *RegistryMemory {
 func (r *RegistryMemory) prepareAuthn() {
 	r.Lock()
 	defer r.Unlock()
-	_ = r.Tracer() // make sure tracer is initialized
+	_ = r.Tracer(context.Background()) // make sure tracer is initialized
 	if r.authenticators == nil {
 		interim := []authn.Authenticator{
-			authn.NewAuthenticatorAnonymous(r.c),
-			authn.NewAuthenticatorCookieSession(r.c, r.trc.Provider()),
-			authn.NewAuthenticatorBearerToken(r.c, r.trc.Provider()),
-			authn.NewAuthenticatorJWT(r.c, r),
-			authn.NewAuthenticatorNoOp(r.c),
-			authn.NewAuthenticatorOAuth2ClientCredentials(r.c, r.Logger()),
-			authn.NewAuthenticatorOAuth2Introspection(r.c, r.Logger(), r.trc.Provider()),
-			authn.NewAuthenticatorUnauthorized(r.c),
+			authn.NewAuthenticatorAnonymous(r),
+			authn.NewAuthenticatorCookieSession(r),
+			authn.NewAuthenticatorBearerToken(r),
+			authn.NewAuthenticatorJWT(r),
+			authn.NewAuthenticatorNoOp(r),
+			authn.NewAuthenticatorOAuth2ClientCredentials(r),
+			authn.NewAuthenticatorOAuth2Introspection(r),
+			authn.NewAuthenticatorUnauthorized(r),
 		}
 
 		r.authenticators = map[string]authn.Authenticator{}
@@ -353,11 +339,11 @@ func (r *RegistryMemory) prepareAuthz() {
 	defer r.Unlock()
 	if r.authorizers == nil {
 		interim := []authz.Authorizer{
-			authz.NewAuthorizerAllow(r.c),
-			authz.NewAuthorizerDeny(r.c),
-			authz.NewAuthorizerKetoEngineACPORY(r.c, r),
-			authz.NewAuthorizerRemote(r.c, r),
-			authz.NewAuthorizerRemoteJSON(r.c, r),
+			authz.NewAuthorizerAllow(r),
+			authz.NewAuthorizerDeny(r),
+			authz.NewAuthorizerKetoEngineACPORY(r),
+			authz.NewAuthorizerRemote(r),
+			authz.NewAuthorizerRemoteJSON(r),
 		}
 
 		r.authorizers = map[string]authz.Authorizer{}
@@ -372,11 +358,11 @@ func (r *RegistryMemory) prepareMutators() {
 	defer r.Unlock()
 	if r.mutators == nil {
 		interim := []mutate.Mutator{
-			mutate.NewMutatorCookie(r.c),
-			mutate.NewMutatorHeader(r.c),
-			mutate.NewMutatorIDToken(r.c, r),
-			mutate.NewMutatorNoop(r.c),
-			mutate.NewMutatorHydrator(r.c, r),
+			mutate.NewMutatorCookie(r),
+			mutate.NewMutatorHeader(r),
+			mutate.NewMutatorIDToken(r),
+			mutate.NewMutatorNoop(r),
+			mutate.NewMutatorHydrator(r),
 		}
 
 		r.mutators = map[string]mutate.Mutator{}
@@ -386,7 +372,7 @@ func (r *RegistryMemory) prepareMutators() {
 	}
 }
 
-func (r *RegistryMemory) Tracer() trace.Tracer {
+func (r *RegistryMemory) Tracer(_ context.Context) *otelx.Tracer {
 	if r.trc == nil {
 		var err error
 		r.trc, err = otelx.New(r.c.TracingServiceName(), r.Logger(), r.c.TracingConfig())
@@ -394,5 +380,5 @@ func (r *RegistryMemory) Tracer() trace.Tracer {
 			r.Logger().WithError(err).Fatalf("Unable to initialize Tracer for Oathkeeper.")
 		}
 	}
-	return r.trc.Tracer()
+	return r.trc
 }

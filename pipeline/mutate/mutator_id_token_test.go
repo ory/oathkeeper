@@ -16,22 +16,20 @@ import (
 	"text/template"
 	"time"
 
+	"github.com/golang-jwt/jwt/v5"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/tidwall/sjson"
 
-	"github.com/ory/oathkeeper/rule"
-	"github.com/ory/oathkeeper/x"
 	"github.com/ory/x/configx"
-
-	"github.com/golang-jwt/jwt/v5"
 
 	"github.com/ory/oathkeeper/credentials"
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/internal"
 	"github.com/ory/oathkeeper/pipeline/authn"
 	. "github.com/ory/oathkeeper/pipeline/mutate"
-
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
+	"github.com/ory/oathkeeper/rule"
+	"github.com/ory/oathkeeper/x"
 )
 
 type idTokenTestCase struct {
@@ -183,14 +181,14 @@ func parseToken(h http.Header) string {
 
 func TestMutatorIDToken(t *testing.T) {
 	t.Parallel()
-	conf := internal.NewConfigurationWithDefaults(configx.SkipValidation())
-	reg := internal.NewRegistry(conf)
+	reg := internal.NewRegistry(t,
+		configx.SkipValidation(),
+		configx.WithValue("mutators.id_token.config.issuer_url", "/foo/bar"),
+	)
 
 	a, err := reg.PipelineMutator("id_token")
 	require.NoError(t, err)
 	assert.Equal(t, "id_token", a.GetID())
-
-	conf.SetForTest(t, "mutators.id_token.config.issuer_url", "/foo/bar")
 
 	t.Run("method=mutate", func(t *testing.T) {
 		r := &http.Request{}
@@ -349,7 +347,7 @@ func TestMutatorIDToken(t *testing.T) {
 			{e: true, i: "http://baz/foo", j: "http://baz/foo", pass: true},
 		} {
 			t.Run(fmt.Sprintf("case=%d", k), func(t *testing.T) {
-				conf.SetForTest(t, configuration.MutatorIDTokenIsEnabled, tc.e)
+				reg.Config().SetForTest(t, configuration.MutatorIDTokenIsEnabled, tc.e)
 				err := a.Validate(json.RawMessage(`{"issuer_url":"` + tc.i + `", "jwks_url": "` + tc.j + `"}`))
 				if tc.pass {
 					require.NoError(t, err)
@@ -364,8 +362,7 @@ func TestMutatorIDToken(t *testing.T) {
 func BenchmarkMutatorIDToken(b *testing.B) {
 	issuers := []string{"foo", "bar", "baz", "zab"}
 
-	conf := internal.NewConfigurationWithDefaults()
-	reg := internal.NewRegistry(conf)
+	reg := internal.NewRegistry(b)
 	rl := &rule.Rule{ID: "test-rule"}
 	r := &http.Request{}
 
@@ -395,7 +392,7 @@ func BenchmarkMutatorIDToken(b *testing.B) {
 					for i := 0; i < b.N; i++ {
 						tc = tcs[i%len(tcs)]
 						config, _ = sjson.SetBytes(tc.Config, "jwks_url", key)
-						conf.SetForTest(b, "mutators.id_token.config.issuer_url", "/"+issuers[i%len(issuers)])
+						reg.Config().SetForTest(b, "mutators.id_token.config.issuer_url", "/"+issuers[i%len(issuers)])
 
 						b.StartTimer()
 						err := a.Mutate(r, tc.Session, config, rl)

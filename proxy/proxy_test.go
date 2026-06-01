@@ -39,22 +39,21 @@ func TestProxy(t *testing.T) {
 	}))
 	t.Cleanup(backend.Close)
 
-	conf := internal.NewConfigurationWithDefaults()
-	reg := internal.NewRegistry(conf).WithBrokenPipelineMutator()
+	reg := internal.NewRegistry(t, configx.WithValues(map[string]any{
+		configuration.AuthenticatorNoopIsEnabled:         true,
+		configuration.AuthenticatorUnauthorizedIsEnabled: true,
+		configuration.AuthenticatorAnonymousIsEnabled:    true,
+		configuration.AuthorizerAllowIsEnabled:           true,
+		configuration.AuthorizerDenyIsEnabled:            true,
+		configuration.MutatorNoopIsEnabled:               true,
+		"mutators.header.config":                         map[string]any{"headers": map[string]string{}},
+		configuration.MutatorHeaderIsEnabled:             true,
+		configuration.ErrorsWWWAuthenticateIsEnabled:     true,
+	})).WithBrokenPipelineMutator()
 
 	d := reg.Proxy()
 	ts := httptest.NewServer(&httputil.ReverseProxy{Rewrite: d.Rewrite, Transport: d})
 	t.Cleanup(ts.Close)
-
-	conf.SetForTest(t, configuration.AuthenticatorNoopIsEnabled, true)
-	conf.SetForTest(t, configuration.AuthenticatorUnauthorizedIsEnabled, true)
-	conf.SetForTest(t, configuration.AuthenticatorAnonymousIsEnabled, true)
-	conf.SetForTest(t, configuration.AuthorizerAllowIsEnabled, true)
-	conf.SetForTest(t, configuration.AuthorizerDenyIsEnabled, true)
-	conf.SetForTest(t, configuration.MutatorNoopIsEnabled, true)
-	conf.SetForTest(t, "mutators.header.config", map[string]any{"headers": map[string]string{}})
-	conf.SetForTest(t, configuration.MutatorHeaderIsEnabled, true)
-	conf.SetForTest(t, configuration.ErrorsWWWAuthenticateIsEnabled, true)
 
 	ruleNoOpAuthenticator := rule.Rule{
 		Match:          &rule.Match{Methods: []string{"GET"}, URL: ts.URL + "/authn-noop/<[0-9]+>"},
@@ -207,7 +206,7 @@ func TestProxy(t *testing.T) {
 		{
 			d: "should pass and set x-forwarded headers",
 			prep: func(t *testing.T) {
-				conf.SetForTest(t, configuration.ProxyTrustForwardedHeaders, true)
+				reg.Config().SetForTest(t, configuration.ProxyTrustForwardedHeaders, true)
 			},
 			transform: func(r *http.Request) {
 				r.Header.Set("X-Forwarded-Host", "foobar.com")
@@ -581,23 +580,22 @@ func TestRateLimitHeaderPropagation(t *testing.T) {
 		w.Header().Set("X-Ratelimit-Reset", "1709042400")
 		w.WriteHeader(http.StatusTooManyRequests)
 	}))
-	defer rateLimitUpstream.Close()
+	t.Cleanup(rateLimitUpstream.Close)
 
 	backend := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) { _, _ = fmt.Fprint(w, "ok") }))
-	defer backend.Close()
+	t.Cleanup(backend.Close)
 
-	conf := internal.NewConfigurationWithDefaults()
-	reg := internal.NewRegistry(conf)
+	reg := internal.NewRegistry(t, configx.WithValues(map[string]any{
+		"authenticators.cookie_session.config.check_session_url": rateLimitUpstream.URL,
+		configuration.AuthenticatorCookieSessionIsEnabled:        true,
+		configuration.AuthorizerAllowIsEnabled:                   true,
+		configuration.MutatorNoopIsEnabled:                       true,
+		configuration.ErrorsJSONIsEnabled:                        true,
+	}))
 
 	d := reg.Proxy()
 	ts := httptest.NewServer(&httputil.ReverseProxy{Rewrite: d.Rewrite, Transport: d})
-	defer ts.Close()
-
-	conf.SetForTest(t, "authenticators.cookie_session.config.check_session_url", rateLimitUpstream.URL)
-	conf.SetForTest(t, configuration.AuthenticatorCookieSessionIsEnabled, true)
-	conf.SetForTest(t, configuration.AuthorizerAllowIsEnabled, true)
-	conf.SetForTest(t, configuration.MutatorNoopIsEnabled, true)
-	conf.SetForTest(t, configuration.ErrorsJSONIsEnabled, true)
+	t.Cleanup(ts.Close)
 
 	rl := rule.Rule{
 		Match:          &rule.Match{Methods: []string{"GET"}, URL: ts.URL + "/rate-limit-test/<[0-9]*>"},
@@ -627,7 +625,7 @@ func TestRateLimitHeaderPropagation(t *testing.T) {
 }
 
 func TestDoNotUseXForwardedWhenUntrusted(t *testing.T) {
-	conf := internal.NewConfigurationWithDefaults(configx.WithValues(map[string]any{
+	reg := internal.NewRegistry(t, configx.WithValues(map[string]any{
 		configuration.ProxyTrustForwardedHeaders:                                false,
 		configuration.AuthenticatorAnonymousIsEnabled:                           true,
 		configuration.AuthorizerAllowIsEnabled:                                  true,
@@ -639,7 +637,6 @@ func TestDoNotUseXForwardedWhenUntrusted(t *testing.T) {
 		configuration.ErrorsHandlers + ".redirect.config.return_to_query_param": "return_to",
 		configuration.ErrorsFallback:                                            []string{"redirect"},
 	}))
-	reg := internal.NewRegistry(conf)
 
 	d := reg.Proxy()
 	proxyServer := httptest.NewServer(&httputil.ReverseProxy{Rewrite: d.Rewrite, Transport: d})

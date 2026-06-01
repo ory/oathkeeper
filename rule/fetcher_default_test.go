@@ -23,10 +23,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/ory/x/watcherx"
-
 	"github.com/ory/x/configx"
-	"github.com/ory/x/logrusx"
+	"github.com/ory/x/watcherx"
 
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/internal"
@@ -46,7 +44,7 @@ func copyToFile(t *testing.T, src string, dst *os.File) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer source.Close() //nolint:errcheck
+	t.Cleanup(func() { _ = source.Close() })
 
 	_, err = dst.Seek(0, 0)
 	if err != nil {
@@ -73,41 +71,35 @@ func copyToFile(t *testing.T, src string, dst *os.File) {
 }
 
 func TestFetcherReload(t *testing.T) {
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-
 	configFile, err := os.CreateTemp(t.TempDir(), "config-*.yaml")
 	require.NoError(t, err)
-	t.Cleanup(func() { configFile.Close() }) //nolint:errcheck,gosec // tests ignore cleanup failures
+	t.Cleanup(func() { _ = configFile.Close() })
 
 	configChanged := make(chan struct{})
 
-	conf := internal.NewConfigurationWithDefaults(
-		configx.WithContext(ctx),
-		configx.WithLogger(logrusx.NewT(t)),
+	r := internal.NewRegistry(t,
 		configx.SkipValidation(),
 		configx.WithConfigFiles(configFile.Name()),
 		configx.AttachWatcher(func(event watcherx.Event, err error) {
 			go func() { configChanged <- struct{}{} }()
 		}),
 	)
-	r := internal.NewRegistry(conf)
 
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		_, _ = w.Write([]byte(testRule))
 	}))
-	defer ts.Close()
+	t.Cleanup(ts.Close)
 
-	go func() { require.NoError(t, r.RuleFetcher().Watch(ctx)) }()
+	go func() { require.NoError(t, r.RuleFetcher().Watch(t.Context())) }()
 
 	// initial config without a repo and without a matching strategy
 	copyToFile(t, "config_no_repo.yaml", configFile)
 	<-configChanged
 
-	rules := eventuallyListRules(ctx, t, r, 0)
+	rules := eventuallyListRules(t.Context(), t, r, 0)
 	require.Empty(t, rules)
 
-	strategy, err := r.RuleRepository().MatchingStrategy(ctx)
+	strategy, err := r.RuleRepository().MatchingStrategy(t.Context())
 	require.NoError(t, err)
 	require.Equal(t, configuration.DefaultMatchingStrategy, strategy)
 
@@ -115,10 +107,10 @@ func TestFetcherReload(t *testing.T) {
 	copyToFile(t, "config_default.yaml", configFile)
 	<-configChanged
 
-	rules = eventuallyListRules(ctx, t, r, 1)
+	rules = eventuallyListRules(t.Context(), t, r, 1)
 	require.Equal(t, "test-rule-1-glob", rules[0].ID)
 
-	strategy, err = r.RuleRepository().MatchingStrategy(ctx)
+	strategy, err = r.RuleRepository().MatchingStrategy(t.Context())
 	require.NoError(t, err)
 	require.Equal(t, configuration.Regexp, strategy)
 
@@ -126,10 +118,10 @@ func TestFetcherReload(t *testing.T) {
 	copyToFile(t, "config_glob.yaml", configFile)
 	<-configChanged
 
-	rules = eventuallyListRules(ctx, t, r, 1)
+	rules = eventuallyListRules(t.Context(), t, r, 1)
 	require.Equal(t, "test-rule-1-glob", rules[0].ID)
 
-	strategy, err = r.RuleRepository().MatchingStrategy(ctx)
+	strategy, err = r.RuleRepository().MatchingStrategy(t.Context())
 	require.NoError(t, err)
 	require.Equal(t, configuration.Glob, strategy)
 
@@ -137,10 +129,10 @@ func TestFetcherReload(t *testing.T) {
 	copyToFile(t, "config_error.yaml", configFile)
 	<-configChanged
 
-	rules = eventuallyListRules(ctx, t, r, 1)
+	rules = eventuallyListRules(t.Context(), t, r, 1)
 	require.Equal(t, "test-rule-1-glob", rules[0].ID)
 
-	strategy, err = r.RuleRepository().MatchingStrategy(ctx)
+	strategy, err = r.RuleRepository().MatchingStrategy(t.Context())
 	require.NoError(t, err)
 	require.Equal(t, "UNKNOWN", string(strategy))
 
@@ -148,43 +140,38 @@ func TestFetcherReload(t *testing.T) {
 	copyToFile(t, "config_regexp.yaml", configFile)
 	<-configChanged
 
-	rules = eventuallyListRules(ctx, t, r, 1)
+	rules = eventuallyListRules(t.Context(), t, r, 1)
 	require.Equal(t, "test-rule-1-glob", rules[0].ID)
 
-	strategy, err = r.RuleRepository().MatchingStrategy(ctx)
+	strategy, err = r.RuleRepository().MatchingStrategy(t.Context())
 	require.NoError(t, err)
 	require.Equal(t, configuration.Regexp, strategy)
 }
 
 func TestFetcherWatchConfig(t *testing.T) {
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-
 	configFile, err := os.CreateTemp(t.TempDir(), "config-*.yaml")
 	require.NoError(t, err)
-	configFile.Close() //nolint:errcheck,gosec // best-effort cleanup
+	_ = configFile.Close()
 	configChanged := make(chan struct{})
-	conf := internal.NewConfigurationWithDefaults(
-		configx.WithContext(ctx),
+
+	r := internal.NewRegistry(t,
 		configx.SkipValidation(),
-		configx.WithLogger(logrusx.NewT(t)),
 		configx.WithConfigFiles(configFile.Name()),
 		configx.AttachWatcher(func(event watcherx.Event, err error) {
 			go func() { configChanged <- struct{}{} }()
 		}),
+		configx.WithValues(map[string]any{
+			configuration.AuthorizerAllowIsEnabled:        true,
+			configuration.AuthorizerDenyIsEnabled:         true,
+			configuration.AuthenticatorNoopIsEnabled:      true,
+			configuration.AuthenticatorAnonymousIsEnabled: true,
+			configuration.MutatorNoopIsEnabled:            true,
+			configuration.MutatorHeaderIsEnabled:          true,
+			configuration.MutatorIDTokenIsEnabled:         true,
+			configuration.MutatorIDTokenJWKSURL:           "https://stub/.well-known/jwks.json",
+			configuration.MutatorIDTokenIssuerURL:         "https://stub",
+		}),
 	)
-	// set default values for all test cases
-	conf.SetForTest(t, configuration.AuthorizerAllowIsEnabled, true)
-	conf.SetForTest(t, configuration.AuthorizerDenyIsEnabled, true)
-	conf.SetForTest(t, configuration.AuthenticatorNoopIsEnabled, true)
-	conf.SetForTest(t, configuration.AuthenticatorAnonymousIsEnabled, true)
-	conf.SetForTest(t, configuration.MutatorNoopIsEnabled, true)
-	conf.SetForTest(t, configuration.MutatorHeaderIsEnabled, true)
-	conf.SetForTest(t, configuration.MutatorIDTokenIsEnabled, true)
-	conf.SetForTest(t, configuration.MutatorIDTokenJWKSURL, "https://stub/.well-known/jwks.json")
-	conf.SetForTest(t, configuration.MutatorIDTokenIssuerURL, "https://stub")
-
-	r := internal.NewRegistry(conf)
 
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		_, _ = w.Write([]byte(testRule))
@@ -193,7 +180,7 @@ func TestFetcherWatchConfig(t *testing.T) {
 
 	require.NoError(t, os.WriteFile(configFile.Name(), []byte(""), 0o600))
 
-	require.NoError(t, r.RuleFetcher().Watch(ctx))
+	require.NoError(t, r.RuleFetcher().Watch(t.Context()))
 
 	for k, tc := range []struct {
 		config           string
@@ -266,8 +253,8 @@ access_rules:
 			require.NoError(t, os.WriteFile(configFile.Name(), []byte(tc.config), 0o600))
 			<-configChanged
 
-			rules := eventuallyListRules(ctx, t, r, len(tc.expectIDs))
-			strategy, err := r.RuleRepository().MatchingStrategy(ctx)
+			rules := eventuallyListRules(t.Context(), t, r, len(tc.expectIDs))
+			strategy, err := r.RuleRepository().MatchingStrategy(t.Context())
 			require.NoError(t, err)
 			require.Equal(t, tc.expectedStrategy, strategy)
 
@@ -291,34 +278,30 @@ func TestFetcherWatchRepositoryFromFS(t *testing.T) {
 	tempDir := t.TempDir()
 	configFile, err := os.CreateTemp(tempDir, "config-*.yaml")
 	require.NoError(t, err)
-	t.Cleanup(func() { configFile.Close() }) //nolint:errcheck,gosec // tests ignore cleanup failures
+	t.Cleanup(func() { _ = configFile.Close() })
 
 	repoFile, err := os.CreateTemp(tempDir, "access-rules-*.json")
 	require.NoError(t, err)
-	t.Cleanup(func() { repoFile.Close() }) //nolint:errcheck,gosec // tests ignore cleanup failures
+	t.Cleanup(func() { _ = repoFile.Close() })
 
-	repoFile.WriteString("[]") //nolint:errcheck,gosec // temporary file writes best effort
+	_, _ = repoFile.WriteString("[]")
 	require.NoError(t, repoFile.Sync())
 
-	//nolint:errcheck,gosec,staticcheck // write config template best effort
-	configFile.WriteString(fmt.Sprintf(`
+	_, _ = fmt.Fprintf(configFile, `
 access_rules:
   repositories:
   - file://%s
-`, repoFile.Name()))
+`, repoFile.Name())
 	require.NoError(t, configFile.Sync())
 
-	conf := internal.NewConfigurationWithDefaults(
-		configx.WithContext(ctx),
-		configx.SkipValidation(),
-		configx.WithLogger(logrusx.NewT(t)),
+	r := internal.NewRegistry(t,
 		configx.WithConfigFiles(configFile.Name()),
+		configx.WithValues(map[string]any{
+			configuration.AuthenticatorNoopIsEnabled: true,
+			configuration.AuthorizerAllowIsEnabled:   true,
+			configuration.MutatorNoopIsEnabled:       true,
+		}),
 	)
-	conf.SetForTest(t, configuration.AuthenticatorNoopIsEnabled, true)
-	conf.SetForTest(t, configuration.AuthorizerAllowIsEnabled, true)
-	conf.SetForTest(t, configuration.MutatorNoopIsEnabled, true)
-
-	r := internal.NewRegistry(conf)
 
 	go func() {
 		require.NoError(t, r.RuleFetcher().Watch(ctx))
@@ -354,9 +337,9 @@ access_rules:
 			}
 			content := fmt.Sprintf("[%s]", strings.Join(rawRules, ","))
 
-			repoFile.Truncate(0)                 //nolint:errcheck,gosec // temporary file maintenance
-			repoFile.WriteAt([]byte(content), 0) //nolint:errcheck,gosec // temporary file maintenance
-			repoFile.Sync()                      //nolint:errcheck,gosec // temporary file maintenance
+			_ = repoFile.Truncate(0)
+			_, _ = repoFile.WriteAt([]byte(content), 0)
+			_ = repoFile.Sync()
 
 			actualRules := eventuallyListRules(ctx, t, r, len(tc.ids))
 
@@ -382,18 +365,12 @@ func TestFetcherWatchRepositoryFromKubernetesConfigMap(t *testing.T) {
 	watchDir := t.TempDir()
 	watchFile := filepath.Join(watchDir, "access-rules.json")
 
-	conf := internal.NewConfigurationWithDefaults(
-		configx.SkipValidation(),
-		configx.WithContext(ctx),
-		configx.WithLogger(logrusx.NewT(t)),
-	)
-	r := internal.NewRegistry(conf)
-
-	// Configure watcher
-	conf.SetForTest(t, configuration.AccessRuleRepositories, []string{"file://" + watchFile})
-	conf.SetForTest(t, configuration.AuthenticatorNoopIsEnabled, true)
-	conf.SetForTest(t, configuration.AuthorizerAllowIsEnabled, true)
-	conf.SetForTest(t, configuration.MutatorNoopIsEnabled, true)
+	r := internal.NewRegistry(t, configx.WithValues(map[string]any{
+		configuration.AccessRuleRepositories:     []string{"file://" + watchFile},
+		configuration.AuthenticatorNoopIsEnabled: true,
+		configuration.AuthorizerAllowIsEnabled:   true,
+		configuration.MutatorNoopIsEnabled:       true,
+	}))
 
 	// This emulates a config map update
 	// drwxr-xr-x    2 root     root          4096 Aug  1 07:42 ..2019_08_01_07_42_33.068812649
@@ -476,8 +453,7 @@ func TestFetchRulesFromObjectStorage(t *testing.T) {
 	defer cancel()
 
 	configFile, _ := os.CreateTemp(t.TempDir(), ".oathkeeper-*.yml")
-	//nolint:errcheck,gosec // best-effort fixture generation
-	configFile.WriteString(`
+	_, _ = configFile.WriteString(`
 authenticators:
   noop: { enabled: true }
   anonymous: { enabled: true }
@@ -502,13 +478,10 @@ access_rules:
 `)
 	require.NoError(t, configFile.Sync())
 
-	conf := internal.NewConfigurationWithDefaults(
+	r := internal.NewRegistry(t,
 		configx.SkipValidation(),
-		configx.WithContext(ctx),
-		configx.WithLogger(logrusx.NewT(t)),
 		configx.WithConfigFiles(configFile.Name()),
 	)
-	r := internal.NewRegistry(conf)
 	r.RuleFetcher().(rule.URLMuxSetter).SetURLMux(cloudstorage.NewTestURLMux(t))
 
 	go func() {

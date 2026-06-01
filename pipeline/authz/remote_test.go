@@ -4,10 +4,11 @@
 package authz_test
 
 import (
-	"context"
 	"encoding/json"
-	"fmt"
+	"errors"
+	fmt "fmt"
 	"io"
+	"net"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -20,56 +21,68 @@ import (
 	"go.opentelemetry.io/otel/propagation"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 
-	"github.com/ory/x/configx"
-	"github.com/ory/x/logrusx"
+	"github.com/ory/oathkeeper/internal"
 
 	"github.com/ory/oathkeeper/driver/configuration"
+	"github.com/ory/oathkeeper/helper"
 	"github.com/ory/oathkeeper/pipeline/authn"
 	. "github.com/ory/oathkeeper/pipeline/authz"
 	"github.com/ory/oathkeeper/rule"
-	"github.com/ory/x/otelx"
+	"github.com/ory/x/configx"
 )
 
 func TestAuthorizerRemoteAuthorize(t *testing.T) {
 	t.Parallel()
-	tests := []struct {
+	for _, tc := range []struct {
 		name               string
 		setup              func(t *testing.T) *httptest.Server
 		session            *authn.AuthenticationSession
 		sessionHeaderMatch *http.Header
 		body               string
 		config             json.RawMessage
-		wantErr            bool
+		assertErr          func(t *testing.T, err error)
 	}{
 		{
 			name:    "invalid configuration",
 			session: &authn.AuthenticationSession{},
 			config:  json.RawMessage(`{}`),
-			wantErr: true,
+			assertErr: func(t *testing.T, err error) {
+				assert.ErrorIs(t, err, ErrAuthorizerNotEnabled())
+			},
 		},
 		{
 			name:    "unresolvable host",
 			session: &authn.AuthenticationSession{},
-			config:  json.RawMessage(`{"remote":"http://unresolvable-host/path",}`),
-			wantErr: true,
+			config:  json.RawMessage(`{"remote":"http://unresolvable-host/path"}`),
+			assertErr: func(t *testing.T, err error) {
+				dnsErr, ok := errors.AsType[*net.DNSError](err)
+				require.Truef(t, ok, "%#v", err)
+				assert.Equal(t, "unresolvable-host", dnsErr.Name)
+			},
 		},
 		{
 			name:    "invalid headers type",
 			session: &authn.AuthenticationSession{},
 			config:  json.RawMessage(`{"remote":"http://host/path","headers":"string"}`),
-			wantErr: true,
+			assertErr: func(t *testing.T, err error) {
+				assert.ErrorIs(t, err, ErrAuthorizerNotEnabled())
+			},
 		},
 		{
 			name:    "invalid headers template",
 			session: &authn.AuthenticationSession{},
 			config:  json.RawMessage(`{"remote":"http://host/path","headers":{"Subject":"{{ Invalid Template }}"}}`),
-			wantErr: true,
+			assertErr: func(t *testing.T, err error) {
+				assert.ErrorContains(t, err, `function "Invalid" not defined`)
+			},
 		},
 		{
 			name:    "headers template with unknown field",
 			session: &authn.AuthenticationSession{},
 			config:  json.RawMessage(`{"remote":"http://host/path","headers":{"Subject":"{{ .UnknownField }}"}}`),
-			wantErr: true,
+			assertErr: func(t *testing.T, err error) {
+				assert.ErrorContains(t, err, `can't evaluate field UnknownField`)
+			},
 		},
 		{
 			name: "forbidden",
@@ -80,7 +93,9 @@ func TestAuthorizerRemoteAuthorize(t *testing.T) {
 			},
 			session: &authn.AuthenticationSession{},
 			config:  json.RawMessage(`{}`),
-			wantErr: true,
+			assertErr: func(t *testing.T, err error) {
+				assert.ErrorIs(t, err, helper.ErrForbidden())
+			},
 		},
 		{
 			name: "unexpected status code",
@@ -91,7 +106,9 @@ func TestAuthorizerRemoteAuthorize(t *testing.T) {
 			},
 			session: &authn.AuthenticationSession{},
 			config:  json.RawMessage(`{}`),
-			wantErr: true,
+			assertErr: func(t *testing.T, err error) {
+				assert.ErrorContains(t, err, "unexpected status code")
+			},
 		},
 		{
 			name: "nobody",
@@ -179,42 +196,43 @@ func TestAuthorizerRemoteAuthorize(t *testing.T) {
 			},
 			config: json.RawMessage(`{"headers":{"Subject": "{{ .Subject }}"}}`),
 		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if tt.setup != nil {
-				server := tt.setup(t)
-				defer server.Close()
-				tt.config, _ = sjson.SetBytes(tt.config, "remote", server.URL)
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			if tc.setup != nil {
+				server := tc.setup(t)
+				t.Cleanup(server.Close)
+				var err error
+				tc.config, err = sjson.SetBytes(tc.config, "remote", server.URL)
+				require.NoError(t, err)
 			}
 
-			l := logrusx.NewT(t)
-			p, err := configuration.NewKoanfProvider(
-				context.Background(), nil, l)
-			if err != nil {
-				l.WithError(err).Fatal("Failed to initialize configuration")
-			}
-			a := NewAuthorizerRemote(p, otelx.NewNoop())
+			reg := internal.NewRegistry(t)
+
+			a := NewAuthorizerRemote(reg)
 			r := &http.Request{
 				Header: map[string][]string{
 					"Content-Type": {"text/plain"},
 					"User-Agent":   {"Fancy Browser 5.1"},
 				},
 			}
-			if tt.body != "" {
-				r.Body = io.NopCloser(strings.NewReader(tt.body))
-			}
-			if err := a.Authorize(r, tt.session, tt.config, &rule.Rule{}); (err != nil) != tt.wantErr {
-				t.Errorf("Authorize() error = %v, wantErr %v", err, tt.wantErr)
-			}
-			if tt.body != "" {
-				body, err := io.ReadAll(r.Body)
-				require.NoError(t, err)
-				require.Equal(t, tt.body, string(body), "body must stay intact")
+			if tc.body != "" {
+				r.Body = io.NopCloser(strings.NewReader(tc.body))
 			}
 
-			if tt.sessionHeaderMatch != nil {
-				assert.Equal(t, tt.sessionHeaderMatch, &tt.session.Header)
+			err := a.Authorize(r, tc.session, tc.config, &rule.Rule{})
+			if tc.assertErr != nil {
+				tc.assertErr(t, err)
+			} else {
+				assert.NoError(t, err)
+			}
+			if tc.body != "" {
+				body, err := io.ReadAll(r.Body)
+				require.NoError(t, err)
+				assert.Equal(t, tc.body, string(body), "body must stay intact")
+			}
+
+			if tc.sessionHeaderMatch != nil {
+				assert.Equal(t, tc.sessionHeaderMatch, &tc.session.Header)
 			}
 		})
 	}
@@ -271,16 +289,15 @@ func TestAuthorizerRemoteValidate(t *testing.T) {
 			config:  json.RawMessage(`{"remote":"http://host/path","retry":{"give_up_after":"3s", "max_delay":"100ms"}}`),
 		},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			p, err := configuration.NewKoanfProvider(
-				context.Background(), nil, logrusx.NewT(t),
-				configx.SkipValidation())
-			require.NoError(t, err)
-			a := NewAuthorizerRemote(p, otelx.NewNoop())
-			p.SetForTest(t, configuration.AuthorizerRemoteIsEnabled, tt.enabled)
-			if err := a.Validate(tt.config); (err != nil) != tt.wantErr {
-				t.Errorf("Validate() error = %v, wantErr %v", err, tt.wantErr)
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			reg := internal.NewRegistry(t,
+				configx.WithValue(configuration.AuthorizerRemoteIsEnabled, tc.enabled),
+				configx.SkipValidation(),
+			)
+			a := NewAuthorizerRemote(reg)
+			if err := a.Validate(tc.config); (err != nil) != tc.wantErr {
+				t.Errorf("Validate() error = %v, wantErr %v", err, tc.wantErr)
 			}
 		})
 	}
@@ -298,7 +315,7 @@ func TestAuthorizerRemoteTracePropagation(t *testing.T) {
 	t.Cleanup(func() {
 		otel.SetTracerProvider(prevTP)
 		otel.SetTextMapPropagator(prevProp)
-		_ = tp.Shutdown(context.Background())
+		_ = tp.Shutdown(t.Context())
 	})
 
 	var gotTraceparent string
@@ -306,15 +323,14 @@ func TestAuthorizerRemoteTracePropagation(t *testing.T) {
 		gotTraceparent = r.Header.Get("Traceparent")
 		w.WriteHeader(http.StatusOK)
 	}))
-	defer server.Close()
+	t.Cleanup(server.Close)
 
 	config := json.RawMessage(fmt.Sprintf(`{"remote":%q}`, server.URL))
 
-	p, err := configuration.NewKoanfProvider(context.Background(), nil, logrusx.NewT(t))
-	require.NoError(t, err)
+	reg := internal.NewRegistry(t)
 
-	a := NewAuthorizerRemote(p, otelx.NewNoop())
-	r, err := http.NewRequestWithContext(context.Background(), "POST", "", nil)
+	a := NewAuthorizerRemote(reg)
+	r, err := http.NewRequestWithContext(t.Context(), "POST", "", nil)
 	require.NoError(t, err)
 	r.Header.Set("Content-Type", "text/plain")
 	err = a.Authorize(r, &authn.AuthenticationSession{}, config, &rule.Rule{})

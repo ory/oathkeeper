@@ -4,7 +4,6 @@
 package api_test
 
 import (
-	"context"
 	"crypto/rsa"
 	"encoding/json"
 	"net/http"
@@ -24,17 +23,16 @@ import (
 )
 
 func TestCredentialsHandler(t *testing.T) {
-	conf := internal.NewConfigurationWithDefaults(configx.SkipValidation())
-	conf.SetForTest(t, configuration.MutatorIDTokenIsEnabled, true)
-	conf.SetForTest(t, configuration.MutatorIDTokenJWKSURL, "file://../test/stub/jwks-rsa-multiple.json")
-	conf.SetForTest(t, configuration.MutatorIDTokenIssuerURL, "https://example.com")
-	conf.SetForTest(t, configuration.AuthenticatorAnonymousIsEnabled, true)
-	conf.SetForTest(t, configuration.AuthorizerAllowIsEnabled, true)
-
-	r := internal.NewRegistry(conf)
+	r := internal.NewRegistry(t, configx.SkipValidation(), configx.WithValues(map[string]any{
+		configuration.MutatorIDTokenIsEnabled:         true,
+		configuration.MutatorIDTokenJWKSURL:           "file://../test/stub/jwks-rsa-multiple.json",
+		configuration.MutatorIDTokenIssuerURL:         "https://example.com",
+		configuration.AuthenticatorAnonymousIsEnabled: true,
+		configuration.AuthorizerAllowIsEnabled:        true,
+	}))
 
 	require.NoError(t, r.RuleRepository().Set(
-		context.Background(),
+		t.Context(),
 		[]rule.Rule{{
 			Match:          &rule.Match{URL: "http://example.com/*"},
 			Authenticators: []rule.Handler{{Handler: "anonymous"}},
@@ -52,11 +50,11 @@ func TestCredentialsHandler(t *testing.T) {
 	router := httprouterx.NewRouter()
 	r.CredentialHandler().SetRoutes(router)
 	server := httptest.NewServer(router)
-	defer server.Close()
+	t.Cleanup(server.Close)
 
 	res, err := server.Client().Get(server.URL + "/.well-known/jwks.json")
 	require.NoError(t, err)
-	defer res.Body.Close() //nolint:errcheck // closing test response best effort
+	t.Cleanup(func() { _ = res.Body.Close() })
 	require.Equal(t, http.StatusOK, res.StatusCode)
 
 	var j jose.JSONWebKeySet

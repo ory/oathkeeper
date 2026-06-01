@@ -7,22 +7,19 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/pipeline"
 	"github.com/ory/oathkeeper/pipeline/authn"
 )
 
-type MutatorNoop struct{ c configuration.Provider }
+type MutatorNoop struct{ d dependencies }
 
-func NewMutatorNoop(c configuration.Provider) *MutatorNoop {
-	return &MutatorNoop{c: c}
+func NewMutatorNoop(d dependencies) *MutatorNoop {
+	return &MutatorNoop{d: d}
 }
 
-func (a *MutatorNoop) GetID() string {
-	return "noop"
-}
+func (a *MutatorNoop) GetID() string { return "noop" }
 
-func (a *MutatorNoop) Mutate(r *http.Request, session *authn.AuthenticationSession, config json.RawMessage, _ pipeline.Rule) error {
+func (a *MutatorNoop) Mutate(r *http.Request, session *authn.AuthenticationSession, _ json.RawMessage, _ pipeline.Rule) error {
 	currentSessionHeaders := session.Header.Clone()
 	session.Header = r.Header
 	if session.Header == nil {
@@ -43,11 +40,11 @@ func (a *MutatorNoop) Mutate(r *http.Request, session *authn.AuthenticationSessi
 }
 
 func (a *MutatorNoop) Validate(config json.RawMessage) error {
-	if !a.c.MutatorIsEnabled(a.GetID()) {
+	if !a.d.Config().MutatorIsEnabled(a.GetID()) {
 		return NewErrMutatorNotEnabled(a)
 	}
 
-	if err := a.c.MutatorConfig(a.GetID(), config, nil); err != nil {
+	if err := a.d.Config().MutatorConfig(a.GetID(), config, nil); err != nil {
 		return NewErrMutatorMisconfigured(a, err)
 	}
 	return nil

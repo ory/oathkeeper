@@ -18,8 +18,7 @@ import (
 
 func TestAuthenticatorAnonymous(t *testing.T) {
 	t.Parallel()
-	conf := internal.NewConfigurationWithDefaults()
-	reg := internal.NewRegistry(conf)
+	reg := internal.NewRegistry(t)
 
 	session := new(authn.AuthenticationSession)
 
@@ -47,10 +46,10 @@ func TestAuthenticatorAnonymous(t *testing.T) {
 	})
 
 	t.Run("method=validate", func(t *testing.T) {
-		conf.SetForTest(t, configuration.AuthenticatorAnonymousIsEnabled, true)
+		reg.Config().SetForTest(t, configuration.AuthenticatorAnonymousIsEnabled, true)
 		require.NoError(t, a.Validate(json.RawMessage(`{"subject":"foo"}`)))
 
-		conf.SetForTest(t, configuration.AuthenticatorAnonymousIsEnabled, false)
+		reg.Config().SetForTest(t, configuration.AuthenticatorAnonymousIsEnabled, false)
 		require.Error(t, a.Validate(json.RawMessage(`{"subject":"foo"}`)))
 	})
 }

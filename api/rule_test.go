@@ -24,12 +24,12 @@ import (
 )
 
 func TestHandler(t *testing.T) {
-	conf := internal.NewConfigurationWithDefaults()
-	reg := internal.NewRegistry(conf).WithBrokenPipelineMutator()
+	reg := internal.NewRegistry(t).WithBrokenPipelineMutator()
 
 	router := httprouterx.NewRouter()
 	reg.RuleHandler().SetRoutes(router)
 	server := httptest.NewServer(router)
+	t.Cleanup(server.Close)
 
 	u, err := url.ParseRequestURI(server.URL)
 	require.NoError(t, err)
@@ -134,6 +134,5 @@ func TestHandler(t *testing.T) {
 		t.Run("glob", func(t *testing.T) {
 			testFunc(configuration.Glob, rulesGlob)
 		})
-
 	})
 }

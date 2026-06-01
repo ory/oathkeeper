@@ -10,7 +10,6 @@ import (
 	"net/http"
 	"text/template"
 
-	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/pipeline"
 	"github.com/ory/oathkeeper/pipeline/authn"
 	"github.com/ory/oathkeeper/x"
@@ -23,21 +22,16 @@ type MutatorHeaderConfig struct {
 }
 
 type MutatorHeader struct {
-	c configuration.Provider
+	d dependencies
 	t *template.Template
 }
 
-func NewMutatorHeader(c configuration.Provider) *MutatorHeader {
-	return &MutatorHeader{c: c, t: x.NewTemplate("header")}
+func NewMutatorHeader(d dependencies) *MutatorHeader {
+	return &MutatorHeader{d: d, t: x.NewTemplate("header")}
 }
 
-func (a *MutatorHeader) GetID() string {
-	return "header"
-}
-
-func (a *MutatorHeader) WithCache(t *template.Template) {
-	a.t = t
-}
+func (a *MutatorHeader) GetID() string                  { return "header" }
+func (a *MutatorHeader) WithCache(t *template.Template) { a.t = t }
 
 func (a *MutatorHeader) Mutate(_ *http.Request, session *authn.AuthenticationSession, config json.RawMessage, rl pipeline.Rule) error {
 	cfg, err := a.config(config)
@@ -70,7 +64,7 @@ func (a *MutatorHeader) Mutate(_ *http.Request, session *authn.AuthenticationSes
 }
 
 func (a *MutatorHeader) Validate(config json.RawMessage) error {
-	if !a.c.MutatorIsEnabled(a.GetID()) {
+	if !a.d.Config().MutatorIsEnabled(a.GetID()) {
 		return NewErrMutatorNotEnabled(a)
 	}
 
@@ -80,7 +74,7 @@ func (a *MutatorHeader) Validate(config json.RawMessage) error {
 
 func (a *MutatorHeader) config(config json.RawMessage) (*MutatorHeaderConfig, error) {
 	var c MutatorHeaderConfig
-	if err := a.c.MutatorConfig(a.GetID(), config, &c); err != nil {
+	if err := a.d.Config().MutatorConfig(a.GetID(), config, &c); err != nil {
 		return nil, NewErrMutatorMisconfigured(a, err)
 	}
 

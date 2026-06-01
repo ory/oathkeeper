@@ -4,49 +4,49 @@
 package driver
 
 import (
-	"context"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/x/logrusx"
+
+	"github.com/ory/oathkeeper/driver/configuration"
+	"github.com/ory/oathkeeper/pipeline"
 )
 
 func TestRegistryMemoryAvailablePipelineAuthorizers(t *testing.T) {
-	c, err := configuration.NewKoanfProvider(context.Background(), nil, logrusx.NewT(t))
+	l := logrusx.NewT(t)
+	c, err := configuration.NewKoanfProvider(t.Context(), nil, l)
 	require.NoError(t, err)
-	r := NewRegistry(c)
+	r := NewRegistry(c, l)
 	got := r.AvailablePipelineAuthorizers()
 	assert.ElementsMatch(t, got, []string{"allow", "deny", "keto_engine_acp_ory", "remote", "remote_json"})
 }
 
 func TestRegistryMemoryPipelineAuthorizer(t *testing.T) {
-	tests := []struct {
-		id      string
-		wantErr bool
+	for _, tc := range []struct {
+		id          string
+		expectedErr error
 	}{
 		{id: "allow"},
 		{id: "deny"},
 		{id: "keto_engine_acp_ory"},
 		{id: "remote"},
 		{id: "remote_json"},
-		{id: "unregistered", wantErr: true},
-	}
-	for _, tt := range tests {
-		t.Run(tt.id, func(t *testing.T) {
-			c, err := configuration.NewKoanfProvider(context.Background(), nil, logrusx.NewT(t))
+		{id: "unregistered", expectedErr: pipeline.ErrPipelineHandlerNotFound},
+	} {
+		t.Run(tc.id, func(t *testing.T) {
+			l := logrusx.NewT(t)
+			c, err := configuration.NewKoanfProvider(t.Context(), nil, l)
 			require.NoError(t, err)
-			r := NewRegistry(c)
-			a, err := r.PipelineAuthorizer(tt.id)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("PipelineAuthorizer() error = %v, wantErr %v", err, tt.wantErr)
+			r := NewRegistry(c, l)
+			a, err := r.PipelineAuthorizer(tc.id)
+			if tc.expectedErr != nil {
+				assert.ErrorIs(t, err, tc.expectedErr)
 				return
 			}
-			if a != nil && a.GetID() != tt.id {
-				t.Errorf("PipelineAuthorizer() got = %v, want %v", a.GetID(), tt.id)
-			}
+			assert.Equal(t, tc.id, a.GetID())
 		})
 	}
 }

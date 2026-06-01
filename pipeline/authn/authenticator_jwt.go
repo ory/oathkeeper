@@ -11,21 +11,14 @@ import (
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/pkg/errors"
-	"go.opentelemetry.io/otel/trace"
 
 	"github.com/ory/herodot"
 	"github.com/ory/oathkeeper/credentials"
-	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/helper"
 	"github.com/ory/oathkeeper/pipeline"
 	"github.com/ory/x/jwtx"
 	"github.com/ory/x/otelx"
 )
-
-type AuthenticatorJWTRegistry interface {
-	credentials.VerifierRegistry
-	Tracer() trace.Tracer
-}
 
 type AuthenticatorOAuth2JWTConfiguration struct {
 	Scope               []string                    `json:"required_scope"`
@@ -37,27 +30,16 @@ type AuthenticatorOAuth2JWTConfiguration struct {
 	BearerTokenLocation *helper.BearerTokenLocation `json:"token_from"`
 }
 
-type AuthenticatorJWT struct {
-	c configuration.Provider
-	r AuthenticatorJWTRegistry
+type AuthenticatorJWT struct{ d dependencies }
+
+func NewAuthenticatorJWT(d dependencies) *AuthenticatorJWT {
+	return &AuthenticatorJWT{d: d}
 }
 
-func NewAuthenticatorJWT(
-	c configuration.Provider,
-	r AuthenticatorJWTRegistry,
-) *AuthenticatorJWT {
-	return &AuthenticatorJWT{
-		c: c,
-		r: r,
-	}
-}
-
-func (a *AuthenticatorJWT) GetID() string {
-	return "jwt"
-}
+func (a *AuthenticatorJWT) GetID() string { return "jwt" }
 
 func (a *AuthenticatorJWT) Validate(config json.RawMessage) error {
-	if !a.c.AuthenticatorIsEnabled(a.GetID()) {
+	if !a.d.Config().AuthenticatorIsEnabled(a.GetID()) {
 		return NewErrAuthenticatorNotEnabled(a)
 	}
 
@@ -67,7 +49,7 @@ func (a *AuthenticatorJWT) Validate(config json.RawMessage) error {
 
 func (a *AuthenticatorJWT) Config(config json.RawMessage) (*AuthenticatorOAuth2JWTConfiguration, error) {
 	var c AuthenticatorOAuth2JWTConfiguration
-	if err := a.c.AuthenticatorConfig(a.GetID(), config, &c); err != nil {
+	if err := a.d.Config().AuthenticatorConfig(a.GetID(), config, &c); err != nil {
 		return nil, NewErrAuthenticatorMisconfigured(a, err)
 	}
 
@@ -75,7 +57,7 @@ func (a *AuthenticatorJWT) Config(config json.RawMessage) (*AuthenticatorOAuth2J
 }
 
 func (a *AuthenticatorJWT) Authenticate(r *http.Request, session *AuthenticationSession, config json.RawMessage, _ pipeline.Rule) (err error) {
-	ctx, span := a.r.Tracer().Start(r.Context(), "pipeline.authn.AuthenticatorJWT.Authenticate")
+	ctx, span := a.d.Tracer(r.Context()).Tracer().Start(r.Context(), "pipeline.authn.AuthenticatorJWT.Authenticate")
 	defer otelx.End(span, &err)
 	r = r.WithContext(ctx)
 
@@ -99,18 +81,18 @@ func (a *AuthenticatorJWT) Authenticate(r *http.Request, session *Authentication
 		cf.AllowedAlgorithms = []string{"RS256"}
 	}
 
-	jwksu, err := a.c.ParseURLs(cf.JWKSURLs)
+	jwksu, err := a.d.Config().ParseURLs(cf.JWKSURLs)
 	if err != nil {
 		return err
 	}
 
-	pt, err := a.r.CredentialsVerifier().Verify(r.Context(), token, &credentials.ValidationContext{
+	pt, err := a.d.CredentialsVerifier().Verify(r.Context(), token, &credentials.ValidationContext{
 		Algorithms:    cf.AllowedAlgorithms,
 		KeyURLs:       jwksu,
 		Scope:         cf.Scope,
 		Issuers:       cf.Issuers,
 		Audiences:     cf.Audience,
-		ScopeStrategy: a.c.ToScopeStrategy(cf.ScopeStrategy, "authenticators.jwt.Config.scope_strategy"),
+		ScopeStrategy: a.d.Config().ToScopeStrategy(cf.ScopeStrategy, "authenticators.jwt.Config.scope_strategy"),
 	})
 	if err != nil {
 		de := herodot.ToDefaultError(err, "")

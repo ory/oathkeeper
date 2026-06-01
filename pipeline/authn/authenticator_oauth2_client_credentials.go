@@ -13,20 +13,14 @@ import (
 	"time"
 
 	"github.com/dgraph-io/ristretto/v2"
+	"github.com/pkg/errors"
 	"golang.org/x/oauth2"
-
-	"github.com/ory/x/logrusx"
+	"golang.org/x/oauth2/clientcredentials"
 
 	"github.com/ory/x/httpx"
 
-	"github.com/ory/oathkeeper/driver/configuration"
-
-	"github.com/ory/oathkeeper/pipeline"
-
-	"github.com/pkg/errors"
-	"golang.org/x/oauth2/clientcredentials"
-
 	"github.com/ory/oathkeeper/helper"
+	"github.com/ory/oathkeeper/pipeline"
 )
 
 type AuthenticatorOAuth2Configuration struct {
@@ -43,12 +37,11 @@ type clientCredentialsCacheConfig struct {
 }
 
 type AuthenticatorOAuth2ClientCredentials struct {
-	c      configuration.Provider
+	d      dependencies
 	client *http.Client
 
-	tokenCache *ristretto.Cache[string, []byte]
+	TokenCache *ristretto.Cache[string, []byte]
 	cacheTTL   *time.Duration
-	logger     *logrusx.Logger
 }
 
 type AuthenticatorOAuth2ClientCredentialsRetryConfiguration struct {
@@ -56,16 +49,14 @@ type AuthenticatorOAuth2ClientCredentialsRetryConfiguration struct {
 	MaxWait string `json:"give_up_after"`
 }
 
-func NewAuthenticatorOAuth2ClientCredentials(c configuration.Provider, logger *logrusx.Logger) *AuthenticatorOAuth2ClientCredentials {
-	return &AuthenticatorOAuth2ClientCredentials{c: c, logger: logger}
+func NewAuthenticatorOAuth2ClientCredentials(d dependencies) *AuthenticatorOAuth2ClientCredentials {
+	return &AuthenticatorOAuth2ClientCredentials{d: d}
 }
 
-func (a *AuthenticatorOAuth2ClientCredentials) GetID() string {
-	return "oauth2_client_credentials"
-}
+func (a *AuthenticatorOAuth2ClientCredentials) GetID() string { return "oauth2_client_credentials" }
 
 func (a *AuthenticatorOAuth2ClientCredentials) Validate(config json.RawMessage) error {
-	if !a.c.AuthenticatorIsEnabled(a.GetID()) {
+	if !a.d.Config().AuthenticatorIsEnabled(a.GetID()) {
 		return NewErrAuthenticatorNotEnabled(a)
 	}
 
@@ -79,7 +70,7 @@ func (a *AuthenticatorOAuth2ClientCredentials) Config(config json.RawMessage) (*
 		defaultMaxWait = "2s"
 	)
 	var c AuthenticatorOAuth2Configuration
-	if err := a.c.AuthenticatorConfig(a.GetID(), config, &c); err != nil {
+	if err := a.d.Config().AuthenticatorConfig(a.GetID(), config, &c); err != nil {
 		return nil, NewErrAuthenticatorMisconfigured(a, err)
 	}
 
@@ -116,12 +107,12 @@ func (a *AuthenticatorOAuth2ClientCredentials) Config(config json.RawMessage) (*
 		a.cacheTTL = &cacheTTL
 	}
 
-	if a.tokenCache == nil {
+	if a.TokenCache == nil {
 		maxTokens := int64(c.Cache.MaxTokens)
 		if maxTokens == 0 {
 			maxTokens = 1000
 		}
-		a.logger.Debugf("Creating cache with max tokens: %d", maxTokens)
+		a.d.Logger().Debugf("Creating cache with max tokens: %d", maxTokens)
 		cache, err := ristretto.NewCache(&ristretto.Config[string, []byte]{
 			// This will hold about 1000 unique mutation responses.
 			NumCounters: 10 * maxTokens,
@@ -139,22 +130,22 @@ func (a *AuthenticatorOAuth2ClientCredentials) Config(config json.RawMessage) (*
 			return nil, err
 		}
 
-		a.tokenCache = cache
+		a.TokenCache = cache
 	}
 
 	return &c, nil
 }
 
-func clientCredentialsConfigToKey(cc clientcredentials.Config) string {
+func ClientCredentialsConfigToKey(cc clientcredentials.Config) string {
 	return fmt.Sprintf("%s|%s|%s:%s", cc.TokenURL, strings.Join(cc.Scopes, " "), cc.ClientID, cc.ClientSecret)
 }
 
-func (a *AuthenticatorOAuth2ClientCredentials) tokenFromCache(config *AuthenticatorOAuth2Configuration, clientCredentials clientcredentials.Config) *oauth2.Token {
+func (a *AuthenticatorOAuth2ClientCredentials) TokenFromCache(config *AuthenticatorOAuth2Configuration, clientCredentials clientcredentials.Config) *oauth2.Token {
 	if !config.Cache.Enabled {
 		return nil
 	}
 
-	i, found := a.tokenCache.Get(clientCredentialsConfigToKey(clientCredentials))
+	i, found := a.TokenCache.Get(ClientCredentialsConfigToKey(clientCredentials))
 	if !found {
 		return nil
 	}
@@ -166,12 +157,12 @@ func (a *AuthenticatorOAuth2ClientCredentials) tokenFromCache(config *Authentica
 	return &v
 }
 
-func (a *AuthenticatorOAuth2ClientCredentials) tokenToCache(config *AuthenticatorOAuth2Configuration, clientCredentials clientcredentials.Config, token oauth2.Token) {
+func (a *AuthenticatorOAuth2ClientCredentials) TokenToCache(config *AuthenticatorOAuth2Configuration, clientCredentials clientcredentials.Config, token oauth2.Token) {
 	if !config.Cache.Enabled {
 		return
 	}
 
-	key := clientCredentialsConfigToKey(clientCredentials)
+	key := ClientCredentialsConfigToKey(clientCredentials)
 
 	if v, err := json.Marshal(token); err != nil {
 		return
@@ -182,7 +173,7 @@ func (a *AuthenticatorOAuth2ClientCredentials) tokenToCache(config *Authenticato
 			ttl = *a.cacheTTL
 		}
 
-		a.tokenCache.SetWithTTL(key, v, 1, ttl)
+		a.TokenCache.SetWithTTL(key, v, 1, ttl)
 	} else {
 		// If token has no expiry apply the same to the cache
 		ttl := time.Duration(0)
@@ -190,7 +181,7 @@ func (a *AuthenticatorOAuth2ClientCredentials) tokenToCache(config *Authenticato
 			ttl = time.Until(token.Expiry)
 		}
 
-		a.tokenCache.SetWithTTL(key, v, 1, ttl)
+		a.TokenCache.SetWithTTL(key, v, 1, ttl)
 	}
 }
 
@@ -223,7 +214,7 @@ func (a *AuthenticatorOAuth2ClientCredentials) Authenticate(r *http.Request, ses
 		AuthStyle:    oauth2.AuthStyleInHeader,
 	}
 
-	token := a.tokenFromCache(cf, c)
+	token := a.TokenFromCache(cf, c)
 
 	if token == nil {
 		t, err := c.Token(context.WithValue(
@@ -254,7 +245,7 @@ func (a *AuthenticatorOAuth2ClientCredentials) Authenticate(r *http.Request, ses
 
 		token = t
 
-		a.tokenToCache(cf, c, *token)
+		a.TokenToCache(cf, c, *token)
 	}
 
 	if token.AccessToken == "" {

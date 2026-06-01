@@ -16,8 +16,7 @@ import (
 
 func TestAuthenticatorBroken(t *testing.T) {
 	t.Parallel()
-	conf := internal.NewConfigurationWithDefaults()
-	reg := internal.NewRegistry(conf)
+	reg := internal.NewRegistry(t)
 
 	a, err := reg.PipelineAuthenticator("unauthorized")
 	require.NoError(t, err)
@@ -29,10 +28,10 @@ func TestAuthenticatorBroken(t *testing.T) {
 	})
 
 	t.Run("method=validate", func(t *testing.T) {
-		conf.SetForTest(t, configuration.AuthenticatorUnauthorizedIsEnabled, true)
+		reg.Config().SetForTest(t, configuration.AuthenticatorUnauthorizedIsEnabled, true)
 		require.NoError(t, a.Validate(nil))
 
-		conf.SetForTest(t, configuration.AuthenticatorUnauthorizedIsEnabled, false)
+		reg.Config().SetForTest(t, configuration.AuthenticatorUnauthorizedIsEnabled, false)
 		require.Error(t, a.Validate(nil))
 	})
 }

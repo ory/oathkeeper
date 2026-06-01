@@ -29,7 +29,7 @@ type (
 		ReturnToQueryParam string `json:"return_to_query_param"`
 	}
 	ErrorRedirect struct {
-		c configuration.Provider
+		c configuration.Configuration
 		d ErrorRedirectDependencies
 	}
 	ErrorRedirectDependencies interface {
@@ -38,7 +38,7 @@ type (
 )
 
 func NewErrorRedirect(
-	c configuration.Provider,
+	c configuration.Configuration,
 	d ErrorRedirectDependencies,
 ) *ErrorRedirect {
 	return &ErrorRedirect{c: c, d: d}

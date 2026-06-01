@@ -5,35 +5,32 @@ package authz_test
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
+	"net"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/tidwall/sjson"
 
 	"github.com/ory/x/configx"
 
 	"github.com/ory/oathkeeper/driver/configuration"
+	"github.com/ory/oathkeeper/helper"
 	"github.com/ory/oathkeeper/internal"
-	"github.com/ory/oathkeeper/x"
-
 	"github.com/ory/oathkeeper/pipeline/authn"
 	. "github.com/ory/oathkeeper/pipeline/authz"
-
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
-
 	"github.com/ory/oathkeeper/rule"
+	"github.com/ory/oathkeeper/x"
 )
 
 func TestAuthorizerKetoWarden(t *testing.T) {
 	t.Parallel()
-	conf := internal.NewConfigurationWithDefaults(configx.SkipValidation())
-	reg := internal.NewRegistry(conf)
-
-	rule := &rule.Rule{ID: "TestAuthorizer"}
+	reg := internal.NewRegistry(t, configx.SkipValidation())
 
 	a, err := reg.PipelineAuthorizer("keto_engine_acp_ory")
 	require.NoError(t, err)
@@ -44,17 +41,24 @@ func TestAuthorizerKetoWarden(t *testing.T) {
 		r         *http.Request
 		session   *authn.AuthenticationSession
 		config    json.RawMessage
-		expectErr bool
+		assertErr func(t *testing.T, err error)
 	}{
 		{
-			r:         &http.Request{},
-			expectErr: true,
+			r: &http.Request{},
+			assertErr: func(t *testing.T, err error) {
+				assert.ErrorIs(t, err, ErrAuthorizerNotEnabled())
+			},
 		},
 		{
-			config:    []byte(`{ "required_action": "action", "required_resource": "resource" }`),
-			r:         &http.Request{URL: &url.URL{}},
-			session:   new(authn.AuthenticationSession),
-			expectErr: true,
+			config:  []byte(`{ "required_action": "action", "required_resource": "resource" }`),
+			r:       &http.Request{URL: &url.URL{}},
+			session: new(authn.AuthenticationSession),
+			assertErr: func(t *testing.T, err error) {
+				e, ok := errors.AsType[*net.DNSError](err)
+				require.True(t, ok)
+				assert.Equal(t, "no such host", e.Err)
+				assert.Equal(t, "73fa403f-7e9c-48ef-870f-d21b2c34fc80c6cb6404-bb36-4e70-8b90-45155657fda6", e.Name)
+			},
 		},
 		{
 			config: []byte(`{ "required_action": "action", "required_resource": "resource", "flavor": "regex" }`),
@@ -64,8 +68,10 @@ func TestAuthorizerKetoWarden(t *testing.T) {
 					w.WriteHeader(http.StatusForbidden)
 				}))
 			},
-			session:   new(authn.AuthenticationSession),
-			expectErr: true,
+			session: new(authn.AuthenticationSession),
+			assertErr: func(t *testing.T, err error) {
+				assert.ErrorIs(t, err, helper.ErrForbidden())
+			},
 		},
 		{
 			config: []byte(`{ "required_action": "action", "required_resource": "resource", "flavor": "exact" }`),
@@ -75,11 +81,13 @@ func TestAuthorizerKetoWarden(t *testing.T) {
 					assert.Contains(t, r.Header, "Content-Type")
 					assert.Contains(t, r.Header["Content-Type"], "application/json")
 					assert.Contains(t, r.URL.Path, "exact")
-					w.Write([]byte(`{"allowed":false}`)) //nolint:errcheck,gosec // test handler ignores errors
+					_, _ = w.Write([]byte(`{"allowed":false}`))
 				}))
 			},
-			session:   new(authn.AuthenticationSession),
-			expectErr: true,
+			session: new(authn.AuthenticationSession),
+			assertErr: func(t *testing.T, err error) {
+				assert.ErrorIs(t, err, helper.ErrForbidden())
+			},
 		},
 		{
 			config: []byte(`{ "required_action": "action:{{ printIndex .MatchContext.RegexpCaptureGroups (sub 1 1 | int)}}:{{ index .MatchContext.RegexpCaptureGroups (sub 2 1 | int)}}", "required_resource": "resource:{{ index .MatchContext.RegexpCaptureGroups 0}}:{{ index .MatchContext.RegexpCaptureGroups 1}}" }`),
@@ -95,7 +103,7 @@ func TestAuthorizerKetoWarden(t *testing.T) {
 						Subject:  "peter",
 					}, ki)
 					assert.Contains(t, r.URL.Path, "regex")
-					w.Write([]byte(`{"allowed":true}`)) //nolint:errcheck,gosec // test handler ignores errors
+					_, _ = w.Write([]byte(`{"allowed":true}`))
 				}))
 			},
 			session: &authn.AuthenticationSession{
@@ -104,7 +112,6 @@ func TestAuthorizerKetoWarden(t *testing.T) {
 					RegexpCaptureGroups: []string{"1234", "abcde"},
 				},
 			},
-			expectErr: false,
 		},
 		{
 			config: []byte(`{ "required_action": "action:{{ index .MatchContext.RegexpCaptureGroups 0}}:{{ index .MatchContext.RegexpCaptureGroups 1}}", "required_resource": "resource:{{ index .MatchContext.RegexpCaptureGroups 0}}:{{ index .MatchContext.RegexpCaptureGroups 1}}", "subject": "{{ .Extra.name }}" }`),
@@ -120,7 +127,7 @@ func TestAuthorizerKetoWarden(t *testing.T) {
 						Subject:  "peter",
 					}, ki)
 					assert.Contains(t, r.URL.Path, "regex")
-					w.Write([]byte(`{"allowed":true}`)) //nolint:errcheck,gosec // test handler ignores errors
+					_, _ = w.Write([]byte(`{"allowed":true}`))
 				}))
 			},
 			session: &authn.AuthenticationSession{
@@ -128,7 +135,6 @@ func TestAuthorizerKetoWarden(t *testing.T) {
 				MatchContext: authn.MatchContext{
 					RegexpCaptureGroups: []string{"1234", "abcde"},
 				}},
-			expectErr: false,
 		},
 		{
 			config: []byte(`{ "required_action": "action:{{ index .MatchContext.RegexpCaptureGroups 0 }}:{{ .Extra.name }}", "required_resource": "resource:{{ index .MatchContext.RegexpCaptureGroups 0}}:{{ .Extra.apiVersion }}", "subject": "{{ .Extra.name }}" }`),
@@ -144,7 +150,7 @@ func TestAuthorizerKetoWarden(t *testing.T) {
 						Subject:  "peter",
 					}, ki)
 					assert.Contains(t, r.URL.Path, "regex")
-					w.Write([]byte(`{"allowed":true}`)) //nolint:errcheck,gosec // test handler ignores errors
+					_, _ = w.Write([]byte(`{"allowed":true}`))
 				}))
 			},
 			session: &authn.AuthenticationSession{
@@ -153,11 +159,8 @@ func TestAuthorizerKetoWarden(t *testing.T) {
 					"apiVersion": "1.0"},
 				MatchContext: authn.MatchContext{RegexpCaptureGroups: []string{"1234"}},
 			},
-			expectErr: false,
 		},
 	} {
-		k := k
-		tc := tc
 		t.Run(fmt.Sprintf("case=%d", k), func(t *testing.T) {
 			t.Parallel()
 
@@ -172,27 +175,29 @@ func TestAuthorizerKetoWarden(t *testing.T) {
 				return map[string]interface{}{}
 			})
 
-			tc.config, _ = sjson.SetBytes(tc.config, "base_url", baseURL)
-			err := a.Authorize(tc.r, tc.session, tc.config, rule)
-			if tc.expectErr {
-				require.Error(t, err)
+			tc.config, err = sjson.SetBytes(tc.config, "base_url", baseURL)
+			require.NoError(t, err)
+
+			err = a.Authorize(tc.r, tc.session, tc.config, &rule.Rule{ID: "TestAuthorizer"})
+			if tc.assertErr != nil {
+				tc.assertErr(t, err)
 			} else {
-				require.NoError(t, err)
+				assert.NoError(t, err)
 			}
 		})
 	}
 
 	t.Run("method=validate", func(t *testing.T) {
-		conf.SetForTest(t, configuration.AuthorizerKetoEngineACPORYIsEnabled, false)
+		reg.Config().SetForTest(t, configuration.AuthorizerKetoEngineACPORYIsEnabled, false)
 		require.Error(t, a.Validate(json.RawMessage(`{"base_url":"","required_action":"foo","required_resource":"bar"}`)))
 
-		conf.SetForTest(t, configuration.AuthorizerKetoEngineACPORYIsEnabled, false)
+		reg.Config().SetForTest(t, configuration.AuthorizerKetoEngineACPORYIsEnabled, false)
 		require.Error(t, a.Validate(json.RawMessage(`{"base_url":"http://foo/bar","required_action":"foo","required_resource":"bar"}`)))
 
-		conf.SetForTest(t, configuration.AuthorizerKetoEngineACPORYIsEnabled, true)
+		reg.Config().SetForTest(t, configuration.AuthorizerKetoEngineACPORYIsEnabled, true)
 		require.Error(t, a.Validate(json.RawMessage(`{"base_url":"","required_action":"foo","required_resource":"bar"}`)))
 
-		conf.SetForTest(t, configuration.AuthorizerKetoEngineACPORYIsEnabled, true)
+		reg.Config().SetForTest(t, configuration.AuthorizerKetoEngineACPORYIsEnabled, true)
 		require.NoError(t, a.Validate(json.RawMessage(`{"base_url":"http://foo/bar","required_action":"foo","required_resource":"bar"}`)))
 	})
 }

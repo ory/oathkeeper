@@ -10,14 +10,13 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/ory/oathkeeper/driver"
-	"github.com/ory/oathkeeper/x"
-	"github.com/ory/x/configx"
-	"github.com/ory/x/logrusx"
-
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/testutil"
 	"github.com/urfave/negroni"
+
+	"github.com/ory/oathkeeper/internal"
+	"github.com/ory/oathkeeper/x"
+	"github.com/ory/x/configx"
 )
 
 var (
@@ -145,20 +144,19 @@ func TestConfigurablePrometheusRequestTotalMetrics(t *testing.T) {
 			// re-initialize to prevent double counts
 			RequestTotal.Reset()
 
-			logger := logrusx.NewT(t)
-			d := driver.NewDefaultDriver(logger, nil,
+			reg := internal.NewRegistry(t,
 				configx.WithConfigFiles(x.WriteFile(t, `
 serve:
   prometheus:
     metric_name_prefix: http_
 `)),
 			)
-			promRepo := NewConfigurablePrometheusRepository(d, logger)
+			promRepo := NewConfigurablePrometheusRepository(reg)
 			promMiddleware := NewMiddleware(promRepo, "test")
 			promMiddleware.CollapsePaths(tt.collapsePaths)
 
 			ts := httptest.NewServer(PrometheusTestApp(promMiddleware))
-			defer ts.Close()
+			t.Cleanup(ts.Close)
 
 			for _, path := range serverRequestPaths {
 				req, err := http.NewRequest("GET", ts.URL+path, nil)

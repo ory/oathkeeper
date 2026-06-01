@@ -5,7 +5,6 @@ package mutate
 
 import (
 	"bytes"
-	//nolint:gosec
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -15,13 +14,10 @@ import (
 	"github.com/dgraph-io/ristretto/v2"
 	"github.com/pkg/errors"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
-	"go.opentelemetry.io/otel/trace"
 
-	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/pipeline"
 	"github.com/ory/oathkeeper/pipeline/authn"
 	"github.com/ory/x/httpx"
-	"github.com/ory/x/logrusx"
 )
 
 const (
@@ -36,8 +32,7 @@ const (
 )
 
 type MutatorHydrator struct {
-	c configuration.Provider
-	d mutatorHydratorDependencies
+	d dependencies
 
 	hydrateCache *ristretto.Cache[string, *authn.AuthenticationSession]
 }
@@ -74,12 +69,7 @@ type MutatorHydratorConfig struct {
 	Cache cacheConfig       `json:"cache"`
 }
 
-type mutatorHydratorDependencies interface {
-	logrusx.Provider
-	Tracer() trace.Tracer
-}
-
-func NewMutatorHydrator(c configuration.Provider, d mutatorHydratorDependencies) *MutatorHydrator {
+func NewMutatorHydrator(d dependencies) *MutatorHydrator {
 	cache, _ := ristretto.NewCache(&ristretto.Config[string, *authn.AuthenticationSession]{
 		// This will hold about 1000 unique mutation responses.
 		NumCounters: 10000,
@@ -89,7 +79,6 @@ func NewMutatorHydrator(c configuration.Provider, d mutatorHydratorDependencies)
 		BufferItems: 64,
 	})
 	return &MutatorHydrator{
-		c:            c,
 		d:            d,
 		hydrateCache: cache,
 	}
@@ -168,7 +157,7 @@ func (a *MutatorHydrator) Mutate(r *http.Request, session *authn.AuthenticationS
 	req.Header.Set(contentTypeHeaderKey, contentTypeJSONHeaderValue)
 
 	client := http.DefaultClient
-	if a.d.Tracer() != nil {
+	if a.d.Tracer(r.Context()).IsLoaded() {
 		client = &http.Client{Transport: otelhttp.NewTransport(http.DefaultTransport)}
 	}
 	if cfg.Api.Retry != nil {
@@ -229,7 +218,7 @@ func (a *MutatorHydrator) Mutate(r *http.Request, session *authn.AuthenticationS
 }
 
 func (a *MutatorHydrator) Validate(config json.RawMessage) error {
-	if !a.c.MutatorIsEnabled(a.GetID()) {
+	if !a.d.Config().MutatorIsEnabled(a.GetID()) {
 		return NewErrMutatorNotEnabled(a)
 	}
 
@@ -239,7 +228,7 @@ func (a *MutatorHydrator) Validate(config json.RawMessage) error {
 
 func (a *MutatorHydrator) Config(config json.RawMessage) (*MutatorHydratorConfig, error) {
 	var c MutatorHydratorConfig
-	if err := a.c.MutatorConfig(a.GetID(), config, &c); err != nil {
+	if err := a.d.Config().MutatorConfig(a.GetID(), config, &c); err != nil {
 		return nil, NewErrMutatorMisconfigured(a, err)
 	}
 

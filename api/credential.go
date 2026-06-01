@@ -32,11 +32,11 @@ type credentialHandlerRegistry interface {
 }
 
 type CredentialsHandler struct {
-	c configuration.Provider
+	c configuration.Configuration
 	r credentialHandlerRegistry
 }
 
-func NewCredentialHandler(c configuration.Provider, r credentialHandlerRegistry) *CredentialsHandler {
+func NewCredentialHandler(c configuration.Configuration, r credentialHandlerRegistry) *CredentialsHandler {
 	return &CredentialsHandler{c: c, r: r}
 }
 

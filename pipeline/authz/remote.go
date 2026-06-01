@@ -18,9 +18,6 @@ import (
 	"github.com/ory/x/httpx"
 	"github.com/ory/x/otelx"
 
-	"go.opentelemetry.io/otel/trace"
-
-	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/helper"
 	"github.com/ory/oathkeeper/pipeline"
 	"github.com/ory/oathkeeper/pipeline/authn"
@@ -42,22 +39,20 @@ type AuthorizerRemoteRetryConfiguration struct {
 
 // AuthorizerRemote implements the Authorizer interface.
 type AuthorizerRemote struct {
-	c configuration.Provider
+	d dependencies
 
 	client *http.Client
 	t      *template.Template
-	tracer trace.Tracer
 }
 
 // NewAuthorizerRemote creates a new AuthorizerRemote.
-func NewAuthorizerRemote(c configuration.Provider, d interface{ Tracer() trace.Tracer }) *AuthorizerRemote {
+func NewAuthorizerRemote(d dependencies) *AuthorizerRemote {
 	client := httpx.NewResilientClient().StandardClient()
 	client.Transport = otelhttp.NewTransport(client.Transport)
 	return &AuthorizerRemote{
-		c:      c,
 		client: client,
 		t:      x.NewTemplate("remote"),
-		tracer: d.Tracer(),
+		d:      d,
 	}
 }
 
@@ -68,7 +63,7 @@ func (a *AuthorizerRemote) GetID() string {
 
 // Authorize implements the Authorizer interface.
 func (a *AuthorizerRemote) Authorize(r *http.Request, session *authn.AuthenticationSession, config json.RawMessage, rl pipeline.Rule) (err error) {
-	ctx, span := a.tracer.Start(r.Context(), "pipeline.authz.AuthorizerRemote.Authorize")
+	ctx, span := a.d.Tracer(r.Context()).Tracer().Start(r.Context(), "pipeline.authz.AuthorizerRemote.Authorize")
 	defer otelx.End(span, &err)
 
 	c, err := a.Config(config)
@@ -79,7 +74,7 @@ func (a *AuthorizerRemote) Authorize(r *http.Request, session *authn.Authenticat
 	read, write := io.Pipe()
 	go func() {
 		err := pipeRequestBody(r, write)
-		write.CloseWithError(errors.Wrapf(err, `could not pipe request body in rule "%s"`, rl.GetID()))
+		_ = write.CloseWithError(errors.Wrapf(err, `could not pipe request body in rule "%s"`, rl.GetID()))
 	}()
 
 	req, err := http.NewRequestWithContext(ctx, "POST", c.Remote, read)
@@ -122,14 +117,14 @@ func (a *AuthorizerRemote) Authorize(r *http.Request, session *authn.Authenticat
 	if err != nil {
 		return errors.WithStack(err)
 	}
-	defer res.Body.Close() //nolint:errcheck // body close errors ignored in tests and handlers
+	defer func() { _ = res.Body.Close() }()
 
 	if res.StatusCode == http.StatusTooManyRequests {
 		return errors.WithStack(helper.NewErrTooManyRequestsWithHeaders(res))
 	} else if res.StatusCode == http.StatusForbidden {
 		return errors.WithStack(helper.ErrForbidden())
 	} else if res.StatusCode != http.StatusOK {
-		return errors.Errorf("expected status code %d but got %d", http.StatusOK, res.StatusCode)
+		return errors.Errorf("unexpected status code: expected status code %d but got %d", http.StatusOK, res.StatusCode)
 	}
 
 	for _, allowedHeader := range c.ForwardResponseHeadersToUpstream {
@@ -141,7 +136,7 @@ func (a *AuthorizerRemote) Authorize(r *http.Request, session *authn.Authenticat
 
 // Validate implements the Authorizer interface.
 func (a *AuthorizerRemote) Validate(config json.RawMessage) error {
-	if !a.c.AuthorizerIsEnabled(a.GetID()) {
+	if !a.d.Config().AuthorizerIsEnabled(a.GetID()) {
 		return NewErrAuthorizerNotEnabled(a)
 	}
 
@@ -157,7 +152,7 @@ func (a *AuthorizerRemote) Config(config json.RawMessage) (*AuthorizerRemoteConf
 		defaultMaxWait = "1s"
 	)
 	var c AuthorizerRemoteConfiguration
-	if err := a.c.AuthorizerConfig(a.GetID(), config, &c); err != nil {
+	if err := a.d.Config().AuthorizerConfig(a.GetID(), config, &c); err != nil {
 		return nil, NewErrAuthorizerMisconfigured(a, err)
 	}
 

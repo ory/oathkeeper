@@ -5,23 +5,21 @@ package authn
 
 import (
 	"cmp"
+	"context"
 	"encoding/json"
 	"io"
 	"net/http"
 	"net/url"
 
-	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
-	"go.opentelemetry.io/otel/trace"
-
 	"github.com/pkg/errors"
 	"github.com/tidwall/gjson"
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 
 	"github.com/ory/oathkeeper/x/header"
 	"github.com/ory/x/otelx"
 
 	"github.com/ory/herodot"
 
-	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/helper"
 	"github.com/ory/oathkeeper/pipeline"
 )
@@ -76,32 +74,28 @@ func (a *AuthenticatorCookieSessionConfiguration) GetForceMethod() string {
 }
 
 type AuthenticatorCookieSession struct {
-	c      configuration.Provider
+	d      dependencies
 	client *http.Client
-	tracer trace.Tracer
 }
 
 var _ AuthenticatorForwardConfig = new(AuthenticatorCookieSessionConfiguration)
 
-func NewAuthenticatorCookieSession(c configuration.Provider, provider trace.TracerProvider) *AuthenticatorCookieSession {
+func NewAuthenticatorCookieSession(d dependencies) *AuthenticatorCookieSession {
 	return &AuthenticatorCookieSession{
-		c: c,
+		d: d,
 		client: &http.Client{
 			Transport: otelhttp.NewTransport(
 				http.DefaultTransport,
-				otelhttp.WithTracerProvider(provider),
+				otelhttp.WithTracerProvider(d.Tracer(context.Background()).Provider()),
 			),
 		},
-		tracer: provider.Tracer("oauthkeeper/pipeline/authn"),
 	}
 }
 
-func (a *AuthenticatorCookieSession) GetID() string {
-	return "cookie_session"
-}
+func (a *AuthenticatorCookieSession) GetID() string { return "cookie_session" }
 
 func (a *AuthenticatorCookieSession) Validate(config json.RawMessage) error {
-	if !a.c.AuthenticatorIsEnabled(a.GetID()) {
+	if !a.d.Config().AuthenticatorIsEnabled(a.GetID()) {
 		return NewErrAuthenticatorNotEnabled(a)
 	}
 
@@ -111,7 +105,7 @@ func (a *AuthenticatorCookieSession) Validate(config json.RawMessage) error {
 
 func (a *AuthenticatorCookieSession) Config(config json.RawMessage) (*AuthenticatorCookieSessionConfiguration, error) {
 	var c AuthenticatorCookieSessionConfiguration
-	if err := a.c.AuthenticatorConfig(a.GetID(), config, &c); err != nil {
+	if err := a.d.Config().AuthenticatorConfig(a.GetID(), config, &c); err != nil {
 		return nil, NewErrAuthenticatorMisconfigured(a, err)
 	}
 
@@ -130,7 +124,7 @@ func (a *AuthenticatorCookieSession) Config(config json.RawMessage) (*Authentica
 }
 
 func (a *AuthenticatorCookieSession) Authenticate(r *http.Request, session *AuthenticationSession, config json.RawMessage, _ pipeline.Rule) (err error) {
-	ctx, span := a.tracer.Start(r.Context(), "pipeline.authn.AuthenticatorCookieSession.Authenticate")
+	ctx, span := a.d.Tracer(r.Context()).Tracer().Start(r.Context(), "pipeline.authn.AuthenticatorCookieSession.Authenticate")
 	defer otelx.End(span, &err)
 	r = r.WithContext(ctx)
 

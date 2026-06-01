@@ -18,7 +18,6 @@ import (
 
 	"github.com/ghodss/yaml"
 	"github.com/pkg/errors"
-	"go.opentelemetry.io/otel/trace"
 	"gocloud.dev/blob"
 	_ "gocloud.dev/blob/azureblob"
 	_ "gocloud.dev/blob/gcsblob"
@@ -26,6 +25,7 @@ import (
 
 	"github.com/ory/x/httpx"
 	"github.com/ory/x/logrusx"
+	"github.com/ory/x/otelx"
 	"github.com/ory/x/urlx"
 	"github.com/ory/x/watcherx"
 
@@ -38,11 +38,11 @@ var _ Fetcher = new(FetcherDefault)
 type fetcherRegistry interface {
 	logrusx.Provider
 	RuleRepository() Repository
-	Tracer() trace.Tracer
+	otelx.Provider
 }
 
 type FetcherDefault struct {
-	config   configuration.Provider
+	config   configuration.Configuration
 	registry fetcherRegistry
 	hc       *http.Client
 	mux      *blob.URLMux
@@ -55,7 +55,7 @@ type FetcherDefault struct {
 }
 
 func NewFetcherDefault(
-	config configuration.Provider,
+	config configuration.Configuration,
 	registry fetcherRegistry,
 ) *FetcherDefault {
 	return &FetcherDefault{

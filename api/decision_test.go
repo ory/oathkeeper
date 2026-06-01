@@ -19,21 +19,21 @@ import (
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 
-	"github.com/ory/herodot"
-	"github.com/ory/x/configx"
-	"github.com/ory/x/httprouterx"
-	"github.com/ory/x/logrusx"
+	"github.com/ory/oathkeeper/driver"
 
+	"github.com/ory/herodot"
 	"github.com/ory/oathkeeper/api"
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/internal"
 	"github.com/ory/oathkeeper/pipeline/authn"
 	"github.com/ory/oathkeeper/proxy"
 	"github.com/ory/oathkeeper/rule"
+	"github.com/ory/x/configx"
+	"github.com/ory/x/httprouterx"
 )
 
 func TestDecisionAPI(t *testing.T) {
-	conf := internal.NewConfigurationWithDefaults(configx.WithValues(map[string]any{
+	reg := internal.NewRegistry(t, configx.WithValues(map[string]any{
 		configuration.AuthenticatorNoopIsEnabled:         true,
 		configuration.AuthenticatorUnauthorizedIsEnabled: true,
 		configuration.AuthenticatorAnonymousIsEnabled:    true,
@@ -41,8 +41,7 @@ func TestDecisionAPI(t *testing.T) {
 		configuration.AuthorizerDenyIsEnabled:            true,
 		configuration.MutatorNoopIsEnabled:               true,
 		configuration.ErrorsWWWAuthenticateIsEnabled:     true,
-	}))
-	reg := internal.NewRegistry(conf).WithBrokenPipelineMutator()
+	})).WithBrokenPipelineMutator()
 
 	router := httprouterx.NewRouter()
 	reg.DecisionHandler().SetRoutes(router)
@@ -379,43 +378,31 @@ func TestDecisionAPI(t *testing.T) {
 
 type decisionHandlerRegistryMock struct {
 	mock.Mock
-	t *testing.T
+	driver.Registry
 }
 
-func (m *decisionHandlerRegistryMock) RuleMatcher() rule.Matcher {
-	return m
-}
-
-func (m *decisionHandlerRegistryMock) ProxyRequestHandler() proxy.RequestHandler {
-	return m
-}
-
-func (*decisionHandlerRegistryMock) Writer() herodot.Writer {
-	return nil
-}
-
-func (m *decisionHandlerRegistryMock) Logger() *logrusx.Logger {
-	return logrusx.NewT(m.t)
-}
+func (m *decisionHandlerRegistryMock) RuleMatcher() rule.Matcher                 { return m }
+func (m *decisionHandlerRegistryMock) ProxyRequestHandler() proxy.RequestHandler { return m }
+func (*decisionHandlerRegistryMock) Writer() herodot.Writer                      { return nil }
 
 func (m *decisionHandlerRegistryMock) Match(ctx context.Context, method string, u *url.URL, _ rule.Protocol) (*rule.Rule, error) {
 	args := m.Called(ctx, method, u)
 	return args.Get(0).(*rule.Rule), args.Error(1)
 }
 
-func (*decisionHandlerRegistryMock) HandleError(w http.ResponseWriter, r *http.Request, rl *rule.Rule, handleErr error) {
+func (*decisionHandlerRegistryMock) HandleError(http.ResponseWriter, *http.Request, *rule.Rule, error) {
 }
 
-func (*decisionHandlerRegistryMock) HandleRequest(r *http.Request, rl *rule.Rule) (session *authn.AuthenticationSession, err error) {
+func (*decisionHandlerRegistryMock) HandleRequest(*http.Request, *rule.Rule) (session *authn.AuthenticationSession, err error) {
 	return &authn.AuthenticationSession{}, nil
 }
 
-func (*decisionHandlerRegistryMock) InitializeAuthnSession(r *http.Request, rl *rule.Rule) *authn.AuthenticationSession {
+func (*decisionHandlerRegistryMock) InitializeAuthnSession(*http.Request, *rule.Rule) *authn.AuthenticationSession {
 	return nil
 }
 
 func TestDecisionAPIHeaderUsage(t *testing.T) {
-	r := &decisionHandlerRegistryMock{t: t}
+	r := &decisionHandlerRegistryMock{Registry: internal.NewRegistry(t)}
 	h := api.NewJudgeHandler(r)
 	defaultUrl := &url.URL{Scheme: "http", Host: "ory.sh", Path: "/foo"}
 	defaultMethod := "GET"

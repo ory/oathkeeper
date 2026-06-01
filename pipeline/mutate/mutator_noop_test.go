@@ -18,8 +18,7 @@ import (
 
 func TestMutatorNoop(t *testing.T) {
 	t.Parallel()
-	conf := internal.NewConfigurationWithDefaults()
-	reg := internal.NewRegistry(conf)
+	reg := internal.NewRegistry(t)
 
 	a, err := reg.PipelineMutator("noop")
 	require.NoError(t, err)
@@ -44,10 +43,10 @@ func TestMutatorNoop(t *testing.T) {
 	})
 
 	t.Run("method=validate", func(t *testing.T) {
-		conf.SetForTest(t, configuration.MutatorNoopIsEnabled, true)
+		reg.Config().SetForTest(t, configuration.MutatorNoopIsEnabled, true)
 		require.NoError(t, a.Validate(nil))
 
-		conf.SetForTest(t, configuration.MutatorNoopIsEnabled, false)
+		reg.Config().SetForTest(t, configuration.MutatorNoopIsEnabled, false)
 		require.Error(t, a.Validate(nil))
 	})
 }

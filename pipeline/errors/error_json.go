@@ -25,7 +25,7 @@ type (
 		Verbose bool `json:"verbose"`
 	}
 	ErrorJSON struct {
-		c configuration.Provider
+		c configuration.Configuration
 		d errorJSONDependencies
 	}
 	errorJSONDependencies interface {
@@ -34,7 +34,7 @@ type (
 )
 
 func NewErrorJSON(
-	c configuration.Provider,
+	c configuration.Configuration,
 	d errorJSONDependencies,
 ) *ErrorJSON {
 	return &ErrorJSON{c: c, d: d}

@@ -8,28 +8,25 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/pipeline"
 
 	"github.com/pkg/errors"
 )
 
 type AuthenticatorAnonymous struct {
-	c configuration.Provider
+	d dependencies
 }
 
 type AuthenticatorAnonymousConfiguration struct {
 	Subject string `json:"subject"`
 }
 
-func NewAuthenticatorAnonymous(c configuration.Provider) *AuthenticatorAnonymous {
-	return &AuthenticatorAnonymous{
-		c: c,
-	}
+func NewAuthenticatorAnonymous(d dependencies) *AuthenticatorAnonymous {
+	return &AuthenticatorAnonymous{d: d}
 }
 
 func (a *AuthenticatorAnonymous) Validate(config json.RawMessage) error {
-	if !a.c.AuthenticatorIsEnabled(a.GetID()) {
+	if !a.d.Config().AuthenticatorIsEnabled(a.GetID()) {
 		return NewErrAuthenticatorNotEnabled(a)
 	}
 
@@ -37,13 +34,11 @@ func (a *AuthenticatorAnonymous) Validate(config json.RawMessage) error {
 	return err
 }
 
-func (a *AuthenticatorAnonymous) GetID() string {
-	return "anonymous"
-}
+func (a *AuthenticatorAnonymous) GetID() string { return "anonymous" }
 
 func (a *AuthenticatorAnonymous) Config(config json.RawMessage) (*AuthenticatorAnonymousConfiguration, error) {
 	var c AuthenticatorAnonymousConfiguration
-	if err := a.c.AuthenticatorConfig(a.GetID(), config, &c); err != nil {
+	if err := a.d.Config().AuthenticatorConfig(a.GetID(), config, &c); err != nil {
 		return nil, NewErrAuthenticatorMisconfigured(a, err)
 	}
 

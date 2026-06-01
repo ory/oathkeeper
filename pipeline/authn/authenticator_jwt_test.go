@@ -33,8 +33,7 @@ func TestAuthenticatorJWT(t *testing.T) {
 		"file://../../test/stub/jwks-rsa-single.json",
 		"file://../../test/stub/jwks-ecdsa.json",
 	}
-	conf := internal.NewConfigurationWithDefaults()
-	reg := internal.NewRegistry(conf)
+	reg := internal.NewRegistry(t)
 
 	a, err := reg.PipelineAuthenticator("jwt")
 	require.NoError(t, err)

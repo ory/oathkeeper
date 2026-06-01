@@ -4,30 +4,26 @@
 package driver
 
 import (
-	"go.opentelemetry.io/otel/trace"
-
+	"github.com/ory/x/healthx"
 	"github.com/ory/x/httpx"
 	"github.com/ory/x/logrusx"
-
-	"github.com/ory/x/healthx"
-
-	"github.com/ory/oathkeeper/pipeline/errors"
-	"github.com/ory/oathkeeper/proxy"
+	"github.com/ory/x/otelx"
 
 	"github.com/ory/oathkeeper/api"
 	"github.com/ory/oathkeeper/credentials"
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/pipeline/authn"
 	"github.com/ory/oathkeeper/pipeline/authz"
+	"github.com/ory/oathkeeper/pipeline/errors"
 	"github.com/ory/oathkeeper/pipeline/mutate"
+	"github.com/ory/oathkeeper/proxy"
 	"github.com/ory/oathkeeper/rule"
 )
 
 type Registry interface {
 	Init()
 
-	Config() configuration.Provider
-	SetLogger(l *logrusx.Logger) Registry
+	Config() configuration.Configuration
 
 	ProxyRequestHandler() proxy.RequestHandler
 	HealthxReadyCheckers() healthx.ReadyCheckers
@@ -37,7 +33,8 @@ type Registry interface {
 	CredentialHandler() *api.CredentialsHandler
 
 	Proxy() *proxy.Proxy
-	Tracer() trace.Tracer
+
+	otelx.Provider
 
 	authn.Registry
 	authz.Registry
@@ -53,6 +50,6 @@ type Registry interface {
 	logrusx.Provider
 }
 
-func NewRegistry(c configuration.Provider) Registry {
-	return NewRegistryMemory(c)
+func NewRegistry(c configuration.Configuration, l *logrusx.Logger) Registry {
+	return NewRegistryMemory(c, l)
 }

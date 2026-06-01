@@ -15,8 +15,7 @@ import (
 )
 
 func BenchmarkDefaultSigner(b *testing.B) {
-	conf := internal.NewConfigurationWithDefaults()
-	reg := internal.NewRegistry(conf)
+	reg := internal.NewRegistry(b)
 	ctx := context.Background()
 
 	for alg, keys := range map[string]string{

@@ -18,9 +18,6 @@ import (
 	"github.com/ory/x/httpx"
 	"github.com/ory/x/otelx"
 
-	"go.opentelemetry.io/otel/trace"
-
-	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/helper"
 	"github.com/ory/oathkeeper/pipeline"
 	"github.com/ory/oathkeeper/pipeline/authn"
@@ -48,22 +45,20 @@ func (c *AuthorizerRemoteJSONConfiguration) PayloadTemplateID() string {
 
 // AuthorizerRemoteJSON implements the Authorizer interface.
 type AuthorizerRemoteJSON struct {
-	c configuration.Provider
+	d dependencies
 
 	client *http.Client
 	t      *template.Template
-	tracer trace.Tracer
 }
 
 // NewAuthorizerRemoteJSON creates a new AuthorizerRemoteJSON.
-func NewAuthorizerRemoteJSON(c configuration.Provider, d interface{ Tracer() trace.Tracer }) *AuthorizerRemoteJSON {
+func NewAuthorizerRemoteJSON(d dependencies) *AuthorizerRemoteJSON {
 	client := httpx.NewResilientClient().StandardClient()
 	client.Transport = otelhttp.NewTransport(client.Transport)
 	return &AuthorizerRemoteJSON{
-		c:      c,
 		client: client,
 		t:      x.NewTemplate("remote_json"),
-		tracer: d.Tracer(),
+		d:      d,
 	}
 }
 
@@ -74,7 +69,7 @@ func (a *AuthorizerRemoteJSON) GetID() string {
 
 // Authorize implements the Authorizer interface.
 func (a *AuthorizerRemoteJSON) Authorize(r *http.Request, session *authn.AuthenticationSession, config json.RawMessage, rl pipeline.Rule) (err error) {
-	ctx, span := a.tracer.Start(r.Context(), "pipeline.authz.AuthorizerRemoteJSON.Authorize")
+	ctx, span := a.d.Tracer(r.Context()).Tracer().Start(r.Context(), "pipeline.authz.AuthorizerRemoteJSON.Authorize")
 	defer otelx.End(span, &err)
 	r = r.WithContext(ctx)
 
@@ -162,7 +157,7 @@ func (a *AuthorizerRemoteJSON) Authorize(r *http.Request, session *authn.Authent
 
 // Validate implements the Authorizer interface.
 func (a *AuthorizerRemoteJSON) Validate(config json.RawMessage) error {
-	if !a.c.AuthorizerIsEnabled(a.GetID()) {
+	if !a.d.Config().AuthorizerIsEnabled(a.GetID()) {
 		return NewErrAuthorizerNotEnabled(a)
 	}
 
@@ -174,7 +169,7 @@ func (a *AuthorizerRemoteJSON) Validate(config json.RawMessage) error {
 // resulting configuration. It reports an error if the configuration is invalid.
 func (a *AuthorizerRemoteJSON) Config(config json.RawMessage) (*AuthorizerRemoteJSONConfiguration, error) {
 	var c AuthorizerRemoteJSONConfiguration
-	if err := a.c.AuthorizerConfig(a.GetID(), config, &c); err != nil {
+	if err := a.d.Config().AuthorizerConfig(a.GetID(), config, &c); err != nil {
 		return nil, NewErrAuthorizerMisconfigured(a, err)
 	}
 

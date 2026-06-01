@@ -19,8 +19,7 @@ import (
 )
 
 func TestErrorWWWAuthenticate(t *testing.T) {
-	conf := internal.NewConfigurationWithDefaults()
-	reg := internal.NewRegistry(conf)
+	reg := internal.NewRegistry(t)
 
 	a, err := reg.PipelineErrorHandler("www_authenticate")
 	require.NoError(t, err)

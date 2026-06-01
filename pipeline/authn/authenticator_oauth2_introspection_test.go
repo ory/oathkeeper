@@ -13,15 +13,12 @@ import (
 	"testing"
 	"time"
 
-	"go.opentelemetry.io/otel/trace/noop"
-
-	"github.com/ory/x/assertx"
-	"github.com/ory/x/configx"
-	"github.com/ory/x/logrusx"
-
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/tidwall/sjson"
+
+	"github.com/ory/x/assertx"
+	"github.com/ory/x/configx"
 
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/helper"
@@ -30,8 +27,7 @@ import (
 )
 
 func TestAuthenticatorOAuth2Introspection(t *testing.T) {
-	conf := internal.NewConfigurationWithDefaults(configx.SkipValidation())
-	reg := internal.NewRegistry(conf)
+	reg := internal.NewRegistry(t, configx.SkipValidation())
 
 	aa, err := reg.PipelineAuthenticator("oauth2_introspection")
 	require.NoError(t, err)
@@ -617,7 +613,7 @@ func TestAuthenticatorOAuth2Introspection(t *testing.T) {
 	})
 
 	t.Run("method=authenticate-with-cache", func(t *testing.T) {
-		conf.SetForTest(t, "authenticators.oauth2_introspection.config.cache.enabled", true)
+		reg.Config().SetForTest(t, "authenticators.oauth2_introspection.config.cache.enabled", true)
 
 		cacheUsed := atomic.Bool{}
 		cacheUsed.Store(true)
@@ -680,7 +676,7 @@ func TestAuthenticatorOAuth2Introspection(t *testing.T) {
 		}
 
 		t.Run("case=with none scope strategy", func(t *testing.T) {
-			conf.SetForTest(t, "authenticators.oauth2_introspection.config.scope_strategy", "none")
+			reg.Config().SetForTest(t, "authenticators.oauth2_introspection.config.scope_strategy", "none")
 			r := &http.Request{Header: http.Header{"Authorization": {"bearer active-scope-a"}}}
 			expected := new(AuthenticationSession)
 			t.Run("case=initial request succeeds and caches", func(t *testing.T) {
@@ -723,7 +719,7 @@ func TestAuthenticatorOAuth2Introspection(t *testing.T) {
 		t.Run("case=does not use cache for refresh tokens", func(t *testing.T) {
 			for _, strategy := range []string{"wildcard", "none"} {
 				t.Run("scope_strategy="+strategy, func(t *testing.T) {
-					conf.SetForTest(t, "authenticators.oauth2_introspection.config.scope_strategy", strategy)
+					reg.Config().SetForTest(t, "authenticators.oauth2_introspection.config.scope_strategy", strategy)
 					r := &http.Request{Header: http.Header{"Authorization": {"bearer refresh_token"}}}
 					expected := new(AuthenticationSession)
 
@@ -740,7 +736,7 @@ func TestAuthenticatorOAuth2Introspection(t *testing.T) {
 		})
 
 		t.Run("case=with a scope scope strategy", func(t *testing.T) {
-			conf.SetForTest(t, "authenticators.oauth2_introspection.config.scope_strategy", "wildcard")
+			reg.Config().SetForTest(t, "authenticators.oauth2_introspection.config.scope_strategy", "wildcard")
 			r := &http.Request{Header: http.Header{"Authorization": {"bearer another-active-scope-a"}}}
 			expected := new(AuthenticationSession)
 
@@ -817,22 +813,21 @@ func TestAuthenticatorOAuth2Introspection(t *testing.T) {
 	})
 
 	t.Run("method=validate", func(t *testing.T) {
-		conf.SetForTest(t, configuration.AuthenticatorOAuth2TokenIntrospectionIsEnabled, false)
+		reg.Config().SetForTest(t, configuration.AuthenticatorOAuth2TokenIntrospectionIsEnabled, false)
 		require.Error(t, a.Validate(json.RawMessage(`{"introspection_url":""}`)))
 
-		conf.SetForTest(t, configuration.AuthenticatorOAuth2TokenIntrospectionIsEnabled, true)
+		reg.Config().SetForTest(t, configuration.AuthenticatorOAuth2TokenIntrospectionIsEnabled, true)
 		require.Error(t, a.Validate(json.RawMessage(`{"introspection_url":""}`)))
 
-		conf.SetForTest(t, configuration.AuthenticatorOAuth2TokenIntrospectionIsEnabled, false)
+		reg.Config().SetForTest(t, configuration.AuthenticatorOAuth2TokenIntrospectionIsEnabled, false)
 		require.Error(t, a.Validate(json.RawMessage(`{"introspection_url":"/oauth2/token"}`)))
 
-		conf.SetForTest(t, configuration.AuthenticatorOAuth2TokenIntrospectionIsEnabled, true)
+		reg.Config().SetForTest(t, configuration.AuthenticatorOAuth2TokenIntrospectionIsEnabled, true)
 		require.Error(t, a.Validate(json.RawMessage(`{"introspection_url":"/oauth2/token"}`)))
 	})
 
 	t.Run("method=config", func(t *testing.T) {
-		logger := logrusx.NewT(t)
-		authenticator := NewAuthenticatorOAuth2Introspection(conf, logger, noop.NewTracerProvider())
+		authenticator := NewAuthenticatorOAuth2Introspection(reg)
 
 		noPreauthConfig := []byte(`{ "introspection_url":"http://localhost/oauth2/token" }`)
 		preAuthConfigOne := []byte(`{ "introspection_url":"http://localhost/oauth2/token","pre_authorization":{"token_url":"http://localhost/oauth2/token","client_id":"some_id","client_secret":"some_secret","enabled":true} }`)
@@ -873,9 +868,7 @@ func TestAuthenticatorOAuth2Introspection(t *testing.T) {
 		require.NotEqual(t, preauthTwoClient2, preauthOneClient)
 
 		t.Run("Should not be equal because we changed a system default", func(t *testing.T) {
-			// Unskip once https://github.com/ory/oathkeeper/issues/757 lands
-			t.Skip("This fails due to viper caching and it makes no sense to fix it as we need to adopt koanf first")
-			conf.SetForTest(t, "authenticators.oauth2_introspection.config.pre_authorization", map[string]interface{}{"scope": []string{"foo"}})
+			reg.Config().SetForTest(t, "authenticators.oauth2_introspection.config.pre_authorization", map[string]interface{}{"scope": []string{"foo"}})
 
 			_, noPreauthClient3, err := authenticator.Config(noPreauthConfig)
 			require.NoError(t, err)

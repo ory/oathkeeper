@@ -27,8 +27,7 @@ import (
 
 func TestAuthenticatorBearerToken(t *testing.T) {
 	t.Parallel()
-	conf := internal.NewConfigurationWithDefaults()
-	reg := internal.NewRegistry(conf)
+	reg := internal.NewRegistry(t)
 
 	pipelineAuthenticator, err := reg.PipelineAuthenticator("bearer_token")
 	require.NoError(t, err)

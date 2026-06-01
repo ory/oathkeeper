@@ -4,7 +4,9 @@
 package internal
 
 import (
-	"context"
+	"testing"
+
+	"github.com/stretchr/testify/require"
 
 	"github.com/ory/oathkeeper/driver"
 	"github.com/ory/oathkeeper/driver/configuration"
@@ -12,16 +14,16 @@ import (
 	"github.com/ory/x/logrusx"
 )
 
-func NewConfigurationWithDefaults(opts ...configx.OptionModifier) configuration.Provider {
-	l := logrusx.New("", "")
-	c, err := configuration.NewKoanfProvider(
-		context.Background(), nil, l, opts...)
-	if err != nil {
-		l.WithError(err).Fatal("Failed to initialize configuration")
-	}
+func NewConfigurationWithDefaults(t testing.TB, opts ...configx.OptionModifier) configuration.Configuration {
+	l := logrusx.NewT(t)
+	c, err := configuration.NewKoanfProvider(t.Context(), nil, l, opts...)
+	require.NoError(t, err)
 	return c
 }
 
-func NewRegistry(c configuration.Provider) *driver.RegistryMemory {
-	return driver.NewRegistryMemory(c)
+func NewRegistry(t testing.TB, opts ...configx.OptionModifier) *driver.RegistryMemory {
+	l := logrusx.NewT(t)
+	c, err := configuration.NewKoanfProvider(t.Context(), nil, l, opts...)
+	require.NoError(t, err)
+	return driver.NewRegistryMemory(c, l)
 }

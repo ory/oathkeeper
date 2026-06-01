@@ -11,25 +11,22 @@ import (
 	"testing"
 	"text/template"
 
-	"github.com/ory/x/configx"
-
-	"github.com/ory/oathkeeper/driver/configuration"
-	"github.com/ory/oathkeeper/internal"
-
-	"github.com/ory/oathkeeper/pipeline/authn"
-
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
+	"github.com/ory/x/configx"
+
+	"github.com/ory/oathkeeper/driver/configuration"
+	"github.com/ory/oathkeeper/internal"
+	"github.com/ory/oathkeeper/pipeline/authn"
 	. "github.com/ory/oathkeeper/pipeline/mutate"
 	"github.com/ory/oathkeeper/rule"
 )
 
 func TestCredentialsIssuerHeaders(t *testing.T) {
 	t.Parallel()
-	conf := internal.NewConfigurationWithDefaults(configx.SkipValidation())
-	reg := internal.NewRegistry(conf)
+	reg := internal.NewRegistry(t, configx.SkipValidation())
 
 	a, err := reg.PipelineMutator("header")
 	require.NoError(t, err)
@@ -222,10 +219,10 @@ func TestCredentialsIssuerHeaders(t *testing.T) {
 	})
 
 	t.Run("method=validate", func(t *testing.T) {
-		conf.SetForTest(t, configuration.MutatorHeaderIsEnabled, true)
+		reg.Config().SetForTest(t, configuration.MutatorHeaderIsEnabled, true)
 		require.NoError(t, a.Validate(json.RawMessage(`{"headers":{}}`)))
 
-		conf.SetForTest(t, configuration.MutatorHeaderIsEnabled, false)
+		reg.Config().SetForTest(t, configuration.MutatorHeaderIsEnabled, false)
 		require.Error(t, a.Validate(json.RawMessage(`{"headers":{}}`)))
 	})
 }

@@ -10,12 +10,14 @@ import (
 	"sync"
 
 	"github.com/pkg/errors"
+	"go.opentelemetry.io/otel/attribute"
+
+	"github.com/ory/x/logrusx"
+	"github.com/ory/x/otelx"
+	"github.com/ory/x/pagination"
 
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/helper"
-
-	"github.com/ory/x/logrusx"
-	"github.com/ory/x/pagination"
 )
 
 var _ Repository = new(RepositoryMemory)
@@ -23,6 +25,7 @@ var _ Repository = new(RepositoryMemory)
 type repositoryMemoryRegistry interface {
 	RuleValidator() Validator
 	logrusx.Provider
+	otelx.Provider
 }
 
 type RepositoryMemory struct {
@@ -62,14 +65,14 @@ func (m *RepositoryMemory) WithRules(rules []Rule) {
 	m.Unlock()
 }
 
-func (m *RepositoryMemory) Count(ctx context.Context) (int, error) {
+func (m *RepositoryMemory) Count(_ context.Context) (int, error) {
 	m.RLock()
 	defer m.RUnlock()
 
 	return len(m.rules), nil
 }
 
-func (m *RepositoryMemory) List(ctx context.Context, limit, offset int) ([]Rule, error) {
+func (m *RepositoryMemory) List(_ context.Context, limit, offset int) ([]Rule, error) {
 	m.RLock()
 	defer m.RUnlock()
 
@@ -77,7 +80,7 @@ func (m *RepositoryMemory) List(ctx context.Context, limit, offset int) ([]Rule,
 	return m.rules[start:end], nil
 }
 
-func (m *RepositoryMemory) Get(ctx context.Context, id string) (*Rule, error) {
+func (m *RepositoryMemory) Get(_ context.Context, id string) (*Rule, error) {
 	m.RLock()
 	defer m.RUnlock()
 
@@ -90,7 +93,7 @@ func (m *RepositoryMemory) Get(ctx context.Context, id string) (*Rule, error) {
 	return nil, errors.WithStack(helper.ErrResourceNotFound())
 }
 
-func (m *RepositoryMemory) Set(ctx context.Context, rules []Rule) error {
+func (m *RepositoryMemory) Set(_ context.Context, rules []Rule) error {
 	m.Lock()
 	defer m.Unlock()
 
@@ -110,7 +113,11 @@ func (m *RepositoryMemory) Set(ctx context.Context, rules []Rule) error {
 	return nil
 }
 
-func (m *RepositoryMemory) Match(_ context.Context, method string, u *url.URL, protocol Protocol) (*Rule, error) {
+func (m *RepositoryMemory) Match(ctx context.Context, method string, u *url.URL, protocol Protocol) (_ *Rule, err error) {
+	ctx, span := m.r.Tracer(ctx).Tracer().Start(ctx, "RepositoryMemory.Match")
+	defer otelx.End(span, &err)
+	_ = ctx
+
 	if u == nil {
 		return nil, errors.WithStack(errors.New("nil URL provided"))
 	}
@@ -142,6 +149,7 @@ func (m *RepositoryMemory) Match(_ context.Context, method string, u *url.URL, p
 		return nil, errors.WithStack(helper.ErrMatchesMoreThanOneRule())
 	}
 
+	span.SetAttributes(attribute.String("matched_rule_id", rules[0].ID))
 	return rules[0], nil
 }
 

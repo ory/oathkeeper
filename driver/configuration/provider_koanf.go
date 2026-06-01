@@ -40,7 +40,6 @@ type (
 	KoanfProvider struct {
 		source *configx.Provider
 		l      *logrusx.Logger
-		ctx    context.Context
 
 		configValidationCache *ristretto.Cache[string, bool]
 
@@ -55,7 +54,7 @@ type (
 	}
 )
 
-var _ Provider = new(KoanfProvider)
+var _ Configuration = (*KoanfProvider)(nil)
 
 func NewKoanfProvider(ctx context.Context, flags *pflag.FlagSet, l *logrusx.Logger, opts ...configx.OptionModifier) (kp *KoanfProvider, err error) {
 	maxItems := int64(5000)
@@ -65,14 +64,11 @@ func NewKoanfProvider(ctx context.Context, flags *pflag.FlagSet, l *logrusx.Logg
 		BufferItems:        64,
 		Metrics:            false,
 		IgnoreInternalCost: true,
-		Cost: func(value bool) int64 {
-			return 1
-		},
+		Cost:               func(value bool) int64 { return 1 },
 	})
 
 	kp = &KoanfProvider{
-		ctx: ctx,
-		l:   l,
+		l: l,
 
 		configValidationCache: cache,
 		subscriptions:         subscriptions{data: make(map[SubscriptionID]callback)},
@@ -95,7 +91,7 @@ func NewKoanfProvider(ctx context.Context, flags *pflag.FlagSet, l *logrusx.Logg
 	l.UseConfig(kp.source)
 
 	for k, v := range kp.source.All() {
-		l.Infof("Loaded config: %v = %v", k, v)
+		l.Debugf("Loaded config: %v = %v", k, v)
 	}
 
 	return kp, nil
@@ -106,7 +102,6 @@ func (v *KoanfProvider) configChangeHandler(event watcherx.Event, err error) {
 	v.subscriptions.RLock()
 	defer v.subscriptions.RUnlock()
 	for _, cb := range v.subscriptions.data {
-		cb := cb
 		go cb(event, err)
 	}
 }
@@ -312,7 +307,7 @@ func (v *KoanfProvider) PipelineConfig(prefix, id string, override json.RawMessa
 
 	if len(override) != 0 {
 		overrideCfg := koanf.New(".")
-		if err := overrideCfg.Load(configx.NewKoanfMemory(v.ctx, override), nil); err != nil {
+		if err := overrideCfg.Load(configx.NewKoanfMemory(override), nil); err != nil {
 			return errors.WithStack(err)
 		}
 		if err := pipelineCfg.Merge(overrideCfg); err != nil {

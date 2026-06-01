@@ -16,10 +16,6 @@ import (
 	"github.com/ory/x/otelx"
 )
 
-const (
-	ForbiddenStrategyErrorType = "forbidden"
-)
-
 // MatchingStrategy defines matching strategy such as Regexp or Glob.
 // Empty string defaults to "regexp".
 type MatchingStrategy string
@@ -31,7 +27,7 @@ const (
 	DefaultMatchingStrategy                  = Regexp
 )
 
-type Provider interface {
+type Configuration interface {
 	Get(k Key) interface{}
 	String(k Key) string
 	AllSettings() map[string]interface{}
@@ -45,10 +41,20 @@ type Provider interface {
 
 	ProxyTrustForwardedHeaders() bool
 
-	ProviderAuthenticators
-	ProviderErrorHandlers
-	ProviderAuthorizers
-	ProviderMutators
+	AuthenticatorConfig(id string, overrides json.RawMessage, destination interface{}) error
+	AuthenticatorIsEnabled(id string) bool
+	AuthenticatorJwtJwkMaxWait() time.Duration
+	AuthenticatorJwtJwkTtl() time.Duration
+
+	ErrorHandlerConfig(id string, override json.RawMessage, dest interface{}) error
+	ErrorHandlerIsEnabled(id string) bool
+	ErrorHandlerFallbackSpecificity() []string
+
+	AuthorizerConfig(id string, overrides json.RawMessage, destination interface{}) error
+	AuthorizerIsEnabled(id string) bool
+
+	MutatorConfig(id string, overrides json.RawMessage, destination interface{}) error
+	MutatorIsEnabled(id string) bool
 
 	ProxyReadTimeout() time.Duration
 	ProxyWriteTimeout() time.Duration
@@ -82,24 +88,6 @@ type Provider interface {
 	SetForTest(t testing.TB, key string, value interface{})
 }
 
-type ProviderErrorHandlers interface {
-	ErrorHandlerConfig(id string, override json.RawMessage, dest interface{}) error
-	ErrorHandlerIsEnabled(id string) bool
-	ErrorHandlerFallbackSpecificity() []string
-}
-type ProviderAuthenticators interface {
-	AuthenticatorConfig(id string, overrides json.RawMessage, destination interface{}) error
-	AuthenticatorIsEnabled(id string) bool
-	AuthenticatorJwtJwkMaxWait() time.Duration
-	AuthenticatorJwtJwkTtl() time.Duration
-}
-
-type ProviderAuthorizers interface {
-	AuthorizerConfig(id string, overrides json.RawMessage, destination interface{}) error
-	AuthorizerIsEnabled(id string) bool
-}
-
-type ProviderMutators interface {
-	MutatorConfig(id string, overrides json.RawMessage, destination interface{}) error
-	MutatorIsEnabled(id string) bool
+type Provider interface {
+	Config() Configuration
 }

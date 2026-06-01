@@ -1,7 +1,7 @@
 // Copyright © 2023 Ory Corp
 // SPDX-License-Identifier: Apache-2.0
 
-package credentials
+package credentials_test
 
 import (
 	"context"
@@ -16,12 +16,17 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/ory/fosite"
+
+	. "github.com/ory/oathkeeper/credentials"
+	"github.com/ory/oathkeeper/internal"
 	"github.com/ory/oathkeeper/x"
 )
 
 func TestVerifierDefault(t *testing.T) {
-	signer := NewSignerDefault(newDefaultSignerMockRegistry())
-	verifier := NewVerifierDefault(newDefaultSignerMockRegistry())
+	reg := internal.NewRegistry(t)
+
+	signer := NewSignerDefault(reg)
+	verifier := NewVerifierDefault(reg)
 	now := time.Now().Round(time.Second)
 
 	var sign = func(claims jwt.MapClaims, src string) string {
@@ -308,31 +313,6 @@ func TestVerifierDefault(t *testing.T) {
 			if tc.expectClaims != nil {
 				assert.EqualValues(t, tc.expectClaims, claims.Claims)
 			}
-		})
-	}
-}
-
-func TestScope(t *testing.T) {
-	for k, tc := range []struct {
-		i  map[string]interface{}
-		ev []string
-		ek string
-	}{
-		{i: map[string]interface{}{}, ev: []string{}},
-		{i: map[string]interface{}{"scp": "foo bar"}, ev: []string{"foo", "bar"}, ek: "scp"},
-		{i: map[string]interface{}{"scope": "foo bar"}, ev: []string{"foo", "bar"}, ek: "scope"},
-		{i: map[string]interface{}{"scopes": "foo bar"}, ev: []string{"foo", "bar"}, ek: "scopes"},
-		{i: map[string]interface{}{"scp": []string{"foo", "bar"}}, ev: []string{"foo", "bar"}, ek: "scp"},
-		{i: map[string]interface{}{"scope": []string{"foo", "bar"}}, ev: []string{"foo", "bar"}, ek: "scope"},
-		{i: map[string]interface{}{"scopes": []string{"foo", "bar"}}, ev: []string{"foo", "bar"}, ek: "scopes"},
-		{i: map[string]interface{}{"scp": []interface{}{"foo", "bar"}}, ev: []string{"foo", "bar"}, ek: "scp"},
-		{i: map[string]interface{}{"scope": []interface{}{"foo", "bar"}}, ev: []string{"foo", "bar"}, ek: "scope"},
-		{i: map[string]interface{}{"scopes": []interface{}{"foo", "bar"}}, ev: []string{"foo", "bar"}, ek: "scopes"},
-	} {
-		t.Run(fmt.Sprintf("case=%d", k), func(t *testing.T) {
-			value, key := scope(tc.i)
-			assert.EqualValues(t, tc.ev, value)
-			assert.EqualValues(t, tc.ek, key)
 		})
 	}
 }

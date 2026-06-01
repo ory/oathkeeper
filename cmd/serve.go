@@ -21,7 +21,7 @@ on configuration options, open the configuration documentation:
 
 >> https://www.ory.com/docs/oathkeeper/reference/configuration <<
 `,
-	Run: server.RunServe,
+	RunE: server.RunServe,
 }
 
 func init() {

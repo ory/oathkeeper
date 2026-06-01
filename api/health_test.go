@@ -5,6 +5,7 @@ package api_test
 
 import (
 	"encoding/json"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -14,6 +15,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/ory/herodot"
+	"github.com/ory/x/configx"
 	"github.com/ory/x/httprouterx"
 
 	"github.com/ory/oathkeeper/driver/configuration"
@@ -34,31 +36,31 @@ type statusError struct {
 }
 
 func TestHealth(t *testing.T) {
-	conf := internal.NewConfigurationWithDefaults()
-	conf.SetForTest(t, configuration.AccessRuleRepositories, []string{"file://../test/stub/rules.json"})
-	conf.SetForTest(t, configuration.AuthorizerAllowIsEnabled, true)
-	conf.SetForTest(t, configuration.AuthorizerDenyIsEnabled, true)
-	conf.SetForTest(t, configuration.AuthenticatorNoopIsEnabled, true)
-	conf.SetForTest(t, configuration.AuthenticatorAnonymousIsEnabled, true)
-	conf.SetForTest(t, configuration.MutatorNoopIsEnabled, true)
-	conf.SetForTest(t, "mutators.header.config", map[string]interface{}{"headers": map[string]interface{}{}})
-	conf.SetForTest(t, configuration.MutatorHeaderIsEnabled, true)
-	conf.SetForTest(t, configuration.MutatorIDTokenJWKSURL, "https://stub/.well-known/jwks.json")
-	conf.SetForTest(t, configuration.MutatorIDTokenIssuerURL, "https://stub")
-	conf.SetForTest(t, configuration.MutatorIDTokenIsEnabled, true)
-	r := internal.NewRegistry(conf)
+	r := internal.NewRegistry(t, configx.WithValues(map[string]any{
+		configuration.AccessRuleRepositories:          []string{"file://../test/stub/rules.json"},
+		configuration.AuthorizerAllowIsEnabled:        true,
+		configuration.AuthorizerDenyIsEnabled:         true,
+		configuration.AuthenticatorNoopIsEnabled:      true,
+		configuration.AuthenticatorAnonymousIsEnabled: true,
+		configuration.MutatorNoopIsEnabled:            true,
+		"mutators.header.config":                      map[string]interface{}{"headers": map[string]interface{}{}},
+		configuration.MutatorHeaderIsEnabled:          true,
+		configuration.MutatorIDTokenJWKSURL:           "https://stub/.well-known/jwks.json",
+		configuration.MutatorIDTokenIssuerURL:         "https://stub",
+		configuration.MutatorIDTokenIsEnabled:         true,
+	}))
 
 	router := httprouterx.NewRouter()
 	r.HealthHandler().SetHealthRoutes(router, true)
 	server := httptest.NewServer(router)
-	defer server.Close()
+	t.Cleanup(server.Close)
 
 	var result statusResult
 
 	// Checking health state before initializing the registry
 	res, err := server.Client().Get(server.URL + "/health/alive")
 	require.NoError(t, err)
-	defer res.Body.Close() //nolint:errcheck // closing test response
+	t.Cleanup(func(b io.Closer) func() { return func() { _ = b.Close() } }(res.Body))
 	require.Equal(t, http.StatusOK, res.StatusCode)
 	require.NoError(t, json.NewDecoder(res.Body).Decode(&result))
 	assert.Equal(t, "ok", result.Status)
@@ -67,7 +69,7 @@ func TestHealth(t *testing.T) {
 	result = statusResult{}
 	res, err = server.Client().Get(server.URL + "/health/ready")
 	require.NoError(t, err)
-	defer res.Body.Close() //nolint:errcheck // closing test response
+	t.Cleanup(func(b io.Closer) func() { return func() { _ = b.Close() } }(res.Body))
 	require.Equal(t, http.StatusServiceUnavailable, res.StatusCode)
 	require.NoError(t, json.NewDecoder(res.Body).Decode(&result))
 	assert.Empty(t, result.Status)
@@ -81,7 +83,7 @@ func TestHealth(t *testing.T) {
 	result = statusResult{}
 	res, err = server.Client().Get(server.URL + "/health/alive")
 	require.NoError(t, err)
-	defer res.Body.Close() //nolint:errcheck // closing test response
+	t.Cleanup(func(b io.Closer) func() { return func() { _ = b.Close() } }(res.Body))
 	require.Equal(t, http.StatusOK, res.StatusCode)
 	require.NoError(t, json.NewDecoder(res.Body).Decode(&result))
 	assert.Equal(t, "ok", result.Status)
@@ -90,7 +92,7 @@ func TestHealth(t *testing.T) {
 	result = statusResult{}
 	res, err = server.Client().Get(server.URL + "/health/ready")
 	require.NoError(t, err)
-	defer res.Body.Close() //nolint:errcheck // closing test response
+	t.Cleanup(func(b io.Closer) func() { return func() { _ = b.Close() } }(res.Body))
 	require.Equal(t, http.StatusOK, res.StatusCode)
 	require.NoError(t, json.NewDecoder(res.Body).Decode(&result))
 	assert.Equal(t, "ok", result.Status)

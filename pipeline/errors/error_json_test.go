@@ -22,8 +22,7 @@ import (
 )
 
 func TestErrorJSON(t *testing.T) {
-	conf := internal.NewConfigurationWithDefaults()
-	reg := internal.NewRegistry(conf)
+	reg := internal.NewRegistry(t)
 
 	a, err := reg.PipelineErrorHandler("json")
 	require.NoError(t, err)

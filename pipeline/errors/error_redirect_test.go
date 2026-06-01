@@ -20,8 +20,7 @@ import (
 )
 
 func TestErrorRedirect(t *testing.T) {
-	conf := internal.NewConfigurationWithDefaults()
-	reg := internal.NewRegistry(conf)
+	reg := internal.NewRegistry(t)
 
 	a, err := reg.PipelineErrorHandler("redirect")
 	require.NoError(t, err)
@@ -183,8 +182,7 @@ func TestErrorRedirect(t *testing.T) {
 }
 
 func TestErrorReturnToRedirectURLHeaderUsage(t *testing.T) {
-	conf := internal.NewConfigurationWithDefaults()
-	reg := internal.NewRegistry(conf)
+	reg := internal.NewRegistry(t)
 
 	defaultUrl := &url.URL{Scheme: "http", Host: "ory.sh", Path: "/foo"}
 	defaultTransform := func(req *http.Request) {}

@@ -17,27 +17,27 @@ import (
 )
 
 type AuthorizerDeny struct {
-	c configuration.Provider
+	d configuration.Provider
 }
 
-func NewAuthorizerDeny(c configuration.Provider) *AuthorizerDeny {
-	return &AuthorizerDeny{c: c}
+func NewAuthorizerDeny(d configuration.Provider) *AuthorizerDeny {
+	return &AuthorizerDeny{d: d}
 }
 
 func (a *AuthorizerDeny) GetID() string {
 	return "deny"
 }
 
-func (a *AuthorizerDeny) Authorize(r *http.Request, session *authn.AuthenticationSession, config json.RawMessage, _ pipeline.Rule) error {
+func (a *AuthorizerDeny) Authorize(*http.Request, *authn.AuthenticationSession, json.RawMessage, pipeline.Rule) error {
 	return errors.WithStack(helper.ErrForbidden())
 }
 
 func (a *AuthorizerDeny) Validate(config json.RawMessage) error {
-	if !a.c.AuthorizerIsEnabled(a.GetID()) {
+	if !a.d.Config().AuthorizerIsEnabled(a.GetID()) {
 		return NewErrAuthorizerNotEnabled(a)
 	}
 
-	if err := a.c.AuthorizerConfig(a.GetID(), config, nil); err != nil {
+	if err := a.d.Config().AuthorizerConfig(a.GetID(), config, nil); err != nil {
 		return NewErrAuthorizerMisconfigured(a, err)
 	}
 	return nil

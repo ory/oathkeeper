@@ -5,6 +5,7 @@ package driver
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/spf13/pflag"
 
@@ -14,25 +15,10 @@ import (
 	"github.com/ory/oathkeeper/driver/configuration"
 )
 
-type DefaultDriver struct {
-	c configuration.Provider
-	r Registry
-}
-
-func NewDefaultDriver(l *logrusx.Logger, flags *pflag.FlagSet, configOpts ...configx.OptionModifier) Driver {
-	c, err := configuration.NewKoanfProvider(
-		context.Background(), flags, l, configOpts...)
+func NewDefaultDriver(ctx context.Context, l *logrusx.Logger, flags *pflag.FlagSet, configOpts ...configx.OptionModifier) (Registry, error) {
+	c, err := configuration.NewKoanfProvider(ctx, flags, l, configOpts...)
 	if err != nil {
-		l.WithError(err).Fatal("Failed to initialize configuration")
+		return nil, fmt.Errorf("failed to initialize configuration provider: %w", err)
 	}
-	r := NewRegistry(c).SetLogger(l)
-	return &DefaultDriver{r: r, c: c}
-}
-
-func (r *DefaultDriver) Configuration() configuration.Provider {
-	return r.c
-}
-
-func (r *DefaultDriver) Registry() Registry {
-	return r.r
+	return NewRegistry(c, l), nil
 }

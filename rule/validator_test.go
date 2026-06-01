@@ -8,28 +8,29 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/ory/oathkeeper/driver/configuration"
-	"github.com/ory/oathkeeper/internal"
-	. "github.com/ory/oathkeeper/rule"
-
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
 	"github.com/ory/herodot"
+	"github.com/ory/x/configx"
+
+	"github.com/ory/oathkeeper/driver/configuration"
+	"github.com/ory/oathkeeper/internal"
+	. "github.com/ory/oathkeeper/rule"
 )
 
 func TestValidateRule(t *testing.T) {
-	var prep = func(an, az, m bool) func(*testing.T, configuration.Provider) {
-		return func(t *testing.T, config configuration.Provider) {
-			config.SetForTest(t, configuration.AuthenticatorNoopIsEnabled, an)
-			config.SetForTest(t, configuration.AuthorizerAllowIsEnabled, az)
-			config.SetForTest(t, configuration.MutatorNoopIsEnabled, m)
+	var prep = func(an, az, m bool) map[string]any {
+		return map[string]any{
+			configuration.AuthenticatorNoopIsEnabled: an,
+			configuration.AuthorizerAllowIsEnabled:   az,
+			configuration.MutatorNoopIsEnabled:       m,
 		}
 	}
 
 	for k, tc := range []struct {
-		setup     func(*testing.T, configuration.Provider)
+		config    map[string]any
 		r         *Rule
 		expectErr string
 	}{
@@ -49,7 +50,7 @@ func TestValidateRule(t *testing.T) {
 			expectErr: `Value of "authenticators" must be set and can not be an empty array.`,
 		},
 		{
-			setup: prep(true, false, false),
+			config: prep(true, false, false),
 			r: &Rule{
 				Match:          &Match{URL: "https://www.ory.com", Methods: []string{"POST"}},
 				Upstream:       Upstream{URL: "https://www.ory.com"},
@@ -58,7 +59,7 @@ func TestValidateRule(t *testing.T) {
 			expectErr: `Value "foo" of "authenticators[0]" is not in list of supported authenticators: `,
 		},
 		{
-			setup: prep(false, false, false),
+			config: prep(false, false, false),
 			r: &Rule{
 				Match:          &Match{URL: "https://www.ory.com", Methods: []string{"POST"}},
 				Upstream:       Upstream{URL: "https://www.ory.com"},
@@ -67,7 +68,7 @@ func TestValidateRule(t *testing.T) {
 			expectErr: `Authenticator "noop" is disabled per configuration.`,
 		},
 		{
-			setup: prep(true, false, false),
+			config: prep(true, false, false),
 			r: &Rule{
 				Match:          &Match{URL: "https://www.ory.com", Methods: []string{"POST"}},
 				Upstream:       Upstream{URL: "https://www.ory.com"},
@@ -76,7 +77,7 @@ func TestValidateRule(t *testing.T) {
 			expectErr: `Value of "authorizer.handler" can not be empty.`,
 		},
 		{
-			setup: prep(true, true, false),
+			config: prep(true, true, false),
 			r: &Rule{
 				Match:          &Match{URL: "https://www.ory.com", Methods: []string{"POST"}},
 				Upstream:       Upstream{URL: "https://www.ory.com"},
@@ -86,7 +87,7 @@ func TestValidateRule(t *testing.T) {
 			expectErr: `Value "foo" of "authorizer.handler" is not in list of supported authorizers: `,
 		},
 		{
-			setup: prep(true, true, false),
+			config: prep(true, true, false),
 			r: &Rule{
 				Match:          &Match{URL: "https://www.ory.com", Methods: []string{"POST"}},
 				Upstream:       Upstream{URL: "https://www.ory.com"},
@@ -96,7 +97,7 @@ func TestValidateRule(t *testing.T) {
 			expectErr: `Value of "mutators" must be set and can not be an empty array.`,
 		},
 		{
-			setup: prep(true, true, true),
+			config: prep(true, true, true),
 			r: &Rule{
 				Match:          &Match{URL: "https://www.ory.com", Methods: []string{"POST"}},
 				Upstream:       Upstream{URL: "https://www.ory.com"},
@@ -107,7 +108,7 @@ func TestValidateRule(t *testing.T) {
 			expectErr: `Value "foo" of "mutators[0]" is not in list of supported mutators: `,
 		},
 		{
-			setup: prep(true, true, true),
+			config: prep(true, true, true),
 			r: &Rule{
 				Match:          &Match{URL: "https://www.ory.com", Methods: []string{"POST"}},
 				Upstream:       Upstream{URL: "https://www.ory.com"},
@@ -117,7 +118,7 @@ func TestValidateRule(t *testing.T) {
 			},
 		},
 		{
-			setup: prep(true, true, true),
+			config: prep(true, true, true),
 			r: &Rule{
 				Match:          &Match{URL: "https://www.ory.com", Methods: []string{"MKCOL"}},
 				Upstream:       Upstream{URL: "https://www.ory.com"},
@@ -127,7 +128,7 @@ func TestValidateRule(t *testing.T) {
 			},
 		},
 		{
-			setup: prep(true, true, true),
+			config: prep(true, true, true),
 			r: &Rule{
 				Match:          &Match{URL: "https://www.ory.com", Methods: []string{"MKCOL"}},
 				Upstream:       Upstream{URL: "http://tasks.foo-bar_baz"},
@@ -137,7 +138,7 @@ func TestValidateRule(t *testing.T) {
 			},
 		},
 		{
-			setup: prep(true, true, false),
+			config: prep(true, true, false),
 			r: &Rule{
 				Match:          &Match{URL: "https://www.ory.com", Methods: []string{"POST"}},
 				Upstream:       Upstream{URL: "https://www.ory.com"},
@@ -149,12 +150,8 @@ func TestValidateRule(t *testing.T) {
 		},
 	} {
 		t.Run(fmt.Sprintf("case=%d", k), func(t *testing.T) {
-			conf := internal.NewConfigurationWithDefaults()
-			if tc.setup != nil {
-				tc.setup(t, conf)
-			}
+			r := internal.NewRegistry(t, configx.WithValues(tc.config))
 
-			r := internal.NewRegistry(conf)
 			v := NewValidatorDefault(r)
 
 			err := v.Validate(tc.r)

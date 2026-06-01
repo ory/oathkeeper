@@ -26,8 +26,7 @@ import (
 
 func TestAuthenticatorCookieSession(t *testing.T) {
 	t.Parallel()
-	conf := internal.NewConfigurationWithDefaults()
-	reg := internal.NewRegistry(conf)
+	reg := internal.NewRegistry(t)
 	session := new(AuthenticationSession)
 
 	pipelineAuthenticator, err := reg.PipelineAuthenticator("cookie_session")
@@ -264,7 +263,7 @@ func TestAuthenticatorCookieSession(t *testing.T) {
 					return
 				}
 				w.WriteHeader(http.StatusOK)
-				w.Write([]byte(`{"identity": {"id": "123"}, "session": {"foo": "bar"}}`)) //nolint:errcheck,gosec // test handler response best effort
+				_, _ = w.Write([]byte(`{"identity": {"id": "123"}, "session": {"foo": "bar"}}`))
 			}))
 			req := makeRequest("GET", "/", "", map[string]string{"sessionid": "zyx"}, "")
 			req.Header.Add("X-UsEr", "123")
@@ -345,23 +344,23 @@ func makeServer(t *testing.T, statusCode int, responseBody string) (*httptest.Se
 		requestBody, _ := io.ReadAll(r.Body)
 		requestRecorder.bodies = append(requestRecorder.bodies, requestBody)
 		w.WriteHeader(statusCode)
-		w.Write([]byte(responseBody)) //nolint:errcheck,gosec // test helper ignores write errors
+		_, _ = w.Write([]byte(responseBody))
 	}))
 	t.Cleanup(testServer.Close)
 	return testServer, requestRecorder
 }
 
-func makeRequest(method string, path string, rawQuery string, cookies map[string]string, bodyStr string) *http.Request {
+func makeRequest(method, path, rawQuery string, cookies map[string]string, bodyStr string) *http.Request {
 	var body io.ReadCloser
-	header := http.Header{}
+	h := http.Header{}
 	if bodyStr != "" {
 		body = io.NopCloser(bytes.NewBufferString(bodyStr))
-		header.Add("Content-Length", strconv.Itoa(len(bodyStr)))
+		h.Add("Content-Length", strconv.Itoa(len(bodyStr)))
 	}
 	req := &http.Request{
 		Method: method,
 		URL:    &url.URL{Path: path, RawQuery: rawQuery},
-		Header: header,
+		Header: h,
 		Body:   body,
 	}
 	for name, value := range cookies {
@@ -371,8 +370,7 @@ func makeRequest(method string, path string, rawQuery string, cookies map[string
 }
 
 func TestAuthenticatorCookieSession429Headers(t *testing.T) {
-	conf := internal.NewConfigurationWithDefaults()
-	reg := internal.NewRegistry(conf)
+	reg := internal.NewRegistry(t)
 
 	pipelineAuthenticator, err := reg.PipelineAuthenticator("cookie_session")
 	require.NoError(t, err)

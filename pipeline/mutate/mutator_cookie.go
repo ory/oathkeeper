@@ -10,7 +10,6 @@ import (
 	"net/http"
 	"text/template"
 
-	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/pipeline"
 	"github.com/ory/oathkeeper/pipeline/authn"
 	"github.com/ory/oathkeeper/x"
@@ -26,20 +25,15 @@ type CredentialsCookiesConfig struct {
 
 type MutatorCookie struct {
 	t *template.Template
-	c configuration.Provider
+	d dependencies
 }
 
-func NewMutatorCookie(c configuration.Provider) *MutatorCookie {
-	return &MutatorCookie{c: c, t: x.NewTemplate("cookie")}
+func NewMutatorCookie(d dependencies) *MutatorCookie {
+	return &MutatorCookie{d: d, t: x.NewTemplate("cookie")}
 }
 
-func (a *MutatorCookie) GetID() string {
-	return "cookie"
-}
-
-func (a *MutatorCookie) WithCache(t *template.Template) {
-	a.t = t
-}
+func (a *MutatorCookie) GetID() string                  { return "cookie" }
+func (a *MutatorCookie) WithCache(t *template.Template) { a.t = t }
 
 func (a *MutatorCookie) Mutate(r *http.Request, session *authn.AuthenticationSession, config json.RawMessage, rl pipeline.Rule) error {
 	// Cache request cookies
@@ -97,7 +91,7 @@ func (a *MutatorCookie) Mutate(r *http.Request, session *authn.AuthenticationSes
 }
 
 func (a *MutatorCookie) Validate(config json.RawMessage) error {
-	if !a.c.MutatorIsEnabled(a.GetID()) {
+	if !a.d.Config().MutatorIsEnabled(a.GetID()) {
 		return NewErrMutatorNotEnabled(a)
 	}
 
@@ -107,7 +101,7 @@ func (a *MutatorCookie) Validate(config json.RawMessage) error {
 
 func (a *MutatorCookie) config(config json.RawMessage) (*CredentialsCookiesConfig, error) {
 	var c CredentialsCookiesConfig
-	if err := a.c.MutatorConfig(a.GetID(), config, &c); err != nil {
+	if err := a.d.Config().MutatorConfig(a.GetID(), config, &c); err != nil {
 		return nil, NewErrMutatorMisconfigured(a, err)
 	}
 

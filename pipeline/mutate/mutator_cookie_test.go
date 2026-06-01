@@ -25,8 +25,7 @@ import (
 
 func TestCredentialsIssuerCookies(t *testing.T) {
 	t.Parallel()
-	conf := internal.NewConfigurationWithDefaults()
-	reg := internal.NewRegistry(conf)
+	reg := internal.NewRegistry(t)
 
 	a, err := reg.PipelineMutator("cookie")
 	require.NoError(t, err)

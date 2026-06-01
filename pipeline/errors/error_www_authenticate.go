@@ -20,7 +20,7 @@ type (
 		Realm string `json:"realm"`
 	}
 	ErrorWWWAuthenticate struct {
-		c configuration.Provider
+		c configuration.Configuration
 		d ErrorWWWAuthenticateDependencies
 	}
 	ErrorWWWAuthenticateDependencies interface {
@@ -29,7 +29,7 @@ type (
 )
 
 func NewErrorWWWAuthenticate(
-	c configuration.Provider,
+	c configuration.Configuration,
 	d ErrorWWWAuthenticateDependencies,
 ) *ErrorWWWAuthenticate {
 	return &ErrorWWWAuthenticate{c: c, d: d}

@@ -87,7 +87,7 @@ func New(ctx context.Context, opts ...Option) (Middleware, error) {
 		return nil, errors.WithStack(err)
 	}
 
-	r := driver.NewRegistry(c).SetLogger(o.logger)
+	r := driver.NewRegistry(c, o.logger)
 	r.Init()
 
 	m := &middleware{r}

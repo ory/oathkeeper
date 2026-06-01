@@ -13,6 +13,9 @@ import (
 	"strings"
 
 	"github.com/ory/oathkeeper/driver/configuration"
+	"github.com/ory/oathkeeper/pipeline/authz"
+	pe "github.com/ory/oathkeeper/pipeline/errors"
+	"github.com/ory/oathkeeper/pipeline/mutate"
 	"github.com/ory/x/httpx"
 	"github.com/ory/x/logrusx"
 
@@ -23,20 +26,26 @@ import (
 	"github.com/ory/oathkeeper/rule"
 )
 
-type proxyRegistry interface {
+type dependencies interface {
 	logrusx.Provider
 	httpx.WriterProvider
+	configuration.Provider
+
+	authn.Registry
+	authz.Registry
+	mutate.Registry
+	pe.Registry
+
 	ProxyRequestHandler() RequestHandler
 	RuleMatcher() rule.Matcher
 }
 
-func NewProxy(r proxyRegistry, c configuration.Provider) *Proxy {
-	return &Proxy{r: r, c: c}
+func NewProxy(d dependencies) *Proxy {
+	return &Proxy{d: d}
 }
 
 type Proxy struct {
-	r proxyRegistry
-	c configuration.Provider
+	d dependencies
 }
 
 type key int
@@ -47,7 +56,7 @@ const (
 	ContextKeySession
 )
 
-func (d *Proxy) RoundTrip(r *http.Request) (*http.Response, error) {
+func (p *Proxy) RoundTrip(r *http.Request) (*http.Response, error) {
 	rw := NewSimpleResponseWriter()
 	fields := map[string]interface{}{
 		"http_method":     r.Method,
@@ -65,7 +74,7 @@ func (d *Proxy) RoundTrip(r *http.Request) (*http.Response, error) {
 		fields["rule_id"] = rl.ID
 	}
 
-	logger := d.r.Logger().WithSpanFromContext(r.Context())
+	logger := p.d.Logger().WithSpanFromContext(r.Context())
 
 	if err, ok := r.Context().Value(director).(error); ok && err != nil {
 		logger.WithError(err).
@@ -73,7 +82,7 @@ func (d *Proxy) RoundTrip(r *http.Request) (*http.Response, error) {
 			WithField("granted", false).
 			Warn("Access request denied")
 
-		d.r.ProxyRequestHandler().HandleError(rw, r, rl, err)
+		p.d.ProxyRequestHandler().HandleError(rw, r, rl, err)
 
 		return &http.Response{
 			StatusCode: rw.code,
@@ -106,7 +115,7 @@ func (d *Proxy) RoundTrip(r *http.Request) (*http.Response, error) {
 		WithFields(fields).
 		Warn("Unable to type assert context")
 
-	d.r.ProxyRequestHandler().HandleError(rw, r, rl, err)
+	p.d.ProxyRequestHandler().HandleError(rw, r, rl, err)
 
 	return &http.Response{
 		StatusCode: rw.code,
@@ -115,8 +124,8 @@ func (d *Proxy) RoundTrip(r *http.Request) (*http.Response, error) {
 	}, nil
 }
 
-func (d *Proxy) Rewrite(r *httputil.ProxyRequest) {
-	if d.c.ProxyTrustForwardedHeaders() {
+func (p *Proxy) Rewrite(r *httputil.ProxyRequest) {
+	if p.d.Config().ProxyTrustForwardedHeaders() {
 		for _, h := range []string{
 			"X-Forwarded-Host",
 			"X-Forwarded-Proto",
@@ -138,15 +147,15 @@ func (d *Proxy) Rewrite(r *httputil.ProxyRequest) {
 		}
 	}
 
-	EnrichRequestedURL(r, d.c.ProxyTrustForwardedHeaders())
-	rl, err := d.r.RuleMatcher().Match(r.Out.Context(), r.Out.Method, r.Out.URL, rule.ProtocolHTTP)
+	EnrichRequestedURL(r, p.d.Config().ProxyTrustForwardedHeaders())
+	rl, err := p.d.RuleMatcher().Match(r.Out.Context(), r.Out.Method, r.Out.URL, rule.ProtocolHTTP)
 	if err != nil {
 		*r.Out = *r.Out.WithContext(context.WithValue(r.Out.Context(), director, err))
 		return
 	}
 
 	*r.Out = *r.Out.WithContext(context.WithValue(r.Out.Context(), ContextKeyMatchedRule, rl))
-	s, err := d.r.ProxyRequestHandler().HandleRequest(r.Out, rl)
+	s, err := p.d.ProxyRequestHandler().HandleRequest(r.Out, rl)
 	if err != nil {
 		*r.Out = *r.Out.WithContext(context.WithValue(r.Out.Context(), director, err))
 		return

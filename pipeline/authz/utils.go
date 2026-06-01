@@ -14,8 +14,9 @@ func pipeRequestBody(r *http.Request, w io.Writer) error {
 		return nil
 	}
 
+	defer func(originalBody io.Closer) { _ = originalBody.Close() }(r.Body)
+
 	var body bytes.Buffer
-	defer r.Body.Close() //nolint:errcheck
 	_, err := io.Copy(w, io.TeeReader(r.Body, &body))
 	if err != nil {
 		return err

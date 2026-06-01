@@ -18,6 +18,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/ory/x/logrusx"
+	"github.com/ory/x/otelx"
 
 	"github.com/ory/oathkeeper/driver/configuration"
 )
@@ -48,6 +49,8 @@ func (r *mockRepositoryRegistry) Logger() *logrusx.Logger {
 	r.loggerCalled++
 	return logrusx.NewT(r.t)
 }
+
+func (r *mockRepositoryRegistry) Tracer(_ context.Context) *otelx.Tracer { return otelx.NewNoop() }
 
 func init() {
 	err := faker.AddProvider("urlProvider", func(v reflect.Value) (interface{}, error) {

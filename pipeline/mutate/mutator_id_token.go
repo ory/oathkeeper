@@ -20,21 +20,14 @@ import (
 	"github.com/pborman/uuid"
 	"github.com/pkg/errors"
 
-	"github.com/ory/oathkeeper/credentials"
-	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/pipeline"
 	"github.com/ory/oathkeeper/pipeline/authn"
 	"github.com/ory/oathkeeper/x"
 	"github.com/ory/x/urlx"
 )
 
-type MutatorIDTokenRegistry interface {
-	credentials.SignerRegistry
-}
-
 type MutatorIDToken struct {
-	c             configuration.Provider
-	r             MutatorIDTokenRegistry
+	d             dependencies
 	templates     *template.Template
 	templatesLock sync.Mutex
 
@@ -53,26 +46,18 @@ func (c *CredentialsIDTokenConfig) ClaimsTemplateID() string {
 	return fmt.Sprintf("%x", md5.Sum([]byte(c.Claims))) //nolint:gosec
 }
 
-func NewMutatorIDToken(c configuration.Provider, r MutatorIDTokenRegistry) *MutatorIDToken {
+func NewMutatorIDToken(d dependencies) *MutatorIDToken {
 	cache, _ := ristretto.NewCache(&ristretto.Config[string, *idTokenCacheContainer]{
 		NumCounters: 10000,
 		MaxCost:     1 << 25,
 		BufferItems: 64,
 	})
-	return &MutatorIDToken{r: r, c: c, templates: x.NewTemplate("id_token"), tokenCache: cache, tokenCacheEnabled: true}
+	return &MutatorIDToken{d: d, templates: x.NewTemplate("id_token"), tokenCache: cache, tokenCacheEnabled: true}
 }
 
-func (a *MutatorIDToken) GetID() string {
-	return "id_token"
-}
-
-func (a *MutatorIDToken) WithCache(t *template.Template) {
-	a.templates = t
-}
-
-func (a *MutatorIDToken) SetCaching(token bool) {
-	a.tokenCacheEnabled = token
-}
+func (a *MutatorIDToken) GetID() string                  { return "id_token" }
+func (a *MutatorIDToken) WithCache(t *template.Template) { a.templates = t }
+func (a *MutatorIDToken) SetCaching(token bool)          { a.tokenCacheEnabled = token }
 
 type idTokenCacheContainer struct {
 	ExpiresAt time.Time
@@ -177,7 +162,7 @@ func (a *MutatorIDToken) Mutate(r *http.Request, session *authn.AuthenticationSe
 		return errors.WithStack(err)
 	}
 
-	signed, err := a.r.CredentialsSigner().Sign(r.Context(), jwks, claims)
+	signed, err := a.d.CredentialsSigner().Sign(r.Context(), jwks, claims)
 	if err != nil {
 		return err
 	}
@@ -188,7 +173,7 @@ func (a *MutatorIDToken) Mutate(r *http.Request, session *authn.AuthenticationSe
 }
 
 func (a *MutatorIDToken) Validate(config json.RawMessage) error {
-	if !a.c.MutatorIsEnabled(a.GetID()) {
+	if !a.d.Config().MutatorIsEnabled(a.GetID()) {
 		return NewErrMutatorNotEnabled(a)
 	}
 
@@ -198,7 +183,7 @@ func (a *MutatorIDToken) Validate(config json.RawMessage) error {
 
 func (a *MutatorIDToken) Config(config json.RawMessage) (*CredentialsIDTokenConfig, error) {
 	var c CredentialsIDTokenConfig
-	if err := a.c.MutatorConfig(a.GetID(), config, &c); err != nil {
+	if err := a.d.Config().MutatorConfig(a.GetID(), config, &c); err != nil {
 		return nil, NewErrMutatorMisconfigured(a, err)
 	}
 

@@ -13,11 +13,11 @@ import (
 )
 
 type AuthorizerAllow struct {
-	c configuration.Provider
+	d configuration.Provider
 }
 
-func NewAuthorizerAllow(c configuration.Provider) *AuthorizerAllow {
-	return &AuthorizerAllow{c: c}
+func NewAuthorizerAllow(d configuration.Provider) *AuthorizerAllow {
+	return &AuthorizerAllow{d: d}
 }
 
 func (a *AuthorizerAllow) GetID() string {
@@ -29,11 +29,11 @@ func (a *AuthorizerAllow) Authorize(r *http.Request, session *authn.Authenticati
 }
 
 func (a *AuthorizerAllow) Validate(config json.RawMessage) error {
-	if !a.c.AuthorizerIsEnabled(a.GetID()) {
+	if !a.d.Config().AuthorizerIsEnabled(a.GetID()) {
 		return NewErrAuthorizerNotEnabled(a)
 	}
 
-	if err := a.c.AuthorizerConfig(a.GetID(), config, nil); err != nil {
+	if err := a.d.Config().AuthorizerConfig(a.GetID(), config, nil); err != nil {
 		return NewErrAuthorizerMisconfigured(a, err)
 	}
 	return nil

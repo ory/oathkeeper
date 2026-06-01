@@ -14,21 +14,18 @@ import (
 	"time"
 
 	"github.com/hashicorp/go-retryablehttp"
-	"go.opentelemetry.io/otel/trace"
-
-	"github.com/ory/oathkeeper/driver/configuration"
-	"github.com/ory/oathkeeper/pipeline"
-	"github.com/ory/oathkeeper/pipeline/authn"
-	"github.com/ory/oathkeeper/x"
+	"github.com/pkg/errors"
+	"github.com/tomasen/realip"
 
 	"github.com/ory/x/httpx"
 	"github.com/ory/x/otelx"
 	"github.com/ory/x/urlx"
 
-	"github.com/pkg/errors"
-	"github.com/tomasen/realip"
-
+	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/helper"
+	"github.com/ory/oathkeeper/pipeline"
+	"github.com/ory/oathkeeper/pipeline/authn"
+	"github.com/ory/oathkeeper/x"
 )
 
 type AuthorizerKetoEngineACPORYConfiguration struct {
@@ -52,17 +49,16 @@ func (c *AuthorizerKetoEngineACPORYConfiguration) ResourceTemplateID() string {
 }
 
 type AuthorizerKetoEngineACPORY struct {
-	c configuration.Provider
+	d dependencies
 
 	client         *retryablehttp.Client
 	contextCreator authorizerKetoWardenContext
 	t              *template.Template
-	tracer         trace.Tracer
 }
 
-func NewAuthorizerKetoEngineACPORY(c configuration.Provider, d interface{ Tracer() trace.Tracer }) *AuthorizerKetoEngineACPORY {
+func NewAuthorizerKetoEngineACPORY(d dependencies) *AuthorizerKetoEngineACPORY {
 	return &AuthorizerKetoEngineACPORY{
-		c: c,
+		d: d,
 		client: httpx.NewResilientClient(
 			httpx.ResilientClientWithMaxRetryWait(100*time.Millisecond),
 			httpx.ResilientClientWithMaxRetry(5),
@@ -73,14 +69,11 @@ func NewAuthorizerKetoEngineACPORY(c configuration.Provider, d interface{ Tracer
 				"requestedAt":     time.Now().UTC(),
 			}
 		},
-		t:      x.NewTemplate("keto_engine_acp_ory"),
-		tracer: d.Tracer(),
+		t: x.NewTemplate("keto_engine_acp_ory"),
 	}
 }
 
-func (a *AuthorizerKetoEngineACPORY) GetID() string {
-	return "keto_engine_acp_ory"
-}
+func (a *AuthorizerKetoEngineACPORY) GetID() string { return "keto_engine_acp_ory" }
 
 type authorizerKetoWardenContext func(r *http.Request) map[string]interface{}
 
@@ -96,7 +89,7 @@ func (a *AuthorizerKetoEngineACPORY) WithContextCreator(f authorizerKetoWardenCo
 }
 
 func (a *AuthorizerKetoEngineACPORY) Authorize(r *http.Request, session *authn.AuthenticationSession, config json.RawMessage, _ pipeline.Rule) (err error) {
-	ctx, span := a.tracer.Start(r.Context(), "pipeline.authz.AuthorizerKetoEngineACPORY.Authorize")
+	ctx, span := a.d.Tracer(r.Context()).Tracer().Start(r.Context(), "pipeline.authz.AuthorizerKetoEngineACPORY.Authorize")
 	defer otelx.End(span, &err)
 	r = r.WithContext(ctx)
 
@@ -106,7 +99,7 @@ func (a *AuthorizerKetoEngineACPORY) Authorize(r *http.Request, session *authn.A
 	}
 
 	// only Regexp matching strategy is supported for now.
-	if !(a.c.AccessRuleMatchingStrategy() == "" || a.c.AccessRuleMatchingStrategy() == configuration.Regexp) { //nolint:staticcheck // clarity over De Morgan form
+	if !(a.d.Config().AccessRuleMatchingStrategy() == "" || a.d.Config().AccessRuleMatchingStrategy() == configuration.Regexp) { //nolint:staticcheck // clarity over De Morgan form
 		return helper.ErrNonRegexpMatchingStrategy()
 	}
 
@@ -164,7 +157,7 @@ func (a *AuthorizerKetoEngineACPORY) Authorize(r *http.Request, session *authn.A
 	if err != nil {
 		return errors.WithStack(err)
 	}
-	defer res.Body.Close() //nolint:errcheck // response body close failure not actionable
+	defer func() { _ = res.Body.Close() }()
 
 	if res.StatusCode == http.StatusTooManyRequests {
 		return errors.WithStack(helper.NewErrTooManyRequestsWithHeaders(res))
@@ -207,7 +200,7 @@ func (a *AuthorizerKetoEngineACPORY) parseParameter(session *authn.Authenticatio
 }
 
 func (a *AuthorizerKetoEngineACPORY) Validate(config json.RawMessage) error {
-	if !a.c.AuthorizerIsEnabled(a.GetID()) {
+	if !a.d.Config().AuthorizerIsEnabled(a.GetID()) {
 		return NewErrAuthorizerNotEnabled(a)
 	}
 
@@ -217,7 +210,7 @@ func (a *AuthorizerKetoEngineACPORY) Validate(config json.RawMessage) error {
 
 func (a *AuthorizerKetoEngineACPORY) Config(config json.RawMessage) (*AuthorizerKetoEngineACPORYConfiguration, error) {
 	var c AuthorizerKetoEngineACPORYConfiguration
-	if err := a.c.AuthorizerConfig(a.GetID(), config, &c); err != nil {
+	if err := a.d.Config().AuthorizerConfig(a.GetID(), config, &c); err != nil {
 		return nil, NewErrAuthorizerMisconfigured(a, err)
 	}
 

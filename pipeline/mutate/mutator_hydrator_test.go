@@ -13,16 +13,16 @@ import (
 	"net/url"
 	"testing"
 
-	"github.com/ory/oathkeeper/pipeline/authn"
-	"github.com/ory/oathkeeper/pipeline/mutate"
-	"github.com/ory/oathkeeper/rule"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+
 	"github.com/ory/x/configx"
 
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/internal"
-
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
+	"github.com/ory/oathkeeper/pipeline/authn"
+	"github.com/ory/oathkeeper/pipeline/mutate"
+	"github.com/ory/oathkeeper/rule"
 )
 
 func setExtra(key string, value interface{}) func(a *authn.AuthenticationSession) {
@@ -129,8 +129,7 @@ func configWithRetriesForMutator(giveUpAfter, retryDelay string) func(*httptest.
 
 func TestMutatorHydrator(t *testing.T) {
 	t.Parallel()
-	conf := internal.NewConfigurationWithDefaults(configx.SkipValidation())
-	reg := internal.NewRegistry(conf)
+	reg := internal.NewRegistry(t, configx.SkipValidation())
 
 	a, err := reg.PipelineMutator("hydrator")
 	require.NoError(t, err)
@@ -383,7 +382,7 @@ func TestMutatorHydrator(t *testing.T) {
 			{enabled: true, shouldPass: true, apiUrl: "http://api/bar"},
 		} {
 			t.Run(fmt.Sprintf("case=%d", k), func(t *testing.T) {
-				conf.SetForTest(t, configuration.MutatorHydratorIsEnabled, testCase.enabled)
+				reg.Config().SetForTest(t, configuration.MutatorHydratorIsEnabled, testCase.enabled)
 
 				err := a.Validate(json.RawMessage(`{"api":{"url":"` + testCase.apiUrl + `"}}`))
 				if testCase.shouldPass {

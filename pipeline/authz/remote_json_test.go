@@ -4,14 +4,14 @@
 package authz_test
 
 import (
-	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
+	"net"
 	"net/http"
 	"net/http/httptest"
 	"testing"
-	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -20,14 +20,14 @@ import (
 	"go.opentelemetry.io/otel/propagation"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 
-	"github.com/ory/x/configx"
-	"github.com/ory/x/logrusx"
+	"github.com/ory/oathkeeper/helper"
+	"github.com/ory/oathkeeper/internal"
 
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/pipeline/authn"
 	. "github.com/ory/oathkeeper/pipeline/authz"
 	"github.com/ory/oathkeeper/rule"
-	"github.com/ory/x/otelx"
+	"github.com/ory/x/configx"
 )
 
 func TestAuthorizerRemoteJSONAuthorize(t *testing.T) {
@@ -38,55 +38,73 @@ func TestAuthorizerRemoteJSONAuthorize(t *testing.T) {
 		session            *authn.AuthenticationSession
 		sessionHeaderMatch *http.Header
 		config             json.RawMessage
-		wantErr            bool
+		assertErr          func(t *testing.T, err error)
 	}{
 		{
 			name:    "invalid configuration",
 			session: &authn.AuthenticationSession{},
 			config:  json.RawMessage(`{}`),
-			wantErr: true,
+			assertErr: func(t *testing.T, err error) {
+				assert.ErrorIs(t, err, ErrAuthorizerNotEnabled())
+			},
 		},
 		{
 			name:    "unresolvable host",
 			session: &authn.AuthenticationSession{},
 			config:  json.RawMessage(`{"remote":"http://unresolvable-host/path","payload":"{}"}`),
-			wantErr: true,
+			assertErr: func(t *testing.T, err error) {
+				dnsErr, ok := errors.AsType[*net.DNSError](err)
+				require.Truef(t, ok, "%#v", err)
+				assert.Equal(t, "unresolvable-host", dnsErr.Name)
+			},
 		},
 		{
 			name:    "invalid template",
 			session: &authn.AuthenticationSession{},
 			config:  json.RawMessage(`{"remote":"http://host/path","payload":"{{"}`),
-			wantErr: true,
+			assertErr: func(t *testing.T, err error) {
+				assert.ErrorContains(t, err, "unclosed action")
+			},
 		},
 		{
 			name:    "unknown field",
 			session: &authn.AuthenticationSession{},
 			config:  json.RawMessage(`{"remote":"http://host/path","payload":"{{ .foo }}"}`),
-			wantErr: true,
+			assertErr: func(t *testing.T, err error) {
+				assert.ErrorContains(t, err, "can't evaluate field foo")
+			},
 		},
 		{
 			name:    "invalid json",
 			session: &authn.AuthenticationSession{},
 			config:  json.RawMessage(`{"remote":"http://host/path","payload":"{"}`),
-			wantErr: true,
+			assertErr: func(t *testing.T, err error) {
+				assert.ErrorContains(t, err, "unexpected end of JSON input")
+			},
 		},
 		{
 			name:    "invalid headers type",
 			session: &authn.AuthenticationSession{},
 			config:  json.RawMessage(`{"remote":"http://host/path","payload":"{\"match\":\"baz\"}","headers":"string"}`),
-			wantErr: true,
+			assertErr: func(t *testing.T, err error) {
+				assert.ErrorIs(t, err, ErrAuthorizerNotEnabled())
+			},
 		},
 		{
 			name:    "invalid headers template",
 			session: &authn.AuthenticationSession{},
 			config:  json.RawMessage(`{"remote":"http://host/path","payload":"{\"match\":\"baz\"}","headers":{"Subject":"{{ Invalid Template }}"}}`),
-			wantErr: true,
+			assertErr: func(t *testing.T, err error) {
+				assert.ErrorContains(t, err, `function "Invalid" not defined`)
+			},
 		},
 		{
 			name:    "headers template with unknown field",
 			session: &authn.AuthenticationSession{},
 			config:  json.RawMessage(`{"remote":"http://host/path","payload":"{\"match\":\"baz\"}","headers":{"Subject":"{{ .UnknownField }}"}}`),
-			wantErr: true,
+			assertErr: func(t *testing.T, err error) {
+				assert.ErrorContains(t, err, "can't evaluate field UnknownField")
+			},
 		},
 		{
 			name: "forbidden",
@@ -97,7 +115,9 @@ func TestAuthorizerRemoteJSONAuthorize(t *testing.T) {
 			},
 			session: &authn.AuthenticationSession{},
 			config:  json.RawMessage(`{"payload":"{}"}`),
-			wantErr: true,
+			assertErr: func(t *testing.T, err error) {
+				assert.ErrorIs(t, err, helper.ErrForbidden())
+			},
 		},
 		{
 			name: "unexpected status code",
@@ -108,7 +128,9 @@ func TestAuthorizerRemoteJSONAuthorize(t *testing.T) {
 			},
 			session: &authn.AuthenticationSession{},
 			config:  json.RawMessage(`{"payload":"{}"}`),
-			wantErr: true,
+			assertErr: func(t *testing.T, err error) {
+				assert.ErrorContains(t, err, "expected status code 200 but got 400")
+			},
 		},
 		{
 			name: "ok",
@@ -201,33 +223,29 @@ func TestAuthorizerRemoteJSONAuthorize(t *testing.T) {
 			config:  json.RawMessage(`{"payload":"[\"foo\",\"bar\"]"}`),
 		},
 	}
-	for _, tt := range tests {
-		tt := tt
-		t.Run(tt.name, func(t *testing.T) {
-			t.Parallel()
-			if tt.setup != nil {
-				server := tt.setup(t)
-				defer server.Close()
-				tt.config, _ = sjson.SetBytes(tt.config, "remote", server.URL)
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			if tc.setup != nil {
+				server := tc.setup(t)
+				t.Cleanup(server.Close)
+				tc.config, _ = sjson.SetBytes(tc.config, "remote", server.URL)
 			}
 
-			l := logrusx.NewT(t)
-			p, err := configuration.NewKoanfProvider(context.Background(), nil, l)
-			if err != nil {
-				l.WithError(err).Fatal("Failed to initialize configuration")
-			}
-			a := NewAuthorizerRemoteJSON(p, otelx.NewNoop())
-			ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
-			defer cancel()
-			r, err := http.NewRequestWithContext(ctx, "", "", nil)
+			reg := internal.NewRegistry(t)
+			a := NewAuthorizerRemoteJSON(reg)
+			r, err := http.NewRequestWithContext(t.Context(), "", "", nil)
 			require.NoError(t, err)
 			r.Header = map[string][]string{"Authorization": {"Bearer token"}}
-			if err := a.Authorize(r, tt.session, tt.config, &rule.Rule{}); (err != nil) != tt.wantErr {
-				t.Errorf("Authorize() error = %v, wantErr %v", err, tt.wantErr)
+
+			err = a.Authorize(r, tc.session, tc.config, &rule.Rule{})
+			if tc.assertErr != nil {
+				tc.assertErr(t, err)
+			} else {
+				assert.NoError(t, err)
 			}
 
-			if tt.sessionHeaderMatch != nil {
-				assert.Equal(t, tt.sessionHeaderMatch, &tt.session.Header)
+			if tc.sessionHeaderMatch != nil {
+				assert.Equal(t, tc.sessionHeaderMatch, &tc.session.Header)
 			}
 		})
 	}
@@ -296,19 +314,15 @@ func TestAuthorizerRemoteJSONValidate(t *testing.T) {
 			config:  json.RawMessage(`{"remote":"http://host/path","payload":"{}","retry":{"give_up_after":"3s", "max_delay":"100ms"}}`),
 		},
 	}
-	for _, tt := range tests {
-		tt := tt
-		t.Run(tt.name, func(t *testing.T) {
-			t.Parallel()
-			p, err := configuration.NewKoanfProvider(
-				context.Background(), nil, logrusx.NewT(t),
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			reg := internal.NewRegistry(t,
+				configx.WithValue(configuration.AuthorizerRemoteJSONIsEnabled, tc.enabled),
 				configx.SkipValidation(),
 			)
-			require.NoError(t, err)
-			a := NewAuthorizerRemoteJSON(p, otelx.NewNoop())
-			p.SetForTest(t, configuration.AuthorizerRemoteJSONIsEnabled, tt.enabled)
-			if err := a.Validate(tt.config); (err != nil) != tt.wantErr {
-				t.Errorf("Validate() error = %v, wantErr %v", err, tt.wantErr)
+			a := NewAuthorizerRemoteJSON(reg)
+			if err := a.Validate(tc.config); (err != nil) != tc.wantErr {
+				t.Errorf("Validate() error = %v, wantErr %v", err, tc.wantErr)
 			}
 		})
 	}
@@ -349,24 +363,21 @@ func TestAuthorizerRemoteJSONConfig(t *testing.T) {
 			},
 		},
 	}
-	for _, tt := range tests {
-		tt := tt
-		t.Run("case="+tt.name, func(t *testing.T) {
-			t.Parallel()
-			p, err := configuration.NewKoanfProvider(
-				context.Background(), nil, logrusx.NewT(t),
-			)
-			require.NoError(t, err)
-			a := NewAuthorizerRemoteJSON(p, otelx.NewNoop())
-			actual, err := a.Config(tt.raw)
+	for _, tc := range tests {
+		t.Run("case="+tc.name, func(t *testing.T) {
+			reg := internal.NewRegistry(t)
+			a := NewAuthorizerRemoteJSON(reg)
+			actual, err := a.Config(tc.raw)
 			assert.NoError(t, err)
-			assert.Equal(t, tt.expected, actual)
+			assert.Equal(t, tc.expected, actual)
 		})
 	}
 }
 
-// This test must NOT use t.Parallel() because it mutates global OTEL state.
 func TestAuthorizerRemoteJSONTracePropagation(t *testing.T) {
+	// This test must NOT use t.Parallel() because it mutates global OTEL state.
+	// t.Parallel()
+
 	// Set up a real tracer provider so otelhttp.NewTransport creates sampled spans.
 	tp := sdktrace.NewTracerProvider(sdktrace.WithSampler(sdktrace.AlwaysSample()))
 
@@ -377,7 +388,7 @@ func TestAuthorizerRemoteJSONTracePropagation(t *testing.T) {
 	t.Cleanup(func() {
 		otel.SetTracerProvider(prevTP)
 		otel.SetTextMapPropagator(prevProp)
-		_ = tp.Shutdown(context.Background())
+		_ = tp.Shutdown(t.Context())
 	})
 
 	var gotTraceparent string
@@ -385,15 +396,13 @@ func TestAuthorizerRemoteJSONTracePropagation(t *testing.T) {
 		gotTraceparent = r.Header.Get("Traceparent")
 		w.WriteHeader(http.StatusOK)
 	}))
-	defer server.Close()
+	t.Cleanup(server.Close)
 
 	config := json.RawMessage(fmt.Sprintf(`{"remote":%q,"payload":"{}"}`, server.URL))
 
-	p, err := configuration.NewKoanfProvider(context.Background(), nil, logrusx.NewT(t))
-	require.NoError(t, err)
-
-	a := NewAuthorizerRemoteJSON(p, otelx.NewNoop())
-	r, err := http.NewRequestWithContext(context.Background(), "", "", nil)
+	reg := internal.NewRegistry(t)
+	a := NewAuthorizerRemoteJSON(reg)
+	r, err := http.NewRequestWithContext(t.Context(), "", "", nil)
 	require.NoError(t, err)
 	err = a.Authorize(r, &authn.AuthenticationSession{}, config, &rule.Rule{})
 	require.NoError(t, err)

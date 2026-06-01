@@ -1,10 +1,9 @@
 // Copyright © 2023 Ory Corp
 // SPDX-License-Identifier: Apache-2.0
 
-package authn
+package authn_test
 
 import (
-	"context"
 	"testing"
 	"time"
 
@@ -13,26 +12,21 @@ import (
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/clientcredentials"
 
-	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/x/configx"
-	"github.com/ory/x/logrusx"
+
+	"github.com/ory/oathkeeper/internal"
+	"github.com/ory/oathkeeper/pipeline/authn"
 )
 
 func TestClientCredentialsCache(t *testing.T) {
 	t.Parallel()
 
-	logger := logrusx.NewT(t)
-	c, err := configuration.NewKoanfProvider(
-		context.Background(),
-		nil,
-		logger,
-		configx.WithValues(map[string]interface{}{
-			"authenticators.oauth2_client_credentials.config.token_url":     "https://example.com/oauth2/token",
-			"authenticators.oauth2_client_credentials.config.cache.enabled": true,
-		}))
-	require.NoError(t, err)
+	reg := internal.NewRegistry(t, configx.WithValues(map[string]interface{}{
+		"authenticators.oauth2_client_credentials.config.token_url":     "https://example.com/oauth2/token",
+		"authenticators.oauth2_client_credentials.config.cache.enabled": true,
+	}))
 
-	a := NewAuthenticatorOAuth2ClientCredentials(c, logger)
+	a := authn.NewAuthenticatorOAuth2ClientCredentials(reg)
 	assert.Equal(t, "oauth2_client_credentials", a.GetID())
 
 	config, err := a.Config(nil)
@@ -50,11 +44,11 @@ func TestClientCredentialsCache(t *testing.T) {
 				ClientSecret: "secret",
 			}
 
-			a.tokenToCache(config, cc, token)
+			a.TokenToCache(config, cc, token)
 			// wait for cache to save value
 			time.Sleep(time.Millisecond * 10)
 
-			v := a.tokenFromCache(config, cc)
+			v := a.TokenFromCache(config, cc)
 			require.NotNil(t, v)
 		})
 
@@ -64,12 +58,12 @@ func TestClientCredentialsCache(t *testing.T) {
 				ClientSecret: "secret",
 			}
 
-			ok := a.tokenCache.Set(clientCredentialsConfigToKey(cc), []byte("invalid-json-string"), 1)
+			ok := a.TokenCache.Set(authn.ClientCredentialsConfigToKey(cc), []byte("invalid-json-string"), 1)
 			require.True(t, ok)
 			// wait cache to save value
 			time.Sleep(time.Millisecond * 10)
 
-			v := a.tokenFromCache(config, cc)
+			v := a.TokenFromCache(config, cc)
 			require.Nil(t, v)
 		})
 
@@ -85,17 +79,17 @@ func TestClientCredentialsCache(t *testing.T) {
 			}
 
 			config, _ := a.Config([]byte(`{ "cache": { "ttl": "100ms" } }`))
-			a.tokenToCache(config, cc, token)
-			a.tokenCache.Wait()
+			a.TokenToCache(config, cc, token)
+			a.TokenCache.Wait()
 
 			assert.EventuallyWithT(t, func(t *assert.CollectT) {
-				v := a.tokenFromCache(config, cc)
+				v := a.TokenFromCache(config, cc)
 				assert.NotNil(t, v)
 			}, 90*time.Millisecond, 10*time.Millisecond)
 
 			// wait cache to be expired
 			assert.EventuallyWithT(t, func(t *assert.CollectT) {
-				v := a.tokenFromCache(config, cc)
+				v := a.TokenFromCache(config, cc)
 				assert.Nil(t, v)
 			}, 120*time.Millisecond, 10*time.Millisecond)
 		})

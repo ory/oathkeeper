@@ -22,12 +22,10 @@ import (
 	"golang.org/x/oauth2/clientcredentials"
 
 	"github.com/ory/fosite"
-	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/helper"
 	"github.com/ory/oathkeeper/pipeline"
 	"github.com/ory/oathkeeper/x/header"
 	"github.com/ory/x/httpx"
-	"github.com/ory/x/logrusx"
 	"github.com/ory/x/otelx"
 )
 
@@ -67,26 +65,24 @@ type cacheConfig struct {
 }
 
 type AuthenticatorOAuth2Introspection struct {
-	c configuration.Provider
+	d dependencies
 
 	clientMap map[string]*http.Client
 	mu        sync.RWMutex
 
-	tokenCache *ristretto.Cache[string, []byte]
+	TokenCache *ristretto.Cache[string, []byte]
 	cacheTTL   *time.Duration
-	logger     *logrusx.Logger
-	provider   trace.TracerProvider
 }
 
-func NewAuthenticatorOAuth2Introspection(c configuration.Provider, l *logrusx.Logger, p trace.TracerProvider) *AuthenticatorOAuth2Introspection {
-	return &AuthenticatorOAuth2Introspection{c: c, logger: l, provider: p, clientMap: make(map[string]*http.Client)}
+func NewAuthenticatorOAuth2Introspection(d dependencies) *AuthenticatorOAuth2Introspection {
+	return &AuthenticatorOAuth2Introspection{d: d, clientMap: make(map[string]*http.Client)}
 }
 
 func (a *AuthenticatorOAuth2Introspection) GetID() string { return "oauth2_introspection" }
 
 func (a *AuthenticatorOAuth2Introspection) WaitForCache() {
-	if a.tokenCache != nil {
-		a.tokenCache.Wait()
+	if a.TokenCache != nil {
+		a.TokenCache.Wait()
 	}
 }
 
@@ -135,11 +131,11 @@ func (a *Audience) UnmarshalJSON(b []byte) error {
 	return errUnsupportedType
 }
 
-func tokenCacheKey(token, endpoint string) string {
+func TokenCacheKey(token, endpoint string) string {
 	return fmt.Sprintf("%s|%s", token, endpoint)
 }
 
-func (a *AuthenticatorOAuth2Introspection) tokenFromCache(config *AuthenticatorOAuth2IntrospectionConfiguration, token string, ss fosite.ScopeStrategy) *AuthenticatorOAuth2IntrospectionResult {
+func (a *AuthenticatorOAuth2Introspection) TokenFromCache(config *AuthenticatorOAuth2IntrospectionConfiguration, token string, ss fosite.ScopeStrategy) *AuthenticatorOAuth2IntrospectionResult {
 	if !config.Cache.Enabled {
 		return nil
 	}
@@ -148,8 +144,8 @@ func (a *AuthenticatorOAuth2Introspection) tokenFromCache(config *AuthenticatorO
 		return nil
 	}
 
-	key := tokenCacheKey(token, config.IntrospectionURL)
-	i, found := a.tokenCache.Get(key)
+	key := TokenCacheKey(token, config.IntrospectionURL)
+	i, found := a.TokenCache.Get(key)
 	if !found {
 		return nil
 	}
@@ -161,7 +157,7 @@ func (a *AuthenticatorOAuth2Introspection) tokenFromCache(config *AuthenticatorO
 	return &v
 }
 
-func (a *AuthenticatorOAuth2Introspection) tokenToCache(config *AuthenticatorOAuth2IntrospectionConfiguration, i *AuthenticatorOAuth2IntrospectionResult, token string, ss fosite.ScopeStrategy) {
+func (a *AuthenticatorOAuth2Introspection) TokenToCache(config *AuthenticatorOAuth2IntrospectionConfiguration, i *AuthenticatorOAuth2IntrospectionResult, token string, ss fosite.ScopeStrategy) {
 	if !config.Cache.Enabled {
 		return
 	}
@@ -170,16 +166,16 @@ func (a *AuthenticatorOAuth2Introspection) tokenToCache(config *AuthenticatorOAu
 		return
 	}
 
-	key := tokenCacheKey(token, config.IntrospectionURL)
+	key := TokenCacheKey(token, config.IntrospectionURL)
 	v, err := json.Marshal(i)
 	if err != nil {
 		return
 	}
 
 	if a.cacheTTL != nil {
-		a.tokenCache.SetWithTTL(key, v, 1, *a.cacheTTL)
+		a.TokenCache.SetWithTTL(key, v, 1, *a.cacheTTL)
 	} else {
-		a.tokenCache.Set(key, v, 1)
+		a.TokenCache.Set(key, v, 1)
 	}
 }
 
@@ -199,9 +195,9 @@ func (a *AuthenticatorOAuth2Introspection) Authenticate(r *http.Request, session
 		return errors.WithStack(ErrAuthenticatorNotResponsible)
 	}
 
-	ss := a.c.ToScopeStrategy(cf.ScopeStrategy, "authenticators.oauth2_introspection.config.scope_strategy")
+	ss := a.d.Config().ToScopeStrategy(cf.ScopeStrategy, "authenticators.oauth2_introspection.config.scope_strategy")
 
-	i := a.tokenFromCache(cf, token, ss)
+	i := a.TokenFromCache(cf, token, ss)
 	inCache := i != nil
 
 	// If the token can not be found, and the scope strategy is nil, and the required scope list
@@ -277,7 +273,7 @@ func (a *AuthenticatorOAuth2Introspection) Authenticate(r *http.Request, session
 	}
 
 	if !inCache {
-		a.tokenToCache(cf, i, token, ss)
+		a.TokenToCache(cf, i, token, ss)
 	}
 
 	if len(i.Extra) == 0 {
@@ -299,7 +295,7 @@ func (a *AuthenticatorOAuth2Introspection) Authenticate(r *http.Request, session
 }
 
 func (a *AuthenticatorOAuth2Introspection) Validate(config json.RawMessage) error {
-	if !a.c.AuthenticatorIsEnabled(a.GetID()) {
+	if !a.d.Config().AuthenticatorIsEnabled(a.GetID()) {
 		return NewErrAuthenticatorNotEnabled(a)
 	}
 
@@ -309,7 +305,7 @@ func (a *AuthenticatorOAuth2Introspection) Validate(config json.RawMessage) erro
 
 func (a *AuthenticatorOAuth2Introspection) Config(config json.RawMessage) (*AuthenticatorOAuth2IntrospectionConfiguration, *http.Client, error) {
 	var c AuthenticatorOAuth2IntrospectionConfiguration
-	if err := a.c.AuthenticatorConfig(a.GetID(), config, &c); err != nil {
+	if err := a.d.Config().AuthenticatorConfig(a.GetID(), config, &c); err != nil {
 		return nil, nil, NewErrAuthenticatorMisconfigured(a, err)
 	}
 
@@ -324,7 +320,7 @@ func (a *AuthenticatorOAuth2Introspection) Config(config json.RawMessage) (*Auth
 	a.mu.RUnlock()
 
 	if !ok || client == nil {
-		a.logger.Debug("Initializing http client")
+		a.d.Logger().Debug("Initializing http client")
 		var rt http.RoundTripper
 		if c.PreAuth != nil && c.PreAuth.Enabled {
 			var ep url.Values
@@ -367,7 +363,7 @@ func (a *AuthenticatorOAuth2Introspection) Config(config json.RawMessage) (*Auth
 			httpx.ResilientClientWithMaxRetryWait(maxWait),
 			httpx.ResilientClientWithConnectionTimeout(timeout),
 		).StandardClient()
-		client.Transport = otelhttp.NewTransport(rt, otelhttp.WithTracerProvider(a.provider))
+		client.Transport = otelhttp.NewTransport(rt, otelhttp.WithTracerProvider(a.d.Tracer(context.Background()).Provider()))
 		a.mu.Lock()
 		a.clientMap[clientKey] = client
 		a.mu.Unlock()
@@ -380,21 +376,21 @@ func (a *AuthenticatorOAuth2Introspection) Config(config json.RawMessage) (*Auth
 		}
 
 		// clear cache if previous ttl was longer (or none)
-		if a.tokenCache != nil {
+		if a.TokenCache != nil {
 			if a.cacheTTL == nil || (a.cacheTTL != nil && a.cacheTTL.Seconds() > cacheTTL.Seconds()) {
-				a.tokenCache.Clear()
+				a.TokenCache.Clear()
 			}
 		}
 
 		a.cacheTTL = &cacheTTL
 	}
 
-	if a.tokenCache == nil {
+	if a.TokenCache == nil {
 		cost := int64(c.Cache.MaxCost)
 		if cost == 0 {
 			cost = 100000000
 		}
-		a.logger.Debugf("Creating cache with max cost: %d", c.Cache.MaxCost)
+		a.d.Logger().Debugf("Creating cache with max cost: %d", c.Cache.MaxCost)
 		cache, err := ristretto.NewCache(&ristretto.Config[string, []byte]{
 			// This will hold about 1000 unique mutation responses.
 			NumCounters: cost * 10,
@@ -411,7 +407,7 @@ func (a *AuthenticatorOAuth2Introspection) Config(config json.RawMessage) (*Auth
 			return nil, nil, err
 		}
 
-		a.tokenCache = cache
+		a.TokenCache = cache
 	}
 
 	return &c, client, nil

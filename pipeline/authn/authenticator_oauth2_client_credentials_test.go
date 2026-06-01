@@ -11,18 +11,18 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ory/oathkeeper/driver/configuration"
-	"github.com/ory/oathkeeper/internal"
-	"github.com/ory/oathkeeper/pipeline/authn"
-	"github.com/ory/x/configx"
-
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/tidwall/sjson"
 
 	"github.com/ory/herodot"
+	"github.com/ory/x/configx"
+
+	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/helper"
+	"github.com/ory/oathkeeper/internal"
+	"github.com/ory/oathkeeper/pipeline/authn"
 )
 
 func authOkDynamic(u string) *http.Request {
@@ -34,8 +34,7 @@ func authOkDynamic(u string) *http.Request {
 
 func TestAuthenticatorOAuth2ClientCredentials(t *testing.T) {
 	t.Parallel()
-	conf := internal.NewConfigurationWithDefaults(configx.SkipValidation())
-	reg := internal.NewRegistry(conf)
+	reg := internal.NewRegistry(t, configx.SkipValidation())
 
 	a, err := reg.PipelineAuthenticator("oauth2_client_credentials")
 	require.NoError(t, err)
@@ -244,7 +243,7 @@ func TestAuthenticatorOAuth2ClientCredentials(t *testing.T) {
 				})
 
 				var authnConfig authn.AuthenticatorOAuth2Configuration
-				json.Unmarshal(c, &authnConfig) //nolint:errcheck,gosec // test overrides config
+				require.NoError(t, json.Unmarshal(c, &authnConfig))
 
 				authnConfig.Scopes = []string{"some-scope"}
 				authnConfig.Cache.TTL = "6h"
@@ -383,19 +382,19 @@ func TestAuthenticatorOAuth2ClientCredentials(t *testing.T) {
 	ts := httptest.NewServer(h)
 
 	t.Run("method=validate", func(t *testing.T) {
-		conf.SetForTest(t, configuration.AuthenticatorOAuth2ClientCredentialsIsEnabled, false)
+		reg.Config().SetForTest(t, configuration.AuthenticatorOAuth2ClientCredentialsIsEnabled, false)
 		require.Error(t, a.Validate(json.RawMessage(`{"token_url":""}`)))
 
-		conf.SetForTest(t, configuration.AuthenticatorOAuth2ClientCredentialsIsEnabled, false)
+		reg.Config().SetForTest(t, configuration.AuthenticatorOAuth2ClientCredentialsIsEnabled, false)
 		require.Error(t, a.Validate(json.RawMessage(`{"token_url":"`+ts.URL+"/oauth2/token"+`"}`)))
 
-		conf.SetForTest(t, configuration.AuthenticatorOAuth2ClientCredentialsIsEnabled, true)
+		reg.Config().SetForTest(t, configuration.AuthenticatorOAuth2ClientCredentialsIsEnabled, true)
 		require.Error(t, a.Validate(json.RawMessage(`{"token_url":""}`)))
 
-		conf.SetForTest(t, configuration.AuthenticatorOAuth2ClientCredentialsIsEnabled, true)
+		reg.Config().SetForTest(t, configuration.AuthenticatorOAuth2ClientCredentialsIsEnabled, true)
 		require.NoError(t, a.Validate(json.RawMessage(`{"token_url":"`+ts.URL+"/oauth2/token"+`"}`)))
 
-		conf.SetForTest(t, configuration.AuthenticatorOAuth2ClientCredentialsIsEnabled, true)
+		reg.Config().SetForTest(t, configuration.AuthenticatorOAuth2ClientCredentialsIsEnabled, true)
 		require.NoError(t, a.Validate(json.RawMessage(`{"token_url":"`+ts.URL+"/oauth2/token"+`","retry":{"give_up_after":"3s", "max_delay":"100ms"}}`)))
 	})
 }

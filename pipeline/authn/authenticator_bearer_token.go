@@ -5,6 +5,7 @@ package authn
 
 import (
 	"cmp"
+	"context"
 	"encoding/json"
 	"net/http"
 	"strings"
@@ -12,9 +13,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/tidwall/gjson"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
-	"go.opentelemetry.io/otel/trace"
 
-	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/helper"
 	"github.com/ory/oathkeeper/pipeline"
 	"github.com/ory/oathkeeper/x/header"
@@ -73,23 +72,21 @@ func (a *AuthenticatorBearerTokenConfiguration) GetForceMethod() string {
 }
 
 type AuthenticatorBearerToken struct {
-	c      configuration.Provider
+	d      dependencies
 	client *http.Client
-	tracer trace.Tracer
 }
 
-var _ AuthenticatorForwardConfig = new(AuthenticatorBearerTokenConfiguration)
+var _ AuthenticatorForwardConfig = (*AuthenticatorBearerTokenConfiguration)(nil)
 
-func NewAuthenticatorBearerToken(c configuration.Provider, provider trace.TracerProvider) *AuthenticatorBearerToken {
+func NewAuthenticatorBearerToken(d dependencies) *AuthenticatorBearerToken {
 	return &AuthenticatorBearerToken{
-		c: c,
+		d: d,
 		client: &http.Client{
 			Transport: otelhttp.NewTransport(
 				http.DefaultTransport,
-				otelhttp.WithTracerProvider(provider),
+				otelhttp.WithTracerProvider(d.Tracer(context.Background()).Provider()),
 			),
 		},
-		tracer: provider.Tracer("oauthkeeper/pipeline/authn"),
 	}
 }
 
@@ -98,7 +95,7 @@ func (a *AuthenticatorBearerToken) GetID() string {
 }
 
 func (a *AuthenticatorBearerToken) Validate(config json.RawMessage) error {
-	if !a.c.AuthenticatorIsEnabled(a.GetID()) {
+	if !a.d.Config().AuthenticatorIsEnabled(a.GetID()) {
 		return NewErrAuthenticatorNotEnabled(a)
 	}
 
@@ -108,7 +105,7 @@ func (a *AuthenticatorBearerToken) Validate(config json.RawMessage) error {
 
 func (a *AuthenticatorBearerToken) Config(config json.RawMessage) (*AuthenticatorBearerTokenConfiguration, error) {
 	var c AuthenticatorBearerTokenConfiguration
-	if err := a.c.AuthenticatorConfig(a.GetID(), config, &c); err != nil {
+	if err := a.d.Config().AuthenticatorConfig(a.GetID(), config, &c); err != nil {
 		return nil, NewErrAuthenticatorMisconfigured(a, err)
 	}
 
@@ -127,7 +124,7 @@ func (a *AuthenticatorBearerToken) Config(config json.RawMessage) (*Authenticato
 }
 
 func (a *AuthenticatorBearerToken) Authenticate(r *http.Request, session *AuthenticationSession, config json.RawMessage, _ pipeline.Rule) (err error) {
-	ctx, span := a.tracer.Start(r.Context(), "pipeline.authn.AuthenticatorBearerToken.Authenticate")
+	ctx, span := a.d.Tracer(r.Context()).Tracer().Start(r.Context(), "pipeline.authn.AuthenticatorBearerToken.Authenticate")
 	defer otelx.End(span, &err)
 	r = r.WithContext(ctx)
 

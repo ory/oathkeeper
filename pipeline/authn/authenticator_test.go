@@ -21,7 +21,6 @@ const (
 
 func TestSetHeader(t *testing.T) {
 	t.Parallel()
-	assert := assert.New(t)
 	for k, tc := range []struct {
 		a    *authn.AuthenticationSession
 		desc string
@@ -38,16 +37,15 @@ func TestSetHeader(t *testing.T) {
 		t.Run(fmt.Sprintf("case=%d/description=%s", k, tc.desc), func(t *testing.T) {
 			tc.a.SetHeader(key, val)
 
-			assert.NotNil(tc.a.Header)
-			assert.Len(tc.a.Header, 1)
-			assert.Equal(tc.a.Header.Get(key), val)
+			assert.NotNil(t, tc.a.Header)
+			assert.Len(t, tc.a.Header, 1)
+			assert.Equal(t, tc.a.Header.Get(key), val)
 		})
 	}
 }
 
 func TestCopy(t *testing.T) {
 	t.Parallel()
-	assert := assert.New(t)
 	original := &authn.AuthenticationSession{
 		Subject: "ab",
 		Extra:   map[string]interface{}{"a": "b", "b": map[string]string{"a:": "b"}},
@@ -67,10 +65,10 @@ func TestCopy(t *testing.T) {
 	copied.MatchContext.RegexpCaptureGroups[0] = "b"
 	copied.MatchContext.Method = "PUT"
 
-	assert.NotEqual(original.Subject, copied.Subject)
-	assert.NotEqual(original.Extra, copied.Extra)
-	assert.NotEqual(original.Header, copied.Header)
-	assert.NotEqual(original.MatchContext.URL.Host, copied.MatchContext.URL.Host)
-	assert.NotEqual(original.MatchContext.RegexpCaptureGroups, copied.MatchContext.RegexpCaptureGroups)
-	assert.NotEqual(original.MatchContext.Method, copied.MatchContext.Method)
+	assert.NotEqual(t, original.Subject, copied.Subject)
+	assert.NotEqual(t, original.Extra, copied.Extra)
+	assert.NotEqual(t, original.Header, copied.Header)
+	assert.NotEqual(t, original.MatchContext.URL.Host, copied.MatchContext.URL.Host)
+	assert.NotEqual(t, original.MatchContext.RegexpCaptureGroups, copied.MatchContext.RegexpCaptureGroups)
+	assert.NotEqual(t, original.MatchContext.Method, copied.MatchContext.Method)
 }

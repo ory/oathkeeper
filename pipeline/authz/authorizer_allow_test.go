@@ -15,8 +15,7 @@ import (
 
 func TestAuthorizerAllow(t *testing.T) {
 	t.Parallel()
-	conf := internal.NewConfigurationWithDefaults()
-	reg := internal.NewRegistry(conf)
+	reg := internal.NewRegistry(t)
 
 	a, err := reg.PipelineAuthorizer("allow")
 	require.NoError(t, err)
@@ -27,10 +26,10 @@ func TestAuthorizerAllow(t *testing.T) {
 	})
 
 	t.Run("method=validate", func(t *testing.T) {
-		conf.SetForTest(t, configuration.AuthorizerAllowIsEnabled, true)
+		reg.Config().SetForTest(t, configuration.AuthorizerAllowIsEnabled, true)
 		require.NoError(t, a.Validate(nil))
 
-		conf.SetForTest(t, configuration.AuthorizerAllowIsEnabled, false)
+		reg.Config().SetForTest(t, configuration.AuthorizerAllowIsEnabled, false)
 		require.Error(t, a.Validate(nil))
 	})
 }

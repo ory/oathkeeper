@@ -8,33 +8,15 @@ import (
 	"net/http"
 	"path"
 
-	"github.com/ory/herodot"
-	"github.com/ory/x/errorsx"
-	"github.com/ory/x/httpx"
-	"github.com/ory/x/logrusx"
-
-	"github.com/ory/oathkeeper/driver/configuration"
-
-	"github.com/ory/oathkeeper/pipeline/authn"
-	"github.com/ory/oathkeeper/pipeline/authz"
-	pe "github.com/ory/oathkeeper/pipeline/errors"
-	"github.com/ory/oathkeeper/pipeline/mutate"
-
 	"github.com/pkg/errors"
 
+	"github.com/ory/herodot"
+
 	"github.com/ory/oathkeeper/helper"
+	"github.com/ory/oathkeeper/pipeline/authn"
+	pe "github.com/ory/oathkeeper/pipeline/errors"
 	"github.com/ory/oathkeeper/rule"
 )
-
-type requestHandlerRegistry interface {
-	httpx.WriterProvider
-	logrusx.Provider
-
-	authn.Registry
-	authz.Registry
-	mutate.Registry
-	pe.Registry
-}
 
 type RequestHandler interface {
 	HandleError(w http.ResponseWriter, r *http.Request, rl *rule.Rule, handleErr error)
@@ -42,123 +24,118 @@ type RequestHandler interface {
 	InitializeAuthnSession(r *http.Request, rl *rule.Rule) *authn.AuthenticationSession
 }
 
-type requestHandler struct {
-	r requestHandlerRegistry
-	c configuration.Provider
-}
+type requestHandler struct{ d dependencies }
 
 type whenConfig struct {
 	When pe.Whens `json:"when"`
 }
 
-func NewRequestHandler(r requestHandlerRegistry, c configuration.Provider) RequestHandler {
-	return &requestHandler{r: r, c: c}
-}
+func NewRequestHandler(d dependencies) RequestHandler { return &requestHandler{d: d} }
 
 // matchesWhen
-func (d *requestHandler) matchesWhen(w http.ResponseWriter, r *http.Request, h pe.Handler, config json.RawMessage, handleErr error) error {
+func (h *requestHandler) matchesWhen(w http.ResponseWriter, r *http.Request, handler pe.Handler, config json.RawMessage, handleErr error) error {
 	var when whenConfig
-	if err := d.c.ErrorHandlerConfig(h.GetID(), config, &when); err != nil {
-		d.r.Writer().WriteError(w, r, pe.NewErrErrorHandlerMisconfigured(h, err))
+	if err := h.d.Config().ErrorHandlerConfig(handler.GetID(), config, &when); err != nil {
+		h.d.Writer().WriteError(w, r, pe.NewErrErrorHandlerMisconfigured(handler, err))
 		return err
 	}
 
 	if err := pe.MatchesWhen(when.When, r, handleErr); err != nil {
-		if errorsx.Cause(err) == pe.ErrHandlerNotResponsible {
+		if errors.Is(err, pe.ErrHandlerNotResponsible) {
 			return err
 		}
-		d.r.Writer().WriteError(w, r, errors.WithStack(herodot.ErrInternalServerError().WithReasonf(`Unable to execute error handler "%s". This is either a bug or a configuration issue and should be reported to the administrator. Returned error: "%s". Original error: "%s"`, h.GetID(), err, handleErr)))
+		h.d.Writer().WriteError(w, r, errors.WithStack(herodot.ErrInternalServerError().WithReasonf(`Unable to execute error handler "%s". This is either a bug or a configuration issue and should be reported to the administrator. Returned error: "%s". Original error: "%s"`, handler.GetID(), err, handleErr)))
 		return err
 	}
 
 	return nil
 }
 
-func (d *requestHandler) HandleError(w http.ResponseWriter, r *http.Request, rl *rule.Rule, handleErr error) {
+func (h *requestHandler) HandleError(w http.ResponseWriter, r *http.Request, rl *rule.Rule, handleErr error) {
 	if rl == nil {
 		// Create a new, empty rule.
 		rl = new(rule.Rule)
 	}
 
-	var h pe.Handler
+	var errorHandler pe.Handler
 	var config json.RawMessage
 	for _, re := range rl.Errors {
-		handler, err := d.r.PipelineErrorHandler(re.Handler)
+		handler, err := h.d.PipelineErrorHandler(re.Handler)
 		if err != nil {
-			d.r.Writer().WriteError(w, r, errors.WithStack(herodot.ErrInternalServerError().WithReasonf(
+			h.d.Writer().WriteError(w, r, errors.WithStack(herodot.ErrInternalServerError().WithReasonf(
 				"Unable to find error handler named: %s. This is a configuration issue and should be reported to the administrator.", re.Handler,
 			)))
 			return
 		}
 
-		if err := d.matchesWhen(w, r, handler, re.Config, handleErr); errorsx.Cause(err) == pe.ErrHandlerNotResponsible {
+		if err := h.matchesWhen(w, r, handler, re.Config, handleErr); errors.Is(err, pe.ErrHandlerNotResponsible) {
 			continue
 		} else if err != nil {
 			// error was handled already by d.matchesWhen
 			return
 		}
 
-		if h != nil {
-			d.r.Writer().WriteError(w, r, errors.WithStack(herodot.ErrInternalServerError().WithReasonf(
+		if errorHandler != nil {
+			h.d.Writer().WriteError(w, r, errors.WithStack(herodot.ErrInternalServerError().WithReasonf(
 				`Found more than one error handlers to be responsible for this request. This is a configuration error that needs to be resolved by the system administrator."`,
 			)))
 			return
 		}
 
-		h = handler
+		errorHandler = handler
 		config = re.Config
 	}
 
-	if h == nil {
-		for _, name := range d.c.ErrorHandlerFallbackSpecificity() {
-			if !d.c.ErrorHandlerIsEnabled(name) {
-				d.r.Writer().WriteError(w, r, errors.WithStack(herodot.ErrInternalServerError().WithReasonf(
+	if errorHandler == nil {
+		for _, name := range h.d.Config().ErrorHandlerFallbackSpecificity() {
+			if !h.d.Config().ErrorHandlerIsEnabled(name) {
+				h.d.Writer().WriteError(w, r, errors.WithStack(herodot.ErrInternalServerError().WithReasonf(
 					`Fallback error handler "%s" was requested but is disabled or unknown. This is a configuration issue and should be reported to the administrator.`, name,
 				)))
 				return
 			}
 
-			handler, err := d.r.PipelineErrorHandler(name)
+			handler, err := h.d.PipelineErrorHandler(name)
 			if err != nil {
-				d.r.Writer().WriteError(w, r, errors.WithStack(herodot.ErrInternalServerError().WithReasonf(
+				h.d.Writer().WriteError(w, r, errors.WithStack(herodot.ErrInternalServerError().WithReasonf(
 					`Unable to find fallback error handler named "%s". This is a configuration issue and should be reported to the administrator.`, name,
 				)))
 				return
 			}
 
-			if err := d.matchesWhen(w, r, handler, nil, handleErr); errorsx.Cause(err) == pe.ErrHandlerNotResponsible {
+			if err := h.matchesWhen(w, r, handler, nil, handleErr); errors.Is(err, pe.ErrHandlerNotResponsible) {
 				continue
 			} else if err != nil {
 				// error was handled already by d.matchesWhen
 				return
 			}
 
-			h = handler
+			errorHandler = handler
 			break
 		}
 	}
 
-	if h == nil {
-		d.r.Writer().WriteError(w, r, errors.WithStack(herodot.ErrInternalServerError().WithReasonf(
+	if errorHandler == nil {
+		h.d.Writer().WriteError(w, r, errors.WithStack(herodot.ErrInternalServerError().WithReasonf(
 			"Unable to handle HTTP request because no matching error handling strategy was found. This is a bug and should be reported to: http://github.com/ory/oathkeeper",
 		)))
 		return
 	}
 
-	if err := h.Validate(config); err != nil {
-		d.r.Writer().WriteError(w, r, err)
+	if err := errorHandler.Validate(config); err != nil {
+		h.d.Writer().WriteError(w, r, err)
 		return
 	}
 
-	if err := h.Handle(w, r, config, rl, handleErr); err != nil {
-		d.r.Writer().WriteError(w, r, errors.WithStack(herodot.ErrInternalServerError().WithReasonf(
-			`Unable to execute error handler "%s". This is either a bug or a configuration issue and should be reported to the administrator. Returned error: "%s". Original error: "%s"`, h.GetID(), err, handleErr,
+	if err := errorHandler.Handle(w, r, config, rl, handleErr); err != nil {
+		h.d.Writer().WriteError(w, r, errors.WithStack(herodot.ErrInternalServerError().WithReasonf(
+			`Unable to execute error handler "%s". This is either a bug or a configuration issue and should be reported to the administrator. Returned error: "%s". Original error: "%s"`, errorHandler.GetID(), err, handleErr,
 		)))
 		return
 	}
 }
 
-func (d *requestHandler) HandleRequest(r *http.Request, rl *rule.Rule) (session *authn.AuthenticationSession, err error) {
+func (h *requestHandler) HandleRequest(r *http.Request, rl *rule.Rule) (session *authn.AuthenticationSession, err error) {
 	var found bool
 
 	fields := map[string]interface{}{
@@ -169,10 +146,10 @@ func (d *requestHandler) HandleRequest(r *http.Request, rl *rule.Rule) (session 
 		"rule_id":         rl.ID,
 	}
 
-	logger := d.r.Logger().WithSpanFromContext(r.Context())
+	logger := h.d.Logger().WithSpanFromContext(r.Context())
 
 	// initialize the session used during all the flow
-	session = d.InitializeAuthnSession(r, rl)
+	session = h.InitializeAuthnSession(r, rl)
 
 	if len(rl.Authenticators) == 0 {
 		err = errors.New("No authentication handler was set in the rule")
@@ -185,7 +162,7 @@ func (d *requestHandler) HandleRequest(r *http.Request, rl *rule.Rule) (session 
 	}
 
 	for _, a := range rl.Authenticators {
-		anh, err := d.r.PipelineAuthenticator(a.Handler)
+		anh, err := h.d.PipelineAuthenticator(a.Handler)
 		if err != nil {
 			logger.WithError(err).
 				WithFields(fields).
@@ -249,7 +226,7 @@ func (d *requestHandler) HandleRequest(r *http.Request, rl *rule.Rule) (session 
 		return nil, err
 	}
 
-	azh, err := d.r.PipelineAuthorizer(rl.Authorizer.Handler)
+	azh, err := h.d.PipelineAuthorizer(rl.Authorizer.Handler)
 	if err != nil {
 		logger.WithError(err).
 			WithFields(fields).
@@ -292,7 +269,7 @@ func (d *requestHandler) HandleRequest(r *http.Request, rl *rule.Rule) (session 
 	}
 
 	for _, m := range rl.Mutators {
-		sh, err := d.r.PipelineMutator(m.Handler)
+		sh, err := h.d.PipelineMutator(m.Handler)
 		if err != nil {
 			logger.WithError(err).
 				WithFields(fields).
@@ -329,7 +306,7 @@ func (d *requestHandler) HandleRequest(r *http.Request, rl *rule.Rule) (session 
 }
 
 // InitializeAuthnSession creates an authentication session and initializes it with a Match context if possible
-func (d *requestHandler) InitializeAuthnSession(r *http.Request, rl *rule.Rule) *authn.AuthenticationSession {
+func (h *requestHandler) InitializeAuthnSession(r *http.Request, rl *rule.Rule) *authn.AuthenticationSession {
 	session := &authn.AuthenticationSession{
 		Subject: "",
 	}
@@ -338,9 +315,9 @@ func (d *requestHandler) InitializeAuthnSession(r *http.Request, rl *rule.Rule) 
 		r.URL.Path = path.Clean(r.URL.Path)
 	}
 
-	values, err := rl.ExtractRegexGroups(d.c.AccessRuleMatchingStrategy(), r.URL)
+	values, err := rl.ExtractRegexGroups(h.d.Config().AccessRuleMatchingStrategy(), r.URL)
 	if err != nil {
-		d.r.Logger().WithSpanFromContext(r.Context()).WithError(err).
+		h.d.Logger().WithSpanFromContext(r.Context()).WithError(err).
 			WithField("rule_id", rl.ID).
 			WithField("access_url", r.URL.String()).
 			WithField("reason_id", "capture_groups_error").
