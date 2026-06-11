@@ -8,7 +8,7 @@ replace (
 )
 
 require (
-	connectrpc.com/connect v1.19.2
+	connectrpc.com/connect v1.20.0
 	github.com/Azure/azure-pipeline-go v0.2.2
 	github.com/Azure/azure-storage-blob-go v0.9.0
 	github.com/Masterminds/sprig/v3 v3.3.0
