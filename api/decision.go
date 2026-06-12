@@ -71,7 +71,15 @@ func (h *DecisionHandler) Decisions(w http.ResponseWriter, r *http.Request) {
 	r.URL.Scheme = cmp.Or(r.Header.Get(xForwardedProto),
 		x.IfThenElseString(r.TLS != nil, "https", "http"))
 	r.URL.Host = cmp.Or(r.Header.Get(xForwardedHost), r.Host)
-	r.URL.Path = cmp.Or(strings.SplitN(r.Header.Get(xForwardedUri), "?", 2)[0], r.URL.Path[len(DecisionPath):])
+	if fwdUri := r.Header.Get(xForwardedUri); fwdUri != "" {
+		parts := strings.SplitN(fwdUri, "?", 2)
+		r.URL.Path = parts[0]
+		if len(parts) == 2 {
+			r.URL.RawQuery = parts[1]
+		}
+	} else {
+		r.URL.Path = r.URL.Path[len(DecisionPath):]
+	}
 
 	fields := map[string]interface{}{
 		"http_method":     r.Method,
