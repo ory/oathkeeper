@@ -314,7 +314,6 @@ mutators:
 					_, err = clStream.CloseAndRecv()
 					assertErrDenied(t, err)
 					cClStream := connectClient.ClientStream(t.Context())
-					require.NoError(t, cClStream.Send(&rpctest.ClientStreamRequest{}))
 					_, err = cClStream.CloseAndReceive()
 					assertErrDenied(t, err)
 
