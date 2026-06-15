@@ -4,7 +4,6 @@
 package rule_test
 
 import (
-	"context"
 	"encoding/base64"
 	"fmt"
 	"io"
@@ -22,14 +21,14 @@ import (
 	"github.com/gofrs/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-
-	"github.com/ory/x/configx"
-	"github.com/ory/x/watcherx"
+	"golang.org/x/sync/errgroup"
 
 	"github.com/ory/oathkeeper/driver/configuration"
 	"github.com/ory/oathkeeper/internal"
 	"github.com/ory/oathkeeper/internal/cloudstorage"
 	"github.com/ory/oathkeeper/rule"
+	"github.com/ory/x/configx"
+	"github.com/ory/x/watcherx"
 )
 
 const (
@@ -90,13 +89,13 @@ func TestFetcherReload(t *testing.T) {
 	}))
 	t.Cleanup(ts.Close)
 
-	go func() { require.NoError(t, r.RuleFetcher().Watch(t.Context())) }()
+	watch(t, r)
 
 	// initial config without a repo and without a matching strategy
 	copyToFile(t, "config_no_repo.yaml", configFile)
 	<-configChanged
 
-	rules := eventuallyListRules(t.Context(), t, r, 0)
+	rules := eventuallyListRules(t, r, 0)
 	require.Empty(t, rules)
 
 	strategy, err := r.RuleRepository().MatchingStrategy(t.Context())
@@ -107,7 +106,7 @@ func TestFetcherReload(t *testing.T) {
 	copyToFile(t, "config_default.yaml", configFile)
 	<-configChanged
 
-	rules = eventuallyListRules(t.Context(), t, r, 1)
+	rules = eventuallyListRules(t, r, 1)
 	require.Equal(t, "test-rule-1-glob", rules[0].ID)
 
 	strategy, err = r.RuleRepository().MatchingStrategy(t.Context())
@@ -118,7 +117,7 @@ func TestFetcherReload(t *testing.T) {
 	copyToFile(t, "config_glob.yaml", configFile)
 	<-configChanged
 
-	rules = eventuallyListRules(t.Context(), t, r, 1)
+	rules = eventuallyListRules(t, r, 1)
 	require.Equal(t, "test-rule-1-glob", rules[0].ID)
 
 	strategy, err = r.RuleRepository().MatchingStrategy(t.Context())
@@ -129,7 +128,7 @@ func TestFetcherReload(t *testing.T) {
 	copyToFile(t, "config_error.yaml", configFile)
 	<-configChanged
 
-	rules = eventuallyListRules(t.Context(), t, r, 1)
+	rules = eventuallyListRules(t, r, 1)
 	require.Equal(t, "test-rule-1-glob", rules[0].ID)
 
 	strategy, err = r.RuleRepository().MatchingStrategy(t.Context())
@@ -140,7 +139,7 @@ func TestFetcherReload(t *testing.T) {
 	copyToFile(t, "config_regexp.yaml", configFile)
 	<-configChanged
 
-	rules = eventuallyListRules(t.Context(), t, r, 1)
+	rules = eventuallyListRules(t, r, 1)
 	require.Equal(t, "test-rule-1-glob", rules[0].ID)
 
 	strategy, err = r.RuleRepository().MatchingStrategy(t.Context())
@@ -180,7 +179,7 @@ func TestFetcherWatchConfig(t *testing.T) {
 
 	require.NoError(t, os.WriteFile(configFile.Name(), []byte(""), 0o600))
 
-	require.NoError(t, r.RuleFetcher().Watch(t.Context()))
+	watch(t, r)
 
 	for k, tc := range []struct {
 		config           string
@@ -253,7 +252,7 @@ access_rules:
 			require.NoError(t, os.WriteFile(configFile.Name(), []byte(tc.config), 0o600))
 			<-configChanged
 
-			rules := eventuallyListRules(t.Context(), t, r, len(tc.expectIDs))
+			rules := eventuallyListRules(t, r, len(tc.expectIDs))
 			strategy, err := r.RuleRepository().MatchingStrategy(t.Context())
 			require.NoError(t, err)
 			require.Equal(t, tc.expectedStrategy, strategy)
@@ -272,8 +271,6 @@ func TestFetcherWatchRepositoryFromFS(t *testing.T) {
 	if runtime.GOOS == "windows" {
 		t.Skip("Skipping watcher tests on windows")
 	}
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
 
 	tempDir := t.TempDir()
 	configFile, err := os.CreateTemp(tempDir, "config-*.yaml")
@@ -303,9 +300,7 @@ access_rules:
 		}),
 	)
 
-	go func() {
-		require.NoError(t, r.RuleFetcher().Watch(ctx))
-	}()
+	watch(t, r)
 
 	const rulePattern = `{
   "id": "%s",
@@ -341,7 +336,7 @@ access_rules:
 			_, _ = repoFile.WriteAt([]byte(content), 0)
 			_ = repoFile.Sync()
 
-			actualRules := eventuallyListRules(ctx, t, r, len(tc.ids))
+			actualRules := eventuallyListRules(t, r, len(tc.ids))
 
 			ids := make([]string, len(rawRules))
 			for k, r := range actualRules {
@@ -415,13 +410,10 @@ func TestFetcherWatchRepositoryFromKubernetesConfigMap(t *testing.T) {
 		}
 	}
 
+	watch(t, r)
+
 	var cleanup func()
-
-	go func() {
-		require.NoError(t, r.RuleFetcher().Watch(ctx))
-	}()
-
-	for i := 0; i < 10; i++ {
+	for i := range 10 {
 		t.Run(fmt.Sprintf("case=%d", i), func(t *testing.T) {
 			cleanup = configMapUpdate(t, fmt.Sprintf(`[{
   "id": "%d",
@@ -439,7 +431,18 @@ func TestFetcherWatchRepositoryFromKubernetesConfigMap(t *testing.T) {
   "mutators": [{"handler": "noop"}]
 }]`, i), cleanup)
 
-			rules := eventuallyListRules(ctx, t, r, 1)
+			// The rule count stays at 1 across iterations, so waiting for the
+			// count alone is satisfied by the stale rule from the previous
+			// iteration before the new one is loaded. Wait for the expected
+			// rule ID instead.
+			var rules []rule.Rule
+			assert.EventuallyWithT(t, func(t *assert.CollectT) {
+				var err error
+				rules, err = r.RuleRepository().List(ctx, 500, 0)
+				require.NoError(t, err)
+				require.Len(t, rules, 1)
+				require.Equal(t, fmt.Sprintf("%d", i), rules[0].ID)
+			}, 10*time.Second, 10*time.Millisecond)
 
 			require.Len(t, rules, 1)
 			require.Equal(t, fmt.Sprintf("%d", i), rules[0].ID)
@@ -449,8 +452,6 @@ func TestFetcherWatchRepositoryFromKubernetesConfigMap(t *testing.T) {
 
 func TestFetchRulesFromObjectStorage(t *testing.T) {
 	t.Parallel()
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
 
 	configFile, _ := os.CreateTemp(t.TempDir(), ".oathkeeper-*.yml")
 	_, _ = configFile.WriteString(`
@@ -484,21 +485,28 @@ access_rules:
 	)
 	r.RuleFetcher().(rule.URLMuxSetter).SetURLMux(cloudstorage.NewTestURLMux(t))
 
-	go func() {
-		require.NoError(t, r.RuleFetcher().Watch(ctx))
-	}()
+	watch(t, r)
 
-	eventuallyListRules(ctx, t, r, 6)
+	eventuallyListRules(t, r, 6)
 }
 
-func eventuallyListRules(ctx context.Context, t *testing.T, r rule.Registry, expectedLen int) (rules []rule.Rule) {
-	t.Helper()
-	assert.EventuallyWithT(t, func(t *assert.CollectT) {
+func eventuallyListRules(t0 *testing.T, r rule.Registry, expectedLen int) (rules []rule.Rule) {
+	assert.EventuallyWithT(t0, func(t *assert.CollectT) {
 		var err error
-		rules, err = r.RuleRepository().List(ctx, 500, 0)
+		rules, err = r.RuleRepository().List(t0.Context(), 500, 0)
 		require.NoError(t, err)
 		assert.Len(t, rules, expectedLen)
 	}, 10*time.Second, 10*time.Millisecond)
-	require.Len(t, rules, expectedLen)
+	require.Len(t0, rules, expectedLen)
 	return
+}
+
+func watch(t *testing.T, r rule.Registry) {
+	var eg errgroup.Group
+	eg.Go(func() error {
+		return r.RuleFetcher().Watch(t.Context())
+	})
+	t.Cleanup(func() {
+		assert.NoError(t, eg.Wait())
+	})
 }
