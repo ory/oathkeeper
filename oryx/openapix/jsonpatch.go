@@ -12,7 +12,7 @@ type JSONPatchDocument []JSONPatch
 //
 // swagger:model jsonPatch
 type JSONPatch struct {
-	// The operation to be performed. One of "add", "remove", "replace", "move", "copy", or "test".
+	// The operation to be performed. One of "add", "remove", or "replace".
 	//
 	// required: true
 	// example: replace
