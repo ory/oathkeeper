@@ -369,15 +369,25 @@ func (a *AuthenticatorOAuth2Introspection) Config(config json.RawMessage) (*Auth
 		a.mu.Unlock()
 	}
 
+	// Integrity fix: TokenCache initialization, cacheTTL pointer assignment, and
+	// TokenCache.Clear() are all brought under the existing a.mu write lock to
+	// eliminate the TOCTOU data race where concurrent goroutines could observe
+	// a nil TokenCache, each independently allocate a new cache instance, and
+	// overwrite each other — corrupting the singleton and leaking goroutines
+	// spawned by ristretto's internal workers.
+	a.mu.Lock()
+
 	if c.Cache.TTL != "" {
 		cacheTTL, err := time.ParseDuration(c.Cache.TTL)
 		if err != nil {
+			a.mu.Unlock()
 			return nil, nil, err
 		}
 
-		// clear cache if previous ttl was longer (or none)
+		// Clear cache if the previous TTL was longer (or unset), so stale
+		// entries with a longer lifetime than the new policy cannot linger.
 		if a.TokenCache != nil {
-			if a.cacheTTL == nil || (a.cacheTTL != nil && a.cacheTTL.Seconds() > cacheTTL.Seconds()) {
+			if a.cacheTTL == nil || a.cacheTTL.Seconds() > cacheTTL.Seconds() {
 				a.TokenCache.Clear()
 			}
 		}
@@ -404,11 +414,13 @@ func (a *AuthenticatorOAuth2Introspection) Config(config json.RawMessage) (*Auth
 			IgnoreInternalCost: true,
 		})
 		if err != nil {
+			a.mu.Unlock()
 			return nil, nil, err
 		}
 
 		a.TokenCache = cache
 	}
 
+	a.mu.Unlock()
 	return &c, client, nil
 }

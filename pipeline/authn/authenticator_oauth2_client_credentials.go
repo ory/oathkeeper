@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/dgraph-io/ristretto/v2"
@@ -36,9 +37,30 @@ type clientCredentialsCacheConfig struct {
 	MaxTokens int    `json:"max_tokens"`
 }
 
+// AuthenticatorOAuth2ClientCredentials authenticates requests via the OAuth2
+// client credentials flow.
+//
+// Integrity fix: the original struct had no synchronization primitives, causing
+// two distinct data races under concurrent request handling:
+//
+//  1. a.client was overwritten on every Config() invocation — any concurrent
+//     goroutine could observe a partially-initialized or entirely different
+//     *http.Client pointer, leading to non-deterministic transport behaviour.
+//
+//  2. a.TokenCache and a.cacheTTL were written without any lock, meaning the
+//     TOCTOU check "if a.TokenCache == nil" was not atomic: two goroutines
+//     could both observe nil, each allocate a new ristretto cache (spawning
+//     background goroutines), and then one would overwrite the other's pointer
+//     — leaking the orphaned cache and its goroutines permanently.
+//
+// The fix introduces:
+//   - clientOnce (sync.Once) to guarantee a.client is initialized exactly once.
+//   - mu (sync.Mutex) to serialize writes to a.TokenCache and a.cacheTTL.
 type AuthenticatorOAuth2ClientCredentials struct {
-	d      dependencies
-	client *http.Client
+	d          dependencies
+	client     *http.Client
+	clientOnce sync.Once
+	mu         sync.Mutex
 
 	TokenCache *ristretto.Cache[string, []byte]
 	cacheTTL   *time.Duration
@@ -94,14 +116,33 @@ func (a *AuthenticatorOAuth2ClientCredentials) Config(config json.RawMessage) (*
 		return nil, err
 	}
 	timeout := time.Millisecond * duration
-	a.client = httpx.NewResilientClient(
-		httpx.ResilientClientWithMaxRetryWait(maxWait),
-		httpx.ResilientClientWithConnectionTimeout(timeout),
-	).StandardClient()
+
+	// clientOnce.Do guarantees that a.client is allocated and written exactly
+	// once, regardless of how many goroutines are concurrently executing
+	// Config(). Subsequent calls observe the pointer set by the first caller
+	// without any unsynchronized write. Timeout and maxWait are captured from
+	// the first successful config resolution; the values are validated above
+	// before Do is reached, so the closure is always called with well-formed
+	// duration arguments.
+	a.clientOnce.Do(func() {
+		a.client = httpx.NewResilientClient(
+			httpx.ResilientClientWithMaxRetryWait(maxWait),
+			httpx.ResilientClientWithConnectionTimeout(timeout),
+		).StandardClient()
+	})
+
+	// mu serializes writes to a.cacheTTL and a.TokenCache so that the
+	// check-then-act sequence "if a.TokenCache == nil { ... a.TokenCache = cache }"
+	// is atomic. Without this lock, two goroutines can both observe nil,
+	// independently allocate separate ristretto caches (each spawning
+	// background goroutines), and then one silently overwrites the other's
+	// pointer, permanently leaking the orphaned cache.
+	a.mu.Lock()
 
 	if c.Cache.TTL != "" {
 		cacheTTL, err := time.ParseDuration(c.Cache.TTL)
 		if err != nil {
+			a.mu.Unlock()
 			return nil, err
 		}
 		a.cacheTTL = &cacheTTL
@@ -127,12 +168,14 @@ func (a *AuthenticatorOAuth2ClientCredentials) Config(config json.RawMessage) (*
 			IgnoreInternalCost: true,
 		})
 		if err != nil {
+			a.mu.Unlock()
 			return nil, err
 		}
 
 		a.TokenCache = cache
 	}
 
+	a.mu.Unlock()
 	return &c, nil
 }
 
