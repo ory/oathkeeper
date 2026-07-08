@@ -167,6 +167,10 @@ func TestKoanfProvider(t *testing.T) {
 			assert.True(t, p.CORSEnabled("proxy"))
 			assert.True(t, p.CORSEnabled("api"))
 
+			proxyCORS := p.CORSOptions("proxy")
+			// configx sets AllowOriginVaryRequestFunc (boundary-safe matching); a
+			// func value is not comparable, so drop it before the struct equality.
+			proxyCORS.AllowOriginVaryRequestFunc = nil
 			assert.Equal(t, cors.Options{
 				AllowedOrigins:     []string{"https://example.com", "https://*.example.com"},
 				AllowedMethods:     []string{"POST", "GET", "PUT", "PATCH", "DELETE"},
@@ -176,8 +180,10 @@ func TestKoanfProvider(t *testing.T) {
 				AllowCredentials:   true,
 				OptionsPassthrough: false,
 				Debug:              true,
-			}, p.CORSOptions("proxy"))
+			}, proxyCORS)
 
+			apiCORS := p.CORSOptions("api")
+			apiCORS.AllowOriginVaryRequestFunc = nil
 			assert.Equal(t, cors.Options{
 				AllowedOrigins:     []string{"https://example.org", "https://*.example.org"},
 				AllowedMethods:     []string{"GET", "PUT", "PATCH", "DELETE"},
@@ -187,7 +193,7 @@ func TestKoanfProvider(t *testing.T) {
 				AllowCredentials:   true,
 				OptionsPassthrough: false,
 				Debug:              true,
-			}, p.CORSOptions("api"))
+			}, apiCORS)
 		})
 
 		t.Run("group=tls", func(t *testing.T) {
