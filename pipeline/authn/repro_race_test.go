@@ -1,9 +1,18 @@
 //go:build race
 // +build race
 
-// This test is a minimal concurrent harness to reproduce the data races
-// in AuthenticatorOAuth2Introspection.Config() vs TokenToCache/TokenFromCache.
-// Run with: go test -race -v ./pipeline/authn -run TestConfigDataRace
+// Package authn_test contains a concurrent regression harness for the OAuth2
+// introspection authenticator. Run with:
+//
+//	go test -race -v ./pipeline/authn -run TestConfigDataRace
+//
+// After the stateless-after-init refactoring, Config() no longer mutates
+// a.TokenCache or a.cacheTTL (the latter has been removed from the struct).
+// TokenToCache and TokenFromCache derive all state from their config argument
+// and from the immutable TokenCache pointer set in the constructor, so they
+// require no locks and present no shared mutable state to the race detector.
+// This test serves as a permanent regression guard: it must pass cleanly
+// under -race in all future states of the codebase.
 package authn_test
 
 import (
@@ -20,8 +29,11 @@ import (
 )
 
 // TestConfigDataRace launches concurrent writers invoking Config() with varying
-// cache TTLs while readers concurrently hit TokenToCache/TokenFromCache.
-// The Go race detector should report races on a.cacheTTL and a.TokenCache.
+// cache TTLs while readers concurrently exercise TokenToCache/TokenFromCache.
+// With the stateless-after-init design the Go race detector must not report any
+// data races: Config() only writes to clientMap (protected by a.mu.RWMutex),
+// and the cache methods access only the immutable TokenCache pointer and the
+// request-scoped config argument.
 func TestConfigDataRace(t *testing.T) {
 	reg := internal.NewRegistry(t, configx.SkipValidation())
 	aa, err := reg.PipelineAuthenticator("oauth2_introspection")
@@ -34,7 +46,8 @@ func TestConfigDataRace(t *testing.T) {
 
 	var wg sync.WaitGroup
 
-	// Writers mutate TTL and (re)initialize cache concurrently.
+	// Writers: call Config() concurrently with varying TTLs to exercise the
+	// clientMap read/write path under a.mu.RWMutex.
 	for i := 0; i < 8; i++ {
 		wg.Add(1)
 		go func(id int) {
@@ -46,7 +59,8 @@ func TestConfigDataRace(t *testing.T) {
 		}(i)
 	}
 
-	// Readers exercise cache paths concurrently with Config() calls.
+	// Readers: call Config() then exercise the cache paths concurrently with
+	// the writer goroutines. No struct-level mutable state is accessed.
 	for i := 0; i < 8; i++ {
 		wg.Add(1)
 		go func(id int) {

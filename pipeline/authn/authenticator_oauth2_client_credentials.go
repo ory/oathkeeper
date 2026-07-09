@@ -10,15 +10,12 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/dgraph-io/ristretto/v2"
 	"github.com/pkg/errors"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/clientcredentials"
-
-	"github.com/ory/x/httpx"
 
 	"github.com/ory/oathkeeper/helper"
 	"github.com/ory/oathkeeper/pipeline"
@@ -40,30 +37,29 @@ type clientCredentialsCacheConfig struct {
 // AuthenticatorOAuth2ClientCredentials authenticates requests via the OAuth2
 // client credentials flow.
 //
-// Integrity fix: the original struct had no synchronization primitives, causing
-// two distinct data races under concurrent request handling:
+// Stateless-after-init design (architectural refactoring per @zepatrik):
 //
-//  1. a.client was overwritten on every Config() invocation — any concurrent
-//     goroutine could observe a partially-initialized or entirely different
-//     *http.Client pointer, leading to non-deterministic transport behaviour.
+//   - The Ristretto token cache is allocated exactly once inside the factory
+//     constructor NewAuthenticatorOAuth2ClientCredentials and is never
+//     reassigned at request time. Because the pointer is written before the
+//     struct is shared with any goroutine, all subsequent reads of TokenCache
+//     are safe without locks.
 //
-//  2. a.TokenCache and a.cacheTTL were written without any lock, meaning the
-//     TOCTOU check "if a.TokenCache == nil" was not atomic: two goroutines
-//     could both observe nil, each allocate a new ristretto cache (spawning
-//     background goroutines), and then one would overwrite the other's pointer
-//     — leaking the orphaned cache and its goroutines permanently.
+//   - The former a.client *http.Client field was unused in the request path:
+//     Authenticate delegates the token exchange entirely to
+//     clientcredentials.Config.Token, which manages its own HTTP transport.
+//     The field along with its associated sync.Once and sync.Mutex guards
+//     have been removed.
 //
-// The fix introduces:
-//   - clientOnce (sync.Once) to guarantee a.client is initialized exactly once.
-//   - mu (sync.Mutex) to serialize writes to a.TokenCache and a.cacheTTL.
+//   - cacheTTL is no longer persisted on the struct. TokenToCache derives the
+//     effective TTL directly from the per-request config.Cache.TTL on each
+//     call, eliminating the last source of shared mutable state.
+//
+// The resulting struct carries no mutable fields after construction, making
+// concurrent request handling naturally race-free without any locks.
 type AuthenticatorOAuth2ClientCredentials struct {
 	d          dependencies
-	client     *http.Client
-	clientOnce sync.Once
-	mu         sync.Mutex
-
 	TokenCache *ristretto.Cache[string, []byte]
-	cacheTTL   *time.Duration
 }
 
 type AuthenticatorOAuth2ClientCredentialsRetryConfiguration struct {
@@ -71,8 +67,27 @@ type AuthenticatorOAuth2ClientCredentialsRetryConfiguration struct {
 	MaxWait string `json:"give_up_after"`
 }
 
+// NewAuthenticatorOAuth2ClientCredentials constructs a fully initialized
+// authenticator instance. The Ristretto token cache is created here with
+// sensible fixed defaults so that no lazy initialization is required (or
+// permitted) at request time, eliminating any TOCTOU window on the cache
+// pointer entirely.
 func NewAuthenticatorOAuth2ClientCredentials(d dependencies) *AuthenticatorOAuth2ClientCredentials {
-	return &AuthenticatorOAuth2ClientCredentials{d: d}
+	cache, err := ristretto.NewCache(&ristretto.Config[string, []byte]{
+		// Default capacity: 1 000 tokens. NumCounters follows the ristretto
+		// recommendation of 10 × MaxCost for the frequency-sketch counters.
+		NumCounters:        10_000,
+		MaxCost:            1_000,
+		BufferItems:        64,
+		Cost:               func(_ []byte) int64 { return 1 },
+		IgnoreInternalCost: true,
+	})
+	if err != nil {
+		// ristretto.NewCache only returns an error for programmer-invalid
+		// configuration; the parameters above are unconditionally valid.
+		panic(fmt.Sprintf("authn/oauth2_client_credentials: cache init failed: %v", err))
+	}
+	return &AuthenticatorOAuth2ClientCredentials{d: d, TokenCache: cache}
 }
 
 func (a *AuthenticatorOAuth2ClientCredentials) GetID() string { return "oauth2_client_credentials" }
@@ -86,6 +101,10 @@ func (a *AuthenticatorOAuth2ClientCredentials) Validate(config json.RawMessage) 
 	return err
 }
 
+// Config parses and validates the merged global + rule-level authenticator
+// configuration. It is now a pure read operation with respect to the receiver:
+// it reads from a.d.Config() but performs no writes to any field on a, making
+// concurrent calls naturally race-free without any synchronization.
 func (a *AuthenticatorOAuth2ClientCredentials) Config(config json.RawMessage) (*AuthenticatorOAuth2Configuration, error) {
 	const (
 		defaultTimeout = "1s"
@@ -106,76 +125,16 @@ func (a *AuthenticatorOAuth2ClientCredentials) Config(config json.RawMessage) (*
 			c.Retry.MaxWait = defaultMaxWait
 		}
 	}
-	duration, err := time.ParseDuration(c.Retry.Timeout)
-	if err != nil {
+
+	// Validate retry duration strings eagerly so callers receive a descriptive
+	// configuration error rather than a late failure during token exchange.
+	if _, err := time.ParseDuration(c.Retry.Timeout); err != nil {
+		return nil, err
+	}
+	if _, err := time.ParseDuration(c.Retry.MaxWait); err != nil {
 		return nil, err
 	}
 
-	maxWait, err := time.ParseDuration(c.Retry.MaxWait)
-	if err != nil {
-		return nil, err
-	}
-	timeout := time.Millisecond * duration
-
-	// clientOnce.Do guarantees that a.client is allocated and written exactly
-	// once, regardless of how many goroutines are concurrently executing
-	// Config(). Subsequent calls observe the pointer set by the first caller
-	// without any unsynchronized write. Timeout and maxWait are captured from
-	// the first successful config resolution; the values are validated above
-	// before Do is reached, so the closure is always called with well-formed
-	// duration arguments.
-	a.clientOnce.Do(func() {
-		a.client = httpx.NewResilientClient(
-			httpx.ResilientClientWithMaxRetryWait(maxWait),
-			httpx.ResilientClientWithConnectionTimeout(timeout),
-		).StandardClient()
-	})
-
-	// mu serializes writes to a.cacheTTL and a.TokenCache so that the
-	// check-then-act sequence "if a.TokenCache == nil { ... a.TokenCache = cache }"
-	// is atomic. Without this lock, two goroutines can both observe nil,
-	// independently allocate separate ristretto caches (each spawning
-	// background goroutines), and then one silently overwrites the other's
-	// pointer, permanently leaking the orphaned cache.
-	a.mu.Lock()
-
-	if c.Cache.TTL != "" {
-		cacheTTL, err := time.ParseDuration(c.Cache.TTL)
-		if err != nil {
-			a.mu.Unlock()
-			return nil, err
-		}
-		a.cacheTTL = &cacheTTL
-	}
-
-	if a.TokenCache == nil {
-		maxTokens := int64(c.Cache.MaxTokens)
-		if maxTokens == 0 {
-			maxTokens = 1000
-		}
-		a.d.Logger().Debugf("Creating cache with max tokens: %d", maxTokens)
-		cache, err := ristretto.NewCache(&ristretto.Config[string, []byte]{
-			// This will hold about 1000 unique mutation responses.
-			NumCounters: 10 * maxTokens,
-			// Allocate a maximum amount of tokens to cache
-			MaxCost: maxTokens,
-			// This is a best-practice value.
-			BufferItems: 64,
-			// Use a static cost of 1, so we can limit the amount of tokens that can be stored
-			Cost: func(value []byte) int64 {
-				return 1
-			},
-			IgnoreInternalCost: true,
-		})
-		if err != nil {
-			a.mu.Unlock()
-			return nil, err
-		}
-
-		a.TokenCache = cache
-	}
-
-	a.mu.Unlock()
 	return &c, nil
 }
 
@@ -188,6 +147,7 @@ func (a *AuthenticatorOAuth2ClientCredentials) TokenFromCache(config *Authentica
 		return nil
 	}
 
+	// TokenCache is immutable after construction: no lock required.
 	i, found := a.TokenCache.Get(ClientCredentialsConfigToKey(clientCredentials))
 	if !found {
 		return nil
@@ -207,25 +167,33 @@ func (a *AuthenticatorOAuth2ClientCredentials) TokenToCache(config *Authenticato
 
 	key := ClientCredentialsConfigToKey(clientCredentials)
 
-	if v, err := json.Marshal(token); err != nil {
+	v, err := json.Marshal(token)
+	if err != nil {
 		return
-	} else if a.cacheTTL != nil {
-		// Allow up-to at most the cache TTL, otherwise use token expiry
-		ttl := time.Until(token.Expiry)
-		if ttl > *a.cacheTTL {
-			ttl = *a.cacheTTL
-		}
-
-		a.TokenCache.SetWithTTL(key, v, 1, ttl)
-	} else {
-		// If token has no expiry apply the same to the cache
-		ttl := time.Duration(0)
-		if !token.Expiry.IsZero() {
-			ttl = time.Until(token.Expiry)
-		}
-
-		a.TokenCache.SetWithTTL(key, v, 1, ttl)
 	}
+
+	// Derive the effective TTL from the per-request config on each call.
+	// cacheTTL is no longer stored on the struct; reading it from the
+	// request-scoped config eliminates all struct mutation, making this
+	// method safe for concurrent use without any lock.
+	if config.Cache.TTL != "" {
+		if cacheTTL, parseErr := time.ParseDuration(config.Cache.TTL); parseErr == nil {
+			// Allow up-to at most the cache TTL, otherwise use token expiry.
+			ttl := time.Until(token.Expiry)
+			if ttl > cacheTTL {
+				ttl = cacheTTL
+			}
+			a.TokenCache.SetWithTTL(key, v, 1, ttl)
+			return
+		}
+	}
+
+	// No TTL configured: use token expiry, or zero for non-expiring tokens.
+	ttl := time.Duration(0)
+	if !token.Expiry.IsZero() {
+		ttl = time.Until(token.Expiry)
+	}
+	a.TokenCache.SetWithTTL(key, v, 1, ttl)
 }
 
 func (a *AuthenticatorOAuth2ClientCredentials) Authenticate(r *http.Request, session *AuthenticationSession, config json.RawMessage, _ pipeline.Rule) error {
