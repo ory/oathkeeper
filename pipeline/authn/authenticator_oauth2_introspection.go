@@ -136,6 +136,9 @@ func TokenCacheKey(token, endpoint string) string {
 }
 
 func (a *AuthenticatorOAuth2Introspection) TokenFromCache(config *AuthenticatorOAuth2IntrospectionConfiguration, token string, ss fosite.ScopeStrategy) *AuthenticatorOAuth2IntrospectionResult {
+	a.mu.RLock()
+	defer a.mu.RUnlock()
+
 	if !config.Cache.Enabled {
 		return nil
 	}
@@ -158,6 +161,9 @@ func (a *AuthenticatorOAuth2Introspection) TokenFromCache(config *AuthenticatorO
 }
 
 func (a *AuthenticatorOAuth2Introspection) TokenToCache(config *AuthenticatorOAuth2IntrospectionConfiguration, i *AuthenticatorOAuth2IntrospectionResult, token string, ss fosite.ScopeStrategy) {
+	a.mu.RLock()
+	defer a.mu.RUnlock()
+
 	if !config.Cache.Enabled {
 		return
 	}

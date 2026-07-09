@@ -53,7 +53,10 @@ func TestConfigDataRace(t *testing.T) {
 			defer wg.Done()
 			res := &AuthenticatorOAuth2IntrospectionResult{Active: true}
 			for j := 0; j < 2000; j++ {
-				c, _, _ := a.Config([]byte(base))
+				c, _, err := a.Config([]byte(base))
+				if err != nil || c == nil {
+					continue
+				}
 				a.TokenToCache(c, res, "tok", nil)
 				_ = a.TokenFromCache(c, "tok", nil)
 			}
@@ -61,4 +64,5 @@ func TestConfigDataRace(t *testing.T) {
 	}
 
 	wg.Wait()
+	a.WaitForCache()
 }
