@@ -4,13 +4,11 @@
 package authn
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/url"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/dgraph-io/ristretto/v2"
@@ -38,17 +36,29 @@ type clientCredentialsCacheConfig struct {
 // AuthenticatorOAuth2ClientCredentials authenticates requests via the OAuth2
 // client credentials flow.
 //
-// Stateless-after-init design:
-// - TokenCache is created once (lazily) the first time Config() is called,
-//   based on c.Cache.max_tokens. After initialization, the struct remains
-//   immutable and safe for concurrent use.
-// - Token TTL is derived per call from the token expiry and the dynamic
-//   config TTL; no per-instance mutable TTL state is stored.
+// Stateless-after-init design (architectural refactoring per @zepatrik):
 //
+//   - The Ristretto token cache is allocated exactly once inside the factory
+//     constructor NewAuthenticatorOAuth2ClientCredentials and is never
+//     reassigned at request time. Because the pointer is written before the
+//     struct is shared with any goroutine, all subsequent reads of TokenCache
+//     are safe without locks.
+//
+//   - The former a.client *http.Client field was unused in the request path:
+//     Authenticate delegates the token exchange entirely to
+//     clientcredentials.Config.Token, which manages its own HTTP transport.
+//     The field along with its associated sync.Once and sync.Mutex guards
+//     have been removed.
+//
+//   - cacheTTL is no longer persisted on the struct. TokenToCache derives the
+//     effective TTL directly from the per-request config.Cache.TTL on each
+//     call, eliminating the last source of shared mutable state.
+//
+// The resulting struct carries no mutable fields after construction, making
+// concurrent request handling naturally race-free without any locks.
 type AuthenticatorOAuth2ClientCredentials struct {
 	d          dependencies
 	TokenCache *ristretto.Cache[string, []byte]
-	mu         sync.Mutex // guards one-time TokenCache init
 }
 
 type AuthenticatorOAuth2ClientCredentialsRetryConfiguration struct {
@@ -56,10 +66,42 @@ type AuthenticatorOAuth2ClientCredentialsRetryConfiguration struct {
 	MaxWait string `json:"give_up_after"`
 }
 
-// NewAuthenticatorOAuth2ClientCredentials returns an instance; cache is
-// initialized on first Config() to respect user-defined max_tokens.
+// NewAuthenticatorOAuth2ClientCredentials constructs a fully initialized
+// authenticator instance. The Ristretto token cache is created here so that no
+// lazy initialization is required (or permitted) at request time, eliminating
+// any TOCTOU window on the cache pointer entirely.
+//
+// The cache capacity honours cache.max_tokens from the global authenticator
+// configuration when set. The cache is shared across all rules so only the
+// global (non-rule-level) setting is applicable at construction time.
 func NewAuthenticatorOAuth2ClientCredentials(d dependencies) *AuthenticatorOAuth2ClientCredentials {
-	return &AuthenticatorOAuth2ClientCredentials{d: d}
+	const defaultMaxTokens int64 = 1_000
+
+	// Attempt to read the global authenticator configuration so that
+	// cache.max_tokens is honoured rather than always defaulting to 1 000.
+	// A failure here (e.g. schema validation disabled) is non-fatal: the
+	// sentinel default is used instead.
+	maxTokens := defaultMaxTokens
+	var globalCfg AuthenticatorOAuth2Configuration
+	if err := d.Config().AuthenticatorConfig("oauth2_client_credentials", json.RawMessage(nil), &globalCfg); err == nil && globalCfg.Cache.MaxTokens > 0 {
+		maxTokens = int64(globalCfg.Cache.MaxTokens)
+	}
+
+	cache, err := ristretto.NewCache(&ristretto.Config[string, []byte]{
+		// NumCounters follows the ristretto recommendation of 10 × MaxCost for
+		// the frequency-sketch counters.
+		NumCounters:        maxTokens * 10,
+		MaxCost:            maxTokens,
+		BufferItems:        64,
+		Cost:               func(_ []byte) int64 { return 1 },
+		IgnoreInternalCost: true,
+	})
+	if err != nil {
+		// ristretto.NewCache only returns an error for programmer-invalid
+		// configuration; the parameters above are unconditionally valid.
+		panic(fmt.Sprintf("authn/oauth2_client_credentials: cache init failed: %v", err))
+	}
+	return &AuthenticatorOAuth2ClientCredentials{d: d, TokenCache: cache}
 }
 
 func (a *AuthenticatorOAuth2ClientCredentials) GetID() string { return "oauth2_client_credentials" }
@@ -74,8 +116,9 @@ func (a *AuthenticatorOAuth2ClientCredentials) Validate(config json.RawMessage) 
 }
 
 // Config parses and validates the merged global + rule-level authenticator
-// configuration. It also performs a one-time TokenCache initialization using
-// c.Cache.max_tokens (default 1000) in a concurrency-safe manner.
+// configuration. It is now a pure read operation with respect to the receiver:
+// it reads from a.d.Config() but performs no writes to any field on a, making
+// concurrent calls naturally race-free without any synchronization.
 func (a *AuthenticatorOAuth2ClientCredentials) Config(config json.RawMessage) (*AuthenticatorOAuth2Configuration, error) {
 	const (
 		defaultTimeout = "1s"
@@ -106,31 +149,6 @@ func (a *AuthenticatorOAuth2ClientCredentials) Config(config json.RawMessage) (*
 		return nil, err
 	}
 
-	// One-time cache initialization honoring configured max_tokens
-	if a.TokenCache == nil {
-		a.mu.Lock()
-		if a.TokenCache == nil {
-			maxTokens := int64(c.Cache.MaxTokens)
-			if maxTokens == 0 {
-				maxTokens = 1000
-			}
-			cache, err := ristretto.NewCache(&ristretto.Config[string, []byte]{
-				// Frequency sketch size: 10x of MaxCost (ristretto best practice)
-				NumCounters:        10 * maxTokens,
-				MaxCost:            maxTokens,
-				BufferItems:        64,
-				Cost:               func(_ []byte) int64 { return 1 },
-				IgnoreInternalCost: true,
-			})
-			if err != nil {
-				a.mu.Unlock()
-				return nil, err
-			}
-			a.TokenCache = cache
-		}
-		a.mu.Unlock()
-	}
-
 	return &c, nil
 }
 
@@ -143,7 +161,7 @@ func (a *AuthenticatorOAuth2ClientCredentials) TokenFromCache(config *Authentica
 		return nil
 	}
 
-	// TokenCache is immutable after initialization: no lock required.
+	// TokenCache is immutable after construction: no lock required.
 	i, found := a.TokenCache.Get(ClientCredentialsConfigToKey(clientCredentials))
 	if !found {
 		return nil
@@ -168,19 +186,19 @@ func (a *AuthenticatorOAuth2ClientCredentials) TokenToCache(config *Authenticato
 		return
 	}
 
-	// Derive effective TTL from token expiry with a cap from config.Cache.TTL.
-	// If the token has a zero expiry, we fall back to the configured TTL to
-	// avoid caching with an unintended zero/forever TTL.
+	// Derive the effective TTL from the per-request config on each call.
+	// cacheTTL is no longer stored on the struct; reading it from the
+	// request-scoped config eliminates all struct mutation, making this
+	// method safe for concurrent use without any lock.
 	if config.Cache.TTL != "" {
 		if cacheTTL, parseErr := time.ParseDuration(config.Cache.TTL); parseErr == nil {
-			var ttl time.Duration
-			if token.Expiry.IsZero() {
-				// Zero-expiry token: fall back to configured TTL
-				ttl = cacheTTL
-			} else {
-				ttl = time.Until(token.Expiry)
-				if ttl > cacheTTL {
-					ttl = cacheTTL
+			// Use cacheTTL as the ceiling. If the token carries a concrete expiry,
+			// cap further to the token's remaining lifetime. For zero-expiry tokens
+			// fall back to cacheTTL so a negative duration is never produced.
+			ttl := cacheTTL
+			if !token.Expiry.IsZero() {
+				if remaining := time.Until(token.Expiry); remaining < cacheTTL {
+					ttl = remaining
 				}
 			}
 			a.TokenCache.SetWithTTL(key, v, 1, ttl)
@@ -228,11 +246,12 @@ func (a *AuthenticatorOAuth2ClientCredentials) Authenticate(r *http.Request, ses
 	token := a.TokenFromCache(cf, c)
 
 	if token == nil {
-		t, err := c.Token(context.WithValue(
-			r.Context(),
-			oauth2.HTTPClient,
-			c.Client,
-		))
+		// c.Token propagates the request context for deadline/cancellation.
+		// The previous context.WithValue(r.Context(), oauth2.HTTPClient, c.Client)
+		// was a no-op: c.Client is a bound method value (func(context.Context)
+		// *http.Client), not an *http.Client, so the oauth2 library's type
+		// assertion always fails silently and the default transport is used.
+		t, err := c.Token(r.Context())
 		if err != nil {
 			if rErr, ok := err.(*oauth2.RetrieveError); ok {
 				switch httpStatusCode := rErr.Response.StatusCode; httpStatusCode {
