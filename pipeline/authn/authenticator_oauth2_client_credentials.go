@@ -169,6 +169,8 @@ func (a *AuthenticatorOAuth2ClientCredentials) TokenToCache(config *Authenticato
 	}
 
 	// Derive effective TTL from token expiry with a cap from config.Cache.TTL.
+	// If the token has a zero expiry, we fall back to the configured TTL to
+	// avoid caching with an unintended zero/forever TTL.
 	if config.Cache.TTL != "" {
 		if cacheTTL, parseErr := time.ParseDuration(config.Cache.TTL); parseErr == nil {
 			var ttl time.Duration
