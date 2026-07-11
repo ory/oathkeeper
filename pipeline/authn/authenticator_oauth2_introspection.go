@@ -301,6 +301,16 @@ func (a *AuthenticatorOAuth2Introspection) Authenticate(r *http.Request, session
 	}
 
 	if i.Expires > 0 && time.Unix(i.Expires, 0).Before(time.Now()) {
+		if inCache {
+			// A cached result is only refreshed on a cache miss (see below), so a
+			// cached entry that outlives its own token expiry would otherwise keep
+			// failing every subsequent request indefinitely (or until the
+			// configured cache TTL, if any, separately evicts it). Evict it here
+			// so the next request re-introspects instead of serving permanently
+			// stale data. This is a single atomic ristretto operation on the
+			// affected key only, so it requires no lock.
+			a.TokenCache.Del(TokenCacheKey(token, cf.IntrospectionURL))
+		}
 		return errors.WithStack(helper.ErrUnauthorized().WithReason("Access token expired"))
 	}
 
