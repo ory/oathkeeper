@@ -108,7 +108,7 @@ func (v *VerifierDefault) Verify(
 	}
 
 	if len(r.Issuers) > 0 {
-		if !slices.Contains(r.Issuers, parsedClaims.Issuer) {
+		if !matchesTrustedIssuer(r.Issuers, parsedClaims.Issuer) {
 			return nil, herodot.ErrUnauthorized().WithReasonf("Token issuer does not match any trusted issuer %s.", parsedClaims.Issuer).
 				WithDetail("received issuers", strings.Join(r.Issuers, ", "))
 		}
@@ -165,4 +165,21 @@ func scope(claims map[string]interface{}) ([]string, string) {
 	default:
 		return []string{}, key
 	}
+}
+
+// matchesTrustedIssuer reports whether the token issuer matches any of the
+// trusted issuers, treating issuers that differ only by a trailing slash as
+// equal. This avoids rejecting otherwise-valid tokens when the trusted_issuers
+// configuration and the token's "iss" claim disagree on a trailing "/" (for
+// example "https://issuer" versus "https://issuer/").
+//
+// See https://github.com/ory/oathkeeper/issues/527.
+func matchesTrustedIssuer(trusted []string, issuer string) bool {
+	issuer = strings.TrimSuffix(issuer, "/")
+	for _, t := range trusted {
+		if strings.TrimSuffix(t, "/") == issuer {
+			return true
+		}
+	}
+	return false
 }
