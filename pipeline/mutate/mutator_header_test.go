@@ -5,6 +5,7 @@ package mutate_test
 
 import (
 	"bytes"
+	"crypto/md5" //nolint:gosec
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -191,8 +192,8 @@ func TestCredentialsIssuerHeaders(t *testing.T) {
 				var cfg MutatorHeaderConfig
 				require.NoError(t, json.NewDecoder(bytes.NewBuffer(specs.Config)).Decode(&cfg))
 
-				for hdr := range cfg.Headers {
-					templateId := fmt.Sprintf("%s:%s", specs.Rule.ID, hdr)
+				for hdr, templateString := range cfg.Headers {
+					templateId := fmt.Sprintf("%s:%s:%x", specs.Rule.ID, hdr, md5.Sum([]byte(templateString)))
 					_, err := cache.New(templateId).Parse("override")
 					require.NoError(t, err)
 					overrideHeaders.Add(hdr, "override")
@@ -225,4 +226,31 @@ func TestCredentialsIssuerHeaders(t *testing.T) {
 		reg.Config().SetForTest(t, configuration.MutatorHeaderIsEnabled, false)
 		require.Error(t, a.Validate(json.RawMessage(`{"headers":{}}`)))
 	})
+}
+
+func TestCredentialsIssuerHeadersTemplateBodyChange(t *testing.T) {
+	t.Parallel()
+	reg := internal.NewRegistry(t, configx.SkipValidation())
+
+	a, err := reg.PipelineMutator("header")
+	require.NoError(t, err)
+
+	mutate := func(session *authn.AuthenticationSession, config string) string {
+		session.Header = http.Header{}
+		require.NoError(t, a.Mutate(
+			&http.Request{Header: http.Header{}},
+			session,
+			json.RawMessage(config),
+			&rule.Rule{ID: "collector-agent"},
+		))
+		return session.Header.Get("X-Token-Claims")
+	}
+
+	session := &authn.AuthenticationSession{Extra: map[string]interface{}{"tenant_id": "acme"}}
+
+	require.Equal(t, `"map[tenant_id:acme]"`,
+		mutate(session, `{"headers":{"X-Token-Claims": "{{ print .Extra | toJson }}"}}`))
+
+	require.Equal(t, `{"tenant_id":"acme"}`,
+		mutate(session, `{"headers":{"X-Token-Claims": "{{ .Extra | toJson }}"}}`))
 }
