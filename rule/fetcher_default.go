@@ -30,7 +30,6 @@ import (
 	"github.com/ory/x/watcherx"
 
 	"github.com/ory/oathkeeper/driver/configuration"
-	"github.com/ory/oathkeeper/internal/cloudstorage"
 )
 
 var _ Fetcher = new(FetcherDefault)
@@ -61,7 +60,7 @@ func NewFetcherDefault(
 	return &FetcherDefault{
 		registry: registry,
 		config:   config,
-		mux:      cloudstorage.NewURLMux(),
+		mux:      blob.DefaultURLMux(),
 		hc: httpx.NewResilientClient(
 			httpx.ResilientClientWithConnectionTimeout(15 * time.Second),
 		).StandardClient(),

@@ -28,8 +28,6 @@ import (
 	"github.com/ory/x/logrusx"
 	"github.com/ory/x/otelx"
 	"github.com/ory/x/urlx"
-
-	"github.com/ory/oathkeeper/internal/cloudstorage"
 )
 
 type reasoner interface {
@@ -76,7 +74,7 @@ func NewFetcherDefault(d dependencies, cancelAfter, ttl time.Duration, opts ...F
 		client: httpx.NewResilientClient(
 			httpx.ResilientClientWithConnectionTimeout(15 * time.Second),
 		).StandardClient(),
-		mux: cloudstorage.NewURLMux(),
+		mux: blob.DefaultURLMux(),
 	}
 	for _, o := range opts {
 		o(f)
