@@ -102,8 +102,12 @@ func (f *FetcherDefault) watchLocalFiles(ctx context.Context) {
 		if cancel, ok := f.cancelWatchers[fp]; !ok {
 			// watch all files we are not yet watching
 			repoChanged = true
-			ctx, cancelWatchers[fp] = context.WithCancel(ctx)
-			w, err := watcherx.WatchFile(ctx, fp, f.events)
+			// Derive each file's context from the caller's ctx, not from the
+			// previous iteration's, so cancelling one file's watcher does not
+			// cancel the others.
+			var fileCtx context.Context
+			fileCtx, cancelWatchers[fp] = context.WithCancel(ctx)
+			w, err := watcherx.WatchFile(fileCtx, fp, f.events)
 			if err != nil {
 				f.registry.Logger().WithError(err).WithField("file", fp).Error("Unable to watch file, ignoring it.")
 				continue
@@ -144,6 +148,12 @@ func (f *FetcherDefault) watchLocalFiles(ctx context.Context) {
 }
 
 func (f *FetcherDefault) Watch(ctx context.Context) error {
+	// Start the local update consumer before watching files. watchLocalFiles
+	// forces an initial read via DispatchNow, which sends on the unbuffered
+	// f.events channel; without a reader already running, that send can block
+	// and deadlock the watcher setup.
+	go f.processLocalUpdates(ctx)
+
 	f.watchLocalFiles(ctx)
 
 	getRemoteRepos := func() map[url.URL]struct{} {
@@ -191,7 +201,6 @@ func (f *FetcherDefault) Watch(ctx context.Context) error {
 		remoteRepos = newRemoteRepos
 	})
 
-	go f.processLocalUpdates(ctx)
 	return nil
 }
 
