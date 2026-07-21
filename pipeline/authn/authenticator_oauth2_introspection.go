@@ -19,6 +19,7 @@ import (
 	"github.com/pkg/errors"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"go.opentelemetry.io/otel/trace"
+	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/clientcredentials"
 
 	"github.com/ory/fosite"
@@ -321,22 +322,6 @@ func (a *AuthenticatorOAuth2Introspection) Config(config json.RawMessage) (*Auth
 
 	if !ok || client == nil {
 		a.d.Logger().Debug("Initializing http client")
-		var rt http.RoundTripper
-		if c.PreAuth != nil && c.PreAuth.Enabled {
-			var ep url.Values
-
-			if c.PreAuth.Audience != "" {
-				ep = url.Values{"audience": {c.PreAuth.Audience}}
-			}
-
-			rt = (&clientcredentials.Config{
-				ClientID:       c.PreAuth.ClientID,
-				ClientSecret:   c.PreAuth.ClientSecret,
-				Scopes:         c.PreAuth.Scope,
-				EndpointParams: ep,
-				TokenURL:       c.PreAuth.TokenURL,
-			}).Client(context.Background()).Transport
-		}
 
 		if c.Retry == nil {
 			c.Retry = &AuthenticatorOAuth2IntrospectionRetryConfiguration{Timeout: "500ms", MaxWait: "1s"}
@@ -348,22 +333,49 @@ func (a *AuthenticatorOAuth2Introspection) Config(config json.RawMessage) (*Auth
 				c.Retry.MaxWait = "1s"
 			}
 		}
-		duration, err := time.ParseDuration(c.Retry.Timeout)
+		timeout, err := time.ParseDuration(c.Retry.Timeout)
 		if err != nil {
 			return nil, nil, errors.WithStack(err)
 		}
-		timeout := time.Millisecond * duration
-
 		maxWait, err := time.ParseDuration(c.Retry.MaxWait)
 		if err != nil {
 			return nil, nil, errors.WithStack(err)
 		}
 
-		client = httpx.NewResilientClient(
+		// The resilient client enforces the configured retry.max_delay as the
+		// per-request connection timeout and retries transient failures. Requests
+		// must flow through it so those settings are actually honored.
+		resilient := httpx.NewResilientClient(
 			httpx.ResilientClientWithMaxRetryWait(maxWait),
 			httpx.ResilientClientWithConnectionTimeout(timeout),
 		).StandardClient()
-		client.Transport = otelhttp.NewTransport(rt, otelhttp.WithTracerProvider(a.d.Tracer(context.Background()).Provider()))
+
+		rt := resilient.Transport
+		if c.PreAuth != nil && c.PreAuth.Enabled {
+			var ep url.Values
+
+			if c.PreAuth.Audience != "" {
+				ep = url.Values{"audience": {c.PreAuth.Audience}}
+			}
+
+			// Perform the pre-authorization token exchange through the resilient
+			// client (via the oauth2.HTTPClient context value), and route the
+			// pre-authorized introspection requests through it as well by making
+			// the OAuth2 transport wrap the resilient transport.
+			preAuthCtx := context.WithValue(context.Background(), oauth2.HTTPClient, resilient)
+			rt = (&clientcredentials.Config{
+				ClientID:       c.PreAuth.ClientID,
+				ClientSecret:   c.PreAuth.ClientSecret,
+				Scopes:         c.PreAuth.Scope,
+				EndpointParams: ep,
+				TokenURL:       c.PreAuth.TokenURL,
+			}).Client(preAuthCtx).Transport
+		}
+
+		// Use a fresh outer client for tracing so the OAuth2 token source keeps
+		// using the resilient client above without recursing through the tracing
+		// transport.
+		client = &http.Client{Transport: otelhttp.NewTransport(rt, otelhttp.WithTracerProvider(a.d.Tracer(context.Background()).Provider()))}
 		a.mu.Lock()
 		a.clientMap[clientKey] = client
 		a.mu.Unlock()

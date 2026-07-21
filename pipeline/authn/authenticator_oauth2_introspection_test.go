@@ -898,3 +898,43 @@ func TestAudienceUnmarshal(t *testing.T) {
 		})
 	}
 }
+
+// TestAuthenticatorOAuth2IntrospectionRetryTimeout is a regression test for two
+// coupled bugs that stopped retry.max_delay from being enforced as the outbound
+// HTTP timeout for the introspection request:
+//
+//   - The parsed max_delay duration was multiplied by an extra factor of
+//     time.Millisecond, inflating the timeout by 1e6 (a 50ms setting became
+//     ~13.9 hours).
+//   - The resilient client that carries the timeout was discarded: its transport
+//     was overwritten with a tracing transport that wrapped a nil round tripper,
+//     so requests bypassed the timeout and retries entirely.
+//
+// With either bug present, a call to a slow introspection endpoint blocks until
+// the server responds; with both fixed, it times out promptly.
+func TestAuthenticatorOAuth2IntrospectionRetryTimeout(t *testing.T) {
+	t.Parallel()
+	reg := internal.NewRegistry(t, configx.SkipValidation())
+	a := NewAuthenticatorOAuth2Introspection(reg)
+
+	slow := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		time.Sleep(2 * time.Second)
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = w.Write([]byte(`{"active":true}`))
+	}))
+	t.Cleanup(slow.Close)
+
+	config, err := sjson.SetBytes(
+		[]byte(`{"scope_strategy":"none","retry":{"max_delay":"50ms","give_up_after":"10ms"}}`),
+		"introspection_url", slow.URL+"/oauth2/introspect")
+	require.NoError(t, err)
+
+	r := &http.Request{Header: http.Header{"Authorization": {"bearer token"}}}
+	start := time.Now()
+	err = a.Authenticate(r, new(AuthenticationSession), config, nil)
+	elapsed := time.Since(start)
+
+	require.Error(t, err)
+	assert.Less(t, elapsed, time.Second,
+		"the configured 50ms max_delay must time the request out; the inflated value would block ~2s on the slow server")
+}
