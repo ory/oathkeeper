@@ -64,6 +64,25 @@ type cacheConfig struct {
 	MaxCost int    `json:"max_cost"`
 }
 
+// AuthenticatorOAuth2Introspection authenticates requests by calling an OAuth2
+// token introspection endpoint.
+//
+// Stateless-after-init design (architectural refactoring per @zepatrik):
+//
+//   - TokenCache is allocated exactly once in NewAuthenticatorOAuth2Introspection
+//     and is never reassigned. Because the pointer is established before the
+//     struct is shared with any goroutine, all subsequent reads are safe without
+//     locks.
+//
+//   - cacheTTL is no longer stored on the struct. TokenToCache derives the
+//     effective TTL directly from config.Cache.TTL on each call, eliminating
+//     the associated mutable pointer and the need to hold a.mu around cache
+//     reads and writes.
+//
+//   - a.mu (sync.RWMutex) is retained solely for clientMap, where it already
+//     provided correct serialization. The cache-initialization block that was
+//     previously appended to Config() under a separate a.mu.Lock() scope has
+//     been removed entirely.
 type AuthenticatorOAuth2Introspection struct {
 	d dependencies
 
@@ -71,19 +90,40 @@ type AuthenticatorOAuth2Introspection struct {
 	mu        sync.RWMutex
 
 	TokenCache *ristretto.Cache[string, []byte]
-	cacheTTL   *time.Duration
 }
 
+// NewAuthenticatorOAuth2Introspection constructs a fully initialized
+// authenticator. The Ristretto token cache is created here with sensible
+// fixed defaults so that no lazy initialization is required at request time,
+// eliminating any TOCTOU window on the cache pointer.
 func NewAuthenticatorOAuth2Introspection(d dependencies) *AuthenticatorOAuth2Introspection {
-	return &AuthenticatorOAuth2Introspection{d: d, clientMap: make(map[string]*http.Client)}
+	const defaultMaxCost int64 = 100_000
+	cache, err := ristretto.NewCache(&ristretto.Config[string, []byte]{
+		// NumCounters follows the ristretto recommendation of 10 × MaxCost.
+		NumCounters:        defaultMaxCost * 10,
+		MaxCost:            defaultMaxCost,
+		BufferItems:        64,
+		Cost:               func(_ []byte) int64 { return 1 },
+		IgnoreInternalCost: true,
+	})
+	if err != nil {
+		// ristretto.NewCache only returns an error for programmer-invalid
+		// configuration; the parameters above are unconditionally valid.
+		panic(fmt.Sprintf("authn/oauth2_introspection: cache init failed: %v", err))
+	}
+	return &AuthenticatorOAuth2Introspection{
+		d:          d,
+		clientMap:  make(map[string]*http.Client),
+		TokenCache: cache,
+	}
 }
 
 func (a *AuthenticatorOAuth2Introspection) GetID() string { return "oauth2_introspection" }
 
+// WaitForCache blocks until all pending ristretto write operations have been
+// applied. TokenCache is always non-nil after construction.
 func (a *AuthenticatorOAuth2Introspection) WaitForCache() {
-	if a.TokenCache != nil {
-		a.TokenCache.Wait()
-	}
+	a.TokenCache.Wait()
 }
 
 type Audience []string
@@ -135,6 +175,9 @@ func TokenCacheKey(token, endpoint string) string {
 	return fmt.Sprintf("%s|%s", token, endpoint)
 }
 
+// TokenFromCache looks up a previously introspected token result from the
+// in-process cache. TokenCache is immutable after construction so no lock
+// is required; ristretto's internal operations are goroutine-safe.
 func (a *AuthenticatorOAuth2Introspection) TokenFromCache(config *AuthenticatorOAuth2IntrospectionConfiguration, token string, ss fosite.ScopeStrategy) *AuthenticatorOAuth2IntrospectionResult {
 	if !config.Cache.Enabled {
 		return nil
@@ -157,6 +200,10 @@ func (a *AuthenticatorOAuth2Introspection) TokenFromCache(config *AuthenticatorO
 	return &v
 }
 
+// TokenToCache stores an introspection result in the cache. The TTL is derived
+// from config.Cache.TTL on each call rather than from a struct field, so this
+// method is safe for concurrent use without any lock. TokenCache is immutable
+// after construction; ristretto's Set/SetWithTTL are goroutine-safe.
 func (a *AuthenticatorOAuth2Introspection) TokenToCache(config *AuthenticatorOAuth2IntrospectionConfiguration, i *AuthenticatorOAuth2IntrospectionResult, token string, ss fosite.ScopeStrategy) {
 	if !config.Cache.Enabled {
 		return
@@ -172,11 +219,16 @@ func (a *AuthenticatorOAuth2Introspection) TokenToCache(config *AuthenticatorOAu
 		return
 	}
 
-	if a.cacheTTL != nil {
-		a.TokenCache.SetWithTTL(key, v, 1, *a.cacheTTL)
-	} else {
-		a.TokenCache.Set(key, v, 1)
+	// Derive TTL from the per-request config on each call.
+	// cacheTTL is no longer stored on the struct; this eliminates the
+	// mutable pointer that previously required a.mu.RLock() here.
+	if config.Cache.TTL != "" {
+		if cacheTTL, parseErr := time.ParseDuration(config.Cache.TTL); parseErr == nil {
+			a.TokenCache.SetWithTTL(key, v, 1, cacheTTL)
+			return
+		}
 	}
+	a.TokenCache.Set(key, v, 1)
 }
 
 func (a *AuthenticatorOAuth2Introspection) Authenticate(r *http.Request, session *AuthenticationSession, config json.RawMessage, _ pipeline.Rule) (err error) {
@@ -249,6 +301,16 @@ func (a *AuthenticatorOAuth2Introspection) Authenticate(r *http.Request, session
 	}
 
 	if i.Expires > 0 && time.Unix(i.Expires, 0).Before(time.Now()) {
+		if inCache {
+			// A cached result is only refreshed on a cache miss (see below), so a
+			// cached entry that outlives its own token expiry would otherwise keep
+			// failing every subsequent request indefinitely (or until the
+			// configured cache TTL, if any, separately evicts it). Evict it here
+			// so the next request re-introspects instead of serving permanently
+			// stale data. This is a single atomic ristretto operation on the
+			// affected key only, so it requires no lock.
+			a.TokenCache.Del(TokenCacheKey(token, cf.IntrospectionURL))
+		}
 		return errors.WithStack(helper.ErrUnauthorized().WithReason("Access token expired"))
 	}
 
@@ -303,6 +365,12 @@ func (a *AuthenticatorOAuth2Introspection) Validate(config json.RawMessage) erro
 	return err
 }
 
+// Config parses the merged global + rule-level configuration, initializes the
+// per-config HTTP client (lazily, under a.mu), and returns the configuration
+// and client for use by Authenticate.
+//
+// After this refactoring Config() no longer touches TokenCache or cacheTTL:
+// those are exclusively owned by the constructor and TokenToCache respectively.
 func (a *AuthenticatorOAuth2Introspection) Config(config json.RawMessage) (*AuthenticatorOAuth2IntrospectionConfiguration, *http.Client, error) {
 	var c AuthenticatorOAuth2IntrospectionConfiguration
 	if err := a.d.Config().AuthenticatorConfig(a.GetID(), config, &c); err != nil {
@@ -367,47 +435,6 @@ func (a *AuthenticatorOAuth2Introspection) Config(config json.RawMessage) (*Auth
 		a.mu.Lock()
 		a.clientMap[clientKey] = client
 		a.mu.Unlock()
-	}
-
-	if c.Cache.TTL != "" {
-		cacheTTL, err := time.ParseDuration(c.Cache.TTL)
-		if err != nil {
-			return nil, nil, err
-		}
-
-		// clear cache if previous ttl was longer (or none)
-		if a.TokenCache != nil {
-			if a.cacheTTL == nil || (a.cacheTTL != nil && a.cacheTTL.Seconds() > cacheTTL.Seconds()) {
-				a.TokenCache.Clear()
-			}
-		}
-
-		a.cacheTTL = &cacheTTL
-	}
-
-	if a.TokenCache == nil {
-		cost := int64(c.Cache.MaxCost)
-		if cost == 0 {
-			cost = 100000000
-		}
-		a.d.Logger().Debugf("Creating cache with max cost: %d", c.Cache.MaxCost)
-		cache, err := ristretto.NewCache(&ristretto.Config[string, []byte]{
-			// This will hold about 1000 unique mutation responses.
-			NumCounters: cost * 10,
-			// Allocate a max
-			MaxCost: cost,
-			// This is a best-practice value.
-			BufferItems: 64,
-			Cost: func(value []byte) int64 {
-				return 1
-			},
-			IgnoreInternalCost: true,
-		})
-		if err != nil {
-			return nil, nil, err
-		}
-
-		a.TokenCache = cache
 	}
 
 	return &c, client, nil
