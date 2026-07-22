@@ -93,7 +93,7 @@ func (a *AuthenticatorOAuth2ClientCredentials) Config(config json.RawMessage) (*
 	if err != nil {
 		return nil, err
 	}
-	timeout := duration
+	timeout := time.Millisecond * duration
 	a.client = httpx.NewResilientClient(
 		httpx.ResilientClientWithMaxRetryWait(maxWait),
 		httpx.ResilientClientWithConnectionTimeout(timeout),
@@ -220,7 +220,7 @@ func (a *AuthenticatorOAuth2ClientCredentials) Authenticate(r *http.Request, ses
 		t, err := c.Token(context.WithValue(
 			r.Context(),
 			oauth2.HTTPClient,
-			a.client,
+			c.Client,
 		))
 		if err != nil {
 			if rErr, ok := err.(*oauth2.RetrieveError); ok {

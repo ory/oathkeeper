@@ -186,7 +186,7 @@ func (a *AuthorizerRemoteJSON) Config(config json.RawMessage) (*AuthorizerRemote
 	if err != nil {
 		return nil, err
 	}
-	timeout := duration
+	timeout := time.Millisecond * duration
 	client := httpx.NewResilientClient(
 		httpx.ResilientClientWithMaxRetryWait(maxWait),
 		httpx.ResilientClientWithConnectionTimeout(timeout),

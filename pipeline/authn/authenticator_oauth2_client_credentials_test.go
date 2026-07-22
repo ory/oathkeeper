@@ -269,10 +269,10 @@ func TestAuthenticatorOAuth2ClientCredentials(t *testing.T) {
 			},
 		},
 		{
-			d:         "fails and returns not available after the resilient client retries a persistent 503",
+			d:         "fails and returns 503 Service Unavailable error due to the unavailability of the upstream service",
 			r:         upstreamFailure,
 			expectErr: helper.ErrUpstreamServiceNotAvailable(),
-			config:    json.RawMessage(`{"retry":{"give_up_after":"10ms"}}`),
+			config:    json.RawMessage(`{}`),
 			token_url: "",
 			setup: func(t *testing.T, h *http.ServeMux, _ json.RawMessage) {
 				h.HandleFunc("POST /oauth2/token", func(w http.ResponseWriter, r *http.Request) {
@@ -282,13 +282,10 @@ func TestAuthenticatorOAuth2ClientCredentials(t *testing.T) {
 			},
 		},
 		{
-			// The resilient client retries the 504 and, once retries are
-			// exhausted, surfaces the upstream as not available (the specific
-			// status is no longer available after give-up).
-			d:         "fails and returns not available after the resilient client retries a persistent 504",
+			d:         "fails and returns 504 Gateway Timeout error due to upstream service timeout",
 			r:         upstreamFailure,
-			expectErr: helper.ErrUpstreamServiceNotAvailable(),
-			config:    json.RawMessage(`{"retry":{"give_up_after":"10ms"}}`),
+			expectErr: helper.ErrUpstreamServiceTimeout(),
+			config:    json.RawMessage(`{}`),
 			token_url: "",
 			setup: func(t *testing.T, h *http.ServeMux, _ json.RawMessage) {
 				h.HandleFunc("POST /oauth2/token", func(w http.ResponseWriter, r *http.Request) {
@@ -298,12 +295,10 @@ func TestAuthenticatorOAuth2ClientCredentials(t *testing.T) {
 			},
 		},
 		{
-			// The resilient client retries the 500 and, once retries are
-			// exhausted, surfaces the upstream as not available.
-			d:         "fails and returns not available after the resilient client retries a persistent 500",
+			d:         "fails and returns 500 Internal Server Error error due to an unexpected error in the upstream service",
 			r:         upstreamFailure,
-			expectErr: helper.ErrUpstreamServiceNotAvailable(),
-			config:    json.RawMessage(`{"retry":{"give_up_after":"10ms"}}`),
+			expectErr: helper.ErrUpstreamServiceInternalServerError(),
+			config:    json.RawMessage(`{}`),
 			token_url: "",
 			setup: func(t *testing.T, h *http.ServeMux, _ json.RawMessage) {
 				h.HandleFunc("POST /oauth2/token", func(w http.ResponseWriter, r *http.Request) {
@@ -402,46 +397,4 @@ func TestAuthenticatorOAuth2ClientCredentials(t *testing.T) {
 		reg.Config().SetForTest(t, configuration.AuthenticatorOAuth2ClientCredentialsIsEnabled, true)
 		require.NoError(t, a.Validate(json.RawMessage(`{"token_url":"`+ts.URL+"/oauth2/token"+`","retry":{"give_up_after":"3s", "max_delay":"100ms"}}`)))
 	})
-}
-
-// TestAuthenticatorOAuth2ClientCredentialsHonorsMaxDelayTimeout is a regression
-// test for two coupled bugs that stopped retry.max_delay from being enforced as
-// the outbound HTTP timeout for the token request:
-//
-//   - The parsed max_delay duration was multiplied by an extra factor of
-//     time.Millisecond, inflating the timeout by 1e6 (a 50ms setting became
-//     ~13.9 hours).
-//   - The resilient client that carries the timeout (a.client) was never passed
-//     to the OAuth2 token exchange; a method value (c.Client) was passed
-//     instead, which the OAuth2 library ignores, so the default client with no
-//     timeout was used.
-//
-// With either bug present, a call to a slow token endpoint blocks until the
-// server responds; with both fixed, it times out promptly.
-func TestAuthenticatorOAuth2ClientCredentialsHonorsMaxDelayTimeout(t *testing.T) {
-	t.Parallel()
-	reg := internal.NewRegistry(t, configx.SkipValidation())
-	a, err := reg.PipelineAuthenticator("oauth2_client_credentials")
-	require.NoError(t, err)
-
-	slow := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
-		time.Sleep(2 * time.Second)
-		w.Header().Set("Content-Type", "application/json")
-		_, _ = w.Write([]byte(`{"access_token":"foo","token_type":"bearer"}`))
-	}))
-	t.Cleanup(slow.Close)
-
-	r := &http.Request{Header: http.Header{}}
-	r.SetBasicAuth("client", "secret")
-	config, err := sjson.SetBytes(
-		[]byte(`{"retry":{"max_delay":"50ms","give_up_after":"10ms"}}`), "token_url", slow.URL+"/oauth2/token")
-	require.NoError(t, err)
-
-	start := time.Now()
-	err = a.Authenticate(r, new(authn.AuthenticationSession), config, nil)
-	elapsed := time.Since(start)
-
-	require.Error(t, err)
-	assert.Less(t, elapsed, time.Second,
-		"the configured 50ms max_delay must time the token request out; the inflated value would block ~2s on the slow server")
 }

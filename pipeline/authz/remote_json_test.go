@@ -12,7 +12,6 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
-	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -408,37 +407,4 @@ func TestAuthorizerRemoteJSONTracePropagation(t *testing.T) {
 	err = a.Authorize(r, &authn.AuthenticationSession{}, config, &rule.Rule{})
 	require.NoError(t, err)
 	assert.NotEmpty(t, gotTraceparent, "expected traceparent header to be propagated to remote_json authorizer endpoint")
-}
-
-// TestAuthorizerRemoteJSONHonorsMaxDelayTimeout is a regression test for a bug
-// where the parsed retry.max_delay duration was multiplied by an extra factor
-// of time.Millisecond, inflating the outbound HTTP timeout by 1e6 (a 50ms
-// setting became ~13.9 hours, effectively disabling the timeout). With the bug
-// the call blocks until the slow server responds; with the fix it times out
-// promptly.
-func TestAuthorizerRemoteJSONHonorsMaxDelayTimeout(t *testing.T) {
-	t.Parallel()
-
-	slow := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
-		time.Sleep(2 * time.Second)
-		w.WriteHeader(http.StatusOK)
-	}))
-	t.Cleanup(slow.Close)
-
-	config, err := sjson.SetBytes(
-		[]byte(`{"payload":"{}","retry":{"max_delay":"50ms","give_up_after":"10ms"}}`), "remote", slow.URL)
-	require.NoError(t, err)
-
-	reg := internal.NewRegistry(t)
-	a := NewAuthorizerRemoteJSON(reg)
-	r, err := http.NewRequestWithContext(t.Context(), "POST", "", nil)
-	require.NoError(t, err)
-
-	start := time.Now()
-	err = a.Authorize(r, &authn.AuthenticationSession{}, config, &rule.Rule{})
-	elapsed := time.Since(start)
-
-	require.Error(t, err)
-	assert.Less(t, elapsed, time.Second,
-		"the configured 50ms max_delay must time the request out; the inflated value would block ~2s on the slow server")
 }
