@@ -26,6 +26,6 @@
     "axios": ">=1.15.2",
     "form-data": ">=4.0.4",
     "glob": ">=11.1.0",
-    "shell-quote": "1.8.4"
+    "shell-quote": "1.9.0"
   }
 }
