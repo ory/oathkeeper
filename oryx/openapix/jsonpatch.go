@@ -12,7 +12,7 @@ type JSONPatchDocument []JSONPatch
 //
 // swagger:model jsonPatch
 type JSONPatch struct {
-	// The operation to be performed. One of "add", "remove", "replace", "move", "copy", or "test".
+	// The operation to be performed. One of "add", "remove", or "replace".
 	//
 	// required: true
 	// example: replace
@@ -33,7 +33,8 @@ type JSONPatch struct {
 	// example: foobar
 	Value interface{} `json:"value"`
 
-	// This field is used together with operation "move" and uses JSON Pointer notation.
+	// The source path for operations that require it. Uses JSON pointer notation.
+	// Not used by the currently supported operations ("add", "remove", "replace").
 	//
 	// Learn more [about JSON Pointers](https://datatracker.ietf.org/doc/html/rfc6901#section-5).
 	//

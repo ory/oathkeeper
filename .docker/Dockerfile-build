@@ -8,7 +8,9 @@ RUN apt-get update && apt-get upgrade -y
 COPY go.mod go.mod
 COPY go.sum go.sum
 COPY oryx/go.mod oryx/go.mod
-COPY oryx/go.sum proto/go.sum
+COPY oryx/go.sum oryx/go.sum
+COPY middleware/rpctest/go.mod middleware/rpctest/go.mod
+COPY middleware/rpctest/go.sum middleware/rpctest/go.sum
 
 ENV CGO_ENABLED=0
 

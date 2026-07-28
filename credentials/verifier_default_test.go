@@ -301,6 +301,46 @@ func TestVerifierDefault(t *testing.T) {
 			}, "file://../test/stub/jwks-hs.json"),
 			expectErr: true,
 		},
+		{
+			d: "should pass when the trusted issuer has a trailing slash but the token issuer does not (issue #527)",
+			c: &ValidationContext{
+				Algorithms: []string{"HS256"},
+				Issuers:    []string{"https://my-issuer/"},
+				KeyURLs:    []url.URL{*x.ParseURLOrPanic("file://../test/stub/jwks-hs.json")},
+			},
+			token: sign(jwt.MapClaims{
+				"sub": "sub",
+				"exp": now.Add(time.Hour).Unix(),
+				"iss": "https://my-issuer",
+			}, "file://../test/stub/jwks-hs.json"),
+		},
+		{
+			d: "should pass when the token issuer has a trailing slash but the trusted issuer does not (issue #527)",
+			c: &ValidationContext{
+				Algorithms: []string{"HS256"},
+				Issuers:    []string{"https://my-issuer"},
+				KeyURLs:    []url.URL{*x.ParseURLOrPanic("file://../test/stub/jwks-hs.json")},
+			},
+			token: sign(jwt.MapClaims{
+				"sub": "sub",
+				"exp": now.Add(time.Hour).Unix(),
+				"iss": "https://my-issuer/",
+			}, "file://../test/stub/jwks-hs.json"),
+		},
+		{
+			d: "should still fail when the issuer genuinely differs despite trailing-slash normalization (issue #527)",
+			c: &ValidationContext{
+				Algorithms: []string{"HS256"},
+				Issuers:    []string{"https://my-issuer/"},
+				KeyURLs:    []url.URL{*x.ParseURLOrPanic("file://../test/stub/jwks-hs.json")},
+			},
+			token: sign(jwt.MapClaims{
+				"sub": "sub",
+				"exp": now.Add(time.Hour).Unix(),
+				"iss": "https://evil-issuer",
+			}, "file://../test/stub/jwks-hs.json"),
+			expectErr: true,
+		},
 	} {
 		t.Run(fmt.Sprintf("case=%d/description=%s", k, tc.d), func(t *testing.T) {
 			claims, err := verifier.Verify(context.Background(), tc.token, tc.c)
