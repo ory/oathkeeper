@@ -60,7 +60,8 @@ func ApplyJSONPatch[T any](p json.RawMessage, object T, denyPaths ...string) (re
 	}
 
 	for _, op := range patch {
-		// Some operations are buggy, see https://github.com/evanphx/json-patch/pull/158
+		// Only "add", "remove", and "replace" operations are supported; "move",
+		// "copy", and "test" are intentionally rejected.
 		if isUnsupported(op) {
 			return result, errors.Errorf("unsupported operation: %s", op.Kind())
 		}
