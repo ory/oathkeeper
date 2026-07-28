@@ -1,0 +1,109 @@
+[
+  {
+    "id": "public-allow-get-only",
+    "upstream": {
+      "url": "https://httpbin.org/anything/public"
+    },
+    "match": {
+      "url": "http://<127.0.0.1|localhost>:4455/public/<.*>",
+      "methods": ["GET"]
+    },
+    "authenticators": [
+      {
+        "handler": "anonymous"
+      }
+    ],
+    "authorizer": {
+      "handler": "allow"
+    },
+    "mutators": [
+      {
+        "handler": "header",
+        "config": {
+          "headers": {
+            "X-User": "{{ print .Subject }}"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "protected-admin-deny",
+    "upstream": {
+      "url": "https://httpbin.org/anything/admin"
+    },
+    "match": {
+      "url": "http://<127.0.0.1|localhost>:4455/admin/<.*>",
+      "methods": ["GET", "POST", "PUT", "DELETE"]
+    },
+    "authenticators": [
+      {
+        "handler": "anonymous"
+      }
+    ],
+    "authorizer": {
+      "handler": "deny"
+    },
+    "mutators": [
+      {
+        "handler": "noop"
+      }
+    ],
+    "errors": [
+      {
+        "handler": "json",
+        "config": {
+          "when": [
+            {
+              "request": {
+                "header": {
+                  "accept": ["application/json"]
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "handler": "redirect",
+        "config": {
+          "to": "https://login.example.com/auth",
+          "code": 302,
+          "return_to_query_param": "return_to",
+          "when": [
+            {
+              "request": {
+                "header": {
+                  "accept": ["text/html"]
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "id": "allow-anonymous-with-id-token",
+    "upstream": {
+      "url": "https://httpbin.org/anything/id_token"
+    },
+    "match": {
+      "url": "http://<127.0.0.1|localhost>:4455/token/<.*>",
+      "methods": ["GET"]
+    },
+    "authenticators": [
+      {
+        "handler": "anonymous"
+      }
+    ],
+    "authorizer": {
+      "handler": "allow"
+    },
+    "mutators": [
+      {
+        "handler": "id_token"
+      }
+    ]
+  }
+]

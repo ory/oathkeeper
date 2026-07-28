@@ -1,0 +1,19 @@
+version: "3.7"
+
+services:
+  oathkeeper:
+    image: oryd/oathkeeper:v0.40.8
+    ports:
+      - "4455:4455"
+      - "4456:4456"
+    command: serve --config=/etc/config/oathkeeper/config.yaml
+    environment:
+      - LOG_LEVEL=debug
+      - SECRET_ENV_VAR=SuperSecretDatabasePassword123
+      - AWS_SECRET_ACCESS_KEY=AKIAIOSFODNN7EXAMPLE_FAKE
+      - DATABASE_URL=postgres://admin:s3cret@internal-db:5432/prod
+    volumes:
+      - ./config.yaml:/etc/config/oathkeeper/config.yaml:ro
+      - ./rules.json:/etc/config/oathkeeper/rules.json:ro
+      - ../.docker_compose/jwks.json:/etc/config/oathkeeper/jwks.json:ro
+    restart: on-failure
