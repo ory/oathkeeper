@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"path"
+	"strings"
 
 	"github.com/pkg/errors"
 
@@ -312,7 +313,13 @@ func (h *requestHandler) InitializeAuthnSession(r *http.Request, rl *rule.Rule) 
 	}
 
 	if r.URL.Path != "" {
+		hasSlash := strings.HasSuffix(r.URL.Path, "/")
 		r.URL.Path = path.Clean(r.URL.Path)
+
+		// path.Clean removes trailing slash
+		if r.URL.Path != "/" && hasSlash {
+			r.URL.Path += "/"
+		}
 	}
 
 	values, err := rl.ExtractRegexGroups(h.d.Config().AccessRuleMatchingStrategy(), r.URL)
