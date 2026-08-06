@@ -30,6 +30,24 @@ func TestFindStringSubmatch(t *testing.T) {
 			wantErr: true,
 		},
 		{
+			name: "bad lookbehind (wrong delimiters)",
+			args: args{
+				pattern:      `urn:foo:<(?<=foo:)foobar>`,
+				matchAgainst: "urn:foo:foobar",
+			},
+			want:    nil,
+			wantErr: true,
+		},
+		{
+			name: "bad possessive (wrong delimiters)",
+			args: args{
+				pattern:      `urn:foo:<(?>=foo:)foobar>`,
+				matchAgainst: "urn:foo:foobar",
+			},
+			want:    nil,
+			wantErr: true,
+		},
+		{
 			name: "one group",
 			args: args{
 				pattern:      `urn:foo:<.*>`,
@@ -55,6 +73,33 @@ func TestFindStringSubmatch(t *testing.T) {
 			},
 			want:    []string{"bar"},
 			wantErr: false,
+		},
+		{
+			name: "positive lookbehind (?<=foo)bar",
+			args: args{
+				pattern:      `urn:foo:{(?<=foo:)foobar}`,
+				matchAgainst: "urn:foo:foobar",
+			},
+			want:    []string{"foobar"},
+			wantErr: false,
+		},
+		{
+			name: "negative lookbehind (?<!boo)foobar",
+			args: args{
+				pattern:      `urn:foo:{(?<!boo:)foobar}`,
+				matchAgainst: "urn:foo:foobar",
+			},
+			want:    []string{"foobar"},
+			wantErr: false,
+		},
+		{
+			name: "negative lookbehind (?<!boo)foobar, not match",
+			args: args{
+				pattern:      `urn:foo:{(?<!boo:)foobar}`,
+				matchAgainst: "urn:boo:foobar",
+			},
+			want:    nil,
+			wantErr: true,
 		},
 	}
 	for _, tt := range tests {
