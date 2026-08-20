@@ -74,6 +74,16 @@ func ErrTooManyRequests() *herodot.DefaultError {
 	}
 }
 
+// NewErrClientError returns an error that surfaces the given HTTP status code
+// to the client. Intended for opt-in 4xx passthrough from remote authorizers.
+func NewErrClientError(code int) *herodot.DefaultError {
+	return &herodot.DefaultError{
+		ErrorField:  http.StatusText(code),
+		CodeField:   code,
+		StatusField: http.StatusText(code),
+	}
+}
+
 func ErrUpstreamServiceNotAvailable() *herodot.DefaultError {
 	return &herodot.DefaultError{
 		ErrorField:  "The upstream service is not available",

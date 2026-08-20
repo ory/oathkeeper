@@ -1013,6 +1013,12 @@
           "uniqueItems": true,
           "default": []
         },
+        "preserve_client_errors": {
+          "title": "Preserve Client Errors",
+          "type": "boolean",
+          "default": false,
+          "description": "When true, 4xx responses from the remote authorizer other than 403 Forbidden and 429 Too Many Requests are forwarded to the client with their original status code instead of being remapped to 500 Internal Server Error."
+        },
         "retry": {
           "$ref": "#/definitions/retry"
         }
