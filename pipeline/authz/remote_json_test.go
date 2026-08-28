@@ -313,6 +313,11 @@ func TestAuthorizerRemoteJSONValidate(t *testing.T) {
 			enabled: true,
 			config:  json.RawMessage(`{"remote":"http://host/path","payload":"{}","retry":{"give_up_after":"3s", "max_delay":"100ms"}}`),
 		},
+		{
+			name:    "valid configuration with preserve_client_errors",
+			enabled: true,
+			config:  json.RawMessage(`{"remote":"http://host/path","payload":"{}","preserve_client_errors":true}`),
+		},
 	}
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
@@ -362,6 +367,20 @@ func TestAuthorizerRemoteJSONConfig(t *testing.T) {
 				},
 			},
 		},
+		{
+			name: "valid configuration with preserve_client_errors",
+			raw:  json.RawMessage(`{"remote":"http://host/path","payload":"{}","preserve_client_errors":true}`),
+			expected: &AuthorizerRemoteJSONConfiguration{
+				Remote:                           "http://host/path",
+				Payload:                          "{}",
+				ForwardResponseHeadersToUpstream: []string{},
+				PreserveClientErrors:             true,
+				Retry: &AuthorizerRemoteJSONRetryConfiguration{
+					Timeout: "100ms", // default timeout from schema
+					MaxWait: "1s",
+				},
+			},
+		},
 	}
 	for _, tc := range tests {
 		t.Run("case="+tc.name, func(t *testing.T) {
@@ -370,6 +389,89 @@ func TestAuthorizerRemoteJSONConfig(t *testing.T) {
 			actual, err := a.Config(tc.raw)
 			assert.NoError(t, err)
 			assert.Equal(t, tc.expected, actual)
+		})
+	}
+}
+
+func TestAuthorizerRemoteJSONPreserveClientErrors(t *testing.T) {
+	t.Parallel()
+
+	type statusCoder interface {
+		StatusCode() int
+	}
+
+	tests := []struct {
+		name                 string
+		status               int
+		preserveClientErrors bool
+		wantErr              bool
+		wantStatus           int
+		wantIs               error
+		// retryable statuses (429, 5xx) are consumed by the resilient HTTP client.
+		retryable bool
+	}{
+		{name: "200 flag off", status: http.StatusOK},
+		{name: "200 flag on", status: http.StatusOK, preserveClientErrors: true},
+		{name: "400 flag off", status: http.StatusBadRequest, wantErr: true},
+		{name: "400 flag on", status: http.StatusBadRequest, preserveClientErrors: true, wantErr: true, wantStatus: http.StatusBadRequest},
+		{name: "403 flag off", status: http.StatusForbidden, wantErr: true, wantIs: helper.ErrForbidden()},
+		{name: "403 flag on", status: http.StatusForbidden, preserveClientErrors: true, wantErr: true, wantIs: helper.ErrForbidden()},
+		{name: "404 flag off", status: http.StatusNotFound, wantErr: true},
+		{name: "404 flag on", status: http.StatusNotFound, preserveClientErrors: true, wantErr: true, wantStatus: http.StatusNotFound},
+		{name: "429 flag off", status: http.StatusTooManyRequests, wantErr: true, retryable: true},
+		{name: "429 flag on", status: http.StatusTooManyRequests, preserveClientErrors: true, wantErr: true, retryable: true},
+		{name: "500 flag off", status: http.StatusInternalServerError, wantErr: true, retryable: true},
+		{name: "500 flag on", status: http.StatusInternalServerError, preserveClientErrors: true, wantErr: true, retryable: true},
+	}
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+				w.WriteHeader(tc.status)
+			}))
+			t.Cleanup(server.Close)
+
+			config := json.RawMessage(`{"payload":"{}"}`)
+			config, err := sjson.SetBytes(config, "remote", server.URL)
+			require.NoError(t, err)
+			if tc.preserveClientErrors {
+				config, err = sjson.SetBytes(config, "preserve_client_errors", true)
+				require.NoError(t, err)
+			}
+			if tc.retryable {
+				config, err = sjson.SetBytes(config, "retry.give_up_after", "1ns")
+				require.NoError(t, err)
+			}
+
+			reg := internal.NewRegistry(t)
+			a := NewAuthorizerRemoteJSON(reg)
+			r, err := http.NewRequestWithContext(t.Context(), "", "", nil)
+			require.NoError(t, err)
+
+			err = a.Authorize(r, &authn.AuthenticationSession{}, config, &rule.Rule{})
+			if !tc.wantErr {
+				assert.NoError(t, err)
+				return
+			}
+			require.Error(t, err)
+			if tc.wantIs != nil {
+				assert.ErrorIs(t, err, tc.wantIs)
+			}
+			if tc.wantStatus != 0 {
+				var sc statusCoder
+				require.Truef(t, errors.As(err, &sc), "expected status-coded error, got %T: %v", err, err)
+				assert.Equal(t, tc.wantStatus, sc.StatusCode())
+				return
+			}
+			if tc.wantIs != nil {
+				return
+			}
+			var sc statusCoder
+			if errors.As(err, &sc) {
+				assert.NotEqual(t, tc.status, sc.StatusCode(), "must not preserve this status as a client error")
+			}
+			if !tc.retryable {
+				assert.ErrorContains(t, err, fmt.Sprintf("expected status code %d but got %d", http.StatusOK, tc.status))
+			}
 		})
 	}
 }

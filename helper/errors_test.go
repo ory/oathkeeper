@@ -44,6 +44,22 @@ func TestErrWithHeaders(t *testing.T) {
 	})
 }
 
+func TestNewErrClientError(t *testing.T) {
+	t.Run("uses caller-supplied status code", func(t *testing.T) {
+		err := helper.NewErrClientError(http.StatusBadRequest)
+		assert.Equal(t, http.StatusBadRequest, err.StatusCode())
+		assert.Equal(t, http.StatusText(http.StatusBadRequest), err.Status())
+		assert.Equal(t, http.StatusText(http.StatusBadRequest), err.Error())
+	})
+
+	t.Run("distinguishes status codes", func(t *testing.T) {
+		badRequest := helper.NewErrClientError(http.StatusBadRequest)
+		notFound := helper.NewErrClientError(http.StatusNotFound)
+		assert.False(t, errors.Is(badRequest, notFound))
+		assert.True(t, errors.Is(badRequest, helper.NewErrClientError(http.StatusBadRequest)))
+	})
+}
+
 func TestNewErrTooManyRequestsWithHeaders(t *testing.T) {
 	t.Run("captures all rate-limit headers", func(t *testing.T) {
 		resp := &http.Response{

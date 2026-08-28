@@ -31,6 +31,7 @@ type AuthorizerRemoteJSONConfiguration struct {
 	Payload                          string                                  `json:"payload"`
 	ForwardResponseHeadersToUpstream []string                                `json:"forward_response_headers_to_upstream"`
 	Retry                            *AuthorizerRemoteJSONRetryConfiguration `json:"retry"`
+	PreserveClientErrors             bool                                    `json:"preserve_client_errors"`
 }
 
 type AuthorizerRemoteJSONRetryConfiguration struct {
@@ -144,6 +145,8 @@ func (a *AuthorizerRemoteJSON) Authorize(r *http.Request, session *authn.Authent
 		return errors.WithStack(helper.NewErrTooManyRequestsWithHeaders(res))
 	} else if res.StatusCode == http.StatusForbidden {
 		return errors.WithStack(helper.ErrForbidden())
+	} else if c.PreserveClientErrors && res.StatusCode >= 400 && res.StatusCode < 500 {
+		return errors.WithStack(helper.NewErrClientError(res.StatusCode))
 	} else if res.StatusCode != http.StatusOK {
 		return errors.Errorf("expected status code %d but got %d", http.StatusOK, res.StatusCode)
 	}
