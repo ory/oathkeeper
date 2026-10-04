@@ -21,6 +21,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/tidwall/sjson"
 
+	"github.com/ory/herodot"
 	"github.com/ory/x/configx"
 
 	"github.com/ory/oathkeeper/credentials"
@@ -298,6 +299,27 @@ func TestMutatorIDToken(t *testing.T) {
 				config, _ := sjson.SetBytes(config, "jwks_url", "file://../../test/stub/jwks-hs.json")
 				assert.NotEqual(t, prev, mutate(t, *session, config))
 			})
+
+			t.Run("subcase=different tokens because cache disabled", func(t *testing.T) {
+				config, _ := sjson.SetBytes(config, "cache", map[string]bool{"enabled": false})
+				prev := mutate(t, *session, config)
+				assert.NotEqual(t, prev, mutate(t, *session, config))
+			})
+
+			t.Run("subcase=different tokens because exceeded cost", func(t *testing.T) {
+				config, _ := sjson.SetBytes(config, "cache", map[string]int{"max_cost": 1})
+				prev := mutate(t, *session, config)
+				assert.NotEqual(t, prev, mutate(t, *session, config))
+			})
+
+			t.Run("subcase=rejects negative max cost", func(t *testing.T) {
+				config, _ := sjson.SetBytes(config, "cache", map[string]int{"max_cost": -1})
+				s := *session
+				err := a.Mutate(new(http.Request), &s, config, &rule.Rule{ID: "1"})
+				var herr *herodot.DefaultError
+				require.ErrorAs(t, err, &herr)
+				assert.Contains(t, herr.Reason(), "must be greater than or equal to 0")
+			})
 		})
 
 		t.Run("case=ensure template cache", func(t *testing.T) {
@@ -383,8 +405,8 @@ func BenchmarkMutatorIDToken(b *testing.B) {
 	} {
 		b.Run("alg="+alg, func(b *testing.B) {
 			for _, enableCache := range []bool{true, false} {
-				a.(*MutatorIDToken).SetCaching(enableCache)
 				b.Run(fmt.Sprintf("cache=%v", enableCache), func(b *testing.B) {
+					reg.Config().SetForTest(b, "mutators.id_token.config.cache.enabled", enableCache)
 					var tc idTokenTestCase
 					var config []byte
 
