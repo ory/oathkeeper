@@ -12,6 +12,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"strings"
+	"sync"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -236,6 +237,46 @@ func TestAuthorizerRemoteAuthorize(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestAuthorizerRemoteRuleIDReuseAfterRuleUpdate(t *testing.T) {
+	t.Parallel()
+
+	var mux sync.Mutex
+	var gotTuples []string
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		mux.Lock()
+		gotTuples = append(gotTuples, r.Header.Get("X-Tuple-Factory"))
+		mux.Unlock()
+		w.WriteHeader(http.StatusOK)
+	}))
+	t.Cleanup(server.Close)
+
+	reg := internal.NewRegistry(t)
+	a := NewAuthorizerRemote(reg)
+	session := &authn.AuthenticationSession{}
+	newRequest := func() *http.Request {
+		return &http.Request{
+			Header: map[string][]string{
+				"Content-Type": {"text/plain"},
+				"User-Agent":   {"Fancy Browser 5.1"},
+			},
+		}
+	}
+
+	oldConfig, err := sjson.SetBytes(json.RawMessage(`{"headers":{"X-Tuple-Factory":"owner:credential:id:false:body"}}`), "remote", server.URL)
+	require.NoError(t, err)
+	newConfig, err := sjson.SetBytes(json.RawMessage(`{"headers":{"X-Tuple-Factory":"editor:organization:orgId:false:body"}}`), "remote", server.URL)
+	require.NoError(t, err)
+
+	require.NoError(t, a.Authorize(newRequest(), session, oldConfig, &rule.Rule{ID: "svc-7.ns"}))
+	require.NoError(t, a.Authorize(newRequest(), session, newConfig, &rule.Rule{ID: "svc-7.ns"}))
+
+	mux.Lock()
+	defer mux.Unlock()
+	require.Len(t, gotTuples, 2)
+	assert.Equal(t, "owner:credential:id:false:body", gotTuples[0])
+	assert.Equal(t, "editor:organization:orgId:false:body", gotTuples[1], "a rule must never be evaluated with the authorizer template cached by an earlier rule that reused its ID")
 }
 
 func TestAuthorizerRemoteValidate(t *testing.T) {

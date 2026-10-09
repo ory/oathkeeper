@@ -5,6 +5,7 @@ package mutate_test
 
 import (
 	"bytes"
+	"crypto/sha256"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -192,7 +193,7 @@ func TestCredentialsIssuerHeaders(t *testing.T) {
 				require.NoError(t, json.NewDecoder(bytes.NewBuffer(specs.Config)).Decode(&cfg))
 
 				for hdr := range cfg.Headers {
-					templateId := fmt.Sprintf("%s:%s", specs.Rule.ID, hdr)
+					templateId := fmt.Sprintf("%s:%s:%x", specs.Rule.ID, hdr, sha256.Sum256([]byte(cfg.Headers[hdr])))
 					_, err := cache.New(templateId).Parse("override")
 					require.NoError(t, err)
 					overrideHeaders.Add(hdr, "override")

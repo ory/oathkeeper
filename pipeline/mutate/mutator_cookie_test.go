@@ -5,6 +5,7 @@ package mutate_test
 
 import (
 	"bytes"
+	"crypto/sha256"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -184,7 +185,7 @@ func TestCredentialsIssuerCookies(t *testing.T) {
 				require.NoError(t, json.NewDecoder(bytes.NewBuffer(specs.Config)).Decode(&cfg))
 
 				for cookie := range cfg.Cookies {
-					templateId := fmt.Sprintf("%s:%s", specs.Rule.ID, cookie)
+					templateId := fmt.Sprintf("%s:%s:%x", specs.Rule.ID, cookie, sha256.Sum256([]byte(cfg.Cookies[cookie])))
 					_, err := cache.New(templateId).Parse("override")
 					require.NoError(t, err)
 					overrideCookies = append(overrideCookies, &http.Cookie{Name: cookie, Value: "override"})
