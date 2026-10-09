@@ -5,6 +5,7 @@ package mutate
 
 import (
 	"bytes"
+	"crypto/sha256"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -43,7 +44,7 @@ func (a *MutatorHeader) Mutate(_ *http.Request, session *authn.AuthenticationSes
 		var tmpl *template.Template
 		var err error
 
-		templateId := fmt.Sprintf("%s:%s", rl.GetID(), hdr)
+		templateId := fmt.Sprintf("%s:%s:%x", rl.GetID(), hdr, sha256.Sum256([]byte(templateString)))
 		tmpl = a.t.Lookup(templateId)
 		if tmpl == nil {
 			tmpl, err = a.t.New(templateId).Parse(templateString)
