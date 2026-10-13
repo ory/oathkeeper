@@ -385,7 +385,7 @@ func (a *AuthenticatorOAuth2Introspection) Config(config json.RawMessage) (*Auth
 		a.cacheTTL = &cacheTTL
 	}
 
-	if a.TokenCache == nil {
+	if c.Cache.Enabled && a.TokenCache == nil {
 		cost := int64(c.Cache.MaxCost)
 		if cost == 0 {
 			cost = 100000000
