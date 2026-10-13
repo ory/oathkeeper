@@ -106,3 +106,29 @@ func TestCache(t *testing.T) {
 		require.Nil(t, v)
 	})
 }
+
+func TestCacheDisabled(t *testing.T) {
+	t.Parallel()
+	reg := internal.NewRegistry(t, configx.WithValues(map[string]interface{}{
+		"authenticators.oauth2_introspection.config.cache.enabled":     false,
+		"authenticators.oauth2_introspection.config.introspection_url": "http://localhost:8080/",
+	}))
+
+	a := authn.NewAuthenticatorOAuth2Introspection(reg)
+
+	config, _, err := a.Config(nil)
+	require.NoError(t, err)
+	assert.Nil(t, a.TokenCache, "cache should not be allocated when disabled")
+
+	a.TokenToCache(config, &authn.AuthenticatorOAuth2IntrospectionResult{Active: true}, "token", fosite.WildcardScopeStrategy)
+	a.WaitForCache()
+	assert.Nil(t, a.TokenFromCache(config, "token", fosite.WildcardScopeStrategy))
+
+	config, _, err = a.Config([]byte(`{ "cache": { "enabled": true } }`))
+	require.NoError(t, err)
+	require.NotNil(t, a.TokenCache, "cache should be allocated once a rule enables it")
+
+	a.TokenToCache(config, &authn.AuthenticatorOAuth2IntrospectionResult{Active: true}, "token", fosite.WildcardScopeStrategy)
+	a.WaitForCache()
+	assert.NotNil(t, a.TokenFromCache(config, "token", fosite.WildcardScopeStrategy))
+}
