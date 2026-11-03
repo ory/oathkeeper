@@ -8,6 +8,7 @@ import (
 	"crypto/sha256"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"text/template"
 	"time"
@@ -138,7 +139,11 @@ func (a *AuthorizerRemoteJSON) Authorize(r *http.Request, session *authn.Authent
 	if err != nil {
 		return errors.WithStack(err)
 	}
-	defer func() { _ = res.Body.Close() }()
+	defer func() {
+		// Drain the body so the connection can be reused.
+		_, _ = io.Copy(io.Discard, res.Body)
+		_ = res.Body.Close()
+	}()
 
 	if res.StatusCode == http.StatusTooManyRequests {
 		return errors.WithStack(helper.NewErrTooManyRequestsWithHeaders(res))

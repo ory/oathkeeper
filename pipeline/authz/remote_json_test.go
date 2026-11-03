@@ -11,6 +11,7 @@ import (
 	"net"
 	"net/http"
 	"net/http/httptest"
+	"sync/atomic"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -372,6 +373,33 @@ func TestAuthorizerRemoteJSONConfig(t *testing.T) {
 			assert.Equal(t, tc.expected, actual)
 		})
 	}
+}
+
+func TestAuthorizerRemoteJSONReusesConnections(t *testing.T) {
+	t.Parallel()
+
+	var newConns atomic.Int32
+	server := httptest.NewUnstartedServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = w.Write([]byte(`{"allowed":true}`))
+	}))
+	server.Config.ConnState = func(_ net.Conn, s http.ConnState) {
+		if s == http.StateNew {
+			newConns.Add(1)
+		}
+	}
+	server.Start()
+	t.Cleanup(server.Close)
+
+	config := json.RawMessage(fmt.Sprintf(`{"remote":%q,"payload":"{}"}`, server.URL))
+	reg := internal.NewRegistry(t)
+	a := NewAuthorizerRemoteJSON(reg)
+	for range 5 {
+		r, err := http.NewRequestWithContext(t.Context(), "", "", nil)
+		require.NoError(t, err)
+		require.NoError(t, a.Authorize(r, &authn.AuthenticationSession{}, config, &rule.Rule{}))
+	}
+	assert.EqualValues(t, 1, newConns.Load(), "expected the connection to the remote to be reused")
 }
 
 func TestAuthorizerRemoteJSONTracePropagation(t *testing.T) {
